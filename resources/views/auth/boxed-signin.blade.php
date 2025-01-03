@@ -43,7 +43,7 @@
                     </div>
                     <div class="mx-auto w-full max-w-[440px]">
                         <div class="mb-10">
-                            <h1 class="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Sign in</h1>
+                            <h1 class="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Sign WAAA</h1>
                             <p class="text-base font-bold leading-normal text-white-dark">Enter your email and password to login</p>
                         </div>
                         <form class="space-y-5 dark:text-white" @submit.prevent="window.location='/'">
