@@ -11,21 +11,44 @@
             <img src="/assets/images/auth/polygon-object.svg" alt="image" class="absolute bottom-0 end-[28%]" />
             <div class="relative flex w-full max-w-[1502px] flex-col justify-between overflow-hidden rounded-md bg-white/60 backdrop-blur-lg dark:bg-black/50 lg:min-h-[758px] lg:flex-row lg:gap-10 xl:gap-0">
                 <div
-                    class="relative hidden w-full items-center justify-center bg-[linear-gradient(225deg,rgba(239,18,98,1)_0%,rgba(67,97,238,1)_100%)] p-5 lg:inline-flex lg:max-w-[835px] xl:-ms-28 ltr:xl:skew-x-[14deg] rtl:xl:skew-x-[-14deg]">
-                    <div class="absolute inset-y-0 w-8 from-primary/10 via-transparent to-transparent ltr:-right-10 ltr:bg-gradient-to-r rtl:-left-10 rtl:bg-gradient-to-l xl:w-16 ltr:xl:-right-20 rtl:xl:-left-20"></div>
+                    class="relative hidden w-full items-center justify-center bg-[linear-gradient(225deg,#1D2671,#C33764)] p-5 lg:inline-flex lg:max-w-[835px] xl:-ms-32 ltr:xl:skew-x-[14deg] rtl:xl:skew-x-[-14deg]">
+                    <div
+                        class="absolute inset-y-0 w-8 from-primary/10 via-transparent to-transparent ltr:-right-10 ltr:bg-gradient-to-r rtl:-left-10 rtl:bg-gradient-to-l xl:w-16 ltr:xl:-right-20 rtl:xl:-left-20">
+                    </div>
                     <div class="ltr:xl:-skew-x-[14deg] rtl:xl:skew-x-[14deg]">
-                        <a href="/" class="w-48 block lg:w-72 ms-10">
-                            <img src="/assets/images/auth/logo-white.svg" alt="Logo" class="w-full" />
+                        <a href="/" class="w-36 block lg:w-72 ms-10">
+                            <img src="/assets/images/auth/logogkm.png" alt="Logo" class="w-full" />
                         </a>
-                        <div class="mt-24 hidden w-full max-w-[430px] lg:block">
-                            <img src="/assets/images/auth/reset-password.svg" alt="Cover Image" class="w-full" />
+                        <div class="mt-24 hidden w-full max-w-[430px] lg:block slide-astronaut">
+                            <img src="/assets/images/auth/loginfoto2.png" alt="Cover Image" class="w-full" />
                         </div>
+
+                        <style>
+                            /* Animación de movimiento lateral */
+                            @keyframes slide {
+                              0% {
+                                transform: translateX(0); /* Posición inicial */
+                              }
+                              50% {
+                                transform: translateX(50px); /* Se mueve a la derecha */
+                              }
+                              100% {
+                                transform: translateX(0); /* Vuelve a la posición inicial */
+                              }
+                            }
+                          
+                            /* Clase para la animación de movimiento lateral */
+                            .slide-astronaut {
+                              animation: slide 3s ease-in-out infinite; /* Duración de 3 segundos, repetición infinita */
+                            }
+                          </style>
+
                     </div>
                 </div>
                 <div class="relative flex w-full flex-col items-center justify-center gap-6 px-4 pb-16 pt-6 sm:px-6 lg:max-w-[667px]">
                     <div class="flex w-full max-w-[440px] items-center gap-2 lg:absolute lg:end-6 lg:top-6 lg:max-w-full">
                         <a href="/" class="block w-8 lg:hidden">
-                            <img src="/assets/images/logo.svg" alt="Logo" class="w-full" />
+                            <img src="/assets/images/auth/profile.png" alt="Logo" class="w-full" />
                         </a>
                         <div class="dropdown ms-auto w-max" x-data="dropdown" @click.outside="open = false">
                             <a href="javascript:;" class="flex items-center gap-2.5 rounded-lg border border-white-dark/30 bg-white px-2 py-1.5 text-white-dark hover:border-primary hover:text-primary dark:bg-black"
@@ -57,14 +80,14 @@
                     </div>
                     <div class="w-full max-w-[440px] lg:mt-16">
                         <div class="mb-7">
-                            <h1 class="mb-3 text-2xl font-bold !leading-snug dark:text-white">Password Reset</h1>
-                            <p>Enter your email to recover your ID</p>
+                            <h1 class="mb-3 text-2xl font-bold !leading-snug dark:text-white">Restablecer contraseña</h1>
+                            <p>Ingresa tu email para recuperar tu contraseña</p>
                         </div>
                         <form class="space-y-5" @submit.prevent="window.location = '/'">
                             <div>
-                                <label for="Email">Email</label>
+                                <label for="Email">Correo Electronico</label>
                                 <div class="relative text-white-dark">
-                                    <input id="Email" type="email" placeholder="Enter Email" class="form-input pl-10 placeholder:text-white-dark" />
+                                    <input id="Email" type="email" placeholder="Ingresa tu correo electronico" class="form-input pl-10 placeholder:text-white-dark" />
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2">
                                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                                             <path opacity="0.5"
@@ -78,12 +101,12 @@
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]">
-                                RECOVER
+                                RECUPERAR
                             </button>
                         </form>
                     </div>
                     <p class="absolute bottom-6 w-full text-center dark:text-white">
-                        © <span id="footer-year">2022</span>. VRISTO All Rights Reserved.
+                        © <span id="footer-year">2025</span>. Solutions Force. Todos los derechos reservado.
                     </p>
                 </div>
             </div>

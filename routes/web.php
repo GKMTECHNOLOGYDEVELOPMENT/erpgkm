@@ -31,10 +31,10 @@ Route::post('/check-email', [AuthController::class, 'checkEmail']);
 // Route::view('/auth/boxed-signin', 'auth.boxed-signin');
 // Route::view('/auth/boxed-signup', 'auth.boxed-signup');
 // Route::view('/auth/boxed-password-reset', 'auth.boxed-password-reset');
-// Route::view('/auth/cover-login', 'auth.cover-login');
-// Route::view('/auth/cover-register', 'auth.cover-register');
+//Route::view('/auth/cover-login', 'auth.cover-login');
+//Route::view('/auth/cover-register', 'auth.cover-register')
 // Route::view('/auth/cover-lockscreen', 'auth.cover-lockscreen');
-// Route::view('/auth/cover-password-reset', 'auth.cover-password-reset');
+//Route::view('/auth/cover-password-reset', 'auth.cover-password-reset');
 
 // Route::view('/analytics', 'analytics');
 // Route::view('/finance', 'finance');
