@@ -1,27 +1,30 @@
 <?php
 
+// use App\Http\Controllers\dashboard\AdministracionController;
+// use App\Http\Controllers\dashboard\AlmacenController;
 use App\Http\Controllers\AuthController;
+// use App\Http\Controllers\dashboard\ComercialController;
+// use App\Http\Controllers\dashboard\TicketsController;
+// use Illuminate\Container\Attributes\Auth;
+
+use App\Http\Controllers\dashboard\AdministracionController;
+use App\Http\Controllers\dashboard\AlmacenController;
+use App\Http\Controllers\dashboard\ComercialController;
+use App\Http\Controllers\dashboard\TicketsController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 
-// Ruta para mostrar el formulario de login
-Route::get('/', function () { return view('auth.cover-login'); // Carga la vista del login
-})->name('login');
+Auth::routes();
 
+// Ruta para mostrar el formulario de login
+Route::get('/', function () { return view('auth.cover-login'); })->name('login');
 // Ruta para manejar el envío del formulario de login
 Route::post('/login', [AuthController::class, 'login'])->name('login');
-
 // Ruta para cerrar sesión
-Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
-// Route::view('/', 'index');
-
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Ruta protegida con middleware 'auth'
-Route::get('/index', function () {
-    return view('index');
-})->middleware('auth')->name('index');
-
-
-Route::post('/check-email', [App\Http\Controllers\AuthController::class, 'checkEmail']);
+Route::post('/check-email', [AuthController::class, 'checkEmail']);
 
 
 // Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
@@ -33,9 +36,21 @@ Route::post('/check-email', [App\Http\Controllers\AuthController::class, 'checkE
 // Route::view('/auth/cover-lockscreen', 'auth.cover-lockscreen');
 // Route::view('/auth/cover-password-reset', 'auth.cover-password-reset');
 
-Route::view('/analytics', 'analytics');
-Route::view('/finance', 'finance');
-Route::view('/crypto', 'crypto');
+// Route::view('/analytics', 'analytics');
+// Route::view('/finance', 'finance');
+// Route::view('/crypto', 'crypto');
+// Ruta para el dashboard de administración
+Route::get('/index', [AdministracionController::class, 'index'])->name('index')->middleware('auth');
+
+// Ruta para el dashboard de almacén
+Route::get('/almacen', [AlmacenController::class, 'index'])->name('almacen')->middleware('auth');
+
+// Ruta para el dashboard comercial
+Route::get('/comercial', [ComercialController::class, 'index'])->name('commercial')->middleware('auth');
+
+// Ruta para el dashboard de tickets
+Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->middleware('auth');
+
 
 Route::view('/apps/chat', 'apps.chat');
 Route::view('/apps/mailbox', 'apps.mailbox');

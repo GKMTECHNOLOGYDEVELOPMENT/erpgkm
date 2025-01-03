@@ -52,16 +52,16 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'dashboard'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="/">Sales</a>
+                            <a href="{{ route('index') }}">Administracion</a>
                         </li>
                         <li>
-                            <a href="/analytics">Analytics</a>
+                            <a href="{{ route('almacen') }}">Almacen</a>
                         </li>
                         <li>
-                            <a href="/finance">Finance</a>
+                            <a href="{{ route('tickets') }}">Tickets</a>
                         </li>
                         <li>
-                            <a href="/crypto">Crypto</a>
+                            <a href="{{ route('commercial') }}">Comercial</a>
                         </li>
                     </ul>
                 </li>

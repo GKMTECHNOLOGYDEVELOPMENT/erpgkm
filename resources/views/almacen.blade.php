@@ -1,13 +1,13 @@
 <x-layout.default>
 
     <script defer src="/assets/js/apexcharts.js"></script>
-    <div x-data="analytics">
+    <div x-data="almacen">
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
                 <a href="javascript:;" class="text-primary hover:underline">Dashboard</a>
             </li>
             <li class="before:content-['/'] before:mr-1 rtl:before:ml-1">
-                <span>Analytics</span>
+                <span>Almacen</span>
             </li>
         </ul>
         <div class="pt-5">
