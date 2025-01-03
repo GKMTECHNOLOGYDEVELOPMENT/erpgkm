@@ -1,19 +1,28 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 
 // Ruta para mostrar el formulario de login
-Route::get('/', function () {
-    return view('auth.cover-login'); // Carga la vista del login
+Route::get('/', function () { return view('auth.cover-login'); // Carga la vista del login
 })->name('login');
 
 // Ruta para manejar el envío del formulario de login
-Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 // Ruta para cerrar sesión
 Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 // Route::view('/', 'index');
+
+// Ruta protegida con middleware 'auth'
+Route::get('/index', function () {
+    return view('index');
+})->middleware('auth')->name('index');
+
+
+Route::post('/check-email', [App\Http\Controllers\AuthController::class, 'checkEmail']);
+
 
 // Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
 // Route::view('/auth/boxed-signin', 'auth.boxed-signin');
