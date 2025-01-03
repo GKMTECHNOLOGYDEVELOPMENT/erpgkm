@@ -1,8 +1,38 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'index');
+
+// Ruta para mostrar el formulario de login
+Route::get('/', function () { return view('auth.cover-login'); // Carga la vista del login
+})->name('login');
+
+// Ruta para manejar el envío del formulario de login
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+// Ruta para cerrar sesión
+Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+// Route::view('/', 'index');
+
+// Ruta protegida con middleware 'auth'
+Route::get('/index', function () {
+    return view('index');
+})->middleware('auth')->name('index');
+
+
+Route::post('/check-email', [App\Http\Controllers\AuthController::class, 'checkEmail']);
+
+
+// Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
+// Route::view('/auth/boxed-signin', 'auth.boxed-signin');
+// Route::view('/auth/boxed-signup', 'auth.boxed-signup');
+// Route::view('/auth/boxed-password-reset', 'auth.boxed-password-reset');
+// Route::view('/auth/cover-login', 'auth.cover-login');
+// Route::view('/auth/cover-register', 'auth.cover-register');
+// Route::view('/auth/cover-lockscreen', 'auth.cover-lockscreen');
+// Route::view('/auth/cover-password-reset', 'auth.cover-password-reset');
+
 Route::view('/analytics', 'analytics');
 Route::view('/finance', 'finance');
 Route::view('/crypto', 'crypto');
@@ -105,11 +135,4 @@ Route::view('/pages/error500', 'pages.error500');
 Route::view('/pages/error503', 'pages.error503');
 Route::view('/pages/maintenence', 'pages.maintenence');
 
-Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
-Route::view('/auth/boxed-signin', 'auth.boxed-signin');
-Route::view('/auth/boxed-signup', 'auth.boxed-signup');
-Route::view('/auth/boxed-password-reset', 'auth.boxed-password-reset');
-Route::view('/auth/cover-login', 'auth.cover-login');
-Route::view('/auth/cover-register', 'auth.cover-register');
-Route::view('/auth/cover-lockscreen', 'auth.cover-lockscreen');
-Route::view('/auth/cover-password-reset', 'auth.cover-password-reset');
+

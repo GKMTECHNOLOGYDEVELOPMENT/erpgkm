@@ -444,7 +444,7 @@
                                 Lock Screen</a>
                         </li>
                         <li class="border-t border-white-light dark:border-white-light/10">
-                            <a href="/auth/cover-login" class=" text-danger !py-3" @click="toggle">
+                            <a href="/" class=" text-danger !py-3" @click="toggle">
                                 <svg class="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0 rotate-90" width="18" height="18"
                                     viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path opacity="0.5"
