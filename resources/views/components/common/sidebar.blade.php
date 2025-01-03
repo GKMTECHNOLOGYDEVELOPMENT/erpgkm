@@ -7,7 +7,7 @@
                     <img class="w-8 ml-[5px] flex-none" src="/assets/images/logo.svg"
                         alt="image" />
                     <span
-                        class="text-2xl ltr:ml-1.5 rtl:mr-1.5  font-semibold  align-middle lg:inline dark:text-white-light">VRISTO</span>
+                        class="text-2xl ltr:ml-1.5 rtl:mr-1.5  font-semibold  align-middle lg:inline dark:text-white-light">GKM </span>
                 </a>
                 <a href="javascript:;"
                     class="collapse-icon w-8 h-8 rounded-full flex items-center hover:bg-gray-500/10 dark:hover:bg-dark-light/10 dark:text-white-light transition duration-300 rtl:rotate-180"
@@ -73,7 +73,7 @@
                         fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    <span>Apps</span>
+                    <span>Apps GKM</span>
                 </h2>
 
                 <li class="nav-item">
@@ -116,7 +116,7 @@
                                             fill="currentColor" />
                                     </svg>
                                     <span
-                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Mailbox</span>
+                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Correo</span>
                                 </div>
                             </a>
                         </li>
@@ -134,8 +134,7 @@
                                             fill="currentColor" />
                                     </svg>
                                     <span
-                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Todo
-                                        List</span>
+                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Lista Correo</span>
                                 </div>
                             </a>
                         </li>
@@ -159,11 +158,11 @@
                                             fill="currentColor" />
                                     </svg>
                                     <span
-                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Notes</span>
+                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Notas</span>
                                 </div>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a href="/apps/scrumboard" class="group">
                                 <div class="flex items-center">
 
@@ -183,7 +182,7 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Scrumboard</span>
                                 </div>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a href="/apps/contacts" class="group">
                                 <div class="flex items-center">
@@ -199,11 +198,11 @@
                                     </svg>
 
                                     <span
-                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Contacts</span>
+                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Contactos</span>
                                 </div>
                             </a>
                         </li>
-                        <li class="menu nav-item">
+                        <!-- <li class="menu nav-item">
                             <button type="button" class="nav-link group"
                                 :class="{ 'active': activeDropdown === 'invoice' }"
                                 @click="activeDropdown === 'invoice' ? activeDropdown = null : activeDropdown = 'invoice'">
@@ -245,7 +244,7 @@
                                     <a href="/apps/invoice/edit">Edit</a>
                                 </li>
                             </ul>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a href="/apps/calendar" class="group">
                                 <div class="flex items-center">
@@ -260,7 +259,7 @@
                                             fill="currentColor" />
                                     </svg>
                                     <span
-                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Calendar</span>
+                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Calendario</span>
                                 </div>
                             </a>
                         </li>
@@ -274,7 +273,7 @@
                         stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    <span>USER INTERFACE</span>
+                    <span>Administracion</span>
                 </h2>
 
                 <li class="menu nav-item">
@@ -537,7 +536,7 @@
                         stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    <span>TABLES AND FORMS</span>
+                    <span>ALMACEN</span>
                 </h2>
 
                 <li class="menu nav-item">
@@ -731,7 +730,7 @@
                         stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    <span>USER AND PAGES</span>
+                    <span>TICKES</span>
                 </h2>
 
                 <li class="menu nav-item">
