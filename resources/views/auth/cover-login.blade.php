@@ -112,8 +112,7 @@
                         <div class="mb-10">
                             <h1 class="text-3xl font-extrabold uppercase !leading-snug md:text-4xl text-[#EA1C1C]">
                                 Iniciar Sesión
-                            </h1>
-
+                            </h1>                            
                             <p class="text-base font-bold leading-normal text-white-dark">Ingrese su correo electrónico
                                 y contraseña para iniciar sesión</p>
                         </div>
