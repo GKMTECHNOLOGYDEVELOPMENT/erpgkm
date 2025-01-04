@@ -79,7 +79,7 @@
                 <li class="nav-item">
                     <ul>
                         <li class="nav-item">
-                            <a href="/apps/chat" class="group">
+                            <a href="{{ route('apps.chat') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
@@ -97,7 +97,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/apps/mailbox" class="group">
+                            <a href="{{ route('apps.mailbox') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
@@ -121,7 +121,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/apps/todolist" class="group">
+                            <a href="{{ route('apps.todolist') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
@@ -139,7 +139,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/apps/notes" class="group">
+                        <a href="{{ route('apps.notes') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
@@ -184,7 +184,7 @@
                             </a>
                         </li> -->
                         <li class="nav-item">
-                            <a href="/apps/contacts" class="group">
+                        <a href="{{ route('apps.contacts') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
@@ -246,7 +246,7 @@
                             </ul>
                         </li> -->
                         <li class="nav-item">
-                            <a href="/apps/calendar" class="group">
+                          <a href="{{ route('apps.calendar') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"

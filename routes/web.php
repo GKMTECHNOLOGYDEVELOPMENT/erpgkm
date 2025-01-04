@@ -1,18 +1,21 @@
 <?php
 
-// use App\Http\Controllers\dashboard\AdministracionController;
-// use App\Http\Controllers\dashboard\AlmacenController;
 use App\Http\Controllers\AuthController;
-// use App\Http\Controllers\dashboard\ComercialController;
-// use App\Http\Controllers\dashboard\TicketsController;
-// use Illuminate\Container\Attributes\Auth;
-
 use App\Http\Controllers\dashboard\AdministracionController;
 use App\Http\Controllers\dashboard\AlmacenController;
 use App\Http\Controllers\dashboard\ComercialController;
 use App\Http\Controllers\dashboard\TicketsController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\LockscreenController;
+use App\Http\Controllers\PasswordResetController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Apps\ChatController;
+use App\Http\Controllers\Apps\MailboxController;
+use App\Http\Controllers\Apps\TodolistController;
+use App\Http\Controllers\Apps\NotesController;
+use App\Http\Controllers\Apps\ScrumboardController;
+use App\Http\Controllers\Apps\ContactsController;
+use App\Http\Controllers\Apps\CalendarController;
 
 
 Auth::routes();
@@ -25,6 +28,10 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Ruta protegida con middleware 'auth'
 Route::post('/check-email', [AuthController::class, 'checkEmail']);
+// Ruta para la pantalla de bloqueo
+Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->name('auth.lockscreen');
+// Ruta para la pantalla de restablecimiento de contraseña
+Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'show'])->name('auth.password-reset');
 
 
 // Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
@@ -51,14 +58,21 @@ Route::get('/comercial', [ComercialController::class, 'index'])->name('commercia
 // Ruta para el dashboard de tickets
 Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->middleware('auth');
 
+Route::get('/apps/chat', [ChatController::class, 'index'])->name('apps.chat');
+Route::get('/apps/mailbox', [MailboxController::class, 'index'])->name('apps.mailbox');
+Route::get('/apps/todolist', [TodolistController::class, 'index'])->name('apps.todolist');
+Route::get('/apps/notes', [NotesController::class, 'index'])->name('apps.notes');
+Route::get('/apps/scrumboard', [ScrumboardController::class, 'index'])->name('apps.scrumboard');
+Route::get('/apps/contacts', [ContactsController::class, 'index'])->name('apps.contacts');
+Route::get('/apps/calendar', [CalendarController::class, 'index'])->name('apps.calendar');
 
-Route::view('/apps/chat', 'apps.chat');
-Route::view('/apps/mailbox', 'apps.mailbox');
-Route::view('/apps/todolist', 'apps.todolist');
-Route::view('/apps/notes', 'apps.notes');
-Route::view('/apps/scrumboard', 'apps.scrumboard');
-Route::view('/apps/contacts', 'apps.contacts');
-Route::view('/apps/calendar', 'apps.calendar');
+// Route::view('/apps/chat', 'apps.chat');
+// Route::view('/apps/mailbox', 'apps.mailbox');
+// Route::view('/apps/todolist', 'apps.todolist');
+// Route::view('/apps/notes', 'apps.notes');
+// Route::view('/apps/scrumboard', 'apps.scrumboard');
+// Route::view('/apps/contacts', 'apps.contacts');
+// Route::view('/apps/calendar', 'apps.calendar');
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');
