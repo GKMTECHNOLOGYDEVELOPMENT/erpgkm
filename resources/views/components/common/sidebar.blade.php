@@ -353,6 +353,113 @@
                 </li>
 
                 <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'asociados' }"
+                        @click="activeDropdown === 'asociados' ? activeDropdown = null : activeDropdown = 'asociados'">
+                        <div class="flex items-center">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75a3 3 0 11-6 0 3 3 0 016 0zM12 14.25a7.5 7.5 0 00-6 3.25M12 14.25a7.5 7.5 0 016 3.25M12 14.25v6.75M6.75 6.75a3 3 0 100 6 3 3 0 000-6zm10.5 0a3 3 0 100 6 3 3 0 000-6zM6.75 12.75V21m10.5-8.25v8.25"/>
+                              </svg>
+                              
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Asociados</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'asociados' }">
+
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'asociados'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="/components/tabs">Cliente General</a>
+                        </li>
+                        <li>
+                            <a href="/components/accordions">Tienda</a>
+                        </li>
+                        <li>
+                            <a href="/components/modals">Subsidiario</a>
+                        </li>
+                        <li>
+                            <a href="/components/cards">CAST</a>
+                        </li>
+                        <li>
+                            <a href="/components/carousel">Clientes</a>
+                        </li>
+                        <li>
+                            <a href="/components/countdown">Proveedores</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'asistencias' }"
+                        @click="activeDropdown === 'asistencias' ? activeDropdown = null : activeDropdown = 'asistencias'">
+                        <div class="flex items-center">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h8M6 10h12M9 14h6M12 18v4M4 4h16v16H4V4z" />
+                              </svg>
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Asistencias</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'asistencias' }">
+
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'asistencias'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="/components/tabs">Técnico</a>
+                        </li>
+                        <li>
+                            <a href="/components/accordions">Oficina</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'cotizaciones' }"
+                        @click="activeDropdown === 'cotizaciones' ? activeDropdown = null : activeDropdown = 'cotizaciones'">
+                        <div class="flex items-center">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c2.485 0 4.5 1.567 4.5 3.5S14.485 15 12 15s-4.5-1.567-4.5-3.5S9.515 8 12 8z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v6m-6 12h12a2 2 0 002-2V4a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                              </svg>                                                          
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Cotizaciones</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'cotizaciones' }">
+
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'cotizaciones'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="/components/tabs">Agregar</a>
+                        </li>
+                        <li>
+                            <a href="/components/accordions">Lista</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'elements' }"
                         @click="activeDropdown === 'elements' ? activeDropdown = null : activeDropdown = 'elements'">
                         <div class="flex items-center">
@@ -450,6 +557,21 @@
                             </svg>
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Charts</span>
+                        </div>
+                    </a>
+                </li>
+
+                <li class="menu nav-item">
+                    <a href="{{ route('administracion.usuarios') }}" class="nav-link group">
+                        <div class="flex items-center">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12z" fill="currentColor"/>
+                                <path opacity="0.7" d="M12 14c-3.314 0-6 2.686-6 6 0 .552.448 1 1 1h10c.552 0 1-.448 1-1 0-3.314-2.686-6-6-6z" fill="currentColor"/>
+                              </svg>
+                              
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Usuarios</span>
                         </div>
                     </a>
                 </li>

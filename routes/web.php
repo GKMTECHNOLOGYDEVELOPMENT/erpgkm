@@ -5,6 +5,7 @@ use App\Http\Controllers\dashboard\AdministracionController;
 use App\Http\Controllers\dashboard\AlmacenController;
 use App\Http\Controllers\dashboard\ComercialController;
 use App\Http\Controllers\dashboard\TicketsController;
+use App\Http\Controllers\administracion\UsuariosController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LockscreenController;
 use App\Http\Controllers\PasswordResetController;
@@ -58,6 +59,9 @@ Route::get('/comercial', [ComercialController::class, 'index'])->name('commercia
 // Ruta para el dashboard de tickets
 Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->middleware('auth');
 
+// Ruta para Administración de Usuarios
+Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
+
 Route::get('/apps/chat', [ChatController::class, 'index'])->name('apps.chat');
 Route::get('/apps/mailbox', [MailboxController::class, 'index'])->name('apps.mailbox');
 Route::get('/apps/todolist', [TodolistController::class, 'index'])->name('apps.todolist');
@@ -78,6 +82,8 @@ Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');
 Route::view('/apps/invoice/add', 'apps.invoice.add');
 Route::view('/apps/invoice/edit', 'apps.invoice.edit');
+
+
 
 Route::view('/components/tabs', 'ui-components.tabs');
 Route::view('/components/accordions', 'ui-components.accordions');
