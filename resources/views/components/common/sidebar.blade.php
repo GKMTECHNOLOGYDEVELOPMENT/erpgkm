@@ -376,22 +376,22 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'asociados'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="/components/tabs">Cliente General</a>
+                            <a href="{{ route('administracion.cliente-general') }}">Cliente General</a>
                         </li>
                         <li>
-                            <a href="/components/accordions">Tienda</a>
+                            <a href="{{ route('administracion.tienda') }}">Tienda</a>
                         </li>
                         <li>
-                            <a href="/components/modals">Subsidiario</a>
+                            <a href="{{ route('administracion.sub-sidiario') }}">Subsidiario</a>
                         </li>
                         <li>
-                            <a href="/components/cards">CAST</a>
+                            <a href="{{ route('administracion.cast') }}">CAST</a>
                         </li>
                         <li>
-                            <a href="/components/carousel">Clientes</a>
+                            <a href="{{ route('administracion.clientes') }}">Clientes</a>
                         </li>
                         <li>
-                            <a href="/components/countdown">Proveedores</a>
+                            <a href="{{ route('administracion.proveedores') }}">Proveedores</a>
                         </li>
                     </ul>
                 </li>
@@ -451,7 +451,7 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'cotizaciones'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="/components/tabs">Agregar</a>
+                            <a href="{{ route('cotizaciones.crear-cotizacion') }}">Agregar</a>
                         </li>
                         <li>
                             <a href="/components/accordions">Lista</a>

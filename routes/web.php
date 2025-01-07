@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\administracion\asociados\CastController;
+use App\Http\Controllers\administracion\asociados\ClienteGeneralController;
+use App\Http\Controllers\administracion\asociados\ClientesController;
+use App\Http\Controllers\administracion\asociados\ProveedoresController;
+use App\Http\Controllers\administracion\asociados\SubsidiarioController;
+use App\Http\Controllers\administracion\asociados\TiendaController;
+use App\Http\Controllers\administracion\cotizaciones\cotizacionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\dashboard\AdministracionController;
 use App\Http\Controllers\dashboard\AlmacenController;
@@ -17,7 +24,8 @@ use App\Http\Controllers\Apps\NotesController;
 use App\Http\Controllers\Apps\ScrumboardController;
 use App\Http\Controllers\Apps\ContactsController;
 use App\Http\Controllers\Apps\CalendarController;
-
+use App\Models\Clientegeneral;
+use App\Models\Subsidiario;
 
 Auth::routes();
 
@@ -61,6 +69,22 @@ Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->mi
 
 // Ruta para Administración de Usuarios
 Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
+// Ruta para Administración de Clientes Generales
+Route::get('/administracion/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
+// Ruta para Administracion de tiendas
+Route::get('/administracion/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
+// Ruta para Administracion Subsidiario
+Route::get('/administracion/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
+//Ruta para Administracion Cast
+Route::get('/administracion/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
+// Route::get('/casts', [CastController::class, 'getAll']);
+
+//Ruta para Administracion Clientes
+Route::get('/administracion/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
+//Ruta para Administracion Proveedores
+Route::get('/administracion/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
+//Ruta para administracion cotizaciones
+Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'index'])->name('cotizaciones.crear-cotizacion')->middleware('auth');
 
 Route::get('/apps/chat', [ChatController::class, 'index'])->name('apps.chat');
 Route::get('/apps/mailbox', [MailboxController::class, 'index'])->name('apps.mailbox');
