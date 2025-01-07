@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Controllers\administracion\asociados\CastController;
+use App\Http\Controllers\administracion\asociados\ClienteGeneralController;
+use App\Http\Controllers\administracion\asociados\ClientesController;
+use App\Http\Controllers\administracion\asociados\SubsidiarioController;
+use App\Http\Controllers\administracion\asociados\TiendaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +21,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+
+    
 });
+
+Route::get('/casts', [CastController::class, 'getAll']);
+
+Route::get('/clientegeneral', [ClienteGeneralController::class, 'getAll']);
+
+
+Route::get('/tiendas', [TiendaController::class, 'getAll']);
+
+Route::get('/subsidiarios', [SubsidiarioController::class, 'getAll']);
+
+Route::get('/clientes', [ClientesController::class, 'getAll']);
+
+
+
