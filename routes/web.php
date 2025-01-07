@@ -6,6 +6,13 @@ use App\Http\Controllers\dashboard\AlmacenController;
 use App\Http\Controllers\dashboard\ComercialController;
 use App\Http\Controllers\dashboard\TicketsController;
 use App\Http\Controllers\administracion\UsuariosController;
+use App\Http\Controllers\administracion\asistencias\OficinaController;
+use App\Http\Controllers\administracion\asistencias\TecnicoController;
+use App\Http\Controllers\administracion\asociados\ClienteGeneralController;
+use App\Http\Controllers\administracion\asociados\ClientesController;
+use App\Http\Controllers\administracion\asociados\ProveedoresController;
+use App\Http\Controllers\administracion\asociados\SubsidiarioController;
+use App\Http\Controllers\administracion\asociados\CastController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LockscreenController;
 use App\Http\Controllers\PasswordResetController;
@@ -17,6 +24,7 @@ use App\Http\Controllers\Apps\NotesController;
 use App\Http\Controllers\Apps\ScrumboardController;
 use App\Http\Controllers\Apps\ContactsController;
 use App\Http\Controllers\Apps\CalendarController;
+
 
 
 Auth::routes();
@@ -61,6 +69,15 @@ Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->mi
 
 // Ruta para Administración de Usuarios
 Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
+// Ruta para Administración de Asociados
+Route::get('/administracion/oficina', [OficinaController::class, 'index'])->name('administracion.oficina')->middleware('auth');
+Route::get('/administracion/tecnico', [TecnicoController::class, 'index'])->name('administracion.tecnico')->middleware('auth');
+Route::get('/administracion/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
+Route::get('/administracion/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
+Route::get('/administracion/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
+Route::get('/administracion/subsidiario', [SubsidiarioController::class, 'index'])->name('administracion.subsidiario')->middleware('auth');
+Route::get('/administracion/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
+
 
 Route::get('/apps/chat', [ChatController::class, 'index'])->name('apps.chat');
 Route::get('/apps/mailbox', [MailboxController::class, 'index'])->name('apps.mailbox');
