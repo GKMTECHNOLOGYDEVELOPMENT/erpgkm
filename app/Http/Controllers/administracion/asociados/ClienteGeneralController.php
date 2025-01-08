@@ -4,60 +4,98 @@ namespace App\Http\Controllers\administracion\asociados;
 
 use App\Http\Controllers\Controller;
 use App\Models\Clientegeneral;
+use App\Http\Requests\GeneralRequests;
 use Illuminate\Http\Request;
+
+
+
 
 class ClienteGeneralController extends Controller
 {
     public function index()
     {
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.cliente-general'); 
+        return view('administracion.asociados.cliente-general'); 
+    }
+    public function store(GeneralRequests $request)
+    {
+        $dataClientes = [
+            'descripcion' => $request->descripcion,
+            // 'logo' => $request->logo,
+            'estado' => 1,
+        ];
+
+        Clientegeneral::insert($dataClientes);
+        $data = Clientegeneral::latest('id')->first();
+        $idCliente = $data->id;
+
+        if ($request->hasFile('logo')) {
+            $extension = $request->file('logo')->getClientOriginalExtension();
+            $file_name = mt_rand(0, 999) . '.' . $extension;
+
+            $directorio = "img/general/" . $idCliente;
+            if (!file_exists($directorio)) {
+                mkdir($directorio, 0755);
+            }
+
+            $path =   $request->logo->move(public_path('img/general/' . $idCliente . '/'), $file_name);
+            $rutaImg = "img/general/" . $idCliente . '/' . $file_name;
+        } else {
+            $rutaImg = $request->logoDefault;
+        }
+
+        $update = Clientegeneral::where('id', '=', $idCliente)->update(['foto' => $rutaImg]);
+
+
+
+        return redirect('cliente-general')->with('addClientes', 'ok');
+    }
+    
+    
+
+    public function edit($id)
+    {
+        $dataClientes = Clientegeneral::findOrFail($id);
+        return view('cliente-general.edit', compact('dataClientes'));
     }
 
-    public function store(Request $request)
+    public function update(GeneralRequests $request, $id)
     {
-        $request->validate([
-            'descripcion' => 'required|string|max:255',
-            'estado' => 'required|boolean',
-            'foto' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240',
+        // return $request->all();
+        if ($request->hasFile('logo')) {
+            $extension = $request->file('logo')->getClientOriginalExtension();
+            $file_name = mt_rand(0, 999) . '.' . $extension;
+
+            $directorio = "img/general/" . $id;
+            if (!file_exists($directorio)) {
+                mkdir($directorio, 0755);
+            }
+
+            $path =   $request->logo->move(public_path('img/general/' . $id . '/'), $file_name);
+            $rutaImg = "img/general/" . $id . '/' . $file_name;
+        } else {
+            $rutaImg = $request->logoDefault;
+        }
+
+        $update = Clientegeneral::where('id', '=', $id)->update([
+            'descripcion' => $request->descripcion,
+            'foto' => $rutaImg,
+            'estado' => $request->estado
         ]);
 
-        $clienteGeneral = new Clientegeneral();
-        $clienteGeneral->descripcion = $request->descripcion;
-        $clienteGeneral->estado = $request->estado;
-        if ($request->hasFile('foto')) {
-            $clienteGeneral->foto = file_get_contents($request->file('foto'));
-        }
-        $clienteGeneral->save();
 
-        return response()->json(['message' => 'Cliente general creado'], 201);
+        return redirect('cliente-general')->with('updateClientes', 'ok');
     }
 
 
-    public function update(Request $request, $id)
+    public function deleteClienteGeneral(Request $request)
     {
-        $request->validate([
-            'descripcion' => 'required|string|max:255',
-            'estado' => 'required|boolean',
-            'foto' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240',
+        $update = Clientegeneral::where('id', '=', $request->idGeneral)->update([
+            'estado' => 2,
         ]);
-
-        $clienteGeneral = ClienteGeneral::findOrFail($id);
-        $clienteGeneral->descripcion = $request->descripcion;
-        $clienteGeneral->estado = $request->estado;
-        if ($request->hasFile('foto')) {
-            $clienteGeneral->foto = file_get_contents($request->file('foto'));
+        if ($update > 0) {
+            return response()->json(['success' => $request->idGeneral]);
         }
-        $clienteGeneral->save();
-
-        return response()->json(['message' => 'Cliente general actualizado']);
-    }
-
-
-    public function destroy($id)
-    {
-        ClienteGeneral::findOrFail($id)->delete();
-        return response()->json(['message' => 'Cliente general eliminado']);
     }
 
 

@@ -11,44 +11,44 @@ class TiendaController extends Controller
     public function index()
     {
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.tienda'); 
+        return view('administracion.asociados.tienda'); 
     }
     // Crear una nueva Tienda
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'nombre' => 'required|string|max:255',
+    //     ]);
 
-        $tienda = new Tienda();
-        $tienda->nombre = $request->nombre;
-        $tienda->save();
+    //     $tienda = new Tienda();
+    //     $tienda->nombre = $request->nombre;
+    //     $tienda->save();
 
-        return response()->json(['message' => 'Tienda creada correctamente'], 201);
-    }
+    //     return response()->json(['message' => 'Tienda creada correctamente'], 201);
+    // }
 
     // Actualizar una Tienda
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-        ]);
+    // public function update(Request $request, $id)
+    // {
+    //     $request->validate([
+    //         'nombre' => 'required|string|max:255',
+    //     ]);
 
-        $tienda = Tienda::findOrFail($id);
-        $tienda->nombre = $request->nombre;
-        $tienda->save();
+    //     $tienda = Tienda::findOrFail($id);
+    //     $tienda->nombre = $request->nombre;
+    //     $tienda->save();
 
-        return response()->json(['message' => 'Tienda actualizada correctamente']);
-    }
+    //     return response()->json(['message' => 'Tienda actualizada correctamente']);
+    // }
 
     // Eliminar una Tienda
-    public function destroy($id)
-    {
-        $tienda = Tienda::findOrFail($id);
-        $tienda->delete();
+    // public function destroy($id)
+    // {
+    //     $tienda = Tienda::findOrFail($id);
+    //     $tienda->delete();
 
-        return response()->json(['message' => 'Tienda eliminada correctamente']);
-    }
+    //     return response()->json(['message' => 'Tienda eliminada correctamente']);
+    // }
 
     public function getAll()
 {
