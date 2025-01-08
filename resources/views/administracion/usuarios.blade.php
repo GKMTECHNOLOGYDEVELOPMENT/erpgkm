@@ -6,7 +6,6 @@
         /* Scroll transparente y elegante */
         .modal-scroll {
             overflow-y: auto;
-            max-height: 70vh;
             /* Controla la altura máxima del contenido */
             scrollbar-width: thin;
             /* Estilo del scroll en navegadores compatibles */
@@ -103,7 +102,7 @@
             <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
                 <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
                     <div x-show="open" x-transition.duration.300
-                        class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-4x1 my-8 animate__animated animate__zoomInUp">
+                        class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
                         <!-- Header del Modal -->
                         <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                             <h5 class="font-bold text-lg">Agregar Usuario</h5>
@@ -116,11 +115,12 @@
                                 </svg>
                             </button>
                         </div>
-                        <div class="p-5 modal-scroll">
+                        <div class="modal-scroll">
                             <!-- Formulario -->
                             <form class="p-5 space-y-4">
-                                <!-- Primera Fila -->
-                                <div class="grid grid-cols-3 gap-4">
+                                <!-- Rejilla de dos columnas -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Primera Fila -->
                                     <div>
                                         <label for="apellidoPaterno" class="block text-sm font-medium">Apellido
                                             Paterno</label>
@@ -138,13 +138,10 @@
                                         <input id="nombre" x-model="formData.Nombre" type="text"
                                             class="form-input w-full" placeholder="Nombre">
                                     </div>
-                                </div>
-                                <!-- Segunda Fila -->
-                                <div class="grid grid-cols-3 gap-4">
                                     <div x-data="form">
                                         <label for="fechaNacimiento" class="block text-sm font-medium">Fecha de
                                             Nacimiento</label>
-                                        <input id="fechaNacimiento" x-model="date1" class="form-input w-full"
+                                        <input id="fechaNacimiento" type="text" class="form-input w-full"
                                             placeholder="Seleccione la fecha">
                                     </div>
                                     <div>
@@ -157,9 +154,60 @@
                                         <input id="correo" x-model="formData.correo" type="email"
                                             class="form-input w-full" placeholder="Correo Electrónico">
                                     </div>
-                                </div>
-                                <!-- Tercera Fila -->
-                                <div class="grid grid-cols-3 gap-4">
+                                    <!-- Selects -->
+                                    <div>
+
+                                        <select id="idSucursal" x-model="formData.idSucursal" class="select2 w-full">
+                                            <option value="" disabled selected>Seleccionar Sucursal</option>
+                                            <option value="1">Sucursal 1</option>
+                                            <option value="2">Sucursal 2</option>
+                                        </select>
+                                    </div>
+                                    <div>
+
+                                        <select id="idSexo" x-model="formData.idSexo" class="select2 w-full">
+                                            <option value="" disabled selected>Seleccionar Sexo</option>
+                                            <option value="1">Masculino</option>
+                                            <option value="2">Femenino</option>
+                                        </select>
+                                    </div>
+                                    <div>
+
+                                        <select id="idArea" x-model="formData.idArea" class="select2 w-full">
+                                            <option value="" disabled selected>Seleccionar Área</option>
+                                            <option value="1">Recursos Humanos</option>
+                                            <option value="2">Tecnología</option>
+                                        </select>
+                                    </div>
+                                    <div>
+
+                                        <select id="idRol" x-model="formData.idRol" class="select2 w-full">
+                                            <option value="" disabled selected>Seleccionar Rol</option>
+                                            <option value="1">Gerente</option>
+                                            <option value="2">Supervisor</option>
+                                        </select>
+                                    </div>
+                                    <div>
+
+                                        <select id="idTipoUsuario" x-model="formData.idTipoUsuario"
+                                            class="select2 w-full">
+                                            <option value="" disabled selected>Seleccionar Tipo Usuario</option>
+                                            <option value="1">Usuario 1</option>
+                                            <option value="2">Usuario 2</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+
+                                        <select id="idTipoDocumento" x-model="formData.idTipoDocumento"
+                                            class="select2 w-full">
+                                            <option value="" disabled selected>Seleccionar Tipo Documento
+                                            </option>
+                                            <option value="1">DNI 1</option>
+                                            <option value="2">Otro 2</option>
+                                        </select>
+                                    </div>
+
                                     <div>
                                         <label for="usuario" class="block text-sm font-medium">Usuario</label>
                                         <input id="usuario" x-model="formData.usuario" type="text"
@@ -171,14 +219,6 @@
                                             class="form-input w-full" placeholder="Clave">
                                     </div>
                                     <div>
-                                        <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                        <input id="direccion" x-model="formData.direccion" type="text"
-                                            class="form-input w-full" placeholder="Dirección">
-                                    </div>
-                                </div>
-                                <!-- Selects -->
-                                <div class="grid grid-cols-3 gap-4">
-                                    <div>
                                         <label for="documento" class="block text-sm font-medium">Documento</label>
                                         <input id="documento" x-model="formData.documento" type="text"
                                             class="form-input w-full" placeholder="Documento">
@@ -189,38 +229,12 @@
                                         <input id="sueldoPorHora" x-model="formData.sueldoPorHora" type="number"
                                             class="form-input w-full" placeholder="Sueldo por Hora">
                                     </div>
-                                    <div>
-
-                                        <select id="idSucursal" x-model="formData.idSucursal" class="select2">
-                                            <option value="" disabled selected>Seleccionar Sucursal</option>
-                                            <option value="1">Sucursal 1</option>
-                                            <option value="2">Sucursal 2</option>
-                                        </select>
+                                    <!-- Dirección (Ocupa 2 columnas) -->
+                                    <div class="md:col-span-2">
+                                        <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                                        <textarea id="direccion" x-model="formData.direccion" class="form-input w-full" rows="5" placeholder="Ingrese la dirección"></textarea>
                                     </div>
-                                    <div>
 
-                                        <select id="idSexo" x-model="formData.idSexo" class="select2">
-                                            <option value="" disabled selected>Seleccionar Sexo</option>
-                                            <option value="1">Masculino</option>
-                                            <option value="2">Femenino</option>
-                                        </select>
-                                    </div>
-                                    <div>
-
-                                        <select id="idArea" x-model="formData.idArea" class="select2">
-                                            <option value="" disabled selected>Seleccionar Área</option>
-                                            <option value="1">Recursos Humanos</option>
-                                            <option value="2">Tecnología</option>
-                                        </select>
-                                    </div>
-                                    <div>
-
-                                        <select id="idRol" x-model="formData.idRol" class="select2">
-                                            <option value="" disabled selected>Seleccionar Rol</option>
-                                            <option value="1">Gerente</option>
-                                            <option value="2">Supervisor</option>
-                                        </select>
-                                    </div>
                                 </div>
                                 <!-- Botones -->
                                 <div class="flex justify-end items-center mt-4">

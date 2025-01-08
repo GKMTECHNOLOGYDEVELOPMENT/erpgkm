@@ -11,7 +11,7 @@ class CastController extends Controller
     public function index()
     {
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.cast'); 
+        return view('administracion.asociados.cast'); 
     }
 
     // Crear un nuevo Cast
