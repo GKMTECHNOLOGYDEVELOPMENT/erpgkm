@@ -28,7 +28,7 @@ use App\Http\Controllers\Apps\ContactsController;
 use App\Http\Controllers\Apps\CalendarController;
 use App\Models\Clientegeneral;
 use App\Models\Subsidiario;
-
+use Illuminate\Http\Client\Request;
 
 Auth::routes();
 
@@ -74,6 +74,14 @@ Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->mi
 Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
 // Ruta para Administración de Clientes Generales
 Route::get('/administracion/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
+// Ruta para crear un ciente general 
+Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
+
+Route::post('/check-nombre', function (Request $request) {
+    $nombre = $request->input('nombre');
+    $exists = Clientegeneral::where('descripcion', $nombre)->exists();
+    return response()->json(['unique' => !$exists]);
+});
 // Ruta para Administracion de tiendas
 Route::get('/administracion/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
 // Ruta para Administracion Subsidiario
@@ -84,6 +92,7 @@ Route::get('/administracion/cast', [CastController::class, 'index'])->name('admi
 
 //Ruta para Administracion Clientes
 Route::get('/administracion/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
+
 //Ruta para Administracion Proveedores
 Route::get('/administracion/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
 //Ruta para administracion cotizaciones

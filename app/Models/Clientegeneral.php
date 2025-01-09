@@ -30,7 +30,7 @@ class Clientegeneral extends Model
 
 	protected $casts = [
 		'estado' => 'bool',
-		'foto' => 'varbinary'
+		'foto' => 'string'
 	];
 
 	protected $fillable = [
