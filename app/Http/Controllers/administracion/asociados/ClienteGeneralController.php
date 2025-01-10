@@ -13,8 +13,9 @@ class ClienteGeneralController extends Controller
 {
     public function index()
     {
+        
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.cliente-general'); 
+        return view('administracion.asociados.clienteGeneral.index'); 
     }
 
     public function store(GeneralRequests $request)
@@ -75,27 +76,48 @@ class ClienteGeneralController extends Controller
             ], 500);
         }
     }
+
+
+    public function edit($id)
+{
+    $cliente = ClienteGeneral::findOrFail($id); // Buscar cliente por ID
+
+    // Retornar vista con los datos del cliente
+    return view('administracion.asociados.clienteGeneral.edit', compact('cliente'));
+}
+
     
 
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        // Validar los datos del formulario
+        $validatedData = $request->validate([
             'descripcion' => 'required|string|max:255',
-            'estado' => 'required|boolean',
-            'foto' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'estado' => 'nullable|boolean',
         ]);
-
-        $clienteGeneral = ClienteGeneral::findOrFail($id);
-        $clienteGeneral->descripcion = $request->descripcion;
-        $clienteGeneral->estado = $request->estado;
+    
+        // Obtener el cliente
+        $cliente = ClienteGeneral::findOrFail($id);
+    
+        // Actualizar los datos del cliente
+        $cliente->descripcion = $validatedData['descripcion'];
+        $cliente->estado = $request->has('estado') ? 1 : 0;
+    
+        // Subir y guardar la foto si se proporciona
         if ($request->hasFile('foto')) {
-            $clienteGeneral->foto = file_get_contents($request->file('foto'));
+            $filePath = $request->file('foto')->store('uploads', 'public');
+            $cliente->foto = $filePath;
         }
-        $clienteGeneral->save();
-
-        return response()->json(['message' => 'Cliente general actualizado']);
+    
+        $cliente->save(); // Guardar los cambios
+    
+        // Redireccionar con un mensaje de éxito
+        return redirect()->route('cliente-general.index')
+            ->with('success', 'Cliente actualizado exitosamente.');
     }
+    
 
 
 

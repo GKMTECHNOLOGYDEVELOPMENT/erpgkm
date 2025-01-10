@@ -81,7 +81,12 @@ Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->na
 // Ruta para Administración de Compras
 Route::get('/administracion/compras', [CompraController::class, 'index'])->name('administracion.compra')->middleware('auth');
 // Ruta para Administración de Clientes Generales
-Route::get('/administracion/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
+Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
+// Mostrar el formulario de edición
+Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
+// Actualizar los datos del cliente general
+Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
+
 // Ruta para crear un ciente general 
 Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
 
