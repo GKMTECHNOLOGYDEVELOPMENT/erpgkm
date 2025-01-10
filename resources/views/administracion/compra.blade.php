@@ -1,7 +1,12 @@
 <x-layout.default>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-
+    <style>
+        .panel {
+            overflow: visible !important;
+            /* Asegura que el modal no restrinja contenido */
+        }
+    </style>
     <div x-data="multipleTable">
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -9,7 +14,7 @@
                     <a href="javascript:;" class="text-primary hover:underline">Asociados</a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                    <span>Proveedores</span>
+                    <span>Compras</span>
                 </li>
             </ul>
         </div>
@@ -59,26 +64,26 @@
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M5 8C5 6.89543 5.89543 6 7 6H17C18.1046 6 19 6.89543 19 8V16C19 17.1046 18.1046 18 17 18H7C5.89543 18 5 17.1046 5 16V8Z" 
+                            <path d="M6 2L3 6V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V6L18 2H6Z" 
                                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9 12H15" 
+                            <path d="M3 6H21" 
                                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 9V15" 
+                            <path d="M16 10C16 11.1046 15.1046 12 14 12C12.8954 12 12 11.1046 12 10C12 8.89543 12.8954 8 14 8C15.1046 8 16 8.89543 16 10Z" 
                                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3 5H21" 
+                            <path d="M10 12H8C6.89543 12 6 11.1046 6 10C6 8.89543 6.89543 8 8 8H10" 
                                   stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3 19H21" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
-                                                   
+                          </svg>                          
                         <span>Agregar</span>
                     </button>
                 </div>
             </div>
 
+
             <table id="myTable1" class="whitespace-nowrap"></table>
         </div>
     </div>
+
+    <!-- Modal -->
     <div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
@@ -86,7 +91,7 @@
                     class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <h5 class="font-bold text-lg">Agregar Proveedor</h5>
+                        <h5 class="font-bold text-lg">Agregar Compra</h5>
                         <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -98,107 +103,111 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario -->
-                        <form class="p-5 space-y-4" id="proveedorForm">
+                        <form class="p-5 space-y-4" id="compraForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Nombre -->
+                                <!-- Serie -->
                                 <div>
-                                    <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                    <input id="nombre" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el nombre">
+                                    <label for="serie" class="block text-sm font-medium">Serie</label>
+                                    <input id="serie" type="text" class="form-input w-full"
+                                        placeholder="Ingrese la serie" required />
                                 </div>
-                                <!-- Tipo de Documento -->
+                                <!-- Número -->
                                 <div>
-                                    <select id="idTipoDocumento" class="select2 w-full">
-                                        <option value="" disabled selected>Seleccione un tipo de Documento
-                                        </option>
-                                        <option value="1">DNI</option>
-                                        <option value="2">RUC</option>
-                                    </select>
+                                    <label for="nro" class="block text-sm font-medium">Número</label>
+                                    <input id="nro" type="number" class="form-input w-full"
+                                        placeholder="Ingrese el número" required />
                                 </div>
-                                <!-- Número de Documento -->
-                                <div>
-                                    <label for="numeroDocumento" class="block text-sm font-medium">Número de
-                                        Documento</label>
-                                    <input id="numeroDocumento" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el número de documento">
+                                <!-- Fecha de Emisión -->
+                                <div x-data="form">
+                                    <label for="fechaEmision" class="block text-sm font-medium">Fecha de
+                                        Emisión</label>
+                                    <input id="fechaEmision" x-model="date2" class="form-input w-full"
+                                        placeholder="Seleccione la fecha y hora" />
                                 </div>
-                                <!-- País -->
-                                <div>
+                                <!-- Fecha de Vencimiento -->
+                                <div x-data="formVencimiento">
+                                    <label for="fechaVencimiento" class="block text-sm font-medium">Fecha de
+                                        Vencimiento</label>
+                                    <input id="fechaVencimiento" x-model="dateVencimiento" class="form-input w-full"
+                                        placeholder="Seleccione la fecha y hora" required />
+                                </div>
+                                <!-- Campo de Imagen con Previsualización -->
+                                <div class="mb-5" x-data="{ imagenPreview: null }">
+                                    <label for="imagen" class="block text-sm font-medium mb-2">Imagen</label>
+                                    <!-- Input de archivo -->
+                                    <input id="imagen" type="file" accept="image/*"
+                                        class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
+                                        @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" />
 
-                                    <select id="pais" class="select2 w-full">
-                                        <option value="" disabled selected>Seleccionar País</option>
-                                        <option value="1">País 1</option>
-                                        <option value="2">País 2</option>
-                                        <option value="3">País 3</option>
-                                    </select>
+                                    <!-- Contenedor de Previsualización -->
+                                    <div
+                                        class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+                                        <template x-if="imagenPreview">
+                                            <img :src="imagenPreview" alt="Previsualización de la imagen"
+                                                class="w-40 h-40 object-cover">
+                                        </template>
+                                        <template x-if="!imagenPreview">
+                                            <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
+                                                class="w-40 h-40 object-cover">
+                                        </template>
+                                    </div>
                                 </div>
-                                <!-- Departamento -->
+                                <!-- Porcentaje Sujeto -->
                                 <div>
+                                    <label for="sujetoporcentaje" class="block text-sm font-medium">Sujeto
+                                        Porcentaje</label>
+                                    <input id="sujetoporcentaje" type="number" step="0.01"
+                                        class="form-input w-full" placeholder="Ingrese el porcentaje" required />
+                                    <!-- Cantidad -->
+                                    <div class="mt-5">
+                                        <label for="cantidad" class="block text-sm font-medium">Cantidad</label>
+                                        <input id="cantidad" type="number" class="form-input w-full"
+                                            placeholder="Ingrese la cantidad" required />
+                                    </div>
+                                    <!-- Gravada -->
+                                    <div class="mt-5">
+                                        <label for="gravada" class="block text-sm font-medium">Gravada</label>
+                                        <input id="gravada" type="number" step="0.01"
+                                            class="form-input w-full" placeholder="Ingrese la gravada" required />
+                                    </div>
+                                </div>
 
-                                    <select id="departamento" class="select2 w-full">
-                                        <option value="" disabled selected>Seleccionar Departamento</option>
-                                        <option value="1">Departamento 1</option>
-                                        <option value="2">Departamento 2</option>
-                                    </select>
-                                </div>
-                                <!-- Provincia -->
-                                <div>
 
-                                    <select id="provincia" class="select2 w-full">
-                                        <option value="" disabled selected>Seleccionar Provincia</option>
-                                        <option value="1">Provincia 1</option>
-                                        <option value="2">Provincia 2</option>
+                                <!-- IGV -->
+                                <div>
+                                    <label for="igv" class="block text-sm font-medium">IGV</label>
+                                    <input id="igv" type="number" step="0.01" class="form-input w-full"
+                                        placeholder="Ingrese el IGV" required />
+                                </div>
+                                <!-- Total -->
+                                <div>
+                                    <label for="total" class="block text-sm font-medium">Total</label>
+                                    <input id="total" type="number" step="0.01" class="form-input w-full"
+                                        placeholder="Ingrese el total" required />
+                                </div>
+                                <!-- Moneda -->
+                                <div>
+                                    <select id="idMonedas" x-model="formData.idMonedas" class="select2">
+                                        <option value="" disabled selected>Seleccionar Moneda</option>
+                                        <option value="1">Moneda 1</option>
+                                        <option value="2">Moneda 2</option>
                                     </select>
                                 </div>
-                                <!-- Distrito -->
+                                <!-- Documento -->
                                 <div>
-
-                                    <select id="distrito" class="select2 w-full">
-                                        <option value="" disabled selected>Seleccionar Distrito</option>
-                                        <option value="1">Distrito 1</option>
-                                        <option value="2">Distrito 2</option>
+                                    <select id="idDocumento" x-model="formData.idDocumento" class="select2">
+                                        <option value="" disabled selected>Seleccionar Documento</option>
+                                        <option value="1">Documento 1</option>
+                                        <option value="2">Documento 2</option>
                                     </select>
                                 </div>
-                                <!-- Compra -->
+                                <!-- Tipo de Pago -->
                                 <div>
-
-                                    <select id="idCompra" class="select2 w-full">
-                                        <option value="" disabled selected>Seleccione una Compra</option>
-                                        <option value="1">Compra 1</option>
-                                        <option value="2">Compra 2</option>
+                                    <select id="idTipoPago" x-model="formData.idTipoPago" class="select2">
+                                        <option value="" disabled selected>Seleccionar Tipo de Pago</option>
+                                        <option value="1">Tipo Pago 1</option>
+                                        <option value="2">Tipo Pago 2</option>
                                     </select>
-                                </div>
-                                <!-- Sucursal -->
-                                <div>
-
-                                    <select id="idSucursal" class="select2 w-full">
-                                        <option value="" disabled selected>Seleccione una Sucursal</option>
-                                        <option value="1">Sucursal 1</option>
-                                        <option value="2">Sucursal 2</option>
-                                    </select>
-                                </div>
-                                <!-- Código Postal -->
-                                <div>
-                                    <label for="codigoPostal" class="block text-sm font-medium">Código Postal</label>
-                                    <input id="codigoPostal" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el código postal">
-                                </div>
-                                <!-- Teléfono -->
-                                <div>
-                                    <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                    <input id="telefono" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el teléfono">
-                                </div>
-                                <!-- Email -->
-                                <div>
-                                    <label for="email" class="block text-sm font-medium">Email</label>
-                                    <input id="email" type="email" class="form-input w-full"
-                                        placeholder="Ingrese el email">
-                                </div>
-                                <!-- Dirección -->
-                                <div class="md:col-span-2">
-                                    <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <textarea id="direccion" class="form-input w-full" rows="3" placeholder="Ingrese la dirección"></textarea>
                                 </div>
                             </div>
                             <!-- Botones -->
@@ -214,37 +223,28 @@
         </div>
     </div>
 
-
     <script>
         document.addEventListener("alpine:init", () => {
             Alpine.data("multipleTable", () => ({
                 datatable1: null,
-                subsidiariosData: [], // Agrega una propiedad para almacenar los datos
+                clientData: [], // Propiedad para almacenar los datos de los clientes
 
                 init() {
-                    // Llamar a la API para obtener los datos de 'subsidiarios'
-                    fetch('/api/subsidiarios') // Ajusta la URL si es necesario
+                    // Llamar a la API para obtener los datos de 'clientegeneral'
+                    fetch('/api/clientegeneral')
                         .then(response => response.json())
                         .then(data => {
-                            this.subsidiariosData = data;
+                            this.clientData = data;
                             // Ahora que tenemos los datos, inicializamos la tabla
                             this.datatable1 = new simpleDatatables.DataTable('#myTable1', {
                                 data: {
-                                    headings: ['ID', 'RUC', 'Nombre',
-                                        'Nombre Contacto', 'Celular', 'Email',
-                                        'Dirección', 'Referencia', 'ID Tienda',
-                                        '<div class="text-center">Acciones</div>'
+                                    headings: ['Descripción', 'Estado', 'Foto',
+                                        '<div class="text-center">Action</div>'
                                     ],
-                                    data: this.subsidiariosData.map(subsidiario => [
-                                        subsidiario.idSubsidiarios,
-                                        subsidiario.ruc,
-                                        subsidiario.nombre,
-                                        subsidiario.nombre_contacto,
-                                        subsidiario.celular,
-                                        subsidiario.email,
-                                        subsidiario.direccion,
-                                        subsidiario.referencia,
-                                        subsidiario.idTienda,
+                                    data: this.clientData.map(cliente => [
+                                        cliente.descripcion,
+                                        cliente.estado,
+                                        `<img src="${cliente.foto}" class="w-10 h-10 rounded-full object-cover" />`,
                                         ''
                                     ]),
                                 },
@@ -254,22 +254,28 @@
                                 columns: [{
                                         select: 0,
                                         render: (data, cell, row) => {
-                                            return `<div class="flex items-center w-max">${data}</div>`;
+                                            return data; // No necesitas modificar esto
                                         },
                                         sort: "asc"
                                     },
                                     {
-                                        select: 8,
+                                        select: 2,
+                                        render: (data, cell, row) => {
+                                            return `<div class="flex items-center w-max"><img class="w-10 h-10 rounded-full object-cover" src="${data}" />${data}</div>`;
+                                        }
+                                    },
+                                    {
+                                        select: 3,
                                         sortable: false,
                                         render: (data, cell, row) => {
                                             return `<div class="flex items-center">
-                                                <button type="button" x-tooltip="Editar">
+                                                <button type="button" class="ltr:mr-2 rtl:ml-2" x-tooltip="Edit">
                                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                                                         <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
-                                                        <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
+                                                    <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
                                                     </svg>
                                                 </button>
-                                                <button type="button" x-tooltip="Eliminar">
+                                                <button type="button" x-tooltip="Delete">
                                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                                         <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                                         <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -299,29 +305,67 @@
                         .catch(error => {
                             console.error('Error al obtener los datos:', error);
                         });
-                },
+                }
             }));
         });
-
-        // Inicializar Select2
         document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar todos los select con la clase "select2"
-            document.querySelectorAll('.select2').forEach(function(select) {
+            // Inicializar NiceSelect
+            document.querySelectorAll(".select2").forEach(function(select) {
                 NiceSelect.bind(select, {
                     searchable: true
                 });
             });
         });
-        // document.addEventListener("DOMContentLoaded", function() {
-        //     // Inicializar Flatpickr en el campo de Fecha de Registro
-        //     flatpickr("#fechaRegistro", {
-        //         dateFormat: "Y-m-d", // Formato de fecha (Año-Mes-Día)
-        //         enableTime: false, // Desactivar selección de hora
-        //         locale: "es" // Cambiar idioma a español
-        //     });
-        // });
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("form", () => ({
+                date2: '', // Este valor será actualizado dinámicamente
+                init() {
+                    // Obtener la fecha y hora actual
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const hours = now.getHours();
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+                    // Convertir hora a formato AM/PM
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    const formattedHours = hours % 12 || 12; // Convertir hora 0 a 12 para AM/PM
+                    this.date2 =
+                        `${year}-${month}-${day} ${formattedHours}:${minutes} ${ampm}`; // Formato inicial
+
+                    flatpickr(document.getElementById('fechaEmision'), {
+                        defaultDate: now, // Mostrar la fecha y hora actual
+                        enableTime: true, // Habilitar selector de tiempo
+                        dateFormat: 'Y-m-d h:i K', // Formato con AM/PM
+                        time_24hr: false, // Desactivar formato 24 horas
+                        onChange: (selectedDates, dateStr) => {
+                            this.date2 = dateStr; // Actualizar el modelo de Alpine.js
+                        },
+                    });
+                },
+            }));
+        });
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("formVencimiento", () => ({
+                dateVencimiento: '', // Inicia vacío para que el usuario seleccione
+                init() {
+                    flatpickr(document.getElementById('fechaVencimiento'), {
+                        enableTime: true, // Habilitar selector de tiempo
+                        dateFormat: 'Y-m-d h:i K', // Formato con AM/PM
+                        time_24hr: false, // Desactivar formato 24 horas
+                        onChange: (selectedDates, dateStr) => {
+                            this.dateVencimiento =
+                                dateStr; // Actualizar el modelo de Alpine.js
+                        },
+                    });
+                },
+            }));
+        });
     </script>
+
     <script src="/assets/js/simple-datatables.js"></script>
     <!-- Script de NiceSelect -->
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </x-layout.default>

@@ -4,10 +4,10 @@
         <div class="bg-white dark:bg-[#0e1726] h-full">
             <div class="flex justify-between items-center px-4 py-3">
                 <a href="/" class="main-logo flex items-center shrink-0">
-                    <img class="w-8 ml-[5px] flex-none" src="/assets/images/auth/profile.png"
-                        alt="image" />
+                    <img class="w-8 ml-[5px] flex-none" src="/assets/images/auth/profile.png" alt="image" />
                     <span
-                        class="text-2xl ltr:ml-1.5 rtl:mr-1.5  font-semibold  align-middle lg:inline dark:text-white-light">GKM </span>
+                        class="text-2xl ltr:ml-1.5 rtl:mr-1.5  font-semibold  align-middle lg:inline dark:text-white-light">GKM
+                    </span>
                 </a>
                 <a href="javascript:;"
                     class="collapse-icon w-8 h-8 rounded-full flex items-center hover:bg-gray-500/10 dark:hover:bg-dark-light/10 dark:text-white-light transition duration-300 rtl:rotate-180"
@@ -28,8 +28,8 @@
                         @click="activeDropdown === 'dashboard' ? activeDropdown = null : activeDropdown = 'dashboard'">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5"
                                     d="M2 12.2039C2 9.91549 2 8.77128 2.5192 7.82274C3.0384 6.87421 3.98695 6.28551 5.88403 5.10813L7.88403 3.86687C9.88939 2.62229 10.8921 2 12 2C13.1079 2 14.1106 2.62229 16.116 3.86687L18.116 5.10812C20.0131 6.28551 20.9616 6.87421 21.4808 7.82274C22 8.77128 22 9.91549 22 12.2039V13.725C22 17.6258 22 19.5763 20.8284 20.7881C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.7881C2 19.5763 2 17.6258 2 13.725V12.2039Z"
                                     fill="currentColor" />
@@ -134,12 +134,13 @@
                                             fill="currentColor" />
                                     </svg>
                                     <span
-                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Lista Correo</span>
+                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Lista
+                                        Correo</span>
                                 </div>
                             </a>
                         </li>
                         <li class="nav-item">
-                        <a href="{{ route('apps.notes') }}" class="group">
+                            <a href="{{ route('apps.notes') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
@@ -184,7 +185,7 @@
                             </a>
                         </li> -->
                         <li class="nav-item">
-                        <a href="{{ route('apps.contacts') }}" class="group">
+                            <a href="{{ route('apps.contacts') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
@@ -246,7 +247,7 @@
                             </ul>
                         </li> -->
                         <li class="nav-item">
-                          <a href="{{ route('apps.calendar') }}" class="group">
+                            <a href="{{ route('apps.calendar') }}" class="group">
                                 <div class="flex items-center">
 
                                     <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
@@ -282,8 +283,8 @@
                         @click="activeDropdown === 'components' ? activeDropdown = null : activeDropdown = 'components'">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M8.42229 20.6181C10.1779 21.5395 11.0557 22.0001 12 22.0001V12.0001L2.63802 7.07275C2.62423 7.09491 2.6107 7.11727 2.5974 7.13986C2 8.15436 2 9.41678 2 11.9416V12.0586C2 14.5834 2 15.8459 2.5974 16.8604C3.19479 17.8749 4.27063 18.4395 6.42229 19.5686L8.42229 20.6181Z"
                                     fill="currentColor" />
@@ -358,10 +359,12 @@
                         @click="activeDropdown === 'asociados' ? activeDropdown = null : activeDropdown = 'asociados'">
                         <div class="flex items-center">
 
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75a3 3 0 11-6 0 3 3 0 016 0zM12 14.25a7.5 7.5 0 00-6 3.25M12 14.25a7.5 7.5 0 016 3.25M12 14.25v6.75M6.75 6.75a3 3 0 100 6 3 3 0 000-6zm10.5 0a3 3 0 100 6 3 3 0 000-6zM6.75 12.75V21m10.5-8.25v8.25"/>
-                              </svg>
-                              
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M17.25 6.75a3 3 0 11-6 0 3 3 0 016 0zM12 14.25a7.5 7.5 0 00-6 3.25M12 14.25a7.5 7.5 0 016 3.25M12 14.25v6.75M6.75 6.75a3 3 0 100 6 3 3 0 000-6zm10.5 0a3 3 0 100 6 3 3 0 000-6zM6.75 12.75V21m10.5-8.25v8.25" />
+                            </svg>
+
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Asociados</span>
                         </div>
@@ -403,8 +406,9 @@
                         <div class="flex items-center">
 
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 6h8M6 10h12M9 14h6M12 18v4M4 4h16v16H4V4z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75h5.25v5.25H3.75V3.75zM14.25 3.75h6v6h-6V3.75zM3.75 14.25h5.25v6H3.75v-6zM14.25 14.25h2.25v2.25h-2.25v2.25h2.25v2.25h2.25v-2.25h2.25v-2.25h-2.25v-2.25h-2.25z" />
                               </svg>
+
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Asistencias</span>
                         </div>
@@ -433,10 +437,12 @@
                         @click="activeDropdown === 'cotizaciones' ? activeDropdown = null : activeDropdown = 'cotizaciones'">
                         <div class="flex items-center">
 
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c2.485 0 4.5 1.567 4.5 3.5S14.485 15 12 15s-4.5-1.567-4.5-3.5S9.515 8 12 8z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v6m-6 12h12a2 2 0 002-2V4a2 2 0 00-2-2H6a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                              </svg>                                                          
+                            <!-- Nuevo SVG relacionado con cotizaciones (documento/factura) -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6M9 8h2m4.5 11.25H6.75A2.25 2.25 0 014.5 17.25V5.25A2.25 2.25 0 016.75 3h7.689a2.25 2.25 0 011.591.659l3.561 3.561c.421.421.659.994.659 1.591v8.439a2.25 2.25 0 01-2.25 2.25z" />
+                            </svg>
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Cotizaciones</span>
                         </div>
@@ -460,7 +466,8 @@
                 </li>
 
                 <li class="menu nav-item">
-                    <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'elements' }"
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'elements' }"
                         @click="activeDropdown === 'elements' ? activeDropdown = null : activeDropdown = 'elements'">
                         <div class="flex items-center">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -546,8 +553,8 @@
                     <a href="/charts" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5"
                                     d="M6.22209 4.60105C6.66665 4.304 7.13344 4.04636 7.6171 3.82976C8.98898 3.21539 9.67491 2.9082 10.5875 3.4994C11.5 4.09061 11.5 5.06041 11.5 7.00001V8.50001C11.5 10.3856 11.5 11.3284 12.0858 11.9142C12.6716 12.5 13.6144 12.5 15.5 12.5H17C18.9396 12.5 19.9094 12.5 20.5006 13.4125C21.0918 14.3251 20.7846 15.011 20.1702 16.3829C19.9536 16.8666 19.696 17.3334 19.399 17.7779C18.3551 19.3402 16.8714 20.5578 15.1355 21.2769C13.3996 21.9959 11.4895 22.184 9.64665 21.8175C7.80383 21.4509 6.11109 20.5461 4.78249 19.2175C3.45389 17.8889 2.5491 16.1962 2.18254 14.3534C1.81598 12.5105 2.00412 10.6004 2.72315 8.86451C3.44218 7.12861 4.65982 5.64492 6.22209 4.60105Z"
                                     fill="currentColor" />
@@ -565,13 +572,31 @@
                     <a href="{{ route('administracion.usuarios') }}" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12z" fill="currentColor"/>
-                                <path opacity="0.7" d="M12 14c-3.314 0-6 2.686-6 6 0 .552.448 1 1 1h10c.552 0 1-.448 1-1 0-3.314-2.686-6-6-6z" fill="currentColor"/>
-                              </svg>
-                              
+                            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0"
+                                width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12z"
+                                    fill="currentColor" />
+                                <path opacity="0.7"
+                                    d="M12 14c-3.314 0-6 2.686-6 6 0 .552.448 1 1 1h10c.552 0 1-.448 1-1 0-3.314-2.686-6-6-6z"
+                                    fill="currentColor" />
+                            </svg>
+
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Usuarios</span>
+                        </div>
+                    </a>
+                </li>
+
+                <li class="menu nav-item">
+                    <a href="{{ route('administracion.compra') }}" class="nav-link group">
+                        <div class="flex items-center">
+
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.5l.749 2.999m0 0L6.75 15.75m0 0a2.25 2.25 0 002.25 2.25h8.25a2.25 2.25 0 002.25-2.25L21.501 6h-17.252m2.251 9.75a.75.75 0 11-1.5 0m13.5 0a.75.75 0 11-1.5 0M6.75 15.75h10.5" />
+                              </svg>
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Compras</span>
                         </div>
                     </a>
                 </li>
@@ -580,8 +605,8 @@
                     <a href="/widgets" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5"
                                     d="M13 15.4C13 13.3258 13 12.2887 13.659 11.6444C14.318 11 15.3787 11 17.5 11C19.6213 11 20.682 11 21.341 11.6444C22 12.2887 22 13.3258 22 15.4V17.6C22 19.6742 22 20.7113 21.341 21.3556C20.682 22 19.6213 22 17.5 22C15.3787 22 14.318 22 13.659 21.3556C13 20.7113 13 19.6742 13 17.6V15.4Z"
                                     fill="currentColor" />
@@ -605,8 +630,8 @@
                     <a href="/font-icons" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5"
                                     d="M2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12Z"
                                     fill="currentColor" />
@@ -625,8 +650,8 @@
                     <a href="/dragndrop" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5"
                                     d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z"
                                     fill="currentColor" />
@@ -665,8 +690,8 @@
                     <a href="/tables" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5"
                                     d="M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22Z"
                                     fill="currentColor" />
@@ -688,12 +713,12 @@
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
-                        :class=" { 'active': activeDropdown === 'datatables' }"
+                        :class="{ 'active': activeDropdown === 'datatables' }"
                         @click="activeDropdown === 'datatables' ? activeDropdown = null : activeDropdown = 'datatables'">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M4.97883 9.68508C2.99294 8.89073 2 8.49355 2 8C2 7.50645 2.99294 7.10927 4.97883 6.31492L7.7873 5.19153C9.77318 4.39718 10.7661 4 12 4C13.2339 4 14.2268 4.39718 16.2127 5.19153L19.0212 6.31492C21.0071 7.10927 22 7.50645 22 8C22 8.49355 21.0071 8.89073 19.0212 9.68508L16.2127 10.8085C14.2268 11.6028 13.2339 12 12 12C10.7661 12 9.77318 11.6028 7.7873 10.8085L4.97883 9.68508Z"
                                     fill="currentColor" />
@@ -765,12 +790,13 @@
                 </li>
 
                 <li class="menu nav-item">
-                    <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'forms' }"
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'forms' }"
                         @click="activeDropdown === 'forms' ? activeDropdown = null : activeDropdown = 'forms'">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5"
                                     d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z"
                                     fill="currentColor" />
@@ -845,6 +871,57 @@
                     </ul>
                 </li>
 
+                <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'productos' }"
+                        @click="activeDropdown === 'productos' ? activeDropdown = null : activeDropdown = 'productos'">
+                        <div class="flex items-center">
+
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 8V6C6 4.34315 7.34315 3 9 3H15C16.6569 3 18 4.34315 18 6V8"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path
+                                    d="M4 8H20C20.5304 8 21.0391 8.21071 21.4142 8.58579C21.7893 8.96086 22 9.46957 22 10V18C22 18.5304 21.7893 19.0391 21.4142 19.4142C21.0391 19.7893 20.5304 20 20 20H4C3.46957 20 2.96086 19.7893 2.58579 19.4142C2.21071 19.0391 2 18.5304 2 18V10C2 9.46957 2.21071 8.96086 2.58579 8.58579C2.96086 8.21071 3.46957 8 4 8Z"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M16 13C16 14.6569 14.6569 16 13 16C11.3431 16 10 14.6569 10 13"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Productos</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'productos' }">
+
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('almacen.articulos') }}">Articulos</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('almacen.modelos') }}">Modelos</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('almacen.marcas') }}">Marcas</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('almacen.tipo-articulos') }}">Tipo Articulos</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('almacen.categorias') }}">Categoria</a>
+                        </li>
+                    </ul>
+                </li>
+
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
@@ -856,14 +933,14 @@
                 </h2>
 
                 <li class="menu nav-item">
-                    <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'users' }"
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'users' }"
                         @click="activeDropdown === 'users' ? activeDropdown = null : activeDropdown = 'users'">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle opacity="0.5" cx="15" cy="6" r="3"
-                                    fill="currentColor" />
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle opacity="0.5" cx="15" cy="6" r="3" fill="currentColor" />
                                 <ellipse opacity="0.5" cx="16" cy="17" rx="5" ry="3"
                                     fill="currentColor" />
                                 <circle cx="9.00098" cy="6" r="4" fill="currentColor" />
@@ -892,12 +969,13 @@
                     </ul>
                 </li>
                 <li class="menu nav-item">
-                    <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'pages' }"
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'pages' }"
                         @click="activeDropdown === 'pages' ? activeDropdown = null : activeDropdown = 'pages'">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd"
                                     d="M14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V10C2 6.22876 2 4.34315 3.17157 3.17157C4.34315 2 6.23869 2 10.0298 2C10.6358 2 11.1214 2 11.53 2.01666C11.5166 2.09659 11.5095 2.17813 11.5092 2.26057L11.5 5.09497C11.4999 6.19207 11.4998 7.16164 11.6049 7.94316C11.7188 8.79028 11.9803 9.63726 12.6716 10.3285C13.3628 11.0198 14.2098 11.2813 15.0569 11.3952C15.8385 11.5003 16.808 11.5002 17.9051 11.5001L18 11.5001H21.9574C22 12.0344 22 12.6901 22 13.5629V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22Z"
                                     fill="currentColor" />
@@ -984,8 +1062,8 @@
                         @click="activeDropdown === 'authentication' ? activeDropdown = null : activeDropdown = 'authentication'">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path opacity="0.5"
                                     d="M2 16C2 13.1716 2 11.7574 2.87868 10.8787C3.75736 10 5.17157 10 8 10H16C18.8284 10 20.2426 10 21.1213 10.8787C22 11.7574 22 13.1716 22 16C22 18.8284 22 20.2426 21.1213 21.1213C20.2426 22 18.8284 22 16 22H8C5.17157 22 3.75736 22 2.87868 21.1213C2 20.2426 2 18.8284 2 16Z"
                                     fill="currentColor" />
@@ -1059,8 +1137,8 @@
                     <a href="https://vristo.sbthemes.com" target="_blank" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24"
-                                fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
                                     d="M4 4.69434V18.6943C4 20.3512 5.34315 21.6943 7 21.6943H17C18.6569 21.6943 20 20.3512 20 18.6943V8.69434C20 7.03748 18.6569 5.69434 17 5.69434H5C4.44772 5.69434 4 5.24662 4 4.69434ZM7.25 11.6943C7.25 11.2801 7.58579 10.9443 8 10.9443H16C16.4142 10.9443 16.75 11.2801 16.75 11.6943C16.75 12.1085 16.4142 12.4443 16 12.4443H8C7.58579 12.4443 7.25 12.1085 7.25 11.6943ZM7.25 15.1943C7.25 14.7801 7.58579 14.4443 8 14.4443H13.5C13.9142 14.4443 14.25 14.7801 14.25 15.1943C14.25 15.6085 13.9142 15.9443 13.5 15.9443H8C7.58579 15.9443 7.25 15.6085 7.25 15.1943Z"
                                     fill="currentColor" />

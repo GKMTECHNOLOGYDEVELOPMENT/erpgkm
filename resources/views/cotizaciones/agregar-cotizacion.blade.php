@@ -7,33 +7,34 @@
                 <div class="flex justify-between flex-wrap px-4">
                     <div class="mb-6 lg:w-1/2 w-full">
                         <div class="flex items-center text-black dark:text-white shrink-0">
-                            <img src="/assets/images/logo.svg" alt="image" class="w-14" />
+                            <img src="/assets/images/auth/profile.png" alt="image" class="w-14" />
                         </div>
                         <div class="space-y-1 mt-6 text-gray-500 dark:text-gray-400">
-                            <div>13 Tetrick Road, Cypress Gardens, Florida, 33884, US</div>
-                            <div>vristo@gmail.com</div>
-                            <div>+1 (070) 123-4567</div>
+                            <div>Av. Santa Elvira E Mz. B Lote 8 Urbanización San Elias - Los Olivos</div>
+                            <div>atencionalcliente@gkmtechnology.com.pe</div>
+                            <div>0800-80142</div>
                         </div>
                     </div>
                     <div class="lg:w-1/2 w-full lg:max-w-fit">
                         <div class="flex items-center">
-                            <label for="number" class="flex-1 ltr:mr-2 rtl:ml-2 mb-0">Invoice Number</label>
-                            <input id="number" type="text" name="inv-num" class="form-input lg:w-[250px] w-2/3"
+                            <label for="codigo" class="flex-1 ltr:mr-2 rtl:ml-2 mb-0">Codigo
+                            </label>
+                            <input id="codigo" type="text" name="inv-num" class="form-input lg:w-[250px] w-2/3"
                                 placeholder="#8801" x-model="params.invoiceNo" />
                         </div>
                         <div class="flex items-center mt-4">
-                            <label for="invoiceLabel" class="flex-1 ltr:mr-2 rtl:ml-2 mb-0">Invoice Label</label>
+                            <label for="invoiceLabel" class="flex-1 ltr:mr-2 rtl:ml-2 mb-0">Etiqueta de factura</label>
                             <input id="invoiceLabel" type="text" name="inv-label"
                                 class="form-input lg:w-[250px] w-2/3" placeholder="Enter Invoice Label"
                                 x-model="params.title" />
                         </div>
                         <div class="flex items-center mt-4">
-                            <label for="startDate" class="flex-1 ltr:mr-2 rtl:ml-2 mb-0">Invoice Date</label>
+                            <label for="startDate" class="flex-1 ltr:mr-2 rtl:ml-2 mb-0">Fecha de factura</label>
                             <input id="startDate" type="date" name="inv-date" class="form-input lg:w-[250px] w-2/3"
                                 x-model="params.invoiceDate" />
                         </div>
                         <div class="flex items-center mt-4">
-                            <label for="dueDate" class="flex-1 ltr:mr-2 rtl:ml-2 mb-0">Due Date</label>
+                            <label for="dueDate" class="flex-1 ltr:mr-2 rtl:ml-2 mb-0">Fecha de vencimiento</label>
                             <input id="dueDate" type="date" name="due-date" class="form-input lg:w-[250px] w-2/3"
                                 x-model="params.dueDate" />
                         </div>
@@ -43,53 +44,53 @@
                 <div class="mt-8 px-4">
                     <div class="flex justify-between lg:flex-row flex-col">
                         <div class="lg:w-1/2 w-full ltr:lg:mr-6 rtl:lg:ml-6 mb-6">
-                            <div class="text-lg font-semibold">Bill To</div>
+                            <div class="text-lg font-semibold">Cobrar a</div>
                             <div class="mt-4 flex items-center">
-                                <label for="reciever-name" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Name</label>
+                                <label for="reciever-name" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Nombre</label>
                                 <input id="reciever-name" type="text" name="reciever-name" class="form-input flex-1"
                                     x-model="params.to.name" placeholder="Enter Name" />
                             </div>
                             <div class="mt-4 flex items-center">
-                                <label for="reciever-email" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Email</label>
+                                <label for="reciever-email" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Correo Electronico</label>
                                 <input id="reciever-email" type="email" name="reciever-email"
                                     class="form-input flex-1" x-model="params.to.email" placeholder="Enter Email" />
                             </div>
                             <div class="mt-4 flex items-center">
-                                <label for="reciever-address" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Address</label>
+                                <label for="reciever-address" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Dirección</label>
                                 <input id="reciever-address" type="text" name="reciever-address"
                                     class="form-input flex-1" x-model="params.to.address" placeholder="Enter Address" />
                             </div>
                             <div class="mt-4 flex items-center">
-                                <label for="reciever-number" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Phone Number</label>
+                                <label for="reciever-number" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Celular</label>
                                 <input id="reciever-number" type="text" name="reciever-number"
                                     class="form-input flex-1" x-model="params.to.phone"
                                     placeholder="Enter Phone Number" />
                             </div>
                         </div>
                         <div class="lg:w-1/2 w-full">
-                            <div class="text-lg font-semibold">Payment Details</div>
+                            <div class="text-lg font-semibold">Detalles de pago</div>
                             <div class="flex items-center mt-4">
-                                <label for="acno" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Account Number</label>
+                                <label for="acno" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Número de cuenta</label>
                                 <input id="acno" type="text" name="acno" class="form-input flex-1"
                                     x-model="params.bankInfo.no" placeholder="Enter Account Number" />
                             </div>
                             <div class="flex items-center mt-4">
-                                <label for="bank-name" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Bank Name</label>
+                                <label for="bank-name" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Nombre del banco</label>
                                 <input id="bank-name" type="text" name="bank-name" class="form-input flex-1"
                                     x-model="params.bankInfo.name" placeholder="Enter Bank Name" />
                             </div>
                             <div class="flex items-center mt-4">
-                                <label for="swift-code" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">SWIFT Number</label>
+                                <label for="swift-code" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Número SWIFT</label>
                                 <input id="swift-code" type="text" name="swift-code" class="form-input flex-1"
                                     x-model="params.bankInfo.swiftCode" placeholder="Enter SWIFT Number" />
                             </div>
                             <div class="flex items-center mt-4">
-                                <label for="iban-code" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">IBAN Number</label>
+                                <label for="iban-code" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Número IBAN</label>
                                 <input id="iban-code" type="text" name="iban-code" class="form-input flex-1"
                                     x-model="params.bankInfo.ibanNo" placeholder="Enter IBAN Number" />
                             </div>
                             <div class="flex items-center mt-4">
-                                <label for="country" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">Country</label>
+                                <label for="country" class="ltr:mr-2 rtl:ml-2 w-1/3 mb-0">País</label>
                                 <select id="country" name="country" class="form-select flex-1"
                                     x-model="params.bankInfo.country">
                                     <option value="">Choose Country</option>
@@ -293,9 +294,9 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Item</th>
-                                    <th class="w-1">Quantity</th>
-                                    <th class="w-1">Price</th>
+                                    <th>Artículo</th>
+                                    <th class="w-1">Cantidad</th>
+                                    <th class="w-1">Precio</th>
                                     <th>Total</th>
                                     <th class="w-1"></th>
                                 </tr>
@@ -303,7 +304,7 @@
                             <tbody>
                                 <template x-if="items.length <= 0">
                                     <tr>
-                                        <td colspan="5" class="!text-center font-semibold">No Item Available</td>
+                                        <td colspan="5" class="!text-center font-semibold">No hay articulo disponible</td>
                                     </tr>
                                 </template>
                                 <template x-for="(item, i) in items" :key="i">
@@ -339,7 +340,7 @@
                     </div>
                     <div class="flex justify-between sm:flex-row flex-col mt-6 px-4">
                         <div class="sm:mb-0 mb-6">
-                            <button type="button" class="btn btn-primary" @click="addItem()">Add Item</button>
+                            <button type="button" class="btn btn-primary" @click="addItem()">Agregar artículo</button>
                         </div>
                         <div class="sm:w-2/5">
                             <div class="flex items-center justify-between">
@@ -351,11 +352,11 @@
                                 <div>0%</div>
                             </div>
                             <div class="flex items-center justify-between mt-4">
-                                <div>Shipping Rate($)</div>
+                                <div>Tarifa de envío($)</div>
                                 <div>$0.00</div>
                             </div>
                             <div class="flex items-center justify-between mt-4">
-                                <div>Discount(%)</div>
+                                <div>Descuento(%)</div>
                                 <div>0%</div>
                             </div>
                             <div class="flex items-center justify-between mt-4 font-semibold">
@@ -367,7 +368,7 @@
                 </div>
                 <div class="mt-8 px-4">
                     <div>
-                        <label for="notes">Notes</label>
+                        <label for="notes">Notas</label>
                         <textarea id="notes" name="notes" class="form-textarea min-h-[130px]" placeholder="Notes...."
                             x-model="params.notes"></textarea>
                     </div>
@@ -376,7 +377,7 @@
             <div class="xl:w-96 w-full xl:mt-0 mt-6">
                 <div class="panel mb-5">
                     <div>
-                        <label for="currency">Currency</label>
+                        <label for="currency">Divisa</label>
                         <select id="currency" name="currency" class="form-select" x-model="selectedCurrency">
                             <template x-for="(currency, i) in currencyList" :key="i">
                                 <option :value="currency" x-text="currency"></option>
@@ -391,7 +392,7 @@
                                     placeholder="Tax" x-model="tax" />
                             </div>
                             <div>
-                                <label for="discount">Discount(%) </label>
+                                <label for="discount">Descuento(%) </label>
                                 <input id="discount" type="number" name="discount" class="form-input"
                                     placeholder="Discount" x-model="discount" />
                             </div>
@@ -399,19 +400,19 @@
                     </div>
                     <div class="mt-4">
                         <div>
-                            <label for="shipping-charge">Shipping Charge($) </label>
+                            <label for="shipping-charge">Gastos de envío($) </label>
                             <input id="shipping-charge" type="number" name="shipping-charge" class="form-input"
                                 placeholder="Shipping Charge" x-model="shippingCharge" />
                         </div>
                     </div>
                     <div class="mt-4">
-                        <label for="payment-method">Accept Payment Via</label>
+                        <label for="payment-method">Aceptar pago mediante</label>
                         <select id="payment-method" name="payment-method" class="form-select"
                             x-model="paymentMethod">
-                            <option value="">Select Payment</option>
-                            <option value="bank">Bank Account</option>
+                            <option value="">Seleccione Pago</option>
+                            <option value="bank">Cuenta bancaria</option>
                             <option value="paypal">Paypal</option>
-                            <option value="upi">UPI Transfer</option>
+                            <option value="upi">Transferencia UPI</option>
                         </select>
                     </div>
                 </div>
@@ -430,7 +431,7 @@
                                 <path opacity="0.5" d="M7 8H13" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" />
                             </svg>
-                            Save </button>
+                            Ahorrar </button>
 
                         <button type="button" class="btn btn-info w-full gap-2">
 
@@ -442,7 +443,7 @@
                                 <path opacity="0.5" d="M6 18L21 3" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" />
                             </svg>
-                            Send Invoice </button>
+                            Enviar factura </button>
 
                         <a href="/apps/invoice/preview" class="btn btn-primary w-full gap-2">
 
@@ -455,7 +456,7 @@
                                     d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z"
                                     stroke="currentColor" stroke-width="1.5"></path>
                             </svg>
-                            Preview </a>
+                            Guardar </a>
 
                         <button type="button" class="btn btn-secondary w-full gap-2">
 
@@ -467,7 +468,7 @@
                                 <path d="M12 2L12 15M12 15L9 11.5M12 15L15 11.5" stroke="currentColor"
                                     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
                             </svg>
-                            Download </button>
+                            Descargar </button>
                     </div>
                 </div>
             </div>

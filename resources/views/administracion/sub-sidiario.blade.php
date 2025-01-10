@@ -38,58 +38,68 @@
     </style>
 
     <div x-data="multipleTable">
+        <div>
+            <ul class="flex space-x-2 rtl:space-x-reverse">
+                <li>
+                    <a href="javascript:;" class="text-primary hover:underline">Asociados</a>
+                </li>
+                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                    <span>Subsidiarios</span>
+                </li>
+            </ul>
+        </div>
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
-                <div class="flex items-center flex-wrap mb-5">
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
-                    <button type="button" class="btn btn-success btn-sm m-1" @click="exportTable('excel')">
+                    <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
+                        @click="exportTable('excel')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19V5C2 3.89543 2.89543 3 4 3Z"
+                                d="M4 3H20C21.1046 3 22 3.89543 22 5V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19V5C2 3.89543 2 3 4 3Z"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M16 10L8 14M8 10L16 14" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        Excel
+                        <span>Excel</span>
                     </button>
 
                     <!-- Botón Exportar a PDF -->
-                    <button type="button" class="btn btn-danger btn-sm m-1" @click="exportTable('pdf')">
+                    <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
+                        @click="exportTable('pdf')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
                                 d="M2 5H22M2 5H22C22 6.10457 21.1046 7 20 7H4C2.89543 7 2 6.10457 2 5ZM2 5V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V5M9 14L15 14"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M12 11L12 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
-                        PDF
+                        <span>PDF</span>
                     </button>
 
                     <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm m-1" @click="printTable">
+                    <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2.89543 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
+                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M9 17V21H15V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
-                        Imprimir
+                        <span>Imprimir</span>
                     </button>
 
                     <!-- Botón Agregar -->
-                    <button type="button" class="btn btn-primary btn-sm m-1" @click="$dispatch('toggle-modal')">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
-                            <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5"
-                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" />
-                        </svg>
-                        Agregar
+                    <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
+                        @click="$dispatch('toggle-modal')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+                            <path d="M3 8H21M3 8L5 5H19L21 8M3 8V19C3 19.5523 3.44772 20 4 20H7C7.55228 20 8 19.5523 8 19V14C8 13.4477 8.44772 13 9 13H15C15.5523 13 16 13.4477 16 14V19C16 19.5523 16.4477 20 17 20H20C20.5523 20 21 19.5523 21 19V8M8 13V11C8 10.4477 8.44772 10 9 10H15C15.5523 10 16 10.4477 16 11V13" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 11H10M14 11H18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                          
+                        <span>Agregar</span>
                     </button>
                 </div>
             </div>
@@ -115,71 +125,70 @@
                             </svg>
                         </button>
                     </div>
-                    <div class= "modal-scroll">
-                        <!-- Formulario -->
-                        <div class="modal-scroll">
-                            <form class="p-5 space-y-4" id="subsidiariosForm">
-                                <!-- RUC -->
-                                <div>
-                                    <label for="ruc" class="block text-sm font-medium">RUC</label>
-                                    <input id="ruc" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el RUC">
-                                </div>
-                                <!-- Nombre -->
-                                <div>
-                                    <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                    <input id="nombre" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el nombre">
-                                </div>
-                                <!-- Nombre del Contacto -->
-                                <div>
-                                    <label for="nombre_contacto" class="block text-sm font-medium">Nombre del
-                                        Contacto</label>
-                                    <input id="nombre_contacto" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el nombre del contacto">
-                                </div>
-                                <!-- Tienda -->
-                                <div>
-                                    <select id="idTienda" x-model="formData.idTienda" class="select2">
-                                        <option value="" disabled selected>Seleccionar Tienda</option>
-                                        <option value="1">Tienda 1</option>
-                                        <option value="2">Tienda 2</option>
-                                        <option value="3">Tienda 3</option>
-                                        <option value="4">Tienda 4</option>
-                                        <option value="5">Tienda 5</option>
-                                    </select>
-                                </div>
-                                <!-- Celular -->
-                                <div>
-                                    <label for="celular" class="block text-sm font-medium">Celular</label>
-                                    <input id="celular" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el celular">
-                                </div>
-                                <!-- Email -->
-                                <div>
-                                    <label for="email" class="block text-sm font-medium">Email</label>
-                                    <input id="email" type="email" class="form-input w-full"
-                                        placeholder="Ingrese el email">
-                                </div>
-                                <!-- Dirección -->
-                                <div>
-                                    <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <textarea id="direccion" class="form-input w-full" rows="3" placeholder="Ingrese la dirección"></textarea>
-                                </div>
-                                <!-- Referencia -->
-                                <div>
-                                    <label for="referencia" class="block text-sm font-medium">Referencia</label>
-                                    <input id="referencia" type="text" class="form-input w-full"
-                                        placeholder="Ingrese la referencia">
-                                </div>
-                                <!-- Botones -->
-                                <div class="flex justify-end items-center mt-4">
-                                    <button type="button" class="btn btn-outline-danger"
-                                        @click="open = false">Cancelar</button>
-                                    <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
-                                </div>
-                            </form>
-                        </div>
+
+                    <!-- Formulario -->
+                    <div class="modal-scroll">
+                        <form class="p-5 space-y-4" id="subsidiariosForm">
+                            <!-- RUC -->
+                            <div>
+                                <label for="ruc" class="block text-sm font-medium">RUC</label>
+                                <input id="ruc" type="text" class="form-input w-full"
+                                    placeholder="Ingrese el RUC">
+                            </div>
+                            <!-- Nombre -->
+                            <div>
+                                <label for="nombre" class="block text-sm font-medium">Nombre</label>
+                                <input id="nombre" type="text" class="form-input w-full"
+                                    placeholder="Ingrese el nombre">
+                            </div>
+                            <!-- Nombre del Contacto -->
+                            <div>
+                                <label for="nombre_contacto" class="block text-sm font-medium">Nombre del
+                                    Contacto</label>
+                                <input id="nombre_contacto" type="text" class="form-input w-full"
+                                    placeholder="Ingrese el nombre del contacto">
+                            </div>
+                            <!-- Tienda -->
+                            <div>
+                                <select id="idTienda" x-model="formData.idTienda" class="select2">
+                                    <option value="" disabled selected>Seleccionar Tienda</option>
+                                    <option value="1">Tienda 1</option>
+                                    <option value="2">Tienda 2</option>
+                                    <option value="3">Tienda 3</option>
+                                    <option value="4">Tienda 4</option>
+                                    <option value="5">Tienda 5</option>
+                                </select>
+                            </div>
+                            <!-- Celular -->
+                            <div>
+                                <label for="celular" class="block text-sm font-medium">Celular</label>
+                                <input id="celular" type="text" class="form-input w-full"
+                                    placeholder="Ingrese el celular">
+                            </div>
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium">Email</label>
+                                <input id="email" type="email" class="form-input w-full"
+                                    placeholder="Ingrese el email">
+                            </div>
+                            <!-- Dirección -->
+                            <div>
+                                <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                                <textarea id="direccion" class="form-input w-full" rows="3" placeholder="Ingrese la dirección"></textarea>
+                            </div>
+                            <!-- Referencia -->
+                            <div>
+                                <label for="referencia" class="block text-sm font-medium">Referencia</label>
+                                <input id="referencia" type="text" class="form-input w-full"
+                                    placeholder="Ingrese la referencia">
+                            </div>
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center mt-4">
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="open = false">Cancelar</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

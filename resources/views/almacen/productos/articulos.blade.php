@@ -1,20 +1,15 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <style>
-        .panel {
-            overflow: visible !important;
-            /* Asegura que el modal no restrinja contenido */
-        }
-    </style>
+
     <div x-data="multipleTable">
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">
                 <li>
-                    <a href="javascript:;" class="text-primary hover:underline">Asociados</a>
+                    <a href="javascript:;" class="text-primary hover:underline">Almacen</a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                    <span>Clientes</span>
+                    <span>Articulos</span>
                 </li>
             </ul>
         </div>
@@ -63,19 +58,21 @@
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5"
-                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 4H20C20.5523 4 21 4.44772 21 5V19C21 19.5523 20.5523 20 20 20H4C3.44772 20 3 19.5523 3 19V5C3 4.44772 3.44772 4 4 4Z" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7 9H17" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7 13H17" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7 17H13" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
                         <span>Agregar</span>
                     </button>
                 </div>
             </div>
+
             <table id="myTable1" class="table whitespace-nowrap"></table>
         </div>
     </div>
@@ -88,7 +85,7 @@
                     class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <h5 class="font-bold text-lg">Agregar Cliente</h5>
+                        <h5 class="font-bold text-lg">Agregar Artículo</h5>
                         <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -100,89 +97,169 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario -->
-                        <form class="p-5 space-y-4" id="clienteForm">
+                        <form class="p-5 space-y-4" id="articuloForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Código -->
+                                <div>
+                                    <label for="codigo" class="block text-sm font-medium">Código</label>
+                                    <input id="codigo" x-model="formData.codigo" type="text"
+                                        class="form-input w-full" placeholder="Ingrese el código">
+                                </div>
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
                                     <input id="nombre" x-model="formData.nombre" type="text"
                                         class="form-input w-full" placeholder="Ingrese el nombre">
                                 </div>
-                                <!-- Documento -->
+                                <!-- Serie -->
                                 <div>
-                                    <label for="documento" class="block text-sm font-medium">Documento</label>
-                                    <input id="documento" type="text" x-model="formData.documento"
-                                        class="form-input w-full" placeholder="Ingrese el documento">
+                                    <label for="serie" class="block text-sm font-medium">Nro. Serie</label>
+                                    <input id="serie" x-model="formData.serie" type="text"
+                                        class="form-input w-full" placeholder="Ingrese la serie">
                                 </div>
-                                <!-- Teléfono -->
-                                <div>
-                                    <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                    <input id="telefono" type="text" x-model="formData.telefono"
-                                        class="form-input w-full" placeholder="Ingrese el teléfono">
-                                </div>
-                                <!-- Email -->
-                                <div>
-                                    <label for="email" class="block text-sm font-medium">Email</label>
-                                    <input id="email" type="email" class="form-input w-full"
-                                        placeholder="Ingrese el email">
-                                </div>
-                                <!-- Fecha de Registro -->
+                                <!-- Fecha de Ingreso -->
                                 <div x-data="form">
-                                    <label for="fechaRegistro" class="block text-sm font-medium">Fecha de
-                                        Registro</label>
-                                    <input id="fechaRegistro" type="text" class="form-input w-full"
+                                    <label for="fechaIngreso" class="block text-sm font-medium">Fecha de
+                                        Ingreso</label>
+                                    <input id="fechaIngreso" type="text" class="form-input w-full"
                                         placeholder="Seleccione la fecha">
                                 </div>
-                                <!-- Código Postal -->
+                                <!-- Stock Total -->
                                 <div>
-                                    <label for="codigo_postal" class="block text-sm font-medium">Código Postal</label>
-                                    <input id="codigo_postal" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el código postal">
+                                    <label for="stock_total" class="block text-sm font-medium">Stock Total</label>
+                                    <input id="stock_total" x-model="formData.stock_total" type="number"
+                                        class="form-input w-full" placeholder="Ingrese el stock total">
                                 </div>
-                                <!-- Nacionalidad -->
+                                <!-- Stock Mínimo -->
                                 <div>
-                                    <label for="nacionalidad" class="block text-sm font-medium">Nacionalidad</label>
-                                    <input id="nacionalidad" type="text" class="form-input w-full"
-                                        placeholder="Ingrese la nacionalidad">
+                                    <label for="stock_minimo" class="block text-sm font-medium">Stock Mínimo</label>
+                                    <input id="stock_minimo" x-model="formData.stock_minimo" type="number"
+                                        class="form-input w-full" placeholder="Ingrese el stock mínimo">
                                 </div>
-                                <!-- Departamento -->
+                                <!-- ID Unidad -->
                                 <div>
-                                    <select id="departamento" x-model="formData.departamento" class="select2">
-                                        <option value="" disabled selected>Seleccionar Departamento</option>
-                                        <option value="1">Departamento 1</option>
-                                        <option value="2">Departamento 2</option>
-                                        <option value="3">Departamento 3</option>
-                                        <option value="4">Departamento 4</option>
-                                        <option value="5">Departamento 5</option>
+                                    <select id="idUnidad" x-model="formData.idUnidad" class="select2">
+                                        <option value="" disabled selected>Seleccionar Unidad</option>
+                                        <option value="1">Unidad 1</option>
+                                        <option value="2">Unidad 2</option>
                                     </select>
                                 </div>
-                                <!-- Provincia -->
+                                <!-- ID Tipo Artículo -->
                                 <div>
-                                    <select id="provincia" x-model="formData.provincia" class="select2">
-                                        <option value="" disabled selected>Seleccionar Provincia</option>
-                                        <option value="1">Provincia 1</option>
-                                        <option value="2">Provincia 2</option>
-                                        <option value="3">Provincia 3</option>
-                                        <option value="4">Provincia 4</option>
-                                        <option value="5">Provincia 5</option>
+                                    <select id="idTipoArticulo" x-model="formData.idTipoArticulo" class="select2">
+                                        <option value="" disabled selected>Seleccionar Tipo Articulo</option>
+                                        <option value="1">Tipo 1</option>
+                                        <option value="2">Tipo 2</option>
                                     </select>
                                 </div>
-                                <!-- Distrito -->
+                                <!-- ID Modelo -->
                                 <div>
-                                    <select id="distrito" x-model="formData.distrito" class="select2">
-                                        <option value="" disabled selected>Seleccionar Distrito</option>
-                                        <option value="1">Distrito 1</option>
-                                        <option value="2">Distrito 2</option>
-                                        <option value="3">Distrito 3</option>
-                                        <option value="4">Distrito 4</option>
-                                        <option value="5">Distrito 5</option>
+                                    <select id="idModelo" x-model="formData.idModelo" class="select2">
+                                        <option value="" disabled selected>Seleccionar Modelo</option>
+                                        <option value="1">Modelo 1</option>
+                                        <option value="2">Modelo 2</option>
                                     </select>
                                 </div>
-                                <!-- Dirección (Ocupa 2 columnas) -->
-                                <div class="md:col-span-2">
-                                    <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <textarea id="direccion" class="form-input w-full" rows="5" placeholder="Ingrese la dirección"></textarea>
+                                <!-- Moneda Compra -->
+                                <div class="mb-5" x-data>
+                                    <label for="moneda_compra" class="block text-sm font-medium">Moneda de
+                                        Compra</label>
+                                    <select id="moneda_compra" x-model="$store.formData.moneda_compra"
+                                        class="form-input w-full">
+                                        <option value="sol">Soles</option>
+                                        <option value="dolar">Dólares</option>
+                                    </select>
                                 </div>
+
+                                <!-- Precio Compra -->
+                                <div class="mb-5" x-data>
+                                    <label for="precio_compra" class="block text-sm font-medium">Precio de
+                                        Compra</label>
+                                    <div class="flex">
+                                        <!-- Contenedor para el símbolo dinámico -->
+                                        <div
+                                            class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
+                                            <span x-text="$store.formData.moneda_compra === 'sol' ? 'S/' : '$'"></span>
+                                        </div>
+                                        <!-- Campo de entrada para el precio -->
+                                        <input id="precio_compra" x-model="$store.formData.precio_compra"
+                                            type="number" step="0.01"
+                                            class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
+                                            placeholder="Ingrese el precio de compra" />
+                                    </div>
+                                </div>
+
+                                <!-- Moneda Venta -->
+                                <div class="mb-5" x-data>
+                                    <label for="moneda_venta" class="block text-sm font-medium">Moneda de
+                                        Venta</label>
+                                    <select id="moneda_venta" x-model="$store.formData.moneda_venta"
+                                        class="form-input w-full">
+                                        <option value="sol">Soles</option>
+                                        <option value="dolar">Dólares</option>
+                                    </select>
+                                </div>
+
+                                <!-- Precio Venta -->
+                                <div class="mb-5" x-data>
+                                    <label for="precio_venta" class="block text-sm font-medium">Precio de
+                                        Venta</label>
+                                    <div class="flex">
+                                        <!-- Contenedor para el símbolo dinámico -->
+                                        <div
+                                            class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
+                                            <span x-text="$store.formData.moneda_venta === 'sol' ? 'S/' : '$'"></span>
+                                        </div>
+                                        <!-- Campo de entrada para el precio -->
+                                        <input id="precio_venta" x-model="$store.formData.precio_venta"
+                                            type="number" step="0.01"
+                                            class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
+                                            placeholder="Ingrese el precio de venta" />
+                                    </div>
+                                </div>
+
+
+
+                                <!-- Peso -->
+                                <div>
+                                    <label for="peso" class="block text-sm font-medium">Peso</label>
+                                    <input id="peso" x-model="formData.peso" type="text"
+                                        class="form-input w-full" placeholder="Ingrese el peso">
+                                </div>
+                                <!-- Foto -->
+                                <div class="mb-5" x-data="{ fotoPreview: null }">
+                                    <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+                                    <!-- Campo de archivo -->
+                                    <input id="foto" type="file" accept="image/*"
+                                        class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
+                                        @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" />
+                                    <!-- Contenedor de previsualización -->
+                                    <div
+                                        class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+                                        <template x-if="fotoPreview">
+                                            <img :src="fotoPreview" alt="Previsualización de la foto"
+                                                class="w-40 h-40 object-cover">
+                                        </template>
+                                        <template x-if="!fotoPreview">
+                                            <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
+                                                class="w-40 h-40 object-cover">
+                                        </template>
+                                    </div>
+                                </div>
+                                <!-- Mostrar en Web -->
+                                <div class="mb-5">
+                                    <label for="mostrarWeb" class="block text-sm font-medium mb-2">Mostrar en
+                                        Web</label>
+                                    <div>
+                                        <label class="w-12 h-6 relative mt-3">
+                                            <input type="checkbox" x-model="formData.mostrarWeb" id="mostrarWeb"
+                                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                                            <span
+                                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
                             </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
@@ -196,6 +273,7 @@
             </div>
         </div>
     </div>
+
 
 
     <script>
@@ -297,17 +375,30 @@
         });
         document.addEventListener("alpine:init", () => {
             Alpine.data("form", () => ({
-                date1: '',
+                date1: '', // Variable para almacenar la fecha seleccionada
                 init() {
-                    flatpickr(document.getElementById('fechaRegistro'), {
+                    // Establece la fecha actual como valor inicial
+                    this.date1 = new Date().toISOString().split('T')[0]; // Formato 'YYYY-MM-DD'
+
+                    // Inicializa el flatpickr con la fecha de hoy por defecto
+                    flatpickr(document.getElementById('fechaIngreso'), {
                         dateFormat: 'Y-m-d',
-                        defaultDate: this.date1,
+                        defaultDate: this.date1, // Asigna la fecha por defecto
                         onChange: (selectedDates, dateStr) => {
                             this.date1 = dateStr; // Sincroniza el valor con Alpine.js
                         }
                     });
                 }
             }));
+        });
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('formData', {
+                moneda_compra: 'sol', // Valor inicial para Moneda Compra
+                moneda_venta: 'sol', // Valor inicial para Moneda Venta
+                precio_compra: '', // Valor inicial para Precio Compra
+                precio_venta: '', // Valor inicial para Precio Venta
+            });
         });
     </script>
     <script src="/assets/js/simple-datatables.js"></script>

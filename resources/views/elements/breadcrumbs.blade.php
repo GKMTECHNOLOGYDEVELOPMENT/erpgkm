@@ -1,7 +1,4 @@
 <x-layout.default>
-
-
-
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>

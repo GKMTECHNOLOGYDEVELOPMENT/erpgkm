@@ -13,8 +13,14 @@ use App\Http\Controllers\dashboard\AlmacenController;
 use App\Http\Controllers\dashboard\ComercialController;
 use App\Http\Controllers\dashboard\TicketsController;
 use App\Http\Controllers\administracion\UsuariosController;
+use App\Http\Controllers\administracion\CompraController;
 use App\Http\Controllers\administracion\asistencias\OficinaController;
 use App\Http\Controllers\administracion\asistencias\TecnicoController;
+use App\Http\Controllers\almacen\productos\ArticulosController;
+use App\Http\Controllers\almacen\productos\ModelosController;
+use App\Http\Controllers\almacen\productos\TipoArticuloController;
+use App\Http\Controllers\almacen\productos\MarcaController;
+use App\Http\Controllers\almacen\productos\CategoriaController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LockscreenController;
 use App\Http\Controllers\PasswordResetController;
@@ -72,6 +78,8 @@ Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->mi
 
 // Ruta para Administración de Usuarios
 Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
+// Ruta para Administración de Compras
+Route::get('/administracion/compras', [CompraController::class, 'index'])->name('administracion.compra')->middleware('auth');
 // Ruta para Administración de Clientes Generales
 Route::get('/administracion/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
 // Ruta para Administracion de tiendas
@@ -88,6 +96,17 @@ Route::get('/administracion/clientes', [ClientesController::class, 'index'])->na
 Route::get('/administracion/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
 //Ruta para administracion cotizaciones
 Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'index'])->name('cotizaciones.crear-cotizacion')->middleware('auth');
+
+//Ruta para Almacen Articulos
+Route::get('/almacen/articulos', [ArticulosController::class, 'index'])->name('almacen.articulos')->middleware('auth');
+//Ruta para Almacen Modelos
+Route::get('/almacen/modelos', [ModelosController::class, 'index'])->name('almacen.modelos')->middleware('auth');
+//Ruta para Almacen Marca
+Route::get('/almacen/marca', [MarcaController::class, 'index'])->name('almacen.marcas')->middleware('auth');
+//Ruta para Almacen TipoArticulos
+Route::get('/almacen/tipo-articulos', [TipoArticuloController::class, 'index'])->name('almacen.tipo-articulos')->middleware('auth');
+//Ruta para Almacen Categoria
+Route::get('/almacen/categoria', [CategoriaController::class, 'index'])->name('almacen.categorias')->middleware('auth');
 
 Route::get('/apps/chat', [ChatController::class, 'index'])->name('apps.chat');
 Route::get('/apps/mailbox', [MailboxController::class, 'index'])->name('apps.mailbox');

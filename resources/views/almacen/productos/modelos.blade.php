@@ -11,10 +11,10 @@
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">
                 <li>
-                    <a href="javascript:;" class="text-primary hover:underline">Asociados</a>
+                    <a href="javascript:;" class="text-primary hover:underline">Almacen</a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                    <span>Clientes</span>
+                    <span>Modelos</span>
                 </li>
             </ul>
         </div>
@@ -63,19 +63,22 @@
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5"
-                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 3H18C19.1046 3 20 3.89543 20 5V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3Z" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 7H16" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 12H14" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 17H12" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                          
                         <span>Agregar</span>
                     </button>
                 </div>
             </div>
+
             <table id="myTable1" class="table whitespace-nowrap"></table>
         </div>
     </div>
@@ -85,10 +88,10 @@
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
                 <div x-show="open" x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <h5 class="font-bold text-lg">Agregar Cliente</h5>
+                        <h5 class="font-bold text-lg">Agregar Modelo</h5>
                         <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -98,91 +101,35 @@
                             </svg>
                         </button>
                     </div>
+
+                    <!-- Formulario -->
                     <div class="modal-scroll">
-                        <!-- Formulario -->
-                        <form class="p-5 space-y-4" id="clienteForm">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Nombre -->
-                                <div>
-                                    <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                    <input id="nombre" x-model="formData.nombre" type="text"
-                                        class="form-input w-full" placeholder="Ingrese el nombre">
-                                </div>
-                                <!-- Documento -->
-                                <div>
-                                    <label for="documento" class="block text-sm font-medium">Documento</label>
-                                    <input id="documento" type="text" x-model="formData.documento"
-                                        class="form-input w-full" placeholder="Ingrese el documento">
-                                </div>
-                                <!-- Teléfono -->
-                                <div>
-                                    <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                    <input id="telefono" type="text" x-model="formData.telefono"
-                                        class="form-input w-full" placeholder="Ingrese el teléfono">
-                                </div>
-                                <!-- Email -->
-                                <div>
-                                    <label for="email" class="block text-sm font-medium">Email</label>
-                                    <input id="email" type="email" class="form-input w-full"
-                                        placeholder="Ingrese el email">
-                                </div>
-                                <!-- Fecha de Registro -->
-                                <div x-data="form">
-                                    <label for="fechaRegistro" class="block text-sm font-medium">Fecha de
-                                        Registro</label>
-                                    <input id="fechaRegistro" type="text" class="form-input w-full"
-                                        placeholder="Seleccione la fecha">
-                                </div>
-                                <!-- Código Postal -->
-                                <div>
-                                    <label for="codigo_postal" class="block text-sm font-medium">Código Postal</label>
-                                    <input id="codigo_postal" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el código postal">
-                                </div>
-                                <!-- Nacionalidad -->
-                                <div>
-                                    <label for="nacionalidad" class="block text-sm font-medium">Nacionalidad</label>
-                                    <input id="nacionalidad" type="text" class="form-input w-full"
-                                        placeholder="Ingrese la nacionalidad">
-                                </div>
-                                <!-- Departamento -->
-                                <div>
-                                    <select id="departamento" x-model="formData.departamento" class="select2">
-                                        <option value="" disabled selected>Seleccionar Departamento</option>
-                                        <option value="1">Departamento 1</option>
-                                        <option value="2">Departamento 2</option>
-                                        <option value="3">Departamento 3</option>
-                                        <option value="4">Departamento 4</option>
-                                        <option value="5">Departamento 5</option>
-                                    </select>
-                                </div>
-                                <!-- Provincia -->
-                                <div>
-                                    <select id="provincia" x-model="formData.provincia" class="select2">
-                                        <option value="" disabled selected>Seleccionar Provincia</option>
-                                        <option value="1">Provincia 1</option>
-                                        <option value="2">Provincia 2</option>
-                                        <option value="3">Provincia 3</option>
-                                        <option value="4">Provincia 4</option>
-                                        <option value="5">Provincia 5</option>
-                                    </select>
-                                </div>
-                                <!-- Distrito -->
-                                <div>
-                                    <select id="distrito" x-model="formData.distrito" class="select2">
-                                        <option value="" disabled selected>Seleccionar Distrito</option>
-                                        <option value="1">Distrito 1</option>
-                                        <option value="2">Distrito 2</option>
-                                        <option value="3">Distrito 3</option>
-                                        <option value="4">Distrito 4</option>
-                                        <option value="5">Distrito 5</option>
-                                    </select>
-                                </div>
-                                <!-- Dirección (Ocupa 2 columnas) -->
-                                <div class="md:col-span-2">
-                                    <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <textarea id="direccion" class="form-input w-full" rows="5" placeholder="Ingrese la dirección"></textarea>
-                                </div>
+                        <form class="p-5 space-y-4" id="modeloForm">
+                            <!-- Nombre -->
+                            <div>
+                                <label for="nombre" class="block text-sm font-medium">Nombre</label>
+                                <input id="nombre" x-model="formData.nombre" type="text"
+                                    class="form-input w-full" placeholder="Ingrese el nombre del modelo">
+                            </div>
+                            <!-- ID Marca -->
+                            <div>
+                                
+                                <select id="idMarca" x-model="formData.idMarca" class="select2 w-full">
+                                    <option value="" disabled selected>Seleccione la Marca</option>
+                                    <option value="1">Marca 1</option>
+                                    <option value="2">Marca 2</option>
+                                    <option value="3">Marca 3</option>
+                                </select>
+                            </div>
+                            <!-- ID Categoria -->
+                            <div>
+                                
+                                <select id="idCategoria" x-model="formData.idCategoria" class="select2 w-full">
+                                    <option value="" disabled selected>Seleccione la Categoría</option>
+                                    <option value="1">Categoría 1</option>
+                                    <option value="2">Categoría 2</option>
+                                    <option value="3">Categoría 3</option>
+                                </select>
                             </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">

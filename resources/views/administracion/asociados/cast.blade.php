@@ -1,60 +1,77 @@
 <x-layout.default>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-
+    <style>
+        .panel {
+            overflow: visible !important;
+            /* Asegura que el modal no restrinja contenido */
+        }
+    </style>
     <div x-data="multipleTable">
+        <div>
+            <ul class="flex space-x-2 rtl:space-x-reverse">
+                <li>
+                    <a href="javascript:;" class="text-primary hover:underline">Asociados</a>
+                </li>
+                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                    <span>CAST</span>
+                </li>
+            </ul>
+        </div>
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
-                <div class="flex items-center flex-wrap mb-5">
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
-                    <button type="button" class="btn btn-success btn-sm m-1" @click="exportTable('excel')">
+                    <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
+                        @click="exportTable('excel')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19V5C2 3.89543 2.89543 3 4 3Z"
+                                d="M4 3H20C21.1046 3 22 3.89543 22 5V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19V5C2 3.89543 2 3 4 3Z"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M16 10L8 14M8 10L16 14" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        Excel
+                        <span>Excel</span>
                     </button>
 
                     <!-- Botón Exportar a PDF -->
-                    <button type="button" class="btn btn-danger btn-sm m-1" @click="exportTable('pdf')">
+                    <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
+                        @click="exportTable('pdf')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
                                 d="M2 5H22M2 5H22C22 6.10457 21.1046 7 20 7H4C2.89543 7 2 6.10457 2 5ZM2 5V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V5M9 14L15 14"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M12 11L12 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
-                        PDF
+                        <span>PDF</span>
                     </button>
 
                     <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm m-1" @click="printTable">
+                    <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2.89543 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
+                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M9 17V21H15V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
-                        Imprimir
+                        <span>Imprimir</span>
                     </button>
 
                     <!-- Botón Agregar -->
-                    <button type="button" class="btn btn-primary btn-sm m-1" @click="$dispatch('toggle-modal')">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
-                            <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5"
-                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" />
-                        </svg>
-                        Agregar
+                    <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
+                        @click="$dispatch('toggle-modal')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2C13.6569 2 15 3.34315 15 5C15 6.65685 13.6569 8 12 8C10.3431 8 9 6.65685 9 5C9 3.34315 10.3431 2 12 2Z" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 8V15M12 15L7 18M12 15L17 18" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7 18C8.65685 18 10 19.3431 10 21C10 22.6569 8.65685 24 7 24C5.34315 24 4 22.6569 4 21C4 19.3431 5.34315 18 7 18ZM17 18C18.6569 18 20 19.3431 20 21C20 22.6569 18.6569 24 17 24C15.3431 24 14 22.6569 14 21C14 19.3431 15.3431 18 17 18Z" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>                          
+                        <span>Agregar</span>
                     </button>
                 </div>
             </div>

@@ -23,58 +23,69 @@
         }
     </style>
     <div x-data="multipleTable">
+        <div>
+            <ul class="flex space-x-2 rtl:space-x-reverse">
+                <li>
+                    <a href="javascript:;" class="text-primary hover:underline">Asociados</a>
+                </li>
+                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                    <span>Tienda</span>
+                </li>
+            </ul>
+        </div>
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
-                <div class="flex items-center flex-wrap mb-5">
+                <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
-                    <button type="button" class="btn btn-success btn-sm m-1" @click="exportTable('excel')">
+                    <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
+                        @click="exportTable('excel')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19V5C2 3.89543 2.89543 3 4 3Z"
+                                d="M4 3H20C21.1046 3 22 3.89543 22 5V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19V5C2 3.89543 2 3 4 3Z"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M16 10L8 14M8 10L16 14" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        Excel
+                        <span>Excel</span>
                     </button>
 
                     <!-- Botón Exportar a PDF -->
-                    <button type="button" class="btn btn-danger btn-sm m-1" @click="exportTable('pdf')">
+                    <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
+                        @click="exportTable('pdf')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
                                 d="M2 5H22M2 5H22C22 6.10457 21.1046 7 20 7H4C2.89543 7 2 6.10457 2 5ZM2 5V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V5M9 14L15 14"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M12 11L12 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
-                        PDF
+                        <span>PDF</span>
                     </button>
 
                     <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm m-1" @click="printTable">
+                    <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2.89543 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
+                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M9 17V21H15V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
-                        Imprimir
+                        <span>Imprimir</span>
                     </button>
 
                     <!-- Botón Agregar -->
-                    <button type="button" class="btn btn-primary btn-sm m-1" @click="$dispatch('toggle-modal')">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
-                            <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5"
-                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" />
-                        </svg>
-                        Agregar
+                    <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
+                        @click="$dispatch('toggle-modal')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="none" viewBox="0 0 21 21">
+                            <path d="M5 13V20C5 20.5523 5.44772 21 6 21H9C9.55228 21 10 20.5523 10 20V16H14V20C14 20.5523 14.4477 21 15 21H18C18.5523 21 19 20.5523 19 20V13" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M3 9.5L4 5C4.1538 4.3481 4.6075 3.7825 5.2287 3.41421C5.8499 3.04591 6.5966 2.89999 7.333 3H16.667C17.4034 2.89999 18.1501 3.04591 18.7713 3.41421C19.3925 3.7825 19.8462 4.3481 20 5L21 9.5M3 9.5H21M3 9.5C3 10.0304 3.21071 10.5391 3.58579 10.9142C3.96086 11.2893 4.46957 11.5 5 11.5C5.53043 11.5 6.03914 11.2893 6.41421 10.9142C6.78929 10.5391 7 10.0304 7 9.5M7 9.5C7 10.0304 7.21071 10.5391 7.58579 10.9142C7.96086 11.2893 8.46957 11.5 9 11.5C9.53043 11.5 10.0391 11.2893 10.4142 10.9142C10.7893 10.5391 11 10.0304 11 9.5M11 9.5C11 10.0304 11.2107 10.5391 11.5858 10.9142C11.9609 11.2893 12.4696 11.5 13 11.5C13.5304 11.5 14.0391 11.2893 14.4142 10.9142C14.7893 10.5391 15 10.0304 15 9.5M15 9.5C15 10.0304 15.2107 10.5391 15.5858 10.9142C15.9609 11.2893 16.4696 11.5 17 11.5C17.5304 11.5 18.0391 11.2893 18.4142 10.9142C18.7893 10.5391 19 10.0304 19 9.5" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                          
+                        <span>Agregar</span>
                     </button>
                 </div>
             </div>
