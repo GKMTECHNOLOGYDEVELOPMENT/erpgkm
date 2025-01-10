@@ -35,6 +35,8 @@ Route::get('/tiendas', [TiendaController::class, 'getAll']);
 Route::get('/subsidiarios', [SubsidiarioController::class, 'getAll']);
 
 Route::get('/clientes', [ClientesController::class, 'getAll']);
+Route::post('/check-nombre', [ClienteGeneralController::class, 'checkNombre']);
 
+Route::delete('/clientegeneral/{id}', [ClienteGeneralController::class, 'destroy']);
 
 

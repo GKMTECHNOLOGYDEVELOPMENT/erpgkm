@@ -3,95 +3,128 @@
 namespace App\Http\Controllers\administracion\asociados;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ClienteRequest;
 use App\Models\Cliente;
+use App\Models\Clientegeneral;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ClientesController extends Controller
 {
     public function index()
     {
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.clientes'); 
+        return view('administracion.asociados.clientes'); 
     }
-    // Crear un nuevo Cliente
-    public function store(Request $request)
+    
+
+    public function store(ClienteRequest $request)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'documento' => 'required|string|max:255',
-            'telefono' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
-            'fecha_registro' => 'required|date',
-            'direccion' => 'required|string|max:255',
-            'nacionalidad' => 'required|string|max:255',
-            'departamento' => 'required|string|max:255',
-            'provincia' => 'required|string|max:255',
-            'distrito' => 'required|string|max:255',
-            'codigo_postal' => 'required|string|max:255',
-            'estado' => 'required|boolean',
-        ]);
+        $dataClientes = $request->except('_token');
+        $dataClientes = [
+            'id_cliente_general' => $request->id_cliente_general,
+            'fecha_registro' => Carbon::now(),
+            'nombre' => $request->nombre,
+            'documento' => $request->documento,
+            'direccion' => $request->direccion,
+            'departamento' => $request->departamento,
+            'provincia' => $request->provincia,
+            'distrito' => $request->distrito,
+            'pais' => $request->pais,
+            'telefono' => $request->telefono,
+            'celular' => $request->celular,
+            'email' => $request->email,
+            'cod_postal' => $request->cod_postal,
+        ];
 
-        $cliente = new Cliente();
-        $cliente->nombre = $request->nombre;
-        $cliente->documento = $request->documento;
-        $cliente->telefono = $request->telefono;
-        $cliente->email = $request->email;
-        $cliente->fecha_registro = $request->fecha_registro;
-        $cliente->direccion = $request->direccion;
-        $cliente->nacionalidad = $request->nacionalidad;
-        $cliente->departamento = $request->departamento;
-        $cliente->provincia = $request->provincia;
-        $cliente->distrito = $request->distrito;
-        $cliente->codigo_postal = $request->codigo_postal;
-        $cliente->estado = $request->estado;
-        $cliente->save();
 
-        return response()->json(['message' => 'Cliente creado correctamente'], 201);
+        Cliente::insert($dataClientes);
+        $lastId = Cliente::latest('id')->first();
+        $id = $lastId->id;
+
+        if (isset($request->emailContact) || isset($request->telContact)) {
+            if (isset($request->emailContact)) {
+                $emailContact  = $request->emailContact;
+            } else {
+                $emailContact = '';
+            }
+
+            if (isset($request->telContact)) {
+                $telContact  = $request->telContact;
+            } else {
+                $telContact  = '';
+            }
+
+            foreach ($emailContact as $key => $value) {
+                $dataCustomer = [
+                    'id_cliente' => $id,
+                    'email' => $value,
+                    'celular' => $telContact[$key]
+                ];
+                contacto_cliente::insert($dataCustomer);
+            }
+        }
+
+        return redirect('clientes')->with('addClientes', 'ok');
     }
 
-    // Actualizar un Cliente
+    public function edit($id)
+    {
+        $dataClientes = Cliente::findOrFail($id);
+        $contacts = DB::table('contacto_clientes')
+            ->select('id', 'id_cliente', 'email', 'celular')
+            ->where('id_cliente', '=', $dataClientes->id)
+            ->get();
+        $generales = Clientegeneral::all()->where('estado', '!=', 2)->where('estado', '!=', 0);
+        return view('clientes.edit', compact('dataClientes', 'contacts', 'generales'));
+    }
+
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'documento' => 'required|string|max:255',
-            'telefono' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255',
-            'fecha_registro' => 'required|date',
-            'direccion' => 'required|string|max:255',
-            'nacionalidad' => 'required|string|max:255',
-            'departamento' => 'required|string|max:255',
-            'provincia' => 'required|string|max:255',
-            'distrito' => 'required|string|max:255',
-            'codigo_postal' => 'required|string|max:255',
-            'estado' => 'required|boolean',
-        ]);
+        $dataClientes = request()->except(['_token', '_method', 'telContact', 'emailContact']);
 
-        $cliente = Cliente::findOrFail($id);
-        $cliente->nombre = $request->nombre;
-        $cliente->documento = $request->documento;
-        $cliente->telefono = $request->telefono;
-        $cliente->email = $request->email;
-        $cliente->fecha_registro = $request->fecha_registro;
-        $cliente->direccion = $request->direccion;
-        $cliente->nacionalidad = $request->nacionalidad;
-        $cliente->departamento = $request->departamento;
-        $cliente->provincia = $request->provincia;
-        $cliente->distrito = $request->distrito;
-        $cliente->codigo_postal = $request->codigo_postal;
-        $cliente->estado = $request->estado;
-        $cliente->save();
+        Cliente::where('id', '=', $id)->update($dataClientes);
 
-        return response()->json(['message' => 'Cliente actualizado correctamente']);
+
+        contacto_cliente::where('id_cliente', '=', $id)->delete();
+
+
+        if (isset($request->emailContact) || isset($request->telContact)) {
+            if (isset($request->emailContact)) {
+                $emailContact  = $request->emailContact;
+            } else {
+                $emailContact = '';
+            }
+
+            if (isset($request->telContact)) {
+                $telContact  = $request->telContact;
+            } else {
+                $telContact  = '';
+            }
+
+            foreach ($emailContact as $key => $value) {
+                $dataCustomer = [
+                    'id_cliente' => $id,
+                    'email' => $value,
+                    'celular' => $telContact[$key]
+                ];
+                contacto_cliente::insert($dataCustomer);
+            }
+        }
+
+        $dataClientes = Cliente::findOrFail($id);
+        return redirect('clientes')->with('updateCliente', 'ok');
+
+
+        // return redirect('clientes', compact('arrayContact', 'arrayContact'))->with('updateCliente', 'ok');
+        // return view('clientes.index', compact('arrayContact', 'arrayContact'));
     }
 
-    // Eliminar un Cliente
-    public function destroy($id)
+    public function deleteCliente(Request $request)
     {
-        $cliente = Cliente::findOrFail($id);
-        $cliente->delete();
-
-        return response()->json(['message' => 'Cliente eliminado correctamente']);
+        Cliente::where('id', '=', $request->idCliente)->update(['estado' => 1]);
+        return true;
     }
 
 }
