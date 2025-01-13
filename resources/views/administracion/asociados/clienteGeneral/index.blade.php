@@ -3,11 +3,21 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
     <div x-data="multipleTable">
+        <div>
+            <ul class="flex space-x-2 rtl:space-x-reverse">
+                <li>
+                    <a href="javascript:;" class="text-primary hover:underline">Administración</a>
+                </li>
+                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                    <span>Cliente General</span>
+                </li>
+            </ul>
+        </div>
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex items-center flex-wrap mb-5">
                     <!-- Botón Exportar a Excel -->
-                    <button type="button" class="btn btn-success btn-sm m-1" @click="exportTable('excel')">
+                    <button type="button" class="btn btn-success btn-sm m-1" onclick="window.location='{{ route('clientes-general.exportExcel') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
                             <path
@@ -30,20 +40,6 @@
                             <path d="M12 11L12 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
                         PDF
-                    </button>
-
-
-
-                    <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm m-1" @click="printTable">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
-                            <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2.89543 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M9 17V21H15V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        </svg>
-                        Imprimir
                     </button>
 
                     <!-- Botón Agregar -->
@@ -244,10 +240,14 @@
                                 searchable: true,
                                 perPage: 10,
                                 labels: {
-                                    placeholder: "Buscar...",
-                                    perPage: "{select}",
-                                    noRows: "No se encontraron registros",
-                                    info: "Mostrando {start} a {end} de {rows} registros",
+                                    placeholder: "Buscar...", // Placeholder de búsqueda
+                                    perPage: "{select} registros por página", // Selección de registros por página
+                                    noRows: "No se encontraron registros", // Mensaje cuando no hay registros
+                                    info: "", // Información de la tabla
+                                },
+                                layout: {
+                                    top: "{search}", // Posición del campo de búsqueda
+                                    bottom: "{info}{select}{pager}", // Posición de información, selector y paginador
                                 },
                             });
                         })
