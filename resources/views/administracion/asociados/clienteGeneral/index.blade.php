@@ -94,7 +94,7 @@
                         <div class="mb-5" x-data="{ fotoPreview: null }">
                             <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
                             <!-- Campo de archivo -->
-                            <input id="ctnFile" type="file" name="logo"accept="image/*"
+                            <input id="ctnFile" type="file" name="logo"accept="image/*" require
                                 class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
                                 @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" />
                             <!-- Contenedor de previsualización -->
@@ -341,9 +341,10 @@
                     return data.map((cliente) => [
                         cliente.descripcion,
                         `<img src="${cliente.foto}" class="w-10 h-10 rounded-full object-cover" alt="Foto" />`,
-                        cliente.estado ?
+                        cliente.estado === 'Activo' ?
                         `<span class="badge badge-outline-success">Activo</span>` :
                         `<span class="badge badge-outline-danger">Inactivo</span>`,
+
 
                         `<div class="flex items-center">
                <a href="/cliente-general/${cliente.idClienteGeneral}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
@@ -365,98 +366,69 @@
                     ]);
                 },
 
-                checkForUpdates() {
-                    fetch("/api/clientegeneral")
-                        .then((response) => {
-                            if (!response.ok) throw new Error("Error al verificar actualizaciones");
-                            return response.json();
-                        })
-                        .then((data) => {
-                            console.log("Datos actuales:", this.clientData);
-                            console.log("Datos del servidor:", data);
-
-                            // Detectar nuevas filas
-                            const newData = data.filter(
-                                (newCliente) =>
-                                !this.clientData.some(
-                                    (existingCliente) =>
-                                    existingCliente.idClienteGeneral === newCliente
-                                    .idClienteGeneral
-                                )
-                            );
-
-                            if (newData.length > 0) {
-                                console.log("Nuevos datos detectados:", newData);
-
-                                // Agregar filas nuevas a la tabla
-                                this.datatable1.rows().add(this.formatDataForTable(newData));
-                                this.clientData.push(...newData); // Actualizar clientData
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Error al verificar actualizaciones:", error);
-                        });
-                },
+               
 
                 deleteClient(idClienteGeneral) {
+    new window.Swal({
+        icon: 'warning',
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esta acción!",
+        showCancelButton: true,
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+        padding: '2em',
+        customClass: 'sweet-alerts',
+    }).then((result) => {
+        if (result.value) {
+            // Hacer la solicitud de eliminación
+            fetch(`/api/clientegeneral/${idClienteGeneral}`, {
+                    method: "DELETE",
+                })
+                .then((response) => {
+                    if (!response.ok) throw new Error("Error al eliminar cliente");
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log(`Cliente ${idClienteGeneral} eliminado con éxito`);
+
+                    // Verificamos si la foto fue eliminada
+                    if (data.fotoEliminada) {
+                        console.log(`La foto del cliente ${idClienteGeneral} fue eliminada correctamente.`);
+                    } else {
+                        console.log(`No se pudo eliminar la foto del cliente ${idClienteGeneral}.`);
+                    }
+
+                    // Actualizar la tabla eliminando la fila
+                    this.clientData = this.clientData.filter(
+                        (cliente) => cliente.idClienteGeneral !== idClienteGeneral
+                    );
+                    this.datatable1.rows().remove(
+                        (row) => row.cells[0].innerHTML === idClienteGeneral.toString() // Basado en algún identificador único
+                    );
+
+                    // Mostrar notificación de éxito
                     new window.Swal({
-                        icon: 'warning',
-                        title: '¿Estás seguro?',
-                        text: "¡No podrás revertir esta acción!",
-                        showCancelButton: true,
-                        confirmButtonText: 'Eliminar',
-                        cancelButtonText: 'Cancelar',
-                        padding: '2em',
+                        title: '¡Eliminado!',
+                        text: 'El cliente ha sido eliminado con éxito.',
+                        icon: 'success',
                         customClass: 'sweet-alerts',
-                    }).then((result) => {
-                        if (result.value) {
-                            // Hacer la solicitud de eliminación
-                            fetch(`/api/clientegeneral/${idClienteGeneral}`, {
-                                    method: "DELETE",
-                                })
-                                .then((response) => {
-                                    if (!response.ok) throw new Error(
-                                        "Error al eliminar cliente");
-                                    return response.json();
-                                })
-                                .then(() => {
-                                    console.log(
-                                        `Cliente ${idClienteGeneral} eliminado con éxito`
-                                    );
-
-                                    // Actualizar la tabla eliminando la fila
-                                    this.clientData = this.clientData.filter(
-                                        (cliente) => cliente.idClienteGeneral !==
-                                        idClienteGeneral
-                                    );
-                                    this.datatable1.rows().remove(
-                                        (row) =>
-                                        row.cells[0].innerHTML === idClienteGeneral
-                                        .toString() // Basado en algún identificador único
-                                    );
-
-                                    // Mostrar notificación de éxito
-                                    new window.Swal({
-                                        title: '¡Eliminado!',
-                                        text: 'El cliente ha sido eliminado con éxito.',
-                                        icon: 'success',
-                                        customClass: 'sweet-alerts',
-                                    });
-                                })
-                                .catch((error) => {
-                                    console.error("Error al eliminar cliente:", error);
-
-                                    // Mostrar notificación de error
-                                    new window.Swal({
-                                        title: 'Error',
-                                        text: 'Ocurrió un error al eliminar el cliente.',
-                                        icon: 'error',
-                                        customClass: 'sweet-alerts',
-                                    });
-                                });
-                        }
                     });
-                }
+                })
+                .catch((error) => {
+                    console.error("Error al eliminar cliente:", error);
+
+                    // Mostrar notificación de error
+                    new window.Swal({
+                        title: 'Error',
+                        text: 'Ocurrió un error al eliminar el cliente.',
+                        icon: 'error',
+                        customClass: 'sweet-alerts',
+                    });
+                });
+        }
+    });
+}
+
 
             }));
         });

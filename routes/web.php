@@ -87,6 +87,7 @@ Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->
 Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
 //Rutas para Tiendas
 Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
+Route::get('/tienda/store', [TiendaController::class, 'store'])->name('tienda.store')->middleware('auth');
 
 Route::post('/check-nombre', function (Request $request) {
     $nombre = $request->input('nombre');
