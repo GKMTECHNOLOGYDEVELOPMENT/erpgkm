@@ -85,7 +85,7 @@ Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
 
 Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF'])
-    ->name('clientes-general.exportPDF');
+    ->name('clientes-general.exportPDF')->middleware('auth');
 // Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
 Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
