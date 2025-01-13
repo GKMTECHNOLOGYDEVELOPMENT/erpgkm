@@ -5,67 +5,69 @@ namespace App\Http\Controllers\administracion\asociados;
 use App\Http\Controllers\Controller;
 use App\Models\Tienda;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TiendaController extends Controller
 {
     public function index()
     {
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.tienda'); 
+        return view('administracion.asociados.tienda.index'); 
     }
-    // Crear una nueva Tienda
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'nombre' => 'required|string|max:255',
-    //     ]);
+    
 
-    //     $tienda = new Tienda();
-    //     $tienda->nombre = $request->nombre;
-    //     $tienda->save();
+    // En el controlador TiendaController.php
+public function store(Request $request)
+{
+    try {
+        // Validar y obtener los datos de la tienda
+        $dataTienda = [
+            'nombre' => $request->nombre, // Solo 'nombre' se almacenará
+        ];
 
-    //     return response()->json(['message' => 'Tienda creada correctamente'], 201);
-    // }
+        // Guardar la tienda en la base de datos
+        Log::info('Insertando tienda:', $dataTienda);
+        Tienda::insert($dataTienda);
 
-    // Actualizar una Tienda
-    // public function update(Request $request, $id)
-    // {
-    //     $request->validate([
-    //         'nombre' => 'required|string|max:255',
-    //     ]);
+        // Obtener la última tienda insertada para obtener su ID
+        $data = Tienda::latest('idTienda')->first();
+        $idTienda = $data->idTienda;
+        Log::info('Tienda insertada con ID: ' . $idTienda);
 
-    //     $tienda = Tienda::findOrFail($id);
-    //     $tienda->nombre = $request->nombre;
-    //     $tienda->save();
+        // Responder con JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Tienda agregada correctamente',
+            'data' => $dataTienda,
+        ]);
+    } catch (\Exception $e) {
+        // Log para capturar el error
+        Log::error('Error al guardar la tienda: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al guardar la tienda.',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
 
-    //     return response()->json(['message' => 'Tienda actualizada correctamente']);
-    // }
-
-    // Eliminar una Tienda
-    // public function destroy($id)
-    // {
-    //     $tienda = Tienda::findOrFail($id);
-    //     $tienda->delete();
-
-    //     return response()->json(['message' => 'Tienda eliminada correctamente']);
-    // }
 
     public function getAll()
-{
-    // Obtén todos los datos de la tabla tienda
-    $tiendas = Tienda::all();
+    {
+        // Obtén todos los datos de la tabla tienda
+        $tiendas = Tienda::all();
 
-    // Procesa los datos
-    $tiendasData = $tiendas->map(function ($tienda) {
-        return [
-            'idTienda' => $tienda->idTienda,
-            'nombre' => $tienda->nombre,
-        ];
-    });
+        // Procesa los datos
+        $tiendasData = $tiendas->map(function ($tienda) {
+            return [
+                'idTienda' => $tienda->idTienda,
+                'nombre' => $tienda->nombre,
+            ];
+        });
 
-    // Retorna los datos en formato JSON
-    return response()->json($tiendasData);
-}
+        // Retorna los datos en formato JSON
+        return response()->json($tiendasData);
+    }
 
 
 }

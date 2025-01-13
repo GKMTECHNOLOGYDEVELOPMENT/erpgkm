@@ -446,8 +446,6 @@ document.addEventListener("alpine:init", () => {
 });
 </script>
 
-
-
     <script src="/assets/js/simple-datatables.js"></script>
     <!-- Script de NiceSelect -->
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>

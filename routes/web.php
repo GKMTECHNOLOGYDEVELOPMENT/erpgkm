@@ -80,15 +80,13 @@ Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->mi
 Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
 // Ruta para Administración de Compras
 Route::get('/administracion/compras', [CompraController::class, 'index'])->name('administracion.compra')->middleware('auth');
-// Ruta para Administración de Clientes Generales
+//Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
-// Mostrar el formulario de edición
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
-// Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
-
-// Ruta para crear un ciente general 
 Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
+//Rutas para Tiendas
+Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
 
 Route::post('/check-nombre', function (Request $request) {
     $nombre = $request->input('nombre');
@@ -96,7 +94,7 @@ Route::post('/check-nombre', function (Request $request) {
     return response()->json(['unique' => !$exists]);
 });
 // Ruta para Administracion de tiendas
-Route::get('/administracion/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
+
 // Ruta para Administracion Subsidiario
 Route::get('/administracion/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
 //Ruta para Administracion Cast
