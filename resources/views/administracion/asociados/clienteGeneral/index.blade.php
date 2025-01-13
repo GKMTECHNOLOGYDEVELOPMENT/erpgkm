@@ -63,286 +63,296 @@
         </div>
     </div>
 
- <!-- Modal -->
-<div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
-    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
-        <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
-            <div x-show="open" x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
-                <!-- Header del Modal -->
-                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg">Agregar Cliente General</h5>
-                    <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-6 h-6">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
+    <!-- Modal -->
+    <div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
+        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
+                <div x-show="open" x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
+                    <!-- Header del Modal -->
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <h5 class="font-bold text-lg">Agregar Cliente General</h5>
+                        <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" class="w-6 h-6">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Formulario -->
+                    <form class="p-5 space-y-4" id="clientGeneralForm" enctype="multipart/form-data" method="post">
+                        @csrf <!-- Asegúrate de incluir el token CSRF -->
+                        <!-- Descripción -->
+                        <div>
+                            <label for="descripcion" class="block text-sm font-medium">Nombre</label>
+                            <input type="text" id="descripcion" name="descripcion" class="form-input w-full"
+                                placeholder="Ingrese la descripción" required>
+                        </div>
+                        <!-- Foto -->
+                        <div class="mb-5" x-data="{ fotoPreview: null }">
+                            <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+                            <!-- Campo de archivo -->
+                            <input id="ctnFile" type="file" name="logo"accept="image/*"
+                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
+                                @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" />
+                            <!-- Contenedor de previsualización -->
+                            <div
+                                class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+                                <template x-if="fotoPreview">
+                                    <img :src="fotoPreview" alt="Previsualización de la foto"
+                                        class="w-40 h-40 object-cover object-center">
+                                </template>
+                                <template x-if="!fotoPreview">
+                                    <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
+                                        Sin imagen
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+
+                        <!-- Botones -->
+                        <div class="flex justify-end items-center mb-4">
+                            <button type="button" class="btn btn-outline-danger"
+                                @click="open = false">Cancelar</button>
+                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                        </div>
+                    </form>
                 </div>
-                <!-- Formulario -->
-                <form class="p-5 space-y-4" id="clientGeneralForm" enctype="multipart/form-data" method="post">
-                  @csrf <!-- Asegúrate de incluir el token CSRF -->
-                    <!-- Descripción -->
-                    <div>
-                        <label for="descripcion" class="block text-sm font-medium">Nombre</label>
-                        <input type="text" id="descripcion" name="descripcion" class="form-input w-full" placeholder="Ingrese la descripción" required>
-                    </div>
-                    <!-- Foto -->
-                    <div>
-                        <label for="foto" class="block text-sm font-medium">Foto</label>
-                        <input id="ctnFile" type="file" name="logo"
-                            class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary"
-                            required />
-                    </div>
-                    <!-- Botones -->
-                    <div class="flex justify-end items-center mb-4">
-                        <button type="button" class="btn btn-outline-danger"
-                            @click="open = false">Cancelar</button>
-                        <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('clientGeneralForm');
-        const descripcionInput = document.getElementById('descripcion');
-        const fileInput = document.getElementById('ctnFile');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('clientGeneralForm');
+            const descripcionInput = document.getElementById('descripcion');
+            const fileInput = document.getElementById('ctnFile');
 
-        // Base URL for API requests
-        const BASE_URL = 'http://127.0.0.1:8000/'; // Ajusta según tu configuración
+            // Base URL for API requests
+            const BASE_URL = 'http://127.0.0.1:8000/'; // Ajusta según tu configuración
 
-        // Validaciones
-        const validateNombreUnico = async (nombre) => {
-            try {
-                const response = await fetch(`${BASE_URL}api/check-nombre`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                    },
-                    body: JSON.stringify({ nombre })
-                });
-                const data = await response.json();
-                return data.unique; // true si es único, false si ya existe
-            } catch (error) {
-                console.error('Error al verificar el nombre:', error);
-                return false;
-            }
-        };
-
-        const validateDescripcion = (value) => {
-            const regex = /^[a-zA-Z0-9\s]+$/; // Sin caracteres especiales
-            return value.trim() !== '' && regex.test(value);
-        };
-
-        const validateFile = (file) => {
-            const allowedExtensions = ['image/png', 'image/jpeg', 'image/webp'];
-            return file.size <= 5 * 1024 * 1024 && allowedExtensions.includes(file.type);
-        };
-
-        // Escucha de eventos para validaciones en tiempo real
-        descripcionInput.addEventListener('input', async () => {
-            const nombre = descripcionInput.value;
-            if (!validateDescripcion(nombre)) {
-                descripcionInput.setCustomValidity('El nombre no debe estar vacío ni tener caracteres especiales.');
-            } else if (!(await validateNombreUnico(nombre))) {
-                descripcionInput.setCustomValidity('El nombre ya está en uso.');
-            } else {
-                descripcionInput.setCustomValidity(''); // Todo está correcto
-            }
-            descripcionInput.reportValidity();
-        });
-
-        fileInput.addEventListener('change', () => {
-            const file = fileInput.files[0];
-            if (!file) {
-                fileInput.setCustomValidity('Debes seleccionar un archivo.');
-            } else if (!validateFile(file)) {
-                fileInput.setCustomValidity(
-                    'El archivo debe ser PNG, JPG, WEBP y no superar los 5 MB.'
-                );
-            } else {
-                fileInput.setCustomValidity('');
-            }
-            fileInput.reportValidity();
-        });
-
-        // Validaciones al enviar el formulario
-        form.addEventListener('submit', async (event) => {
-            const nombre = descripcionInput.value;
-            const file = fileInput.files[0];
-
-            if (!validateDescripcion(nombre)) {
-                alert('El nombre no debe estar vacío ni tener caracteres especiales.');
-                event.preventDefault();
-                return;
-            }
-
-            if (!(await validateNombreUnico(nombre))) {
-                alert('El nombre ya está en uso.');
-                event.preventDefault();
-                return;
-            }
-
-            if (!file || !validateFile(file)) {
-                alert('El archivo debe ser PNG, JPG, WEBP y no superar los 5 MB.');
-                event.preventDefault();
-                return;
-            }
-
-            // Si todo es válido, el formulario se envía
-        });
-    });
-</script>
-
-<!-- Script AJAX -->
-<script>
-// Script AJAX
-document.getElementById('clientGeneralForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evita el envío del formulario tradicional
-    
-    let formData = new FormData(this); // Obtiene todos los datos del formulario, incluida la foto
-    console.log("Enviando datos:", formData); // Log de los datos del formulario
-
-    fetch("{{ route('cliente-general.store') }}", {
-        method: "POST", // Asegúrate de usar el método POST
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
-        },
-        body: formData, // Envío de datos en formato multipart
-    })
-    .then(response => response.json())  // Espera una respuesta JSON
-    .then(data => {
-        console.log("Respuesta del servidor:", data); // Log de la respuesta
-
-        if (data.success) {
-            // Mostrar la alerta de éxito
-            showMessage('Cliente agregado correctamente.', 'top-end');
-            
-            // Limpiar los campos del formulario
-            document.getElementById('clientGeneralForm').reset();
-            
-            // Cerrar el modal
-            open = false; // Esto asume que `open` es el controlador del modal en Alpine.js
-
-            // Llamar al método para actualizar la tabla
-            // Acceder al contexto de Alpine y llamar a `updateTable`
-            let alpineData = Alpine.store('multipleTable');
-            if (alpineData && alpineData.updateTable) {
-                alpineData.updateTable();  // Llama a `updateTable` de Alpine
-            } else {
-                console.error('Método updateTable no encontrado en Alpine');
-            }
-
-        } else {
-            // Mostrar alerta de error
-            showMessage('Hubo un error al guardar el cliente.', 'top-end');
-        }
-    })
-    .catch(error => {
-        console.error("Error al enviar el formulario:", error);
-        // Mostrar alerta de error
-        showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
-    });
-});
-
-// Función para mostrar la alerta con SweetAlert
-showMessage = (msg = 'Example notification text.', position = 'top-end', showCloseButton = true, closeButtonHtml = '', duration = 3000, type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: position || 'top-end',
-        showConfirmButton: false,
-        timer: duration,
-        showCloseButton: showCloseButton,
-        icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-        background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-        iconColor: 'white', // Color del icono
-        customClass: {
-            title: 'text-white', // Asegura que el texto sea blanco
-        },
-    });
-
-    toast.fire({
-        title: msg,
-    });
-};
-
-</script>
-
-
-<script>
-document.addEventListener("alpine:init", () => {
-    Alpine.data("multipleTable", () => ({
-        datatable1: null,
-        clientData: [], // Almacena los datos actuales de la tabla
-        pollInterval: 2000, // Intervalo de polling (en ms)
-
-        init() {
-            console.log("Component initialized");
-
-            // Obtener datos iniciales e inicializar la tabla
-            this.fetchDataAndInitTable();
-
-            // Configurar polling para verificar actualizaciones
-            setInterval(() => {
-                this.checkForUpdates();
-            }, this.pollInterval);
-        },
-
-        fetchDataAndInitTable() {
-            fetch("/api/clientegeneral")
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al obtener datos del servidor");
-                    return response.json();
-                })
-                .then((data) => {
-                    this.clientData = data;
-
-                    // Inicializar DataTable
-                    this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
-                        data: {
-                            headings: ["Descripción", "Foto", "Estado", "Acción"],
-                            data: this.formatDataForTable(data),
+            // Validaciones
+            const validateNombreUnico = async (nombre) => {
+                try {
+                    const response = await fetch(`${BASE_URL}api/check-nombre`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
                         },
-                        searchable: true,
-                        perPage: 10,
-                        labels: {
-                            placeholder: "Buscar...",
-                            perPage: "{select}",
-                            noRows: "No se encontraron registros",
-                            info: "Mostrando {start} a {end} de {rows} registros",
-                         
-
-                        },
+                        body: JSON.stringify({
+                            nombre
+                        })
                     });
-                })
-                .catch((error) => {
-                    console.error("Error al inicializar la tabla:", error);
-                });
-        },
+                    const data = await response.json();
+                    return data.unique; // true si es único, false si ya existe
+                } catch (error) {
+                    console.error('Error al verificar el nombre:', error);
+                    return false;
+                }
+            };
 
-        formatDataForTable(data) {
-            return data.map((cliente) => [
-                cliente.descripcion,
-                `<img src="${cliente.foto}" class="w-10 h-10 rounded-full object-cover" alt="Foto" />`,
-                cliente.estado
-                    ? `<span class="badge badge-outline-success">Activo</span>`
-                    : `<span class="badge badge-outline-danger">Inactivo</span>`,
-               
-                `<div class="flex items-center">
+            const validateDescripcion = (value) => {
+                const regex = /^[a-zA-Z0-9\s]+$/; // Sin caracteres especiales
+                return value.trim() !== '' && regex.test(value);
+            };
+
+            const validateFile = (file) => {
+                const allowedExtensions = ['image/png', 'image/jpeg', 'image/webp'];
+                return file.size <= 5 * 1024 * 1024 && allowedExtensions.includes(file.type);
+            };
+
+            // Escucha de eventos para validaciones en tiempo real
+            descripcionInput.addEventListener('input', async () => {
+                const nombre = descripcionInput.value;
+                if (!validateDescripcion(nombre)) {
+                    descripcionInput.setCustomValidity(
+                        'El nombre no debe estar vacío ni tener caracteres especiales.');
+                } else if (!(await validateNombreUnico(nombre))) {
+                    descripcionInput.setCustomValidity('El nombre ya está en uso.');
+                } else {
+                    descripcionInput.setCustomValidity(''); // Todo está correcto
+                }
+                descripcionInput.reportValidity();
+            });
+
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (!file) {
+                    fileInput.setCustomValidity('Debes seleccionar un archivo.');
+                } else if (!validateFile(file)) {
+                    fileInput.setCustomValidity(
+                        'El archivo debe ser PNG, JPG, WEBP y no superar los 5 MB.'
+                    );
+                } else {
+                    fileInput.setCustomValidity('');
+                }
+                fileInput.reportValidity();
+            });
+
+            // Validaciones al enviar el formulario
+            form.addEventListener('submit', async (event) => {
+                const nombre = descripcionInput.value;
+                const file = fileInput.files[0];
+
+                if (!validateDescripcion(nombre)) {
+                    alert('El nombre no debe estar vacío ni tener caracteres especiales.');
+                    event.preventDefault();
+                    return;
+                }
+
+                if (!(await validateNombreUnico(nombre))) {
+                    alert('El nombre ya está en uso.');
+                    event.preventDefault();
+                    return;
+                }
+
+                if (!file || !validateFile(file)) {
+                    alert('El archivo debe ser PNG, JPG, WEBP y no superar los 5 MB.');
+                    event.preventDefault();
+                    return;
+                }
+
+                // Si todo es válido, el formulario se envía
+            });
+        });
+    </script>
+
+    <!-- Script AJAX -->
+    <script>
+        // Script AJAX
+        document.getElementById('clientGeneralForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita el envío del formulario tradicional
+
+            let formData = new FormData(this); // Obtiene todos los datos del formulario, incluida la foto
+            console.log("Enviando datos:", formData); // Log de los datos del formulario
+
+            fetch("{{ route('cliente-general.store') }}", {
+                    method: "POST", // Asegúrate de usar el método POST
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
+                    },
+                    body: formData, // Envío de datos en formato multipart
+                })
+                .then(response => response.json()) // Espera una respuesta JSON
+                .then(data => {
+                    console.log("Respuesta del servidor:", data); // Log de la respuesta
+
+                    if (data.success) {
+                        // Mostrar la alerta de éxito
+                        showMessage('Cliente agregado correctamente.', 'top-end');
+
+                        // Recargar la página inmediatamente
+                        window.location.reload(); // Recarga la página para reflejar los cambio
+                    } else {
+                        // Mostrar alerta de error
+                        showMessage('Hubo un error al guardar el cliente.', 'top-end');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al enviar el formulario:", error);
+                    // Mostrar alerta de error
+                    showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
+                });
+        });
+
+        // Función para mostrar la alerta con SweetAlert
+        showMessage = (msg = 'Example notification text.', position = 'top-end', showCloseButton = true, closeButtonHtml =
+            '', duration = 3000, type = 'success') => {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
+            });
+
+            toast.fire({
+                title: msg,
+            });
+        };
+    </script>
+
+
+    <script>
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("multipleTable", () => ({
+                datatable1: null,
+                clientData: [], // Almacena los datos actuales de la tabla
+                pollInterval: 2000, // Intervalo de polling (en ms)
+
+                init() {
+                    console.log("Component initialized");
+
+                    // Obtener datos iniciales e inicializar la tabla
+                    this.fetchDataAndInitTable();
+
+                    // Configurar polling para verificar actualizaciones
+                    setInterval(() => {
+                        this.checkForUpdates();
+                    }, this.pollInterval);
+                },
+
+                fetchDataAndInitTable() {
+                    fetch("/api/clientegeneral")
+                        .then((response) => {
+                            if (!response.ok) throw new Error(
+                                "Error al obtener datos del servidor");
+                            return response.json();
+                        })
+                        .then((data) => {
+                            this.clientData = data;
+
+                            // Inicializar DataTable
+                            this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
+                                data: {
+                                    headings: ["Descripción", "Foto", "Estado", "Acción"],
+                                    data: this.formatDataForTable(data),
+                                },
+                                searchable: true,
+                                perPage: 10,
+                                labels: {
+                                    placeholder: "Buscar...", // Placeholder de búsqueda
+                                    perPage: "{select} registros por página", // Selección de registros por página
+                                    noRows: "No se encontraron registros", // Mensaje cuando no hay registros
+                                    info: "", // Información de la tabla
+                                },
+                                layout: {
+                                    top: "{search}", // Posición del campo de búsqueda
+                                    bottom: "{info}{select}{pager}", // Posición de información, selector y paginador
+                                },
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error al inicializar la tabla:", error);
+                        });
+                },
+
+                formatDataForTable(data) {
+                    return data.map((cliente) => [
+                        cliente.descripcion,
+                        `<img src="${cliente.foto}" class="w-10 h-10 rounded-full object-cover" alt="Foto" />`,
+                        cliente.estado ?
+                        `<span class="badge badge-outline-success">Activo</span>` :
+                        `<span class="badge badge-outline-danger">Inactivo</span>`,
+
+                        `<div class="flex items-center">
                <a href="/cliente-general/${cliente.idClienteGeneral}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                                             <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
                                             <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
                                         </svg>
                                     </a>
-                                    <button type="button"  x-tooltip="Delete" @click="deleteClient(${cliente.idClienteGeneral})">
+                                    <button type="button"  x-tooltip="Eliminar" @click="deleteClient(${cliente.idClienteGeneral})">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                             <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                             <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -352,99 +362,105 @@ document.addEventListener("alpine:init", () => {
                                         </svg>
                                     </button>
                                 </div>`,
-            ]);
-        },
+                    ]);
+                },
 
-        checkForUpdates() {
-            fetch("/api/clientegeneral")
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al verificar actualizaciones");
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log("Datos actuales:", this.clientData);
-                    console.log("Datos del servidor:", data);
+                checkForUpdates() {
+                    fetch("/api/clientegeneral")
+                        .then((response) => {
+                            if (!response.ok) throw new Error("Error al verificar actualizaciones");
+                            return response.json();
+                        })
+                        .then((data) => {
+                            console.log("Datos actuales:", this.clientData);
+                            console.log("Datos del servidor:", data);
 
-                    // Detectar nuevas filas
-                    const newData = data.filter(
-                        (newCliente) =>
-                            !this.clientData.some(
-                                (existingCliente) =>
-                                    existingCliente.idClienteGeneral === newCliente.idClienteGeneral
-                            )
-                    );
+                            // Detectar nuevas filas
+                            const newData = data.filter(
+                                (newCliente) =>
+                                !this.clientData.some(
+                                    (existingCliente) =>
+                                    existingCliente.idClienteGeneral === newCliente
+                                    .idClienteGeneral
+                                )
+                            );
 
-                    if (newData.length > 0) {
-                        console.log("Nuevos datos detectados:", newData);
+                            if (newData.length > 0) {
+                                console.log("Nuevos datos detectados:", newData);
 
-                        // Agregar filas nuevas a la tabla
-                        this.datatable1.rows().add(this.formatDataForTable(newData));
-                        this.clientData.push(...newData); // Actualizar clientData
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error al verificar actualizaciones:", error);
-                });
-        },
+                                // Agregar filas nuevas a la tabla
+                                this.datatable1.rows().add(this.formatDataForTable(newData));
+                                this.clientData.push(...newData); // Actualizar clientData
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error al verificar actualizaciones:", error);
+                        });
+                },
 
-        deleteClient(idClienteGeneral) {
-    new window.Swal({
-        icon: 'warning',
-        title: '¿Estás seguro?',
-        text: "¡No podrás revertir esta acción!",
-        showCancelButton: true,
-        confirmButtonText: 'Eliminar',
-        cancelButtonText: 'Cancelar',
-        padding: '2em',
-        customClass: 'sweet-alerts',
-    }).then((result) => {
-        if (result.value) {
-            // Hacer la solicitud de eliminación
-            fetch(`/api/clientegeneral/${idClienteGeneral}`, {
-                method: "DELETE",
-            })
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al eliminar cliente");
-                    return response.json();
-                })
-                .then(() => {
-                    console.log(`Cliente ${idClienteGeneral} eliminado con éxito`);
-
-                    // Actualizar la tabla eliminando la fila
-                    this.clientData = this.clientData.filter(
-                        (cliente) => cliente.idClienteGeneral !== idClienteGeneral
-                    );
-                    this.datatable1.rows().remove(
-                        (row) =>
-                            row.cells[0].innerHTML === idClienteGeneral.toString() // Basado en algún identificador único
-                    );
-
-                    // Mostrar notificación de éxito
+                deleteClient(idClienteGeneral) {
                     new window.Swal({
-                        title: '¡Eliminado!',
-                        text: 'El cliente ha sido eliminado con éxito.',
-                        icon: 'success',
+                        icon: 'warning',
+                        title: '¿Estás seguro?',
+                        text: "¡No podrás revertir esta acción!",
+                        showCancelButton: true,
+                        confirmButtonText: 'Eliminar',
+                        cancelButtonText: 'Cancelar',
+                        padding: '2em',
                         customClass: 'sweet-alerts',
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error al eliminar cliente:", error);
+                    }).then((result) => {
+                        if (result.value) {
+                            // Hacer la solicitud de eliminación
+                            fetch(`/api/clientegeneral/${idClienteGeneral}`, {
+                                    method: "DELETE",
+                                })
+                                .then((response) => {
+                                    if (!response.ok) throw new Error(
+                                        "Error al eliminar cliente");
+                                    return response.json();
+                                })
+                                .then(() => {
+                                    console.log(
+                                        `Cliente ${idClienteGeneral} eliminado con éxito`
+                                    );
 
-                    // Mostrar notificación de error
-                    new window.Swal({
-                        title: 'Error',
-                        text: 'Ocurrió un error al eliminar el cliente.',
-                        icon: 'error',
-                        customClass: 'sweet-alerts',
-                    });
-                });
-        }
-    });
-}
+                                    // Actualizar la tabla eliminando la fila
+                                    this.clientData = this.clientData.filter(
+                                        (cliente) => cliente.idClienteGeneral !==
+                                        idClienteGeneral
+                                    );
+                                    this.datatable1.rows().remove(
+                                        (row) =>
+                                        row.cells[0].innerHTML === idClienteGeneral
+                                        .toString() // Basado en algún identificador único
+                                    );
 
-    }));
-});
-</script>
+                                    // Mostrar notificación de éxito
+                                    new window.Swal({
+                                        title: '¡Eliminado!',
+                                        text: 'El cliente ha sido eliminado con éxito.',
+                                        icon: 'success',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                })
+                                .catch((error) => {
+                                    console.error("Error al eliminar cliente:", error);
+
+                                    // Mostrar notificación de error
+                                    new window.Swal({
+                                        title: 'Error',
+                                        text: 'Ocurrió un error al eliminar el cliente.',
+                                        icon: 'error',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                });
+                        }
+                    });
+                }
+
+            }));
+        });
+    </script>
 
 
 
