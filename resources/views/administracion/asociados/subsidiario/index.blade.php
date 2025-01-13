@@ -1,42 +1,5 @@
 <x-layout.default>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-    <style>
-        /* Scroll transparente y elegante */
-        .modal-scroll {
-            overflow-y: auto;
-            max-height: 80vh;
-            /* Controla la altura máxima del contenido */
-            scrollbar-width: thin;
-            /* Estilo del scroll en navegadores compatibles */
-            scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
-        }
-
-        .modal-scroll::-webkit-scrollbar {
-            width: 8px;
-            background-color: transparent;
-            /* Fondo del scrollbar */
-        }
-
-        .modal-scroll::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.5);
-            /* Color del scroll */
-            border-radius: 4px;
-            /* Redondeo del scroll */
-            transition: background-color 0.3s ease;
-        }
-
-        .modal-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(255, 255, 255, 0.8);
-            /* Color más visible al pasar el mouse */
-        }
-
-        .modal-scroll::-webkit-scrollbar-track {
-            background: transparent;
-            /* Fondo transparente del track */
-        }
-    </style>
-
     <div x-data="multipleTable">
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -91,107 +54,24 @@
                     </button>
 
                     <!-- Botón Agregar -->
-                    <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
-                        @click="$dispatch('toggle-modal')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
-                            <path d="M3 8H21M3 8L5 5H19L21 8M3 8V19C3 19.5523 3.44772 20 4 20H7C7.55228 20 8 19.5523 8 19V14C8 13.4477 8.44772 13 9 13H15C15.5523 13 16 13.4477 16 14V19C16 19.5523 16.4477 20 17 20H20C20.5523 20 21 19.5523 21 19V8M8 13V11C8 10.4477 8.44772 10 9 10H15C15.5523 10 16 10.4477 16 11V13" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M6 11H10M14 11H18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
-                          
+                    <a href="{{ route('administracion.create') }}"
+                        class="btn btn-primary btn-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21"
+                            fill="none">
+                            <path
+                                d="M3 8H21M3 8L5 5H19L21 8M3 8V19C3 19.5523 3.44772 20 4 20H7C7.55228 20 8 19.5523 8 19V14C8 13.4477 8.44772 13 9 13H15C15.5523 13 16 13.4477 16 14V19C16 19.5523 16.4477 20 17 20H20C20.5523 20 21 19.5523 21 19V8M8 13V11C8 10.4477 8.44772 10 9 10H15C15.5523 10 16 10.4477 16 11V13"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M6 11H10M14 11H18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
                         <span>Agregar</span>
-                    </button>
+                    </a>
+
                 </div>
             </div>
 
             <table id="myTable1" class="whitespace-nowrap"></table>
-        </div>
-    </div>
-    <!-- Modal -->
-    <div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
-        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
-            <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
-                <div x-show="open" x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
-                    <!-- Header del Modal -->
-                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <h5 class="font-bold text-lg">Agregar Subsidiario</h5>
-                        <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-6 h-6">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- Formulario -->
-                    <div class="modal-scroll">
-                        <form class="p-5 space-y-4" id="subsidiariosForm">
-                            <!-- RUC -->
-                            <div>
-                                <label for="ruc" class="block text-sm font-medium">RUC</label>
-                                <input id="ruc" type="text" class="form-input w-full"
-                                    placeholder="Ingrese el RUC">
-                            </div>
-                            <!-- Nombre -->
-                            <div>
-                                <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input id="nombre" type="text" class="form-input w-full"
-                                    placeholder="Ingrese el nombre">
-                            </div>
-                            <!-- Nombre del Contacto -->
-                            <div>
-                                <label for="nombre_contacto" class="block text-sm font-medium">Nombre del
-                                    Contacto</label>
-                                <input id="nombre_contacto" type="text" class="form-input w-full"
-                                    placeholder="Ingrese el nombre del contacto">
-                            </div>
-                            <!-- Tienda -->
-                            <div>
-                                <select id="idTienda" x-model="formData.idTienda" class="select2">
-                                    <option value="" disabled selected>Seleccionar Tienda</option>
-                                    <option value="1">Tienda 1</option>
-                                    <option value="2">Tienda 2</option>
-                                    <option value="3">Tienda 3</option>
-                                    <option value="4">Tienda 4</option>
-                                    <option value="5">Tienda 5</option>
-                                </select>
-                            </div>
-                            <!-- Celular -->
-                            <div>
-                                <label for="celular" class="block text-sm font-medium">Celular</label>
-                                <input id="celular" type="text" class="form-input w-full"
-                                    placeholder="Ingrese el celular">
-                            </div>
-                            <!-- Email -->
-                            <div>
-                                <label for="email" class="block text-sm font-medium">Email</label>
-                                <input id="email" type="email" class="form-input w-full"
-                                    placeholder="Ingrese el email">
-                            </div>
-                            <!-- Dirección -->
-                            <div>
-                                <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                <textarea id="direccion" class="form-input w-full" rows="3" placeholder="Ingrese la dirección"></textarea>
-                            </div>
-                            <!-- Referencia -->
-                            <div>
-                                <label for="referencia" class="block text-sm font-medium">Referencia</label>
-                                <input id="referencia" type="text" class="form-input w-full"
-                                    placeholder="Ingrese la referencia">
-                            </div>
-                            <!-- Botones -->
-                            <div class="flex justify-end items-center mt-4">
-                                <button type="button" class="btn btn-outline-danger"
-                                    @click="open = false">Cancelar</button>
-                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -283,17 +163,6 @@
             }));
         });
 
-        // Inicializar Select2
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar todos los select con la clase "select2"
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
-            });
-        });
     </script>
     <script src="/assets/js/simple-datatables.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-
 </x-layout.default>

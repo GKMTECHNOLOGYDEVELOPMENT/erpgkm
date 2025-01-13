@@ -20,16 +20,15 @@
                     </button>
 
                     <!-- Botón Exportar a PDF -->
-                    <button type="button" class="btn btn-danger btn-sm m-1" @click="exportTable('pdf')">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
-                            <path
-                                d="M2 5H22M2 5H22C22 6.10457 21.1046 7 20 7H4C2.89543 7 2 6.10457 2 5ZM2 5V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V5M9 14L15 14"
-                                stroke="currentColor" stroke-width="1.5" />
+                    <button id="exportPdfBtn" class="btn btn-danger btn-sm" onclick="window.location='{{ route('clientes-general.exportPDF') }}'">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                            <path d="M2 5H22M2 5H22C22 6.10457 21.1046 7 20 7H4C2.89543 7 2 6.10457 2 5ZM2 5V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V5M9 14L15 14" stroke="currentColor" stroke-width="1.5" />
                             <path d="M12 11L12 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
                         PDF
                     </button>
+                    
+                    
 
                     <!-- Botón Imprimir -->
                     <button type="button" class="btn btn-warning btn-sm m-1" @click="printTable">

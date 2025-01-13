@@ -10,9 +10,14 @@ class SubsidiarioController extends Controller
     public function index()
     {
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.sub-sidiario'); 
+        return view('administracion.asociados.subsidiario.index'); 
     }
 
+    public function create()
+    {
+        // Llamar la vista ubicada en administracion/usuarios.blade.php
+        return view('administracion.asociados.subsidiario.create'); 
+    }
     // Crear un nuevo Subsidiario
     //  public function store(Request $request)
     //  {

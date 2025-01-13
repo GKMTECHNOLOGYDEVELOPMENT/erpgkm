@@ -84,6 +84,9 @@ Route::get('/administracion/compras', [CompraController::class, 'index'])->name(
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
 // Mostrar el formulario de edición
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
+
+Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF'])
+    ->name('clientes-general.exportPDF');
 // Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
 
@@ -98,11 +101,12 @@ Route::post('/check-nombre', function (Request $request) {
 // Ruta para Administracion de tiendas
 Route::get('/administracion/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
 // Ruta para Administracion Subsidiario
-Route::get('/administracion/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
+Route::get('/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
 //Ruta para Administracion Cast
 Route::get('/administracion/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
 // Route::get('/casts', [CastController::class, 'getAll']);
-
+// Ruta para Administracion Subsidiario
+Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');
 //Ruta para Administracion Clientes
 Route::get('/administracion/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
 
