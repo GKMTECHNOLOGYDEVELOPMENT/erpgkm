@@ -89,35 +89,40 @@ class ClienteGeneralController extends Controller
     
 
 
-    public function update(Request $request, $id)
-    {
-        // Validar los datos del formulario
-        $validatedData = $request->validate([
-            'descripcion' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'estado' => 'nullable|boolean',
-        ]);
-    
-        // Obtener el cliente
-        $cliente = ClienteGeneral::findOrFail($id);
-    
-        // Actualizar los datos del cliente
-        $cliente->descripcion = $validatedData['descripcion'];
-        $cliente->estado = $request->has('estado') ? 1 : 0;
-    
-        // Subir y guardar la foto si se proporciona
-        if ($request->hasFile('foto')) {
-            $filePath = $request->file('foto')->store('uploads', 'public');
-            $cliente->foto = $filePath;
+public function update(Request $request, $id)
+{
+    // Validar los datos del formulario
+    $validatedData = $request->validate([
+        'descripcion' => 'required|string|max:255',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'estado' => 'nullable|boolean',
+    ]);
+
+    // Obtener el cliente
+    $cliente = Clientegeneral::findOrFail($id);
+
+    // Actualizar los datos básicos del cliente
+    $cliente->descripcion = $validatedData['descripcion'];
+    $cliente->estado = $request->estado;
+
+    // Manejar la actualización de la imagen
+    if ($request->hasFile('foto')) {
+        // Eliminar la imagen anterior si existe
+        if ($cliente->foto && Storage::exists(str_replace('storage/', '', $cliente->foto))) {
+            Storage::delete(str_replace('storage/', '', $cliente->foto));
         }
-    
-        $cliente->save(); // Guardar los cambios
-    
-        // Redireccionar con un mensaje de éxito
-        return redirect()->route('cliente-general.index')
-            ->with('success', 'Cliente actualizado exitosamente.');
+
+        // Subir la nueva imagen
+        $filePath = $request->file('foto')->store('img/general', 'public');
+        $cliente->foto = 'storage/' . $filePath; // Agregar el prefijo 'storage/'
     }
-    
+
+    $cliente->save(); // Guardar los cambios
+
+    // Redireccionar con un mensaje de éxito
+    return redirect()->route('administracion.cliente-general')
+        ->with('success', 'Cliente actualizado exitosamente.');
+}
 
 
 
