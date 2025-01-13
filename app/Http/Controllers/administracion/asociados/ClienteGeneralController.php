@@ -13,7 +13,6 @@ class ClienteGeneralController extends Controller
 {
     public function index()
     {
-        
         // Llamar la vista ubicada en administracion/usuarios.blade.php
         return view('administracion.asociados.clienteGeneral.index'); 
     }
@@ -76,76 +75,17 @@ class ClienteGeneralController extends Controller
             ], 500);
         }
     }
-
-//     public function store(GeneralRequests $request)
-// {
-//     try {
-//         // Datos básicos del cliente sin la imagen
-//         $dataClientes = [
-//             'descripcion' => $request->descripcion,
-//             'estado' => 1,
-//         ];
-
-//         // Guardar el cliente en la base de datos (sin la imagen por ahora)
-//         Log::info('Insertando cliente:', $dataClientes);
-//         Clientegeneral::insert($dataClientes);
-
-//         // Obtener el último cliente insertado (para obtener su ID)
-//         $data = Clientegeneral::latest('idClienteGeneral')->first();
-//         $idCliente = $data->idClienteGeneral;
-//         Log::info('Cliente insertado con ID: ' . $idCliente);
-
-//         // Procesar la imagen si se ha subido
-//         if ($request->hasFile('logo')) {
-//             // Obtener la extensión del archivo
-//             $extension = $request->file('logo')->getClientOriginalExtension();
-//             Log::info('Extensión de la imagen: ' . $extension);
-
-//             // Generar un nombre de archivo único para evitar sobrescribir archivos
-//             $file_name = mt_rand(0, 999) . '.' . $extension;
-
-//             // Definir la carpeta de destino dentro de storage/app/public
-//             $directorio = "img/general/{$idCliente}";
-
-//             // Guardar la imagen en el directorio usando el almacenamiento de Laravel
-//             $path = $request->file('logo')->storeAs($directorio, $file_name, 'public');
-//             Log::info('Ruta de la imagen almacenada: ' . $path);
-
-//             // Crear la ruta pública para la imagen con barras invertidas
-//             $rutaImg = "storage\\" . str_replace('/', '\\', $path); // Cambiar las barras '/' por '\\'
-
-//             // Actualizar el cliente con la ruta de la imagen
-//             Clientegeneral::where('idClienteGeneral', $idCliente)->update(['foto' => $rutaImg]);
-//             Log::info('Ruta de la imagen actualizada en la base de datos.');
-//         }
-
-//         // Responder con JSON
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Cliente agregado correctamente',
-//             'data' => $dataClientes,
-//         ]);
-//     } catch (\Exception $e) {
-//         // Log para capturar el error
-//         Log::error('Error al guardar el cliente: ' . $e->getMessage());
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Ocurrió un error al guardar el cliente.',
-//             'error' => $e->getMessage(),
-//         ], 500);
-//     }
-// }
-
-
+    
 
     public function edit($id)
-{
-    $cliente = ClienteGeneral::findOrFail($id); // Buscar cliente por ID
+    {
+        $cliente = ClienteGeneral::findOrFail($id); // Buscar cliente por ID
+    
+        // Retornar vista con los datos del cliente
+        return view('administracion.asociados.clienteGeneral.edit', compact('cliente'));
+    }
 
-    // Retornar vista con los datos del cliente
-    return view('administracion.asociados.clienteGeneral.edit', compact('cliente'));
-}
-
+   
 public function update(Request $request, $id)
 {
     // Validar los datos del formulario
@@ -222,50 +162,27 @@ public function update(Request $request, $id)
 
 
 
-
-
- 
-// public function destroy($id)
-// {
+// public function destroy($id) {
 //     $cliente = ClienteGeneral::find($id);
 
 //     if (!$cliente) {
 //         return response()->json(['error' => 'Cliente no encontrado'], 404);
 //     }
 
-//     $fotoEliminada = false; // Variable para saber si la foto fue eliminada
-
 //     // Verificar si el cliente tiene una imagen y eliminarla
-//     if ($cliente->foto) {
-//         // Eliminar el prefijo 'storage/' de la ruta almacenada en la base de datos
-//         $fotoPath = str_replace('storage/', '', $cliente->foto);  // Eliminar 'storage/' si está presente
-
-//         // Crear la ruta completa para la foto utilizando el storage_path
-//         $fotoPathCompleta = storage_path('app/public/' . $fotoPath);
-
-//         // Log para ver la ruta de la imagen
-//         Log::info("Ruta completa de la foto del cliente $id: " . $fotoPathCompleta);
-
-//         // Verificar si el archivo existe
-//         if (file_exists($fotoPathCompleta)) {
-//             // Eliminar la imagen
-//             unlink($fotoPathCompleta); // Usamos unlink para eliminar archivos en el sistema de archivos
-//             Log::info("Imagen del cliente $id eliminada: " . $fotoPathCompleta);
-//             $fotoEliminada = true; // Si se eliminó la foto, cambiamos la variable
-//         } else {
-//             Log::warning("La imagen no fue encontrada en la ruta: " . $fotoPathCompleta);
-//         }
+//     if ($cliente->foto && Storage::exists($cliente->foto)) {
+//         // Eliminar la imagen de la ruta especificada en la columna 'foto'
+//         Storage::delete($cliente->foto);
+//         // Opcional: Puedes hacer un log para confirmar que se eliminó la imagen
+//         Log::info("Imagen del cliente $id eliminada: " . $cliente->foto);
 //     }
 
 //     // Eliminar el cliente
 //     $cliente->delete();
 
-//     // Responder con el estado de la eliminación
-//     return response()->json([
-//         'message' => 'Cliente y su imagen eliminados con éxito',
-//         'fotoEliminada' => $fotoEliminada // Indicamos si la foto fue eliminada
-//     ], 200);
+//     return response()->json(['message' => 'Cliente y su imagen eliminados con éxito'], 200);
 // }
+ 
 
 
 public function destroy($id)
@@ -319,11 +236,6 @@ public function destroy($id)
         'carpetaEliminada' => $carpetaEliminada // Indicamos si la carpeta fue eliminada
     ], 200);
 }
-
-
-
-
-
 
 
 
