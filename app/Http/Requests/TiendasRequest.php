@@ -25,28 +25,16 @@ class TiendasRequest extends FormRequest
     public function rules()
     {
         return [
-            'id_cliente' => 'required',
-            'numero' => 'required',
+         
             'nombre' => 'required',
-            'direccion' => 'required',
-            'telefono' => 'nullable',
-            'email' => 'email|nullable'
-        ];
-    }
-
-    public function attributes()
-    {
-        return[
-            'nombre' => 'nombre de la tienda',
-            'direccion' => 'dirección de la tienda',
-            'numero' => 'número de la tienda',
+     
         ];
     }
 
     public function messages()
     {
         return[
-            'id_cliente.required' => 'Debe seleccionar cliente'
+            'nombre.required' => 'Debe ingresar nombre de la tienda'
         ];
     }
 }
