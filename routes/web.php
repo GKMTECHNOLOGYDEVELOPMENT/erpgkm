@@ -35,7 +35,8 @@ use App\Http\Controllers\Apps\CalendarController;
 use App\Models\Clientegeneral;
 use App\Models\Subsidiario;
 use Illuminate\Http\Client\Request;
-
+use App\Exports\ClientesGeneralExport;
+use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
 
 // Ruta para mostrar el formulario de login
@@ -69,6 +70,14 @@ Route::get('/administracion/compras', [CompraController::class, 'index'])->name(
 //Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
+Route::get('/exportar-clientes-general', function () {
+    return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx');
+})->name('clientes-general.exportExcel');
+
+Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF'])
+    ->name('clientes-general.exportPDF')->middleware('auth');
+
+// Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
 Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
 
@@ -93,11 +102,12 @@ Route::post('/check-nombre', function (Request $request) {
 // Ruta para Administracion de tiendas
 
 // Ruta para Administracion Subsidiario
-Route::get('/administracion/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
+Route::get('/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
 //Ruta para Administracion Cast
 Route::get('/administracion/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
 // Route::get('/casts', [CastController::class, 'getAll']);
-
+// Ruta para Administracion Subsidiario
+Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');
 //Ruta para Administracion Clientes
 Route::get('/administracion/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
 

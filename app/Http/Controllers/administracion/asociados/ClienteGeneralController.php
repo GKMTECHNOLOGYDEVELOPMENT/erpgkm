@@ -8,6 +8,7 @@ use App\Models\Clientegeneral;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ClienteGeneralController extends Controller
 {
@@ -237,9 +238,19 @@ public function destroy($id)
     ], 200);
 }
 
+public function exportAllPDF()
+{
+    // Obtener todos los registros de ClienteGeneral
+    $clientes = ClienteGeneral::all();
 
+    // Generar el PDF con la colección completa
+    $pdf = Pdf::loadView('administracion.asociados.clienteGeneral.pdf.cliente-general', compact('clientes'))
+        ->setPaper('a4', 'portrait'); // Define orientación vertical
 
-
+    // Retornar el PDF como descarga
+    return $pdf->download('reporte-cliente-generales.pdf');
+}
+ 
     public function getAll()
     {
         // Obtén todos los datos de la tabla clientegeneral

@@ -1,27 +1,6 @@
 <x-layout.default>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-    <style>
-        .modal-scroll {
-            overflow-y: auto;
-            max-height: 70vh;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
-        }
-
-        .modal-scroll::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .modal-scroll::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.5);
-            border-radius: 4px;
-        }
-
-        .modal-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-    </style>
     <div x-data="multipleTable">
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -62,19 +41,6 @@
                         </svg>
                         <span>PDF</span>
                     </button>
-
-                    <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M9 17V21H15V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        </svg>
-                        <span>Imprimir</span>
-                    </button>
-
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
