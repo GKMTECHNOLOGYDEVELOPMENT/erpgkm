@@ -51,20 +51,6 @@ Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->nam
 // Ruta para la pantalla de restablecimiento de contraseña
 Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'show'])->name('auth.password-reset');
 
-
-// Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
-// Route::view('/auth/boxed-signin', 'auth.boxed-signin');
-// Route::view('/auth/boxed-signup', 'auth.boxed-signup');
-// Route::view('/auth/boxed-password-reset', 'auth.boxed-password-reset');
-//Route::view('/auth/cover-login', 'auth.cover-login');
-//Route::view('/auth/cover-register', 'auth.cover-register')
-// Route::view('/auth/cover-lockscreen', 'auth.cover-lockscreen');
-//Route::view('/auth/cover-password-reset', 'auth.cover-password-reset');
-
-// Route::view('/analytics', 'analytics');
-// Route::view('/finance', 'finance');
-// Route::view('/crypto', 'crypto');
-// Ruta para el dashboard de administración
 Route::get('/index', [AdministracionController::class, 'index'])->name('index')->middleware('auth');
 
 // Ruta para el dashboard de almacén
@@ -85,9 +71,19 @@ Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
 Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
+
 //Rutas para Tiendas
 Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
-Route::get('/tienda/store', [TiendaController::class, 'store'])->name('tienda.store')->middleware('auth');
+Route::post('/tienda/store', [TiendaController::class, 'store'])->name('tienda.store')->middleware('auth');
+Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
+Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tienda.update');
+// Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tiendas')->middleware('auth');
+
+
+
+// // Ruta para actualizar una tienda
+// Route::put('/api/tiendas/{id}', [TiendaController::class, 'update']);
+
 
 Route::post('/check-nombre', function (Request $request) {
     $nombre = $request->input('nombre');
