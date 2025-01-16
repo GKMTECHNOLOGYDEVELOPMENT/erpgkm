@@ -1136,80 +1136,18 @@
                 </h2>
 
                 <li class="menu nav-item">
-                    <button type="button" class="nav-link group"
-                        :class="{ 'active': activeDropdown === 'informacion' }"
-                        @click="activeDropdown === 'informacion' ? activeDropdown = null : activeDropdown = 'informacion'">
+                    <a href="{{ route('configuracion') }}" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
-                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M4.97883 9.68508C2.99294 8.89073 2 8.49355 2 8C2 7.50645 2.99294 7.10927 4.97883 6.31492L7.7873 5.19153C9.77318 4.39718 10.7661 4 12 4C13.2339 4 14.2268 4.39718 16.2127 5.19153L19.0212 6.31492C21.0071 7.10927 22 7.50645 22 8C22 8.49355 21.0071 8.89073 19.0212 9.68508L16.2127 10.8085C14.2268 11.6028 13.2339 12 12 12C10.7661 12 9.77318 11.6028 7.7873 10.8085L4.97883 9.68508Z"
-                                    fill="currentColor" />
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M2 8C2 8.49355 2.99294 8.89073 4.97883 9.68508L7.7873 10.8085C9.77318 11.6028 10.7661 12 12 12C13.2339 12 14.2268 11.6028 16.2127 10.8085L19.0212 9.68508C21.0071 8.89073 22 8.49355 22 8C22 7.50645 21.0071 7.10927 19.0212 6.31492L16.2127 5.19153C14.2268 4.39718 13.2339 4 12 4C10.7661 4 9.77318 4.39718 7.7873 5.19153L4.97883 6.31492C2.99294 7.10927 2 7.50645 2 8Z"
+                                    d="M12 2C12.5523 2 13 2.44772 13 3V5.05884C14.1143 5.27789 15.1627 5.73961 16.07 6.41L17.657 4.82322C18.047 4.43317 18.6806 4.43317 19.0706 4.82322L19.1768 4.92941C19.5668 5.31946 19.5668 5.95302 19.1768 6.34307L17.59 7.93C18.2604 8.83734 18.7221 9.88569 18.9412 11H21C21.5523 11 22 11.4477 22 12C22 12.5523 21.5523 13 21 13H18.9412C18.7221 14.1143 18.2604 15.1627 17.59 16.07L19.1768 17.657C19.5668 18.047 19.5668 18.6806 19.1768 19.0706L19.0706 19.1768C18.6806 19.5668 18.047 19.5668 17.657 19.1768L16.07 17.59C15.1627 18.2604 14.1143 18.7221 13 18.9412V21C13 21.5523 12.5523 22 12 22C11.4477 22 11 21.5523 11 21V18.9412C9.88569 18.7221 8.83734 18.2604 7.93 17.59L6.34315 19.1768C5.9531 19.5668 5.31954 19.5668 4.92949 19.1768L4.8233 19.0706C4.43325 18.6806 4.43325 18.047 4.8233 17.657L6.41 16.07C5.73961 15.1627 5.27789 14.1143 5.05884 13H3C2.44772 13 2 12.5523 2 12C2 11.4477 2.44772 11 3 11H5.05884C5.27789 9.88569 5.73961 8.83734 6.41 7.93L4.82322 6.34315C4.43317 5.9531 4.43317 5.31954 4.82322 4.92949L4.92941 4.8233C5.31946 4.43325 5.95302 4.43325 6.34307 4.8233L7.93 6.41C8.83734 5.73961 9.88569 5.27789 11 5.05884V3C11 2.44772 11.4477 2 12 2ZM12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8Z"
                                     fill="currentColor" />
-                                <path opacity="0.7"
-                                    d="M5.76613 10L4.97883 10.3149C2.99294 11.1093 2 11.5065 2 12C2 12.4935 2.99294 12.8907 4.97883 13.6851L7.7873 14.8085C9.77318 15.6028 10.7661 16 12 16C13.2339 16 14.2268 15.6028 16.2127 14.8085L19.0212 13.6851C21.0071 12.8907 22 12.4935 22 12C22 11.5065 21.0071 11.1093 19.0212 10.3149L18.2339 10L16.2127 10.8085C14.2268 11.6028 13.2339 12 12 12C10.7661 12 9.77318 11.6028 7.7873 10.8085L5.76613 10Z"
-                                    fill="currentColor" />
-                                <path opacity="0.4"
-                                    d="M5.76613 14L4.97883 14.3149C2.99294 15.1093 2 15.5065 2 16C2 16.4935 2.99294 16.8907 4.97883 17.6851L7.7873 18.8085C9.77318 19.6028 10.7661 20 12 20C13.2339 20 14.2268 19.6028 16.2127 18.8085L19.0212 17.6851C21.0071 16.8907 22 16.4935 22 16C22 15.5065 21.0071 15.1093 19.0212 14.3149L18.2339 14L16.2127 14.8085C14.2268 15.6028 13.2339 16 12 16C10.7661 16 9.77318 15.6028 7.7873 14.8085L5.76613 14Z"
-                                    fill="currentColor" />
-                            </svg>
-
+                            </svg>                            
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Información</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Configuración</span>
                         </div>
-                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'informacion' }">
-
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                    </button>
-                    <ul x-cloak x-show="activeDropdown === 'informacion'" x-collapse class="sub-menu text-gray-500">
-                        <li>
-                            <a href="/datatables/basic">Basic</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/advanced">Advanced</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/skin">Skin</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/order-sorting">Order Sorting</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/multi-column">Multi Column</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/multiple-tables">Multiple Tables</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/alt-pagination">Alt. Pagination</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/checkbox">Checkbox</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/range-search">Range Search</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/export">Export</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/sticky-header">Sticky Header</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/clone-header">Clone Header</a>
-                        </li>
-                        <li>
-                            <a href="/datatables/column-chooser">Column Chooser</a>
-                        </li>
-                    </ul>
+                    </a>
                 </li>
 
                 <h2

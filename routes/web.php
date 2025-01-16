@@ -21,6 +21,7 @@ use App\Http\Controllers\almacen\productos\ModelosController;
 use App\Http\Controllers\almacen\productos\TipoArticuloController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
+use App\Http\Controllers\configuracion\ConfiguracionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LockscreenController;
 use App\Http\Controllers\PasswordResetController;
@@ -53,6 +54,9 @@ Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->nam
 Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'show'])->name('auth.password-reset');
 
 
+Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion')->middleware('auth');
+Route::post('/configuracion', [ConfiguracionController::class, 'store'])->name('configuracion.store')->middleware('auth');
+Route::post('/configuracion/delete', [ConfiguracionController::class, 'delete'])->name('configuracion.delete');
 // Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
 // Route::view('/auth/boxed-signin', 'auth.boxed-signin');
 // Route::view('/auth/boxed-signup', 'auth.boxed-signup');
