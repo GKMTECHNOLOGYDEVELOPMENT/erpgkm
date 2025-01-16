@@ -1,8 +1,8 @@
 <x-layout.default>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-    
-    
+
+
     <style>
         .panel {
             overflow: visible !important;
@@ -66,14 +66,14 @@
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                        <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                        <path opacity="0.5"
-                            d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
-                            stroke="currentColor" stroke-width="1.5" />
-                        <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
-                            stroke-linecap="round" />
-                    </svg>
+                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                            <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
+                            <path opacity="0.5"
+                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
+                                stroke="currentColor" stroke-width="1.5" />
+                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" />
+                        </svg>
                         <span>Agregar</span>
                     </button>
                 </div>
@@ -105,11 +105,32 @@
                         <!-- Formulario -->
                         <form class="p-5 space-y-4" id="clienteForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- ClienteGeneral -->
+                                <div>
+                                    <select id="idClienteGeneral" x-model="formData.idClienteGeneral"
+                                        class="select2 w-full">
+                                        <option value="" disabled selected>Seleccionar Cliente General</option>
+                                        <option value="1">Provincia 1</option>
+                                        <option value="2">Provincia 2</option>
+                                        <option value="3">Provincia 3</option>
+                                        <option value="4">Provincia 4</option>
+                                        <option value="5">Provincia 5</option>
+                                    </select>
+                                </div>
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
                                     <input id="nombre" x-model="formData.nombre" type="text"
                                         class="form-input w-full" placeholder="Ingrese el nombre">
+                                </div>
+                                <!-- idTipoDocumento -->
+                                <div>
+                                    <select id="idTipoDocumento" class="select2 w-full">
+                                        <option value="" disabled selected>Seleccionar Tipo Documento</option>
+                                        <option value="1">DNI</option>
+                                        <option value="2">RUC</option>
+                                        <option value="3">Pasaporte</option>
+                                    </select>
                                 </div>
                                 <!-- Documento -->
                                 <div>
@@ -148,13 +169,14 @@
                                     <input id="nacionalidad" type="text" class="form-input w-full"
                                         placeholder="Ingrese la nacionalidad">
                                 </div>
-                                 <!-- departamento -->
+                                <!-- departamento -->
                                 <div>
                                     <label for="departamento" class="block text-sm font-medium">Departamento</label>
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                            <option value="{{ $departamento['id_ubigeo'] }}">{{ $departamento['nombre_ubigeo'] }}</option>
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -194,109 +216,118 @@
     </div>
 
     <script>
-    $(document).ready(function() {
-    // Cuando se selecciona un departamento, obtener las provincias relacionadas
-    $('#departamento').change(function() {
-        var departamentoId = $(this).val();
+        $(document).ready(function() {
+            // Cuando se selecciona un departamento, obtener las provincias relacionadas
+            $('#departamento').change(function() {
+                var departamentoId = $(this).val();
 
-        if (departamentoId) {
-            $.get('/ubigeo/provincias/' + departamentoId, function(data) {
-                var provinciaSelect = $('#provincia');
-                provinciaSelect.empty().prop('disabled', false);
-                provinciaSelect.append('<option value="" disabled selected>Seleccionar Provincia</option>');
+                if (departamentoId) {
+                    $.get('/ubigeo/provincias/' + departamentoId, function(data) {
+                        var provinciaSelect = $('#provincia');
+                        provinciaSelect.empty().prop('disabled', false);
+                        provinciaSelect.append(
+                            '<option value="" disabled selected>Seleccionar Provincia</option>');
 
-                data.forEach(function(provincia) {
-                    provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' + provincia.nombre_ubigeo + '</option>');
-                });
-            });
-        } else {
-            $('#provincia').empty().prop('disabled', true);
-            $('#distrito').empty().prop('disabled', true);
-        }
-    });
-
-    // Cuando se selecciona una provincia, obtener los distritos relacionados
-    $('#provincia').change(function() {
-        var provinciaId = $(this).val();
-
-        if (provinciaId) {
-            $.get('/ubigeo/distritos/' + provinciaId, function(data) {
-                var distritoSelect = $('#distrito');
-                distritoSelect.empty().prop('disabled', false);
-                distritoSelect.append('<option value="" disabled selected>Seleccionar Distrito</option>');
-
-                data.forEach(function(distrito) {
-                    distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' + distrito.nombre_ubigeo + '</option>');
-                });
-            });
-        } else {
-            $('#distrito').empty().prop('disabled', true);
-        }
-    });
-});
-
-</script>
-<script>
-document.addEventListener("alpine:init", () => {
-    Alpine.data("multipleTable", () => ({
-        datatable1: null,
-        clienteData: [], // Almacena los datos actuales de la tabla de clientes
-        pollInterval: 2000, // Intervalo de polling (en ms)
-
-        init() {
-            console.log("Component initialized for Cliente");
-
-            // Obtener datos iniciales e inicializar la tabla
-            this.fetchDataAndInitTable();
-
-            // Configurar polling para verificar actualizaciones
-            setInterval(() => {
-                this.checkForUpdates();
-            }, this.pollInterval);
-        },
-
-        fetchDataAndInitTable() {
-            fetch("/api/clientes") // Cambia la URL de la API a /api/clientes
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al obtener datos del servidor");
-                    return response.json();
-                })
-                .then((data) => {
-                    this.clienteData = data;
-
-                    // Inicializar DataTable con las nuevas cabeceras
-                    this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
-                        data: {
-                            headings: ["Tipo Documento", "Documento", "Nombre", "Teléfono", "Email", "Cliente General", "Dirección", "Estado", "Acción"],  // Nuevas cabeceras
-                            data: this.formatDataForTable(data),  // Asegúrate de que esta función mapee los nuevos datos
-                        },
-                        searchable: true,
-                        perPage: 10,
-                        labels: {
-                            placeholder: "Buscar...",
-                            perPage: "{select}",
-                            noRows: "No se encontraron registros",
-                            info: "Mostrando {start} a {end} de {rows} registros",
-                        },
+                        data.forEach(function(provincia) {
+                            provinciaSelect.append('<option value="' + provincia.id_ubigeo +
+                                '">' + provincia.nombre_ubigeo + '</option>');
+                        });
                     });
-                })
-                .catch((error) => {
-                    console.error("Error al inicializar la tabla:", error);
-                });
-        },
+                } else {
+                    $('#provincia').empty().prop('disabled', true);
+                    $('#distrito').empty().prop('disabled', true);
+                }
+            });
 
-        // Actualiza esta función para que incluya los nuevos datos de cliente
-        formatDataForTable(data) {
-            return data.map((cliente) => [
-                cliente.idTipoDocumento,        // Tipo de Documento (ahora el nombre del tipo)
-                cliente.documento,              // Documento
-                cliente.nombre,                 // Nombre
-                cliente.telefono,               // Teléfono
-                cliente.email,                  // Email
-                cliente.clienteGeneral,         // Cliente General (ahora la descripción)
-                cliente.direccion,              // Dirección
-                cliente.estado === 'Activo' ? 'Activo' : 'Inactivo',  // Estado
-                `<div class="flex items-center">
+            // Cuando se selecciona una provincia, obtener los distritos relacionados
+            $('#provincia').change(function() {
+                var provinciaId = $(this).val();
+
+                if (provinciaId) {
+                    $.get('/ubigeo/distritos/' + provinciaId, function(data) {
+                        var distritoSelect = $('#distrito');
+                        distritoSelect.empty().prop('disabled', false);
+                        distritoSelect.append(
+                            '<option value="" disabled selected>Seleccionar Distrito</option>');
+
+                        data.forEach(function(distrito) {
+                            distritoSelect.append('<option value="' + distrito.id_ubigeo +
+                                '">' + distrito.nombre_ubigeo + '</option>');
+                        });
+                    });
+                } else {
+                    $('#distrito').empty().prop('disabled', true);
+                }
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("multipleTable", () => ({
+                datatable1: null,
+                clienteData: [], // Almacena los datos actuales de la tabla de clientes
+                pollInterval: 2000, // Intervalo de polling (en ms)
+
+                init() {
+                    console.log("Component initialized for Cliente");
+
+                    // Obtener datos iniciales e inicializar la tabla
+                    this.fetchDataAndInitTable();
+
+                    // Configurar polling para verificar actualizaciones
+                    setInterval(() => {
+                        this.checkForUpdates();
+                    }, this.pollInterval);
+                },
+
+                fetchDataAndInitTable() {
+                    fetch("/api/clientes") // Cambia la URL de la API a /api/clientes
+                        .then((response) => {
+                            if (!response.ok) throw new Error(
+                                "Error al obtener datos del servidor");
+                            return response.json();
+                        })
+                        .then((data) => {
+                            this.clienteData = data;
+
+                            // Inicializar DataTable con las nuevas cabeceras
+                            this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
+                                data: {
+                                    headings: ["Tipo Documento", "Documento", "Nombre",
+                                        "Teléfono", "Email", "Cliente General",
+                                        "Dirección", "Estado", "Acción"
+                                    ], // Nuevas cabeceras
+                                    data: this.formatDataForTable(
+                                        data
+                                    ), // Asegúrate de que esta función mapee los nuevos datos
+                                },
+                                searchable: true,
+                                perPage: 10,
+                                labels: {
+                                    placeholder: "Buscar...",
+                                    perPage: "{select}",
+                                    noRows: "No se encontraron registros",
+                                    info: "Mostrando {start} a {end} de {rows} registros",
+                                },
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error al inicializar la tabla:", error);
+                        });
+                },
+
+                // Actualiza esta función para que incluya los nuevos datos de cliente
+                formatDataForTable(data) {
+                    return data.map((cliente) => [
+                        cliente.idTipoDocumento, // Tipo de Documento (ahora el nombre del tipo)
+                        cliente.documento, // Documento
+                        cliente.nombre, // Nombre
+                        cliente.telefono, // Teléfono
+                        cliente.email, // Email
+                        cliente.clienteGeneral, // Cliente General (ahora la descripción)
+                        cliente.direccion, // Dirección
+                        cliente.estado === 'Activo' ? 'Activo' : 'Inactivo', // Estado
+                        `<div class="flex items-center">
                     <a href="/cliente/${cliente.idCliente}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                             <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
@@ -313,98 +344,107 @@ document.addEventListener("alpine:init", () => {
                         </svg>
                     </button>
                 </div>`
-            ]);
-        },
+                    ]);
+                },
 
-        checkForUpdates() {
-            fetch("/api/clientes")  // Cambiar la URL de la API a /api/clientes
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al verificar actualizaciones");
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log("Datos actuales:", this.clienteData);
-                    console.log("Datos del servidor:", data);
-
-                    // Detectar nuevas filas
-                    const newData = data.filter(
-                        (newCliente) =>
-                            !this.clienteData.some(
-                                (existingCliente) =>
-                                    existingCliente.idCliente === newCliente.idCliente
-                            )
-                    );
-
-                    if (newData.length > 0) {
-                        console.log("Nuevos datos detectados:", newData);
-
-                        // Agregar filas nuevas a la tabla
-                        this.datatable1.rows().add(this.formatDataForTable(newData));
-                        this.clienteData.push(...newData); // Actualizar clienteData
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error al verificar actualizaciones:", error);
-                });
-        },
-
-        deleteCliente(idCliente) {
-            new window.Swal({
-                icon: 'warning',
-                title: '¿Estás seguro?',
-                text: "¡No podrás revertir esta acción!",
-                showCancelButton: true,
-                confirmButtonText: 'Eliminar',
-                cancelButtonText: 'Cancelar',
-                padding: '2em',
-                customClass: 'sweet-alerts',
-            }).then((result) => {
-                if (result.value) {
-                    // Hacer la solicitud de eliminación
-                    fetch(`/api/clientes/${idCliente}`, {
-                        method: "DELETE",
-                    })
+                checkForUpdates() {
+                    fetch("/api/clientes") // Cambiar la URL de la API a /api/clientes
                         .then((response) => {
-                            if (!response.ok) throw new Error("Error al eliminar cliente");
+                            if (!response.ok) throw new Error("Error al verificar actualizaciones");
                             return response.json();
                         })
-                        .then(() => {
-                            console.log(`Cliente ${idCliente} eliminado con éxito`);
+                        .then((data) => {
+                            console.log("Datos actuales:", this.clienteData);
+                            console.log("Datos del servidor:", data);
 
-                            // Actualizar la tabla eliminando la fila
-                            this.clienteData = this.clienteData.filter(
-                                (cliente) => cliente.idCliente !== idCliente
-                            );
-                            this.datatable1.rows().remove(
-                                (row) =>
-                                    row.cells[0].innerHTML === idCliente.toString()
+                            // Detectar nuevas filas
+                            const newData = data.filter(
+                                (newCliente) =>
+                                !this.clienteData.some(
+                                    (existingCliente) =>
+                                    existingCliente.idCliente === newCliente.idCliente
+                                )
                             );
 
-                            // Mostrar notificación de éxito
-                            new window.Swal({
-                                title: '¡Eliminado!',
-                                text: 'El cliente ha sido eliminado con éxito.',
-                                icon: 'success',
-                                customClass: 'sweet-alerts',
-                            });
+                            if (newData.length > 0) {
+                                console.log("Nuevos datos detectados:", newData);
+
+                                // Agregar filas nuevas a la tabla
+                                this.datatable1.rows().add(this.formatDataForTable(newData));
+                                this.clienteData.push(...newData); // Actualizar clienteData
+                            }
                         })
                         .catch((error) => {
-                            console.error("Error al eliminar cliente:", error);
-
-                            // Mostrar notificación de error
-                            new window.Swal({
-                                title: 'Error',
-                                text: 'Ocurrió un error al eliminar el cliente.',
-                                icon: 'error',
-                                customClass: 'sweet-alerts',
-                            });
+                            console.error("Error al verificar actualizaciones:", error);
                         });
-                }
+                },
+
+                deleteCliente(idCliente) {
+                    new window.Swal({
+                        icon: 'warning',
+                        title: '¿Estás seguro?',
+                        text: "¡No podrás revertir esta acción!",
+                        showCancelButton: true,
+                        confirmButtonText: 'Eliminar',
+                        cancelButtonText: 'Cancelar',
+                        padding: '2em',
+                        customClass: 'sweet-alerts',
+                    }).then((result) => {
+                        if (result.value) {
+                            // Hacer la solicitud de eliminación
+                            fetch(`/api/clientes/${idCliente}`, {
+                                    method: "DELETE",
+                                })
+                                .then((response) => {
+                                    if (!response.ok) throw new Error(
+                                        "Error al eliminar cliente");
+                                    return response.json();
+                                })
+                                .then(() => {
+                                    console.log(`Cliente ${idCliente} eliminado con éxito`);
+
+                                    // Actualizar la tabla eliminando la fila
+                                    this.clienteData = this.clienteData.filter(
+                                        (cliente) => cliente.idCliente !== idCliente
+                                    );
+                                    this.datatable1.rows().remove(
+                                        (row) =>
+                                        row.cells[0].innerHTML === idCliente.toString()
+                                    );
+
+                                    // Mostrar notificación de éxito
+                                    new window.Swal({
+                                        title: '¡Eliminado!',
+                                        text: 'El cliente ha sido eliminado con éxito.',
+                                        icon: 'success',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                })
+                                .catch((error) => {
+                                    console.error("Error al eliminar cliente:", error);
+
+                                    // Mostrar notificación de error
+                                    new window.Swal({
+                                        title: 'Error',
+                                        text: 'Ocurrió un error al eliminar el cliente.',
+                                        icon: 'error',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                });
+                        }
+                    });
+                },
+            }));
+        });
+        // Inicializar Select2
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.select2').forEach(function(select) {
+                NiceSelect.bind(select, {
+                    searchable: true
+                });
             });
-        },
-    }));
-});
-</script>
+        });
+    </script>
 
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
