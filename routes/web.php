@@ -21,6 +21,7 @@ use App\Http\Controllers\almacen\productos\ModelosController;
 use App\Http\Controllers\almacen\productos\TipoArticuloController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
+use App\Http\Controllers\configuracion\ConfiguracionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LockscreenController;
 use App\Http\Controllers\PasswordResetController;
@@ -53,6 +54,23 @@ Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->nam
 // Ruta para la pantalla de restablecimiento de contraseña
 Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'show'])->name('auth.password-reset');
 
+
+Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion')->middleware('auth');
+Route::post('/configuracion', [ConfiguracionController::class, 'store'])->name('configuracion.store')->middleware('auth');
+Route::post('/configuracion/delete', [ConfiguracionController::class, 'delete'])->name('configuracion.delete');
+// Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
+// Route::view('/auth/boxed-signin', 'auth.boxed-signin');
+// Route::view('/auth/boxed-signup', 'auth.boxed-signup');
+// Route::view('/auth/boxed-password-reset', 'auth.boxed-password-reset');
+//Route::view('/auth/cover-login', 'auth.cover-login');
+//Route::view('/auth/cover-register', 'auth.cover-register')
+// Route::view('/auth/cover-lockscreen', 'auth.cover-lockscreen');
+//Route::view('/auth/cover-password-reset', 'auth.cover-password-reset');
+
+// Route::view('/analytics', 'analytics');
+// Route::view('/finance', 'finance');
+// Route::view('/crypto', 'crypto');
+// Ruta para el dashboard de administración
 Route::get('/index', [AdministracionController::class, 'index'])->name('index')->middleware('auth');
 
 // Ruta para el dashboard de almacén
