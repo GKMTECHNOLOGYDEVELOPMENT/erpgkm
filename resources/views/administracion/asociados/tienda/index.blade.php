@@ -42,17 +42,20 @@
                         <span>PDF</span>
                     </button>
                     <!-- Botón Agregar -->
-                    <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
-                        @click="$dispatch('toggle-modal')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="none" viewBox="0 0 21 21">
-                            <path d="M5 13V20C5 20.5523 5.44772 21 6 21H9C9.55228 21 10 20.5523 10 20V16H14V20C14 20.5523 14.4477 21 15 21H18C18.5523 21 19 20.5523 19 20V13" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M3 9.5L4 5C4.1538 4.3481 4.6075 3.7825 5.2287 3.41421C5.8499 3.04591 6.5966 2.89999 7.333 3H16.667C17.4034 2.89999 18.1501 3.04591 18.7713 3.41421C19.3925 3.7825 19.8462 4.3481 20 5L21 9.5M3 9.5H21M3 9.5C3 10.0304 3.21071 10.5391 3.58579 10.9142C3.96086 11.2893 4.46957 11.5 5 11.5C5.53043 11.5 6.03914 11.2893 6.41421 10.9142C6.78929 10.5391 7 10.0304 7 9.5M7 9.5C7 10.0304 7.21071 10.5391 7.58579 10.9142C7.96086 11.2893 8.46957 11.5 9 11.5C9.53043 11.5 10.0391 11.2893 10.4142 10.9142C10.7893 10.5391 11 10.0304 11 9.5M11 9.5C11 10.0304 11.2107 10.5391 11.5858 10.9142C11.9609 11.2893 12.4696 11.5 13 11.5C13.5304 11.5 14.0391 11.2893 14.4142 10.9142C14.7893 10.5391 15 10.0304 15 9.5M15 9.5C15 10.0304 15.2107 10.5391 15.5858 10.9142C15.9609 11.2893 16.4696 11.5 17 11.5C17.5304 11.5 18.0391 11.2893 18.4142 10.9142C18.7893 10.5391 19 10.0304 19 9.5" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                          
+                        <!-- Botón Agregar -->
+                        <a href="{{ route('tienda.create') }}"
+                        class="btn btn-primary btn-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21"
+                            fill="none">
+                            <path
+                                d="M3 8H21M3 8L5 5H19L21 8M3 8V19C3 19.5523 3.44772 20 4 20H7C7.55228 20 8 19.5523 8 19V14C8 13.4477 8.44772 13 9 13H15C15.5523 13 16 13.4477 16 14V19C16 19.5523 16.4477 20 17 20H20C20.5523 20 21 19.5523 21 19V8M8 13V11C8 10.4477 8.44772 10 9 10H15C15.5523 10 16 10.4477 16 11V13"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M6 11H10M14 11H18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
                         <span>Agregar</span>
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -61,131 +64,7 @@
     </div>
 
 
-    <!-- Modal -->
-    <div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
-        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
-            <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
-                <div x-show="open" x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
-                    <!-- Header del Modal -->
-                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <h5 class="font-bold text-lg">Agregar Tienda</h5>
-                        <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-6 h-6">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-                    <!-- Formulario -->
-                    <div class="modal-scroll">
-                    <form class="p-5 space-y-4" id="tiendaForm" enctype="multipart/form-data" method="post" >
-                            @csrf
-                            <!-- Nombre -->
-                            <div>
-                                <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input id="nombre" type="text" name="nombre" class="form-input w-full" placeholder="Ingrese el nombre de la tienda" value="{{ old('nombre') }}">
-                                @error('nombre')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- RUC -->
-                            <div>
-                                <label for="ruc" class="block text-sm font-medium">RUC</label>
-                                <input id="ruc" type="text" name="ruc" class="form-input w-full" placeholder="Ingrese el RUC" value="{{ old('ruc') }}">
-                                @error('ruc')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Celular -->
-                            <div>
-                                <label for="celular" class="block text-sm font-medium">Celular</label>
-                                <input id="celular" type="text" name="celular" class="form-input w-full" placeholder="Ingrese el número de celular" value="{{ old('celular') }}">
-                                @error('celular')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Email -->
-                            <div>
-                                <label for="email" class="block text-sm font-medium">Email</label>
-                                <input id="email" type="email" name="email" class="form-input w-full" placeholder="Ingrese el email" value="{{ old('email') }}">
-                                @error('email')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Dirección -->
-                            <div>
-                                <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                <input id="direccion" type="text" name="direccion" class="form-input w-full" placeholder="Ingrese la dirección" value="{{ old('direccion') }}">
-                                @error('direccion')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Referencia -->
-                            <div>
-                                <label for="referencia" class="block text-sm font-medium">Referencia</label>
-                                <input id="referencia" type="text" name="referencia" class="form-input w-full" placeholder="Ingrese la referencia" value="{{ old('referencia') }}">
-                                @error('referencia')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Latitud -->
-                            <div>
-                                <label for="lat" class="block text-sm font-medium">Latitud</label>
-                                <input id="lat" type="text" name="lat" class="form-input w-full" placeholder="Ingrese la latitud" value="{{ old('lat') }}">
-                                @error('lat')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Longitud -->
-                            <div>
-                                <label for="lng" class="block text-sm font-medium">Longitud</label>
-                                <input id="lng" type="text" name="lng" class="form-input w-full" placeholder="Ingrese la longitud" value="{{ old('lng') }}">
-                                @error('lng')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- ID Cliente -->
-                            <div>
-                                <label for="idCliente" class="block text-sm font-medium">Cliente</label>
-                                <select id="idCliente" name="idCliente" class="form-input w-full">
-                                    <option value="">Seleccione un cliente</option>
-                                    <!-- Aquí puedes colocar los clientes disponibles en tu base de datos -->
-                                    @foreach ($clientes as $cliente)
-                                        <option value="{{ $cliente->id }}" {{ old('idCliente') == $cliente->id ? 'selected' : '' }}>
-                                            {{ $cliente->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('idCliente')
-                                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Botones -->
-                            <div class="flex justify-end items-center mt-4">
-                                <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
-                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
+   
   
 
 
@@ -194,80 +73,6 @@
 
 
 
-<!-- Script AJAX para enviar los datos -->
-<script>
-// Script AJAX
-document.getElementById('tiendaForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evita el envío del formulario tradicional
-    
-    let formData = new FormData(this); // Obtiene los datos del formulario
-    console.log("Enviando datos:", formData); // Log de los datos del formulario
-
-    fetch("{{ route('tienda.store') }}", {
-        method: "POST", // Asegúrate de usar el método POST
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
-        },
-        body: formData, // Envío de datos en formato multipart
-    })
-    .then(response => response.json())  // Espera una respuesta JSON
-    .then(data => {
-        console.log("Respuesta del servidor:", data); // Log de la respuesta
-
-        console.log("URL de la solicitud: ", "{{ route('tienda.store') }}");
-
-
-        if (data.success) {
-            // Mostrar la alerta de éxito
-            showMessage('Tienda agregada correctamente.', 'top-end');
-            
-            // Limpiar los campos del formulario
-            document.getElementById('tiendaForm').reset();
-            
-            // Cerrar el modal
-            open = false; // Esto asume que `open` es el controlador del modal en Alpine.js
-
-            // Llamar al método para actualizar la tabla
-            let alpineData = Alpine.store('multipleTable');
-            if (alpineData && alpineData.updateTable) {
-                alpineData.updateTable();  // Llama a `updateTable` de Alpine
-            } else {
-                console.error('Método updateTable no encontrado en Alpine');
-            }
-
-        } else {
-            // Mostrar alerta de error
-            showMessage('Hubo un error al guardar la tienda.', 'top-end');
-        }
-    })
-    .catch(error => {
-        console.error("Error al enviar el formulario:", error);
-        // Mostrar alerta de error
-        showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
-    });
-});
-
-// Función para mostrar la alerta con SweetAlert
-showMessage = (msg = 'Example notification text.', position = 'top-end', showCloseButton = true, closeButtonHtml = '', duration = 3000, type = 'success') => {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: position || 'top-end',
-        showConfirmButton: false,
-        timer: duration,
-        showCloseButton: showCloseButton,
-        icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-        background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-        iconColor: 'white', // Color del icono
-        customClass: {
-            title: 'text-white', // Asegura que el texto sea blanco
-        },
-    });
-
-    toast.fire({
-        title: msg,
-    });
-};
-</script>
 
 
 
@@ -291,57 +96,64 @@ document.addEventListener("alpine:init", () => {
         },
 
         fetchDataAndInitTable() {
-            fetch("/api/tiendas")
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al obtener datos del servidor");
-                    return response.json();
-                })
-                .then((data) => {
-                    this.tiendaData = data;
+    fetch("/api/tiendas")
+        .then((response) => {
+            if (!response.ok) throw new Error("Error al obtener datos del servidor");
+            return response.json();
+        })
+        .then((data) => {
+            this.tiendaData = data;
 
-                    // Inicializar DataTable
-                    this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
-                        data: {
-                            headings: ["Nombre", "Acción"],  // Solo mostramos 'Nombre' y 'Acción'
-                            data: this.formatDataForTable(data),
-                        },
-                        searchable: true,
-                        perPage: 10,
-                        labels: {
-                            placeholder: "Buscar...",
-                            perPage: "{select}",
-                            noRows: "No se encontraron registros",
-                            info: "Mostrando {start} a {end} de {rows} registros",
-                        },
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error al inicializar la tabla:", error);
-                });
-        },
+            // Inicializar DataTable con las nuevas cabeceras
+            this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
+                data: {
+                    headings: ["Ruc", "Nombre", "Celular", "Email", "Dirección", "Referencia", "Acción"],  // Nuevas cabeceras
+                    data: this.formatDataForTable(data),  // Asegúrate de que esta función mapee los nuevos datos
+                },
+                searchable: true,
+                perPage: 10,
+                labels: {
+                    placeholder: "Buscar...",
+                    perPage: "{select}",
+                    noRows: "No se encontraron registros",
+                    info: "Mostrando {start} a {end} de {rows} registros",
+                },
+            });
+        })
+        .catch((error) => {
+            console.error("Error al inicializar la tabla:", error);
+        });
+},
 
-        formatDataForTable(data) {
-            return data.map((tienda) => [
-                tienda.nombre,  // Solo mostramos 'nombre'
-                `<div class="flex items-center">
-                     <a href="/tienda/${tienda.idTienda}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                            <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
-                        </svg>
-                    </a>
-                    <button type="button" x-tooltip="Eliminar" @click="deleteTienda(${tienda.idTienda})">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                            <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                        </svg>
-                    </button>
-                </div>`,
-            ]);  // Solo agregamos "Nombre" y "Acción"
-        },
+// Actualiza esta función para que incluya los nuevos datos
+formatDataForTable(data) {
+    return data.map((tienda) => [
+        tienda.ruc,           // RUC de la tienda
+        tienda.nombre,        // Nombre de la tienda
+        tienda.celular,       // Celular de la tienda
+        tienda.email,         // Email de la tienda
+        tienda.direccion,     // Dirección de la tienda
+        tienda.referencia,    // Referencia de la tienda
+        `<div class="flex items-center">
+             <a href="/tienda/${tienda.idTienda}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                    <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
+                    <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+            </a>
+            <button type="button" x-tooltip="Eliminar" @click="deleteTienda(${tienda.idTienda})">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                    <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+            </button>
+        </div>`
+    ]);
+},
+
 
 
         checkForUpdates() {
@@ -435,72 +247,40 @@ document.addEventListener("alpine:init", () => {
 </script>
 
 
+<!-- Asegúrate de que SweetAlert2 está cargado -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('tiendaForm');
-        const nombreInput = document.getElementById('nombre');
-
-        // Base URL for API requests
-        const BASE_URL = 'http://127.0.0.1:8000/'; // Ajusta según tu configuración
-
-        // Validaciones
-        const validateNombreUnico = async (nombre) => {
-            try {
-                const response = await fetch(`${BASE_URL}api/check-nombre-tienda`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                    },
-                    body: JSON.stringify({ nombre })
-                });
-                const data = await response.json();
-                return data.unique; // true si es único, false si ya existe
-            } catch (error) {
-                console.error('Error al verificar el nombre:', error);
-                return false;
-            }
-        };
-
-        const validateNombre = (value) => {
-            const regex = /^[a-zA-Z0-9\s]+$/; // Sin caracteres especiales
-            return value.trim() !== '' && regex.test(value);
-        };
-
-        // Escucha de eventos para validaciones en tiempo real
-        nombreInput.addEventListener('input', async () => {
-            const nombre = nombreInput.value;
-            if (!validateNombre(nombre)) {
-                nombreInput.setCustomValidity('El nombre no debe estar vacío ni tener caracteres especiales.');
-            } else if (!(await validateNombreUnico(nombre))) {
-                nombreInput.setCustomValidity('El nombre ya está en uso.');
-            } else {
-                nombreInput.setCustomValidity(''); // Todo está correcto
-            }
-            nombreInput.reportValidity();
+    // Función para mostrar la alerta con SweetAlert
+    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+        closeButtonHtml = '', duration = 3000, type = 'success') {
+        const toast = window.Swal.mixin({
+            toast: true,
+            position: position || 'top-end',
+            showConfirmButton: false,
+            timer: duration,
+            showCloseButton: showCloseButton,
+            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+            iconColor: 'white', // Color del icono
+            customClass: {
+                title: 'text-white', // Asegura que el texto sea blanco
+            },
         });
 
-        // Validaciones al enviar el formulario
-        form.addEventListener('submit', async (event) => {
-            const nombre = nombreInput.value;
-
-            if (!validateNombre(nombre)) {
-                // alert('El nombre no debe estar vacío ni tener caracteres especiales.');
-                event.preventDefault();
-                return;
-            }
-
-            if (!(await validateNombreUnico(nombre))) {
-                // alert('El nombre ya está en uso.');
-                event.preventDefault();
-                return;
-            }
-
-            // Si todo es válido, el formulario se envía
+        toast.fire({
+            title: msg,
         });
-    });
+    }
+
+    // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
+    @if (session('success'))
+        showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
+    @elseif (session('error'))
+        showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
+    @endif
 </script>
+
 
 
 

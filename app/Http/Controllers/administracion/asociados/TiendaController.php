@@ -17,80 +17,186 @@ class TiendaController extends Controller
         // Llamar la vista ubicada en administracion/usuarios.blade.php
         return view('administracion.asociados.tienda.index', compact('clientes')); 
     }
+
+    public function create(){
+
+        $clientes = Cliente::where('estado', 1)->get();
+        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+        return view('administracion.asociados.tienda.create', compact('clientes', 'departamentos'));
+    }
     
 
-    // En TiendaController.php
-public function store(Request $request)
-{
-    try {
-        // Log para ver si se recibe la solicitud
-        Log::info('Solicitud de Tienda recibida', ['data' => $request->all()]);
+  // Método para almacenar la tienda
+  public function store(TiendasRequest $request)
+  {
+      // Verificamos los datos que estamos recibiendo en la solicitud
+      Log::info('Datos del formulario:', $request->all());
+  
+      // Validamos que el cliente seleccionado exista
+      $cliente = Cliente::find($request->idCliente);
+  
+      if (!$cliente) {
+          Log::error('El cliente no fue encontrado.', ['idCliente' => $request->idCliente]);
+          return redirect()->back()->with('error', 'El cliente seleccionado no existe.');
+      }
+  
+      // Intentamos guardar la tienda y verificamos si el modelo se crea correctamente
+      try {
+          $tienda = Tienda::create([
+              'ruc' => $request->ruc,
+              'nombre' => $request->nombre,
+              'celular' => $request->celular,
+              'email' => $request->email,
+              'direccion' => $request->direccion,
+              'referencia' => $request->referencia,
+              'lat' => $request->lat,
+              'lng' => $request->lng,
+              'idCliente' => $request->idCliente, // Relación con cliente
+              'departamento' => $request->departamento,
+              'provincia' => $request->provincia,
+              'distrito' => $request->distrito,
+          ]);
+  
+          // Verificamos si la tienda fue guardada
+          Log::info('Tienda guardada exitosamente:', ['tienda' => $tienda]);
+  
+      } catch (\Exception $e) {
+          // En caso de error, logueamos el error
+          Log::error('Error al guardar la tienda:', [
+              'error' => $e->getMessage(),
+              'request_data' => $request->all()
+          ]);
+  
+          // Enviamos un mensaje de error al usuario
+          return redirect()->back()->with('error', 'Hubo un problema al guardar la tienda.');
+      }
+  
+      // Redirigimos a la lista de tiendas o donde desees
+      return redirect()->route('administracion.tienda')->with('success', 'Tienda guardada exitosamente');
+  }
 
-        // Validar y obtener los datos de la tienda
-        $dataTienda = [
-            'nombre' => $request->nombre, // Solo 'nombre' se almacenará
-        ];
+  public function edit($id)
+  {
+      // Buscar la tienda que se quiere editar
+      $tienda = Tienda::findOrFail($id);
+    
+      // Verificar que los valores de 'departamento', 'provincia', 'distrito' existan
+    //   dd($tienda);  // Esto te ayudará a ver los valores de la tienda
+  
+      // Obtener todos los clientes para el select
+      $clientes = Cliente::all();
+    
+      // Obtener los datos de los archivos JSON
+      $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+      $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
+      $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
+  
+      // Buscar el departamento correspondiente a la tienda
+      $departamentoSeleccionado = array_filter($departamentos, function($departamento) use ($tienda) {
+          return $departamento['id_ubigeo'] == $tienda->departamento;
+      });
+      $departamentoSeleccionado = reset($departamentoSeleccionado);  // Obtener el primer valor del array filtrado
+    
+      // Inicializar la variable $provinciasDelDepartamento como un array vacío
+      $provinciasDelDepartamento = [];
+    
+      // Verificar que la clave 'id_ubigeo' esté presente antes de acceder
+      if (isset($departamentoSeleccionado['id_ubigeo'])) {
+          // Buscar las provincias correspondientes al departamento seleccionado
+          foreach ($provincias as $provincia) {
+              if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
+                  $provinciasDelDepartamento[] = $provincia;
+              }
+          }
+      }
+    
+      // Buscar la provincia seleccionada
+      $provinciaSeleccionada = null;
+      foreach ($provinciasDelDepartamento as $provincia) {
+          if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $tienda->provincia) {
+              $provinciaSeleccionada = $provincia;
+              break;
+          }
+      }
+    
+      // Inicializar la variable $distritosDeLaProvincia como un array vacío
+      $distritosDeLaProvincia = [];
+    
+      // Buscar los distritos correspondientes a la provincia seleccionada
+      if ($provinciaSeleccionada) {
+          foreach ($distritos as $distrito) {
+              if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
+                  $distritosDeLaProvincia[] = $distrito;
+              }
+          }
+      }
+    
+      // Buscar el distrito seleccionado
+      $distritoSeleccionado = null;
+      foreach ($distritosDeLaProvincia as $distrito) {
+          if (isset($distrito['id_ubigeo']) && $distrito['id_ubigeo'] == $tienda->distrito) {
+              $distritoSeleccionado = $distrito;
+              break;
+          }
+      }
+    
+      // Devolver la vista con los datos necesarios
+      return view('administracion.asociados.tienda.edit', compact(
+          'tienda', 
+          'clientes', 
+          'departamentos', 
+          'provincias', 
+          'distritos', 
+          'departamentoSeleccionado', 
+          'provinciaSeleccionada', 
+          'distritoSeleccionado',
+          'provinciasDelDepartamento',  // Asegúrate de incluir esta variable en la vista
+          'distritosDeLaProvincia'     // Asegúrate de incluir esta variable en la vista
+      ));
+  }
+  
 
-        // Guardar la tienda en la base de datos
-        Log::info('Insertando tienda:', $dataTienda);
-        Tienda::insert($dataTienda);
+  
+  
+  
+  
+  
 
-        // Obtener la última tienda insertada para obtener su ID
-        $data = Tienda::latest('idTienda')->first();
-        $idTienda = $data->idTienda;
-        Log::info('Tienda insertada con ID: ' . $idTienda);
 
-        // Responder con JSON
-        return response()->json([
-            'success' => true,
-            'message' => 'Tienda agregada correctamente',
-            'data' => $dataTienda,
+public function update(Request $request, $id)
+    {
+        // Validación de los datos del formulario
+        $request->validate([
+            'ruc' => 'required|string|max:255',
+            'nombre' => 'required|string|max:255',
+            'direccion' => 'required|string|max:255',
+            'idCliente' => 'required|exists:cliente,idCliente',
+            'celular' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'referencia' => 'nullable|string|max:255',
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
         ]);
-    } catch (\Exception $e) {
-        // Log para capturar el error
-        Log::error('Error al guardar la tienda: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Ocurrió un error al guardar la tienda.',
-            'error' => $e->getMessage(),
-        ], 500);
+
+        // Buscar la tienda que se quiere actualizar
+        $tienda = Tienda::findOrFail($id);
+
+        // Actualizar la tienda con los datos recibidos
+        $tienda->update([
+            'ruc' => $request->ruc,
+            'nombre' => $request->nombre,
+            'direccion' => $request->direccion,
+            'idCliente' => $request->idCliente,
+            'celular' => $request->celular,
+            'email' => $request->email,
+            'referencia' => $request->referencia,
+            'lat' => $request->lat,
+            'lng' => $request->lng,
+        ]);
+
+        // Redirigir al índice de tiendas con un mensaje de éxito
+        return redirect()->route('administracion.tienda')->with('success', 'Tienda actualizada exitosamente');
     }
-}
-
-public function edit($id)
-{
-    // Busca la tienda por su id
-    $tienda = Tienda::findOrFail($id); 
-
-    // Retorna la vista de edición, pasando la tienda encontrada
-    return view('administracion.asociados.tienda.edit', compact('tienda'));
-}
-
-
-
- // Método para actualizar una tienda
- public function update(Request $request, $id)
- {
-     // Validar que el nombre de la tienda sea una cadena no vacía
-     $request->validate([
-         'nombre' => 'required|string|max:255',
-     ]);
-
-     // Buscar la tienda por su ID
-     $tienda = Tienda::find($id);
-
-     if (!$tienda) {
-         // Si no se encuentra la tienda, retornar un error 404
-         return response()->json(['message' => 'Tienda no encontrada'], 404);
-     }
-
-     // Actualizar el nombre de la tienda
-     $tienda->nombre = $request->nombre;
-     $tienda->save();
-
-     // Retornar la tienda actualizada en formato JSON
-     return response()->json($tienda);
- }
 
 
 
@@ -112,22 +218,28 @@ public function destroy($id)
 }
 
 
-    public function getAll()
-    {
-        // Obtén todos los datos de la tabla tienda
-        $tiendas = Tienda::all();
+public function getAll()
+{
+    // Obtén todos los datos de la tabla tienda
+    $tiendas = Tienda::all();
 
-        // Procesa los datos
-        $tiendasData = $tiendas->map(function ($tienda) {
-            return [
-                'idTienda' => $tienda->idTienda,
-                'nombre' => $tienda->nombre,
-            ];
-        });
+    // Procesa los datos para incluir todos los campos necesarios
+    $tiendasData = $tiendas->map(function ($tienda) {
+        return [
+            'idTienda'   => $tienda->idTienda,
+            'nombre'     => $tienda->nombre,
+            'ruc'        => $tienda->ruc,
+            'celular'    => $tienda->celular,
+            'email'      => $tienda->email,
+            'direccion'  => $tienda->direccion,
+            'referencia' => $tienda->referencia,
+        ];
+    });
 
-        // Retorna los datos en formato JSON
-        return response()->json($tiendasData);
-    }
+    // Retorna los datos en formato JSON
+    return response()->json($tiendasData);
+}
+
 
     public function checkNombreTienda (Request $request)
     {

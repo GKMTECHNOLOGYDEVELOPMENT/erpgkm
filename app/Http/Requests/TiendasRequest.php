@@ -30,10 +30,13 @@ class TiendasRequest extends FormRequest
             'celular' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'direccion' => 'nullable|string|max:255',
+            'provincia' => 'nullable|string|max:255',
+            'distrito' => 'nullable|string|max:255',
+            'departamento' => 'nullable|string|max:255',
             'referencia' => 'nullable|string|max:255',
             'lat' => 'nullable|size:18', // Si el campo "lat" debe tener una longitud fija de 18
             'lng' => 'nullable|size:18', // Similar a "lat", validamos que tenga longitud de 18
-            'idCliente' => 'required|integer|exists:clientes,id', // Asumiendo que idCliente hace referencia a una tabla 'clientes'
+            'idCliente' => 'required|integer|exists:cliente,idCliente', // Asumiendo que idCliente hace referencia a una tabla 'clientes'
         ];
     }
 

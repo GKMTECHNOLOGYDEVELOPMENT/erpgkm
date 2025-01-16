@@ -36,6 +36,7 @@ use App\Models\Clientegeneral;
 use App\Models\Subsidiario;
 use Illuminate\Http\Client\Request;
 use App\Exports\ClientesGeneralExport;
+use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
 
@@ -70,6 +71,8 @@ Route::get('/administracion/compras', [CompraController::class, 'index'])->name(
 //Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
+
+
 Route::get('/exportar-clientes-general', function () {
     return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx');
 })->name('clientes-general.exportExcel');
@@ -80,13 +83,18 @@ Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'ex
 // Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
 Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
+Route::get('/ubigeo/provincias/{departamento_id}', [UbigeoController::class, 'getProvinciasByDepartamento']);
+Route::get('/ubigeo/distritos/{provincia_id}', [UbigeoController::class, 'getDistritosByProvincia']);
+Route::get('/get-provincia/{departamentoId}', [UbigeoController::class, 'getProvincias']);
+Route::get('/get-distrito/{provinciaId}', [UbigeoController::class, 'getDistritos']);
 
 //Rutas para Tiendas
 Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
-Route::post('/tienda/store', [TiendaController::class, 'store'])->name('tienda.store')->middleware('auth');
+Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store');
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tienda.update');
-// Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tiendas')->middleware('auth');
+Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
+Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tiendas.update');
 
 
 

@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $idTienda
  * @property string|null $nombre
  * 
- * @property Collection|Subsidiario[] $subsidiarios
+ * @property Collection|Cliente[] $subsidiarios
  *
  * @package App\Models
  */
@@ -26,11 +26,13 @@ class Tienda extends Model
 	public $timestamps = false;
 
 	protected $fillable = [
-		'nombre'
-	];
+        'ruc', 'nombre', 'celular', 'email', 'direccion', 'referencia', 'lat', 'lng', 'idCliente', 'provincia', 'distrito','departamento',
 
-	public function subsidiarios()
-	{
-		return $this->hasMany(Subsidiario::class, 'idTienda');
-	}
+    ];
+
+	// Relación uno a muchos (Un cliente tiene muchas tiendas)
+    public function tiendas()
+    {
+        return $this->hasMany(Tienda::class, 'idCliente');
+    }
 }

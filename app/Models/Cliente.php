@@ -57,7 +57,9 @@ class Cliente extends Model
 		'provincia',
 		'distrito',
 		'codigo_postal',
-		'estado'
+		'estado',
+		'idTipoDocumento',
+		'idClienteGeneral'
 	];
 
 	public function cotizaciones()
@@ -79,4 +81,8 @@ class Cliente extends Model
 	{
 		return $this->hasMany(Ticket::class, 'idCliente');
 	}
+	public function tiendas()
+    {
+        return $this->hasMany(Tienda::class, 'idCliente');
+    }
 }
