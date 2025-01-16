@@ -6,70 +6,56 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ClienteRequest;
 use App\Models\Cliente;
 use App\Models\Clientegeneral;
+use App\Models\Tipodocumento;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ClientesController extends Controller
 {
     public function index()
     {
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
-
+        $clientesGenerales = Clientegeneral::all();
+        $tiposDocumento = Tipodocumento::all();
+        
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.clientes.index', compact('departamentos')); 
+        return view('administracion.asociados.clientes.index', compact('departamentos', 'clientesGenerales', 'tiposDocumento')); 
     }
     
 
     public function store(ClienteRequest $request)
     {
-        $dataClientes = $request->except('_token');
-        $dataClientes = [
-            'id_cliente_general' => $request->id_cliente_general,
-            'fecha_registro' => Carbon::now(),
-            'nombre' => $request->nombre,
-            'documento' => $request->documento,
-            'direccion' => $request->direccion,
-            'departamento' => $request->departamento,
-            'provincia' => $request->provincia,
-            'distrito' => $request->distrito,
-            'pais' => $request->pais,
-            'telefono' => $request->telefono,
-            'celular' => $request->celular,
-            'email' => $request->email,
-            'cod_postal' => $request->cod_postal,
-        ];
-
-
-        Cliente::insert($dataClientes);
-        $lastId = Cliente::latest('id')->first();
-        $id = $lastId->id;
-
-        if (isset($request->emailContact) || isset($request->telContact)) {
-            if (isset($request->emailContact)) {
-                $emailContact  = $request->emailContact;
-            } else {
-                $emailContact = '';
-            }
-
-            if (isset($request->telContact)) {
-                $telContact  = $request->telContact;
-            } else {
-                $telContact  = '';
-            }
-
-            foreach ($emailContact as $key => $value) {
-                $dataCustomer = [
-                    'id_cliente' => $id,
-                    'email' => $value,
-                    'celular' => $telContact[$key]
-                ];
-                contacto_cliente::insert($dataCustomer);
-            }
+        try {
+            // Datos del cliente, ya validados
+            $dataClientes = $request->validated();
+    
+            // Verificar los datos validados
+            Log::debug('Datos validados recibidos:', $dataClientes);
+    
+            // Guardar el cliente
+            $cliente = Cliente::create($dataClientes);
+    
+            // Verificar si el cliente se guardó correctamente
+            Log::debug('Cliente insertado:', $cliente);
+    
+            // Responder con JSON
+            return response()->json([
+                'success' => true,
+                'message' => 'Cliente agregado correctamente',
+                'data' => $cliente,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al guardar el cliente: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al guardar el cliente.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        return redirect('clientes')->with('addClientes', 'ok');
     }
+    
 
     public function edit($id)
     {

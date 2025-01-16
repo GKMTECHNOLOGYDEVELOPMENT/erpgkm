@@ -137,6 +137,7 @@ Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast
 // Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');
 //Ruta para Administracion Clientes
 Route::get('/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
+Route::post('/cliente/store', [ClientesController::class, 'store'])->name('cliente.store');
 
 //Ruta para Administracion Proveedores
 Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');

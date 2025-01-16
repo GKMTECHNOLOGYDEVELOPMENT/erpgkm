@@ -103,18 +103,17 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario -->
-                        <form class="p-5 space-y-4" id="clienteForm">
+                        <form class="p-5 space-y-4" id="clienteForm" enctype="multipart/form-data" method="post">
+                            @csrf <!-- Asegúrate de incluir el token CSRF -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- ClienteGeneral -->
+
                                 <div>
-                                    <select id="idClienteGeneral" x-model="formData.idClienteGeneral"
-                                        class="select2 w-full">
+                                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Cliente General</option>
-                                        <option value="1">Provincia 1</option>
-                                        <option value="2">Provincia 2</option>
-                                        <option value="3">Provincia 3</option>
-                                        <option value="4">Provincia 4</option>
-                                        <option value="5">Provincia 5</option>
+                                        @foreach ($clientesGenerales as $clienteGeneral)
+                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">{{ $clienteGeneral->descripcion }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <!-- Nombre -->
@@ -123,13 +122,13 @@
                                     <input id="nombre" x-model="formData.nombre" type="text"
                                         class="form-input w-full" placeholder="Ingrese el nombre">
                                 </div>
-                                <!-- idTipoDocumento -->
+                                <!-- Tipo Documento -->
                                 <div>
-                                    <select id="idTipoDocumento" class="select2 w-full">
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
-                                        <option value="1">DNI</option>
-                                        <option value="2">RUC</option>
-                                        <option value="3">Pasaporte</option>
+                                        @foreach ($tiposDocumento as $tipoDocumento)
+                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">{{ $tipoDocumento->nombre }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <!-- Documento -->
@@ -152,11 +151,10 @@
                                 </div>
                                 <!-- Fecha de Registro -->
                                 <div x-data="form">
-                                    <label for="fechaRegistro" class="block text-sm font-medium">Fecha de
-                                        Registro</label>
-                                    <input id="fechaRegistro" type="text" class="form-input w-full"
-                                        placeholder="Seleccione la fecha">
+                                    <label for="fechaRegistro" class="block text-sm font-medium">Fecha de Registro</label>
+                                    <input id="fechaRegistro" type="date" class="form-input w-full" placeholder="Seleccione la fecha">
                                 </div>
+
                                 <!-- Código Postal -->
                                 <div>
                                     <label for="codigo_postal" class="block text-sm font-medium">Código Postal</label>
@@ -175,8 +173,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                            <option value="{{ $departamento['id_ubigeo'] }}">
-                                                {{ $departamento['nombre_ubigeo'] }}</option>
+                                        <option value="{{ $departamento['id_ubigeo'] }}">
+                                            {{ $departamento['nombre_ubigeo'] }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -214,6 +213,88 @@
             </div>
         </div>
     </div>
+
+    <script>
+    // Script AJAX para el formulario de cliente
+    document.getElementById('clienteForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita el envío del formulario tradicional
+
+        let formData = new FormData(this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
+
+        // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
+        console.log("Datos enviados al servidor:", formData);
+
+        // Hacer la solicitud AJAX
+        fetch("{{ route('cliente.store') }}", {
+            method: "POST", // Asegúrate de usar el método POST
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
+            },
+            body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
+        })
+        .then(response => {
+            // Verificar que la respuesta sea válida y que sea JSON
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json(); // Intentar convertir la respuesta en JSON
+        })
+        .then(data => {
+            // Mostrar la respuesta procesada
+            console.log("Datos recibidos:", data);
+
+            if (data.success) {
+                // Mostrar la alerta de éxito
+                showMessage('Cliente agregado correctamente.', 'top-end');
+
+                // Limpiar los campos del formulario
+                document.getElementById('clienteForm').reset();
+
+                // Cerrar el modal (asumiendo que `open` está vinculado al estado del modal)
+                document.querySelector('[x-data]').__x.$data.open = false;
+
+                // Llamar al método para actualizar la tabla (si usas Alpine.js)
+                let alpineData = Alpine.store('multipleTable');
+                if (alpineData && alpineData.updateTable) {
+                    alpineData.updateTable(); // Llamar a `updateTable` de Alpine
+                }
+            } else {
+                // Mostrar alerta de error
+                showMessage('Hubo un error al guardar el cliente.', 'top-end');
+            }
+        })
+        .catch(error => {
+            // Mostrar alerta de error si algo falla
+            console.error("Error en la solicitud:", error); // Mostrar el error en la consola
+            showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
+        });
+    });
+
+    // Función para mostrar la alerta con SweetAlert
+    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+        closeButtonHtml = '', duration = 3000, type = 'success') {
+        const toast = window.Swal.mixin({
+            toast: true,
+            position: position || 'top-end',
+            showConfirmButton: false,
+            timer: duration,
+            showCloseButton: showCloseButton,
+            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+            iconColor: 'white', // Color del icono
+            customClass: {
+                title: 'text-white', // Asegura que el texto sea blanco
+            },
+        });
+
+        toast.fire({
+            title: msg,
+        });
+    };
+</script>
+
+
+
 
     <script>
         $(document).ready(function() {
