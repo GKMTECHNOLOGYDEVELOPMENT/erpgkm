@@ -48,4 +48,10 @@ class Clientegeneral extends Model
 	{
 		return $this->hasMany(Ticket::class, 'idClienteGeneral');
 	}
+	// En el modelo ClienteGeneral (App\Models\ClienteGeneral)
+	public function clientes()
+	{
+		return $this->hasMany(Cliente::class, 'idClienteGeneral', 'idClienteGeneral');
+	}
+
 }

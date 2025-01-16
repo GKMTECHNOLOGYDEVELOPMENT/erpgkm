@@ -35,7 +35,7 @@ Route::get('/tiendas', [TiendaController::class, 'getAll']);
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);
 
 
-Route::get('/subsidiarios', [SubsidiarioController::class, 'getAll']);
+// Route::get('/subsidiarios', [SubsidiarioController::class, 'getAll']);
 
 Route::get('/clientes', [ClientesController::class, 'getAll']);
 
