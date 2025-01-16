@@ -75,128 +75,115 @@ class TiendaController extends Controller
       return redirect()->route('administracion.tienda')->with('success', 'Tienda guardada exitosamente');
   }
 
-  public function edit($id)
-  {
-      // Buscar la tienda que se quiere editar
-      $tienda = Tienda::findOrFail($id);
-    
-      // Verificar que los valores de 'departamento', 'provincia', 'distrito' existan
-    //   dd($tienda);  // Esto te ayudará a ver los valores de la tienda
-  
-      // Obtener todos los clientes para el select
-      $clientes = Cliente::all();
-    
-      // Obtener los datos de los archivos JSON
-      $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
-      $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
-      $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
-  
-      // Buscar el departamento correspondiente a la tienda
-      $departamentoSeleccionado = array_filter($departamentos, function($departamento) use ($tienda) {
-          return $departamento['id_ubigeo'] == $tienda->departamento;
-      });
-      $departamentoSeleccionado = reset($departamentoSeleccionado);  // Obtener el primer valor del array filtrado
-    
-      // Inicializar la variable $provinciasDelDepartamento como un array vacío
-      $provinciasDelDepartamento = [];
-    
-      // Verificar que la clave 'id_ubigeo' esté presente antes de acceder
-      if (isset($departamentoSeleccionado['id_ubigeo'])) {
-          // Buscar las provincias correspondientes al departamento seleccionado
-          foreach ($provincias as $provincia) {
-              if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
-                  $provinciasDelDepartamento[] = $provincia;
-              }
-          }
-      }
-    
-      // Buscar la provincia seleccionada
-      $provinciaSeleccionada = null;
-      foreach ($provinciasDelDepartamento as $provincia) {
-          if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $tienda->provincia) {
-              $provinciaSeleccionada = $provincia;
-              break;
-          }
-      }
-    
-      // Inicializar la variable $distritosDeLaProvincia como un array vacío
-      $distritosDeLaProvincia = [];
-    
-      // Buscar los distritos correspondientes a la provincia seleccionada
-      if ($provinciaSeleccionada) {
-          foreach ($distritos as $distrito) {
-              if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
-                  $distritosDeLaProvincia[] = $distrito;
-              }
-          }
-      }
-    
-      // Buscar el distrito seleccionado
-      $distritoSeleccionado = null;
-      foreach ($distritosDeLaProvincia as $distrito) {
-          if (isset($distrito['id_ubigeo']) && $distrito['id_ubigeo'] == $tienda->distrito) {
-              $distritoSeleccionado = $distrito;
-              break;
-          }
-      }
-    
-      // Devolver la vista con los datos necesarios
-      return view('administracion.asociados.tienda.edit', compact(
-          'tienda', 
-          'clientes', 
-          'departamentos', 
-          'provincias', 
-          'distritos', 
-          'departamentoSeleccionado', 
-          'provinciaSeleccionada', 
-          'distritoSeleccionado',
-          'provinciasDelDepartamento',  // Asegúrate de incluir esta variable en la vista
-          'distritosDeLaProvincia'     // Asegúrate de incluir esta variable en la vista
-      ));
-  }
-  
+
+
+public function edit($id)
+{
+    // Buscar la tienda que se quiere editar
+    $tienda = Tienda::findOrFail($id);
+
+    // Obtener todos los clientes para el select
+    $clientes = Cliente::all();
+
+    // Obtener los datos de los archivos JSON
+    $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+    $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
+    $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
+
+    // Buscar el departamento correspondiente a la tienda
+    $departamentoSeleccionado = array_filter($departamentos, function($departamento) use ($tienda) {
+        return $departamento['id_ubigeo'] == $tienda->departamento;
+    });
+    $departamentoSeleccionado = reset($departamentoSeleccionado);  // Obtener el primer valor del array filtrado
+
+    // Obtener provincias del departamento seleccionado
+    $provinciasDelDepartamento = [];
+    foreach ($provincias as $provincia) {
+        if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
+            $provinciasDelDepartamento[] = $provincia;
+        }
+    }
+
+    // Buscar la provincia seleccionada en el array de provinciasDelDepartamento
+    $provinciaSeleccionada = null;
+    foreach ($provinciasDelDepartamento as $provincia) {
+        if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $tienda->provincia) {
+            $provinciaSeleccionada = $provincia;
+            break;
+        }
+    }
+
+    // Obtener los distritos correspondientes a la provincia seleccionada
+    $distritosDeLaProvincia = [];
+    foreach ($distritos as $distrito) {
+        if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
+            $distritosDeLaProvincia[] = $distrito;
+        }
+    }
+
+    // Definir distritoSeleccionado como null si no es necesario
+    $distritoSeleccionado = null;  // Si no es necesario, puedes omitir esta línea también
+
+    // Devolver la vista con los datos necesarios
+    return view('administracion.asociados.tienda.edit', compact(
+        'tienda', 
+        'clientes', 
+        'departamentos', 
+        'provinciasDelDepartamento', 
+        'provinciaSeleccionada', 
+        'distritosDeLaProvincia', 
+        'distritoSeleccionado' // Si realmente necesitas esta variable, asegúrate de pasarla correctamente
+    ));
+}
+
 
   
   
   
   
   
-
 
 public function update(Request $request, $id)
-    {
-        // Validación de los datos del formulario
-        $request->validate([
-            'ruc' => 'required|string|max:255',
-            'nombre' => 'required|string|max:255',
-            'direccion' => 'required|string|max:255',
-            'idCliente' => 'required|exists:cliente,idCliente',
-            'celular' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'referencia' => 'nullable|string|max:255',
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
-        ]);
+{
+    // Validación de los datos del formulario
+    $request->validate([
+        'ruc' => 'required|string|max:255',
+        'nombre' => 'required|string|max:255',
+        'direccion' => 'required|string|max:255',
+        'idCliente' => 'required|exists:cliente,idCliente',
+        'celular' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'referencia' => 'nullable|string|max:255',
+        'lat' => 'required|numeric',
+        'lng' => 'required|numeric',
+        'departamento' => 'required|string|max:255', // Validar el campo 'departamento'
+        'provincia' => 'required|string|max:255',    // Validar el campo 'provincia'
+        'distrito' => 'required|string|max:255',     // Validar el campo 'distrito'
+    ]);
 
-        // Buscar la tienda que se quiere actualizar
-        $tienda = Tienda::findOrFail($id);
+    // Buscar la tienda que se quiere actualizar
+    $tienda = Tienda::findOrFail($id);
 
-        // Actualizar la tienda con los datos recibidos
-        $tienda->update([
-            'ruc' => $request->ruc,
-            'nombre' => $request->nombre,
-            'direccion' => $request->direccion,
-            'idCliente' => $request->idCliente,
-            'celular' => $request->celular,
-            'email' => $request->email,
-            'referencia' => $request->referencia,
-            'lat' => $request->lat,
-            'lng' => $request->lng,
-        ]);
+    // Actualizar la tienda con los datos recibidos, incluyendo 'departamento', 'provincia' y 'distrito'
+    $tienda->update([
+        'ruc' => $request->ruc,
+        'nombre' => $request->nombre,
+        'direccion' => $request->direccion,
+        'idCliente' => $request->idCliente,
+        'celular' => $request->celular,
+        'email' => $request->email,
+        'referencia' => $request->referencia,
+        'lat' => $request->lat,
+        'lng' => $request->lng,
+        'departamento' => $request->departamento, // Actualizar el departamento
+        'provincia' => $request->provincia,       // Actualizar la provincia
+        'distrito' => $request->distrito,         // Actualizar el distrito
+    ]);
 
-        // Redirigir al índice de tiendas con un mensaje de éxito
-        return redirect()->route('administracion.tienda')->with('success', 'Tienda actualizada exitosamente');
-    }
+    // Redirigir al índice de tiendas con un mensaje de éxito
+    return redirect()->route('administracion.tienda')->with('success', 'Tienda actualizada exitosamente');
+}
+
 
 
 
