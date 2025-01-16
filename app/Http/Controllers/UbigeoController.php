@@ -41,18 +41,31 @@ class UbigeoController extends Controller
         // Obtener todas las provincias del archivo JSON
         $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
     
-        // Filtrar las provincias que corresponden al departamentoId
-        $provinciasDelDepartamento = [];
-        foreach ($provincias as $provincia) {
-            // Verificar que la clave 'id_padre_ubigeo' exista antes de acceder a ella
-            if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoId) {
-                $provinciasDelDepartamento[] = $provincia;
-            }
+        // Verifica que las provincias existen para el departamentoId
+        if (isset($provincias[$departamentoId])) {
+            // Si existen, devuelve las provincias correspondientes
+            return response()->json(['provincias' => $provincias[$departamentoId]]);
         }
     
-        // Devolver las provincias como respuesta JSON
-        return response()->json($provinciasDelDepartamento);
+        // Si no hay provincias, devolver un mensaje de error
+        return response()->json(['error' => 'No se encontraron provincias para este departamento']);
     }
+    
+    public function getDistritos($provinciaId)
+    {
+        // Obtener todos los distritos del archivo JSON
+        $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
+    
+        // Verifica si existen distritos para la provinciaId
+        if (isset($distritos[$provinciaId])) {
+            return response()->json(['distritos' => $distritos[$provinciaId]]);
+        }
+    
+        return response()->json(['error' => 'No se encontraron distritos para esta provincia']);
+    }
+    
+    
+
     
     
 }

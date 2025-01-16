@@ -106,6 +106,7 @@ Route::get('/ubigeo/distritos/{provincia_id}', [UbigeoController::class, 'getDis
 Route::get('/get-provincia/{departamentoId}', [UbigeoController::class, 'getProvincias']);
 Route::get('/get-distrito/{provinciaId}', [UbigeoController::class, 'getDistritos']);
 
+
 //Rutas para Tiendas
 Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
 Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store');
