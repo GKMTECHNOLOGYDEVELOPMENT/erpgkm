@@ -34,8 +34,8 @@ class TiendasRequest extends FormRequest
             'distrito' => 'nullable|string|max:255',
             'departamento' => 'nullable|string|max:255',
             'referencia' => 'nullable|string|max:255',
-            'lat' => 'nullable|size:18', // Si el campo "lat" debe tener una longitud fija de 18
-            'lng' => 'nullable|size:18', // Similar a "lat", validamos que tenga longitud de 18
+            'lat' => 'nullable|size:25', // Si el campo "lat" debe tener una longitud fija de 18
+            'lng' => 'nullable|size:25', // Similar a "lat", validamos que tenga longitud de 18
             'idCliente' => 'required|integer|exists:cliente,idCliente', // Asumiendo que idCliente hace referencia a una tabla 'clientes'
         ];
     }
