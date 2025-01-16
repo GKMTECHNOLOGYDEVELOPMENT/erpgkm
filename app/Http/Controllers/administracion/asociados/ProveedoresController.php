@@ -12,7 +12,7 @@ class ProveedoresController extends Controller
     public function index()
     {
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.proveedores'); 
+        return view('administracion.asociados.proveedores.index'); 
     }
 
     // Crear un nuevo Proveedor

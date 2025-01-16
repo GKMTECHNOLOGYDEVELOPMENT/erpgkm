@@ -128,17 +128,17 @@ Route::post('/check-nombre', function (Request $request) {
 // Ruta para Administracion de tiendas
 
 // Ruta para Administracion Subsidiario
-Route::get('/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
+// Route::get('/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
 //Ruta para Administracion Cast
-Route::get('/administracion/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
+Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
 // Route::get('/casts', [CastController::class, 'getAll']);
 // Ruta para Administracion Subsidiario
 Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');
 //Ruta para Administracion Clientes
-Route::get('/administracion/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
+Route::get('/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
 
 //Ruta para Administracion Proveedores
-Route::get('/administracion/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
+Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
 //Ruta para administracion cotizaciones
 Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'index'])->name('cotizaciones.crear-cotizacion')->middleware('auth');
 

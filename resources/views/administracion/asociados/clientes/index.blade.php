@@ -1,6 +1,6 @@
 <x-layout.default>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         .panel {
             overflow: visible !important;
@@ -64,19 +64,20 @@
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5"
-                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" />
-                        </svg>
+                        xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                        <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
+                        <path opacity="0.5"
+                            d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
+                            stroke="currentColor" stroke-width="1.5" />
+                        <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" />
+                    </svg>
                         <span>Agregar</span>
                     </button>
                 </div>
             </div>
-            <table id="myTable1" class="table whitespace-nowrap"></table>
+
+            <table id="myTable1" class="whitespace-nowrap"></table>
         </div>
     </div>
 
@@ -196,38 +197,33 @@
             </div>
         </div>
     </div>
-
-
     <script>
         document.addEventListener("alpine:init", () => {
             Alpine.data("multipleTable", () => ({
                 datatable1: null,
-                subsidiariosData: [], // Agrega una propiedad para almacenar los datos
+                castData: [], // Agrega una propiedad para almacenar los datos
 
                 init() {
-                    // Llamar a la API para obtener los datos de 'subsidiarios'
-                    fetch('/api/subsidiarios') // Ajusta la URL si es necesario
+                    // Llamar a la API para obtener los datos de 'casts'
+                    fetch('/api/casts')
                         .then(response => response.json())
                         .then(data => {
-                            this.subsidiariosData = data;
+                            this.castData = data;
                             // Ahora que tenemos los datos, inicializamos la tabla
                             this.datatable1 = new simpleDatatables.DataTable('#myTable1', {
                                 data: {
-                                    headings: ['ID', 'RUC', 'Nombre',
-                                        'Nombre Contacto', 'Celular', 'Email',
-                                        'Dirección', 'Referencia', 'ID Tienda',
-                                        '<div class="text-center">Acciones</div>'
+                                    headings: ['Nombre', 'Provincia', 'Ruc', 'Direccion',
+                                        'Correo', 'Telefono', 'Status',
+                                        '<div class="text-center">Action</div>'
                                     ],
-                                    data: this.subsidiariosData.map(subsidiario => [
-                                        subsidiario.idSubsidiarios,
-                                        subsidiario.ruc,
-                                        subsidiario.nombre,
-                                        subsidiario.nombre_contacto,
-                                        subsidiario.celular,
-                                        subsidiario.email,
-                                        subsidiario.direccion,
-                                        subsidiario.referencia,
-                                        subsidiario.idTienda,
+                                    data: this.castData.map(cast => [
+                                        cast.nombre,
+                                        cast.provincia,
+                                        cast.ruc,
+                                        cast.direccion,
+                                        cast.email,
+                                        cast.telefono,
+                                        this.randomStatus(),
                                         ''
                                     ]),
                                 },
@@ -237,22 +233,36 @@
                                 columns: [{
                                         select: 0,
                                         render: (data, cell, row) => {
-                                            return `<div class="flex items-center w-max">${data}</div>`;
+                                            return `<div class="flex items-center w-max"><img class="w-9 h-9 rounded-full ltr:mr-2 rtl:ml-2 object-cover" src="/assets/images/profile-${row.dataIndex + 1}.jpeg" />${data}</div>`;
                                         },
                                         sort: "asc"
                                     },
                                     {
-                                        select: 8,
+                                        select: 3,
+                                        render: (data, cell, row) => {
+                                            return this.formatDate(data);
+                                        },
+                                    },
+                                    {
+                                        select: 6,
+                                        render: (data, cell, row) => {
+                                            return '<span class="badge bg-' + this
+                                                .randomColor() + '">' + this
+                                                .randomStatus() + '</span>';
+                                        },
+                                    },
+                                    {
+                                        select: 7,
                                         sortable: false,
                                         render: (data, cell, row) => {
                                             return `<div class="flex items-center">
-                                                <button type="button" x-tooltip="Editar">
+                                                <button type="button" class="ltr:mr-2 rtl:ml-2" x-tooltip="Edit">
                                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                                                         <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
                                                         <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
                                                     </svg>
                                                 </button>
-                                                <button type="button" x-tooltip="Eliminar">
+                                                <button type="button" x-tooltip="Delete">
                                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                                         <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                                         <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -283,9 +293,33 @@
                             console.error('Error al obtener los datos:', error);
                         });
                 },
+
+                formatDate(date) {
+                    if (date) {
+                        const dt = new Date(date);
+                        const month = dt.getMonth() + 1 < 10 ? '0' + (dt.getMonth() + 1) : dt
+                            .getMonth() + 1;
+                        const day = dt.getDate() < 10 ? '0' + dt.getDate() : dt.getDate();
+                        return day + '/' + month + '/' + dt.getFullYear();
+                    }
+                    return '';
+                },
+
+                randomColor() {
+                    const color = ['primary', 'secondary', 'success', 'danger', 'warning', 'info'];
+                    const random = Math.floor(Math.random() * color.length);
+                    return color[random];
+                },
+
+                randomStatus() {
+                    const status = ['PAID', 'APPROVED', 'FAILED', 'CANCEL', 'SUCCESS', 'PENDING',
+                        'COMPLETE'
+                    ];
+                    const random = Math.floor(Math.random() * status.length);
+                    return status[random];
+                }
             }));
         });
-
         // Inicializar Select2
         document.addEventListener("DOMContentLoaded", function() {
             // Inicializar todos los select con la clase "select2"
@@ -295,23 +329,8 @@
                 });
             });
         });
-        document.addEventListener("alpine:init", () => {
-            Alpine.data("form", () => ({
-                date1: '',
-                init() {
-                    flatpickr(document.getElementById('fechaRegistro'), {
-                        dateFormat: 'Y-m-d',
-                        defaultDate: this.date1,
-                        onChange: (selectedDates, dateStr) => {
-                            this.date1 = dateStr; // Sincroniza el valor con Alpine.js
-                        }
-                    });
-                }
-            }));
-        });
     </script>
     <script src="/assets/js/simple-datatables.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
 </x-layout.default>

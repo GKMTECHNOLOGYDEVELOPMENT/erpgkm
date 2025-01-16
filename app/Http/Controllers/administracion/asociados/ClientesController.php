@@ -15,7 +15,7 @@ class ClientesController extends Controller
     public function index()
     {
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.clientes'); 
+        return view('administracion.asociados.clientes.index'); 
     }
     
 
