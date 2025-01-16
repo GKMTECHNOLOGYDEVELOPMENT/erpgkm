@@ -59,6 +59,8 @@
             <table id="myTable1" class="whitespace-nowrap"></table>
         </div>
     </div>
+
+
     <!-- Modal -->
     <div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
@@ -79,96 +81,123 @@
                     </div>
                     <!-- Formulario -->
                     <div class="modal-scroll">
-                        <form class="p-5 space-y-4" id="tiendaForm">
-                            <!-- ID Tienda -->
+                    <form class="p-5 space-y-4" id="tiendaForm" enctype="multipart/form-data" method="post" >
+                            @csrf
+                            <!-- Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input id="nombre" type="text" class="form-input w-full"
-                                    placeholder="Ingrese el nombre de la tienda">
+                                <input id="nombre" type="text" name="nombre" class="form-input w-full" placeholder="Ingrese el nombre de la tienda" value="{{ old('nombre') }}">
+                                @error('nombre')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
                             </div>
+
+                            <!-- RUC -->
+                            <div>
+                                <label for="ruc" class="block text-sm font-medium">RUC</label>
+                                <input id="ruc" type="text" name="ruc" class="form-input w-full" placeholder="Ingrese el RUC" value="{{ old('ruc') }}">
+                                @error('ruc')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Celular -->
+                            <div>
+                                <label for="celular" class="block text-sm font-medium">Celular</label>
+                                <input id="celular" type="text" name="celular" class="form-input w-full" placeholder="Ingrese el número de celular" value="{{ old('celular') }}">
+                                @error('celular')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium">Email</label>
+                                <input id="email" type="email" name="email" class="form-input w-full" placeholder="Ingrese el email" value="{{ old('email') }}">
+                                @error('email')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Dirección -->
+                            <div>
+                                <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                                <input id="direccion" type="text" name="direccion" class="form-input w-full" placeholder="Ingrese la dirección" value="{{ old('direccion') }}">
+                                @error('direccion')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Referencia -->
+                            <div>
+                                <label for="referencia" class="block text-sm font-medium">Referencia</label>
+                                <input id="referencia" type="text" name="referencia" class="form-input w-full" placeholder="Ingrese la referencia" value="{{ old('referencia') }}">
+                                @error('referencia')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Latitud -->
+                            <div>
+                                <label for="lat" class="block text-sm font-medium">Latitud</label>
+                                <input id="lat" type="text" name="lat" class="form-input w-full" placeholder="Ingrese la latitud" value="{{ old('lat') }}">
+                                @error('lat')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- Longitud -->
+                            <div>
+                                <label for="lng" class="block text-sm font-medium">Longitud</label>
+                                <input id="lng" type="text" name="lng" class="form-input w-full" placeholder="Ingrese la longitud" value="{{ old('lng') }}">
+                                @error('lng')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <!-- ID Cliente -->
+                            <div>
+                                <label for="idCliente" class="block text-sm font-medium">Cliente</label>
+                                <select id="idCliente" name="idCliente" class="form-input w-full">
+                                    <option value="">Seleccione un cliente</option>
+                                    <!-- Aquí puedes colocar los clientes disponibles en tu base de datos -->
+                                    @foreach ($clientes as $cliente)
+                                        <option value="{{ $cliente->id }}" {{ old('idCliente') == $cliente->id ? 'selected' : '' }}>
+                                            {{ $cliente->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('idCliente')
+                                    <div class="text-red-500 text-sm">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
-                                <button type="button" class="btn btn-outline-danger"
-                                    @click="open = false">Cancelar</button>
+                                <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const form = document.getElementById('tiendaGeneralForm');
-        const nombreInput = document.getElementById('nombre');
 
-        // Base URL for API requests
-        const BASE_URL = 'http://127.0.0.1:8000/'; // Ajusta según tu configuración
+  
 
-        // Validaciones
-        const validateNombreUnico = async (nombre) => {
-            try {
-                const response = await fetch(`${BASE_URL}api/check-nombre`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                    },
-                    body: JSON.stringify({ nombre })
-                });
-                const data = await response.json();
-                return data.unique; // true si es único, false si ya existe
-            } catch (error) {
-                console.error('Error al verificar el nombre:', error);
-                return false;
-            }
-        };
 
-        const validateNombre = (value) => {
-            const regex = /^[a-zA-Z0-9\s]+$/; // Sin caracteres especiales
-            return value.trim() !== '' && regex.test(value);
-        };
+   
 
-        // Escucha de eventos para validaciones en tiempo real
-        nombreInput.addEventListener('input', async () => {
-            const nombre = nombreInput.value;
-            if (!validateNombre(nombre)) {
-                nombreInput.setCustomValidity('El nombre no debe estar vacío ni tener caracteres especiales.');
-            } else if (!(await validateNombreUnico(nombre))) {
-                nombreInput.setCustomValidity('El nombre ya está en uso.');
-            } else {
-                nombreInput.setCustomValidity(''); // Todo está correcto
-            }
-            nombreInput.reportValidity();
-        });
 
-        // Validaciones al enviar el formulario
-        form.addEventListener('submit', async (event) => {
-            const nombre = nombreInput.value;
 
-            if (!validateNombre(nombre)) {
-                alert('El nombre no debe estar vacío ni tener caracteres especiales.');
-                event.preventDefault();
-                return;
-            }
-
-            if (!(await validateNombreUnico(nombre))) {
-                alert('El nombre ya está en uso.');
-                event.preventDefault();
-                return;
-            }
-
-            // Si todo es válido, el formulario se envía
-        });
-    });
-</script>
 
 <!-- Script AJAX para enviar los datos -->
 <script>
 // Script AJAX
-document.getElementById('tiendaGeneralForm').addEventListener('submit', function(event) {
+document.getElementById('tiendaForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Evita el envío del formulario tradicional
     
     let formData = new FormData(this); // Obtiene los datos del formulario
@@ -185,12 +214,15 @@ document.getElementById('tiendaGeneralForm').addEventListener('submit', function
     .then(data => {
         console.log("Respuesta del servidor:", data); // Log de la respuesta
 
+        console.log("URL de la solicitud: ", "{{ route('tienda.store') }}");
+
+
         if (data.success) {
             // Mostrar la alerta de éxito
             showMessage('Tienda agregada correctamente.', 'top-end');
             
             // Limpiar los campos del formulario
-            document.getElementById('tiendaGeneralForm').reset();
+            document.getElementById('tiendaForm').reset();
             
             // Cerrar el modal
             open = false; // Esto asume que `open` es el controlador del modal en Alpine.js
@@ -238,7 +270,8 @@ showMessage = (msg = 'Example notification text.', position = 'top-end', showClo
 </script>
 
 
-    <script>
+
+<script>
 document.addEventListener("alpine:init", () => {
     Alpine.data("multipleTable", () => ({
         datatable1: null,
@@ -269,7 +302,7 @@ document.addEventListener("alpine:init", () => {
                     // Inicializar DataTable
                     this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
                         data: {
-                            headings: ["ID", "Nombre", "Acción"],
+                            headings: ["Nombre", "Acción"],  // Solo mostramos 'Nombre' y 'Acción'
                             data: this.formatDataForTable(data),
                         },
                         searchable: true,
@@ -289,14 +322,13 @@ document.addEventListener("alpine:init", () => {
 
         formatDataForTable(data) {
             return data.map((tienda) => [
-                tienda.idTienda,
-                tienda.nombre,
+                tienda.nombre,  // Solo mostramos 'nombre'
                 `<div class="flex items-center">
-                    <a href="/tienda/${tienda.idTienda}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                                            <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
-                                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
-                                        </svg>
+                     <a href="/tienda/${tienda.idTienda}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                            <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
+                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
+                        </svg>
                     </a>
                     <button type="button" x-tooltip="Eliminar" @click="deleteTienda(${tienda.idTienda})">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
@@ -308,8 +340,9 @@ document.addEventListener("alpine:init", () => {
                                         </svg>
                     </button>
                 </div>`,
-            ]);
+            ]);  // Solo agregamos "Nombre" y "Acción"
         },
+
 
         checkForUpdates() {
             fetch("/api/tiendas")
@@ -400,6 +433,75 @@ document.addEventListener("alpine:init", () => {
     }));
 });
 </script>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('tiendaForm');
+        const nombreInput = document.getElementById('nombre');
+
+        // Base URL for API requests
+        const BASE_URL = 'http://127.0.0.1:8000/'; // Ajusta según tu configuración
+
+        // Validaciones
+        const validateNombreUnico = async (nombre) => {
+            try {
+                const response = await fetch(`${BASE_URL}api/check-nombre-tienda`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    },
+                    body: JSON.stringify({ nombre })
+                });
+                const data = await response.json();
+                return data.unique; // true si es único, false si ya existe
+            } catch (error) {
+                console.error('Error al verificar el nombre:', error);
+                return false;
+            }
+        };
+
+        const validateNombre = (value) => {
+            const regex = /^[a-zA-Z0-9\s]+$/; // Sin caracteres especiales
+            return value.trim() !== '' && regex.test(value);
+        };
+
+        // Escucha de eventos para validaciones en tiempo real
+        nombreInput.addEventListener('input', async () => {
+            const nombre = nombreInput.value;
+            if (!validateNombre(nombre)) {
+                nombreInput.setCustomValidity('El nombre no debe estar vacío ni tener caracteres especiales.');
+            } else if (!(await validateNombreUnico(nombre))) {
+                nombreInput.setCustomValidity('El nombre ya está en uso.');
+            } else {
+                nombreInput.setCustomValidity(''); // Todo está correcto
+            }
+            nombreInput.reportValidity();
+        });
+
+        // Validaciones al enviar el formulario
+        form.addEventListener('submit', async (event) => {
+            const nombre = nombreInput.value;
+
+            if (!validateNombre(nombre)) {
+                // alert('El nombre no debe estar vacío ni tener caracteres especiales.');
+                event.preventDefault();
+                return;
+            }
+
+            if (!(await validateNombreUnico(nombre))) {
+                // alert('El nombre ya está en uso.');
+                event.preventDefault();
+                return;
+            }
+
+            // Si todo es válido, el formulario se envía
+        });
+    });
+</script>
+
 
 
     <script src="/assets/js/simple-datatables.js"></script>

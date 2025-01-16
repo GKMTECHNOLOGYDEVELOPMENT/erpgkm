@@ -98,9 +98,19 @@ Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'ex
 // Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
 Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
+
 //Rutas para Tiendas
 Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
-Route::get('/tienda/store', [TiendaController::class, 'store'])->name('tienda.store')->middleware('auth');
+Route::post('/tienda/store', [TiendaController::class, 'store'])->name('tienda.store')->middleware('auth');
+Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
+Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tienda.update');
+// Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tiendas')->middleware('auth');
+
+
+
+// // Ruta para actualizar una tienda
+// Route::put('/api/tiendas/{id}', [TiendaController::class, 'update']);
+
 
 Route::post('/check-nombre', function (Request $request) {
     $nombre = $request->input('nombre');
