@@ -85,4 +85,15 @@ class Cliente extends Model
     {
         return $this->hasMany(Tienda::class, 'idCliente');
     }
+	 // Definir relación con TipoDocumento
+	 public function tipoDocumento()
+	 {
+		 return $this->belongsTo(TipoDocumento::class, 'idTipoDocumento', 'idTipoDocumento');
+	 }
+ 
+	 // Definir relación con ClienteGeneral
+	 public function clienteGeneral()
+	 {
+		 return $this->belongsTo(ClienteGeneral::class, 'idClienteGeneral', 'idClienteGeneral');
+	 }
 }

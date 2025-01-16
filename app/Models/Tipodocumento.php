@@ -39,4 +39,10 @@ class Tipodocumento extends Model
 	{
 		return $this->hasMany(Usuario::class, 'idTipoDocumento');
 	}
+	// En el modelo TipoDocumento (App\Models\TipoDocumento)
+	public function clientes()
+	{
+		return $this->hasMany(Cliente::class, 'idTipoDocumento', 'idTipoDocumento');
+	}
+
 }

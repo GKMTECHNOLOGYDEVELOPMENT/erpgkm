@@ -14,8 +14,10 @@ class ClientesController extends Controller
 {
     public function index()
     {
+        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.clientes.index'); 
+        return view('administracion.asociados.clientes.index', compact('departamentos')); 
     }
     
 
@@ -120,6 +122,31 @@ class ClientesController extends Controller
         // return redirect('clientes', compact('arrayContact', 'arrayContact'))->with('updateCliente', 'ok');
         // return view('clientes.index', compact('arrayContact', 'arrayContact'));
     }
+
+    public function getAll()
+    {
+        // Obtener todos los clientes con sus relaciones (TipoDocumento y ClienteGeneral)
+        $clientes = Cliente::with(['tipoDocumento', 'clienteGeneral'])->get();
+    
+        // Procesa los datos para incluir los campos necesarios, mostrando los nombres relacionados
+        $clientesData = $clientes->map(function ($cliente) {
+            return [
+                'idTipoDocumento' => $cliente->tipoDocumento->nombre, // Mostrar nombre del tipo de documento
+                'documento'       => $cliente->documento,
+                'nombre'          => $cliente->nombre,
+                'telefono'        => $cliente->telefono,
+                'email'           => $cliente->email,
+                'clienteGeneral'  => $cliente->clienteGeneral->descripcion, // Mostrar descripción de cliente general
+                'direccion'       => $cliente->direccion,
+                'estado'          => $cliente->estado == 1 ? 'Activo' : 'Inactivo',
+            ];
+        });
+    
+        // Retorna los datos en formato JSON
+        return response()->json($clientesData);
+    }
+    
+
 
     public function deleteCliente(Request $request)
     {
