@@ -129,12 +129,12 @@ Route::post('/check-nombre', function (Request $request) {
 // Ruta para Administracion de tiendas
 
 // Ruta para Administracion Subsidiario
-// Route::get('/sub-sidiario', [SubsidiarioController::class, 'index'])->name('administracion.sub-sidiario')->middleware('auth');
+
 //Ruta para Administracion Cast
 Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
 // Route::get('/casts', [CastController::class, 'getAll']);
 // Ruta para Administracion Subsidiario
-Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');
+// Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');
 //Ruta para Administracion Clientes
 Route::get('/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
 
