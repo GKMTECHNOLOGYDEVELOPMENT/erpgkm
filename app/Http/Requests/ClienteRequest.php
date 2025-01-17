@@ -27,16 +27,12 @@ class ClienteRequest extends FormRequest
         return [
             'nombre' => 'required|string|max:255',          // El nombre es obligatorio
             'documento' => 'required|string|max:255',       // El documento es obligatorio
-            'direccion' => 'nullable|string|max:255',       // Dirección es opcional
+            'direccion' => 'nullable|string|max:255',       // Direcxdción es opcional
             'departamento' => 'nullable|string|max:255',    // Departamento es opcional
             'provincia' => 'nullable|string|max:255',       // Provincia es opcional
             'distrito' => 'nullable|string|max:255',        // Distrito es opcional
-            'pais' => 'nullable|string|max:255',            // País es opcional
-            'cod_postal' => 'nullable|string|max:20',       // Código postal es opcional
             'telefono' => 'nullable|string|max:255',        // Teléfono es opcional
-            'celular' => 'nullable|string|max:255',         // Celular es opcional
             'email' => 'nullable|email|max:255',            // Email es opcional pero si se ingresa debe ser un email válido
-            'fecha_registro' => 'required|date',            // Fecha de registro es obligatorio
             'idTipoDocumento' => 'required|integer|exists:tipodocumento,idTipoDocumento', // Validamos si el idTipoDocumento existe en la tabla 'tipodocumento'
             'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral', // Validamos si el idClienteGeneral existe en la tabla 'clientegeneral'
         ];
@@ -56,12 +52,8 @@ class ClienteRequest extends FormRequest
             'departamento' => 'departamento',
             'provincia' => 'provincia',
             'distrito' => 'distrito',
-            'pais' => 'país',
-            'cod_postal' => 'código postal',
             'telefono' => 'teléfono',
-            'celular' => 'celular',
             'email' => 'correo electrónico',
-            'fecha_registro' => 'fecha de registro',
             'idTipoDocumento' => 'tipo de documento',
             'idClienteGeneral' => 'cliente general',
         ];
@@ -77,11 +69,9 @@ class ClienteRequest extends FormRequest
         return [
             'documento.required' => 'Debe ingresar el documento del cliente.',
             'nombre.required' => 'El nombre del cliente es obligatorio.',
-            'fecha_registro.required' => 'La fecha de registro es obligatoria.',
             'idTipoDocumento.required' => 'Debe seleccionar un tipo de documento.',
             'idClienteGeneral.required' => 'Debe seleccionar un cliente general.',
             'email.email' => 'Debe ingresar una dirección de correo electrónico válida.',
-            'cod_postal.max' => 'El código postal no puede tener más de 20 caracteres.',
             'telefono.max' => 'El teléfono no puede tener más de 255 caracteres.',
         ];
     }

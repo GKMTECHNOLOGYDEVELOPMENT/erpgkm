@@ -1,4 +1,5 @@
 <x-layout.default>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
@@ -119,7 +120,7 @@
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                    <input id="nombre" x-model="formData.nombre" type="text"
+                                    <input id="nombre"  type="text" name="nombre"
                                         class="form-input w-full" placeholder="Ingrese el nombre">
                                 </div>
                                 <!-- Tipo Documento -->
@@ -134,38 +135,20 @@
                                 <!-- Documento -->
                                 <div>
                                     <label for="documento" class="block text-sm font-medium">Documento</label>
-                                    <input id="documento" type="text" x-model="formData.documento"
+                                    <input id="documento" type="text"  name="documento"
                                         class="form-input w-full" placeholder="Ingrese el documento">
                                 </div>
                                 <!-- Teléfono -->
                                 <div>
                                     <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                    <input id="telefono" type="text" x-model="formData.telefono"
+                                    <input id="telefono" type="text"  name="telefono"
                                         class="form-input w-full" placeholder="Ingrese el teléfono">
                                 </div>
                                 <!-- Email -->
                                 <div>
                                     <label for="email" class="block text-sm font-medium">Email</label>
-                                    <input id="email" type="email" class="form-input w-full"
+                                    <input id="email" type="email" class="form-input w-full" name="email"
                                         placeholder="Ingrese el email">
-                                </div>
-                                <!-- Fecha de Registro -->
-                                <div x-data="form">
-                                    <label for="fechaRegistro" class="block text-sm font-medium">Fecha de Registro</label>
-                                    <input id="fechaRegistro" type="date" class="form-input w-full" placeholder="Seleccione la fecha">
-                                </div>
-
-                                <!-- Código Postal -->
-                                <div>
-                                    <label for="codigo_postal" class="block text-sm font-medium">Código Postal</label>
-                                    <input id="codigo_postal" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el código postal">
-                                </div>
-                                <!-- Nacionalidad -->
-                                <div>
-                                    <label for="nacionalidad" class="block text-sm font-medium">Nacionalidad</label>
-                                    <input id="nacionalidad" type="text" class="form-input w-full"
-                                        placeholder="Ingrese la nacionalidad">
                                 </div>
                                 <!-- departamento -->
                                 <div>
@@ -196,9 +179,10 @@
                                     </select>
                                 </div>
                                 <!-- Dirección (Ocupa 2 columnas) -->
-                                <div class="md:col-span-2">
+                                <div >
                                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <textarea id="direccion" class="form-input w-full" rows="5" placeholder="Ingrese la dirección"></textarea>
+                                    <input id="direccion" type="text"  name="direccion"
+                                        class="form-input w-full" placeholder="Ingrese el direccion">
                                 </div>
                             </div>
                             <!-- Botones -->
@@ -214,135 +198,79 @@
         </div>
     </div>
 
+
     <script>
-    // Script AJAX para el formulario de cliente
-    document.getElementById('clienteForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Evita el envío del formulario tradicional
+// Script AJAX para el formulario de cliente
+document.getElementById('clienteForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evita el envío del formulario tradicional
 
-        let formData = new FormData(this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
+    let formData = new FormData(this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
 
-        // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
-        console.log("Datos enviados al servidor:", formData);
+    // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
+    console.log("Formulario enviado:", this);
+    console.log("Datos del formulario:", Array.from(formData.entries()));
 
-        // Hacer la solicitud AJAX
-        fetch("{{ route('cliente.store') }}", {
-            method: "POST", // Asegúrate de usar el método POST
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
-            },
-            body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
-        })
-        .then(response => {
-            // Verificar que la respuesta sea válida y que sea JSON
-            if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
-            }
-            return response.json(); // Intentar convertir la respuesta en JSON
-        })
-        .then(data => {
-            // Mostrar la respuesta procesada
-            console.log("Datos recibidos:", data);
+    // Hacer la solicitud AJAX
+    fetch("{{ route('cliente.store') }}", {
+        method: "POST", // Asegúrate de usar el método POST
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
+        },
+        body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
+    })
+    .then(response => {
+    console.log("Respuesta del servidor:", response);
+    if (!response.ok) {
+        throw new Error('Error en la respuesta del servidor');
+    }
+    return response.json(); // Intentar convertir la respuesta en JSON
+})
+.then(data => {
+    console.log("Datos recibidos del servidor:", data);
 
-            if (data.success) {
-                // Mostrar la alerta de éxito
-                showMessage('Cliente agregado correctamente.', 'top-end');
+    if (data && data.success) { // Asegurarte de que `data` y `data.success` existen
+        showMessage('Cliente agregado correctamente.', 'top-end');
+        document.getElementById('clienteForm').reset();
+        // document.querySelector('[x-data]').__x.$data.open = false;
+        let alpineData = Alpine.store('multipleTable');
+        if (alpineData && alpineData.updateTable) {
+            alpineData.updateTable();
+        }
+    } else {
+        showMessage('Hubo un error al guardar el cliente.', 'top-end');
+    }
+})
+.catch(error => {
+    console.error("Error en la solicitud:", error);
+    showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
+});
+});
 
-                // Limpiar los campos del formulario
-                document.getElementById('clienteForm').reset();
-
-                // Cerrar el modal (asumiendo que `open` está vinculado al estado del modal)
-                document.querySelector('[x-data]').__x.$data.open = false;
-
-                // Llamar al método para actualizar la tabla (si usas Alpine.js)
-                let alpineData = Alpine.store('multipleTable');
-                if (alpineData && alpineData.updateTable) {
-                    alpineData.updateTable(); // Llamar a `updateTable` de Alpine
-                }
-            } else {
-                // Mostrar alerta de error
-                showMessage('Hubo un error al guardar el cliente.', 'top-end');
-            }
-        })
-        .catch(error => {
-            // Mostrar alerta de error si algo falla
-            console.error("Error en la solicitud:", error); // Mostrar el error en la consola
-            showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
-        });
+// Función para mostrar la alerta con SweetAlert
+function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+    closeButtonHtml = '', duration = 3000, type = 'success') {
+    const toast = window.Swal.mixin({
+        toast: true,
+        position: position || 'top-end',
+        showConfirmButton: false,
+        timer: duration,
+        showCloseButton: showCloseButton,
+        icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+        background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+        iconColor: 'white', // Color del icono
+        customClass: {
+            title: 'text-white', // Asegura que el texto sea blanco
+        },
     });
 
-    // Función para mostrar la alerta con SweetAlert
-    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-        closeButtonHtml = '', duration = 3000, type = 'success') {
-        const toast = window.Swal.mixin({
-            toast: true,
-            position: position || 'top-end',
-            showConfirmButton: false,
-            timer: duration,
-            showCloseButton: showCloseButton,
-            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-            iconColor: 'white', // Color del icono
-            customClass: {
-                title: 'text-white', // Asegura que el texto sea blanco
-            },
-        });
-
-        toast.fire({
-            title: msg,
-        });
-    };
+    toast.fire({
+        title: msg,
+    });
+};
 </script>
 
 
-
-
-    <script>
-        $(document).ready(function() {
-            // Cuando se selecciona un departamento, obtener las provincias relacionadas
-            $('#departamento').change(function() {
-                var departamentoId = $(this).val();
-
-                if (departamentoId) {
-                    $.get('/ubigeo/provincias/' + departamentoId, function(data) {
-                        var provinciaSelect = $('#provincia');
-                        provinciaSelect.empty().prop('disabled', false);
-                        provinciaSelect.append(
-                            '<option value="" disabled selected>Seleccionar Provincia</option>');
-
-                        data.forEach(function(provincia) {
-                            provinciaSelect.append('<option value="' + provincia.id_ubigeo +
-                                '">' + provincia.nombre_ubigeo + '</option>');
-                        });
-                    });
-                } else {
-                    $('#provincia').empty().prop('disabled', true);
-                    $('#distrito').empty().prop('disabled', true);
-                }
-            });
-
-            // Cuando se selecciona una provincia, obtener los distritos relacionados
-            $('#provincia').change(function() {
-                var provinciaId = $(this).val();
-
-                if (provinciaId) {
-                    $.get('/ubigeo/distritos/' + provinciaId, function(data) {
-                        var distritoSelect = $('#distrito');
-                        distritoSelect.empty().prop('disabled', false);
-                        distritoSelect.append(
-                            '<option value="" disabled selected>Seleccionar Distrito</option>');
-
-                        data.forEach(function(distrito) {
-                            distritoSelect.append('<option value="' + distrito.id_ubigeo +
-                                '">' + distrito.nombre_ubigeo + '</option>');
-                        });
-                    });
-                } else {
-                    $('#distrito').empty().prop('disabled', true);
-                }
-            });
-        });
-    </script>
-    <script>
+<script>
         document.addEventListener("alpine:init", () => {
             Alpine.data("multipleTable", () => ({
                 datatable1: null,
@@ -369,6 +297,7 @@
                             return response.json();
                         })
                         .then((data) => {
+                            console.log("Datos de los clientes:", data);
                             this.clienteData = data;
 
                             // Inicializar DataTable con las nuevas cabeceras
@@ -461,60 +390,89 @@
                 },
 
                 deleteCliente(idCliente) {
-                    new window.Swal({
-                        icon: 'warning',
-                        title: '¿Estás seguro?',
-                        text: "¡No podrás revertir esta acción!",
-                        showCancelButton: true,
-                        confirmButtonText: 'Eliminar',
-                        cancelButtonText: 'Cancelar',
-                        padding: '2em',
-                        customClass: 'sweet-alerts',
-                    }).then((result) => {
-                        if (result.value) {
-                            // Hacer la solicitud de eliminación
-                            fetch(`/api/clientes/${idCliente}`, {
-                                    method: "DELETE",
-                                })
-                                .then((response) => {
-                                    if (!response.ok) throw new Error(
-                                        "Error al eliminar cliente");
-                                    return response.json();
-                                })
-                                .then(() => {
-                                    console.log(`Cliente ${idCliente} eliminado con éxito`);
+    console.log(`Intentando eliminar el cliente con ID: ${idCliente}`);
+    
+    new window.Swal({
+        icon: 'warning',
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esta acción!",
+        showCancelButton: true,
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+        padding: '2em',
+        customClass: 'sweet-alerts',
+    }).then((result) => {
+        if (result.value) {
+            // Hacer la solicitud de eliminación
+            fetch(`/api/clientes/${idCliente}`, {
+                method: "DELETE",
+            })
+            .then((response) => {
+                if (!response.ok) throw new Error("Error al eliminar cliente");
+                return response.json();
+            })
+            .then((data) => {
+                console.log(`Respuesta del servidor al eliminar cliente:`, data);
 
-                                    // Actualizar la tabla eliminando la fila
-                                    this.clienteData = this.clienteData.filter(
-                                        (cliente) => cliente.idCliente !== idCliente
-                                    );
-                                    this.datatable1.rows().remove(
-                                        (row) =>
-                                        row.cells[0].innerHTML === idCliente.toString()
-                                    );
+                // Verificar que el cliente ha sido eliminado correctamente
+                if (data.message) {
+                    console.log(`Cliente ${idCliente} eliminado con éxito`);
 
-                                    // Mostrar notificación de éxito
-                                    new window.Swal({
-                                        title: '¡Eliminado!',
-                                        text: 'El cliente ha sido eliminado con éxito.',
-                                        icon: 'success',
-                                        customClass: 'sweet-alerts',
-                                    });
-                                })
-                                .catch((error) => {
-                                    console.error("Error al eliminar cliente:", error);
+                    // Actualizar la lista de clientes en el frontend
+                    this.clienteData = this.clienteData.filter(
+                        (cliente) => cliente.idCliente !== idCliente
+                    );
 
-                                    // Mostrar notificación de error
-                                    new window.Swal({
-                                        title: 'Error',
-                                        text: 'Ocurrió un error al eliminar el cliente.',
-                                        icon: 'error',
-                                        customClass: 'sweet-alerts',
-                                    });
-                                });
+                    // Obtener todas las filas de la tabla
+                    const rows = this.datatable1.rows();
+
+                    console.log("Filas actuales en la tabla:", rows);
+
+                    // Verifica la estructura de rows
+                    console.log("Tipo de 'rows':", typeof rows);
+
+                    // Si rows es un objeto con un método 'get' para obtener las filas, entonces
+                    // debes utilizar ese método para obtener las filas de forma correcta.
+
+                    // Iterar sobre las filas de la tabla
+                    Array.from(rows).forEach((row, index) => {
+                        // Depurar el contenido de cada fila
+                        console.log(`Fila ${index}:`, row);
+
+                        if (row.cells[0].innerText == idCliente.toString()) {
+                            console.log(`Eliminando fila con ID ${idCliente}`);
+                            this.datatable1.rows().remove(index); // Eliminar la fila
                         }
                     });
-                },
+
+                    // Mostrar notificación de éxito
+                    new window.Swal({
+                        title: '¡Eliminado!',
+                        text: 'El cliente ha sido eliminado con éxito.',
+                        icon: 'success',
+                        customClass: 'sweet-alerts',
+                    });
+                } else {
+                    throw new Error('No se pudo eliminar el cliente.');
+                }
+            })
+            .catch((error) => {
+                console.error("Error al eliminar cliente:", error);
+
+                // Mostrar notificación de error
+                new window.Swal({
+                    title: 'Error',
+                    text: 'Ocurrió un error al eliminar el cliente.',
+                    icon: 'error',
+                    customClass: 'sweet-alerts',
+                });
+            });
+        }
+    });
+}
+
+
+
             }));
         });
         // Inicializar Select2
@@ -526,6 +484,89 @@
             });
         });
     </script>
+
+
+
+
+    <script>
+        $(document).ready(function() {
+            // Cuando se selecciona un departamento, obtener las provincias relacionadas
+            $('#departamento').change(function() {
+                var departamentoId = $(this).val();
+
+                if (departamentoId) {
+                    $.get('/ubigeo/provincias/' + departamentoId, function(data) {
+                        var provinciaSelect = $('#provincia');
+                        provinciaSelect.empty().prop('disabled', false);
+                        provinciaSelect.append(
+                            '<option value="" disabled selected>Seleccionar Provincia</option>');
+
+                        data.forEach(function(provincia) {
+                            provinciaSelect.append('<option value="' + provincia.id_ubigeo +
+                                '">' + provincia.nombre_ubigeo + '</option>');
+                        });
+                    });
+                } else {
+                    $('#provincia').empty().prop('disabled', true);
+                    $('#distrito').empty().prop('disabled', true);
+                }
+            });
+
+            // Cuando se selecciona una provincia, obtener los distritos relacionados
+            $('#provincia').change(function() {
+                var provinciaId = $(this).val();
+
+                if (provinciaId) {
+                    $.get('/ubigeo/distritos/' + provinciaId, function(data) {
+                        var distritoSelect = $('#distrito');
+                        distritoSelect.empty().prop('disabled', false);
+                        distritoSelect.append(
+                            '<option value="" disabled selected>Seleccionar Distrito</option>');
+
+                        data.forEach(function(distrito) {
+                            distritoSelect.append('<option value="' + distrito.id_ubigeo +
+                                '">' + distrito.nombre_ubigeo + '</option>');
+                        });
+                    });
+                } else {
+                    $('#distrito').empty().prop('disabled', true);
+                }
+            });
+        });
+    </script>
+    
+    <script>
+    // Función para mostrar la alerta con SweetAlert
+    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+        closeButtonHtml = '', duration = 3000, type = 'success') {
+        const toast = window.Swal.mixin({
+            toast: true,
+            position: position || 'top-end',
+            showConfirmButton: false,
+            timer: duration,
+            showCloseButton: showCloseButton,
+            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+            iconColor: 'white', // Color del icono
+            customClass: {
+                title: 'text-white', // Asegura que el texto sea blanco
+            },
+        });
+
+        toast.fire({
+            title: msg,
+        });
+    }
+
+    // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
+    @if (session('success'))
+        showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
+    @elseif (session('error'))
+        showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
+    @endif
+</script>
+
+
 
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>

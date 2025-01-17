@@ -45,5 +45,6 @@ Route::delete('/clientegeneral/{id}', [ClienteGeneralController::class, 'destroy
 
 Route::delete('/tiendas/{id}', [TiendaController::class, 'destroy']);
 
+Route::delete('/clientes/{id}', [ClientesController::class, 'destroy']);
 
 

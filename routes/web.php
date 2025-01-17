@@ -113,7 +113,7 @@ Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tienda.update');
 Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
-Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tiendas.update');
+
 
 
 
@@ -136,8 +136,10 @@ Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast
 // Ruta para Administracion Subsidiario
 // Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');
 //Ruta para Administracion Clientes
-Route::get('/clientes', [ClientesController::class, 'index'])->name('administracion.clientes')->middleware('auth');
+Route::get('/clientes', [ClientesController::class, 'index'])->name('administracion.clientes');
 Route::post('/cliente/store', [ClientesController::class, 'store'])->name('cliente.store');
+Route::get('/cliente/{idCliente}/edit', [ClientesController::class, 'edit'])->name('cliente.edit');
+Route::put('/clientes/{idCliente}', [ClientesController::class, 'update'])->name('clientes.update');
 
 //Ruta para Administracion Proveedores
 Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
