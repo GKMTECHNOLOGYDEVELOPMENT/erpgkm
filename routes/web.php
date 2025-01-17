@@ -89,14 +89,8 @@ Route::get('/administracion/compras', [CompraController::class, 'index'])->name(
 //Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
-
-
-Route::get('/exportar-clientes-general', function () {
-    return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx');
-})->name('clientes-general.exportExcel');
-
-Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF'])
-    ->name('clientes-general.exportPDF')->middleware('auth');
+Route::get('/exportar-clientes-general', function () { return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx'); })->name('clientes-general.exportExcel');
+Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF']) ->name('clientes-general.exportPDF')->middleware('auth');
 
 // Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
@@ -143,6 +137,8 @@ Route::get('/clientes', [ClientesController::class, 'index'])->name('administrac
 Route::post('/cliente/store', [ClientesController::class, 'store'])->name('cliente.store');
 Route::get('/cliente/{idCliente}/edit', [ClientesController::class, 'edit'])->name('cliente.edit');
 Route::put('/clientes/{idCliente}', [ClientesController::class, 'update'])->name('clientes.update');
+Route::get('/reporte-clientes', [ClientesController::class, 'exportAllPDF']) ->name('reporte.clientes');
+
 
 //Ruta para Administracion Proveedores
 Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
