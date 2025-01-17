@@ -26,7 +26,6 @@ class ProveedoresRequest extends FormRequest
     {
         return [
             'nombre' => 'required|string|max:255',           // El nombre es obligatorio
-            'estado' => 'required|boolean',                   // El estado debe ser un valor booleano
             'departamento' => 'nullable|string|max:255',      // Departamento es opcional
             'provincia' => 'nullable|string|max:255',         // Provincia es opcional
             'distrito' => 'nullable|string|max:255',          // Distrito es opcional

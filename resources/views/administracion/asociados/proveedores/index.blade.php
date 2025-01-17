@@ -84,6 +84,8 @@
         </div>
     </div>
 
+    <!--Modal -->
+
     <div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">

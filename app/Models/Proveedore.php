@@ -41,15 +41,13 @@ class Proveedore extends Model
 
 	protected $casts = [
 		'estado' => 'bool',
-		'idCompra' => 'int',
-		'idSucursal' => 'int',
+		'idArea' => 'int',
 		'idTipoDocumento' => 'int'
 	];
 
 	protected $fillable = [
 		'nombre',
 		'estado',
-		'pais',
 		'departamento',
 		'provincia',
 		'distrito',
@@ -58,19 +56,18 @@ class Proveedore extends Model
 		'telefono',
 		'email',
 		'numeroDocumento',
-		'idCompra',
-		'idSucursal',
+		'idArea',
 		'idTipoDocumento'
 	];
 
-	public function compra()
-	{
-		return $this->belongsTo(Compra::class, 'idCompra');
-	}
+	// public function compra()
+	// {
+	// 	return $this->belongsTo(Compra::class, 'idCompra');
+	// }
 
-	public function sucursal()
+	public function area()
 	{
-		return $this->belongsTo(Sucursal::class, 'idSucursal');
+		return $this->belongsTo(Area::class, 'idArea');
 	}
 
 	public function tipodocumento()
