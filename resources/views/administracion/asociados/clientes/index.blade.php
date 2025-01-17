@@ -1,5 +1,5 @@
 <x-layout.default>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
@@ -40,7 +40,7 @@
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                        @click="exportTable('pdf')">
+                        @click="window.location.href = '{{ route('reporte.clientes') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -51,17 +51,6 @@
                         <span>PDF</span>
                     </button>
 
-                    <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M9 17V21H15V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        </svg>
-                        <span>Imprimir</span>
-                    </button>
 
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
@@ -113,36 +102,38 @@
                                     <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Cliente General</option>
                                         @foreach ($clientesGenerales as $clienteGeneral)
-                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">{{ $clienteGeneral->descripcion }}</option>
+                                            <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                                {{ $clienteGeneral->descripcion }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                    <input id="nombre"  type="text" name="nombre"
-                                        class="form-input w-full" placeholder="Ingrese el nombre">
+                                    <input id="nombre" type="text" name="nombre" class="form-input w-full"
+                                        placeholder="Ingrese el nombre">
                                 </div>
                                 <!-- Tipo Documento -->
                                 <div>
                                     <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
-                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">{{ $tipoDocumento->nombre }}</option>
+                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                                {{ $tipoDocumento->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <!-- Documento -->
                                 <div>
                                     <label for="documento" class="block text-sm font-medium">Documento</label>
-                                    <input id="documento" type="text"  name="documento"
-                                        class="form-input w-full" placeholder="Ingrese el documento">
+                                    <input id="documento" type="text" name="documento" class="form-input w-full"
+                                        placeholder="Ingrese el documento">
                                 </div>
                                 <!-- Teléfono -->
                                 <div>
                                     <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                    <input id="telefono" type="text"  name="telefono"
-                                        class="form-input w-full" placeholder="Ingrese el teléfono">
+                                    <input id="telefono" type="text" name="telefono" class="form-input w-full"
+                                        placeholder="Ingrese el teléfono">
                                 </div>
                                 <!-- Email -->
                                 <div>
@@ -156,9 +147,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                        <option value="{{ $departamento['id_ubigeo'] }}">
-                                            {{ $departamento['nombre_ubigeo'] }}
-                                        </option>
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -179,10 +170,10 @@
                                     </select>
                                 </div>
                                 <!-- Dirección (Ocupa 2 columnas) -->
-                                <div >
+                                <div>
                                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <input id="direccion" type="text"  name="direccion"
-                                        class="form-input w-full" placeholder="Ingrese el direccion">
+                                    <input id="direccion" type="text" name="direccion" class="form-input w-full"
+                                        placeholder="Ingrese el direccion">
                                 </div>
                             </div>
                             <!-- Botones -->
@@ -200,77 +191,78 @@
 
 
     <script>
-// Script AJAX para el formulario de cliente
-document.getElementById('clienteForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evita el envío del formulario tradicional
+        // Script AJAX para el formulario de cliente
+        document.getElementById('clienteForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita el envío del formulario tradicional
 
-    let formData = new FormData(this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
+            let formData = new FormData(
+            this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
 
-    // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
-    console.log("Formulario enviado:", this);
-    console.log("Datos del formulario:", Array.from(formData.entries()));
+            // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
+            console.log("Formulario enviado:", this);
+            console.log("Datos del formulario:", Array.from(formData.entries()));
 
-    // Hacer la solicitud AJAX
-    fetch("{{ route('cliente.store') }}", {
-        method: "POST", // Asegúrate de usar el método POST
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
-        },
-        body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
-    })
-    .then(response => {
-    console.log("Respuesta del servidor:", response);
-    if (!response.ok) {
-        throw new Error('Error en la respuesta del servidor');
-    }
-    return response.json(); // Intentar convertir la respuesta en JSON
-})
-.then(data => {
-    console.log("Datos recibidos del servidor:", data);
+            // Hacer la solicitud AJAX
+            fetch("{{ route('cliente.store') }}", {
+                    method: "POST", // Asegúrate de usar el método POST
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
+                    },
+                    body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
+                })
+                .then(response => {
+                    console.log("Respuesta del servidor:", response);
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json(); // Intentar convertir la respuesta en JSON
+                })
+                .then(data => {
+                    console.log("Datos recibidos del servidor:", data);
 
-    if (data && data.success) { // Asegurarte de que `data` y `data.success` existen
-        showMessage('Cliente agregado correctamente.', 'top-end');
-        document.getElementById('clienteForm').reset();
-        // document.querySelector('[x-data]').__x.$data.open = false;
-        let alpineData = Alpine.store('multipleTable');
-        if (alpineData && alpineData.updateTable) {
-            alpineData.updateTable();
-        }
-    } else {
-        showMessage('Hubo un error al guardar el cliente.', 'top-end');
-    }
-})
-.catch(error => {
-    console.error("Error en la solicitud:", error);
-    showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
-});
-});
+                    if (data && data.success) { // Asegurarte de que `data` y `data.success` existen
+                        showMessage('Cliente agregado correctamente.', 'top-end');
+                        document.getElementById('clienteForm').reset();
+                        // document.querySelector('[x-data]').__x.$data.open = false;
+                        let alpineData = Alpine.store('multipleTable');
+                        if (alpineData && alpineData.updateTable) {
+                            alpineData.updateTable();
+                        }
+                    } else {
+                        showMessage('Hubo un error al guardar el cliente.', 'top-end');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error en la solicitud:", error);
+                    showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
+                });
+        });
 
-// Función para mostrar la alerta con SweetAlert
-function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-    closeButtonHtml = '', duration = 3000, type = 'success') {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: position || 'top-end',
-        showConfirmButton: false,
-        timer: duration,
-        showCloseButton: showCloseButton,
-        icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-        background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-        iconColor: 'white', // Color del icono
-        customClass: {
-            title: 'text-white', // Asegura que el texto sea blanco
-        },
-    });
+        // Función para mostrar la alerta con SweetAlert
+        function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+            closeButtonHtml = '', duration = 3000, type = 'success') {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
+            });
 
-    toast.fire({
-        title: msg,
-    });
-};
-</script>
+            toast.fire({
+                title: msg,
+            });
+        };
+    </script>
 
 
-<script>
+    <script>
         document.addEventListener("alpine:init", () => {
             Alpine.data("multipleTable", () => ({
                 datatable1: null,
@@ -314,10 +306,14 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
                                 searchable: true,
                                 perPage: 10,
                                 labels: {
-                                    placeholder: "Buscar...",
-                                    perPage: "{select}",
-                                    noRows: "No se encontraron registros",
-                                    info: "Mostrando {start} a {end} de {rows} registros",
+                                    placeholder: "Buscar...", // Placeholder de búsqueda
+                                    perPage: "{select} registros por página", // Selección de registros por página
+                                    noRows: "No se encontraron registros", // Mensaje cuando no hay registros
+                                    info: "", // Información de la tabla
+                                },
+                                layout: {
+                                    top: "{search}", // Posición del campo de búsqueda
+                                    bottom: "{info}{select}{pager}", // Posición de información, selector y paginador
                                 },
                             });
                         })
@@ -390,86 +386,94 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
                 },
 
                 deleteCliente(idCliente) {
-    console.log(`Intentando eliminar el cliente con ID: ${idCliente}`);
-    
-    new window.Swal({
-        icon: 'warning',
-        title: '¿Estás seguro?',
-        text: "¡No podrás revertir esta acción!",
-        showCancelButton: true,
-        confirmButtonText: 'Eliminar',
-        cancelButtonText: 'Cancelar',
-        padding: '2em',
-        customClass: 'sweet-alerts',
-    }).then((result) => {
-        if (result.value) {
-            // Hacer la solicitud de eliminación
-            fetch(`/api/clientes/${idCliente}`, {
-                method: "DELETE",
-            })
-            .then((response) => {
-                if (!response.ok) throw new Error("Error al eliminar cliente");
-                return response.json();
-            })
-            .then((data) => {
-                console.log(`Respuesta del servidor al eliminar cliente:`, data);
+                    console.log(`Intentando eliminar el cliente con ID: ${idCliente}`);
 
-                // Verificar que el cliente ha sido eliminado correctamente
-                if (data.message) {
-                    console.log(`Cliente ${idCliente} eliminado con éxito`);
+                    new window.Swal({
+                        icon: 'warning',
+                        title: '¿Estás seguro?',
+                        text: "¡No podrás revertir esta acción!",
+                        showCancelButton: true,
+                        confirmButtonText: 'Eliminar',
+                        cancelButtonText: 'Cancelar',
+                        padding: '2em',
+                        customClass: 'sweet-alerts',
+                    }).then((result) => {
+                        if (result.value) {
+                            // Hacer la solicitud de eliminación
+                            fetch(`/api/clientes/${idCliente}`, {
+                                    method: "DELETE",
+                                })
+                                .then((response) => {
+                                    if (!response.ok) throw new Error(
+                                        "Error al eliminar cliente");
+                                    return response.json();
+                                })
+                                .then((data) => {
+                                    console.log(
+                                        `Respuesta del servidor al eliminar cliente:`,
+                                        data);
 
-                    // Actualizar la lista de clientes en el frontend
-                    this.clienteData = this.clienteData.filter(
-                        (cliente) => cliente.idCliente !== idCliente
-                    );
+                                    // Verificar que el cliente ha sido eliminado correctamente
+                                    if (data.message) {
+                                        console.log(
+                                            `Cliente ${idCliente} eliminado con éxito`);
 
-                    // Obtener todas las filas de la tabla
-                    const rows = this.datatable1.rows();
+                                        // Actualizar la lista de clientes en el frontend
+                                        this.clienteData = this.clienteData.filter(
+                                            (cliente) => cliente.idCliente !== idCliente
+                                        );
 
-                    console.log("Filas actuales en la tabla:", rows);
+                                        // Obtener todas las filas de la tabla
+                                        const rows = this.datatable1.rows();
 
-                    // Verifica la estructura de rows
-                    console.log("Tipo de 'rows':", typeof rows);
+                                        console.log("Filas actuales en la tabla:", rows);
 
-                    // Si rows es un objeto con un método 'get' para obtener las filas, entonces
-                    // debes utilizar ese método para obtener las filas de forma correcta.
+                                        // Verifica la estructura de rows
+                                        console.log("Tipo de 'rows':", typeof rows);
 
-                    // Iterar sobre las filas de la tabla
-                    Array.from(rows).forEach((row, index) => {
-                        // Depurar el contenido de cada fila
-                        console.log(`Fila ${index}:`, row);
+                                        // Si rows es un objeto con un método 'get' para obtener las filas, entonces
+                                        // debes utilizar ese método para obtener las filas de forma correcta.
 
-                        if (row.cells[0].innerText == idCliente.toString()) {
-                            console.log(`Eliminando fila con ID ${idCliente}`);
-                            this.datatable1.rows().remove(index); // Eliminar la fila
+                                        // Iterar sobre las filas de la tabla
+                                        Array.from(rows).forEach((row, index) => {
+                                            // Depurar el contenido de cada fila
+                                            console.log(`Fila ${index}:`, row);
+
+                                            if (row.cells[0].innerText == idCliente
+                                                .toString()) {
+                                                console.log(
+                                                    `Eliminando fila con ID ${idCliente}`
+                                                    );
+                                                this.datatable1.rows().remove(
+                                                index); // Eliminar la fila
+                                            }
+                                        });
+
+                                        // Mostrar notificación de éxito
+                                        new window.Swal({
+                                            title: '¡Eliminado!',
+                                            text: 'El cliente ha sido eliminado con éxito.',
+                                            icon: 'success',
+                                            customClass: 'sweet-alerts',
+                                        });
+                                    } else {
+                                        throw new Error('No se pudo eliminar el cliente.');
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error("Error al eliminar cliente:", error);
+
+                                    // Mostrar notificación de error
+                                    new window.Swal({
+                                        title: 'Error',
+                                        text: 'Ocurrió un error al eliminar el cliente.',
+                                        icon: 'error',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                });
                         }
                     });
-
-                    // Mostrar notificación de éxito
-                    new window.Swal({
-                        title: '¡Eliminado!',
-                        text: 'El cliente ha sido eliminado con éxito.',
-                        icon: 'success',
-                        customClass: 'sweet-alerts',
-                    });
-                } else {
-                    throw new Error('No se pudo eliminar el cliente.');
                 }
-            })
-            .catch((error) => {
-                console.error("Error al eliminar cliente:", error);
-
-                // Mostrar notificación de error
-                new window.Swal({
-                    title: 'Error',
-                    text: 'Ocurrió un error al eliminar el cliente.',
-                    icon: 'error',
-                    customClass: 'sweet-alerts',
-                });
-            });
-        }
-    });
-}
 
 
 
@@ -534,37 +538,37 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
             });
         });
     </script>
-    
+
     <script>
-    // Función para mostrar la alerta con SweetAlert
-    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-        closeButtonHtml = '', duration = 3000, type = 'success') {
-        const toast = window.Swal.mixin({
-            toast: true,
-            position: position || 'top-end',
-            showConfirmButton: false,
-            timer: duration,
-            showCloseButton: showCloseButton,
-            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-            iconColor: 'white', // Color del icono
-            customClass: {
-                title: 'text-white', // Asegura que el texto sea blanco
-            },
-        });
+        // Función para mostrar la alerta con SweetAlert
+        function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+            closeButtonHtml = '', duration = 3000, type = 'success') {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
+            });
 
-        toast.fire({
-            title: msg,
-        });
-    }
+            toast.fire({
+                title: msg,
+            });
+        }
 
-    // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
-    @if (session('success'))
-        showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
-    @elseif (session('error'))
-        showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
-    @endif
-</script>
+        // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
+        @if (session('success'))
+            showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
+        @elseif (session('error'))
+            showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
+        @endif
+    </script>
 
 
 

@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use PDF;
 
 class ClientesController extends Controller
 {
@@ -180,6 +181,32 @@ class ClientesController extends Controller
         return response()->json($clientesData);
     }
     
+    public function exportAllPDF()
+    {
+        try {
+            // Cargar los clientes con sus relaciones necesarias (optimización con eager loading)
+            $clientes = Cliente::with('tipoDocumento', 'clienteGeneral')->get();
+    
+            // Verificar si hay datos para exportar
+            if ($clientes->isEmpty()) {
+                return redirect()->back()->with('error', 'No hay clientes para generar el reporte.');
+            }
+    
+            // Generar el PDF usando la vista
+            $pdf = PDF::loadView('reporte.clientes', compact('clientes'))
+                      ->setPaper('a4', 'landscape'); // Configuración de tamaño y orientación del PDF
+    
+            // Retornar el PDF para su descarga o visualización
+            return $pdf->stream('reporte-clientes.pdf');
+        } catch (\Exception $e) {
+            // Registrar el error en los logs
+            Log::error('Error al generar el PDF: ' . $e->getMessage());
+    
+            // Redirigir con un mensaje de error
+            return redirect()->back()->with('error', 'Ocurrió un error al generar el reporte.');
+        }
+    }
+    
 
 
     public function destroy($id)
@@ -212,5 +239,6 @@ class ClientesController extends Controller
             return response()->json(['error' => 'Error al eliminar el cliente'], 500);
         }
     }
-    
+
+
 }
