@@ -3,118 +3,190 @@
 namespace App\Exports;
 
 use App\Models\ClienteGeneral;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithDrawings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ClientesGeneralExport implements FromCollection, WithHeadings, WithStyles, WithEvents, WithDrawings
+class ClientesGeneralExport implements 
+    FromCollection, 
+    WithMapping, 
+    WithHeadings, 
+    ShouldAutoSize, 
+    WithStyles, 
+    WithColumnWidths, 
+    WithCustomStartCell
 {
-    private $clientes;
+    private const HEADERS = ['#', 'Nombre', 'Foto', 'Estado'];
+    private \Illuminate\Support\Collection $clientes;
 
     public function __construct()
     {
         $this->clientes = ClienteGeneral::all();
+
+        if ($this->clientes->isEmpty()) {
+            throw new \Exception('No hay datos disponibles para exportar.');
+        }
     }
 
-    public function collection()
+    /**
+     * Devuelve la colección de datos.
+     */
+    public function collection(): \Illuminate\Support\Collection
     {
-        return $this->clientes->map(function ($cliente) {
-            return [
-                'descripcion' => $cliente->descripcion,
-                'foto' => '', // Aquí irá la imagen
-                'estado' => $cliente->estado ? 'Activo' : 'Inactivo',
-            ];
-        });
+        return $this->clientes;
     }
 
+    /**
+     * Mapea las columnas que se exportarán.
+     */
+    public function map($cliente): array
+    {
+        static $rowNumber = 1;
+
+        return [
+            $rowNumber++,                               // Columna de numeración
+            mb_strimwidth($cliente->descripcion, 0, 50, '...'), // Limita la longitud del nombre
+            $cliente->foto ? 'Tiene Imagen' : 'Sin Imagen',     // Verifica si el campo foto contiene datos
+            $cliente->estado ? 'Activo' : 'Inactivo', // Estado
+        ];
+    }
+
+    /**
+     * Define los encabezados de las columnas.
+     */
     public function headings(): array
     {
-        return ['Nombre', 'Foto', 'Estado'];
+        return self::HEADERS;
     }
 
-    public function styles(Worksheet $sheet)
+    /**
+     * Define los anchos de las columnas.
+     */
+    public function columnWidths(): array
     {
         return [
-            1 => [ // Encabezados
-                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'B71C1C']],
-                'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
+            'A' => 10,  // Número
+            'B' => 30,  // Nombre
+            'C' => 15,  // Foto
+            'D' => 15,  // Estado
+        ];
+    }
+
+    /**
+     * Define la celda de inicio de los datos.
+     */
+    public function startCell(): string
+    {
+        return 'A4'; // Inicia desde la celda A4 para dejar espacio para el título y la fecha
+    }
+
+    /**
+     * Aplica estilos al archivo Excel.
+     */
+    public function styles(Worksheet $sheet): array
+    {
+        // Establecer la zona horaria de Perú
+        date_default_timezone_set('America/Lima');
+
+        // Título del reporte
+        $sheet->mergeCells('A1:D1');
+        $sheet->setCellValue('A1', 'Reporte General de Clientes');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 16,
+                'color' => ['argb' => 'FFFFFFFF'], // Texto blanco
             ],
-        ];
-    }
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FFE3342F'], // Fondo rojo
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
 
-    public function registerEvents(): array
-    {
-        return [
-            \Maatwebsite\Excel\Events\AfterSheet::class => function (\Maatwebsite\Excel\Events\AfterSheet $event) {
-                $sheet = $event->sheet->getDelegate();
+        // Fecha del reporte
+        $sheet->mergeCells('A2:D2');
+        $sheet->setCellValue('A2', 'Generado el: ' . now()->setTimezone('America/Lima')->format('d/m/Y H:i'));
+        $sheet->getStyle('A2')->applyFromArray([
+            'font' => [
+                'italic' => true,
+                'color' => ['argb' => 'FF555555'], // Texto gris
+                'size' => 11,
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
 
-                // Ajustar encabezados en la fila 2
-                $sheet->getStyle('A1:C1')->applyFromArray([
-                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'B71C1C']],
-                    'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
-                ]);
+        // Estilo del encabezado
+        $sheet->getStyle('A4:D4')->applyFromArray([
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FFE3342F'], // Fondo rojo
+            ],
+            'font' => [
+                'bold' => true,
+                'color' => ['argb' => 'FFFFFFFF'], // Texto blanco
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
 
-                // Ajustar columnas
-                $sheet->getColumnDimension('A')->setWidth(30); // Nombre
-                $sheet->getColumnDimension('B')->setWidth(20); // Foto
-                $sheet->getColumnDimension('C')->setWidth(20); // Estado
+        // Centramos los datos de todas las columnas
+        $sheet->getStyle('A5:D' . $sheet->getHighestRow())->applyFromArray([
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+            ],
+        ]);
 
-                // Aplicar bordes y centrar contenido
-                $sheet->getStyle('A1:C' . (count($this->clientes) + 1))->applyFromArray([
-                    'alignment' => [
-                        'horizontal' => 'center',
-                        'vertical' => 'center',
+        // Bordes alrededor de la tabla
+        $sheet->getStyle('A4:D' . $sheet->getHighestRow())->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'], // Bordes negros
+                ],
+            ],
+        ]);
+
+        // Estilo para las celdas "Activo" e "Inactivo"
+        foreach (range(5, $sheet->getHighestRow()) as $row) {
+            $estado = $sheet->getCell("D{$row}")->getValue();
+            if ($estado === 'Activo') {
+                $sheet->getStyle("D{$row}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FF38C172'], // Fondo verde
                     ],
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                            'color' => ['rgb' => '000000'],
-                        ],
+                    'font' => [
+                        'color' => ['argb' => 'FFFFFFFF'], // Texto blanco
                     ],
                 ]);
-
-                // Aplicar colores según el estado
-                foreach ($this->clientes as $index => $cliente) {
-                    $row = $index + 2; // Los datos empiezan en la fila 2
-                    $color = $cliente->estado ? 'DFF0D8' : 'F8D7DA'; // Verde claro para activo, rojo claro para inactivo
-
-                    $sheet->getStyle('C' . $row)->applyFromArray([
-                        'fill' => [
-                            'fillType' => 'solid',
-                            'startColor' => ['rgb' => $color],
-                        ],
-                        'font' => ['bold' => true],
-                    ]);
-                }
-            },
-        ];
-    }
-
-    public function drawings()
-    {
-        $drawings = [];
-        $row = 2; // Las imágenes empiezan en la fila 2
-
-        foreach ($this->clientes as $cliente) {
-            if ($cliente->foto && Storage::exists('public/' . $cliente->foto)) {
-                $drawing = new Drawing();
-                $drawing->setName($cliente->descripcion);
-                $drawing->setDescription('Foto del cliente');
-                $drawing->setPath(storage_path('app/public/' . $cliente->foto)); // Ruta a la imagen
-                $drawing->setHeight(40); // Tamaño de la imagen
-                $drawing->setCoordinates('B' . $row); // Columna de la imagen
-                $drawings[] = $drawing;
+            } elseif ($estado === 'Inactivo') {
+                $sheet->getStyle("D{$row}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                        'startColor' => ['argb' => 'FFE3342F'], // Fondo rojo
+                    ],
+                    'font' => [
+                        'color' => ['argb' => 'FFFFFFFF'], // Texto blanco
+                    ],
+                ]);
             }
-            $row++;
         }
 
-        return $drawings;
+        return [];
     }
 }

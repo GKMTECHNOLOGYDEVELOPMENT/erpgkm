@@ -1,176 +1,144 @@
+@php
+    setlocale(LC_TIME, 'Spanish_Spain.1252');
+    $fechaFormateada = mb_strtoupper(strftime('%d %B %Y'), 'UTF-8');
+    $fechaPeru = \Carbon\Carbon::now()->setTimezone('America/Lima')->format('d/m/Y H:i:s');
+@endphp
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Clientes Generales</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        /* General */
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 10px;
             margin: 0;
             padding: 0;
-            background-color: #ffffff;
-            color: #333;
-            line-height: 1.5;
+            background-color: #f3f4f6;
         }
-
-        /* Header */
-        header {
-            background-color: #d32f2f; /* Rojo elegante */
-            color: #ffffff;
-            padding: 10px 0;
+        .container {
+            margin: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e3342f;
             text-align: center;
-            border-bottom: 3px solid #b71c1c;
         }
-
-        header h1 {
-            font-size: 20px;
-            letter-spacing: 1px;
+        .header h1 {
+            font-size: 14px;
+            color: #e3342f;
             margin: 0;
         }
-
-        header p {
-            font-size: 12px;
-            margin-top: 5px;
+        .header p {
+            font-size: 10px;
+            margin: 0;
+            color: #555;
         }
-
-        /* Tabla */
-        table {
-            width: 90%;
-            margin: 10px auto;
-            border-collapse: collapse;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #b71c1c; /* Rojo más oscuro */
-            color: #ffffff;
-            font-size: 12px;
+        .table-header {
+            background-color: #e3342f;
+            color: white;
             text-transform: uppercase;
+            font-size: 10px;
         }
-
-        tr:nth-child(even) {
-            background-color: #f8f9fa; /* Gris claro */
+        .table-row:nth-child(odd) {
+            background-color: #f9fafb;
         }
-
-        tr:hover {
-            background-color: #f1f1f1; /* Hover gris */
+        .table-row:nth-child(even) {
+            background-color: #fefefe;
         }
-
-        td {
-            font-size: 12px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            page-break-inside: auto;
         }
-
-        /* Badges */
-        .badge {
-            display: inline-block;
-            padding: 5px 8px;
-            border-radius: 8px;
-            color: #fff;
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #e3342f;
+        }
+        th {
             font-size: 10px;
             font-weight: bold;
         }
-
-        .badge-success {
-            background-color: #28a745; /* Verde */
+        td {
+            font-size: 10px;
         }
-
-        .badge-danger {
-            background-color: #dc3545; /* Rojo */
-        }
-
-        /* Imagen */
         img {
             width: 40px;
             height: 40px;
             object-fit: cover;
             border-radius: 5px;
             border: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            margin-top: 10px;
-            padding: 5px 0;
-            font-size: 10px;
-            color: #777;
-            border-top: 2px solid #d32f2f;
-        }
-
-        footer p {
-            margin: 0;
-        }
-
-        /* Detalles del PDF */
-        .report-details {
-            width: 90%;
-            margin: 0 auto 10px;
-            text-align: right;
-            font-size: 10px;
-            color: #555;
-        }
-
-        .report-details span {
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 8px;
             font-weight: bold;
+            font-size: 10px;
+            color: #fff;
+        }
+        .badge-success {
+            background-color: #28a745;
+        }
+        .badge-danger {
+            background-color: #dc3545;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <h1>Reporte de Clientes Generales</h1>
-        <p>Generado el: {{ now()->format('d/m/Y') }}</p>
-    </header>
+    <div class="container">
+        <!-- Encabezado -->
+        <div class="header">
+            <h1>REPORTE DE CLIENTES GENERALES</h1>
+            <p>Generado el: {{ $fechaFormateada }}</p>
+        </div>
 
-    <!-- Detalles del Reporte -->
-    <div class="report-details">
-        <p><span>Total Clientes:</span> {{ count($clientes) }}</p>
+        <!-- Tabla de clientes -->
+        <div class="content">
+            <table>
+                <thead class="table-header">
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Foto</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($clientes as $cliente)
+                        <tr class="table-row">
+                            <td>{{ $cliente->descripcion }}</td>
+                            <td>
+                                @if ($cliente->foto)
+                                    <img src="{{ public_path('/' . $cliente->foto) }}" alt="Foto">
+                                @else
+                                    <span>Sin imagen</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge {{ $cliente->estado ? 'badge-success' : 'badge-danger' }}">
+                                    {{ $cliente->estado ? 'Activo' : 'Inactivo' }}
+                                </span>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="text-center mt-4">
+            <p class="text-xs">
+                Generado el {{ $fechaPeru }}
+            </p>
+        </div>
     </div>
-
-    <!-- Tabla -->
-    <table>
-        <thead>
-            <tr>
-                <th>Descripción</th>
-                <th>Foto</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($clientes as $cliente)
-            <tr>
-                <td>{{ $cliente->descripcion }}</td>
-                <td>
-                    @if ($cliente->foto)
-                        <img src="{{ public_path('/' . $cliente->foto) }}" alt="Foto del Cliente">
-                    @else
-                        Sin imagen
-                    @endif
-                </td>
-                <td>
-                    <span class="badge {{ $cliente->estado ? 'badge-success' : 'badge-danger' }}">
-                        {{ $cliente->estado ? 'Activo' : 'Inactivo' }}
-                    </span>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; {{ now()->year }} Solutions Force. Todos los derechos reservados.</p>
-    </footer>
 </body>
 </html>
