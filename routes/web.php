@@ -38,6 +38,7 @@ use App\Models\Subsidiario;
 use Illuminate\Http\Client\Request;
 use App\Exports\ClientesGeneralExport;
 use App\Exports\ClientesExport;
+use App\Exports\TiendaExport;
 use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
@@ -108,6 +109,7 @@ Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tienda.update');
 Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
+Route::get('/exportar-tiendas', function () { return Excel::download(new TiendaExport, 'reporte_tiendas.xlsx'); })->name('tiendas.exportExcel');
 Route::get('/reporte-tiendas', [TiendaController::class, 'exportAllPDF'])->name('reporte.tiendas');
 
 

@@ -122,40 +122,60 @@ class ClientesController extends Controller
     // Método para actualizar el cliente
     public function update(Request $request, $id)
     {
-        // Validación de los datos
-        $request->validate([
-            'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
-            'nombre' => 'required|string|max:255',
-            'idTipoDocumento' => 'required|exists:tipodocumento,idTipoDocumento',
-            'documento' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:255',
-            'departamento' => 'required|string|max:255', // Validar el campo 'departamento'
-            'provincia' => 'required|string|max:255',    // Validar el campo 'provincia'
-            'distrito' => 'required|string|max:255',     // Validar el campo 'distrito'
-            'direccion' => 'required|string|max:255',
-        ]);
-
-        // Buscar el cliente
-        $cliente = Cliente::findOrFail($id);
-
-        // Actualizar los campos del cliente
-        $cliente->update([
-            'idClienteGeneral' => $request->idClienteGeneral,
-            'nombre' => $request->nombre,
-            'idTipoDocumento' => $request->idTipoDocumento,
-            'documento' => $request->documento,
-            'telefono' => $request->telefono,
-            'email' => $request->email,
-            'departamento' => $request->departamento,
-            'provincia' => $request->provincia,
-            'distrito' => $request->distrito,
-            'direccion' => $request->direccion,
-        ]);
-
-        // Redirigir con un mensaje de éxito
-        return redirect()->route('administracion.clientes')->with('success', 'Cliente actualizado correctamente');
+        try {
+            // Log inicial: datos recibidos en la solicitud
+            Log::info('Datos recibidos en la solicitud:', $request->all());
+    
+            // Validación de los datos
+            $validatedData = $request->validate([
+                'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+                'nombre' => 'required|string|max:255',
+                'idTipoDocumento' => 'required|exists:tipodocumento,idTipoDocumento',
+                'documento' => 'required|string|max:255',
+                'telefono' => 'nullable|string|max:15',
+                'email' => 'nullable|email|max:255',
+                'departamento' => 'required|string|max:255', // Validar el campo 'departamento'
+                'provincia' => 'required|string|max:255',    // Validar el campo 'provincia'
+                'distrito' => 'required|string|max:255',     // Validar el campo 'distrito'
+                'direccion' => 'required|string|max:255',
+            ]);
+            Log::info('Datos validados correctamente:', $validatedData);
+    
+            // Buscar el cliente
+            $cliente = Cliente::find($id);
+    
+            if (!$cliente) {
+                Log::error("Cliente con ID {$id} no encontrado.");
+                return redirect()->route('administracion.clientes')->with('error', 'Cliente no encontrado.');
+            }
+            Log::info("Cliente encontrado con ID {$id}:", $cliente->toArray());
+    
+            // Actualizar los campos del cliente
+            $cliente->update([
+                'idClienteGeneral' => $validatedData['idClienteGeneral'],
+                'nombre' => $validatedData['nombre'],
+                'idTipoDocumento' => $validatedData['idTipoDocumento'],
+                'documento' => $validatedData['documento'],
+                'telefono' => $validatedData['telefono'],
+                'email' => $validatedData['email'],
+                'departamento' => $validatedData['departamento'],
+                'provincia' => $validatedData['provincia'],
+                'distrito' => $validatedData['distrito'],
+                'direccion' => $validatedData['direccion'],
+            ]);
+            Log::info("Cliente con ID {$id} actualizado exitosamente.");
+    
+            // Redirigir con un mensaje de éxito
+            return redirect()->route('administracion.clientes')->with('success', 'Cliente actualizado correctamente');
+        } catch (\Exception $e) {
+            // Log de error para capturar excepciones
+            Log::error("Error al actualizar el cliente con ID {$id}: " . $e->getMessage(), [
+                'stack' => $e->getTraceAsString(),
+            ]);
+            return redirect()->route('administracion.clientes')->with('error', 'Hubo un error al actualizar el cliente.');
+        }
     }
+    
 
     public function getAll()
     {
