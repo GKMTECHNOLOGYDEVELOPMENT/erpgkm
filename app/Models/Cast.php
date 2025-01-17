@@ -36,7 +36,9 @@ class Cast extends Model
 		'email',
 		'direccion',
 		'ruc',
-		'provincia'
+		'provincia',
+		'distrito',
+		'departamento'
 	];
 
 	public function contactos()
