@@ -35,17 +35,11 @@ Route::get('/tiendas', [TiendaController::class, 'getAll']);
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);
-
-
 // Route::get('/subsidiarios', [SubsidiarioController::class, 'getAll']);
-
-
 Route::post('/check-nombre', [ClienteGeneralController::class, 'checkNombre']);
 
 Route::delete('/clientegeneral/{id}', [ClienteGeneralController::class, 'destroy']);
-
 Route::delete('/tiendas/{id}', [TiendaController::class, 'destroy']);
-
 Route::delete('/clientes/{id}', [ClientesController::class, 'destroy']);
-
+Route::delete('/proveedores/{id}', [ProveedoresController::class, 'destroy']);
 

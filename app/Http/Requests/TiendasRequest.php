@@ -26,7 +26,7 @@ class TiendasRequest extends FormRequest
     {
         return [
             'nombre' => 'required|string|max:255',
-            'ruc' => 'required|string|size:11', // Asumiendo que RUC tiene una longitud fija de 11 caracteres
+            'ruc' => 'required|string|max:255', // Asumiendo que RUC tiene una longitud fija de 11 caracteres
             'celular' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'direccion' => 'nullable|string|max:255',
@@ -34,8 +34,8 @@ class TiendasRequest extends FormRequest
             'distrito' => 'nullable|string|max:255',
             'departamento' => 'nullable|string|max:255',
             'referencia' => 'nullable|string|max:255',
-            'lat' => 'nullable|size:25', // Si el campo "lat" debe tener una longitud fija de 18
-            'lng' => 'nullable|size:25', // Similar a "lat", validamos que tenga longitud de 18
+            'lat' => 'nullable|max:255', // Si el campo "lat" debe tener una longitud fija de 18
+            'lng' => 'nullable|max:255', // Similar a "lat", validamos que tenga longitud de 18
             'idCliente' => 'required|integer|exists:cliente,idCliente', // Asumiendo que idCliente hace referencia a una tabla 'clientes'
         ];
     }
