@@ -31,8 +31,8 @@ class Tienda extends Model
     ];
 
 	// Relación uno a muchos (Un cliente tiene muchas tiendas)
-    public function tiendas()
+    public function cliente()
     {
-        return $this->hasMany(Tienda::class, 'idCliente');
+        return $this->belongsTo(Cliente::class, 'idCliente', 'idCliente');
     }
 }

@@ -11,8 +11,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <title>Reporte de Clientes</title>
+    <title>Reporte de Tiendas</title>
     <style>
         body {
             font-family: 'Times New Roman', Times, serif;
@@ -81,30 +80,6 @@
         .table-row:nth-child(even) {
             background-color: #fefefe;
         }
-
-        img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 10px;
-            color: #fff;
-        }
-
-        .badge-success {
-            background-color: #28a745;
-        }
-
-        .badge-danger {
-            background-color: #dc3545;
-        }
     </style>
 </head>
 
@@ -112,7 +87,7 @@
     <div class="container">
         <!-- Encabezado -->
         <div class="header">
-            <h1>REPORTE DE CLIENTES</h1>
+            <h1>REPORTE DE TIENDAS</h1>
             <p>Generado el: {{ $fechaFormateada }}</p>
             <p>Hora del servidor (Perú): {{ $fechaPeru }}</p>
         </div>
@@ -121,31 +96,27 @@
         <table>
             <thead>
                 <tr>
-                    <th>Tipo Documento</th>
-                    <th>Documento</th>
+                    <th>#</th>
                     <th>Nombre</th>
-                    <th>Teléfono</th>
+                    <th>RUC</th>
+                    <th>Celular</th>
                     <th>Email</th>
-                    <th>Cliente General</th>
                     <th>Dirección</th>
-                    <th>Estado</th>
+                    <th>Referencia</th>
+                    <th>Cliente Asociado</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($clientes as $cliente)
+                @foreach ($tiendas as $index => $tienda)
                     <tr class="table-row">
-                        <td>{{ $cliente->tipoDocumento->nombre }}</td>
-                        <td>{{ $cliente->documento }}</td>
-                        <td>{{ $cliente->nombre }}</td>
-                        <td>{{ $cliente->telefono }}</td>
-                        <td>{{ $cliente->email }}</td>
-                        <td>{{ $cliente->clienteGeneral->descripcion }}</td>
-                        <td>{{ $cliente->direccion }}</td>
-                        <td>
-                            <span class="badge {{ $cliente->estado ? 'badge-success' : 'badge-danger' }}">
-                                {{ $cliente->estado ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </td>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $tienda->nombre }}</td>
+                        <td>{{ $tienda->ruc }}</td>
+                        <td>{{ $tienda->celular }}</td>
+                        <td>{{ $tienda->email }}</td>
+                        <td>{{ $tienda->direccion }}</td>
+                        <td>{{ $tienda->referencia }}</td>
+                        <td>{{ $tienda->cliente->nombre ?? 'Sin cliente' }}</td>
                     </tr>
                 @endforeach
             </tbody>

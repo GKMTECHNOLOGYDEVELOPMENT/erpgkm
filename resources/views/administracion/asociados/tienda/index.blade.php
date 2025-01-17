@@ -31,7 +31,7 @@
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                        @click="exportTable('pdf')">
+                        onclick="window.location.href='{{ route('reporte.tiendas') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -41,10 +41,10 @@
                         </svg>
                         <span>PDF</span>
                     </button>
+
                     <!-- Botón Agregar -->
-                        <!-- Botón Agregar -->
-                        <a href="{{ route('tienda.create') }}"
-                        class="btn btn-primary btn-sm flex items-center gap-2">
+                    <!-- Botón Agregar -->
+                    <a href="{{ route('tienda.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21"
                             fill="none">
                             <path
@@ -64,11 +64,6 @@
     </div>
 
 
-   
-  
-
-
-   
 
 
 
@@ -76,65 +71,74 @@
 
 
 
-<script>
-document.addEventListener("alpine:init", () => {
-    Alpine.data("multipleTable", () => ({
-        datatable1: null,
-        tiendaData: [], // Almacena los datos actuales de la tabla
-        pollInterval: 2000, // Intervalo de polling (en ms)
 
-        init() {
-            console.log("Component initialized for Tienda");
 
-            // Obtener datos iniciales e inicializar la tabla
-            this.fetchDataAndInitTable();
 
-            // Configurar polling para verificar actualizaciones
-            setInterval(() => {
-                this.checkForUpdates();
-            }, this.pollInterval);
-        },
 
-        fetchDataAndInitTable() {
-    fetch("/api/tiendas")
-        .then((response) => {
-            if (!response.ok) throw new Error("Error al obtener datos del servidor");
-            return response.json();
-        })
-        .then((data) => {
-            this.tiendaData = data;
 
-            // Inicializar DataTable con las nuevas cabeceras
-            this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
-                data: {
-                    headings: ["Ruc", "Nombre", "Celular", "Email", "Dirección", "Referencia", "Acción"],  // Nuevas cabeceras
-                    data: this.formatDataForTable(data),  // Asegúrate de que esta función mapee los nuevos datos
+    <script>
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("multipleTable", () => ({
+                datatable1: null,
+                tiendaData: [], // Almacena los datos actuales de la tabla
+                pollInterval: 2000, // Intervalo de polling (en ms)
+
+                init() {
+                    console.log("Component initialized for Tienda");
+
+                    // Obtener datos iniciales e inicializar la tabla
+                    this.fetchDataAndInitTable();
+
+                    // Configurar polling para verificar actualizaciones
+                    setInterval(() => {
+                        this.checkForUpdates();
+                    }, this.pollInterval);
                 },
-                searchable: true,
-                perPage: 10,
-                labels: {
-                    placeholder: "Buscar...",
-                    perPage: "{select}",
-                    noRows: "No se encontraron registros",
-                    info: "Mostrando {start} a {end} de {rows} registros",
-                },
-            });
-        })
-        .catch((error) => {
-            console.error("Error al inicializar la tabla:", error);
-        });
-},
 
-// Actualiza esta función para que incluya los nuevos datos
-formatDataForTable(data) {
-    return data.map((tienda) => [
-        tienda.ruc,           // RUC de la tienda
-        tienda.nombre,        // Nombre de la tienda
-        tienda.celular,       // Celular de la tienda
-        tienda.email,         // Email de la tienda
-        tienda.direccion,     // Dirección de la tienda
-        tienda.referencia,    // Referencia de la tienda
-        `<div class="flex items-center">
+                fetchDataAndInitTable() {
+                    fetch("/api/tiendas")
+                        .then((response) => {
+                            if (!response.ok) throw new Error(
+                            "Error al obtener datos del servidor");
+                            return response.json();
+                        })
+                        .then((data) => {
+                            this.tiendaData = data;
+
+                            // Inicializar DataTable con las nuevas cabeceras
+                            this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
+                                data: {
+                                    headings: ["Ruc", "Nombre", "Celular", "Email",
+                                        "Dirección", "Referencia", "Acción"
+                                    ], // Nuevas cabeceras
+                                    data: this.formatDataForTable(
+                                    data), // Asegúrate de que esta función mapee los nuevos datos
+                                },
+                                searchable: true,
+                                perPage: 10,
+                                labels: {
+                                    placeholder: "Buscar...",
+                                    perPage: "{select}",
+                                    noRows: "No se encontraron registros",
+                                    info: "Mostrando {start} a {end} de {rows} registros",
+                                },
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error al inicializar la tabla:", error);
+                        });
+                },
+
+                // Actualiza esta función para que incluya los nuevos datos
+                formatDataForTable(data) {
+                    return data.map((tienda) => [
+                        tienda.ruc, // RUC de la tienda
+                        tienda.nombre, // Nombre de la tienda
+                        tienda.celular, // Celular de la tienda
+                        tienda.email, // Email de la tienda
+                        tienda.direccion, // Dirección de la tienda
+                        tienda.referencia, // Referencia de la tienda
+                        `<div class="flex items-center">
              <a href="/tienda/${tienda.idTienda}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                     <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
@@ -151,135 +155,136 @@ formatDataForTable(data) {
                 </svg>
             </button>
         </div>`
-    ]);
-},
+                    ]);
+                },
 
 
 
-        checkForUpdates() {
-            fetch("/api/tiendas")
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al verificar actualizaciones");
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log("Datos actuales:", this.tiendaData);
-                    console.log("Datos del servidor:", data);
-
-                    // Detectar nuevas filas
-                    const newData = data.filter(
-                        (newTienda) =>
-                            !this.tiendaData.some(
-                                (existingTienda) =>
-                                    existingTienda.idTienda === newTienda.idTienda
-                            )
-                    );
-
-                    if (newData.length > 0) {
-                        console.log("Nuevos datos detectados:", newData);
-
-                        // Agregar filas nuevas a la tabla
-                        this.datatable1.rows().add(this.formatDataForTable(newData));
-                        this.tiendaData.push(...newData); // Actualizar tiendaData
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error al verificar actualizaciones:", error);
-                });
-        },
-
-        deleteTienda(idTienda) {
-            new window.Swal({
-                icon: 'warning',
-                title: '¿Estás seguro?',
-                text: "¡No podrás revertir esta acción!",
-                showCancelButton: true,
-                confirmButtonText: 'Eliminar',
-                cancelButtonText: 'Cancelar',
-                padding: '2em',
-                customClass: 'sweet-alerts',
-            }).then((result) => {
-                if (result.value) {
-                    // Hacer la solicitud de eliminación
-                    fetch(`/api/tiendas/${idTienda}`, {
-                        method: "DELETE",
-                    })
+                checkForUpdates() {
+                    fetch("/api/tiendas")
                         .then((response) => {
-                            if (!response.ok) throw new Error("Error al eliminar tienda");
+                            if (!response.ok) throw new Error("Error al verificar actualizaciones");
                             return response.json();
                         })
-                        .then(() => {
-                            console.log(`Tienda ${idTienda} eliminada con éxito`);
+                        .then((data) => {
+                            console.log("Datos actuales:", this.tiendaData);
+                            console.log("Datos del servidor:", data);
 
-                            // Actualizar la tabla eliminando la fila
-                            this.tiendaData = this.tiendaData.filter(
-                                (tienda) => tienda.idTienda !== idTienda
-                            );
-                            this.datatable1.rows().remove(
-                                (row) =>
-                                    row.cells[0].innerHTML === idTienda.toString()
+                            // Detectar nuevas filas
+                            const newData = data.filter(
+                                (newTienda) =>
+                                !this.tiendaData.some(
+                                    (existingTienda) =>
+                                    existingTienda.idTienda === newTienda.idTienda
+                                )
                             );
 
-                            // Mostrar notificación de éxito
-                            new window.Swal({
-                                title: '¡Eliminado!',
-                                text: 'La tienda ha sido eliminada con éxito.',
-                                icon: 'success',
-                                customClass: 'sweet-alerts',
-                            });
+                            if (newData.length > 0) {
+                                console.log("Nuevos datos detectados:", newData);
+
+                                // Agregar filas nuevas a la tabla
+                                this.datatable1.rows().add(this.formatDataForTable(newData));
+                                this.tiendaData.push(...newData); // Actualizar tiendaData
+                            }
                         })
                         .catch((error) => {
-                            console.error("Error al eliminar tienda:", error);
-
-                            // Mostrar notificación de error
-                            new window.Swal({
-                                title: 'Error',
-                                text: 'Ocurrió un error al eliminar la tienda.',
-                                icon: 'error',
-                                customClass: 'sweet-alerts',
-                            });
+                            console.error("Error al verificar actualizaciones:", error);
                         });
-                }
+                },
+
+                deleteTienda(idTienda) {
+                    new window.Swal({
+                        icon: 'warning',
+                        title: '¿Estás seguro?',
+                        text: "¡No podrás revertir esta acción!",
+                        showCancelButton: true,
+                        confirmButtonText: 'Eliminar',
+                        cancelButtonText: 'Cancelar',
+                        padding: '2em',
+                        customClass: 'sweet-alerts',
+                    }).then((result) => {
+                        if (result.value) {
+                            // Hacer la solicitud de eliminación
+                            fetch(`/api/tiendas/${idTienda}`, {
+                                    method: "DELETE",
+                                })
+                                .then((response) => {
+                                    if (!response.ok) throw new Error(
+                                        "Error al eliminar tienda");
+                                    return response.json();
+                                })
+                                .then(() => {
+                                    console.log(`Tienda ${idTienda} eliminada con éxito`);
+
+                                    // Actualizar la tabla eliminando la fila
+                                    this.tiendaData = this.tiendaData.filter(
+                                        (tienda) => tienda.idTienda !== idTienda
+                                    );
+                                    this.datatable1.rows().remove(
+                                        (row) =>
+                                        row.cells[0].innerHTML === idTienda.toString()
+                                    );
+
+                                    // Mostrar notificación de éxito
+                                    new window.Swal({
+                                        title: '¡Eliminado!',
+                                        text: 'La tienda ha sido eliminada con éxito.',
+                                        icon: 'success',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                })
+                                .catch((error) => {
+                                    console.error("Error al eliminar tienda:", error);
+
+                                    // Mostrar notificación de error
+                                    new window.Swal({
+                                        title: 'Error',
+                                        text: 'Ocurrió un error al eliminar la tienda.',
+                                        icon: 'error',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                });
+                        }
+                    });
+                },
+            }));
+        });
+    </script>
+
+
+    <!-- Asegúrate de que SweetAlert2 está cargado -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Función para mostrar la alerta con SweetAlert
+        function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+            closeButtonHtml = '', duration = 3000, type = 'success') {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
             });
-        },
-    }));
-});
-</script>
 
+            toast.fire({
+                title: msg,
+            });
+        }
 
-<!-- Asegúrate de que SweetAlert2 está cargado -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-    // Función para mostrar la alerta con SweetAlert
-    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-        closeButtonHtml = '', duration = 3000, type = 'success') {
-        const toast = window.Swal.mixin({
-            toast: true,
-            position: position || 'top-end',
-            showConfirmButton: false,
-            timer: duration,
-            showCloseButton: showCloseButton,
-            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-            iconColor: 'white', // Color del icono
-            customClass: {
-                title: 'text-white', // Asegura que el texto sea blanco
-            },
-        });
-
-        toast.fire({
-            title: msg,
-        });
-    }
-
-    // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
-    @if (session('success'))
-        showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
-    @elseif (session('error'))
-        showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
-    @endif
-</script>
+        // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
+        @if (session('success'))
+            showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
+        @elseif (session('error'))
+            showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
+        @endif
+    </script>
 
 
 

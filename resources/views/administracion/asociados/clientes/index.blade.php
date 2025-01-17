@@ -26,7 +26,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
-                        @click="exportTable('excel')">
+                        onclick="window.location.href='{{ route('clientes.exportExcel') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -37,6 +37,7 @@
                         </svg>
                         <span>Excel</span>
                     </button>
+
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
@@ -196,7 +197,7 @@
             event.preventDefault(); // Evita el envío del formulario tradicional
 
             let formData = new FormData(
-            this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
+                this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
 
             // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
             console.log("Formulario enviado:", this);
@@ -332,7 +333,9 @@
                         cliente.email, // Email
                         cliente.clienteGeneral, // Cliente General (ahora la descripción)
                         cliente.direccion, // Dirección
-                        cliente.estado === 'Activo' ? 'Activo' : 'Inactivo', // Estado
+                        cliente.estado === 'Activo' ?
+                        `<span class="badge badge-outline-success">Activo</span>` :
+                        `<span class="badge badge-outline-danger">Inactivo</span>`, // Columna: Estado
                         `<div class="flex items-center">
                     <a href="/cliente/${cliente.idCliente}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
@@ -443,9 +446,9 @@
                                                 .toString()) {
                                                 console.log(
                                                     `Eliminando fila con ID ${idCliente}`
-                                                    );
+                                                );
                                                 this.datatable1.rows().remove(
-                                                index); // Eliminar la fila
+                                                    index); // Eliminar la fila
                                             }
                                         });
 

@@ -8,6 +8,7 @@ use App\Models\Cliente;
 use App\Models\Tienda;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use PDF;
 
 class TiendaController extends Controller
 {
@@ -137,7 +138,21 @@ public function edit($id)
 }
 
 
-  
+public function exportAllPDF()
+{
+    $tiendas = Tienda::with('cliente')->get(); // Ahora la relación funcionará
+
+    try {
+        $pdf = PDF::loadView('administracion.asociados.tienda.pdf.reporte-tiendas', compact('tiendas'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->stream('reporte-tiendas.pdf');
+    } catch (\Exception $e) {
+        Log::error('Error al generar el PDF: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Hubo un problema al generar el PDF.');
+    }
+}
+
   
   
   
