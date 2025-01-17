@@ -129,6 +129,9 @@ Route::post('/check-nombre', function (Request $request) {
 
 //Ruta para Administracion Cast
 Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
+Route::post('/cast/store', [CastController::class, 'store'])->name('cast.store');
+Route::get('/cast/{idCast}/edit', [CastController::class, 'edit'])->name('cast.edit');
+Route::put('/cast/{idCast}', [CastController::class, 'update'])->name('casts.update');
 // Route::get('/casts', [CastController::class, 'getAll']);
 // Ruta para Administracion Subsidiario
 // Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');

@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/clientes', [ClientesController::class, 'getAll']);
-Route::get('/casts', [CastController::class, 'getAll']);
+Route::get('/cast', [CastController::class, 'getAll']);
 Route::get('/clientegeneral', [ClienteGeneralController::class, 'getAll']);
 Route::get('/proveedores', [ProveedoresController::class, 'getAll']);
 Route::get('/tiendas', [TiendaController::class, 'getAll']);
@@ -42,4 +42,4 @@ Route::delete('/clientegeneral/{id}', [ClienteGeneralController::class, 'destroy
 Route::delete('/tiendas/{id}', [TiendaController::class, 'destroy']);
 Route::delete('/clientes/{id}', [ClientesController::class, 'destroy']);
 Route::delete('/proveedores/{id}', [ProveedoresController::class, 'destroy']);
-
+Route::delete('/cast/{id}', [CastController::class, 'destroy']);
