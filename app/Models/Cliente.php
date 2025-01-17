@@ -52,11 +52,9 @@ class Cliente extends Model
 		'email',
 		'fecha_registro',
 		'direccion',
-		'nacionalidad',
 		'departamento',
 		'provincia',
 		'distrito',
-		'codigo_postal',
 		'estado',
 		'idTipoDocumento',
 		'idClienteGeneral'
