@@ -1,4 +1,5 @@
 <x-layout.default>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <style>
@@ -521,6 +522,37 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
             });
         });
     </script>
+
+<script>
+    // Función para mostrar la alerta con SweetAlert
+    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+        closeButtonHtml = '', duration = 3000, type = 'success') {
+        const toast = window.Swal.mixin({
+            toast: true,
+            position: position || 'top-end',
+            showConfirmButton: false,
+            timer: duration,
+            showCloseButton: showCloseButton,
+            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+            iconColor: 'white', // Color del icono
+            customClass: {
+                title: 'text-white', // Asegura que el texto sea blanco
+            },
+        });
+
+        toast.fire({
+            title: msg,
+        });
+    }
+
+    // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
+    @if (session('success'))
+        showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
+    @elseif (session('error'))
+        showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
+    @endif
+</script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
