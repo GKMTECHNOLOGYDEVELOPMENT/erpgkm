@@ -144,6 +144,8 @@ Route::put('/clientes/{idCliente}', [ClientesController::class, 'update'])->name
 //Ruta para Administracion Proveedores
 Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
 Route::post('/proveedores/store', [ProveedoresController::class, 'store'])->name('proveedor.store');
+Route::get('/proveedores/{idProveedor}/edit', [ProveedoresController::class, 'edit'])->name('proveedor.edit');
+Route::put('/proveedores/{idProveedor}', [ProveedoresController::class, 'update'])->name('proveedores.update');
 //Ruta para administracion cotizaciones
 Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'index'])->name('cotizaciones.crear-cotizacion')->middleware('auth');
 
