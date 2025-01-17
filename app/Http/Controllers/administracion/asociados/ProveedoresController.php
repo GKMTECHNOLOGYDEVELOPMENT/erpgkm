@@ -3,136 +3,91 @@
 namespace App\Http\Controllers\administracion\asociados;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProveedoresRequest;
+use App\Models\Area;
 use App\Models\Cliente;
 use App\Models\Proveedore;
+use App\Models\Tipodocumento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ProveedoresController extends Controller
 {
     public function index()
     {
+        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+        $tiposDocumento = Tipodocumento::all();
+        $areas = Area::all();
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.proveedores.index'); 
+        return view('administracion.asociados.proveedores.index', compact('departamentos', 'tiposDocumento','areas') ); 
     }
 
-    // Crear un nuevo Proveedor
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'nombre' => 'required|string|max:255',
-    //         'estado' => 'required|boolean',
-    //         'pais' => 'required|string|max:255',
-    //         'departamento' => 'required|string|max:255',
-    //         'provincia' => 'required|string|max:255',
-    //         'distrito' => 'required|string|max:255',
-    //         'direccion' => 'required|string|max:255',
-    //         'codigoPostal' => 'required|string|max:255',
-    //         'telefono' => 'required|string|max:20',
-    //         'email' => 'required|email|max:255',
-    //         'numeroDocumento' => 'required|string|max:50',
-    //         'idCompra' => 'nullable|integer',
-    //         'idSucursal' => 'nullable|integer',
-    //         'idTipoDocumento' => 'nullable|integer',
-    //     ]);
+    public function store(ProveedoresRequest $request)
+{
+    try {
+        // Datos del proveedor, ya validados
+        $dataProveedores = $request->validated();
+    
+        // Establecer valores predeterminados para 'estado' y 'fecha_registro'
+        $dataProveedores['estado'] = 1; // Valor predeterminado para 'estado' (activo)
+    
+    
+        // Verificar los datos validados con los valores predeterminados
+        Log::debug('Datos validados recibidos:', $dataProveedores);
+    
+        // Guardar el proveedor
+        $proveedor = Proveedore::create($dataProveedores);
+    
+        // Verificar si el proveedor se guardó correctamente
+        Log::debug('Proveedor insertado:', $proveedor->toArray()); // Convertir el proveedor a array
+    
+        // Responder con JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Proveedor agregado correctamente',
+            'data' => $proveedor,
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al guardar el proveedor: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al guardar el proveedor.',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
 
-    //     $proveedor = new Proveedore();
-    //     $proveedor->nombre = $request->nombre;
-    //     $proveedor->estado = $request->estado;
-    //     $proveedor->pais = $request->pais;
-    //     $proveedor->departamento = $request->departamento;
-    //     $proveedor->provincia = $request->provincia;
-    //     $proveedor->distrito = $request->distrito;
-    //     $proveedor->direccion = $request->direccion;
-    //     $proveedor->codigoPostal = $request->codigoPostal;
-    //     $proveedor->telefono = $request->telefono;
-    //     $proveedor->email = $request->email;
-    //     $proveedor->numeroDocumento = $request->numeroDocumento;
-    //     $proveedor->idCompra = $request->idCompra;
-    //     $proveedor->idSucursal = $request->idSucursal;
-    //     $proveedor->idTipoDocumento = $request->idTipoDocumento;
-    //     $proveedor->save();
-
-    //     return response()->json(['message' => 'Proveedor creado correctamente'], 201);
-    // }
-
-
-    // Actualizar un Proveedor
-    // public function update(Request $request, $id)
-    // {
-    //     $request->validate([
-    //         'nombre' => 'required|string|max:255',
-    //         'estado' => 'required|boolean',
-    //         'pais' => 'required|string|max:255',
-    //         'departamento' => 'required|string|max:255',
-    //         'provincia' => 'required|string|max:255',
-    //         'distrito' => 'required|string|max:255',
-    //         'direccion' => 'required|string|max:255',
-    //         'codigoPostal' => 'required|string|max:255',
-    //         'telefono' => 'required|string|max:20',
-    //         'email' => 'required|email|max:255',
-    //         'numeroDocumento' => 'required|string|max:50',
-    //         'idCompra' => 'nullable|integer',
-    //         'idSucursal' => 'nullable|integer',
-    //         'idTipoDocumento' => 'nullable|integer',
-    //     ]);
-
-    //     $proveedor = Proveedore::findOrFail($id);
-    //     $proveedor->nombre = $request->nombre;
-    //     $proveedor->estado = $request->estado;
-    //     $proveedor->pais = $request->pais;
-    //     $proveedor->departamento = $request->departamento;
-    //     $proveedor->provincia = $request->provincia;
-    //     $proveedor->distrito = $request->distrito;
-    //     $proveedor->direccion = $request->direccion;
-    //     $proveedor->codigoPostal = $request->codigoPostal;
-    //     $proveedor->telefono = $request->telefono;
-    //     $proveedor->email = $request->email;
-    //     $proveedor->numeroDocumento = $request->numeroDocumento;
-    //     $proveedor->idCompra = $request->idCompra;
-    //     $proveedor->idSucursal = $request->idSucursal;
-    //     $proveedor->idTipoDocumento = $request->idTipoDocumento;
-    //     $proveedor->save();
-
-    //     return response()->json(['message' => 'Proveedor actualizado correctamente']);
-    // }
-
-    // // Eliminar un Proveedor
-    // public function destroy($id)
-    // {
-    //     $proveedor = Proveedore::findOrFail($id);
-    //     $proveedor->delete();
-
-    //     return response()->json(['message' => 'Proveedor eliminado correctamente']);
-    // }
+ 
 
 
     public function getAll()
-{
-    // Obtén todos los datos de la tabla cliente
-    $clientes = Cliente::all();
-
-    // Procesa los datos
-    $clientesData = $clientes->map(function ($cliente) {
-        return [
-            'idCliente' => $cliente->idCliente,
-            'nombre' => $cliente->nombre,
-            'documento' => $cliente->documento,
-            'telefono' => $cliente->telefono,
-            'email' => $cliente->email,
-            'fecha_registro' => $cliente->fecha_registro ? $cliente->fecha_registro->format('d/m/Y') : '',
-            'direccion' => $cliente->direccion,
-            'nacionalidad' => $cliente->nacionalidad,
-            'departamento' => $cliente->departamento,
-            'provincia' => $cliente->provincia,
-            'distrito' => $cliente->distrito,
-            'codigo_postal' => $cliente->codigo_postal,
-            'estado' => $cliente->estado ? 'Activo' : 'Inactivo',
-        ];
-    });
-
-    // Retorna los datos en formato JSON
-    return response()->json($clientesData);
-}
+    {
+        // Obtener todos los proveedores con sus relaciones (TipoDocumento y Area)
+        $proveedores = Proveedore::with(['tipoDocumento', 'area'])->get();
+    
+        // Procesa los datos para incluir los campos necesarios, mostrando los nombres relacionados
+        $proveedoresData = $proveedores->map(function ($proveedor) {
+            return [
+                'idProveedor'    => $proveedor->idProveedor,
+                'nombre'         => $proveedor->nombre,
+                'estado'         => $proveedor->estado == 1 ? 'Activo' : 'Inactivo',
+                'departamento'   => $proveedor->departamento,
+                'provincia'      => $proveedor->provincia,
+                'distrito'       => $proveedor->distrito,
+                'direccion'      => $proveedor->direccion,
+                'codigoPostal'   => $proveedor->codigoPostal,
+                'telefono'       => $proveedor->telefono,
+                'email'          => $proveedor->email,
+                'numeroDocumento'=> $proveedor->numeroDocumento,
+                'idArea'         => $proveedor->area->nombre, // Mostrar nombre del área
+                'idTipoDocumento'=> $proveedor->tipoDocumento->nombre, // Mostrar nombre del tipo de documento
+            ];
+        });
+    
+        // Retorna los datos en formato JSON
+        return response()->json($proveedoresData);
+    }
+    
 
 
 }

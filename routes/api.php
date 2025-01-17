@@ -3,6 +3,7 @@
 use App\Http\Controllers\administracion\asociados\CastController;
 use App\Http\Controllers\administracion\asociados\ClienteGeneralController;
 use App\Http\Controllers\administracion\asociados\ClientesController;
+use App\Http\Controllers\administracion\asociados\ProveedoresController;
 use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
 use Illuminate\Http\Request;
@@ -25,19 +26,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     
 });
 
+Route::get('/clientes', [ClientesController::class, 'getAll']);
 Route::get('/casts', [CastController::class, 'getAll']);
-
 Route::get('/clientegeneral', [ClienteGeneralController::class, 'getAll']);
-
-
+Route::get('/proveedores', [ProveedoresController::class, 'getAll']);
 Route::get('/tiendas', [TiendaController::class, 'getAll']);
+
+
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);
 
 
 // Route::get('/subsidiarios', [SubsidiarioController::class, 'getAll']);
 
-Route::get('/clientes', [ClientesController::class, 'getAll']);
 
 Route::post('/check-nombre', [ClienteGeneralController::class, 'checkNombre']);
 
