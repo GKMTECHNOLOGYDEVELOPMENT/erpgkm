@@ -63,6 +63,18 @@
         </div>
     </div>
 
+<<<<<<< HEAD
+<!-- Asegúrate de que SweetAlert2 está cargado -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- En tu archivo Blade -->
+<script>
+        window.sessionMessages = {
+            success: '{{ session('success') }}',
+            error: '{{ session('error') }}',
+        };
+    </script>
+    <script src="{{ asset('assets/js/notificacion.js') }}"></script>
+=======
 
 
 
@@ -291,7 +303,9 @@
     </script>
 
 
+>>>>>>> 44e92cc7de1a057b85f9409a23f56ac869174d86
 
+<script src="{{ asset('assets/js/tienda.js') }}"></script>
 
     <script src="/assets/js/simple-datatables.js"></script>
     <!-- Script de NiceSelect -->
