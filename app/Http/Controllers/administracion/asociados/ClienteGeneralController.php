@@ -163,26 +163,7 @@ public function update(Request $request, $id)
 
 
 
-// public function destroy($id) {
-//     $cliente = ClienteGeneral::find($id);
 
-//     if (!$cliente) {
-//         return response()->json(['error' => 'Cliente no encontrado'], 404);
-//     }
-
-//     // Verificar si el cliente tiene una imagen y eliminarla
-//     if ($cliente->foto && Storage::exists($cliente->foto)) {
-//         // Eliminar la imagen de la ruta especificada en la columna 'foto'
-//         Storage::delete($cliente->foto);
-//         // Opcional: Puedes hacer un log para confirmar que se eliminó la imagen
-//         Log::info("Imagen del cliente $id eliminada: " . $cliente->foto);
-//     }
-
-//     // Eliminar el cliente
-//     $cliente->delete();
-
-//     return response()->json(['message' => 'Cliente y su imagen eliminados con éxito'], 200);
-// }
  
 
 
