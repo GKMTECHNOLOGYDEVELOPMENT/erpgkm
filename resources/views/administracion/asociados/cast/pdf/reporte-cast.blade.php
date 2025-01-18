@@ -1,28 +1,32 @@
 @php
+    use Carbon\Carbon;
     setlocale(LC_TIME, 'Spanish_Spain.1252');
     $fechaFormateada = mb_strtoupper(strftime('%d %B %Y'), 'UTF-8');
-    $fechaPeru = \Carbon\Carbon::now()->setTimezone('America/Lima')->format('d/m/Y H:i:s');
+    $fechaPeru = Carbon::now()->setTimezone('America/Lima')->format('d/m/Y H:i:s');
 @endphp
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Clientes Generales</title>
+    <title>Reporte de CAST</title>
     <style>
         body {
-            font-size: 10px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12px;
             margin: 0;
             padding: 0;
             background-image: url('{{ public_path('assets/images/hojamembretada.jpg') }}');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
-            height: 100%; /* Altura completa */
-            width: 100%; /* Ancho completo */
         }
-        .content {
-            padding: 40px; /* Espacio alrededor del contenido */
+        .container {
+            margin: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0); /* Blanco semitransparente */
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .header {
             text-align: center;
@@ -31,12 +35,12 @@
             padding-bottom: 10px;
         }
         .header h1 {
-            font-size: 14px;
+            font-size: 16px;
             color: #e3342f;
             margin: 0;
         }
         .header p {
-            font-size: 10px;
+            font-size: 12px;
             margin: 5px 0;
             color: #555;
         }
@@ -44,7 +48,6 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: rgba(255, 255, 255, 0.9); /* Fondo semitransparente para tabla */
         }
         table, th, td {
             border: 1px solid #e3342f;
@@ -52,7 +55,7 @@
         th, td {
             text-align: center;
             padding: 8px;
-            font-size: 10px;
+            font-size: 12px;
         }
         th {
             background-color: #e3342f;
@@ -60,10 +63,10 @@
             text-transform: uppercase;
         }
         .table-row:nth-child(odd) {
-            background-color: rgba(243, 244, 246, 0.8); /* Transparencia */
+            background-color: #f9fafb;
         }
         .table-row:nth-child(even) {
-            background-color: rgba(255, 255, 255, 0.8); /* Transparencia */
+            background-color: #fefefe;
         }
         .badge {
             display: inline-block;
@@ -79,60 +82,51 @@
         .badge-danger {
             background-color: #dc3545;
         }
-        img {
-            max-width: 60px; /* Tamaño máximo de la imagen */
-            max-height: 60px;
-            border-radius: 5px; /* Bordes redondeados */
-            object-fit: cover; /* Ajusta las imágenes para que mantengan su proporción */
-        }
-        .text-xs {
-            font-size: 10px;
-        }
     </style>
 </head>
 <body>
-    <div class="content">
-        <!-- Encabezado -->
+    <div class="container">
         <div class="header">
-            <h1>REPORTE DE CLIENTES GENERALES</h1>
+            <h1>REPORTE DE CAST</h1>
             <p>Generado el: {{ $fechaFormateada }}</p>
+            <p>Hora del servidor (Perú): {{ $fechaPeru }}</p>
         </div>
-
-        <!-- Tabla de clientes -->
         <table>
             <thead>
                 <tr>
-                    <th>Descripción</th>
-                    <th>Foto</th>
+                    <th>RUC</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Departamento</th>
+                    <th>Provincia</th>
+                    <th>Distrito</th>
+                    <th>Dirección</th>
                     <th>Estado</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($clientes as $cliente)
+                @foreach($casts as $cast)
                     <tr class="table-row">
-                        <td>{{ $cliente->descripcion }}</td>
+                        <td>{{ $cast->ruc }}</td>
+                        <td>{{ $cast->nombre }}</td>
+                        <td>{{ $cast->telefono }}</td>
+                        <td>{{ $cast->email }}</td>
+                        <td>{{ $cast->departamento }}</td>
+                        <td>{{ $cast->provincia }}</td>
+                        <td>{{ $cast->distrito }}</td>
+                        <td>{{ $cast->direccion }}</td>
                         <td>
-                            @if ($cliente->foto)
-                                <img src="{{ public_path('/' . $cliente->foto) }}" alt="Foto">
-                            @else
-                                <span>Sin imagen</span>
-                            @endif
-                        </td>
-                        <td>
-                            <span class="badge {{ $cliente->estado ? 'badge-success' : 'badge-danger' }}">
-                                {{ $cliente->estado ? 'Activo' : 'Inactivo' }}
+                            <span class="badge {{ $cast->estado == 'Activo' ? 'badge-success' : 'badge-danger' }}">
+                                {{ $cast->estado == 'Activo' ? 'Activo' : 'Inactivo' }}
                             </span>
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
-
-        <!-- Información adicional -->
         <div class="text-center mt-4">
-            <p class="text-xs">
-                Generado el {{ $fechaPeru }}
-            </p>
+            <p class="text-xs">Generado el {{ $fechaPeru }}</p>
         </div>
     </div>
 </body>

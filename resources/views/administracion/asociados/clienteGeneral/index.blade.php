@@ -242,7 +242,7 @@
                                 },
                                 layout: {
                                     top: "{search}", // Posición del campo de búsqueda
-                                    bottom: "{info}{select}{pager}", // Posición de información, selector y paginador
+                                    bottom: "", // Posición de información, selector y paginador
                                 },
                             });
                         })

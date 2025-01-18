@@ -9,6 +9,7 @@ use App\Models\Cast;
 use App\Models\Clientegeneral;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use PDF;
 
 class CastController extends Controller
 {
@@ -178,7 +179,20 @@ public function update(Request $request, $id)
     }
 }
 
-   
+public function exportAllPDF()
+{
+    $casts = Cast::all(); // Obtén todos los registros de CAST
+
+    try {
+        $pdf = PDF::loadView('administracion.asociados.cast.pdf.reporte-cast', compact('casts'))
+            ->setPaper('a4', 'landscape'); // Configura el tamaño y orientación del PDF
+
+        return $pdf->stream('reporte-cast.pdf'); // Devuelve el PDF para visualizarlo en el navegador
+    } catch (\Exception $e) {
+        Log::error('Error al generar el PDF: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Hubo un problema al generar el PDF.');
+    }
+}
 
     public function getAll()
     {

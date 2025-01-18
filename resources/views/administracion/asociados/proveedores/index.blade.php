@@ -1,6 +1,6 @@
 <x-layout.default>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <style>
         .panel {
@@ -64,18 +64,21 @@
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M5 8C5 6.89543 5.89543 6 7 6H17C18.1046 6 19 6.89543 19 8V16C19 17.1046 18.1046 18 17 18H7C5.89543 18 5 17.1046 5 16V8Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9 12H15" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 9V15" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3 5H21" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3 19H21" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                            fill="none">
+                            <path
+                                d="M5 8C5 6.89543 5.89543 6 7 6H17C18.1046 6 19 6.89543 19 8V16C19 17.1046 18.1046 18 17 18H7C5.89543 18 5 17.1046 5 16V8Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M9 12H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M12 9V15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M3 5H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M3 19H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
                         <span>Agregar</span>
                     </button>
                 </div>
@@ -119,7 +122,8 @@
                                     <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
-                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">{{ $tipoDocumento->nombre }}</option>
+                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                                {{ $tipoDocumento->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -127,8 +131,8 @@
                                 <div>
                                     <label for="numeroDocumento" class="block text-sm font-medium">Número de
                                         Documento</label>
-                                    <input id="numeroDocumento" type="text" class="form-input w-full" name="numeroDocumento"
-                                        placeholder="Ingrese el número de documento">
+                                    <input id="numeroDocumento" type="text" class="form-input w-full"
+                                        name="numeroDocumento" placeholder="Ingrese el número de documento">
                                 </div>
                                 <!-- departamento -->
                                 <div>
@@ -136,9 +140,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                        <option value="{{ $departamento['id_ubigeo'] }}">
-                                            {{ $departamento['nombre_ubigeo'] }}
-                                        </option>
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -158,21 +162,21 @@
                                         <option value="" disabled selected>Seleccionar Distrito</option>
                                     </select>
                                 </div>
-                               
-                                   <!-- Area -->
-                                   <div>
+
+                                <!-- Area -->
+                                <div>
                                     <select id="idArea" name="idArea" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Area</option>
                                         @foreach ($areas as $area)
-                                        <option value="{{ $area->idArea }}">{{ $area->nombre }}</option>
+                                            <option value="{{ $area->idArea }}">{{ $area->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <!-- Código Postal -->
                                 <div>
                                     <label for="codigoPostal" class="block text-sm font-medium">Código Postal</label>
-                                    <input id="codigoPostal" type="text" class="form-input w-full" name="codigoPostal"
-                                        placeholder="Ingrese el código postal">
+                                    <input id="codigoPostal" type="text" class="form-input w-full"
+                                        name="codigoPostal" placeholder="Ingrese el código postal">
                                 </div>
                                 <!-- Teléfono -->
                                 <div>
@@ -187,10 +191,10 @@
                                         placeholder="Ingrese el email">
                                 </div>
                                 <!-- Dirección -->
-                                <div >
+                                <div>
                                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <input id="direccion" type="text"  name="direccion"
-                                        class="form-input w-full" placeholder="Ingrese el direccion">
+                                    <input id="direccion" type="text" name="direccion" class="form-input w-full"
+                                        placeholder="Ingrese el direccion">
                                 </div>
                             </div>
                             <!-- Botones -->
@@ -206,139 +210,150 @@
         </div>
     </div>
 
-    
-<script>
-// Script AJAX para el formulario de proveedor
-document.getElementById('proveedorForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evita el envío del formulario tradicional
 
-    let formData = new FormData(this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
+    <script>
+        // Script AJAX para el formulario de proveedor
+        document.getElementById('proveedorForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita el envío del formulario tradicional
 
-    // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
-    console.log("Formulario enviado:", this);
-    console.log("Datos del formulario:", Array.from(formData.entries()));
+            let formData = new FormData(
+            this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
 
-    // Hacer la solicitud AJAX
-    fetch("{{ route('proveedor.store') }}", {
-        method: "POST", // Asegúrate de usar el método POST
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
-        },
-        body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
-    })
-    .then(response => {
-        console.log("Respuesta del servidor:", response);
-        if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
-        }
-        return response.json(); // Intentar convertir la respuesta en JSON
-    })
-    .then(data => {
-        console.log("Datos recibidos del servidor:", data);
+            // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
+            console.log("Formulario enviado:", this);
+            console.log("Datos del formulario:", Array.from(formData.entries()));
 
-        if (data && data.success) { // Asegurarte de que `data` y `data.success` existen
-            showMessage('Proveedor agregado correctamente.', 'top-end');
-            document.getElementById('proveedorForm').reset();
-            // Actualizar la tabla de proveedores (si se usa Alpine.js)
-            let alpineData = Alpine.store('multipleTable');
-            if (alpineData && alpineData.updateTable) {
-                alpineData.updateTable();
-            }
-        } else {
-            showMessage('Hubo un error al guardar el proveedor.', 'top-end');
-        }
-    })
-    .catch(error => {
-        console.error("Error en la solicitud:", error);
-        showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
-    });
-});
+            // Hacer la solicitud AJAX
+            fetch("{{ route('proveedor.store') }}", {
+                    method: "POST", // Asegúrate de usar el método POST
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
+                    },
+                    body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
+                })
+                .then(response => {
+                    console.log("Respuesta del servidor:", response);
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json(); // Intentar convertir la respuesta en JSON
+                })
+                .then(data => {
+                    console.log("Datos recibidos del servidor:", data);
 
-// Función para mostrar la alerta con SweetAlert
-function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-    closeButtonHtml = '', duration = 3000, type = 'success') {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: position || 'top-end',
-        showConfirmButton: false,
-        timer: duration,
-        showCloseButton: showCloseButton,
-        icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-        background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-        iconColor: 'white', // Color del icono
-        customClass: {
-            title: 'text-white', // Asegura que el texto sea blanco
-        },
-    });
+                    if (data && data.success) { // Asegurarte de que `data` y `data.success` existen
+                        showMessage('Proveedor agregado correctamente.', 'top-end');
+                        document.getElementById('proveedorForm').reset();
+                        // Actualizar la tabla de proveedores (si se usa Alpine.js)
+                        let alpineData = Alpine.store('multipleTable');
+                        if (alpineData && alpineData.updateTable) {
+                            alpineData.updateTable();
+                        }
+                    } else {
+                        showMessage('Hubo un error al guardar el proveedor.', 'top-end');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error en la solicitud:", error);
+                    showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
+                });
+        });
 
-    toast.fire({
-        title: msg,
-    });
-};
-</script>
+        // Función para mostrar la alerta con SweetAlert
+        function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+            closeButtonHtml = '', duration = 3000, type = 'success') {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
+            });
 
-<script>
-    document.addEventListener("alpine:init", () => {
-        Alpine.data("multipleTable", () => ({
-            datatable1: null,
-            proveedorData: [], // Almacena los datos actuales de la tabla de proveedores
-            pollInterval: 2000, // Intervalo de polling (en ms)
+            toast.fire({
+                title: msg,
+            });
+        };
+    </script>
 
-            init() {
-                console.log("Component initialized for Proveedor");
+    <script>
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("multipleTable", () => ({
+                datatable1: null,
+                proveedorData: [], // Almacena los datos actuales de la tabla de proveedores
+                pollInterval: 2000, // Intervalo de polling (en ms)
 
-                // Obtener datos iniciales e inicializar la tabla
-                this.fetchDataAndInitTable();
+                init() {
+                    console.log("Component initialized for Proveedor");
 
-                // Configurar polling para verificar actualizaciones
-                setInterval(() => {
-                    this.checkForUpdates();
-                }, this.pollInterval);
-            },
+                    // Obtener datos iniciales e inicializar la tabla
+                    this.fetchDataAndInitTable();
 
-            fetchDataAndInitTable() {
-                fetch("/api/proveedores") // Cambiar la URL de la API a /api/proveedores
-                    .then((response) => {
-                        if (!response.ok) throw new Error("Error al obtener datos del servidor");
-                        return response.json();
-                    })
-                    .then((data) => {
-                        console.log("Datos de los proveedores:", data);
-                        this.proveedorData = data;
+                    // Configurar polling para verificar actualizaciones
+                    setInterval(() => {
+                        this.checkForUpdates();
+                    }, this.pollInterval);
+                },
 
-                        // Inicializar DataTable con las nuevas cabeceras
-                        this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
-                            data: {
-                                headings: ["Tipo Documento", "Número Documento", "Nombre", "Teléfono", "Email", "Área", "Dirección", "Estado", "Acción"], // Nuevas cabeceras
-                                data: this.formatDataForTable(data), // Asegúrate de que esta función mapee los nuevos datos
-                            },
-                            searchable: true,
-                            perPage: 10,
-                            labels: {
-                                placeholder: "Buscar...",
-                                perPage: "{select}",
-                                noRows: "No se encontraron registros",
-                                info: "Mostrando {start} a {end} de {rows} registros",
-                            },
+                fetchDataAndInitTable() {
+                    fetch("/api/proveedores") // Cambiar la URL de la API a /api/proveedores
+                        .then((response) => {
+                            if (!response.ok) throw new Error(
+                            "Error al obtener datos del servidor");
+                            return response.json();
+                        })
+                        .then((data) => {
+                            console.log("Datos de los proveedores:", data);
+                            this.proveedorData = data;
+
+                            // Inicializar DataTable con las nuevas cabeceras
+                            this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
+                                data: {
+                                    headings: ["Tipo Documento", "Número Documento",
+                                        "Nombre", "Teléfono", "Email", "Área",
+                                        "Dirección", "Estado", "Acción"
+                                    ], // Nuevas cabeceras
+                                    data: this.formatDataForTable(
+                                    data), // Asegúrate de que esta función mapee los nuevos datos
+                                },
+                                searchable: true,
+                                perPage: 10,
+                                labels: {
+                                    placeholder: "Buscar...", // Placeholder de búsqueda
+                                    perPage: "{select} registros por página", // Selección de registros por página
+                                    noRows: "No se encontraron registros", // Mensaje cuando no hay registros
+                                    info: "", // Información de la tabla
+                                },
+                                layout: {
+                                    top: "{search}", // Posición del campo de búsqueda
+                                    bottom: "", // Posición de información, selector y paginador
+                                },
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error al inicializar la tabla:", error);
                         });
-                    })
-                    .catch((error) => {
-                        console.error("Error al inicializar la tabla:", error);
-                    });
-            },
+                },
 
-            // Actualiza esta función para que incluya los nuevos datos de proveedor
-            formatDataForTable(data) {
-                return data.map((proveedor) => [
-                    proveedor.idTipoDocumento, // Tipo de Documento (ahora el nombre del tipo)
-                    proveedor.numeroDocumento, // Número de Documento
-                    proveedor.nombre, // Nombre
-                    proveedor.telefono, // Teléfono
-                    proveedor.email, // Email
-                    proveedor.idArea, // Área
-                    proveedor.direccion, // Dirección
-                    proveedor.estado === 'Activo' ? 'Activo' : 'Inactivo', // Estado
-                    `<div class="flex items-center">
+                // Actualiza esta función para que incluya los nuevos datos de proveedor
+                formatDataForTable(data) {
+                    return data.map((proveedor) => [
+                        proveedor
+                        .idTipoDocumento, // Tipo de Documento (ahora el nombre del tipo)
+                        proveedor.numeroDocumento, // Número de Documento
+                        proveedor.nombre, // Nombre
+                        proveedor.telefono, // Teléfono
+                        proveedor.email, // Email
+                        proveedor.idArea, // Área
+                        proveedor.direccion, // Dirección
+                        proveedor.estado === 'Activo' ? 'Activo' : 'Inactivo', // Estado
+                        `<div class="flex items-center">
                         <a href="/proveedores/${proveedor.idProveedor}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                                 <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
@@ -355,128 +370,139 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
                             </svg>
                         </button>
                     </div>`
-                ]);
-            },
+                    ]);
+                },
 
-            checkForUpdates() {
-                fetch("/api/proveedores") // Cambiar la URL de la API a /api/proveedores
-                    .then((response) => {
-                        if (!response.ok) throw new Error("Error al verificar actualizaciones");
-                        return response.json();
-                    })
-                    .then((data) => {
-                        console.log("Datos actuales:", this.proveedorData);
-                        console.log("Datos del servidor:", data);
-
-                        // Detectar nuevas filas
-                        const newData = data.filter(
-                            (newProveedor) =>
-                                !this.proveedorData.some(
-                                    (existingProveedor) =>
-                                        existingProveedor.idProveedor === newProveedor.idProveedor
-                                )
-                        );
-
-                        if (newData.length > 0) {
-                            console.log("Nuevos datos detectados:", newData);
-
-                            // Agregar filas nuevas a la tabla
-                            this.datatable1.rows().add(this.formatDataForTable(newData));
-                            this.proveedorData.push(...newData); // Actualizar proveedorData
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error al verificar actualizaciones:", error);
-                    });
-            },
-
-            deleteProveedor(idProveedor) {
-                console.log(`Intentando eliminar el proveedor con ID: ${idProveedor}`);
-                
-                new window.Swal({
-                    icon: 'warning',
-                    title: '¿Estás seguro?',
-                    text: "¡No podrás revertir esta acción!",
-                    showCancelButton: true,
-                    confirmButtonText: 'Eliminar',
-                    cancelButtonText: 'Cancelar',
-                    padding: '2em',
-                    customClass: 'sweet-alerts',
-                }).then((result) => {
-                    if (result.value) {
-                        // Hacer la solicitud de eliminación
-                        fetch(`/api/proveedores/${idProveedor}`, {
-                            method: "DELETE",
-                        })
+                checkForUpdates() {
+                    fetch("/api/proveedores") // Cambiar la URL de la API a /api/proveedores
                         .then((response) => {
-                            if (!response.ok) throw new Error("Error al eliminar proveedor");
+                            if (!response.ok) throw new Error("Error al verificar actualizaciones");
                             return response.json();
                         })
                         .then((data) => {
-                            console.log(`Respuesta del servidor al eliminar proveedor:`, data);
+                            console.log("Datos actuales:", this.proveedorData);
+                            console.log("Datos del servidor:", data);
 
-                            // Verificar que el proveedor ha sido eliminado correctamente
-                            if (data.message) {
-                                console.log(`Proveedor ${idProveedor} eliminado con éxito`);
+                            // Detectar nuevas filas
+                            const newData = data.filter(
+                                (newProveedor) =>
+                                !this.proveedorData.some(
+                                    (existingProveedor) =>
+                                    existingProveedor.idProveedor === newProveedor.idProveedor
+                                )
+                            );
 
-                                // Actualizar la lista de proveedores en el frontend
-                                this.proveedorData = this.proveedorData.filter(
-                                    (proveedor) => proveedor.idProveedor !== idProveedor
-                                );
+                            if (newData.length > 0) {
+                                console.log("Nuevos datos detectados:", newData);
 
-                                // Actualizar la tabla eliminando la fila
-                                const rows = this.datatable1.rows();
-                                Array.from(rows).forEach((row, index) => {
-                                    if (row.cells[0].innerText == idProveedor.toString()) {
-                                        console.log(`Eliminando fila con ID ${idProveedor}`);
-                                        this.datatable1.rows().remove(index); // Eliminar la fila
-                                    }
-                                });
-
-                                // Mostrar notificación de éxito
-                                new window.Swal({
-                                    title: '¡Eliminado!',
-                                    text: 'El proveedor ha sido eliminado con éxito.',
-                                    icon: 'success',
-                                    customClass: 'sweet-alerts',
-                                });
-                            } else {
-                                throw new Error('No se pudo eliminar el proveedor.');
+                                // Agregar filas nuevas a la tabla
+                                this.datatable1.rows().add(this.formatDataForTable(newData));
+                                this.proveedorData.push(...newData); // Actualizar proveedorData
                             }
                         })
                         .catch((error) => {
-                            console.error("Error al eliminar proveedor:", error);
-
-                            // Mostrar notificación de error
-                            new window.Swal({
-                                title: 'Error',
-                                text: 'Ocurrió un error al eliminar el proveedor.',
-                                icon: 'error',
-                                customClass: 'sweet-alerts',
-                            });
+                            console.error("Error al verificar actualizaciones:", error);
                         });
-                    }
-                });
-            }
-        }));
-    });
+                },
 
-    // Inicializar Select2
-    document.addEventListener("DOMContentLoaded", function() {
+                deleteProveedor(idProveedor) {
+                    console.log(`Intentando eliminar el proveedor con ID: ${idProveedor}`);
+
+                    new window.Swal({
+                        icon: 'warning',
+                        title: '¿Estás seguro?',
+                        text: "¡No podrás revertir esta acción!",
+                        showCancelButton: true,
+                        confirmButtonText: 'Eliminar',
+                        cancelButtonText: 'Cancelar',
+                        padding: '2em',
+                        customClass: 'sweet-alerts',
+                    }).then((result) => {
+                        if (result.value) {
+                            // Hacer la solicitud de eliminación
+                            fetch(`/api/proveedores/${idProveedor}`, {
+                                    method: "DELETE",
+                                })
+                                .then((response) => {
+                                    if (!response.ok) throw new Error(
+                                        "Error al eliminar proveedor");
+                                    return response.json();
+                                })
+                                .then((data) => {
+                                    console.log(
+                                        `Respuesta del servidor al eliminar proveedor:`,
+                                        data);
+
+                                    // Verificar que el proveedor ha sido eliminado correctamente
+                                    if (data.message) {
+                                        console.log(
+                                            `Proveedor ${idProveedor} eliminado con éxito`
+                                            );
+
+                                        // Actualizar la lista de proveedores en el frontend
+                                        this.proveedorData = this.proveedorData.filter(
+                                            (proveedor) => proveedor.idProveedor !==
+                                            idProveedor
+                                        );
+
+                                        // Actualizar la tabla eliminando la fila
+                                        const rows = this.datatable1.rows();
+                                        Array.from(rows).forEach((row, index) => {
+                                            if (row.cells[0].innerText ==
+                                                idProveedor.toString()) {
+                                                console.log(
+                                                    `Eliminando fila con ID ${idProveedor}`
+                                                    );
+                                                this.datatable1.rows().remove(
+                                                index); // Eliminar la fila
+                                            }
+                                        });
+
+                                        // Mostrar notificación de éxito
+                                        new window.Swal({
+                                            title: '¡Eliminado!',
+                                            text: 'El proveedor ha sido eliminado con éxito.',
+                                            icon: 'success',
+                                            customClass: 'sweet-alerts',
+                                        });
+                                    } else {
+                                        throw new Error(
+                                        'No se pudo eliminar el proveedor.');
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error("Error al eliminar proveedor:", error);
+
+                                    // Mostrar notificación de error
+                                    new window.Swal({
+                                        title: 'Error',
+                                        text: 'Ocurrió un error al eliminar el proveedor.',
+                                        icon: 'error',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                });
+                        }
+                    });
+                }
+            }));
+        });
+
+        // Inicializar Select2
+        document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.select2').forEach(function(select) {
                 NiceSelect.bind(select, {
                     searchable: true
                 });
             });
         });
-</script>
+    </script>
 
 
 
 
 
-    
-<script>
+
+    <script>
         $(document).ready(function() {
             // Cuando se selecciona un departamento, obtener las provincias relacionadas
             $('#departamento').change(function() {
@@ -523,36 +549,36 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
         });
     </script>
 
-<script>
-    // Función para mostrar la alerta con SweetAlert
-    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-        closeButtonHtml = '', duration = 3000, type = 'success') {
-        const toast = window.Swal.mixin({
-            toast: true,
-            position: position || 'top-end',
-            showConfirmButton: false,
-            timer: duration,
-            showCloseButton: showCloseButton,
-            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-            iconColor: 'white', // Color del icono
-            customClass: {
-                title: 'text-white', // Asegura que el texto sea blanco
-            },
-        });
+    <script>
+        // Función para mostrar la alerta con SweetAlert
+        function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+            closeButtonHtml = '', duration = 3000, type = 'success') {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
+            });
 
-        toast.fire({
-            title: msg,
-        });
-    }
+            toast.fire({
+                title: msg,
+            });
+        }
 
-    // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
-    @if (session('success'))
-        showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
-    @elseif (session('error'))
-        showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
-    @endif
-</script>
+        // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
+        @if (session('success'))
+            showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
+        @elseif (session('error'))
+            showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
+        @endif
+    </script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 

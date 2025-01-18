@@ -1,6 +1,6 @@
 <x-layout.default>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <style>
         .panel {
@@ -38,7 +38,7 @@
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                        @click="exportTable('pdf')">
+                    @click="window.location.href = '{{ route('reporte.cast') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -49,29 +49,23 @@
                         <span>PDF</span>
                     </button>
 
-                    <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V9H2V5C2 3.89543 2 3 4 3ZM2 9H22V15C22 16.1046 21.1046 17 20 17H4C2.89543 17 2 16.1046 2 15V9Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M9 17V21H15V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        </svg>
-                        <span>Imprimir</span>
-                    </button>
 
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2C13.6569 2 15 3.34315 15 5C15 6.65685 13.6569 8 12 8C10.3431 8 9 6.65685 9 5C9 3.34315 10.3431 2 12 2Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 8V15M12 15L7 18M12 15L17 18" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7 18C8.65685 18 10 19.3431 10 21C10 22.6569 8.65685 24 7 24C5.34315 24 4 22.6569 4 21C4 19.3431 5.34315 18 7 18ZM17 18C18.6569 18 20 19.3431 20 21C20 22.6569 18.6569 24 17 24C15.3431 24 14 22.6569 14 21C14 19.3431 15.3431 18 17 18Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>                          
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                            fill="none">
+                            <path
+                                d="M12 2C13.6569 2 15 3.34315 15 5C15 6.65685 13.6569 8 12 8C10.3431 8 9 6.65685 9 5C9 3.34315 10.3431 2 12 2Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M12 8V15M12 15L7 18M12 15L17 18" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path
+                                d="M7 18C8.65685 18 10 19.3431 10 21C10 22.6569 8.65685 24 7 24C5.34315 24 4 22.6569 4 21C4 19.3431 5.34315 18 7 18ZM17 18C18.6569 18 20 19.3431 20 21C20 22.6569 18.6569 24 17 24C15.3431 24 14 22.6569 14 21C14 19.3431 15.3431 18 17 18Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
                         <span>Agregar</span>
                     </button>
                 </div>
@@ -81,232 +75,244 @@
         </div>
     </div>
 
-   <!--Modal -->
-<div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
-    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
-        <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
-            <div x-show="open" x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
-                <!-- Header del Modal -->
-                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg">Agregar Cast</h5>
-                    <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-6 h-6">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-scroll">
-                    <!-- Formulario -->
-                    <form class="p-5 space-y-4" id="castForm">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Nombre -->
-                            <div>
-                                <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input id="nombre" type="text" class="form-input w-full" name="nombre"
-                                    placeholder="Ingrese el nombre">
+    <!--Modal -->
+    <div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
+        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
+                <div x-show="open" x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
+                    <!-- Header del Modal -->
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <h5 class="font-bold text-lg">Agregar Cast</h5>
+                        <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" class="w-6 h-6">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-scroll">
+                        <!-- Formulario -->
+                        <form class="p-5 space-y-4" id="castForm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Nombre -->
+                                <div>
+                                    <label for="nombre" class="block text-sm font-medium">Nombre</label>
+                                    <input id="nombre" type="text" class="form-input w-full" name="nombre"
+                                        placeholder="Ingrese el nombre">
+                                </div>
+                                <!-- RUC -->
+                                <div>
+                                    <label for="ruc" class="block text-sm font-medium">RUC</label>
+                                    <input id="ruc" type="text" class="form-input w-full" name="ruc"
+                                        placeholder="Ingrese el RUC">
+                                </div>
+                                <!-- Teléfono -->
+                                <div>
+                                    <label for="telefono" class="block text-sm font-medium">Teléfono</label>
+                                    <input id="telefono" type="text" class="form-input w-full" name="telefono"
+                                        placeholder="Ingrese el teléfono">
+                                </div>
+                                <!-- Email -->
+                                <div>
+                                    <label for="email" class="block text-sm font-medium">Email</label>
+                                    <input id="email" type="email" class="form-input w-full" name="email"
+                                        placeholder="Ingrese el email">
+                                </div>
+                                <!-- Dirección -->
+                                <div>
+                                    <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                                    <input id="direccion" type="text" name="direccion" class="form-input w-full"
+                                        placeholder="Ingrese la dirección">
+                                </div>
+                                <!-- Departamento -->
+                                <div>
+                                    <label for="departamento" class="block text-sm font-medium">Departamento</label>
+                                    <select id="departamento" name="departamento" class="form-input w-full">
+                                        <option value="" disabled selected>Seleccionar Departamento</option>
+                                        @foreach ($departamentos as $departamento)
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <!-- Provincia -->
+                                <div>
+                                    <label for="provincia" class="block text-sm font-medium">Provincia</label>
+                                    <select id="provincia" name="provincia" class="form-input w-full" disabled>
+                                        <option value="" disabled selected>Seleccionar Provincia</option>
+                                    </select>
+                                </div>
+                                <!-- Distrito -->
+                                <div>
+                                    <label for="distrito" class="block text-sm font-medium">Distrito</label>
+                                    <select id="distrito" name="distrito" class="form-input w-full" disabled>
+                                        <option value="" disabled selected>Seleccionar Distrito</option>
+                                    </select>
+                                </div>
                             </div>
-                            <!-- RUC -->
-                            <div>
-                                <label for="ruc" class="block text-sm font-medium">RUC</label>
-                                <input id="ruc" type="text" class="form-input w-full" name="ruc"
-                                    placeholder="Ingrese el RUC">
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center mt-4">
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="open = false">Cancelar</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
-                            <!-- Teléfono -->
-                            <div>
-                                <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                <input id="telefono" type="text" class="form-input w-full" name="telefono"
-                                    placeholder="Ingrese el teléfono">
-                            </div>
-                            <!-- Email -->
-                            <div>
-                                <label for="email" class="block text-sm font-medium">Email</label>
-                                <input id="email" type="email" class="form-input w-full" name="email"
-                                    placeholder="Ingrese el email">
-                            </div>
-                            <!-- Dirección -->
-                            <div>
-                                <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                <input id="direccion" type="text" name="direccion" class="form-input w-full"
-                                    placeholder="Ingrese la dirección">
-                            </div>
-                            <!-- Departamento -->
-                            <div>
-                                <label for="departamento" class="block text-sm font-medium">Departamento</label>
-                                <select id="departamento" name="departamento" class="form-input w-full">
-                                    <option value="" disabled selected>Seleccionar Departamento</option>
-                                    @foreach ($departamentos as $departamento)
-                                    <option value="{{ $departamento['id_ubigeo'] }}">
-                                        {{ $departamento['nombre_ubigeo'] }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <!-- Provincia -->
-                            <div>
-                                <label for="provincia" class="block text-sm font-medium">Provincia</label>
-                                <select id="provincia" name="provincia" class="form-input w-full" disabled>
-                                    <option value="" disabled selected>Seleccionar Provincia</option>
-                                </select>
-                            </div>
-                            <!-- Distrito -->
-                            <div>
-                                <label for="distrito" class="block text-sm font-medium">Distrito</label>
-                                <select id="distrito" name="distrito" class="form-input w-full" disabled>
-                                    <option value="" disabled selected>Seleccionar Distrito</option>
-                                </select>
-                            </div>
-                        </div>
-                        <!-- Botones -->
-                        <div class="flex justify-end items-center mt-4">
-                            <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
-                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // Script AJAX para el formulario de cast
-document.getElementById('castForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Evita el envío del formulario tradicional
+    <script>
+        // Script AJAX para el formulario de cast
+        document.getElementById('castForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita el envío del formulario tradicional
 
-    let formData = new FormData(this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
+            let formData = new FormData(
+            this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
 
-    // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
-    console.log("Formulario enviado:", this);
-    console.log("Datos del formulario:", Array.from(formData.entries()));
+            // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
+            console.log("Formulario enviado:", this);
+            console.log("Datos del formulario:", Array.from(formData.entries()));
 
-    // Hacer la solicitud AJAX
-    fetch("{{ route('cast.store') }}", {  // Cambiar la ruta a la de cast
-        method: "POST", // Asegúrate de usar el método POST
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
-        },
-        body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
-    })
-    .then(response => {
-        console.log("Respuesta del servidor:", response);
-        if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
-        }
-        return response.json(); // Intentar convertir la respuesta en JSON
-    })
-    .then(data => {
-        console.log("Datos recibidos del servidor:", data);
+            // Hacer la solicitud AJAX
+            fetch("{{ route('cast.store') }}", { // Cambiar la ruta a la de cast
+                    method: "POST", // Asegúrate de usar el método POST
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Agrega el token CSRF
+                    },
+                    body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
+                })
+                .then(response => {
+                    console.log("Respuesta del servidor:", response);
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json(); // Intentar convertir la respuesta en JSON
+                })
+                .then(data => {
+                    console.log("Datos recibidos del servidor:", data);
 
-        if (data && data.success) { // Asegurarte de que `data` y `data.success` existen
-            showMessage('Cast agregado correctamente.', 'top-end');
-            document.getElementById('castForm').reset();  // Resetea el formulario
+                    if (data && data.success) { // Asegurarte de que `data` y `data.success` existen
+                        showMessage('Cast agregado correctamente.', 'top-end');
+                        document.getElementById('castForm').reset(); // Resetea el formulario
 
-            // Actualizar la tabla de cast (si se usa Alpine.js)
-            let alpineData = Alpine.store('multipleTable');
-            if (alpineData && alpineData.updateTable) {
-                alpineData.updateTable();  // Actualizar la tabla en Alpine.js
-            }
-        } else {
-            showMessage('Hubo un error al guardar el cast.', 'top-end');
-        }
-    })
-    .catch(error => {
-        console.error("Error en la solicitud:", error);
-        showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
-    });
-});
+                        // Actualizar la tabla de cast (si se usa Alpine.js)
+                        let alpineData = Alpine.store('multipleTable');
+                        if (alpineData && alpineData.updateTable) {
+                            alpineData.updateTable(); // Actualizar la tabla en Alpine.js
+                        }
+                    } else {
+                        showMessage('Hubo un error al guardar el cast.', 'top-end');
+                    }
+                })
+                .catch(error => {
+                    console.error("Error en la solicitud:", error);
+                    showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
+                });
+        });
 
-// Función para mostrar la alerta con SweetAlert
-function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-    closeButtonHtml = '', duration = 3000, type = 'success') {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: position || 'top-end',
-        showConfirmButton: false,
-        timer: duration,
-        showCloseButton: showCloseButton,
-        icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-        background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-        iconColor: 'white', // Color del icono
-        customClass: {
-            title: 'text-white', // Asegura que el texto sea blanco
-        },
-    });
+        // Función para mostrar la alerta con SweetAlert
+        function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+            closeButtonHtml = '', duration = 3000, type = 'success') {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
+            });
 
-    toast.fire({
-        title: msg,
-    });
-};
+            toast.fire({
+                title: msg,
+            });
+        };
+    </script>
 
-</script>
+    <script>
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("multipleTable", () => ({
+                datatable1: null,
+                castData: [], // Almacena los datos actuales de la tabla de cast
+                pollInterval: 2000, // Intervalo de polling (en ms)
 
-<script>
-    document.addEventListener("alpine:init", () => {
-        Alpine.data("multipleTable", () => ({
-            datatable1: null,
-            castData: [], // Almacena los datos actuales de la tabla de cast
-            pollInterval: 2000, // Intervalo de polling (en ms)
+                init() {
+                    console.log("Component initialized for Cast");
 
-            init() {
-                console.log("Component initialized for Cast");
+                    // Obtener datos iniciales e inicializar la tabla
+                    this.fetchDataAndInitTable();
 
-                // Obtener datos iniciales e inicializar la tabla
-                this.fetchDataAndInitTable();
+                    // Configurar polling para verificar actualizaciones
+                    setInterval(() => {
+                        this.checkForUpdates();
+                    }, this.pollInterval);
+                },
 
-                // Configurar polling para verificar actualizaciones
-                setInterval(() => {
-                    this.checkForUpdates();
-                }, this.pollInterval);
-            },
+                fetchDataAndInitTable() {
+                    fetch("/api/cast") // Cambiar la URL de la API a /api/cast
+                        .then((response) => {
+                            if (!response.ok) throw new Error(
+                            "Error al obtener datos del servidor");
+                            return response.json();
+                        })
+                        .then((data) => {
+                            console.log("Datos de los cast:", data);
+                            this.castData = data;
 
-            fetchDataAndInitTable() {
-                fetch("/api/cast") // Cambiar la URL de la API a /api/cast
-                    .then((response) => {
-                        if (!response.ok) throw new Error("Error al obtener datos del servidor");
-                        return response.json();
-                    })
-                    .then((data) => {
-                        console.log("Datos de los cast:", data);
-                        this.castData = data;
-
-                        // Inicializar DataTable con las nuevas cabeceras
-                        this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
-                            data: {
-                                headings: ["RUC", "Nombre", "Teléfono", "Email", "Departamento", "Provincia", "Distrito", "Dirección", "Estado", "Acción"], // Nuevas cabeceras
-                                data: this.formatDataForTable(data), // Asegúrate de que esta función mapee los nuevos datos
-                            },
-                            searchable: true,
-                            perPage: 10,
-                            labels: {
-                                placeholder: "Buscar...",
-                                perPage: "{select}",
-                                noRows: "No se encontraron registros",
-                                info: "Mostrando {start} a {end} de {rows} registros",
-                            },
+                            // Inicializar DataTable con las nuevas cabeceras
+                            this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
+                                data: {
+                                    headings: ["RUC", "Nombre", "Teléfono", "Email",
+                                        "Departamento", "Provincia", "Distrito",
+                                        "Dirección", "Estado", "Acción"
+                                    ], // Nuevas cabeceras
+                                    data: this.formatDataForTable(
+                                    data), // Asegúrate de que esta función mapee los nuevos datos
+                                },
+                                searchable: true,
+                                perPage: 10,
+                                labels: {
+                                    placeholder: "Buscar...", // Placeholder de búsqueda
+                                    perPage: "{select} registros por página", // Selección de registros por página
+                                    noRows: "No se encontraron registros", // Mensaje cuando no hay registros
+                                    info: "", // Información de la tabla
+                                },
+                                layout: {
+                                    top: "{search}", // Posición del campo de búsqueda
+                                    bottom: "", // Posición de información, selector y paginador
+                                },
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error al inicializar la tabla:", error);
                         });
-                    })
-                    .catch((error) => {
-                        console.error("Error al inicializar la tabla:", error);
-                    });
-            },
+                },
 
-            // Actualiza esta función para que incluya los nuevos datos de cast
-            formatDataForTable(data) {
-                return data.map((cast) => [
-                    cast.ruc, // RUC
-                    cast.nombre, // Nombre
-                    cast.telefono, // Teléfono
-                    cast.email, // Email
-                    cast.departamento, // Departamento
-                    cast.provincia, // Provincia
-                    cast.distrito, // Distrito
-                    cast.direccion, // Dirección
-                    cast.estado === 'Activo' ? 'Activo' : 'Inactivo', // Estado (ajustado según el valor del campo 'estado')
-                    `<div class="flex items-center">
+                // Actualiza esta función para que incluya los nuevos datos de cast
+                formatDataForTable(data) {
+                    return data.map((cast) => [
+                        cast.ruc, // RUC
+                        cast.nombre, // Nombre
+                        cast.telefono, // Teléfono
+                        cast.email, // Email
+                        cast.departamento, // Departamento
+                        cast.provincia, // Provincia
+                        cast.distrito, // Distrito
+                        cast.direccion, // Dirección
+                        cast.estado === 'Activo' ?
+                        `<span class="badge badge-outline-success">Activo</span>` :
+                        `<span class="badge badge-outline-danger">Inactivo</span>`, // Columna: Estado // Estado (ajustado según el valor del campo 'estado')
+                        `<div class="flex items-center">
                         <a href="/cast/${cast.idCast}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                                 <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
@@ -323,124 +329,130 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
                             </svg>
                         </button>
                     </div>`
-                ]); // El formato de datos de la tabla de cast
-            },
+                    ]); // El formato de datos de la tabla de cast
+                },
 
-            checkForUpdates() {
-                fetch("/api/cast") // Cambiar la URL de la API a /api/cast
-                    .then((response) => {
-                        if (!response.ok) throw new Error("Error al verificar actualizaciones");
-                        return response.json();
-                    })
-                    .then((data) => {
-                        console.log("Datos actuales:", this.castData);
-                        console.log("Datos del servidor:", data);
-
-                        // Detectar nuevas filas
-                        const newData = data.filter(
-                            (newCast) =>
-                                !this.castData.some(
-                                    (existingCast) =>
-                                        existingCast.idCast === newCast.idCast
-                                )
-                        );
-
-                        if (newData.length > 0) {
-                            console.log("Nuevos datos detectados:", newData);
-
-                            // Agregar filas nuevas a la tabla
-                            this.datatable1.rows().add(this.formatDataForTable(newData));
-                            this.castData.push(...newData); // Actualizar castData
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error al verificar actualizaciones:", error);
-                    });
-            },
-
-            deleteCast(idCast) {
-                console.log(`Intentando eliminar el cast con ID: ${idCast}`);
-                
-                new window.Swal({
-                    icon: 'warning',
-                    title: '¿Estás seguro?',
-                    text: "¡No podrás revertir esta acción!",
-                    showCancelButton: true,
-                    confirmButtonText: 'Eliminar',
-                    cancelButtonText: 'Cancelar',
-                    padding: '2em',
-                    customClass: 'sweet-alerts',
-                }).then((result) => {
-                    if (result.value) {
-                        // Hacer la solicitud de eliminación
-                        fetch(`/api/cast/${idCast}`, {
-                            method: "DELETE",
-                        })
+                checkForUpdates() {
+                    fetch("/api/cast") // Cambiar la URL de la API a /api/cast
                         .then((response) => {
-                            if (!response.ok) throw new Error("Error al eliminar cast");
+                            if (!response.ok) throw new Error("Error al verificar actualizaciones");
                             return response.json();
                         })
                         .then((data) => {
-                            console.log(`Respuesta del servidor al eliminar cast:`, data);
+                            console.log("Datos actuales:", this.castData);
+                            console.log("Datos del servidor:", data);
 
-                            // Verificar que el cast ha sido eliminado correctamente
-                            if (data.message) {
-                                console.log(`Cast ${idCast} eliminado con éxito`);
+                            // Detectar nuevas filas
+                            const newData = data.filter(
+                                (newCast) =>
+                                !this.castData.some(
+                                    (existingCast) =>
+                                    existingCast.idCast === newCast.idCast
+                                )
+                            );
 
-                                // Actualizar la lista de casts en el frontend
-                                this.castData = this.castData.filter(
-                                    (cast) => cast.idCast !== idCast
-                                );
+                            if (newData.length > 0) {
+                                console.log("Nuevos datos detectados:", newData);
 
-                                // Actualizar la tabla eliminando la fila
-                                const rows = this.datatable1.rows();
-                                Array.from(rows).forEach((row, index) => {
-                                    if (row.cells[0].innerText == idCast.toString()) {
-                                        console.log(`Eliminando fila con ID ${idCast}`);
-                                        this.datatable1.rows().remove(index); // Eliminar la fila
-                                    }
-                                });
-
-                                // Mostrar notificación de éxito
-                                new window.Swal({
-                                    title: '¡Eliminado!',
-                                    text: 'El cast ha sido eliminado con éxito.',
-                                    icon: 'success',
-                                    customClass: 'sweet-alerts',
-                                });
-                            } else {
-                                throw new Error('No se pudo eliminar el cast.');
+                                // Agregar filas nuevas a la tabla
+                                this.datatable1.rows().add(this.formatDataForTable(newData));
+                                this.castData.push(...newData); // Actualizar castData
                             }
                         })
                         .catch((error) => {
-                            console.error("Error al eliminar cast:", error);
-
-                            // Mostrar notificación de error
-                            new window.Swal({
-                                title: 'Error',
-                                text: 'Ocurrió un error al eliminar el cast.',
-                                icon: 'error',
-                                customClass: 'sweet-alerts',
-                            });
+                            console.error("Error al verificar actualizaciones:", error);
                         });
-                    }
-                });
-            }
-        }));
-    });
+                },
 
-    // Inicializar Select2
-    document.addEventListener("DOMContentLoaded", function() {
+                deleteCast(idCast) {
+                    console.log(`Intentando eliminar el cast con ID: ${idCast}`);
+
+                    new window.Swal({
+                        icon: 'warning',
+                        title: '¿Estás seguro?',
+                        text: "¡No podrás revertir esta acción!",
+                        showCancelButton: true,
+                        confirmButtonText: 'Eliminar',
+                        cancelButtonText: 'Cancelar',
+                        padding: '2em',
+                        customClass: 'sweet-alerts',
+                    }).then((result) => {
+                        if (result.value) {
+                            // Hacer la solicitud de eliminación
+                            fetch(`/api/cast/${idCast}`, {
+                                    method: "DELETE",
+                                })
+                                .then((response) => {
+                                    if (!response.ok) throw new Error(
+                                        "Error al eliminar cast");
+                                    return response.json();
+                                })
+                                .then((data) => {
+                                    console.log(`Respuesta del servidor al eliminar cast:`,
+                                        data);
+
+                                    // Verificar que el cast ha sido eliminado correctamente
+                                    if (data.message) {
+                                        console.log(`Cast ${idCast} eliminado con éxito`);
+
+                                        // Actualizar la lista de casts en el frontend
+                                        this.castData = this.castData.filter(
+                                            (cast) => cast.idCast !== idCast
+                                        );
+
+                                        // Actualizar la tabla eliminando la fila
+                                        const rows = this.datatable1.rows();
+                                        Array.from(rows).forEach((row, index) => {
+                                            if (row.cells[0].innerText == idCast
+                                                .toString()) {
+                                                console.log(
+                                                    `Eliminando fila con ID ${idCast}`
+                                                    );
+                                                this.datatable1.rows().remove(
+                                                index); // Eliminar la fila
+                                            }
+                                        });
+
+                                        // Mostrar notificación de éxito
+                                        new window.Swal({
+                                            title: '¡Eliminado!',
+                                            text: 'El cast ha sido eliminado con éxito.',
+                                            icon: 'success',
+                                            customClass: 'sweet-alerts',
+                                        });
+                                    } else {
+                                        throw new Error('No se pudo eliminar el cast.');
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error("Error al eliminar cast:", error);
+
+                                    // Mostrar notificación de error
+                                    new window.Swal({
+                                        title: 'Error',
+                                        text: 'Ocurrió un error al eliminar el cast.',
+                                        icon: 'error',
+                                        customClass: 'sweet-alerts',
+                                    });
+                                });
+                        }
+                    });
+                }
+            }));
+        });
+
+        // Inicializar Select2
+        document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.select2').forEach(function(select) {
                 NiceSelect.bind(select, {
                     searchable: true
                 });
             });
         });
-</script>
+    </script>
 
 
-<script>
+    <script>
         $(document).ready(function() {
             // Cuando se selecciona un departamento, obtener las provincias relacionadas
             $('#departamento').change(function() {
@@ -487,36 +499,36 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
         });
     </script>
 
-<script>
-    // Función para mostrar la alerta con SweetAlert
-    function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-        closeButtonHtml = '', duration = 3000, type = 'success') {
-        const toast = window.Swal.mixin({
-            toast: true,
-            position: position || 'top-end',
-            showConfirmButton: false,
-            timer: duration,
-            showCloseButton: showCloseButton,
-            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-            background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-            iconColor: 'white', // Color del icono
-            customClass: {
-                title: 'text-white', // Asegura que el texto sea blanco
-            },
-        });
+    <script>
+        // Función para mostrar la alerta con SweetAlert
+        function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
+            closeButtonHtml = '', duration = 3000, type = 'success') {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
+            });
 
-        toast.fire({
-            title: msg,
-        });
-    }
+            toast.fire({
+                title: msg,
+            });
+        }
 
-    // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
-    @if (session('success'))
-        showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
-    @elseif (session('error'))
-        showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
-    @endif
-</script>
+        // Mostrar mensaje de éxito o error si hay algún mensaje en la sesión
+        @if (session('success'))
+            showMessage('{{ session('success') }}', 'top-end', true, '', 3000, 'success');
+        @elseif (session('error'))
+            showMessage('{{ session('error') }}', 'top-end', true, '', 3000, 'error');
+        @endif
+    </script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 

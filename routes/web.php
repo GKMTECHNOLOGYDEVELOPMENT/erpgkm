@@ -134,6 +134,8 @@ Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast
 Route::post('/cast/store', [CastController::class, 'store'])->name('cast.store');
 Route::get('/cast/{idCast}/edit', [CastController::class, 'edit'])->name('cast.edit');
 Route::put('/cast/{idCast}', [CastController::class, 'update'])->name('casts.update');
+Route::get('/reporte-cast', [CastController::class, 'exportAllPDF'])->name('reporte.cast');
+
 // Route::get('/casts', [CastController::class, 'getAll']);
 // Ruta para Administracion Subsidiario
 // Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');

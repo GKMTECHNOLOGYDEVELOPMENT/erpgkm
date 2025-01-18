@@ -108,7 +108,7 @@
                             // Inicializar DataTable con las nuevas cabeceras
                             this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
                                 data: {
-                                    headings: ["Ruc", "Nombre", "Celular", "Email",
+                                    headings: ["RUC", "Nombre", "Celular", "Email",
                                         "Dirección", "Referencia", "Acción"
                                     ], // Nuevas cabeceras
                                     data: this.formatDataForTable(
@@ -117,10 +117,14 @@
                                 searchable: true,
                                 perPage: 10,
                                 labels: {
-                                    placeholder: "Buscar...",
-                                    perPage: "{select}",
-                                    noRows: "No se encontraron registros",
-                                    info: "Mostrando {start} a {end} de {rows} registros",
+                                    placeholder: "Buscar...", // Placeholder de búsqueda
+                                    perPage: "{select} registros por página", // Selección de registros por página
+                                    noRows: "No se encontraron registros", // Mensaje cuando no hay registros
+                                    info: "", // Información de la tabla
+                                },
+                                layout: {
+                                    top: "{search}", // Posición del campo de búsqueda
+                                    bottom: "", // Posición de información, selector y paginador
                                 },
                             });
                         })
