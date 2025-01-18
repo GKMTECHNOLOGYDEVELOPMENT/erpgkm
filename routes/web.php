@@ -37,6 +37,8 @@ use App\Models\Clientegeneral;
 use App\Models\Subsidiario;
 use Illuminate\Http\Client\Request;
 use App\Exports\ClientesGeneralExport;
+use App\Exports\ClientesExport;
+use App\Exports\TiendaExport;
 use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
@@ -107,6 +109,9 @@ Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tiendas.update');
 Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
+Route::get('/exportar-tiendas', function () { return Excel::download(new TiendaExport, 'reporte_tiendas.xlsx'); })->name('tiendas.exportExcel');
+Route::get('/reporte-tiendas', [TiendaController::class, 'exportAllPDF'])->name('reporte.tiendas');
+
 
 
 
@@ -137,6 +142,7 @@ Route::get('/clientes', [ClientesController::class, 'index'])->name('administrac
 Route::post('/cliente/store', [ClientesController::class, 'store'])->name('cliente.store');
 Route::get('/cliente/{idCliente}/edit', [ClientesController::class, 'edit'])->name('cliente.edit');
 Route::put('/clientes/{idCliente}', [ClientesController::class, 'update'])->name('clientes.update');
+Route::get('/exportar-clientes', function () { return Excel::download(new ClientesExport, 'clientes.xlsx'); })->name('clientes.exportExcel');
 Route::get('/reporte-clientes', [ClientesController::class, 'exportAllPDF']) ->name('reporte.clientes');
 
 
