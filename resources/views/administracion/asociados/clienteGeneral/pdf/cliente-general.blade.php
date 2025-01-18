@@ -10,25 +10,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Clientes Generales</title>
     <style>
+        @page {
+            margin: 0; /* Elimina márgenes del PDF */
+        }
         body {
             font-size: 10px;
             margin: 0;
             padding: 0;
             background-image: url('{{ public_path('assets/images/hojamembretada.jpg') }}');
-            background-size: cover;
+            background-size: cover; /* Cubre toda la página */
             background-repeat: no-repeat;
             background-position: center;
-            height: 100%; /* Altura completa */
-            width: 100%; /* Ancho completo */
+            height: 100%;
+            width: 100%;
         }
         .content {
-            padding: 40px; /* Espacio alrededor del contenido */
+            margin: 120px 20px 50px 20px; /* Margen superior, derecho, inferior, izquierdo */
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0); /* Fondo blanco semitransparente */
+            border-radius: 8px; /* Bordes redondeados */
         }
         .header {
             text-align: center;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e3342f;
-            padding-bottom: 10px;
         }
         .header h1 {
             font-size: 14px;
@@ -44,7 +48,6 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: rgba(255, 255, 255, 0.9); /* Fondo semitransparente para tabla */
         }
         table, th, td {
             border: 1px solid #e3342f;
@@ -59,11 +62,13 @@
             color: white;
             text-transform: uppercase;
         }
-        .table-row:nth-child(odd) {
-            background-color: rgba(243, 244, 246, 0.8); /* Transparencia */
-        }
-        .table-row:nth-child(even) {
-            background-color: rgba(255, 255, 255, 0.8); /* Transparencia */
+        img {
+            max-width: 60px;
+            max-height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         .badge {
             display: inline-block;
@@ -79,14 +84,10 @@
         .badge-danger {
             background-color: #dc3545;
         }
-        img {
-            max-width: 60px; /* Tamaño máximo de la imagen */
-            max-height: 60px;
-            border-radius: 5px; /* Bordes redondeados */
-            object-fit: cover; /* Ajusta las imágenes para que mantengan su proporción */
-        }
-        .text-xs {
+        .footer {
+            text-align: center;
             font-size: 10px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -109,7 +110,7 @@
             </thead>
             <tbody>
                 @foreach($clientes as $cliente)
-                    <tr class="table-row">
+                    <tr>
                         <td>{{ $cliente->descripcion }}</td>
                         <td>
                             @if ($cliente->foto)
@@ -128,11 +129,9 @@
             </tbody>
         </table>
 
-        <!-- Información adicional -->
-        <div class="text-center mt-4">
-            <p class="text-xs">
-                Generado el {{ $fechaPeru }}
-            </p>
+        <!-- Pie de página -->
+        <div class="footer">
+            <p>Generado el {{ $fechaPeru }}</p>
         </div>
     </div>
 </body>
