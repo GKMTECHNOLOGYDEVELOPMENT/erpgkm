@@ -9,26 +9,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Clientes Generales</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
+        @page {
+            margin: 0; /* Elimina márgenes del PDF */
+        }
         body {
             font-size: 10px;
             margin: 0;
             padding: 0;
-            background-color: #f3f4f6;
+            background-image: url('{{ public_path('assets/images/hojamembretada.jpg') }}');
+            background-size: cover; /* Cubre toda la página */
+            background-repeat: no-repeat;
+            background-position: center;
+            height: 100%;
+            width: 100%;
         }
-        .container {
-            margin: 10px;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .content {
+            margin: 120px 20px 50px 20px; /* Margen superior, derecho, inferior, izquierdo */
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0); /* Fondo blanco semitransparente */
+            border-radius: 8px; /* Bordes redondeados */
         }
         .header {
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #e3342f;
             text-align: center;
+            margin-bottom: 20px;
         }
         .header h1 {
             font-size: 14px;
@@ -37,41 +41,30 @@
         }
         .header p {
             font-size: 10px;
-            margin: 0;
+            margin: 5px 0;
             color: #555;
-        }
-        .table-header {
-            background-color: #e3342f;
-            color: white;
-            text-transform: uppercase;
-            font-size: 10px;
-        }
-        .table-row:nth-child(odd) {
-            background-color: #f9fafb;
-        }
-        .table-row:nth-child(even) {
-            background-color: #fefefe;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            page-break-inside: auto;
+            margin-top: 20px;
         }
-        th, td {
-            padding: 8px;
-            text-align: center;
+        table, th, td {
             border: 1px solid #e3342f;
         }
-        th {
+        th, td {
+            text-align: center;
+            padding: 8px;
             font-size: 10px;
-            font-weight: bold;
         }
-        td {
-            font-size: 10px;
+        th {
+            background-color: #e3342f;
+            color: white;
+            text-transform: uppercase;
         }
         img {
-            width: 40px;
-            height: 40px;
+            max-width: 60px;
+            max-height: 60px;
             object-fit: cover;
             border-radius: 5px;
             border: 1px solid #ddd;
@@ -91,10 +84,15 @@
         .badge-danger {
             background-color: #dc3545;
         }
+        .footer {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="content">
         <!-- Encabezado -->
         <div class="header">
             <h1>REPORTE DE CLIENTES GENERALES</h1>
@@ -102,42 +100,38 @@
         </div>
 
         <!-- Tabla de clientes -->
-        <div class="content">
-            <table>
-                <thead class="table-header">
+        <table>
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Foto</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($clientes as $cliente)
                     <tr>
-                        <th>Descripción</th>
-                        <th>Foto</th>
-                        <th>Estado</th>
+                        <td>{{ $cliente->descripcion }}</td>
+                        <td>
+                            @if ($cliente->foto)
+                                <img src="{{ public_path('/' . $cliente->foto) }}" alt="Foto">
+                            @else
+                                <span>Sin imagen</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="badge {{ $cliente->estado ? 'badge-success' : 'badge-danger' }}">
+                                {{ $cliente->estado ? 'Activo' : 'Inactivo' }}
+                            </span>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($clientes as $cliente)
-                        <tr class="table-row">
-                            <td>{{ $cliente->descripcion }}</td>
-                            <td>
-                                @if ($cliente->foto)
-                                    <img src="{{ public_path('/' . $cliente->foto) }}" alt="Foto">
-                                @else
-                                    <span>Sin imagen</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge {{ $cliente->estado ? 'badge-success' : 'badge-danger' }}">
-                                    {{ $cliente->estado ? 'Activo' : 'Inactivo' }}
-                                </span>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                @endforeach
+            </tbody>
+        </table>
 
-        <!-- Información adicional -->
-        <div class="text-center mt-4">
-            <p class="text-xs">
-                Generado el {{ $fechaPeru }}
-            </p>
+        <!-- Pie de página -->
+        <div class="footer">
+            <p>Generado el {{ $fechaPeru }}</p>
         </div>
     </div>
 </body>

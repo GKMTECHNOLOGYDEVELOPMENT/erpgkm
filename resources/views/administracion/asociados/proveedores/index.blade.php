@@ -1,6 +1,6 @@
 <x-layout.default>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <style>
         .panel {
@@ -64,18 +64,21 @@
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M5 8C5 6.89543 5.89543 6 7 6H17C18.1046 6 19 6.89543 19 8V16C19 17.1046 18.1046 18 17 18H7C5.89543 18 5 17.1046 5 16V8Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M9 12H15" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 9V15" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3 5H21" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M3 19H21" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                            fill="none">
+                            <path
+                                d="M5 8C5 6.89543 5.89543 6 7 6H17C18.1046 6 19 6.89543 19 8V16C19 17.1046 18.1046 18 17 18H7C5.89543 18 5 17.1046 5 16V8Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M9 12H15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M12 9V15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M3 5H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M3 19H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
                         <span>Agregar</span>
                     </button>
                 </div>
@@ -119,7 +122,8 @@
                                     <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
-                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">{{ $tipoDocumento->nombre }}</option>
+                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                                {{ $tipoDocumento->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -127,8 +131,8 @@
                                 <div>
                                     <label for="numeroDocumento" class="block text-sm font-medium">Número de
                                         Documento</label>
-                                    <input id="numeroDocumento" type="text" class="form-input w-full" name="numeroDocumento"
-                                        placeholder="Ingrese el número de documento">
+                                    <input id="numeroDocumento" type="text" class="form-input w-full"
+                                        name="numeroDocumento" placeholder="Ingrese el número de documento">
                                 </div>
                                 <!-- departamento -->
                                 <div>
@@ -136,9 +140,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                        <option value="{{ $departamento['id_ubigeo'] }}">
-                                            {{ $departamento['nombre_ubigeo'] }}
-                                        </option>
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -158,21 +162,21 @@
                                         <option value="" disabled selected>Seleccionar Distrito</option>
                                     </select>
                                 </div>
-                               
-                                   <!-- Area -->
-                                   <div>
+
+                                <!-- Area -->
+                                <div>
                                     <select id="idArea" name="idArea" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Area</option>
                                         @foreach ($areas as $area)
-                                        <option value="{{ $area->idArea }}">{{ $area->nombre }}</option>
+                                            <option value="{{ $area->idArea }}">{{ $area->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <!-- Código Postal -->
                                 <div>
                                     <label for="codigoPostal" class="block text-sm font-medium">Código Postal</label>
-                                    <input id="codigoPostal" type="text" class="form-input w-full" name="codigoPostal"
-                                        placeholder="Ingrese el código postal">
+                                    <input id="codigoPostal" type="text" class="form-input w-full"
+                                        name="codigoPostal" placeholder="Ingrese el código postal">
                                 </div>
                                 <!-- Teléfono -->
                                 <div>
@@ -187,10 +191,10 @@
                                         placeholder="Ingrese el email">
                                 </div>
                                 <!-- Dirección -->
-                                <div >
+                                <div>
                                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <input id="direccion" type="text"  name="direccion"
-                                        class="form-input w-full" placeholder="Ingrese el direccion">
+                                    <input id="direccion" type="text" name="direccion" class="form-input w-full"
+                                        placeholder="Ingrese el direccion">
                                 </div>
                             </div>
                             <!-- Botones -->

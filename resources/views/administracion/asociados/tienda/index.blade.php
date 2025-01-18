@@ -74,6 +74,7 @@
     </script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
 
+
 <script src="{{ asset('assets/js/tienda.js') }}"></script>
 
     <script src="/assets/js/simple-datatables.js"></script>
