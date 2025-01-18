@@ -229,7 +229,7 @@ public function exportAllPDF()
         ->setPaper('a4', 'portrait'); // Define orientación vertical
 
     // Retornar el PDF como descarga
-    return $pdf->stream('reporte-cliente-generales.pdf');
+    return $pdf->download('reporte-cliente-generales.pdf');
 }
  
     public function getAll()

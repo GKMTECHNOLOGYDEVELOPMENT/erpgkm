@@ -10,7 +10,9 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithDrawings;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class ClientesGeneralExport implements 
     FromCollection, 
@@ -19,7 +21,8 @@ class ClientesGeneralExport implements
     ShouldAutoSize, 
     WithStyles, 
     WithColumnWidths, 
-    WithCustomStartCell
+    WithCustomStartCell, 
+    WithDrawings
 {
     private const HEADERS = ['#', 'Nombre', 'Foto', 'Estado'];
     private \Illuminate\Support\Collection $clientes;
@@ -33,66 +36,68 @@ class ClientesGeneralExport implements
         }
     }
 
-    /**
-     * Devuelve la colección de datos.
-     */
     public function collection(): \Illuminate\Support\Collection
     {
         return $this->clientes;
     }
 
-    /**
-     * Mapea las columnas que se exportarán.
-     */
     public function map($cliente): array
     {
         static $rowNumber = 1;
 
         return [
-            $rowNumber++,                               // Columna de numeración
-            mb_strimwidth($cliente->descripcion, 0, 50, '...'), // Limita la longitud del nombre
-            $cliente->foto ? 'Tiene Imagen' : 'Sin Imagen',     // Verifica si el campo foto contiene datos
+            $rowNumber++, // Columna de numeración
+            mb_strimwidth($cliente->descripcion, 0, 50, '...'), // Descripción limitada
+            $cliente->foto ? '' : 'Sin Imagen', // Si no hay foto, mostrar "Sin Imagen"
             $cliente->estado ? 'Activo' : 'Inactivo', // Estado
         ];
     }
 
-    /**
-     * Define los encabezados de las columnas.
-     */
     public function headings(): array
     {
         return self::HEADERS;
     }
 
-    /**
-     * Define los anchos de las columnas.
-     */
     public function columnWidths(): array
     {
         return [
             'A' => 10,  // Número
             'B' => 30,  // Nombre
-            'C' => 15,  // Foto
+            'C' => 25,  // Foto
             'D' => 15,  // Estado
         ];
     }
 
-    /**
-     * Define la celda de inicio de los datos.
-     */
     public function startCell(): string
     {
-        return 'A4'; // Inicia desde la celda A4 para dejar espacio para el título y la fecha
+        return 'A4'; // La tabla inicia en la celda A4
     }
 
-    /**
-     * Aplica estilos al archivo Excel.
-     */
+    public function drawings()
+    {
+        $drawings = [];
+        $rowIndex = 5; // Inicia en la fila siguiente a los encabezados
+
+        foreach ($this->clientes as $cliente) {
+            if ($cliente->foto) {
+                $drawing = new Drawing();
+                $drawing->setName('Foto');
+                $drawing->setDescription($cliente->descripcion);
+                $drawing->setPath(public_path($cliente->foto)); // Ruta de la imagen
+                $drawing->setHeight(60); // Altura de la imagen
+                $drawing->setCoordinates('C' . $rowIndex); // Ubica la imagen en la columna "C"
+                $drawing->setOffsetX(55); // Centra horizontalmente
+                $drawing->setOffsetY(15); // Centra verticalmente
+                $drawings[] = $drawing;
+            }
+            $rowIndex++;
+        }
+
+        return $drawings;
+    }
+
     public function styles(Worksheet $sheet): array
     {
-        // Establecer la zona horaria de Perú
-        date_default_timezone_set('America/Lima');
-
         // Título del reporte
         $sheet->mergeCells('A1:D1');
         $sheet->setCellValue('A1', 'Reporte General de Clientes');
@@ -127,7 +132,7 @@ class ClientesGeneralExport implements
             ],
         ]);
 
-        // Estilo del encabezado
+        // Encabezados
         $sheet->getStyle('A4:D4')->applyFromArray([
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -143,7 +148,12 @@ class ClientesGeneralExport implements
             ],
         ]);
 
-        // Centramos los datos de todas las columnas
+        // Altura de las filas
+        foreach (range(5, $sheet->getHighestRow()) as $row) {
+            $sheet->getRowDimension($row)->setRowHeight(70); // Ajusta la altura de las filas
+        }
+
+        // Centrar todo
         $sheet->getStyle('A5:D' . $sheet->getHighestRow())->applyFromArray([
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -161,7 +171,7 @@ class ClientesGeneralExport implements
             ],
         ]);
 
-        // Estilo para las celdas "Activo" e "Inactivo"
+        // Estilo para "Activo" e "Inactivo"
         foreach (range(5, $sheet->getHighestRow()) as $row) {
             $estado = $sheet->getCell("D{$row}")->getValue();
             if ($estado === 'Activo') {
