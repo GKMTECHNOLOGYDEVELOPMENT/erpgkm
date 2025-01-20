@@ -8,6 +8,7 @@ use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
+use App\Http\Controllers\almacen\productos\ModelosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,7 @@ Route::get('/proveedores', [ProveedoresController::class, 'getAll']);
 Route::get('/tiendas', [TiendaController::class, 'getAll']);
 Route::get('/categoria', [CategoriaController::class, 'getAll']);
 Route::get('/marca', [MarcaController::class, 'getAll']);
+Route::get('/modelo', [ModelosController::class, 'getAll']);
 
 
 
@@ -44,6 +46,7 @@ Route::post('/check-nombre', [ClienteGeneralController::class, 'checkNombre']);
 
 Route::post('/categoria/check-nombre', [CategoriaController::class, 'checkNombre']);
 Route::post('/marca/check-nombre', [MarcaController::class, 'checkNombre']);
+Route::post('/modelo/check-nombre', [ModelosController::class, 'checkNombre']);
 
 
 Route::delete('/clientegeneral/{id}', [ClienteGeneralController::class, 'destroy']);

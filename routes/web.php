@@ -166,7 +166,6 @@ Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'inde
 //Ruta para Almacen Articulos
 Route::get('/almacen/articulos', [ArticulosController::class, 'index'])->name('almacen.articulos')->middleware('auth');
 //Ruta para Almacen Modelos
-Route::get('/almacen/modelos', [ModelosController::class, 'index'])->name('almacen.modelos')->middleware('auth');
 //Ruta para Almacen TipoArticulos
 Route::get('/almacen/tipo-articulos', [TipoArticuloController::class, 'index'])->name('almacen.tipo-articulos')->middleware('auth');
 //Ruta para Almacen Categoria
@@ -216,6 +215,21 @@ Route::prefix('marcas')->name('marcas.')->group(function () {
 
 
 /// FIN MARCA ///
+
+/// INICIO MODELO ///
+Route::prefix('modelos')->name('modelos.')->group(function () {
+    Route::get('/', [ModelosController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::post('/store', [ModelosController::class, 'store'])->name('store'); // Guardar un nuevo modelo
+    Route::get('/edit/{id}', [ModelosController::class, 'edit'])->name('edit'); // Editar un modelo
+    Route::put('/update/{id}', [ModelosController::class, 'update'])->name('update'); // Actualizar un modelo
+    Route::delete('/{id}', [ModelosController::class, 'destroy'])->name('destroy'); // Eliminar un modelo
+    Route::get('/export-pdf', [ModelosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los modelos a PDF
+    Route::get('/get-all', [ModelosController::class, 'getAll'])->name('getAll'); // Obtener todos los modelos en formato JSON
+    Route::post('/check-nombre', [ModelosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+});
+
+
+/// FIN MODELO ///
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');

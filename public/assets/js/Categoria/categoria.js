@@ -43,10 +43,10 @@ document.addEventListener('alpine:init', () => {
                         },
                     });
                     // Centrando los encabezados manualmente
-                    const headers = document.querySelectorAll("#myTable1 thead th");
+                    const headers = document.querySelectorAll('#myTable1 thead th');
                     headers.forEach((header) => {
-                        header.style.textAlign = "center";
-                        header.style.verticalAlign = "middle";
+                        header.style.textAlign = 'center';
+                        header.style.verticalAlign = 'middle';
                     });
                 })
                 .catch((error) => {
@@ -58,9 +58,9 @@ document.addEventListener('alpine:init', () => {
             return data.map((categoria) => [
                 `<div style="text-align: center;">${categoria.nombre}</div>`, // Columna: Nombre
                 categoria.estado === 'Activo'
-                ? `<div style="text-align: center;"><span class="badge badge-outline-success">Activo</span></div>`
-                : `<div style="text-align: center;"><span class="badge badge-outline-danger">Inactivo</span></div>`,
-            // Columna: Estado
+                    ? `<div style="text-align: center;"><span class="badge badge-outline-success">Activo</span></div>`
+                    : `<div style="text-align: center;"><span class="badge badge-outline-danger">Inactivo</span></div>`,
+                // Columna: Estado
                 `<div style="text-align: center;" class="flex justify-center items-center">
     <a href="/categoria/${categoria.idCategoria}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">

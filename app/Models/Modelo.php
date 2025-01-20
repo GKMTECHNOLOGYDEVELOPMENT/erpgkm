@@ -37,7 +37,8 @@ class Modelo extends Model
 	protected $fillable = [
 		'nombre',
 		'idMarca',
-		'idCategoria'
+		'idCategoria',
+		'estado'
 	];
 
 	public function marca()
@@ -47,7 +48,7 @@ class Modelo extends Model
 
 	public function categorium()
 	{
-		return $this->belongsTo(Categorium::class, 'idCategoria');
+		return $this->belongsTo(Categoria::class, 'idCategoria');
 	}
 
 	public function articulos()
