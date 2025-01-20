@@ -152,14 +152,15 @@
 
                                 <!-- Area -->
                                 <div>
-                                    <select id="idTipoArea" name="idTipoArea" class="select2 w-full">
+                                    <select id="idArea" name="idArea" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Área</option>
                                         @foreach ($tiposArea as $tipoArea)
-                                            <option value="{{ $tipoArea->id }}">
+                                            <option value="{{ $tipoArea->idTipoArea }}">
                                                 {{ $tipoArea->nombre }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    
                                     
                                 </div>
                                 <!-- Código Postal -->
