@@ -38,7 +38,7 @@
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                        @click="exportTable('pdf')">
+                    onclick="window.location='{{ route('proveedores.pdf') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path

@@ -27,7 +27,8 @@ class ProveedoresController extends Controller
     {
         try {
             // Obtener todos los datos enviados en la solicitud sin validarlos
-            $dataProveedores = $request->validate();
+            $dataProveedores = $request->all();
+
             // Establecer valores predeterminados para 'estado' y 'fecha_registro'
             $dataProveedores['estado'] = 1; // Valor predeterminado para 'estado' (activo)
 
@@ -61,7 +62,7 @@ class ProveedoresController extends Controller
     {
         $proveedor = Proveedore::findOrFail($id); // Buscar cliente por ID
 
-        $tiposArea = TipoArea::all(); // Obtener todos los clientes generales
+        $areas = Area::all(); // Obtener todos los clientes generales
         $tiposDocumento = TipoDocumento::all(); // Obtener todos los tipos de documento
         // Obtener los datos de los archivos JSON
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
@@ -106,7 +107,7 @@ class ProveedoresController extends Controller
             'proveedor',
             'tiposDocumento',
             'departamentos',
-            'tiposArea',
+            'areas',
             'provinciasDelDepartamento',
             'provinciaSeleccionada',
             'distritosDeLaProvincia',
@@ -165,6 +166,7 @@ class ProveedoresController extends Controller
         $proveedores = Proveedore::with(['tipoDocumento', 'area'])->get(); // Cambia 'tipoarea' por 'area' si tu relación se llama 'area'
 
         // Registrar los datos obtenidos (para depuración)
+        Log::debug('Proveedores obtenidos:', $proveedores->toArray()); // Utiliza toArray() para registrar los datos completos
 
         // Procesa los datos para incluir los campos necesarios, mostrando los nombres relacionados
         $proveedoresData = $proveedores->map(function ($proveedor) {
@@ -189,7 +191,14 @@ class ProveedoresController extends Controller
         return response()->json($proveedoresData);
     }
 
-
+    public function exportAllPDF()
+    {
+        $proveedores = Proveedore::with('tipoDocumento', 'area')->get(); // Ahora la relación funcionará
+    
+        $pdf = PDF::loadView('proveedores.report', compact('proveedores'));
+        return $pdf->download('reporte_proveedores.pdf');
+    }
+    
     public function destroy($id)
     {
         // Intentar encontrar al proveedor

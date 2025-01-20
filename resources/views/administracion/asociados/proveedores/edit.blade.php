@@ -81,7 +81,7 @@
                                 {{ $tipoArea->nombre }}
                             </option>
                         @endforeach
-                    </select>                    
+                    </select>
                 </div>
 
                 <!-- Código Postal -->
