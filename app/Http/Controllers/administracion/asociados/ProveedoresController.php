@@ -27,8 +27,7 @@ class ProveedoresController extends Controller
     {
         try {
             // Obtener todos los datos enviados en la solicitud sin validarlos
-            $dataProveedores = $request->all();
-            Log::debug('Datos recibidos sin validar:', $dataProveedores);
+            $dataProveedores = $request->validate();
             // Establecer valores predeterminados para 'estado' y 'fecha_registro'
             $dataProveedores['estado'] = 1; // Valor predeterminado para 'estado' (activo)
 
