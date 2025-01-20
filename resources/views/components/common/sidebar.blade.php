@@ -918,7 +918,7 @@
                             <a href="{{ route('almacen.tipo-articulos') }}">Tipo Articulos</a>
                         </li>
                         <li>
-                            <a href="{{ route('almacen.categorias') }}">Categoria</a>
+                            <a href="{{ route('categorias.index') }}">Categoria</a>
                         </li>
                     </ul>
                 </li>

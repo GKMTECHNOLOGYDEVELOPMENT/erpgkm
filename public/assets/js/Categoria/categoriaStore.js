@@ -27,15 +27,16 @@ function showMessage(
 }
 
 // Aquí va tu código para el formulario, incluyendo el fetch y demás
-document.getElementById('clientGeneralForm').addEventListener('submit', function (event) {
+document.getElementById('categoriaForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Evita el envío del formulario tradicional
 
-    let formData = new FormData(this); // Obtiene todos los datos del formulario, incluida la foto
+    let formData = new FormData(this); // Obtiene todos los datos del formulario
 
-    fetch(Laravel.routeClientStore, {
+    fetch('/categorias/store', {
         method: 'POST', // Método POST
         headers: {
-            'X-CSRF-TOKEN': Laravel.csrfToken, // Token CSRF
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            Accept: 'application/json', // Asegura que Laravel devuelva errores en JSON
         },
         body: formData, // Envío de datos en formato multipart
     })
@@ -43,22 +44,10 @@ document.getElementById('clientGeneralForm').addEventListener('submit', function
         .then((data) => {
             if (data.success) {
                 // Mostrar la alerta de éxito
-                showMessage('Cliente agregado correctamente.', 'top-end');
+                showMessage('Categoría agregada correctamente.', 'top-end');
 
                 // Limpiar los campos del formulario
-                document.getElementById('clientGeneralForm').reset();
-
-                // Restablecer la previsualización de la imagen
-                if (typeof Alpine !== 'undefined') {
-                    Alpine.store('imagenPreview', '/assets/images/file-preview.svg'); // Actualiza el estado en Alpine.js
-                    Alpine.store('imagenActual', '/assets/images/file-preview.svg'); // Si estás usando otra variable para el estado actual
-                }
-
-                // Asegurar que la previsualización se actualice en la vista
-                const previewImage = document.querySelector('#ctnFile').closest('div').querySelector('img');
-                if (previewImage) {
-                    previewImage.src = '/assets/images/file-preview.svg';
-                }
+                document.getElementById('categoriaForm').reset();
 
                 // Cerrar el modal (si es necesario)
                 if (typeof open !== 'undefined') {
@@ -72,14 +61,12 @@ document.getElementById('clientGeneralForm').addEventListener('submit', function
                 }
             } else {
                 // Mostrar alerta de error
-                showMessage('Hubo un error al guardar el cliente.', 'top-end');
+                showMessage('Hubo un error al guardar la categoría.', 'top-end', true, '', 3000, 'error');
             }
         })
         .catch((error) => {
             console.error('Error en la solicitud:', error);
             // Mostrar alerta de error
-            showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
+            showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end', true, '', 3000, 'error');
         });
 });
-
-

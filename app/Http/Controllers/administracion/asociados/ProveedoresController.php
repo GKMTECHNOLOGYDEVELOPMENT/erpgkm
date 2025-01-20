@@ -195,8 +195,8 @@ class ProveedoresController extends Controller
     {
         $proveedores = Proveedore::with('tipoDocumento', 'area')->get(); // Ahora la relación funcionará
     
-        $pdf = PDF::loadView('proveedores.report', compact('proveedores'));
-        return $pdf->download('reporte_proveedores.pdf');
+        // $pdf = PDF::loadView('proveedores.report', compact('proveedores'));
+        // return $pdf->download('reporte_proveedores.pdf');
     }
     
     public function destroy($id)

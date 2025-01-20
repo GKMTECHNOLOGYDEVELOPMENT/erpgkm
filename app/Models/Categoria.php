@@ -14,20 +14,32 @@ use Illuminate\Database\Eloquent\Model;
  * 
  * @property int $idCategoria
  * @property string|null $nombre
+ * @property bool|null $estado
  * 
+ * @property Collection|Equipo[] $equipos
  * @property Collection|Modelo[] $modelos
  *
  * @package App\Models
  */
-class Categorium extends Model
+class Categoria extends Model
 {
 	protected $table = 'categoria';
 	protected $primaryKey = 'idCategoria';
 	public $timestamps = false;
 
-	protected $fillable = [
-		'nombre'
+	protected $casts = [
+		'estado' => 'bool'
 	];
+
+	protected $fillable = [
+		'nombre',
+		'estado'
+	];
+
+	public function equipos()
+	{
+		return $this->hasMany(Equipo::class, 'idCategoria');
+	}
 
 	public function modelos()
 	{
