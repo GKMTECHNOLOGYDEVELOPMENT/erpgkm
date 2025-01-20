@@ -66,14 +66,14 @@
 
                 <!-- Area -->
                 <div>
-                    <select id="idArea" name="idArea" class="select2 w-full">
-                        <option value="" disabled selected>Seleccionar Area</option>
+                    <select id="idTipoArea" name="idTipoArea" class="select2 w-full">
+                        <option value="" disabled>Seleccionar Área</option>
                         @foreach ($areas as $area)
-                            <option value="{{ $area->idArea }}" {{ old('idArea', $proveedor->idArea) == $area->idArea ? 'selected' : '' }}>
+                            <option value="{{ $area->idArea }}" {{ $proveedor->idArea == $area->idArea ? 'selected' : '' }}>
                                 {{ $area->nombre }}
                             </option>
                         @endforeach
-                    </select>
+                    </select>                    
                 </div>
 
                 <!-- Código Postal -->
