@@ -27,6 +27,20 @@
                 @enderror
             </div>
 
+            <!-- Switch de Estado -->
+            <div>
+                <label for="estado" class="block text-sm font-medium">Estado</label>
+                <div class="flex items-center">
+                    <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
+                    <input type="hidden" name="estado" value="0">
+                    <div class="w-12 h-6 relative">
+                        <input type="checkbox" id="estado" name="estado" class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                               value="1" {{ $marca->estado ? 'checked' : '' }} />
+                        <span for="estado" class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Botones -->
             <div class="flex justify-end space-x-4">
                 <a href="{{ route('marcas.index') }}" class="btn btn-outline-danger">Cancelar</a>

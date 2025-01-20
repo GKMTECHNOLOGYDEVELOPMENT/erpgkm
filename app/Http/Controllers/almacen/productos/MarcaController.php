@@ -52,7 +52,7 @@ class MarcaController extends Controller
     public function edit($id)
     {
         $marca = Marca::findOrFail($id);
-        return view('almacen.productos.marca.edit', compact('marca'));
+        return view('almacen.productos.marcas.edit', compact('marca'));
     }
 
     public function update(Request $request, $id)
@@ -71,11 +71,11 @@ class MarcaController extends Controller
             // Actualizar los datos de la marca
             $marca->update($validatedData);
 
-            return redirect()->route('almacen.productos.marca.index')
+            return redirect()->route('marcas.index')
                 ->with('success', 'Marca actualizada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al actualizar la marca: ' . $e->getMessage());
-            return redirect()->route('almacen.productos.marca.index')
+            return redirect()->route('marcas.index')
                 ->with('error', 'Ocurrió un error al actualizar la marca.');
         }
     }
@@ -108,7 +108,7 @@ class MarcaController extends Controller
         $marcas = Marca::all();
 
         // Generar el PDF
-        $pdf = Pdf::loadView('almacen.productos.marca.pdf.marcas', compact('marcas'))
+        $pdf = Pdf::loadView('almacen.productos.marcas.pdf.reporte-marcas', compact('marcas'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->download('reporte-marcas.pdf');

@@ -41,6 +41,7 @@ use App\Exports\ClientesExport;
 use App\Exports\TiendaExport;
 use App\Exports\CastExport;
 use App\Http\Controllers\almacen\productos\CategoriaController;
+use App\Exports\MarcasExport;
 use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
@@ -205,12 +206,16 @@ Route::prefix('categoria')->name('categorias.')->group(function () {
 Route::prefix('marcas')->name('marcas.')->group(function () {
     Route::get('/', [MarcaController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [MarcaController::class, 'store'])->name('store'); // Guardar una nueva marca
-    Route::get('/edit/{id}', [MarcaController::class, 'edit'])->name('edit'); // Editar una marca
+    Route::get('/{id}/edit', [MarcaController::class, 'edit'])->name('edit'); // Editar una marca
     Route::put('/update/{id}', [MarcaController::class, 'update'])->name('update'); // Actualizar una marca
     Route::delete('/{id}', [MarcaController::class, 'destroy'])->name('destroy'); // Eliminar una marca
-    Route::get('/export-pdf', [MarcaController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todas las marcas a PDF
+    Route::get('/reporte-marcas', [MarcaController::class, 'exportAllPDF'])->name('marcas.pdf'); // Exportar todas las marcas a PDF
     Route::get('/get-all', [MarcaController::class, 'getAll'])->name('getAll'); // Obtener todas las marcas en formato JSON
     Route::post('/check-nombre', [MarcaController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new MarcasExport, 'marcas.xlsx');
+    })->name('exportExcel');
+    
 });
 
 
