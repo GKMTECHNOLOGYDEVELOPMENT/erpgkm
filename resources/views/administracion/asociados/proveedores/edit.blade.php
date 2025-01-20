@@ -72,11 +72,13 @@
 
                 <!-- Area -->
                 <div>
-                    <select id="idTipoArea" name="idTipoArea" class="select2 w-full">
-                        <option value="" disabled>Seleccionar Área</option>
-                        @foreach ($areas as $area)
-                            <option value="{{ $area->idArea }}" {{ $proveedor->idArea == $area->idArea ? 'selected' : '' }}>
-                                {{ $area->nombre }}
+                    <select id="idArea" name="idArea" class="select2 w-full">
+                        <option value="" disabled selected>Seleccionar Area</option>
+
+                        @foreach ($tiposArea as $tipoArea)
+                            <option value="{{ $tipoArea->idTipoArea }}"
+                                {{ old('idArea', $proveedor->idArea) == $tipoArea->idTipoArea ? 'selected' : '' }}>
+                                {{ $tipoArea->nombre }}
                             </option>
                         @endforeach
                     </select>                    
