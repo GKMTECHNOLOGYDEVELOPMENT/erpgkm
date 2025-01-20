@@ -2,26 +2,40 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
+
+    <div>
+        <ul class="flex space-x-2 rtl:space-x-reverse">
+            <li>
+                <a href="javascript:;" class="text-primary hover:underline">Cast</a>
+            </li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <span>Editar Cast</span>
+            </li>
+        </ul>
+    </div>
     <!-- Formulario de Crear o Editar Cast -->
     <div class="panel mt-6 p-5 max-w-2xl mx-auto">
-        <h2 class="text-xl font-bold mb-5">Editar Cast</h2>
+        <h2 class="text-xl font-bold mb-5">EDITAR CAST</h2>
         <div class="p-5">
-            <form id="castForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST" action="{{ route('casts.update', $cast->idCast) }}">
+            <form id="castForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
+                action="{{ route('casts.update', $cast->idCast) }}">
                 @csrf
                 @method('PUT')
 
                 <!-- Nombre -->
                 <div>
                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                    <input id="nombre" type="text" class="form-input w-full" name="nombre" placeholder="Ingrese el nombre" value="{{ old('nombre', $cast->nombre) }}">
+                    <input id="nombre" type="text" class="form-input w-full" name="nombre"
+                        placeholder="Ingrese el nombre" value="{{ old('nombre', $cast->nombre) }}">
                 </div>
 
-              
+
 
                 <!-- Número de Documento -->
                 <div>
                     <label for="numeroDocumento" class="block text-sm font-medium">Número de Documento</label>
-                    <input id="numeroDocumento" type="text" class="form-input w-full" name="numeroDocumento" placeholder="Ingrese el número de documento" value="{{ old('numeroDocumento', $cast->ruc) }}">
+                    <input id="numeroDocumento" type="text" class="form-input w-full" name="numeroDocumento"
+                        placeholder="Ingrese el número de documento" value="{{ old('numeroDocumento', $cast->ruc) }}">
                 </div>
 
                 <!-- Departamento -->
@@ -30,7 +44,8 @@
                     <select id="departamento" name="departamento" class="form-input w-full">
                         <option value="" disabled selected>Seleccionar Departamento</option>
                         @foreach ($departamentos as $departamento)
-                            <option value="{{ $departamento['id_ubigeo'] }}" {{ old('departamento', $cast->departamento) == $departamento['id_ubigeo'] ? 'selected' : '' }}>
+                            <option value="{{ $departamento['id_ubigeo'] }}"
+                                {{ old('departamento', $cast->departamento) == $departamento['id_ubigeo'] ? 'selected' : '' }}>
                                 {{ $departamento['nombre_ubigeo'] }}
                             </option>
                         @endforeach
@@ -53,26 +68,41 @@
                     </select>
                 </div>
 
-           
 
-               
+
+
 
                 <!-- Teléfono -->
                 <div>
                     <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                    <input id="telefono" type="text" class="form-input w-full" name="telefono" placeholder="Ingrese el teléfono" value="{{ old('telefono', $cast->telefono) }}">
+                    <input id="telefono" type="text" class="form-input w-full" name="telefono"
+                        placeholder="Ingrese el teléfono" value="{{ old('telefono', $cast->telefono) }}">
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium">Email</label>
-                    <input id="email" type="email" class="form-input w-full" name="email" placeholder="Ingrese el email" value="{{ old('email', $cast->email) }}">
+                    <input id="email" type="email" class="form-input w-full" name="email"
+                        placeholder="Ingrese el email" value="{{ old('email', $cast->email) }}">
                 </div>
 
                 <!-- Dirección -->
                 <div>
                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                    <input id="direccion" type="text" name="direccion" class="form-input w-full" placeholder="Ingrese la dirección" value="{{ old('direccion', $cast->direccion) }}">
+                    <input id="direccion" type="text" name="direccion" class="form-input w-full"
+                        placeholder="Ingrese la dirección" value="{{ old('direccion', $cast->direccion) }}">
+                </div>
+                <!-- Estado -->
+                <div>
+                    <label for="estado" class="block text-sm font-medium">Estado</label>
+                    <div class="ml-4 w-12 h-6 relative">
+                        <input type="hidden" name="estado" value="0">
+                        <input type="checkbox" id="estado" name="estado"
+                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                            value="1" {{ old('estado', $cast->estado) ? 'checked' : '' }} />
+                        <span for="estado"
+                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                    </div>
                 </div>
 
                 <!-- Botones -->
@@ -91,10 +121,12 @@
                 $.get('/ubigeo/provincias/' + departamentoId, function(data) {
                     var provinciaSelect = $('#provincia');
                     provinciaSelect.empty().prop('disabled', false);
-                    provinciaSelect.append('<option value="" disabled selected>Seleccionar Provincia</option>');
+                    provinciaSelect.append(
+                        '<option value="" disabled selected>Seleccionar Provincia</option>');
 
                     data.forEach(function(provincia) {
-                        provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' + provincia.nombre_ubigeo + '</option>');
+                        provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
+                            provincia.nombre_ubigeo + '</option>');
                     });
 
                     // Si hay provincia seleccionada previamente, se selecciona automáticamente
@@ -109,10 +141,12 @@
                 $.get('/ubigeo/distritos/' + provinciaId, function(data) {
                     var distritoSelect = $('#distrito');
                     distritoSelect.empty().prop('disabled', false);
-                    distritoSelect.append('<option value="" disabled selected>Seleccionar Distrito</option>');
+                    distritoSelect.append(
+                        '<option value="" disabled selected>Seleccionar Distrito</option>');
 
                     data.forEach(function(distrito) {
-                        distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' + distrito.nombre_ubigeo + '</option>');
+                        distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
+                            distrito.nombre_ubigeo + '</option>');
                     });
 
                     // Si hay distrito seleccionado previamente, se selecciona automáticamente

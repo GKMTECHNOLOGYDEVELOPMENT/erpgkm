@@ -1,6 +1,17 @@
 <x-layout.default>
+
+    <div>
+        <ul class="flex space-x-2 rtl:space-x-reverse">
+            <li>
+                <a href="javascript:;" class="text-primary hover:underline">Cliente General</a>
+            </li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <span>Editar Cliente General</span>
+            </li>
+        </ul>
+    </div>
     <div class="panel mt-6 p-5 max-w-2xl mx-auto">
-        <h2 class="text-xl font-bold mb-5">Editar Cliente General</h2>
+        <h2 class="text-xl font-bold mb-5">EDITAR CLIENTE GENERAL</h2>
 
         <form action="{{ route('cliente-general.update', $cliente->idClienteGeneral) }}" method="POST"
             enctype="multipart/form-data" class="space-y-4">
@@ -41,17 +52,17 @@
                 @enderror
             </div>
 
+            <!-- Estado -->
             <div>
                 <label for="estado" class="block text-sm font-medium">Estado</label>
-                <div class="flex items-center space-x-4">
-                    <!-- Campo hidden para enviar valor 0 si el checkbox no está marcado -->
+                <div class="flex items-center">
+                    <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
                     <input type="hidden" name="estado" value="0">
-
-                    <label class="inline-flex items-center">
-                        <input type="checkbox" id="estado" name="estado" class="form-checkbox" value="1"
-                            {{ $cliente->estado ? 'checked' : '' }}>
-                        <span class="ml-2">Activo</span>
-                    </label>
+                    <div class="w-12 h-6 relative">
+                        <input type="checkbox" id="estado" name="estado" class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                               value="1" {{ $cliente->estado ? 'checked' : '' }} />
+                        <span for="estado" class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                    </div>
                 </div>
             </div>
 
