@@ -67,9 +67,9 @@ class Proveedore extends Model
 
 	public function area()
 	{
-		return $this->belongsTo(Area::class, 'idArea');
+		return $this->belongsTo(Tipoarea::class, 'idArea', 'idTipoArea');
 	}
-
+	
 	public function tipodocumento()
 	{
 		return $this->belongsTo(Tipodocumento::class, 'idTipoDocumento');

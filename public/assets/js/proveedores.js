@@ -86,8 +86,6 @@
                         return response.json();
                     })
                     .then((data) => {
-                        console.log("Datos actuales:", this.proveedorData);
-                        console.log("Datos del servidor:", data);
 
                         // Detectar nuevas filas
                         const newData = data.filter(

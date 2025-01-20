@@ -96,7 +96,7 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario -->
-                        <form class="p-5 space-y-4" id="proveedorForm">
+                        <form class="p-5 space-y-4" action="{{ route('proveedor.store') }}" id="proveedorForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Nombre -->
                                 <div>
