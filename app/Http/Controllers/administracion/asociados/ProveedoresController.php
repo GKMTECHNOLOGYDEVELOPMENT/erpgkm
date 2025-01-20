@@ -62,7 +62,7 @@ class ProveedoresController extends Controller
     {
         $proveedor = Proveedore::findOrFail($id); // Buscar cliente por ID
 
-        $areas = Area::all(); // Obtener todos los clientes generales
+        $tiposArea = TipoArea::all(); // Obtener todos los clientes generales
         $tiposDocumento = TipoDocumento::all(); // Obtener todos los tipos de documento
         // Obtener los datos de los archivos JSON
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
@@ -107,7 +107,7 @@ class ProveedoresController extends Controller
             'proveedor',
             'tiposDocumento',
             'departamentos',
-            'areas',
+            'tiposArea',
             'provinciasDelDepartamento',
             'provinciaSeleccionada',
             'distritosDeLaProvincia',
