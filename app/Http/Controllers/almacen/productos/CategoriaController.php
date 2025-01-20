@@ -13,7 +13,7 @@ class CategoriaController extends Controller
     public function index()
     {   
 
-        return view('almacen.productos.categorias');
+        return view('almacen.productos.categoria.index');
     }
 
     public function store(Request $request)
@@ -53,7 +53,7 @@ class CategoriaController extends Controller
     public function edit($id)
     {
         $categoria = Categoria::findOrFail($id);
-        return view('administracion.categorias.edit', compact('categoria'));
+        return view('almacen.productos.categoria.edit', compact('categoria'));
     }
 
     public function update(Request $request, $id)
@@ -72,11 +72,11 @@ class CategoriaController extends Controller
             // Actualizar los datos de la categoría
             $categoria->update($validatedData);
 
-            return redirect()->route('administracion.categorias.index')
+            return redirect()->route('categorias.index')
                 ->with('success', 'Categoría actualizada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al actualizar la categoría: ' . $e->getMessage());
-            return redirect()->route('administracion.categorias.index')
+            return redirect()->route('categorias.index')
                 ->with('error', 'Ocurrió un error al actualizar la categoría.');
         }
     }
