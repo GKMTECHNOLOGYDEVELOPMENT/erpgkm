@@ -47,6 +47,12 @@ document.addEventListener("alpine:init", () => {
                             bottom: "{info}{select}{pager}", // Posición de información, selector y paginador
                         },
                     });
+                    // Centrando los encabezados manualmente
+                    const headers = document.querySelectorAll("#myTable1 thead th");
+                    headers.forEach((header) => {
+                        header.style.textAlign = "center";
+                        header.style.verticalAlign = "middle";
+                    });
                 })
                 .catch((error) => {
                     // console.error("Error al inicializar la tabla:", error);
@@ -55,14 +61,18 @@ document.addEventListener("alpine:init", () => {
 
         formatDataForTable(data) {
             return data.map((cliente) => [
-                cliente.descripcion, // Columna: Descripción
-                cliente.foto ?
-                `<img src="${cliente.foto}" class="w-10 h-10 rounded-full object-cover" alt="Foto" />` :
-                "Sin imagen", // Columna: Foto
-                cliente.estado === 'Activo' ?
-                `<span class="badge badge-outline-success">Activo</span>` :
-                `<span class="badge badge-outline-danger">Inactivo</span>`, // Columna: Estado
-                `<div class="flex items-center">
+                `<div style="text-align: center;">${cliente.descripcion}</div>`, // Columna: Descripción
+                `<div style="text-align: center; display: flex; justify-content: center; align-items: center; height: 100%;">
+                ${cliente.foto ? 
+                    `<img src="${cliente.foto}" class="w-10 h-10 rounded-full object-cover" alt="Foto" />` : 
+                    "Sin imagen"}
+            </div>`, // Columna: Foto
+                `<div style="text-align: center;">
+                    ${cliente.estado === 'Activo' ?
+                    '<span class="badge badge-outline-success">Activo</span>' :
+                    '<span class="badge badge-outline-danger">Inactivo</span>'}
+                </div>`, // Columna: Estado
+                `<div style="text-align: center;" class="flex justify-center items-center">
     <a href="/cliente-general/${cliente.idClienteGeneral}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
             <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
@@ -95,11 +105,11 @@ document.addEventListener("alpine:init", () => {
                     // Detectar nuevas filas
                     const newData = data.filter(
                         (newCliente) =>
-                        !this.clientData.some(
-                            (existingCliente) =>
-                            existingCliente.idClienteGeneral === newCliente
-                            .idClienteGeneral
-                        )
+                            !this.clientData.some(
+                                (existingCliente) =>
+                                    existingCliente.idClienteGeneral === newCliente
+                                        .idClienteGeneral
+                            )
                     );
 
                     if (newData.length > 0) {
@@ -116,63 +126,63 @@ document.addEventListener("alpine:init", () => {
         },
 
         deleteClient(idClienteGeneral) {
-new window.Swal({
-icon: 'warning',
-title: '¿Estás seguro?',
-text: "¡No podrás revertir esta acción!",
-showCancelButton: true,
-confirmButtonText: 'Eliminar',
-cancelButtonText: 'Cancelar',
-padding: '2em',
-customClass: 'sweet-alerts',
-}).then((result) => {
-if (result.value) {
-    console.log(`Iniciando eliminación del cliente con ID: ${idClienteGeneral}`);
+            new window.Swal({
+                icon: 'warning',
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esta acción!",
+                showCancelButton: true,
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar',
+                padding: '2em',
+                customClass: 'sweet-alerts',
+            }).then((result) => {
+                if (result.value) {
+                    console.log(`Iniciando eliminación del cliente con ID: ${idClienteGeneral}`);
 
-    // Hacer la solicitud de eliminación
-    fetch(`/api/clientegeneral/${idClienteGeneral}`, {
-        method: "DELETE",
-    })
-    .then((response) => {
-        console.log('Respuesta del servidor:', response);
+                    // Hacer la solicitud de eliminación
+                    fetch(`/api/clientegeneral/${idClienteGeneral}`, {
+                        method: "DELETE",
+                    })
+                        .then((response) => {
+                            console.log('Respuesta del servidor:', response);
 
-        if (!response.ok) {
-            console.error("Error al eliminar cliente. Código de respuesta:", response.status);
-            throw new Error("Error al eliminar cliente");
+                            if (!response.ok) {
+                                console.error("Error al eliminar cliente. Código de respuesta:", response.status);
+                                throw new Error("Error al eliminar cliente");
+                            }
+
+                            return response.json();
+                        })
+                        .then((data) => {
+                            console.log("Datos de respuesta del servidor:", data);
+
+                            // Mostrar notificación de éxito
+                            new window.Swal({
+                                title: '¡Eliminado!',
+                                text: 'El cliente ha sido eliminado con éxito.',
+                                icon: 'success',
+                                customClass: 'sweet-alerts',
+                            }).then(() => {
+                                // Recargar la página después de la eliminación exitosa
+                                location.reload();
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error al realizar la solicitud de eliminación:", error);
+
+                            // Mostrar notificación de error
+                            new window.Swal({
+                                title: 'Error',
+                                text: 'Ocurrió un error al eliminar el cliente.',
+                                icon: 'error',
+                                customClass: 'sweet-alerts',
+                            });
+                        });
+                } else {
+                    console.log('Eliminación cancelada.');
+                }
+            });
         }
-
-        return response.json();
-    })
-    .then((data) => {
-        console.log("Datos de respuesta del servidor:", data);
-
-        // Mostrar notificación de éxito
-        new window.Swal({
-            title: '¡Eliminado!',
-            text: 'El cliente ha sido eliminado con éxito.',
-            icon: 'success',
-            customClass: 'sweet-alerts',
-        }).then(() => {
-            // Recargar la página después de la eliminación exitosa
-            location.reload();
-        });
-    })
-    .catch((error) => {
-        console.error("Error al realizar la solicitud de eliminación:", error);
-
-        // Mostrar notificación de error
-        new window.Swal({
-            title: 'Error',
-            text: 'Ocurrió un error al eliminar el cliente.',
-            icon: 'error',
-            customClass: 'sweet-alerts',
-        });
-    });
-} else {
-    console.log('Eliminación cancelada.');
-}
-});
-}
 
 
 

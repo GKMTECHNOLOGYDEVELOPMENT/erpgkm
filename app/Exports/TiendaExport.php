@@ -113,7 +113,7 @@ class TiendaExport implements
 
         // Título del reporte
         $sheet->mergeCells('A1:H1');
-        $sheet->setCellValue('A1', 'Reporte General de Tiendas');
+        $sheet->setCellValue('A1', 'REPORTE GENERAL DE TIENDAS');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => [
                 'bold' => true,

@@ -105,7 +105,7 @@ class ClientesExport implements
 
         // Título del reporte
         $sheet->mergeCells('A1:I1');
-        $sheet->setCellValue('A1', 'Reporte General de Clientes');
+        $sheet->setCellValue('A1', 'REPORTE GENERAL DE CLIENTES');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -153,11 +153,12 @@ class ClientesExport implements
             ],
         ]);
 
-        // Centramos los datos de todas las columnas
+        // Ajustar texto y centrar datos
         $sheet->getStyle('A5:I' . $sheet->getHighestRow())->applyFromArray([
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'wrapText' => true, // Ajustar texto
             ],
         ]);
 

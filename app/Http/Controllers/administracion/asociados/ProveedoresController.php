@@ -11,6 +11,7 @@ use App\Models\Proveedore;
 use App\Models\Tipodocumento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use PDF;
 
 class ProveedoresController extends Controller
 {
@@ -193,9 +194,11 @@ class ProveedoresController extends Controller
 
     public function exportAllPDF()
     {
-        $proveedores = Proveedore::with('tipoDocumento', 'area')->get(); // Ahora la relación funcionará
+        $proveedores = Proveedore::with('tipoDocumento', 'area')->get();
     
-        $pdf = PDF::loadView('proveedores.report', compact('proveedores'));
+        $pdf = Pdf::loadView('administracion.asociados.proveedores.pdf.reporte-proveedores', compact('proveedores'))
+            ->setPaper('a4', 'landscape'); // Configura el tamaño y orientación del papel
+    
         return $pdf->download('reporte_proveedores.pdf');
     }
     

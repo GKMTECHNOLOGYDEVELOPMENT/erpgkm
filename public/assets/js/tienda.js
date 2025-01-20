@@ -17,45 +17,53 @@ document.addEventListener("alpine:init", () => {
         },
 
         fetchDataAndInitTable() {
-    fetch("/api/tiendas")
-        .then((response) => {
-            if (!response.ok) throw new Error("Error al obtener datos del servidor");
-            return response.json();
-        })
-        .then((data) => {
-            this.tiendaData = data;
+            fetch("/api/tiendas")
+                .then((response) => {
+                    if (!response.ok) throw new Error("Error al obtener datos del servidor");
+                    return response.json();
+                })
+                .then((data) => {
+                    this.tiendaData = data;
 
-            // Inicializar DataTable con las nuevas cabeceras
-            this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
-                data: {
-                    headings: ["Ruc", "Nombre", "Celular", "Email", "Dirección", "Referencia", "Acción"],  // Nuevas cabeceras
-                    data: this.formatDataForTable(data),  // Asegúrate de que esta función mapee los nuevos datos
-                },
-                searchable: true,
-                perPage: 10,
-                labels: {
-                    placeholder: "Buscar...",
-                    perPage: "{select}",
-                    noRows: "No se encontraron registros",
-                    info: "Mostrando {start} a {end} de {rows} registros",
-                },
-            });
-        })
-        .catch((error) => {
-            console.error("Error al inicializar la tabla:", error);
-        });
-},
+                    // Inicializar DataTable con las nuevas cabeceras
+                    this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
+                        data: {
+                            headings: ["Ruc", "Nombre", "Celular", "Email", "Dirección", "Referencia", "Acción"], // Nuevas cabeceras
+                            data: this.formatDataForTable(data),
+                        },
+                        searchable: true,
+                        perPage: 10,
+                        labels: {
+                            placeholder: "Buscar...",
+                            perPage: "{select}",
+                            noRows: "No se encontraron registros",
+                            info: "Mostrando {start} a {end} de {rows} registros",
+                        },
+                    });
 
-// Actualiza esta función para que incluya los nuevos datos
-formatDataForTable(data) {
-    return data.map((tienda) => [
-        tienda.ruc,           // RUC de la tienda
-        tienda.nombre,        // Nombre de la tienda
-        tienda.celular,       // Celular de la tienda
-        tienda.email,         // Email de la tienda
-        tienda.direccion,     // Dirección de la tienda
-        tienda.referencia,    // Referencia de la tienda
-        `<div class="flex items-center">
+                    // Centrando los encabezados manualmente
+                    const headers = document.querySelectorAll("#myTable1 thead th");
+                    headers.forEach((header) => {
+                        header.style.textAlign = "center";
+                        header.style.verticalAlign = "middle";
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error al inicializar la tabla:", error);
+                });
+        },
+
+
+        // Actualiza esta función para que incluya los nuevos datos
+        formatDataForTable(data) {
+            return data.map((tienda) => [
+                `<div style="text-align: center;">${tienda.ruc}</div>`,       // RUC de la tienda
+                `<div style="text-align: center;">${tienda.nombre}</div>`,    // Nombre de la tienda
+                `<div style="text-align: center;">${tienda.celular}</div>`,   // Celular de la tienda
+                `<div style="text-align: center;">${tienda.email}</div>`,     // Email de la tienda
+                `<div style="text-align: center;">${tienda.direccion}</div>`, // Dirección de la tienda
+                `<div style="text-align: center;">${tienda.referencia}</div>`,  // Referencia de la tienda
+                `<div style="text-align: center;" class="flex justify-center items-center">
              <a href="/tienda/${tienda.idTienda}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                     <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
@@ -72,8 +80,8 @@ formatDataForTable(data) {
                 </svg>
             </button>
         </div>`
-    ]);
-},
+            ]);
+        },
 
 
 
@@ -110,62 +118,62 @@ formatDataForTable(data) {
         },
 
         deleteTienda(idTienda) {
-    new window.Swal({
-        icon: 'warning',
-        title: '¿Estás seguro?',
-        text: "¡No podrás revertir esta acción!",
-        showCancelButton: true,
-        confirmButtonText: 'Eliminar',
-        cancelButtonText: 'Cancelar',
-        padding: '2em',
-        customClass: 'sweet-alerts',
-    }).then((result) => {
-        if (result.value) {
-            // Hacer la solicitud de eliminación
-            fetch(`/api/tiendas/${idTienda}`, {
-                method: "DELETE",
-            })
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al eliminar tienda");
-                    return response.json();
-                })
-                .then(() => {
-                    console.log(`Tienda ${idTienda} eliminada con éxito`);
+            new window.Swal({
+                icon: 'warning',
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esta acción!",
+                showCancelButton: true,
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar',
+                padding: '2em',
+                customClass: 'sweet-alerts',
+            }).then((result) => {
+                if (result.value) {
+                    // Hacer la solicitud de eliminación
+                    fetch(`/api/tiendas/${idTienda}`, {
+                        method: "DELETE",
+                    })
+                        .then((response) => {
+                            if (!response.ok) throw new Error("Error al eliminar tienda");
+                            return response.json();
+                        })
+                        .then(() => {
+                            console.log(`Tienda ${idTienda} eliminada con éxito`);
 
-                    // Actualizar la tabla eliminando la fila
-                    this.tiendaData = this.tiendaData.filter(
-                        (tienda) => tienda.idTienda !== idTienda
-                    );
-                    this.datatable1.rows().remove(
-                        (row) =>
-                            row.cells[0].innerHTML === idTienda.toString()
-                    );
+                            // Actualizar la tabla eliminando la fila
+                            this.tiendaData = this.tiendaData.filter(
+                                (tienda) => tienda.idTienda !== idTienda
+                            );
+                            this.datatable1.rows().remove(
+                                (row) =>
+                                    row.cells[0].innerHTML === idTienda.toString()
+                            );
 
-                    // Mostrar notificación de éxito
-                    new window.Swal({
-                        title: '¡Eliminado!',
-                        text: 'La tienda ha sido eliminada con éxito.',
-                        icon: 'success',
-                        customClass: 'sweet-alerts',
-                    }).then(() => {
-                        // Recargar la página después de la eliminación exitosa
-                        location.reload();
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error al eliminar tienda:", error);
+                            // Mostrar notificación de éxito
+                            new window.Swal({
+                                title: '¡Eliminado!',
+                                text: 'La tienda ha sido eliminada con éxito.',
+                                icon: 'success',
+                                customClass: 'sweet-alerts',
+                            }).then(() => {
+                                // Recargar la página después de la eliminación exitosa
+                                location.reload();
+                            });
+                        })
+                        .catch((error) => {
+                            console.error("Error al eliminar tienda:", error);
 
-                    // Mostrar notificación de error
-                    new window.Swal({
-                        title: 'Error',
-                        text: 'Ocurrió un error al eliminar la tienda.',
-                        icon: 'error',
-                        customClass: 'sweet-alerts',
-                    });
-                });
+                            // Mostrar notificación de error
+                            new window.Swal({
+                                title: 'Error',
+                                text: 'Ocurrió un error al eliminar la tienda.',
+                                icon: 'error',
+                                customClass: 'sweet-alerts',
+                            });
+                        });
+                }
+            });
         }
-    });
-}
 
     }));
 });

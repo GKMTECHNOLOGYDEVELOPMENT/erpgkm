@@ -100,7 +100,7 @@ class ClientesGeneralExport implements
     {
         // Título del reporte
         $sheet->mergeCells('A1:D1');
-        $sheet->setCellValue('A1', 'Reporte General de Clientes');
+        $sheet->setCellValue('A1', 'REPORTE DE CLIENTES GENERALES');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => [
                 'bold' => true,
