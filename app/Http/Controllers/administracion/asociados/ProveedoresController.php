@@ -27,8 +27,7 @@ class ProveedoresController extends Controller
     {
         try {
             // Obtener todos los datos enviados en la solicitud sin validarlos
-            $dataProveedores = $request->all();
-
+            $dataProveedores = $request->validate();
             // Establecer valores predeterminados para 'estado' y 'fecha_registro'
             $dataProveedores['estado'] = 1; // Valor predeterminado para 'estado' (activo)
 
@@ -167,7 +166,6 @@ class ProveedoresController extends Controller
         $proveedores = Proveedore::with(['tipoDocumento', 'area'])->get(); // Cambia 'tipoarea' por 'area' si tu relación se llama 'area'
 
         // Registrar los datos obtenidos (para depuración)
-        Log::debug('Proveedores obtenidos:', $proveedores->toArray()); // Utiliza toArray() para registrar los datos completos
 
         // Procesa los datos para incluir los campos necesarios, mostrando los nombres relacionados
         $proveedoresData = $proveedores->map(function ($proveedor) {
