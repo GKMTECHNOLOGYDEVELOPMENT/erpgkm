@@ -6,6 +6,7 @@ use App\Http\Controllers\administracion\asociados\ClientesController;
 use App\Http\Controllers\administracion\asociados\ProveedoresController;
 use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
+use App\Http\Controllers\almacen\productos\CategoriaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,12 +32,16 @@ Route::get('/cast', [CastController::class, 'getAll']);
 Route::get('/clientegeneral', [ClienteGeneralController::class, 'getAll']);
 Route::get('/proveedores', [ProveedoresController::class, 'getAll']);
 Route::get('/tiendas', [TiendaController::class, 'getAll']);
+Route::get('/categoria', [CategoriaController::class, 'getAll']);
 
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);
 // Route::get('/subsidiarios', [SubsidiarioController::class, 'getAll']);
 Route::post('/check-nombre', [ClienteGeneralController::class, 'checkNombre']);
+
+Route::post('/categoria/check-nombre', [CategoriaController::class, 'checkNombre']);
+
 
 Route::delete('/clientegeneral/{id}', [ClienteGeneralController::class, 'destroy']);
 Route::delete('/tiendas/{id}', [TiendaController::class, 'destroy']);

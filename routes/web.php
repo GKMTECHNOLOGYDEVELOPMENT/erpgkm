@@ -20,7 +20,7 @@ use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\ModelosController;
 use App\Http\Controllers\almacen\productos\TipoArticuloController;
 use App\Http\Controllers\almacen\productos\MarcaController;
-use App\Http\Controllers\almacen\productos\CategoriaController;
+use App\Http\Controllers\almacen\productos\CategoriasController;
 use App\Http\Controllers\configuracion\ConfiguracionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LockscreenController;
@@ -40,7 +40,7 @@ use App\Exports\ClientesGeneralExport;
 use App\Exports\ClientesExport;
 use App\Exports\TiendaExport;
 use App\Exports\CastExport;
-use App\Exports\ProveedoresExport;
+use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
@@ -172,7 +172,6 @@ Route::get('/almacen/marca', [MarcaController::class, 'index'])->name('almacen.m
 //Ruta para Almacen TipoArticulos
 Route::get('/almacen/tipo-articulos', [TipoArticuloController::class, 'index'])->name('almacen.tipo-articulos')->middleware('auth');
 //Ruta para Almacen Categoria
-Route::get('/almacen/categoria', [CategoriaController::class, 'index'])->name('almacen.categorias')->middleware('auth');
 
 Route::get('/apps/chat', [ChatController::class, 'index'])->name('apps.chat');
 Route::get('/apps/mailbox', [MailboxController::class, 'index'])->name('apps.mailbox');
@@ -189,6 +188,21 @@ Route::get('/apps/calendar', [CalendarController::class, 'index'])->name('apps.c
 // Route::view('/apps/scrumboard', 'apps.scrumboard');
 // Route::view('/apps/contacts', 'apps.contacts');
 // Route::view('/apps/calendar', 'apps.calendar');
+// INICIO CATEGORIA ///
+Route::prefix('categorias')->name('categorias.')->group(function () {
+    Route::get('/', [CategoriaController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::post('/store', [CategoriaController::class, 'store'])->name('store'); // Guardar una nueva categoría
+    Route::get('/edit/{id}', [CategoriaController::class, 'edit'])->name('edit'); // Editar una categoría
+    Route::put('/update/{id}', [CategoriaController::class, 'update'])->name('update'); // Actualizar una categoría
+    Route::delete('/{id}', [CategoriaController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
+    Route::get('/export-pdf', [CategoriaController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todas las categorías a PDF
+    Route::get('/get-all', [CategoriaController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
+    Route::post('/check-nombre', [CategoriaController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+});
+
+/// FIN CATEGORIA ///
+
+
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');
