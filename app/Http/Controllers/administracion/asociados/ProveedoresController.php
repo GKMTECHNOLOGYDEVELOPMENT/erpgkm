@@ -64,7 +64,6 @@ class ProveedoresController extends Controller
 
         $areas = Area::all(); // Obtener todos los clientes generales
         $tiposDocumento = TipoDocumento::all(); // Obtener todos los tipos de documento
-
         // Obtener los datos de los archivos JSON
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
         $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
@@ -132,7 +131,7 @@ class ProveedoresController extends Controller
             'distrito' => 'required|string|max:255',     // Validar el campo 'distrito'
             'direccion' => 'required|string|max:255',
             'codigoPostal' => 'nullable|string|max:10',  // Validar el código postal
-            'idArea' => 'required|exists:area,idArea',    // Validar el área
+            'idArea' => 'required|exists:tipoarea,idTipoArea',    // Validar el área
         ]);
 
         // Buscar el proveedor
