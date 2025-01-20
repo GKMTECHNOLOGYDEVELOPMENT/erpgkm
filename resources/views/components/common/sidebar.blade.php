@@ -912,7 +912,7 @@
                             <a href="{{ route('almacen.modelos') }}">Modelos</a>
                         </li>
                         <li>
-                            <a href="{{ route('almacen.marcas') }}">Marcas</a>
+                            <a href="{{ route('marcas.index') }}">Marcas</a>
                         </li>
                         <li>
                             <a href="{{ route('almacen.tipo-articulos') }}">Tipo Articulos</a>

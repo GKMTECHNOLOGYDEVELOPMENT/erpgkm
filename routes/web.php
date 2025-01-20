@@ -167,8 +167,6 @@ Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'inde
 Route::get('/almacen/articulos', [ArticulosController::class, 'index'])->name('almacen.articulos')->middleware('auth');
 //Ruta para Almacen Modelos
 Route::get('/almacen/modelos', [ModelosController::class, 'index'])->name('almacen.modelos')->middleware('auth');
-//Ruta para Almacen Marca
-Route::get('/almacen/marca', [MarcaController::class, 'index'])->name('almacen.marcas')->middleware('auth');
 //Ruta para Almacen TipoArticulos
 Route::get('/almacen/tipo-articulos', [TipoArticuloController::class, 'index'])->name('almacen.tipo-articulos')->middleware('auth');
 //Ruta para Almacen Categoria
@@ -202,7 +200,21 @@ Route::prefix('categorias')->name('categorias.')->group(function () {
 
 /// FIN CATEGORIA ///
 
+/// INICIO MARCA ///
 
+Route::prefix('marcas')->name('marcas.')->group(function () {
+    Route::get('/', [MarcaController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::post('/store', [MarcaController::class, 'store'])->name('store'); // Guardar una nueva marca
+    Route::get('/edit/{id}', [MarcaController::class, 'edit'])->name('edit'); // Editar una marca
+    Route::put('/update/{id}', [MarcaController::class, 'update'])->name('update'); // Actualizar una marca
+    Route::delete('/{id}', [MarcaController::class, 'destroy'])->name('destroy'); // Eliminar una marca
+    Route::get('/export-pdf', [MarcaController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todas las marcas a PDF
+    Route::get('/get-all', [MarcaController::class, 'getAll'])->name('getAll'); // Obtener todas las marcas en formato JSON
+    Route::post('/check-nombre', [MarcaController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+});
+
+
+/// FIN MARCA ///
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');

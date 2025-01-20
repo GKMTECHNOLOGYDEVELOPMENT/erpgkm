@@ -26,7 +26,8 @@ class Marca extends Model
 	public $timestamps = false;
 
 	protected $fillable = [
-		'nombre'
+		'nombre',
+		'estado'
 	];
 
 	public function modelos()

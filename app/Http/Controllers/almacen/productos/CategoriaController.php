@@ -13,7 +13,7 @@ class CategoriaController extends Controller
     public function index()
     {   
 
-        return view('almacen.productos.categorias');
+        return view('almacen.productos.categoria.index');
     }
 
     public function store(Request $request)
