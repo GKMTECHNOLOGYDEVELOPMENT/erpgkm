@@ -5,6 +5,7 @@ namespace App\Http\Controllers\administracion\asociados;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProveedoresRequest;
 use App\Models\Area;
+use App\Models\TipoArea;
 use App\Models\Cliente;
 use App\Models\Proveedore;
 use App\Models\Tipodocumento;
@@ -17,9 +18,9 @@ class ProveedoresController extends Controller
     {
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
         $tiposDocumento = Tipodocumento::all();
-        $areas = Area::all();
+        $tiposArea  = TipoArea::all();
         // Llamar la vista ubicada en administracion/usuarios.blade.php
-        return view('administracion.asociados.proveedores.index', compact('departamentos', 'tiposDocumento','areas') ); 
+        return view('administracion.asociados.proveedores.index', compact('departamentos', 'tiposDocumento','tiposArea') ); 
     }
 
     public function store(ProveedoresRequest $request)

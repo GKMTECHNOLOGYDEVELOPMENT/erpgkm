@@ -7,88 +7,68 @@
 @endphp
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <title>Reporte de Clientes</title>
     <style>
+        @page {
+            margin: 0; /* Elimina márgenes de la página */
+        }
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12px;
             margin: 0;
             padding: 0;
-            background-color: #f3f4f6;
+            background-image: url('{{ public_path('assets/images/hojamembretada.jpg') }}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
         }
-
-        .container {
-            margin: 10px;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .content {
+            margin: 0;
+            padding: 20px; /* Espaciado interno */
         }
-
         .header {
             text-align: center;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e3342f;
             padding-bottom: 10px;
+            border-bottom: 2px solid #e3342f;
         }
-
         .header h1 {
             font-size: 16px;
             color: #e3342f;
             margin: 0;
         }
-
         .header p {
             font-size: 12px;
             margin: 5px 0;
             color: #555;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-
-        table,
-        th,
-        td {
+        table, th, td {
             border: 1px solid #e3342f;
         }
-
-        th,
-        td {
+        th, td {
             text-align: center;
             padding: 8px;
             font-size: 12px;
         }
-
         th {
             background-color: #e3342f;
             color: white;
             text-transform: uppercase;
         }
-
         .table-row:nth-child(odd) {
             background-color: #f9fafb;
         }
-
         .table-row:nth-child(even) {
             background-color: #fefefe;
         }
-
-        img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-
         .badge {
             display: inline-block;
             padding: 5px 10px;
@@ -97,19 +77,16 @@
             font-size: 10px;
             color: #fff;
         }
-
         .badge-success {
             background-color: #28a745;
         }
-
         .badge-danger {
             background-color: #dc3545;
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
+    <div class="content">
         <!-- Encabezado -->
         <div class="header">
             <h1>REPORTE DE CLIENTES</h1>
@@ -139,7 +116,7 @@
                         <td>{{ $cliente->nombre }}</td>
                         <td>{{ $cliente->telefono }}</td>
                         <td>{{ $cliente->email }}</td>
-                        <td>{{ $cliente->clienteGeneral->descripcion }}</td>
+                        <td>{{ $cliente->clienteGeneral->descripcion ?? 'Sin cliente general' }}</td>
                         <td>{{ $cliente->direccion }}</td>
                         <td>
                             <span class="badge {{ $cliente->estado ? 'badge-success' : 'badge-danger' }}">
@@ -150,6 +127,7 @@
                 @endforeach
             </tbody>
         </table>
+
         <!-- Información adicional -->
         <div class="text-center mt-4">
             <p class="text-xs">
@@ -158,5 +136,4 @@
         </div>
     </div>
 </body>
-
 </html>

@@ -1,90 +1,77 @@
 @php
     use Carbon\Carbon;
-
     setlocale(LC_TIME, 'Spanish_Spain.1252');
     $fechaFormateada = mb_strtoupper(strftime('%d %B %Y'), 'UTF-8');
     $fechaPeru = Carbon::now()->setTimezone('America/Lima')->format('d/m/Y H:i:s');
 @endphp
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de Tiendas</title>
     <style>
+        @page {
+            margin: 0; /* Elimina márgenes de la página */
+        }
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12px;
             margin: 0;
             padding: 0;
-            background-color: #f3f4f6;
+            background-image: url('{{ public_path('assets/images/hojamembretada.jpg') }}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
         }
-
-        .container {
-            margin: 10px;
-            padding: 10px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .content {
+            margin: 0;
+            padding: 20px; /* Espaciado interno */
         }
-
         .header {
             text-align: center;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e3342f;
             padding-bottom: 10px;
+            border-bottom: 2px solid #e3342f;
         }
-
         .header h1 {
             font-size: 16px;
             color: #e3342f;
             margin: 0;
         }
-
         .header p {
             font-size: 12px;
             margin: 5px 0;
             color: #555;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-
-        table,
-        th,
-        td {
+        table, th, td {
             border: 1px solid #e3342f;
         }
-
-        th,
-        td {
+        th, td {
             text-align: center;
             padding: 8px;
             font-size: 12px;
         }
-
         th {
             background-color: #e3342f;
             color: white;
             text-transform: uppercase;
         }
-
         .table-row:nth-child(odd) {
             background-color: #f9fafb;
         }
-
         .table-row:nth-child(even) {
             background-color: #fefefe;
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
+    <div class="content">
         <!-- Encabezado -->
         <div class="header">
             <h1>REPORTE DE TIENDAS</h1>
@@ -121,6 +108,7 @@
                 @endforeach
             </tbody>
         </table>
+
         <!-- Información adicional -->
         <div class="text-center mt-4">
             <p class="text-xs">
@@ -129,5 +117,4 @@
         </div>
     </div>
 </body>
-
 </html>

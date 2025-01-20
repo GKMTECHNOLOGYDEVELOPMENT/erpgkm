@@ -39,6 +39,7 @@ use Illuminate\Http\Client\Request;
 use App\Exports\ClientesGeneralExport;
 use App\Exports\ClientesExport;
 use App\Exports\TiendaExport;
+use App\Exports\CastExport;
 use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
@@ -134,6 +135,7 @@ Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast
 Route::post('/cast/store', [CastController::class, 'store'])->name('cast.store');
 Route::get('/cast/{idCast}/edit', [CastController::class, 'edit'])->name('cast.edit');
 Route::put('/cast/{idCast}', [CastController::class, 'update'])->name('casts.update');
+Route::get('/exportar-cast', function () { return Excel::download(new CastExport, 'cast.xlsx'); })->name('cast.exportExcel');
 Route::get('/reporte-cast', [CastController::class, 'exportAllPDF'])->name('reporte.cast');
 
 // Route::get('/casts', [CastController::class, 'getAll']);

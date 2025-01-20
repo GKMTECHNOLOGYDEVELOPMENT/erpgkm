@@ -11,6 +11,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reporte de CAST</title>
     <style>
+        @page {
+            margin: 0; /* Elimina todos los márgenes de la página */
+        }
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12px;
@@ -21,18 +24,15 @@
             background-repeat: no-repeat;
             background-position: center;
         }
-        .container {
-            margin: 10px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0); /* Blanco semitransparente */
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .content {
+            margin: 0; /* Sin márgenes */
+            padding: 20px; /* Espaciado interno del contenido */
         }
         .header {
             text-align: center;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e3342f;
             padding-bottom: 10px;
+            border-bottom: 2px solid #e3342f;
         }
         .header h1 {
             font-size: 16px;
@@ -85,7 +85,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="content">
         <div class="header">
             <h1>REPORTE DE CAST</h1>
             <p>Generado el: {{ $fechaFormateada }}</p>

@@ -67,7 +67,9 @@ document.addEventListener("alpine:init", () => {
                 cliente.email, // Email
                 cliente.clienteGeneral, // Cliente General (ahora la descripción)
                 cliente.direccion, // Dirección
-                cliente.estado === 'Activo' ? 'Activo' : 'Inactivo', // Estado
+                cliente.estado === 'Activo' ?
+                `<span class="badge badge-outline-success">Activo</span>` :
+                `<span class="badge badge-outline-danger">Inactivo</span>`,// Estado
                 `<div class="flex items-center">
             <a href="/cliente/${cliente.idCliente}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">

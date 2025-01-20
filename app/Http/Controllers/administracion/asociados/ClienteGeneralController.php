@@ -250,7 +250,7 @@ public function exportAllPDF()
         // Retorna los datos en formato JSON
         return response()->json($clientesData);
     }
-    
+    // futuras validaciones
     public function checkNombre(Request $request)
     {
         $nombre = $request->input('nombre');

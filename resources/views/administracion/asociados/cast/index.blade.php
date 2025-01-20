@@ -24,7 +24,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
-                        @click="exportTable('excel')">
+                        @click="window.location.href = '{{ route('cast.exportExcel') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -36,9 +36,10 @@
                         <span>Excel</span>
                     </button>
 
+
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                    @click="window.location.href = '{{ route('reporte.cast') }}'">
+                        @click="window.location.href = '{{ route('reporte.cast') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -167,23 +168,23 @@
         </div>
     </div>
 
-<script>
+    <script>
         window.sessionMessages = {
             success: '{{ session('success') }}',
             error: '{{ session('error') }}',
         };
     </script>
 
-<script>
-    window.Laravel = {
-        csrfToken: '{{ csrf_token() }}', // Define el token CSRF
-        routeCastStore: '{{ route('cast.store') }}' // Define la ruta del endpoint
-    };
-</script>
-<script src="{{ asset('assets/js/caststore.js') }}"></script>
+    <script>
+        window.Laravel = {
+            csrfToken: '{{ csrf_token() }}', // Define el token CSRF
+            routeCastStore: '{{ route('cast.store') }}' // Define la ruta del endpoint
+        };
+    </script>
+    <script src="{{ asset('assets/js/caststore.js') }}"></script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
-<script src="{{ asset('assets/js/ubigeo.js') }}"></script>
-<script src="{{ asset('assets/js/cast.js') }}"></script>
+    <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
+    <script src="{{ asset('assets/js/cast.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
