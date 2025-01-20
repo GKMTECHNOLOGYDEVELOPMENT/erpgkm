@@ -94,6 +94,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>#</th> <!-- Número -->
                     <th>Tipo de Documento</th>
                     <th>Número de Documento</th>
                     <th>Nombre</th>
@@ -107,6 +108,7 @@
             <tbody>
                 @foreach($proveedores as $proveedor)
                     <tr class="table-row">
+                        <td>{{ $loop->iteration }}</td> <!-- Número de fila -->
                         <td>{{ $proveedor->tipoDocumento->nombre }}</td>
                         <td>{{ $proveedor->numeroDocumento }}</td>
                         <td>{{ $proveedor->nombre }}</td>

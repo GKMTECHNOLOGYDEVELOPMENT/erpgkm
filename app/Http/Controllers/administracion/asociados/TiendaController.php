@@ -146,7 +146,7 @@ public function exportAllPDF()
         $pdf = PDF::loadView('administracion.asociados.tienda.pdf.reporte-tiendas', compact('tiendas'))
             ->setPaper('a4', 'landscape');
 
-        return $pdf->stream('reporte-tiendas.pdf');
+        return $pdf->download('reporte-tiendas.pdf');
     } catch (\Exception $e) {
         Log::error('Error al generar el PDF: ' . $e->getMessage());
         return redirect()->back()->with('error', 'Hubo un problema al generar el PDF.');

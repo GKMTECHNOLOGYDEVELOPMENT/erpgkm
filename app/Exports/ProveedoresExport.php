@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Cast;
+use App\Models\Proveedore;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CastExport implements 
+class ProveedoresExport implements 
     FromCollection, 
     WithMapping, 
     WithHeadings, 
@@ -21,14 +21,15 @@ class CastExport implements
     WithColumnWidths, 
     WithCustomStartCell
 {
-    private const HEADERS = ['#', 'RUC', 'Nombre', 'Teléfono', 'Email', 'Departamento', 'Provincia', 'Distrito', 'Dirección', 'Estado'];
-    private \Illuminate\Support\Collection $casts;
+    private const HEADERS = ['#', 'Tipo de Documento', 'Número de Documento', 'Nombre', 'Teléfono', 'Email', 'Área', 'Dirección', 'Estado'];
+
+    private \Illuminate\Support\Collection $proveedores;
 
     public function __construct()
     {
-        $this->casts = Cast::all();
+        $this->proveedores = Proveedore::with(['tipoDocumento', 'area'])->get();
 
-        if ($this->casts->isEmpty()) {
+        if ($this->proveedores->isEmpty()) {
             throw new \Exception('No hay datos disponibles para exportar.');
         }
     }
@@ -38,27 +39,26 @@ class CastExport implements
      */
     public function collection(): \Illuminate\Support\Collection
     {
-        return $this->casts;
+        return $this->proveedores;
     }
 
     /**
      * Mapea las columnas que se exportarán.
      */
-    public function map($cast): array
+    public function map($proveedor): array
     {
         static $rowNumber = 1;
 
         return [
-            $rowNumber++,                               // Columna de numeración
-            $cast->ruc,                                 // RUC
-            $cast->nombre,                              // Nombre
-            $cast->telefono ?? 'No especificado',       // Teléfono
-            $cast->email ?? 'No especificado',          // Email
-            $cast->departamento ?? 'No especificado',   // Departamento
-            $cast->provincia ?? 'No especificado',      // Provincia
-            $cast->distrito ?? 'No especificado',       // Distrito
-            $cast->direccion ?? 'No especificado',      // Dirección
-            $cast->estado === 'Activo' ? 'Activo' : 'Inactivo', // Estado
+            $rowNumber++,                              // Número
+            $proveedor->tipoDocumento->nombre ?? '-', // Tipo de Documento
+            $proveedor->numeroDocumento ?? '-',       // Número de Documento
+            $proveedor->nombre ?? '-',                // Nombre
+            $proveedor->telefono ?? 'No especificado',// Teléfono
+            $proveedor->email ?? 'No especificado',   // Email
+            $proveedor->area->nombre ?? '-',          // Área
+            $proveedor->direccion ?? 'No especificado',// Dirección
+            $proveedor->estado == 1 ? 'Activo' : 'Inactivo', // Estado
         ];
     }
 
@@ -77,15 +77,14 @@ class CastExport implements
     {
         return [
             'A' => 5,   // Número
-            'B' => 20,  // RUC
-            'C' => 25,  // Nombre
-            'D' => 15,  // Teléfono
-            'E' => 40,  // Email
-            'F' => 20,  // Departamento
-            'G' => 20,  // Provincia
-            'H' => 20,  // Distrito
-            'I' => 40,  // Dirección
-            'J' => 15,  // Estado
+            'B' => 25,  // Tipo de Documento
+            'C' => 25,  // Número de Documento
+            'D' => 30,  // Nombre
+            'E' => 20,  // Teléfono
+            'F' => 40,  // Email
+            'G' => 30,  // Área
+            'H' => 40,  // Dirección
+            'I' => 15,  // Estado
         ];
     }
 
@@ -94,20 +93,20 @@ class CastExport implements
      */
     public function startCell(): string
     {
-        return 'A4'; // Inicia desde la celda A4 para dejar espacio para el título y la fecha
+        return 'A4'; // Inicia desde la celda A4
     }
 
     /**
      * Aplica estilos al archivo Excel.
      */
-    public function styles(Worksheet $sheet): array
+/**
+ * Aplica estilos al archivo Excel.
+ */
+public function styles(Worksheet $sheet): array
     {
-        // Establecer la zona horaria de Perú
-        date_default_timezone_set('America/Lima');
-
         // Título del reporte
-        $sheet->mergeCells('A1:J1');
-        $sheet->setCellValue('A1', 'REPORTE GENERAL DE CAST');
+        $sheet->mergeCells('A1:I1');
+        $sheet->setCellValue('A1', 'REPORTE GENERAL DE PROVEEDORES');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -125,7 +124,7 @@ class CastExport implements
         ]);
 
         // Fecha del reporte
-        $sheet->mergeCells('A2:J2');
+        $sheet->mergeCells('A2:I2');
         $sheet->setCellValue('A2', 'Generado el: ' . now()->setTimezone('America/Lima')->format('d/m/Y H:i'));
         $sheet->getStyle('A2')->applyFromArray([
             'font' => [
@@ -140,7 +139,7 @@ class CastExport implements
         ]);
 
         // Estilo del encabezado
-        $sheet->getStyle('A4:J4')->applyFromArray([
+        $sheet->getStyle('A4:I4')->applyFromArray([
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                 'startColor' => ['argb' => 'FFE3342F'], // Fondo rojo
@@ -155,16 +154,14 @@ class CastExport implements
             ],
         ]);
 
-        // Centramos los datos de todas las columnas
-        $sheet->getStyle('A5:J' . $sheet->getHighestRow())->applyFromArray([
+        // Habilitar ajuste de texto y aplicar estilo de bordes
+        $highestRow = $sheet->getHighestRow();
+        $sheet->getStyle('A4:I' . $highestRow)->applyFromArray([
             'alignment' => [
+                'wrapText' => true, // Permitir que las celdas ajusten texto
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
                 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
-        ]);
-
-        // Bordes alrededor de la tabla
-        $sheet->getStyle('A4:J' . $sheet->getHighestRow())->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -175,9 +172,9 @@ class CastExport implements
 
         // Estilo para las celdas "Activo" e "Inactivo"
         foreach (range(5, $sheet->getHighestRow()) as $row) {
-            $estado = $sheet->getCell("J{$row}")->getValue();
+            $estado = $sheet->getCell("I{$row}")->getValue();
             if ($estado === 'Activo') {
-                $sheet->getStyle("J{$row}")->applyFromArray([
+                $sheet->getStyle("I{$row}")->applyFromArray([
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'startColor' => ['argb' => 'FF38C172'], // Fondo verde
@@ -187,7 +184,7 @@ class CastExport implements
                     ],
                 ]);
             } elseif ($estado === 'Inactivo') {
-                $sheet->getStyle("J{$row}")->applyFromArray([
+                $sheet->getStyle("I{$row}")->applyFromArray([
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'startColor' => ['argb' => 'FFE3342F'], // Fondo rojo
@@ -198,7 +195,8 @@ class CastExport implements
                 ]);
             }
         }
-
         return [];
     }
+
+
 }

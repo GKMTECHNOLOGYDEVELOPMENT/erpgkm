@@ -156,7 +156,9 @@ Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('admin
 Route::post('/proveedores/store', [ProveedoresController::class, 'store'])->name('proveedor.store');
 Route::get('/proveedores/{idProveedor}/edit', [ProveedoresController::class, 'edit'])->name('proveedor.edit');
 Route::put('/proveedores/{idProveedor}', [ProveedoresController::class, 'update'])->name('proveedores.update');
-Route::get('/reporte-proveedores', [ProveedoresController::class, 'generatePDF'])->name('proveedores.pdf');
+Route::get('/exportar-proveedores', function () { return Excel::download(new ProveedoresExport, 'proveedores.xlsx'); })->name('proveedores.exportExcel');
+Route::get('/reporte-proveedores', [ProveedoresController::class, 'exportAllPDF'])->name('proveedores.pdf');
+
 
 //Ruta para administracion cotizaciones
 Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'index'])->name('cotizaciones.crear-cotizacion')->middleware('auth');
