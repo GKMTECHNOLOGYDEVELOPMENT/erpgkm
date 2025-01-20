@@ -9,6 +9,6 @@ class ArticulosController extends Controller
 {
     public function index()
     {
-        return view('almacen.productos.articulos');
+        return view('almacen.productos.articulos.index');
     }
 }

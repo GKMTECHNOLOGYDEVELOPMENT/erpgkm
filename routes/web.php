@@ -186,11 +186,11 @@ Route::get('/apps/calendar', [CalendarController::class, 'index'])->name('apps.c
 // Route::view('/apps/scrumboard', 'apps.scrumboard');
 // Route::view('/apps/contacts', 'apps.contacts');
 // Route::view('/apps/calendar', 'apps.calendar');
-// INICIO CATEGORIA ///
-Route::prefix('categorias')->name('categorias.')->group(function () {
+// INICIO CATEGORIA /// 
+Route::prefix('categoria')->name('categorias.')->group(function () {
     Route::get('/', [CategoriaController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [CategoriaController::class, 'store'])->name('store'); // Guardar una nueva categoría
-    Route::get('/edit/{id}', [CategoriaController::class, 'edit'])->name('edit'); // Editar una categoría
+    Route::get('/{id}/edit', [CategoriaController::class, 'edit'])->name('edit');// Editar una categoría
     Route::put('/update/{id}', [CategoriaController::class, 'update'])->name('update'); // Actualizar una categoría
     Route::delete('/{id}', [CategoriaController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
     Route::get('/export-pdf', [CategoriaController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todas las categorías a PDF
@@ -200,7 +200,7 @@ Route::prefix('categorias')->name('categorias.')->group(function () {
 
 /// FIN CATEGORIA ///
 
-/// INICIO MARCA ///
+
 
 Route::prefix('marcas')->name('marcas.')->group(function () {
     Route::get('/', [MarcaController::class, 'index'])->name('index'); // Mostrar la vista principal
