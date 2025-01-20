@@ -3,8 +3,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
     <!-- Formulario de Crear o Editar Proveedor -->
+    <div>
+        <ul class="flex space-x-2 rtl:space-x-reverse">
+            <li>
+                <a href="javascript:;" class="text-primary hover:underline">Proveedores</a>
+            </li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <span>Editar Proveedores</span>
+            </li>
+        </ul>
+    </div>
     <div class="panel mt-6 p-5 max-w-2xl mx-auto">
-        <h2 class="text-xl font-bold mb-5">Editar Proveedor</h2>
+        <h2 class="text-xl font-bold mb-5">EDITAR PROVEEDOR</h2>
         <div class="p-5">
             <form id="proveedorForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
                 action="{{ route('proveedores.update', $proveedor->idProveedor) }}">
@@ -112,9 +122,21 @@
                     <input id="direccion" type="text" name="direccion" class="form-input w-full"
                         placeholder="Ingrese la dirección" value="{{ old('direccion', $proveedor->direccion) }}">
                 </div>
+                <!-- Estado -->
+                <div>
+                    <label for="estado" class="block text-sm font-medium">Estado</label>
+                    <div class="ml-4 w-12 h-6 relative">
+                        <input type="hidden" name="estado" value="0">
+                        <input type="checkbox" id="estado" name="estado"
+                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                            value="1" {{ old('estado', $proveedor->estado) ? 'checked' : '' }} />
+                        <span for="estado"
+                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                    </div>
+                </div>
 
                 <!-- Botones -->
-                <div class="flex justify-end items-center mt-4">
+                <div class="md:col-span-2 flex justify-end mt-4">
                     <a href="{{ route('administracion.proveedores') }}" class="btn btn-outline-danger">Cancelar</a>
                     <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Actualizar</button>
                 </div>
