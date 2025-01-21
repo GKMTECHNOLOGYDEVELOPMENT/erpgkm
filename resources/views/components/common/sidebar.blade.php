@@ -1120,7 +1120,7 @@
                 </li>
 
                 <li class="menu nav-item">
-                    <a href="{{ route('ordenes-trabajo.index') }}" class="nav-link group">
+                    <a href="{{ route('ordenes.index') }}" class="nav-link group">
                         <div class="flex items-center">
 
                             <svg class="group-hover:!text-primary shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">

@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 class Tipoticket extends Model
 {
 	protected $table = 'tipotickets';
-	protected $primaryKey = 'idTtipotickets';
+	protected $primaryKey = 'idTipotickets';
 	public $timestamps = false;
 
 	protected $fillable = [
