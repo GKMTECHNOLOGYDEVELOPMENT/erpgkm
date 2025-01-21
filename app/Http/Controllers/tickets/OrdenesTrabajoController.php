@@ -47,6 +47,9 @@ class OrdenesTrabajoController extends Controller
                 'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
             ]);
 
+            // Establecer la zona horaria explícitamente
+            $fechaCreacion = now()->setTimezone('America/Lima');
+
             // Crear la nueva orden de trabajo
             Ticket::create([
                 'idTipotickets' => $validatedData['idTipotickets'],
@@ -58,7 +61,7 @@ class OrdenesTrabajoController extends Controller
                 'tipoServicio' => $validatedData['tipoServicio'],
                 'idUsuario' => auth()->id(), // ID del usuario autenticado
                 'idEstadoots' => 1, // Estado inicial de la orden de trabajo
-                'fecha_creacion' => now(), // Fecha actual para la creación
+                'fecha_creacion' => $fechaCreacion, // Fecha actual en la zona horaria de Perú
             ]);
 
             return response()->json(['success' => true, 'message' => 'Orden de trabajo creada correctamente.']);
@@ -69,6 +72,7 @@ class OrdenesTrabajoController extends Controller
             return response()->json(['success' => false, 'message' => 'Ocurrió un error al crear la orden de trabajo.'], 500);
         }
     }
+
 
 
 
