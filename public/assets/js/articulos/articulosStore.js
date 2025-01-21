@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Crea un objeto FormData con todos los datos del formulario
         const formData = new FormData(articuloForm);
+
         // Realiza la solicitud para enviar los datos al servidor
         fetch('/articulos/store', {
             method: 'POST',
@@ -53,9 +54,26 @@ document.addEventListener("DOMContentLoaded", function () {
                     // Limpia el formulario
                     articuloForm.reset();
 
-                    // Opcional: Recargar la página o cerrar el modal
+                    // Restablecer la previsualización de la imagen
+                    const previewImage = document.querySelector('#foto').closest('div').querySelector('img');
+                    if (previewImage) {
+                        previewImage.src = '/assets/images/file-preview.svg'; // Ruta de la imagen predeterminada
+                    }
+
+                    // Si usas Alpine.js para la previsualización
+                    if (typeof Alpine !== 'undefined') {
+                        Alpine.store('fotoPreview', '/assets/images/file-preview.svg');
+                    }
+
+                    // Opcional: Cerrar el modal
                     if (typeof open !== 'undefined') {
                         open = false;
+                    }
+
+                    // Actualizar la tabla (si usas Alpine.js)
+                    const alpineData = Alpine.store('multipleTable');
+                    if (alpineData && alpineData.updateTable) {
+                        alpineData.updateTable();
                     }
                 } else {
                     // Mostrar mensaje de error
