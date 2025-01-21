@@ -23,7 +23,6 @@ document.addEventListener("alpine:init", () => {
                     return response.json();
                 })
                 .then((data) => {
-                    console.log("Datos de los cast:", data);
                     this.castData = data;
 
                     // Inicializar DataTable con las nuevas cabeceras
@@ -97,8 +96,7 @@ document.addEventListener("alpine:init", () => {
                     return response.json();
                 })
                 .then((data) => {
-                    console.log("Datos actuales:", this.castData);
-                    console.log("Datos del servidor:", data);
+              
 
                     // Detectar nuevas filas
                     const newData = data.filter(
@@ -123,7 +121,6 @@ document.addEventListener("alpine:init", () => {
         },
 
         deleteCast(idCast) {
-            console.log(`Intentando eliminar el cast con ID: ${idCast}`);
 
             new window.Swal({
                 icon: 'warning',
