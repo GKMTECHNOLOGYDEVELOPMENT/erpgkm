@@ -63,17 +63,20 @@
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M6 3H18C19.1046 3 20 3.89543 20 5V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M8 7H16" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M8 12H14" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M8 17H12" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
-                          
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                            fill="none">
+                            <path
+                                d="M6 3H18C19.1046 3 20 3.89543 20 5V19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19V5C4 3.89543 4.89543 3 6 3Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M8 7H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M8 12H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M8 17H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+
                         <span>Agregar</span>
                     </button>
                 </div>
@@ -104,40 +107,38 @@
 
                     <!-- Formulario -->
                     <div class="modal-scroll">
-                        <form class="p-5 space-y-4" id="modeloForm">
+                        <form class="p-5 space-y-4" id="modeloForm" enctype="multipart/form-data" method="post">
+                            @csrf <!-- Asegúrate de incluir el token CSRF -->
                             <!-- Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input id="nombre" x-model="formData.nombre" type="text"
-                                    class="form-input w-full" placeholder="Ingrese el nombre del modelo">
+                                <input id="nombre" name="nombre" class="form-input w-full" placeholder="Ingrese el nombre del modelo" required>
                             </div>
-                            <!-- ID Marca -->
+                            <!-- Marca -->
                             <div>
-                                
-                                <select id="idMarca" x-model="formData.idMarca" class="select2 w-full">
+                                <select id="idMarca" name="idMarca" class="select2 w-full" required>
                                     <option value="" disabled selected>Seleccione la Marca</option>
-                                    <option value="1">Marca 1</option>
-                                    <option value="2">Marca 2</option>
-                                    <option value="3">Marca 3</option>
+                                    @foreach ($marcas as $marca)
+                                        <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                                    @endforeach
                                 </select>
                             </div>
-                            <!-- ID Categoria -->
+                            <!-- Categoría -->
                             <div>
-                                
-                                <select id="idCategoria" x-model="formData.idCategoria" class="select2 w-full">
+                                <select id="idCategoria" name="idCategoria" class="select2 w-full" required>
                                     <option value="" disabled selected>Seleccione la Categoría</option>
-                                    <option value="1">Categoría 1</option>
-                                    <option value="2">Categoría 2</option>
-                                    <option value="3">Categoría 3</option>
+                                    @foreach ($categorias as $categoria)
+                                        <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
-                                <button type="button" class="btn btn-outline-danger"
-                                    @click="open = false">Cancelar</button>
+                                <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
+                        
                     </div>
                 </div>
             </div>
@@ -146,93 +147,7 @@
 
 
     <script>
-        document.addEventListener("alpine:init", () => {
-            Alpine.data("multipleTable", () => ({
-                datatable1: null,
-                subsidiariosData: [], // Agrega una propiedad para almacenar los datos
-
-                init() {
-                    // Llamar a la API para obtener los datos de 'subsidiarios'
-                    fetch('/api/subsidiarios') // Ajusta la URL si es necesario
-                        .then(response => response.json())
-                        .then(data => {
-                            this.subsidiariosData = data;
-                            // Ahora que tenemos los datos, inicializamos la tabla
-                            this.datatable1 = new simpleDatatables.DataTable('#myTable1', {
-                                data: {
-                                    headings: ['ID', 'RUC', 'Nombre',
-                                        'Nombre Contacto', 'Celular', 'Email',
-                                        'Dirección', 'Referencia', 'ID Tienda',
-                                        '<div class="text-center">Acciones</div>'
-                                    ],
-                                    data: this.subsidiariosData.map(subsidiario => [
-                                        subsidiario.idSubsidiarios,
-                                        subsidiario.ruc,
-                                        subsidiario.nombre,
-                                        subsidiario.nombre_contacto,
-                                        subsidiario.celular,
-                                        subsidiario.email,
-                                        subsidiario.direccion,
-                                        subsidiario.referencia,
-                                        subsidiario.idTienda,
-                                        ''
-                                    ]),
-                                },
-                                searchable: true,
-                                perPage: 10,
-                                perPageSelect: [10, 20, 30, 50, 100],
-                                columns: [{
-                                        select: 0,
-                                        render: (data, cell, row) => {
-                                            return `<div class="flex items-center w-max">${data}</div>`;
-                                        },
-                                        sort: "asc"
-                                    },
-                                    {
-                                        select: 8,
-                                        sortable: false,
-                                        render: (data, cell, row) => {
-                                            return `<div class="flex items-center">
-                                                <button type="button" x-tooltip="Editar">
-                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                                                        <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
-                                                        <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
-                                                    </svg>
-                                                </button>
-                                                <button type="button" x-tooltip="Eliminar">
-                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                                        <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                                        <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                                        <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                                        <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                                        <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                                    </svg>
-                                                </button>
-                                            </div>`;
-                                        },
-                                    }
-                                ],
-                                firstLast: true,
-                                firstText: '<<',
-                                lastText: '>>',
-                                prevText: '<',
-                                nextText: '>',
-                                labels: {
-                                    perPage: "{select}"
-                                },
-                                layout: {
-                                    top: "{search}",
-                                    bottom: "{info}{select}{pager}",
-                                },
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error al obtener los datos:', error);
-                        });
-                },
-            }));
-        });
-
+  
         // Inicializar Select2
         document.addEventListener("DOMContentLoaded", function() {
             // Inicializar todos los select con la clase "select2"
@@ -257,6 +172,11 @@
             }));
         });
     </script>
+
+    <script src="{{ asset('assets/js/Modelos/modelos.js') }}"></script>
+    <script src="{{ asset('assets/js/Modelos/modeloStore.js') }}"></script>
+    <script src="{{ asset('assets/js/Modelos/modeloValidaciones.js') }}"></script>
+
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
