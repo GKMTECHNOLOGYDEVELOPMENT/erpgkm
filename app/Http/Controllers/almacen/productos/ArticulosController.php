@@ -167,8 +167,8 @@ class ArticulosController extends Controller
     public function exportAllPDF()
     {
         $articulos = Articulo::all();
-        $pdf = Pdf::loadView('almacen.productos.articulos.pdf.articulos', compact('articulos'))
-            ->setPaper('a4', 'portrait');
+        $pdf = Pdf::loadView('almacen.productos.articulos.pdf.reporte-articulos', compact('articulos'))
+            ->setPaper('a4', 'landscape');
 
         return $pdf->download('reporte-articulos.pdf');
     }

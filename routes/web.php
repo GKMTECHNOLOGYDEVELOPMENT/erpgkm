@@ -44,6 +44,7 @@ use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Exports\MarcasExport;
 use App\Exports\CategoriaExport;
+use App\Exports\ArticuloExport;
 use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
@@ -249,6 +250,9 @@ Route::prefix('articulos')->name('articulos.')->group(function () {
     Route::get('/export-pdf', [ArticulosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
     Route::get('/get-all', [ArticulosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
     Route::post('/check-nombre', [ArticulosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new ArticuloExport, 'articulos.xlsx');
+    })->name('exportExcel');
 });
 
 /// FIN ARTICULO ///
