@@ -57,6 +57,7 @@ class OrdenesTrabajoController extends Controller
                 'idTecnico' => $validatedData['tecnico'],
                 'tipoServicio' => $validatedData['tipoServicio'],
                 'idUsuario' => auth()->id(), // ID del usuario autenticado
+                'idEstadoots' => 1, // Estado inicial de la orden de trabajo
                 'fecha_creacion' => now(), // Fecha actual para la creación
             ]);
 
