@@ -154,4 +154,8 @@ class Ticket extends Model
 	{
 		return $this->hasMany(Visita::class, 'idTickets');
 	}
+	public function tiposervicio()
+	{
+		return $this->belongsTo(Tiposervicio::class, 'tipoServicio', 'idTipoServicio');
+	}
 }
