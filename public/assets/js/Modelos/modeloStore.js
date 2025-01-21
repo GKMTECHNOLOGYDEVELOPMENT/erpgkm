@@ -45,26 +45,10 @@ document.getElementById('modeloForm').addEventListener('submit', function (event
                 // Mostrar mensaje de éxito
                 showMessage('Modelo agregado correctamente.', 'top-end');
 
-                // Limpiar manualmente los inputs del formulario
-                const form = document.getElementById('modeloForm');
-                form.querySelector('#nombre').value = ''; // Limpia el input de texto
-
-                // Limpia manualmente los selects
-                const selects = form.querySelectorAll('.select2');
-                selects.forEach((select) => {
-                    select.selectedIndex = 0; // Selecciona la primera opción
-                });
-
-                // Cerrar el modal si es necesario
-                if (typeof open !== 'undefined') {
-                    open = false;
-                }
-
-                // Actualizar la tabla si usas Alpine.js
-                let alpineData = Alpine.store('multipleTable');
-                if (alpineData && alpineData.updateTable) {
-                    alpineData.updateTable();
-                }
+                // Recargar la página después de guardar
+                setTimeout(() => {
+                    location.reload(); // Recarga la página
+                }); 
             } else {
                 // Mostrar mensaje de error
                 showMessage('Hubo un error al guardar el modelo.', 'top-end', true, '', 3000, 'error');
@@ -76,3 +60,4 @@ document.getElementById('modeloForm').addEventListener('submit', function (event
             showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end', true, '', 3000, 'error');
         });
 });
+
