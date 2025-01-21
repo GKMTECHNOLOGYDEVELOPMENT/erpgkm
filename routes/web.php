@@ -254,7 +254,7 @@ Route::prefix('articulos')->name('articulos.')->group(function () {
 /// FIN ARTICULO ///
 
 /// INICIO ÓRDENES DE TRABAJO ///
-Route::prefix('ordenes-trabajo')->name('ordenes-trabajo.')->group(function () {
+Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/', [OrdenesTrabajoController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [OrdenesTrabajoController::class, 'store'])->name('store'); // Guardar una nueva orden de trabajo
     Route::get('/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit'); // Editar una orden de trabajo

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\tickets;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\OrdenTrabajo; // Asegúrate de tener este modelo
+use App\Models\Ticket; // Asegúrate de tener este modelo
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\ClienteGeneral; // Reemplaza con el modelo correcto
@@ -38,29 +38,44 @@ class OrdenesTrabajoController extends Controller
         try {
             // Validar los datos
             $validatedData = $request->validate([
-                'nombre' => 'required|string|max:255',
-                'descripcion' => 'nullable|string',
-                'estado' => 'nullable|boolean',
+                'idTipotickets' => 'required|integer|exists:tipotickets,idTipotickets',
+                'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
+                'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+                'idCliente' => 'required|integer|exists:cliente,idCliente',
+                'idTienda' => 'required|integer|exists:tienda,idTienda',
+                'tecnico' => 'required|integer|exists:usuarios,idUsuario',
+                'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
             ]);
 
-            // Crear una nueva orden de trabajo
-            OrdenTrabajo::create([
-                'nombre' => $validatedData['nombre'],
-                'descripcion' => $validatedData['descripcion'] ?? '',
-                'estado' => $validatedData['estado'] ?? 1,
+            // Crear la nueva orden de trabajo
+            Ticket::create([
+                'idTipotickets' => $validatedData['idTipotickets'],
+                'numero_ticket' => $validatedData['nroTicket'],
+                'idClienteGeneral' => $validatedData['idClienteGeneral'],
+                'idCliente' => $validatedData['idCliente'],
+                'IdTienda' => $validatedData['idTienda'],
+                'idTecnico' => $validatedData['tecnico'],
+                'tipoServicio' => $validatedData['tipoServicio'],
+                'idUsuario' => auth()->id(), // ID del usuario autenticado
+                'fecha_creacion' => now(), // Fecha actual para la creación
             ]);
 
             return response()->json(['success' => true, 'message' => 'Orden de trabajo creada correctamente.']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['success' => false, 'message' => 'Errores de validación.', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             Log::error('Error al crear una orden de trabajo: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Ocurrió un error al crear la orden de trabajo.'], 500);
         }
     }
 
+
+
+
     // Editar una orden de trabajo
     public function edit($id)
     {
-        $orden = OrdenTrabajo::findOrFail($id);
+        $orden = Ticket::findOrFail($id);
         return view('tickets.ordenes-trabajo.edit', compact('orden'));
     }
 
@@ -76,7 +91,7 @@ class OrdenesTrabajoController extends Controller
             ]);
 
             // Encontrar y actualizar la orden de trabajo
-            $orden = OrdenTrabajo::findOrFail($id);
+            $orden = Ticket::findOrFail($id);
             $orden->update($validatedData);
 
             return redirect()->route('ordenes-trabajo.index')->with('success', 'Orden de trabajo actualizada correctamente.');
@@ -90,7 +105,7 @@ class OrdenesTrabajoController extends Controller
     public function destroy($id)
     {
         try {
-            $orden = OrdenTrabajo::findOrFail($id);
+            $orden = Ticket::findOrFail($id);
             $orden->delete();
 
             return response()->json(['success' => true, 'message' => 'Orden de trabajo eliminada correctamente.']);
@@ -103,7 +118,7 @@ class OrdenesTrabajoController extends Controller
     // Exportar todas las órdenes de trabajo a PDF
     public function exportAllPDF()
     {
-        $ordenes = OrdenTrabajo::all();
+        $ordenes = Ticket::all();
 
         $pdf = Pdf::loadView('tickets.ordenes-trabajo.pdf.ordenes', compact('ordenes'))
             ->setPaper('a4', 'portrait');
@@ -112,18 +127,43 @@ class OrdenesTrabajoController extends Controller
     }
 
     // Obtener todas las órdenes de trabajo en formato JSON
+    // Obtener todas las órdenes de trabajo en formato JSON
     public function getAll()
     {
-        $ordenes = OrdenTrabajo::all();
+        $ordenes = Ticket::with([
+            'tecnico:idUsuario,Nombre', // Relación para obtener el nombre del técnico
+            'usuario:idUsuario,Nombre', // Relación para obtener el nombre del usuario
+            'cliente:idCliente,nombre', // Relación para obtener el nombre del cliente
+            'clientegeneral:idClienteGeneral,descripcion', // Relación para el cliente general
+            'tiposervicio:idTipoServicio,nombre', // Relación para obtener el nombre del tipo de servicio
+            'estado_ot:idEstadoots,descripcion', // Relación para obtener la descripción del estado
+        ])->get();
+
+        // Formatear el resultado
+        $ordenes = $ordenes->map(function ($orden) {
+            return [
+                'idTickets' => $orden->idTickets,
+                'numero_ticket' => $orden->numero_ticket,
+                'tecnico' => $orden->tecnico->Nombre ?? 'N/A', // Nombre del técnico
+                'usuario' => $orden->usuario->Nombre ?? 'N/A', // Nombre del usuario
+                'cliente' => $orden->cliente->nombre ?? 'N/A', // Nombre del cliente
+                'cliente_general' => $orden->clientegeneral->descripcion ?? 'N/A', // Nombre del cliente general
+                'tipoServicio' => $orden->tiposervicio->nombre ?? 'N/A', // Nombre del tipo de servicio
+                'estado' => $orden->estado_ot->descripcion ?? 'N/A', // Descripción del estado
+                'fecha_creacion' => $orden->fecha_creacion ? $orden->fecha_creacion->format('d/m/Y H:i') : 'N/A', // Formato de fecha
+            ];
+        });
 
         return response()->json($ordenes);
     }
 
+
+
     // Validar si un nombre ya existe
-    public function checkNombre(Request $request)
+    public function checkNumeroTicket(Request $request)
     {
-        $nombre = $request->input('nombre');
-        $exists = OrdenTrabajo::where('nombre', $nombre)->exists();
+        $numero_ticket = $request->input('numero_ticket');
+        $exists = Ticket::where('numero_ticket', $numero_ticket)->exists();
 
         return response()->json(['unique' => !$exists]);
     }

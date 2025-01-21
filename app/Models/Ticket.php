@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $numero_ticket
  * @property int|null $tipoServicio
  * @property Carbon|null $fecha_creacion
- * @property int|null $idTtipotickets
+ * @property int|null $idTipotickets
  * @property int|null $idEstadoots
  * @property int $idTecnico
  * @property int $idUsuario
@@ -53,10 +53,10 @@ class Ticket extends Model
 	protected $casts = [
 		'idClienteGeneral' => 'int',
 		'idCliente' => 'int',
-		'IdTienda' => 'varbinary',
+		'IdTienda' => 'int',
 		'tipoServicio' => 'int',
 		'fecha_creacion' => 'datetime',
-		'idTtipotickets' => 'int',
+		'idTipotickets' => 'int',
 		'idEstadoots' => 'int',
 		'idTecnico' => 'int',
 		'idUsuario' => 'int'
@@ -69,7 +69,7 @@ class Ticket extends Model
 		'numero_ticket',
 		'tipoServicio',
 		'fecha_creacion',
-		'idTtipotickets',
+		'idTipotickets',
 		'idEstadoots',
 		'idTecnico',
 		'idUsuario'
@@ -77,7 +77,7 @@ class Ticket extends Model
 
 	public function tipoticket()
 	{
-		return $this->belongsTo(Tipoticket::class, 'idTtipotickets');
+		return $this->belongsTo(Tipoticket::class, 'idTipotickets');
 	}
 
 	public function estado_ot()
@@ -99,6 +99,12 @@ class Ticket extends Model
 	{
 		return $this->belongsTo(Usuario::class, 'idUsuario');
 	}
+
+	public function tecnico()
+	{
+		return $this->belongsTo(Usuario::class,'idTecnico','idUsuario');
+	}
+
 
 	public function cotizaciones()
 	{

@@ -10,6 +10,7 @@ use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
+use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -39,7 +40,7 @@ Route::get('/categoria', [CategoriaController::class, 'getAll']);
 Route::get('/marca', [MarcaController::class, 'getAll']);
 Route::get('/modelo', [ModelosController::class, 'getAll']);
 Route::get('/articulos', [ArticulosController::class, 'getAll']);
-
+Route::get('/ordenes', [OrdenesTrabajoController::class, 'getAll']);
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);
@@ -50,6 +51,7 @@ Route::post('/categoria/check-nombre', [CategoriaController::class, 'checkNombre
 Route::post('/marca/check-nombre', [MarcaController::class, 'checkNombre']);
 Route::post('/modelo/check-nombre', [ModelosController::class, 'checkNombre']);
 Route::post('/articulos/check-nombre', [ArticulosController::class, 'checkNombre']);
+Route::post('/ordenes/check-ticket', [OrdenesTrabajoController::class, 'checkNumeroTicket']);
 
 Route::delete('/clientegeneral/{id}', [ClienteGeneralController::class, 'destroy']);
 Route::delete('/tiendas/{id}', [TiendaController::class, 'destroy']);

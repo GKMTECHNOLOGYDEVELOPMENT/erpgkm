@@ -206,7 +206,9 @@
         });
     </script>
 
-
+    <script src="{{ asset('assets/js/ordenes/ordenes.js') }}"></script>
+    <script src="{{ asset('assets/js/ordenes/ordenesStore.js') }}"></script>
+    <script src="{{ asset('assets/js/ordenes/ordenesValidaciones.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
