@@ -230,7 +230,7 @@ Route::prefix('marcas')->name('marcas.')->group(function () {
 Route::prefix('modelos')->name('modelos.')->group(function () {
     Route::get('/', [ModelosController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [ModelosController::class, 'store'])->name('store'); // Guardar un nuevo modelo
-    Route::get('/edit/{id}', [ModelosController::class, 'edit'])->name('edit'); // Editar un modelo
+    Route::get('/{id}/edit', [ModelosController::class, 'edit'])->name('edit'); // Editar un modelo
     Route::put('/update/{id}', [ModelosController::class, 'update'])->name('update'); // Actualizar un modelo
     Route::delete('/{id}', [ModelosController::class, 'destroy'])->name('destroy'); // Eliminar un modelo
     Route::get('/export-pdf', [ModelosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los modelos a PDF

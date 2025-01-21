@@ -63,7 +63,9 @@ class ModelosController extends Controller
     public function edit($id)
     {
         $modelo = Modelo::findOrFail($id);
-        return view('almacen.productos.modelos.edit', compact('modelo'));
+        $marcas = Marca::all();
+        $categorias = Categoria::all();
+        return view('almacen.productos.modelos.edit', compact('modelo', 'marcas', 'categorias'));
     }
 
     public function update(Request $request, $id)
