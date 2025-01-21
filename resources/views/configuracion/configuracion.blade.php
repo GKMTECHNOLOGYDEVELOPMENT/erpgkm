@@ -113,6 +113,7 @@
         'Tipo Usuario' => ['table' => 'tipousuario', 'data' => $tipoUsuario],
         'Tipo Usuario Soporte' => ['table' => 'tipousuariosoporte', 'data' => $tipoUsuarioSoporte],
         'Unidad' => ['table' => 'unidad', 'data' => $unidad],
+        'Moneda' => ['table' => 'monedas', 'data' => $moneda],
     ] as $tipo => $info)
                         <tr class="">
                             <td class="text-center align-middle">{{ $tipo }}</td>
