@@ -109,7 +109,7 @@ class CategoriaController extends Controller
         $categorias = Categoria::all();
 
         // Generar el PDF
-        $pdf = Pdf::loadView('administracion.categorias.pdf.categorias', compact('categorias'))
+        $pdf = Pdf::loadView('almacen.productos.categoria.pdf.reporte-categorias', compact('categorias'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->download('reporte-categorias.pdf');
