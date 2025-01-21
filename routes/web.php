@@ -42,6 +42,7 @@ use App\Exports\TiendaExport;
 use App\Exports\CastExport;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Exports\MarcasExport;
+use App\Exports\CategoriaExport;
 use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
@@ -195,9 +196,13 @@ Route::prefix('categoria')->name('categorias.')->group(function () {
     Route::get('/{id}/edit', [CategoriaController::class, 'edit'])->name('edit');// Editar una categoría
     Route::put('/update/{id}', [CategoriaController::class, 'update'])->name('update'); // Actualizar una categoría
     Route::delete('/{id}', [CategoriaController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
-    Route::get('/export-pdf', [CategoriaController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todas las categorías a PDF
+    Route::get('/reporte-categorias', [CategoriaController::class, 'exportAllPDF'])->name('categorias.pdf'); // Exportar todas las categorías a PDF
     Route::get('/get-all', [CategoriaController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
     Route::post('/check-nombre', [CategoriaController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new CategoriaExport, 'categorias.xlsx');
+    })->name('exportExcel');
+    
 });
 
 /// FIN CATEGORIA ///

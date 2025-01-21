@@ -23,7 +23,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
-                        @click="exportTable('excel')">
+                    onclick="window.location.href='{{ route('categorias.exportExcel') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -37,7 +37,7 @@
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                        @click="exportTable('pdf')">
+                        onclick="window.location.href='{{ route('categorias.categorias.pdf') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -51,18 +51,19 @@
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M4 4H9V9H4V4Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M15 4H20V9H15V4Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M4 15H9V20H4V15Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M15 15H20V20H15V15Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M11 10H13V14H11V10Z" 
-                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                          </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                            fill="none">
+                            <path d="M4 4H9V9H4V4Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M15 4H20V9H15V4Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M4 15H9V20H4V15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M15 15H20V20H15V15Z" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M11 10H13V14H11V10Z" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                         <span>Agregar</span>
                     </button>
                 </div>
@@ -98,15 +99,17 @@
                             <!-- Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input type="text" id="nombre" name="nombre" class="form-input w-full" placeholder="Ingrese el nombre de la categoría" required>
+                                <input type="text" id="nombre" name="nombre" class="form-input w-full"
+                                    placeholder="Ingrese el nombre de la categoría" required>
                             </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
-                                <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="open = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
-                        
+
                     </div>
                 </div>
             </div>
@@ -115,7 +118,6 @@
 
 
     <script>
-        
         // Inicializar Select2
         document.addEventListener("DOMContentLoaded", function() {
             // Inicializar todos los select con la clase "select2"
