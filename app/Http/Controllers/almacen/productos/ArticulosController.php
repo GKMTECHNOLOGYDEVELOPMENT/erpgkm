@@ -84,7 +84,11 @@ class ArticulosController extends Controller
     public function edit($id)
     {
         $articulo = Articulo::findOrFail($id);
-        return view('almacen.productos.articulos.edit', compact('articulo'));
+        $unidades= Unidad::all();
+        $tiposArticulo= Tipoarticulo::all();
+        $modelos = Modelo::all();
+        $monedas = Moneda::all();
+        return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas'));
     }
 
     public function update(Request $request, $id)
