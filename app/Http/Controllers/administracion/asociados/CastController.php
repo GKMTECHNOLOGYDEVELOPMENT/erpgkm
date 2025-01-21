@@ -113,8 +113,7 @@ class CastController extends Controller
     public function update(Request $request, $id)
     {
         // Validación de los datos
-        $request->validate([
-
+        $validatedData = $request->validate([
             'nombre' => 'required|string|max:255',
             'numeroDocumento' => 'required|string|max:255',
             'telefono' => 'nullable|string|max:15',
@@ -123,7 +122,7 @@ class CastController extends Controller
             'provincia' => 'required|string|max:255',    // Validar el campo 'provincia'
             'distrito' => 'required|string|max:255',     // Validar el campo 'distrito'
             'direccion' => 'required|string|max:255',
-
+            'estado' => 'required|boolean', // Validar el campo 'estado'
         ]);
 
         // Buscar el cast
@@ -131,21 +130,21 @@ class CastController extends Controller
 
         // Actualizar los campos del cast
         $cast->update([
-
-            'nombre' => $request->nombre,
-            'numeroDocumento' => $request->numeroDocumento,
-            'telefono' => $request->telefono,
-            'email' => $request->email,
-            'departamento' => $request->departamento,
-            'provincia' => $request->provincia,
-            'distrito' => $request->distrito,
-            'direccion' => $request->direccion,
-
+            'nombre' => $validatedData['nombre'],
+            'numeroDocumento' => $validatedData['numeroDocumento'],
+            'telefono' => $validatedData['telefono'],
+            'email' => $validatedData['email'],
+            'departamento' => $validatedData['departamento'],
+            'provincia' => $validatedData['provincia'],
+            'distrito' => $validatedData['distrito'],
+            'direccion' => $validatedData['direccion'],
+            'estado' => $validatedData['estado'], // Actualizar el estado
         ]);
 
         // Redirigir con un mensaje de éxito
         return redirect()->route('administracion.cast')->with('success', 'Cast actualizado correctamente');
     }
+
 
 
     public function store(CastRequest $request)
