@@ -124,8 +124,21 @@
                                 <!-- Fecha de Ingreso -->
                                 <div>
                                     <label for="fechaIngreso" class="block text-sm font-medium">Fecha de Ingreso</label>
-                                    <input id="fechaIngreso" name="fechaIngreso" type="date" class="form-input w-full">
+                                    <input id="fechaIngreso" name="fechaIngreso" type="text" class="form-input w-full" placeholder="Seleccionar fecha">
                                 </div>
+                                
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function () {
+                                        // Inicializa flatpickr en el campo de fecha de ingreso
+                                        flatpickr("#fechaIngreso", {
+                                            dateFormat: "Y-m-d", // Formato de la fecha
+                                            defaultDate: new Date(), // Fecha predeterminada: hoy
+                                            altInput: true, // Muestra un campo alternativo
+                                            altFormat: "F j, Y", // Formato amigable para el usuario
+                                            locale: "es", // Localización en español (asegúrate de cargar el idioma si no está disponible por defecto)
+                                        });
+                                    });
+                                </script>
                                 
 
                                 <!-- Stock Total -->
@@ -354,6 +367,7 @@
     <script src="{{ asset('assets/js/articulos/articulosValidaciones.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
 </x-layout.default>
