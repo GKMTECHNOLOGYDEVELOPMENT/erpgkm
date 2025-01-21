@@ -19,7 +19,7 @@ class ArticulosController extends Controller
     {   
         $unidades= Unidad::all();
         $tiposArticulo= Tipoarticulo::all();
-        $modelos = Modelo::all();
+        $modelos = Modelo::where('estado', 1)->get();
         $monedas = Moneda::all();
         // Retorna la vista para artículos
         return view('almacen.productos.articulos.index', compact('unidades','tiposArticulo','modelos', 'monedas'));

@@ -152,19 +152,19 @@ class CastController extends Controller
         try {
             // Datos validados del request
             $dataCast = $request->validated();
-
+    
             // Establecer valores predeterminados para 'estado'
             $dataCast['estado'] = 1; // Asegura que el estado siempre sea 1 (activo)
-
+    
             // Verificar los datos validados con los valores predeterminados
             Log::debug('Datos validados recibidos con estado predeterminado:', $dataCast);
-
+    
             // Crear el registro en la base de datos
             $cast = Cast::create($dataCast);
-
+    
             // Verificar si el cast se guardó correctamente
             Log::debug('Cast insertado:', $cast->toArray());
-
+    
             // Responder con JSON
             return response()->json([
                 'success' => true,
@@ -180,7 +180,7 @@ class CastController extends Controller
             ], 500);
         }
     }
-
+    
     public function exportAllPDF()
     {
         $casts = Cast::all(); // Obtén todos los registros de CAST

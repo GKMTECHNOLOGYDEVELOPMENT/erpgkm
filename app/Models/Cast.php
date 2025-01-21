@@ -38,7 +38,8 @@ class Cast extends Model
 		'ruc',
 		'provincia',
 		'distrito',
-		'departamento'
+		'departamento',
+		'estado'
 	];
 
 	public function contactos()
