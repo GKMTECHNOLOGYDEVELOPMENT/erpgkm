@@ -6,6 +6,7 @@ use App\Http\Controllers\administracion\asociados\ClientesController;
 use App\Http\Controllers\administracion\asociados\ProveedoresController;
 use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
+use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
@@ -37,6 +38,7 @@ Route::get('/tiendas', [TiendaController::class, 'getAll']);
 Route::get('/categoria', [CategoriaController::class, 'getAll']);
 Route::get('/marca', [MarcaController::class, 'getAll']);
 Route::get('/modelo', [ModelosController::class, 'getAll']);
+Route::get('/articulos', [ArticulosController::class, 'getAll']);
 
 
 
@@ -47,7 +49,7 @@ Route::post('/check-nombre', [ClienteGeneralController::class, 'checkNombre']);
 Route::post('/categoria/check-nombre', [CategoriaController::class, 'checkNombre']);
 Route::post('/marca/check-nombre', [MarcaController::class, 'checkNombre']);
 Route::post('/modelo/check-nombre', [ModelosController::class, 'checkNombre']);
-
+Route::post('/articulos/check-nombre', [ArticulosController::class, 'checkNombre']);
 
 Route::delete('/clientegeneral/{id}', [ClienteGeneralController::class, 'destroy']);
 Route::delete('/tiendas/{id}', [TiendaController::class, 'destroy']);
