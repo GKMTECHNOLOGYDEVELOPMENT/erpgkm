@@ -26,7 +26,6 @@ function showMessage(
     });
 }
 
-// Aquí va tu código para el formulario, incluyendo el fetch y demás
 document.getElementById('modeloForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Evita el envío del formulario tradicional
 
@@ -42,31 +41,38 @@ document.getElementById('modeloForm').addEventListener('submit', function (event
     })
         .then((response) => response.json()) // Espera una respuesta JSON
         .then((data) => {
-            if (data.success) {
-                // Mostrar la alerta de éxito
+            if (data && data.success) {
+                // Mostrar mensaje de éxito
                 showMessage('Modelo agregado correctamente.', 'top-end');
 
-                // Limpiar los campos del formulario
-                document.getElementById('modeloForm').reset();
+                // Limpiar manualmente los inputs del formulario
+                const form = document.getElementById('modeloForm');
+                form.querySelector('#nombre').value = ''; // Limpia el input de texto
 
-                // Cerrar el modal (si es necesario)
+                // Limpia manualmente los selects
+                const selects = form.querySelectorAll('.select2');
+                selects.forEach((select) => {
+                    select.selectedIndex = 0; // Selecciona la primera opción
+                });
+
+                // Cerrar el modal si es necesario
                 if (typeof open !== 'undefined') {
                     open = false;
                 }
 
-                // Actualizar la tabla (si usas Alpine.js)
+                // Actualizar la tabla si usas Alpine.js
                 let alpineData = Alpine.store('multipleTable');
                 if (alpineData && alpineData.updateTable) {
                     alpineData.updateTable();
                 }
             } else {
-                // Mostrar alerta de error
+                // Mostrar mensaje de error
                 showMessage('Hubo un error al guardar el modelo.', 'top-end', true, '', 3000, 'error');
             }
         })
         .catch((error) => {
             console.error('Error en la solicitud:', error);
-            // Mostrar alerta de error
+            // Mostrar mensaje de error
             showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end', true, '', 3000, 'error');
         });
 });
