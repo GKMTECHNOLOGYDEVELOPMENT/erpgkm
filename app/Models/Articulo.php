@@ -56,7 +56,7 @@ class Articulo extends Model
 		'moneda_venta' => 'int',
 		'precio_compra' => 'float',
 		'precio_venta' => 'float',
-		'foto' => 'varbinary',
+		'foto' => 'string',
 		'peso' => 'float',
 		'mostrarWeb' => 'bool',
 		'estado' => 'bool',

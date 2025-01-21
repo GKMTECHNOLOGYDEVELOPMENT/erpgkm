@@ -165,12 +165,7 @@ Route::get('/reporte-proveedores', [ProveedoresController::class, 'exportAllPDF'
 //Ruta para administracion cotizaciones
 Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'index'])->name('cotizaciones.crear-cotizacion')->middleware('auth');
 
-//Ruta para Almacen Articulos
-Route::get('/almacen/articulos', [ArticulosController::class, 'index'])->name('almacen.articulos')->middleware('auth');
-//Ruta para Almacen Modelos
-//Ruta para Almacen TipoArticulos
-Route::get('/almacen/tipo-articulos', [TipoArticuloController::class, 'index'])->name('almacen.tipo-articulos')->middleware('auth');
-//Ruta para Almacen Categoria
+
 
 Route::get('/apps/chat', [ChatController::class, 'index'])->name('apps.chat');
 Route::get('/apps/mailbox', [MailboxController::class, 'index'])->name('apps.mailbox');
@@ -240,6 +235,22 @@ Route::prefix('modelos')->name('modelos.')->group(function () {
 
 
 /// FIN MODELO ///
+
+/// INICIO ARTICULO ///
+
+/// INICIO ARTICULOS ///
+Route::prefix('articulos')->name('articulos.')->group(function () {
+    Route::get('/', [ArticulosController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::post('/store', [ArticulosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/edit/{id}', [ArticulosController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::put('/update/{id}', [ArticulosController::class, 'update'])->name('update'); // Actualizar un artículo
+    Route::delete('/{id}', [ArticulosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/export-pdf', [ArticulosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
+    Route::get('/get-all', [ArticulosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
+    Route::post('/check-nombre', [ArticulosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+});
+
+/// FIN ARTICULO ///
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');
