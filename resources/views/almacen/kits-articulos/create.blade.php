@@ -2,6 +2,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
     <div x-data="kitManager">
         <!-- Breadcrumb -->
@@ -24,19 +25,20 @@
                     <!-- Código -->
                     <div>
                         <label for="codigo" class="block text-sm font-medium">Código</label>
-                        <input type="text" id="codigo" name="codigo" x-model="kit.codigo" placeholder="Ingresa un código"
-                            class="form-input w-full" required />
+                        <input type="text" id="codigo" name="codigo" x-model="kit.codigo"
+                            placeholder="Ingresa un código" class="form-input w-full" required />
                     </div>
                     <!-- Nombre -->
                     <div>
                         <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                        <input type="text" id="nombre" name="nombre" x-model="kit.nombre" placeholder="Ingresa un nombre"
-                            class="form-input w-full" required />
+                        <input type="text" id="nombre" name="nombre" x-model="kit.nombre"
+                            placeholder="Ingresa un nombre" class="form-input w-full" required />
                     </div>
                     <!-- Descripción -->
                     <div>
                         <label for="descripcion" class="block text-sm font-medium">Descripción</label>
-                        <textarea id="descripcion" name="descripcion" x-model="kit.descripcion" placeholder="Ingresa una descripción" class="form-input w-full" rows="1"></textarea>
+                        <textarea id="descripcion" name="descripcion" x-model="kit.descripcion" placeholder="Ingresa una descripción"
+                            class="form-input w-full" rows="1"></textarea>
                     </div>
                     <!-- Fecha -->
                     <div>
@@ -99,9 +101,36 @@
         <!-- Drag-and-Drop para gestionar artículos (oculto inicialmente) -->
         <div x-show="showArticlesSection" class="panel mt-6" x-cloak>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12">
+                <!-- Lista derecha (Artículos disponibles) -->
+                <div>
+                    <h3 class="font-bold text-base mb-3 mt-3 text-center">ARTÍCULOS</h3>
+                    <!-- Buscador -->
+                    <div class="mb-4">
+                        <input type="text" x-model="searchQuery" placeholder="Buscar por nombre o código"
+                            class="form-input w-full" />
+                    </div>
+                    <ul id="availableItemsList" class="custom-scroll overflow-y-auto border rounded-md"
+                        style="max-height: 500px; height: 445px;">
+                        <template x-for="articulo in filteredAvailableArticulos" :key="articulo.id">
+                            <li class="mb-2.5 cursor-grab" :data-id="articulo.id">
+                                <div
+                                    class="bg-white dark:bg-[#1b2e4b] rounded-md border border-white-light dark:border-dark px-6 py-3.5 flex items-center">
+                                    <div class="flex-1">
+                                        <div class="font-semibold text-dark dark:text-[#bfc9d4]"
+                                            x-text="articulo.nombre"></div>
+                                        <div class="text-gray-500 dark:text-white-dark text-sm"
+                                            x-text="articulo.codigo"></div>
+                                    </div>
+                                    <button class="btn btn-info btn-sm ml-3"
+                                        @click="viewArticle(articulo)">Ver</button>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
                 <!-- Lista izquierda (Artículos en el Kit) -->
                 <div>
-                    <h3 class="font-bold text-base mb-3 text-center">KIT DE <span x-text="currentKitName"></span></h3>
+                    <h3 class="font-bold text-base mb-3 mt-3 text-center">KIT DE <span x-text="currentKitName"></span></h3>
                     <ul id="kitItemsList" class="custom-scroll overflow-y-auto border rounded-md"
                         style="max-height: 500px; height: 500px;">
                         <template x-for="articulo in kitArticulos" :key="articulo.id">
@@ -129,33 +158,6 @@
                     </ul>
                 </div>
 
-                <!-- Lista derecha (Artículos disponibles) -->
-                <div>
-                    <h3 class="font-bold text-base mb-3 text-center">ARTÍCULOS</h3>
-                    <!-- Buscador -->
-                    <div class="mb-4">
-                        <input type="text" x-model="searchQuery" placeholder="Buscar por nombre o código"
-                            class="form-input w-full" />
-                    </div>
-                    <ul id="availableItemsList" class="custom-scroll overflow-y-auto border rounded-md"
-                        style="max-height: 500px; height: 445px;">
-                        <template x-for="articulo in filteredAvailableArticulos" :key="articulo.id">
-                            <li class="mb-2.5 cursor-grab" :data-id="articulo.id">
-                                <div
-                                    class="bg-white dark:bg-[#1b2e4b] rounded-md border border-white-light dark:border-dark px-6 py-3.5 flex items-center">
-                                    <div class="flex-1">
-                                        <div class="font-semibold text-dark dark:text-[#bfc9d4]"
-                                            x-text="articulo.nombre"></div>
-                                        <div class="text-gray-500 dark:text-white-dark text-sm"
-                                            x-text="articulo.codigo"></div>
-                                    </div>
-                                    <button class="btn btn-info btn-sm ml-3"
-                                        @click="viewArticle(articulo)">Ver</button>
-                                </div>
-                            </li>
-                        </template>
-                    </ul>
-                </div>
             </div>
 
 
