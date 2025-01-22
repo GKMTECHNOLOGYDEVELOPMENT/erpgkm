@@ -121,18 +121,18 @@ class ModelosController extends Controller
     {
         // Obtener todos los modelos
         $modelos = Modelo::with(['marca', 'categorium'])->get();
+        Log::info( 'Modelos obtenidos' .$modelos );
 
         // Generar el PDF
-        $pdf = Pdf::loadView('almacen.productos.modelo.pdf.modelos', compact('modelos'))
+        $pdf = Pdf::loadView('almacen.productos.modelos.pdf.reporte-modelos', compact('modelos'))
             ->setPaper('a4', 'portrait');
 
-        return $pdf->download('reporte-modelos.pdf');
+        return $pdf->stream('reporte-modelos.pdf');
     }
 
     public function getAll()
     {
         $modelos = Modelo::with(['marca', 'categorium'])->get();
-
         $modelosData = $modelos->map(function ($modelo) {
             return [
                 'idModelo' => $modelo->idModelo,
