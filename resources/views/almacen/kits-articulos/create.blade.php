@@ -1,5 +1,7 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <div x-data="kitManager">
         <!-- Breadcrumb -->
@@ -22,28 +24,31 @@
                     <!-- Código -->
                     <div>
                         <label for="codigo" class="block text-sm font-medium">Código</label>
-                        <input type="text" id="codigo" x-model="kit.codigo" class="form-input w-full" required />
+                        <input type="text" id="codigo" name="codigo" x-model="kit.codigo" placeholder="Ingresa un código"
+                            class="form-input w-full" required />
                     </div>
                     <!-- Nombre -->
                     <div>
                         <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                        <input type="text" id="nombre" x-model="kit.nombre" class="form-input w-full" required />
+                        <input type="text" id="nombre" name="nombre" x-model="kit.nombre" placeholder="Ingresa un nombre"
+                            class="form-input w-full" required />
                     </div>
                     <!-- Descripción -->
                     <div>
                         <label for="descripcion" class="block text-sm font-medium">Descripción</label>
-                        <textarea id="descripcion" x-model="kit.descripcion" class="form-input w-full" rows="1"></textarea>
+                        <textarea id="descripcion" name="descripcion" x-model="kit.descripcion" placeholder="Ingresa una descripción" class="form-input w-full" rows="1"></textarea>
                     </div>
                     <!-- Fecha -->
                     <div>
                         <label for="fecha" class="block text-sm font-medium">Fecha</label>
-                        <input type="date" id="fecha" x-model="kit.fecha" class="form-input w-full" />
+                        <input type="date" id="fecha" name="fecha" x-model="kit.fecha"
+                            class="form-input w-full" />
                     </div>
                     <!-- Moneda de Compra -->
                     <div>
                         <label for="moneda_compra" class="block text-sm font-medium">Moneda de Compra</label>
-                        <select id="moneda_compra" class="form-input w-full" x-model="kit.moneda_compra"
-                            @change="updateMonedaCompra()">
+                        <select id="moneda_compra" name="moneda_compra" class="form-input w-full"
+                            x-model="kit.moneda_compra" @change="updateMonedaCompra()">
                             <option value="S/">Soles</option>
                             <option value="$">Dólares</option>
                         </select>
@@ -51,8 +56,8 @@
                     <!-- Moneda de Venta -->
                     <div>
                         <label for="moneda_venta" class="block text-sm font-medium">Moneda de Venta</label>
-                        <select id="moneda_venta" class="form-input w-full" x-model="kit.moneda_venta"
-                            @change="updateMonedaVenta()">
+                        <select id="moneda_venta" name="moneda_venta" class="form-input w-full"
+                            x-model="kit.moneda_venta" @change="updateMonedaVenta()">
                             <option value="S/">Soles</option>
                             <option value="$">Dólares</option>
                         </select>
@@ -65,7 +70,7 @@
                                 class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
                                 <span x-text="kit.symbol_compra">S/</span>
                             </div>
-                            <input type="number" id="precio_compra"
+                            <input type="number" id="precio_compra" name="precio_compra"
                                 class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1" step="0.01"
                                 placeholder="Ingrese el precio de compra" x-model="kit.precio_compra" />
                         </div>
@@ -79,7 +84,7 @@
                                 class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
                                 <span x-text="kit.symbol_venta">S/</span>
                             </div>
-                            <input type="number" id="precio_venta"
+                            <input type="number" id="precio_venta" name="precio_venta"
                                 class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1" step="0.01"
                                 placeholder="Ingrese el precio de venta" x-model="kit.precio_venta" />
                         </div>
@@ -90,6 +95,7 @@
                 </div>
             </form>
         </div>
+
         <!-- Drag-and-Drop para gestionar artículos (oculto inicialmente) -->
         <div x-show="showArticlesSection" class="panel mt-6" x-cloak>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12">
@@ -97,7 +103,7 @@
                 <div>
                     <h3 class="font-bold text-base mb-3 text-center">KIT DE <span x-text="currentKitName"></span></h3>
                     <ul id="kitItemsList" class="custom-scroll overflow-y-auto border rounded-md"
-                        style="max-height: 500px;">
+                        style="max-height: 500px; height: 500px;">
                         <template x-for="articulo in kitArticulos" :key="articulo.id">
                             <li class="mb-2.5 cursor-grab" :data-id="articulo.id">
                                 <div
@@ -113,9 +119,9 @@
                                             @click="viewArticle(articulo)">Ver</button>
                                         <button class="btn btn-success btn-sm mr-2"
                                             @click="articulo.showInput = !articulo.showInput">+</button>
-                                        <input x-show="articulo.showInput" type="number" min="1" step="1"
-                                            class="form-input w-20 text-center" x-model="articulo.cantidad"
-                                            @input="updateQuantity(articulo)" />
+                                        <input x-show="articulo.showInput" type="number" min="1"
+                                            step="1" class="form-input w-20 text-center"
+                                            x-model="articulo.cantidad" @input="updateQuantity(articulo)" />
                                     </div>
                                 </div>
                             </li>
@@ -132,7 +138,7 @@
                             class="form-input w-full" />
                     </div>
                     <ul id="availableItemsList" class="custom-scroll overflow-y-auto border rounded-md"
-                        style="max-height: 500px;">
+                        style="max-height: 500px; height: 445px;">
                         <template x-for="articulo in filteredAvailableArticulos" :key="articulo.id">
                             <li class="mb-2.5 cursor-grab" :data-id="articulo.id">
                                 <div
@@ -394,6 +400,16 @@
                     });
                 },
             }));
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            // Inicializa flatpickr en el campo de fecha
+            flatpickr("#fecha", {
+                dateFormat: "Y-m-d", // Formato de fecha
+                defaultDate: new Date(), // Fecha predeterminada: hoy
+                altInput: true, // Mostrar campo alternativo amigable
+                altFormat: "F j, Y", // Formato amigable para el usuario
+                locale: "es", // Localización en español
+            });
         });
     </script>
 </x-layout.default>
