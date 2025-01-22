@@ -58,7 +58,11 @@ document.addEventListener('alpine:init', () => {
             return data.map((orden) => [
                 `<div style="text-align: center;">${orden.numero_ticket || 'N/A'}</div>`, // Número Ticket
                 `<div style="text-align: center;">${orden.tecnico || 'N/A'}</div>`, // Técnico (Nombre del técnico)
-                `<div style="text-align: center;">${orden.estado || 'Inactivo'}</div>`, // Estado (Activo/Inactivo basado en descripción)
+                `<div style="text-align: center;">
+                <span class="badge" style="background-color: ${orden.color || '#6c757d'}; color: white;">
+                    ${orden.estado || 'Inactivo'}
+                </span>
+                </div>`,
                 `<div style="text-align: center;">${orden.usuario || 'N/A'}</div>`, // Usuario (Nombre del usuario)
                 `<div style="text-align: center;">${orden.tipoServicio || 'N/A'}</div>`, // Servicio (Nombre del servicio)
                 `<div style="text-align: center;">${orden.fecha_creacion ? this.formatDate(orden.fecha_creacion) : 'N/A'}</div>`, // Fecha Creación (Formato: día/mes/año hora:minuto)

@@ -141,7 +141,7 @@ class OrdenesTrabajoController extends Controller
             'cliente:idCliente,nombre', // Relación para obtener el nombre del cliente
             'clientegeneral:idClienteGeneral,descripcion', // Relación para el cliente general
             'tiposervicio:idTipoServicio,nombre', // Relación para obtener el nombre del tipo de servicio
-            'estado_ot:idEstadoots,descripcion', // Relación para obtener la descripción del estado
+            'estado_ot:idEstadoots,descripcion,color', // Relación para obtener la descripción del estado
         ])->get();
 
         // Formatear el resultado
@@ -156,9 +156,10 @@ class OrdenesTrabajoController extends Controller
                 'tipoServicio' => $orden->tiposervicio->nombre ?? 'N/A', // Nombre del tipo de servicio
                 'estado' => $orden->estado_ot->descripcion ?? 'N/A', // Descripción del estado
                 'fecha_creacion' => $orden->fecha_creacion ? $orden->fecha_creacion->format('d/m/Y H:i') : 'N/A', // Formato de fecha
+                'color' => $orden->estado_ot->color ?? '#000000', // Color del estado
             ];
         });
-
+    
         return response()->json($ordenes);
     }
 
