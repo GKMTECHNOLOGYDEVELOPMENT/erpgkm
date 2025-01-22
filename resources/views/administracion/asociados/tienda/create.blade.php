@@ -1,78 +1,95 @@
 <x-layout.default>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
     <style>
         #map {
-            height: 300px; /* Ajusta el tamaño del mapa según tus necesidades */
+            height: 300px;
+            /* Ajusta el tamaño del mapa según tus necesidades */
             width: 100%;
         }
     </style>
-    
+        <div>
+            <ul class="flex space-x-2 rtl:space-x-reverse mt-4">
+                <li>
+                    <a href="javascript:;" class="text-primary hover:underline">Tienda</a>
+                </li>
+                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                    <span>Agregar Tienda</span>
+                </li>
+            </ul>
+        </div>
     <div class="panel mt-6 p-5 max-w-2xl mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Tienda</h2>
 
         <!-- Mostrar alertas de éxito o error -->
-    @if (session('success'))
-        <div class="alert alert-success mb-4">
-            <strong>Éxito!</strong> {{ session('success') }}
-        </div>
-    @elseif (session('error'))
-        <div class="alert alert-danger mb-4">
-            <strong>Error!</strong> {{ session('error') }}
-        </div>
-    @endif  
+        @if (session('success'))
+            <div class="alert alert-success mb-4">
+                <strong>Éxito!</strong> {{ session('success') }}
+            </div>
+        @elseif (session('error'))
+            <div class="alert alert-danger mb-4">
+                <strong>Error!</strong> {{ session('error') }}
+            </div>
+        @endif
         <!-- Formulario -->
         <div class="p-5">
-            <form id="tiendaForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST" action="{{ route('tiendas.store') }}">
-            @csrf
+            <form id="tiendaForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
+                action="{{ route('tiendas.store') }}">
+                @csrf
 
                 <!-- RUC -->
                 <div>
                     <label for="ruc" class="block text-sm font-medium">RUC</label>
-                    <input id="ruc" name="ruc" type="text" class="form-input w-full" placeholder="Ingrese el RUC">
+                    <input id="ruc" name="ruc" type="text" class="form-input w-full"
+                        placeholder="Ingrese el RUC">
                 </div>
                 <!-- Nombre -->
                 <div>
                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                    <input id="nombre" type="text" class="form-input w-full" placeholder="Ingrese el nombre" name="nombre">
+                    <input id="nombre" type="text" class="form-input w-full" placeholder="Ingrese el nombre"
+                        name="nombre">
                 </div>
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium">Email</label>
-                    <input id="email" type="email" class="form-input w-full" placeholder="Ingrese el email" name="email">
+                    <input id="email" type="email" class="form-input w-full" placeholder="Ingrese el email"
+                        name="email">
                 </div>
-                
-             
-            <div>
-                <!-- <label for="idCliente" class="block text-sm font-medium">Cliente</label> -->
-                <select id="idCliente" name="idCliente" class="select2 w-full">
-                    <option value="" disabled selected>Seleccionar Cliente</option>
-                    <!-- Llenar el select con clientes dinámicamente -->
-                    @foreach($clientes as $cliente)
-                        <option value="{{ $cliente->idCliente }}" {{ old('idCliente') == $cliente->idCliente ? 'selected' : '' }}>
-                            {{ $cliente->nombre }} - {{ $cliente->documento }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('idCliente')
-                    <div class="text-red-500 text-sm">{{ $message }}</div>
-                @enderror
-            </div>
+
+
+                <div>
+                    <!-- <label for="idCliente" class="block text-sm font-medium">Cliente</label> -->
+                    <select id="idCliente" name="idCliente" class="select2 w-full">
+                        <option value="" disabled selected>Seleccionar Cliente</option>
+                        <!-- Llenar el select con clientes dinámicamente -->
+                        @foreach ($clientes as $cliente)
+                            <option value="{{ $cliente->idCliente }}"
+                                {{ old('idCliente') == $cliente->idCliente ? 'selected' : '' }}>
+                                {{ $cliente->nombre }} - {{ $cliente->documento }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('idCliente')
+                        <div class="text-red-500 text-sm">{{ $message }}</div>
+                    @enderror
+                </div>
                 <!-- Celular -->
                 <div>
                     <label for="celular" class="block text-sm font-medium">Celular</label>
-                    <input id="celular" type="text" class="form-input w-full" placeholder="Ingrese el celular" name="celular">
+                    <input id="celular" type="text" class="form-input w-full" placeholder="Ingrese el celular"
+                        name="celular">
                 </div>
-               
-                    
-                  <!-- departamento -->
-                  <div>
+
+
+                <!-- departamento -->
+                <div>
                     <label for="departamento" class="block text-sm font-medium">Departamento</label>
                     <select id="departamento" name="departamento" class="form-input w-full">
                         <option value="" disabled selected>Seleccionar Departamento</option>
                         @foreach ($departamentos as $departamento)
-                            <option value="{{ $departamento['id_ubigeo'] }}">{{ $departamento['nombre_ubigeo'] }}</option>
+                            <option value="{{ $departamento['id_ubigeo'] }}">{{ $departamento['nombre_ubigeo'] }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -95,24 +112,28 @@
 
                 <div>
                     <label for="nombre_contacto" class="block text-sm font-medium">Dirección</label>
-                    <input id="nombre_contacto" type="text" class="form-input w-full" placeholder="Ingrese el nombre del contacto" name="direccion">
+                    <input id="nombre_contacto" type="text" class="form-input w-full"
+                        placeholder="Ingrese el nombre del contacto" name="direccion">
                 </div>
                 <!-- Referencia -->
-                <div >
+                <div>
                     <label for="referencia" class="block text-sm font-medium">Referencia</label>
-                    <input id="referencia" type="text" class="form-input w-full" placeholder="Ingrese la referencia" name="referencia">
+                    <input id="referencia" type="text" class="form-input w-full" placeholder="Ingrese la referencia"
+                        name="referencia">
                 </div>
-              
+
 
                 <!-- Latitud -->
                 <div>
                     <label for="latitud" class="block text-sm font-medium">Latitud</label>
-                    <input id="latitud" type="text" class="form-input w-full" placeholder="Latitud" name="lat" readonly>
+                    <input id="latitud" type="text" class="form-input w-full" placeholder="Latitud" name="lat"
+                        readonly>
                 </div>
                 <!-- Longitud -->
                 <div>
                     <label for="longitud" class="block text-sm font-medium">Longitud</label>
-                    <input id="longitud" type="text" name="lng" class="form-input w-full" placeholder="Longitud" readonly>
+                    <input id="longitud" type="text" name="lng" class="form-input w-full" placeholder="Longitud"
+                        readonly>
                 </div>
                 <!-- Mapa -->
                 <div class="md:col-span-2">
@@ -142,7 +163,9 @@
         // Inicializar Select2
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, { searchable: true });
+                NiceSelect.bind(select, {
+                    searchable: true
+                });
             });
 
             // Inicializar el mapa
@@ -156,7 +179,10 @@
             let marker;
 
             map.on('click', function(e) {
-                const { lat, lng } = e.latlng;
+                const {
+                    lat,
+                    lng
+                } = e.latlng;
 
                 // Actualizar los inputs de latitud y longitud
                 document.getElementById('latitud').value = lat;
@@ -172,7 +198,7 @@
         });
     </script>
 
-<script src="{{ asset('assets/js/ubigeo.js') }}"></script>
-  
-  
+    <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
+
+
 </x-layout.default>
