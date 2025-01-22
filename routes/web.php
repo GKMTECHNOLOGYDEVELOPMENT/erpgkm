@@ -42,6 +42,8 @@ use App\Exports\TiendaExport;
 use App\Exports\CastExport;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
+use App\Http\Controllers\almacen\kits\KitsController;
+use App\Exports\ProveedoresExport;
 use App\Exports\MarcasExport;
 use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
@@ -185,6 +187,9 @@ Route::get('/apps/calendar', [CalendarController::class, 'index'])->name('apps.c
 // Route::view('/apps/contacts', 'apps.contacts');
 // Route::view('/apps/calendar', 'apps.calendar');
 
+
+/// MODULO DE ALMACEN /// 
+
 // INICIO CATEGORIA /// 
 Route::prefix('categoria')->name('categorias.')->group(function () {
     Route::get('/', [CategoriaController::class, 'index'])->name('index'); // Mostrar la vista principal
@@ -220,7 +225,6 @@ Route::prefix('marcas')->name('marcas.')->group(function () {
     
 });
 
-
 /// FIN MARCA ///
 
 /// INICIO MODELO ///
@@ -235,10 +239,8 @@ Route::prefix('modelos')->name('modelos.')->group(function () {
     Route::post('/check-nombre', [ModelosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
 });
 
-
 /// FIN MODELO ///
 
-/// INICIO ARTICULO ///
 
 /// INICIO ARTICULOS ///
 Route::prefix('articulos')->name('articulos.')->group(function () {
@@ -256,6 +258,22 @@ Route::prefix('articulos')->name('articulos.')->group(function () {
 });
 
 /// FIN ARTICULO ///
+
+/// KITS DE ARTICULOS ///
+
+Route::prefix('kits')->name('almacen.kits.')->group(function () {
+    Route::get('/', [KitsController::class, 'index'])->name('index'); // Mostrar todos los kits
+    Route::get('/create', [KitsController::class, 'create'])->name('create'); // Crear un nuevo kit
+    Route::post('/store', [KitsController::class, 'store'])->name('store'); // Guardar un nuevo kit
+    Route::get('/{id}/edit', [KitsController::class, 'edit'])->name('edit'); // Editar un kit
+    Route::put('/update/{id}', [KitsController::class, 'update'])->name('update'); // Actualizar un kit
+    Route::delete('/{id}', [KitsController::class, 'destroy'])->name('destroy'); // Eliminar un kit
+    Route::get('/export-pdf', [KitsController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar a PDF
+    Route::get('/get-all', [KitsController::class, 'getAll'])->name('getAll'); // Obtener datos en JSON
+});
+
+
+//INICIO TICKETS///
 
 /// INICIO ÓRDENES DE TRABAJO ///
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
