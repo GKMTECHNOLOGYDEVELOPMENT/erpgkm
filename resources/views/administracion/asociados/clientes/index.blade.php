@@ -198,12 +198,7 @@
         };
     </script>
 
-    <script>
-        window.Laravel = {
-            csrfToken: '{{ csrf_token() }}', // Define el token CSRF
-            routeClienteStore: '{{ route('cliente.store') }}' // Define la ruta del endpoint
-        };
-    </script>
+
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
     <script src="{{ asset('assets/js/clientestore.js') }}"></script>
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>

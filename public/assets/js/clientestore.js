@@ -1,6 +1,12 @@
 // Función para mostrar la alerta con SweetAlert
-function showMessage(msg = 'Example notification text.', position = 'top-end', showCloseButton = true,
-    closeButtonHtml = '', duration = 3000, type = 'success') {
+function showMessage(
+    msg = 'Example notification text.',
+    position = 'top-end',
+    showCloseButton = true,
+    closeButtonHtml = '',
+    duration = 3000,
+    type = 'success',
+) {
     const toast = window.Swal.mixin({
         toast: true,
         position: position || 'top-end',
@@ -21,14 +27,16 @@ function showMessage(msg = 'Example notification text.', position = 'top-end', s
 }
 
 // Script AJAX para el formulario de cliente
-document.getElementById('clienteForm').addEventListener('submit', function(event) {
+document.getElementById('clienteForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Evita el envío del formulario tradicional
 
     let formData = new FormData(this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
-    console.log(formData);
-    // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
-    console.log("Formulario enviado:", this);
-    console.log("Datos del formulario:", Array.from(formData.entries()));
+
+    // Depuración: Mostrar los datos enviados en la consola
+    console.log("Datos enviados en el formulario:");
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
 
     // Hacer la solicitud AJAX
     fetch('/cliente/store', {
@@ -39,31 +47,52 @@ document.getElementById('clienteForm').addEventListener('submit', function(event
         },
         body: formData, // Envío de datos en formato multipart
     })
-        .then(response => {
+        .then((response) => {
+            // Mostrar respuesta del servidor para depuración
             console.log("Respuesta del servidor:", response);
+
             if (!response.ok) {
-                throw new Error('Error en la respuesta del servidor');
+                // Si el estado no es "ok", arrojar error
+                return response.json().then((data) => {
+                    throw data; // Arrojar los datos para capturarlos en el catch
+                });
             }
+
             return response.json(); // Intentar convertir la respuesta en JSON
         })
-        .then(data => {
+        .then((data) => {
+            // Mostrar datos devueltos por el servidor para depuración
             console.log("Datos recibidos del servidor:", data);
 
-            if (data && data.success) { // Asegúrate de que `data` y `data.success` existen
+            if (data && data.success) { // Verificar si la respuesta indica éxito
+                // Mostrar mensaje de éxito
                 showMessage('Cliente agregado correctamente.', 'top-end');
+
+                // Limpiar el formulario
                 document.getElementById('clienteForm').reset();
 
-                // Si usas Alpine.js y quieres limpiar algo en Alpine, puedes hacerlo aquí
+                // Si estás usando Alpine.js para manejar tablas o vistas
                 let alpineData = Alpine.store('multipleTable');
                 if (alpineData && alpineData.updateTable) {
-                    alpineData.updateTable(); // Llama a `updateTable` de Alpine si existe
+                    alpineData.updateTable(); // Actualizar la tabla
                 }
             } else {
-                showMessage('Hubo un error al guardar el cliente.', 'top-end');
+                // Mostrar mensaje de error general
+                showMessage('Hubo un error al guardar el cliente.', 'top-end', true, '', 3000, 'error');
             }
         })
-        .catch(error => {
-            console.error("Error en la solicitud:", error);
-            showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
+        .catch((error) => {
+            // Si es un error de validación, mostrar los errores específicos
+            if (error.errors) {
+                console.error("Errores de validación recibidos del servidor:", error.errors);
+                Object.keys(error.errors).forEach((key) => {
+                    const mensajes = error.errors[key].join(', ');
+                    showMessage(`${mensajes}`, 'top-end', true, '', 3000, 'error');
+                });
+            } else {
+                // Mostrar mensaje de error general si no hay errores específicos
+                console.error("Error en la solicitud AJAX:", error);
+                showMessage('Ocurrió un error inesperado, por favor intenta de nuevo.', 'top-end', true, '', 3000, 'error');
+            }
         });
 });
