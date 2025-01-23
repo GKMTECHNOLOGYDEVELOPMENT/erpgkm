@@ -42,11 +42,15 @@ class ClientesController extends Controller
                 'direccion' => 'required|string|max:255',
                 'idClienteGeneral' => 'required|array', // Asegurarse de que es un array
                 'idClienteGeneral.*' => 'integer|exists:clientegeneral,idClienteGeneral', // Cada elemento debe ser válido
+                'esTienda' => 'nullable|string', // Validar el campo esTienda
             ]);
 
             // Establecer valores predeterminados
             $validatedData['estado'] = 1; // Valor predeterminado para 'estado'
             $validatedData['fecha_registro'] = now(); // Fecha actual para 'fecha_registro'
+
+            // Convertir el valor de esTienda a booleano
+            $validatedData['esTienda'] = isset($validatedData['esTienda']) && $validatedData['esTienda'] == 1 ? true : false;
 
             // Extraer y eliminar 'idClienteGeneral' del array validado
             $idClienteGenerales = $validatedData['idClienteGeneral'];
@@ -99,7 +103,6 @@ class ClientesController extends Controller
             ], 500);
         }
     }
-
 
 
 
