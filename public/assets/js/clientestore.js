@@ -25,19 +25,20 @@ document.getElementById('clienteForm').addEventListener('submit', function(event
     event.preventDefault(); // Evita el envío del formulario tradicional
 
     let formData = new FormData(this); // Obtiene todos los datos del formulario, incluidos archivos si los hay
-
+    console.log(formData);
     // Mostrar en consola los datos antes de enviarlos (esto es solo para depuración)
     console.log("Formulario enviado:", this);
     console.log("Datos del formulario:", Array.from(formData.entries()));
 
     // Hacer la solicitud AJAX
-    fetch(Laravel.routeClienteStore, {
-            method: "POST", // Asegúrate de usar el método POST
-            headers: {
-                'X-CSRF-TOKEN': Laravel.csrfToken, // Usando la variable global para el token CSRF
-            },
-            body: formData, // Enviar los datos del formulario (incluso archivos si los hay)
-        })
+    fetch('/cliente/store', {
+        method: 'POST', // Método POST
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            Accept: 'application/json', // Asegura que Laravel devuelva errores en JSON
+        },
+        body: formData, // Envío de datos en formato multipart
+    })
         .then(response => {
             console.log("Respuesta del servidor:", response);
             if (!response.ok) {
