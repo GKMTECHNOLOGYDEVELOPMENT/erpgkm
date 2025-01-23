@@ -99,7 +99,8 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Tipo Ticket -->
                                 <div>
-                                    <select id="idTipotickets" name="idTipotickets" class="select2 w-full">
+                                    <label for="idCliente" class="block text-sm font-medium">Tipo de Ticket</label>
+                                    <select id="idTipotickets" name="idTipotickets" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo de Ticket</option>
                                         @foreach ($tiposTickets as $tipoTicket)
                                             <option value="{{ $tipoTicket->idTipotickets }}">
@@ -117,8 +118,8 @@
                                 <!-- Cliente General -->
                                 <div>
 
-                                    <!-- <label for="idCliente" class="block text-sm font-medium">Cliente</label> -->
-                                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full">
+                                    <label for="idCliente" class="block text-sm font-medium">Cliente General</label>
+                                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Cliente General</option>
                                         <!-- Llenar el select con clientes dinámicamente -->
                                         @foreach ($clientesGenerales as $clientesGenerale)
@@ -131,7 +132,8 @@
                                 </div>
                                 <!-- Cliente -->
                                 <div>
-                                    <select id="idCliente" name="idCliente" class="select2 w-full">
+                                    <label for="idCliente" class="block text-sm font-medium">Cliente</label>
+                                    <select id="idCliente" name="idCliente" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Cliente</option>
                                         <!-- Llenar el select con clientes dinámicamente -->
                                         @foreach ($clientes as $cliente)
@@ -145,7 +147,8 @@
 
                                 <!-- Tienda -->
                                 <div>
-                                    <select id="idTienda" name="idTienda" class="select2 w-full">
+                                    <label for="idCliente" class="block text-sm font-medium">Tienda</label>
+                                    <select id="idTienda" name="idTienda" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tienda</option>
                                         <!-- Llenar el select con clientes dinámicamente -->
                                         @foreach ($tiendas as $tienda)
@@ -158,7 +161,8 @@
                                 </div>
                                 <!-- Técnico Responsable -->
                                 <div>
-                                    <select id="tecnico" name="tecnico" class="select2 w-full">
+                                    <label for="idCliente" class="block text-sm font-medium">Técnico</label>
+                                    <select id="tecnico" name="tecnico" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Técnico</option>
                                         @foreach ($usuarios as $usuario)
                                             <option value="{{ $usuario->idUsuario }}">
@@ -170,7 +174,8 @@
 
                                 <!-- Tipo Servicio -->
                                 <div>
-                                    <select id="tipoServicio" name="tipoServicio" class="select2 w-full">
+                                    <label for="idCliente" class="block text-sm font-medium">Servicio</label>
+                                    <select id="tipoServicio" name="tipoServicio" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Servicio</option>
                                         @foreach ($tiposServicio as $tiposServicios)
                                             <option value="{{ $tiposServicios->idTipoServicio }}">
