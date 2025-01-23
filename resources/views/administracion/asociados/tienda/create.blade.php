@@ -59,8 +59,8 @@
 
 
                 <div>
-                    <!-- <label for="idCliente" class="block text-sm font-medium">Cliente</label> -->
-                    <select id="idCliente" name="idCliente" class="select2 w-full">
+                    <label for="idCliente" class="block text-sm font-medium">Cliente</label>
+                    <select id="idCliente" name="idCliente" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Cliente</option>
                         <!-- Llenar el select con clientes dinámicamente -->
                         @foreach ($clientes as $cliente)

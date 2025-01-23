@@ -30,8 +30,8 @@
 
                 <!-- Tipo Documento -->
                 <div>
-
-                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
+                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
+                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                         @foreach ($tiposDocumento as $tipoDocumento)
                             <option value="{{ $tipoDocumento->idTipoDocumento }}"
@@ -82,7 +82,8 @@
 
                 <!-- Area -->
                 <div>
-                    <select id="idArea" name="idArea" class="select2 w-full">
+                    <label for="idArea" class="block text-sm font-medium">Área</label>
+                    <select id="idArea" name="idArea" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Area</option>
 
                         @foreach ($tiposArea as $tipoArea)

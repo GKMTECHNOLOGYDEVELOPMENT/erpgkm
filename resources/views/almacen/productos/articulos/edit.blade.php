@@ -58,7 +58,8 @@
 
                 <!-- Unidad -->
                 <div>
-                    <select id="idUnidad" name="idUnidad" class="select2 w-full">
+                    <label for="idUnidad" class="block text-sm font-medium">Unidad</label>
+                    <select id="idUnidad" name="idUnidad" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Unidad</option>
                         @foreach ($unidades as $unidad)
                             <option value="{{ $unidad->idUnidad }}"
@@ -71,7 +72,8 @@
 
                 <!-- Tipo Artículo -->
                 <div>
-                    <select id="idTipoArticulo" name="idTipoArticulo" class="select2 w-full">
+                    <label for="idTipoArticulo" class="block text-sm font-medium">Tipo de Articulo</label>
+                    <select id="idTipoArticulo" name="idTipoArticulo" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Tipo de Artículo</option>
                         @foreach ($tiposArticulo as $tipoArticulo)
                             <option value="{{ $tipoArticulo->idTipoArticulo }}"
@@ -83,7 +85,8 @@
                 </div>
                 <!-- Modelo -->
                 <div>
-                    <select id="idModelo" name="idModelo" class="select2 w-full">
+                    <label for="idModelo" class="block text-sm font-medium">Modelo</label>
+                    <select id="idModelo" name="idModelo" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Modelo</option>
                         @foreach ($modelos as $modelo)
                             <option value="{{ $modelo->idModelo }}"

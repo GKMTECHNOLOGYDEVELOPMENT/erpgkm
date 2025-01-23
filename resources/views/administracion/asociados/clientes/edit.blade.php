@@ -24,8 +24,8 @@
 
                 <!-- ClienteGeneral -->
                 <div>
-                    <!-- <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label> -->
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full">
+                   <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label> 
+                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Cliente General</option>
                         @foreach ($clientesGenerales as $clienteGeneral)
                             <option value="{{ $clienteGeneral->idClienteGeneral }}"
@@ -45,8 +45,8 @@
 
                 <!-- Tipo Documento -->
                 <div>
-                    <!-- <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label> -->
-                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
+                     <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label> 
+                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                         @foreach ($tiposDocumento as $tipoDocumento)
                             <option value="{{ $tipoDocumento->idTipoDocumento }}"
