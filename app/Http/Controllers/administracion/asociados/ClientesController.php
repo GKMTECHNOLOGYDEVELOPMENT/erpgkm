@@ -180,7 +180,7 @@ class ClientesController extends Controller
     public function getAll()
     {
         // Obtener todos los clientes con sus relaciones (TipoDocumento y ClienteGeneral)
-        $clientes = Cliente::with(['tipoDocumento', 'clienteGeneral'])->get();
+        $clientes = Cliente::with(['tipoDocumento'])->get();
     
         // Procesa los datos para incluir los campos necesarios, mostrando los nombres relacionados
         $clientesData = $clientes->map(function ($cliente) {
@@ -191,7 +191,6 @@ class ClientesController extends Controller
                 'nombre'          => $cliente->nombre,
                 'telefono'        => $cliente->telefono,
                 'email'           => $cliente->email,
-                'clienteGeneral'  => $cliente->clienteGeneral->descripcion, // Mostrar descripción de cliente general
                 'direccion'       => $cliente->direccion,
                 'estado'          => $cliente->estado == 1 ? 'Activo' : 'Inactivo',
             ];

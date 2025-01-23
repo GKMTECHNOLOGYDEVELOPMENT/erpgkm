@@ -31,7 +31,7 @@ document.addEventListener("alpine:init", () => {
                     this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
                         data: {
                             headings: ["Tipo Documento", "Documento", "Nombre",
-                                "Teléfono", "Email", "Cliente General",
+                                "Teléfono", "Email", 
                                 "Dirección", "Estado", "Acción"
                             ], // Nuevas cabeceras
                             data: this.formatDataForTable(
@@ -71,7 +71,6 @@ document.addEventListener("alpine:init", () => {
                 `<div style="text-align: center;">${cliente.nombre}</div>`,          // Nombre
                 `<div style="text-align: center;">${cliente.telefono}</div>`,        // Teléfono
                 `<div style="text-align: center;">${cliente.email}</div>`,           // Email
-                `<div style="text-align: center;">${cliente.clienteGeneral}</div>`,  // Cliente General
                 `<div style="text-align: center;">${cliente.direccion}</div>`,       // Dirección
                 `<div style="text-align: center;">
                     ${cliente.estado === 'Activo' ?

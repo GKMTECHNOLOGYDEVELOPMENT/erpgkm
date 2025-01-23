@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $idTickets
  * @property int $idClienteGeneral
  * @property int $idCliente
- * @property varbinary|null $IdTienda
  * @property string|null $numero_ticket
  * @property int|null $tipoServicio
  * @property Carbon|null $fecha_creacion
@@ -24,22 +23,33 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $idEstadoots
  * @property int $idTecnico
  * @property int $idUsuario
+ * @property int $idTienda
+ * @property string|null $fallaReportada
+ * @property string|null $esRecojo
+ * @property string|null $direccion
+ * @property int|null $idMarca
+ * @property int|null $idModelo
+ * @property string|null $serie
+ * @property Carbon|null $fechaCompra
+ * @property string|null $lat
+ * @property string|null $lng
  * 
  * @property Tipoticket|null $tipoticket
  * @property EstadoOt|null $estado_ot
  * @property Cliente $cliente
  * @property Clientegeneral $clientegeneral
  * @property Usuario $usuario
+ * @property Tienda $tienda
+ * @property Marca|null $marca
+ * @property Modelo|null $modelo
  * @property Collection|Cotizacione[] $cotizaciones
+ * @property Collection|Detalleticket[] $detalletickets
  * @property Collection|Equipo[] $equipos
  * @property Collection|Firma[] $firmas
- * @property Collection|LevantamientoInformacion[] $levantamiento_informacions
  * @property Collection|Proyecto[] $proyectos
- * @property Collection|SoporteOnsite[] $soporte_onsites
  * @property Collection|Suministro[] $suministros
- * @property Collection|TipoVisitum[] $tipo_visita
- * @property Collection|TransicionOt[] $transicion_ots
- * @property Collection|TrasladoEquipo[] $traslado_equipos
+ * @property Collection|Ticketapoyo[] $ticketapoyos
+ * @property Collection|TransicionStatusTicket[] $transicion_status_tickets
  * @property Collection|Visita[] $visitas
  *
  * @package App\Models
@@ -53,26 +63,38 @@ class Ticket extends Model
 	protected $casts = [
 		'idClienteGeneral' => 'int',
 		'idCliente' => 'int',
-		'IdTienda' => 'int',
 		'tipoServicio' => 'int',
 		'fecha_creacion' => 'datetime',
 		'idTipotickets' => 'int',
 		'idEstadoots' => 'int',
 		'idTecnico' => 'int',
-		'idUsuario' => 'int'
+		'idUsuario' => 'int',
+		'idTienda' => 'int',
+		'idMarca' => 'int',
+		'idModelo' => 'int',
+		'fechaCompra' => 'datetime'
 	];
 
 	protected $fillable = [
 		'idClienteGeneral',
 		'idCliente',
-		'IdTienda',
 		'numero_ticket',
 		'tipoServicio',
 		'fecha_creacion',
 		'idTipotickets',
 		'idEstadoots',
 		'idTecnico',
-		'idUsuario'
+		'idUsuario',
+		'idTienda',
+		'fallaReportada',
+		'esRecojo',
+		'direccion',
+		'idMarca',
+		'idModelo',
+		'serie',
+		'fechaCompra',
+		'lat',
+		'lng'
 	];
 
 	public function tipoticket()
@@ -100,15 +122,29 @@ class Ticket extends Model
 		return $this->belongsTo(Usuario::class, 'idUsuario');
 	}
 
-	public function tecnico()
+	public function tienda()
 	{
-		return $this->belongsTo(Usuario::class,'idTecnico','idUsuario');
+		return $this->belongsTo(Tienda::class, 'idTienda');
 	}
 
+	public function marca()
+	{
+		return $this->belongsTo(Marca::class, 'idMarca');
+	}
+
+	public function modelo()
+	{
+		return $this->belongsTo(Modelo::class, 'idModelo');
+	}
 
 	public function cotizaciones()
 	{
 		return $this->hasMany(Cotizacione::class, 'idTickets');
+	}
+
+	public function detalletickets()
+	{
+		return $this->hasMany(Detalleticket::class, 'idTickets');
 	}
 
 	public function equipos()
@@ -121,19 +157,9 @@ class Ticket extends Model
 		return $this->hasMany(Firma::class, 'idTickets');
 	}
 
-	public function levantamiento_informacions()
-	{
-		return $this->hasMany(LevantamientoInformacion::class, 'idTickets');
-	}
-
 	public function proyectos()
 	{
 		return $this->hasMany(Proyecto::class, 'idTickets');
-	}
-
-	public function soporte_onsites()
-	{
-		return $this->hasMany(SoporteOnsite::class, 'idTickets');
 	}
 
 	public function suministros()
@@ -141,27 +167,18 @@ class Ticket extends Model
 		return $this->hasMany(Suministro::class, 'idTickets');
 	}
 
-	public function tipo_visita()
+	public function ticketapoyos()
 	{
-		return $this->hasMany(TipoVisitum::class, 'idTickets');
+		return $this->hasMany(Ticketapoyo::class, 'idTicket');
 	}
 
-	public function transicion_ots()
+	public function transicion_status_tickets()
 	{
-		return $this->hasMany(TransicionOt::class, 'idTickets');
-	}
-
-	public function traslado_equipos()
-	{
-		return $this->hasMany(TrasladoEquipo::class, 'idTickets');
+		return $this->hasMany(TransicionStatusTicket::class, 'idTickets');
 	}
 
 	public function visitas()
 	{
 		return $this->hasMany(Visita::class, 'idTickets');
-	}
-	public function tiposervicio()
-	{
-		return $this->belongsTo(Tiposervicio::class, 'tipoServicio', 'idTipoServicio');
 	}
 }
