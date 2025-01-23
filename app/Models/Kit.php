@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
 use Carbon\Carbon;
@@ -20,9 +16,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property float|null $precio_compra
  * @property float|null $precio
  * @property Carbon|null $fecha
+ * @property int|null $monedaCompra
+ * @property int|null $monedaVenta
  * 
  * @property Collection|DetalleCotizacion[] $detalle_cotizacions
  * @property Collection|Articulo[] $articulos
+ * @property Moneda|null $moneda_compra
+ * @property Moneda|null $moneda_venta
  *
  * @package App\Models
  */
@@ -35,7 +35,9 @@ class Kit extends Model
 	protected $casts = [
 		'precio_compra' => 'float',
 		'precio' => 'float',
-		'fecha' => 'datetime'
+		'fecha' => 'datetime',
+		'monedaCompra' => 'int',
+		'monedaVenta' => 'int'
 	];
 
 	protected $fillable = [
@@ -44,7 +46,9 @@ class Kit extends Model
 		'descripcion',
 		'precio_compra',
 		'precio',
-		'fecha'
+		'fecha',
+		'monedaCompra',
+		'monedaVenta'
 	];
 
 	public function detalle_cotizacions()
@@ -56,5 +60,15 @@ class Kit extends Model
 	{
 		return $this->belongsToMany(Articulo::class, 'kit_articulo', 'idKit', 'idArticulos')
 					->withPivot('idkit_articulo', 'cantidad');
+	}
+
+	public function moneda_compra()
+	{
+		return $this->belongsTo(Moneda::class, 'monedaCompra', 'idMonedas');
+	}
+
+	public function moneda_venta()
+	{
+		return $this->belongsTo(Moneda::class, 'monedaVenta', 'idMonedas');
 	}
 }
