@@ -99,7 +99,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Tipo Ticket -->
                                 <div>
-                                    <label for="idCliente" class="block text-sm font-medium">Tipo de Ticket</label>
+                                    <label for="idTipotickets" class="block text-sm font-medium">Tipo de Ticket</label>
                                     <select id="idTipotickets" name="idTipotickets" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo de Ticket</option>
                                         @foreach ($tiposTickets as $tipoTicket)
@@ -118,7 +118,7 @@
                                 <!-- Cliente General -->
                                 <div>
 
-                                    <label for="idCliente" class="block text-sm font-medium">Cliente General</label>
+                                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
                                     <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Cliente General</option>
                                         <!-- Llenar el select con clientes dinámicamente -->
@@ -147,7 +147,7 @@
 
                                 <!-- Tienda -->
                                 <div>
-                                    <label for="idCliente" class="block text-sm font-medium">Tienda</label>
+                                    <label for="idTienda" class="block text-sm font-medium">Tienda</label>
                                     <select id="idTienda" name="idTienda" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tienda</option>
                                         <!-- Llenar el select con clientes dinámicamente -->
@@ -161,7 +161,7 @@
                                 </div>
                                 <!-- Técnico Responsable -->
                                 <div>
-                                    <label for="idCliente" class="block text-sm font-medium">Técnico</label>
+                                    <label for="tecnico" class="block text-sm font-medium">Técnico</label>
                                     <select id="tecnico" name="tecnico" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Técnico</option>
                                         @foreach ($usuarios as $usuario)
@@ -174,7 +174,7 @@
 
                                 <!-- Tipo Servicio -->
                                 <div>
-                                    <label for="idCliente" class="block text-sm font-medium">Servicio</label>
+                                    <label for="tipoServicio" class="block text-sm font-medium">Servicio</label>
                                     <select id="tipoServicio" name="tipoServicio" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Servicio</option>
                                         @foreach ($tiposServicio as $tiposServicios)

@@ -104,8 +104,9 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- ClienteGeneral -->
                                 <div>
+                                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
                                     <select id="idClienteGeneral" name="idClienteGeneral[]"
-                                        placeholder="Seleccionar Cliente General" multiple>
+                                        placeholder="Seleccionar Cliente General" multiple style="display:none">
                                         @foreach ($clientesGenerales as $clienteGeneral)
                                             <option value="{{ $clienteGeneral->idClienteGeneral }}">
                                                 {{ $clienteGeneral->descripcion }}</option>
@@ -127,7 +128,8 @@
                                 </div>
                                 <!-- Tipo Documento -->
                                 <div>
-                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
+                                    <label for="idTipoDocumento" class="block text-sm font-medium">Cliente General</label>
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}">

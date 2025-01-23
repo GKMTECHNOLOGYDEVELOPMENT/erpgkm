@@ -18,7 +18,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
-                    onclick="window.location.href='{{ route('articulos.exportExcel') }}'">
+                        onclick="window.location.href='{{ route('articulos.exportExcel') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -32,7 +32,7 @@
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                    onclick="window.location.href='{{ route('articulos.export.pdf') }}'">
+                        onclick="window.location.href='{{ route('articulos.export.pdf') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -111,12 +111,14 @@
                                 </div>
                                 <!-- Fecha de Ingreso -->
                                 <div>
-                                    <label for="fechaIngreso" class="block text-sm font-medium">Fecha de Ingreso</label>
-                                    <input id="fechaIngreso" name="fechaIngreso" type="text" class="form-input w-full" placeholder="Seleccionar fecha">
+                                    <label for="fechaIngreso" class="block text-sm font-medium">Fecha de
+                                        Ingreso</label>
+                                    <input id="fechaIngreso" name="fechaIngreso" type="text"
+                                        class="form-input w-full" placeholder="Seleccionar fecha">
                                 </div>
-                                
+
                                 <script>
-                                    document.addEventListener("DOMContentLoaded", function () {
+                                    document.addEventListener("DOMContentLoaded", function() {
                                         // Inicializa flatpickr en el campo de fecha de ingreso
                                         flatpickr("#fechaIngreso", {
                                             dateFormat: "Y-m-d", // Formato de la fecha
@@ -127,7 +129,7 @@
                                         });
                                     });
                                 </script>
-                                
+
 
                                 <!-- Stock Total -->
                                 <div>
@@ -143,7 +145,9 @@
                                 </div>
                                 <!-- ID Unidad -->
                                 <div>
-                                    <select id="idUnidad" name="idUnidad" class="select2 w-full">
+                                    <label for="idUnidad" class="block text-sm font-medium">Unidad</label>
+                                    <select id="idUnidad" name="idUnidad" class="select2 w-full"
+                                        style="display:none">
                                         <option value="" disabled selected>Seleccionar Unidad</option>
                                         @foreach ($unidades as $unidad)
                                             <option value="{{ $unidad->idUnidad }}">{{ $unidad->nombre }}</option>
@@ -152,7 +156,10 @@
                                 </div>
                                 <!-- ID Tipo Artículo -->
                                 <div>
-                                    <select id="idTipoArticulo" name="idTipoArticulo" class="select2 w-full">
+                                    <label for="idTipoArticulo" class="block text-sm font-medium">Tipo
+                                        Artículo</label>
+                                    <select id="idTipoArticulo" name="idTipoArticulo" class="select2 w-full"
+                                        style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Artículo</option>
                                         @foreach ($tiposArticulo as $tipoArticulo)
                                             <option value="{{ $tipoArticulo->idTipoArticulo }}">
@@ -162,14 +169,21 @@
                                 </div>
                                 <!-- ID Modelo -->
                                 <div>
-                                    <select id="idModelo" name="idModelo" class="select2 w-full">
+                                    <label for="idModelo" class="block text-sm font-medium">Modelo</label>
+                                    <select id="idModelo" name="idModelo" class="select2 w-full"
+                                        style="display:none">
                                         <option value="" disabled selected>Seleccionar Modelo</option>
                                         @foreach ($modelos as $modelo)
                                             <option value="{{ $modelo->idModelo }}">{{ $modelo->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <!-- Moneda Compra -->
+                                <!-- Peso -->
+                                <div>
+                                    <label for="peso" class="block text-sm font-medium">Peso</label>
+                                    <input id="peso" name="peso" type="text" class="form-input w-full"
+                                        placeholder="Ingrese el peso">
+                                </div>
                                 <!-- Moneda Compra -->
                                 <div class="mb-5">
                                     <label for="moneda_compra" class="block text-sm font-medium">Moneda de
@@ -192,7 +206,7 @@
                                             <span id="precio_compra_symbol">S/</span>
                                         </div>
                                         <!-- Campo de entrada para el precio -->
-                                        <input id="precio_compra" name="precio_compra" type="number" 
+                                        <input id="precio_compra" name="precio_compra" type="number"
                                             class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
                                             placeholder="Ingrese el precio de compra" />
                                     </div>
@@ -204,8 +218,8 @@
                                         Venta</label>
                                     <select id="moneda_venta" name="moneda_venta" class="form-input w-full">
                                         @foreach ($monedas as $moneda)
-                                        <option value="{{ $moneda->idMonedas }}">{{ $moneda->nombre }}</option>
-                                @endforeach
+                                            <option value="{{ $moneda->idMonedas }}">{{ $moneda->nombre }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
 
@@ -220,19 +234,12 @@
                                             <span id="precio_venta_symbol">S/</span>
                                         </div>
                                         <!-- Campo de entrada para el precio -->
-                                        <input id="precio_venta" name="precio_venta" type="number" 
+                                        <input id="precio_venta" name="precio_venta" type="number"
                                             class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
                                             placeholder="Ingrese el precio de venta" />
                                     </div>
                                 </div>
 
-
-                                <!-- Peso -->
-                                <div>
-                                    <label for="peso" class="block text-sm font-medium">Peso</label>
-                                    <input id="peso" name="peso" type="text" class="form-input w-full"
-                                        placeholder="Ingrese el peso">
-                                </div>
                                 <!-- Foto -->
                                 <div class="mb-5" x-data="{ fotoPreview: null }">
                                     <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
@@ -282,13 +289,13 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             // Seleccionar el input de fecha
             const fechaIngresoInput = document.getElementById("fechaIngreso");
-    
+
             // Obtener la fecha actual en formato YYYY-MM-DD
             const today = new Date().toISOString().split('T')[0];
-    
+
             // Establecer la fecha actual como valor predeterminado
             fechaIngresoInput.value = today;
         });

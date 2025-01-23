@@ -24,7 +24,7 @@
             <form class="p-5 space-y-4" id="kitForm" enctype="multipart/form-data" @submit.prevent="addKit"
                 method="post">
                 @csrf
-                <h2 class="text-lg font-bold mb-4">AGREGAR KIT</h2>
+                <h2 class="text-lg font-bold">AGREGAR KIT</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Código -->
                     <div>

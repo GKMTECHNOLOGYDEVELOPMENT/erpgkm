@@ -34,7 +34,8 @@
             <!-- Marca -->
             <div>
                 <!-- Etiqueta encima del select -->
-                <select id="idMarca" name="idMarca" class="select2 w-full" required>
+                <label for="idMarca" class="block text-sm font-medium">Marca</label>
+                <select id="idMarca" name="idMarca" class="select2 w-full" style="display:none" required>
                     <option value="" disabled selected>Seleccione la Marca</option>
                     @foreach ($marcas as $marca)
                         <option value="{{ $marca->idMarca }}"
@@ -49,7 +50,8 @@
 
             <!-- Categoría -->
             <div>
-                <select id="idCategoria" name="idCategoria" class="select2 w-full" required>
+                <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
+                <select id="idCategoria" name="idCategoria" class="select2 w-full" style="display:none" required>
                     <option value="" disabled selected>Seleccione la Categoría</option>
                     @foreach ($categorias as $categoria)
                         <option value="{{ $categoria->idCategoria }}"
