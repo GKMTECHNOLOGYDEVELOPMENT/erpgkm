@@ -1,11 +1,10 @@
-document.addEventListener("alpine:init", () => {
-    Alpine.data("multipleTable", () => ({
+document.addEventListener('alpine:init', () => {
+    Alpine.data('multipleTable', () => ({
         datatable1: null,
         clienteData: [], // Almacena los datos actuales de la tabla de clientes
         pollInterval: 2000, // Intervalo de polling (en ms)
 
         init() {
-            console.log("Component initialized for Cliente");
 
             // Obtener datos iniciales e inicializar la tabla
             this.fetchDataAndInitTable();
@@ -17,49 +16,42 @@ document.addEventListener("alpine:init", () => {
         },
 
         fetchDataAndInitTable() {
-            fetch("/api/clientes") // Cambia la URL de la API a /api/clientes
+            fetch('/api/clientes') // Cambia la URL de la API a /api/clientes
                 .then((response) => {
-                    if (!response.ok) throw new Error(
-                        "Error al obtener datos del servidor");
+                    if (!response.ok) throw new Error('Error al obtener datos del servidor');
                     return response.json();
                 })
                 .then((data) => {
-                    console.log("Datos de los clientes:", data);
                     this.clienteData = data;
 
                     // Inicializar DataTable con las nuevas cabeceras
-                    this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
+                    this.datatable1 = new simpleDatatables.DataTable('#myTable1', {
                         data: {
-                            headings: ["Tipo Documento", "Documento", "Nombre",
-                                "Teléfono", "Email", 
-                                "Dirección", "Estado", "Acción"
-                            ], // Nuevas cabeceras
-                            data: this.formatDataForTable(
-                                data
-                            ), // Asegúrate de que esta función mapee los nuevos datos
+                            headings: ['Tipo Documento', 'Documento', 'Nombre', 'Teléfono', 'Email', 'Dirección', 'Estado', 'Acción'], // Nuevas cabeceras
+                            data: this.formatDataForTable(data), // Asegúrate de que esta función mapee los nuevos datos
                         },
                         searchable: true,
                         perPage: 10,
                         labels: {
-                            placeholder: "Buscar...", // Placeholder de búsqueda
-                            perPage: "{select} registros por página", // Selección de registros por página
-                            noRows: "No se encontraron registros", // Mensaje cuando no hay registros
-                            info: "", // Información de la tabla
+                            placeholder: 'Buscar...', // Placeholder de búsqueda
+                            perPage: '{select} registros por página', // Selección de registros por página
+                            noRows: 'No se encontraron registros', // Mensaje cuando no hay registros
+                            info: '', // Información de la tabla
                         },
                         layout: {
-                            top: "{search}", // Posición del campo de búsqueda
-                            bottom: "{info}{select}{pager}", // Posición de información, selector y paginador
+                            top: '{search}', // Posición del campo de búsqueda
+                            bottom: '{info}{select}{pager}', // Posición de información, selector y paginador
                         },
                     });
                     // Centrando los encabezados manualmente
-                    const headers = document.querySelectorAll("#myTable1 thead th");
+                    const headers = document.querySelectorAll('#myTable1 thead th');
                     headers.forEach((header) => {
-                        header.style.textAlign = "center";
-                        header.style.verticalAlign = "middle";
+                        header.style.textAlign = 'center';
+                        header.style.verticalAlign = 'middle';
                     });
                 })
                 .catch((error) => {
-                    console.error("Error al inicializar la tabla:", error);
+                    console.error('Error al inicializar la tabla:', error);
                 });
         },
 
@@ -67,15 +59,17 @@ document.addEventListener("alpine:init", () => {
         formatDataForTable(data) {
             return data.map((cliente) => [
                 `<div style="text-align: center;">${cliente.idTipoDocumento}</div>`, // Tipo de Documento
-                `<div style="text-align: center;">${cliente.documento}</div>`,       // Documento
-                `<div style="text-align: center;">${cliente.nombre}</div>`,          // Nombre
-                `<div style="text-align: center;">${cliente.telefono}</div>`,        // Teléfono
-                `<div style="text-align: center;">${cliente.email}</div>`,           // Email
-                `<div style="text-align: center;">${cliente.direccion}</div>`,       // Dirección
+                `<div style="text-align: center;">${cliente.documento}</div>`, // Documento
+                `<div style="text-align: center;">${cliente.nombre}</div>`, // Nombre
+                `<div style="text-align: center;">${cliente.telefono}</div>`, // Teléfono
+                `<div style="text-align: center;">${cliente.email}</div>`, // Email
+                `<div style="text-align: center;">${cliente.direccion}</div>`, // Dirección
                 `<div style="text-align: center;">
-                    ${cliente.estado === 'Activo' ?
-                    `<span class="badge badge-outline-success">Activo</span>` :
-                    `<span class="badge badge-outline-danger">Inactivo</span>`}
+                    ${
+                        cliente.estado === 'Activo'
+                            ? `<span class="badge badge-outline-success">Activo</span>`
+                            : `<span class="badge badge-outline-danger">Inactivo</span>`
+                    }
                 </div>`, // Estado
 
                 `<div style="text-align: center;" class="flex justify-center items-center">
@@ -94,31 +88,25 @@ document.addEventListener("alpine:init", () => {
                     <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                 </svg>
             </button>
-        </div>`
+        </div>`,
             ]);
         },
 
         checkForUpdates() {
-            fetch("/api/clientes") // Cambiar la URL de la API a /api/clientes
+            fetch('/api/clientes') // Cambiar la URL de la API a /api/clientes
                 .then((response) => {
-                    if (!response.ok) throw new Error("Error al verificar actualizaciones");
+                    if (!response.ok) throw new Error('Error al verificar actualizaciones');
                     return response.json();
                 })
                 .then((data) => {
-                    console.log("Datos actuales:", this.clienteData);
-                    console.log("Datos del servidor:", data);
+            
 
                     // Detectar nuevas filas
                     const newData = data.filter(
-                        (newCliente) =>
-                            !this.clienteData.some(
-                                (existingCliente) =>
-                                    existingCliente.idCliente === newCliente.idCliente
-                            )
+                        (newCliente) => !this.clienteData.some((existingCliente) => existingCliente.idCliente === newCliente.idCliente),
                     );
 
                     if (newData.length > 0) {
-                        console.log("Nuevos datos detectados:", newData);
 
                         // Agregar filas nuevas a la tabla
                         this.datatable1.rows().add(this.formatDataForTable(newData));
@@ -126,17 +114,16 @@ document.addEventListener("alpine:init", () => {
                     }
                 })
                 .catch((error) => {
-                    console.error("Error al verificar actualizaciones:", error);
+                    console.error('Error al verificar actualizaciones:', error);
                 });
         },
 
         deleteCliente(idCliente) {
-            console.log(`Intentando eliminar el cliente con ID: ${idCliente}`);
 
             new window.Swal({
                 icon: 'warning',
                 title: '¿Estás seguro?',
-                text: "¡No podrás revertir esta acción!",
+                text: '¡No podrás revertir esta acción!',
                 showCancelButton: true,
                 confirmButtonText: 'Eliminar',
                 cancelButtonText: 'Cancelar',
@@ -146,28 +133,23 @@ document.addEventListener("alpine:init", () => {
                 if (result.value) {
                     // Hacer la solicitud de eliminación
                     fetch(`/api/clientes/${idCliente}`, {
-                        method: "DELETE",
+                        method: 'DELETE',
                     })
                         .then((response) => {
-                            if (!response.ok) throw new Error("Error al eliminar cliente");
+                            if (!response.ok) throw new Error('Error al eliminar cliente');
                             return response.json();
                         })
                         .then((data) => {
-                            console.log(`Respuesta del servidor al eliminar cliente:`, data);
 
                             // Verificar que el cliente ha sido eliminado correctamente
                             if (data.message) {
-                                console.log(`Cliente ${idCliente} eliminado con éxito`);
 
                                 // Actualizar la lista de clientes en el frontend
-                                this.clienteData = this.clienteData.filter(
-                                    (cliente) => cliente.idCliente !== idCliente
-                                );
+                                this.clienteData = this.clienteData.filter((cliente) => cliente.idCliente !== idCliente);
 
                                 // Obtener todas las filas de la tabla
                                 const rows = this.datatable1.rows();
 
-                                console.log("Filas actuales en la tabla:", rows);
 
                                 // Iterar sobre las filas de la tabla
                                 Array.from(rows).forEach((row, index) => {
@@ -195,7 +177,7 @@ document.addEventListener("alpine:init", () => {
                             }
                         })
                         .catch((error) => {
-                            console.error("Error al eliminar cliente:", error);
+                            console.error('Error al eliminar cliente:', error);
 
                             // Mostrar notificación de error
                             new window.Swal({
@@ -207,22 +189,14 @@ document.addEventListener("alpine:init", () => {
                         });
                 }
             });
-        }
-
-
-
-
-
+        },
     }));
 });
 // Inicializar Select2
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.select2').forEach(function (select) {
         NiceSelect.bind(select, {
-            searchable: true
+            searchable: true,
         });
     });
 });
-
-
-
