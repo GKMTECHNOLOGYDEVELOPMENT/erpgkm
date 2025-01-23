@@ -1,8 +1,7 @@
 <x-layout.default>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
 
     <style>
         .panel {
@@ -98,10 +97,9 @@
                             @csrf <!-- Asegúrate de incluir el token CSRF -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- ClienteGeneral -->
-
                                 <div>
-                                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full">
-                                        <option value="" disabled selected>Seleccionar Cliente General</option>
+                                    <select id="idClienteGeneral" name="idClienteGeneral[]"
+                                        placeholder="Seleccionar Cliente General" class="select2 w-full" multiple>
                                         @foreach ($clientesGenerales as $clienteGeneral)
                                             <option value="{{ $clienteGeneral->idClienteGeneral }}">
                                                 {{ $clienteGeneral->descripcion }}</option>
@@ -191,8 +189,8 @@
     </div>
 
 
-  <!-- En tu archivo Blade -->
-  <script>
+    <!-- En tu archivo Blade -->
+    <script>
         window.sessionMessages = {
             success: '{{ session('success') }}',
             error: '{{ session('error') }}',
@@ -200,16 +198,28 @@
     </script>
 
     <script>
-    window.Laravel = {
-        csrfToken: '{{ csrf_token() }}', // Define el token CSRF
-        routeClienteStore: '{{ route('cliente.store') }}' // Define la ruta del endpoint
-    };
-</script>
+        window.Laravel = {
+            csrfToken: '{{ csrf_token() }}', // Define el token CSRF
+            routeClienteStore: '{{ route('cliente.store') }}' // Define la ruta del endpoint
+        };
+        document.addEventListener("DOMContentLoaded", function() {
+            const selects = document.querySelectorAll(".choices-select");
+            selects.forEach(select => {
+                new Choices(select, {
+                    removeItemButton: true,
+                    searchPlaceholderValue: "Buscar",
+                    placeholder: true,
+                });
+            });
+        });
+    </script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
-<script src="{{ asset('assets/js/clientestore.js') }}"></script>
-<script src="{{ asset('assets/js/ubigeo.js') }}"></script>
-<script src="{{ asset('assets/js/cliente.js') }}"></script>
+    <script src="{{ asset('assets/js/clientestore.js') }}"></script>
+    <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
+    <script src="{{ asset('assets/js/cliente.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+
 
 </x-layout.default>
