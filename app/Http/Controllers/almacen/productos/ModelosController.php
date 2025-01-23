@@ -127,7 +127,7 @@ class ModelosController extends Controller
         $pdf = Pdf::loadView('almacen.productos.modelos.pdf.reporte-modelos', compact('modelos'))
             ->setPaper('a4', 'portrait');
 
-        return $pdf->stream('reporte-modelos.pdf');
+        return $pdf->download('reporte-modelos.pdf');
     }
 
     public function getAll()

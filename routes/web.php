@@ -47,6 +47,7 @@ use App\Exports\ProveedoresExport;
 use App\Exports\MarcasExport;
 use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
+use App\Exports\ModeloExport;
 use App\Http\Controllers\UbigeoController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
@@ -237,6 +238,9 @@ Route::prefix('modelos')->name('modelos.')->group(function () {
     Route::get('/export-pdf', [ModelosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los modelos a PDF
     Route::get('/get-all', [ModelosController::class, 'getAll'])->name('getAll'); // Obtener todos los modelos en formato JSON
     Route::post('/check-nombre', [ModelosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new ModeloExport, 'modelos.xlsx');
+    })->name('exportExcel');
 });
 
 /// FIN MODELO ///
