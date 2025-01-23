@@ -20,17 +20,20 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $email
  * @property Carbon|null $fecha_registro
  * @property string|null $direccion
- * @property string|null $nacionalidad
  * @property string|null $departamento
  * @property string|null $provincia
- * @property string|null $distrito
- * @property string|null $codigo_postal
  * @property bool|null $estado
+ * @property int|null $idTipoDocumento
+ * @property string|null $distrito
+ * @property string|null $clientecol
+ * @property string|null $esTienda
  * 
+ * @property Tipodocumento|null $tipodocumento
  * @property Collection|Cotizacione[] $cotizaciones
  * @property Collection|Firma[] $firmas
  * @property Collection|Proyecto[] $proyectos
  * @property Collection|Ticket[] $tickets
+ * @property Collection|Tienda[] $tiendas
  *
  * @package App\Models
  */
@@ -42,7 +45,8 @@ class Cliente extends Model
 
 	protected $casts = [
 		'fecha_registro' => 'datetime',
-		'estado' => 'bool'
+		'estado' => 'bool',
+		'idTipoDocumento' => 'int'
 	];
 
 	protected $fillable = [
@@ -54,11 +58,17 @@ class Cliente extends Model
 		'direccion',
 		'departamento',
 		'provincia',
-		'distrito',
 		'estado',
 		'idTipoDocumento',
-		'idClienteGeneral'
+		'distrito',
+		'clientecol',
+		'esTienda'
 	];
+
+	public function tipodocumento()
+	{
+		return $this->belongsTo(Tipodocumento::class, 'idTipoDocumento');
+	}
 
 	public function cotizaciones()
 	{
@@ -79,19 +89,9 @@ class Cliente extends Model
 	{
 		return $this->hasMany(Ticket::class, 'idCliente');
 	}
+
 	public function tiendas()
-    {
-        return $this->hasMany(Tienda::class, 'idCliente');
-    }
-	 // Definir relación con TipoDocumento
-	 public function tipoDocumento()
-	 {
-		 return $this->belongsTo(TipoDocumento::class, 'idTipoDocumento', 'idTipoDocumento');
-	 }
- 
-	 // Definir relación con ClienteGeneral
-	 public function clienteGeneral()
-	 {
-		 return $this->belongsTo(ClienteGeneral::class, 'idClienteGeneral', 'idClienteGeneral');
-	 }
+	{
+		return $this->hasMany(Tienda::class, 'idCliente');
+	}
 }

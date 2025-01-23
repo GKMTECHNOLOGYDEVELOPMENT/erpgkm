@@ -19,7 +19,11 @@
 
         <!-- Formulario para agregar kits -->
         <div class="panel mt-6 p-5 max-w-2xl mx-auto">
-            <form @submit.prevent="addKit">
+
+            <!-- Formulario -->
+            <form class="p-5 space-y-4" id="kitForm" enctype="multipart/form-data" @submit.prevent="addKit"
+                method="post">
+                @csrf
                 <h2 class="text-lg font-bold mb-4">AGREGAR KIT</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Código -->
@@ -73,7 +77,7 @@
                                 <span x-text="kit.symbol_compra">S/</span>
                             </div>
                             <input type="number" id="precio_compra" name="precio_compra"
-                                class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1" step="0.01"
+                                class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
                                 placeholder="Ingrese el precio de compra" x-model="kit.precio_compra" />
                         </div>
                     </div>
@@ -87,7 +91,7 @@
                                 <span x-text="kit.symbol_venta">S/</span>
                             </div>
                             <input type="number" id="precio_venta" name="precio_venta"
-                                class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1" step="0.01"
+                                class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
                                 placeholder="Ingrese el precio de venta" x-model="kit.precio_venta" />
                         </div>
                     </div>
@@ -130,7 +134,8 @@
                 </div>
                 <!-- Lista izquierda (Artículos en el Kit) -->
                 <div>
-                    <h3 class="font-bold text-base mb-3 mt-3 text-center">KIT DE <span x-text="currentKitName"></span></h3>
+                    <h3 class="font-bold text-base mb-3 mt-3 text-center">KIT DE <span x-text="currentKitName"></span>
+                    </h3>
                     <ul id="kitItemsList" class="custom-scroll overflow-y-auto border rounded-md"
                         style="max-height: 500px; height: 500px;">
                         <template x-for="articulo in kitArticulos" :key="articulo.id">
@@ -237,181 +242,6 @@
         }
     </style>
 
-    <script>
-        document.addEventListener("alpine:init", () => {
-            Alpine.data("kitManager", () => ({
-                // Datos del Kit
-                kit: {
-                    codigo: "",
-                    nombre: "",
-                    descripcion: "",
-                    fecha: "",
-                    moneda_compra: "S/",
-                    precio_compra: 0,
-                    moneda_venta: "S/",
-                    precio_venta: 0,
-                    symbol_compra: "S/",
-                    symbol_venta: "S/",
-                },
-                kits: [], // Lista de kits
-                kitArticulos: [], // Artículos asignados al kit
-                availableArticulos: [ // Artículos disponibles
-                    {
-                        id: 1,
-                        codigo: "A001",
-                        nombre: "Artículo 1",
-                        cantidad: 0,
-                        showInput: false,
-                    },
-                    {
-                        id: 2,
-                        codigo: "A002",
-                        nombre: "Artículo 2",
-                        cantidad: 0,
-                        showInput: false,
-                    },
-                    {
-                        id: 3,
-                        codigo: "A003",
-                        nombre: "Artículo 3",
-                        cantidad: 0,
-                        showInput: false,
-                    },
-                    {
-                        id: 4,
-                        codigo: "A004",
-                        nombre: "Artículo 4",
-                        cantidad: 0,
-                        showInput: false,
-                    },
-                    {
-                        id: 5,
-                        codigo: "A005",
-                        nombre: "Artículo 5",
-                        cantidad: 0,
-                        showInput: false,
-                    },
-                ],
-                searchQuery: "", // Query del buscador
-                showArticlesSection: false, // Control para mostrar la sección de artículos
-                currentKitName: "", // Nombre actual del kit
-                showModal: false, // Control para mostrar el modal
-                selectedArticle: {}, // Artículo seleccionado para el modal
+    <script src="{{ asset('assets/js/kit/kit.js') }}"></script>
 
-                // Función para agregar un nuevo kit
-                addKit() {
-                    this.kits.push({
-                        ...this.kit,
-                        id: Date.now(),
-                    });
-                    this.currentKitName = this.kit.nombre; // Actualizar el nombre del kit actual
-                    this.kitArticulos = []; // Vaciar los artículos del kit
-                    this.kit = { // Reiniciar los datos del kit
-                        codigo: "",
-                        nombre: "",
-                        descripcion: "",
-                        fecha: "",
-                        moneda_compra: "S/",
-                        precio_compra: 0,
-                        moneda_venta: "S/",
-                        precio_venta: 0,
-                        symbol_compra: "S/",
-                        symbol_venta: "S/",
-                    };
-                    this.showArticlesSection = true; // Mostrar la sección de artículos
-                    this.initializeSortable(); // Configurar Sortable.js
-                    alert("Kit guardado exitosamente!");
-                },
-
-                // Función para guardar los artículos en el kit
-                saveArticles() {
-                    alert(`Artículos guardados en el kit "${this.currentKitName}"!`);
-                },
-
-                // Función para ver los detalles de un artículo en el modal
-                viewArticle(article) {
-                    this.selectedArticle = article; // Asignar el artículo seleccionado
-                    this.showModal = true; // Mostrar el modal
-                },
-
-                // Actualizar la cantidad de un artículo
-                updateQuantity(article) {
-                    const index = this.kitArticulos.findIndex((a) => a.id === article.id);
-                    if (index !== -1) {
-                        this.kitArticulos[index].cantidad = article.cantidad;
-                    }
-                },
-
-                // Función para actualizar el símbolo de la moneda de compra
-                updateMonedaCompra() {
-                    this.kit.symbol_compra = this.kit.moneda_compra;
-                },
-
-                // Función para actualizar el símbolo de la moneda de venta
-                updateMonedaVenta() {
-                    this.kit.symbol_venta = this.kit.moneda_venta;
-                },
-
-                // Filtrar artículos disponibles en base al buscador
-                get filteredAvailableArticulos() {
-                    const query = this.searchQuery.toLowerCase();
-                    return this.availableArticulos.filter(
-                        (art) =>
-                        art.nombre.toLowerCase().includes(query) ||
-                        art.codigo.toLowerCase().includes(query)
-                    );
-                },
-
-                // Configurar Sortable.js
-                initializeSortable() {
-                    // Lista izquierda (kit)
-                    Sortable.create(document.getElementById("kitItemsList"), {
-                        animation: 150,
-                        group: "shared",
-                        onAdd: (evt) => {
-                            const itemId = parseInt(evt.item.dataset.id, 10);
-                            const item = this.availableArticulos.find((art) => art.id ===
-                                itemId);
-                            if (item) {
-                                this.kitArticulos.push({
-                                    ...item,
-                                    cantidad: 0,
-                                    showInput: false,
-                                });
-                                this.availableArticulos = this.availableArticulos.filter(
-                                    (art) => art.id !== itemId
-                                );
-                            }
-                        },
-                        onRemove: (evt) => {
-                            const itemId = parseInt(evt.item.dataset.id, 10);
-                            const item = this.kitArticulos.find((art) => art.id === itemId);
-                            if (item) {
-                                this.availableArticulos.push(item);
-                                this.kitArticulos = this.kitArticulos.filter(
-                                    (art) => art.id !== itemId
-                                );
-                            }
-                        },
-                    });
-
-                    // Lista derecha (disponibles)
-                    Sortable.create(document.getElementById("availableItemsList"), {
-                        animation: 150,
-                        group: "shared",
-                    });
-                },
-            }));
-        });
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializa flatpickr en el campo de fecha
-            flatpickr("#fecha", {
-                dateFormat: "Y-m-d", // Formato de fecha
-                defaultDate: new Date(), // Fecha predeterminada: hoy
-                altInput: true, // Mostrar campo alternativo amigable
-                altFormat: "F j, Y", // Formato amigable para el usuario
-                locale: "es", // Localización en español
-            });
-        });
-    </script>
 </x-layout.default>

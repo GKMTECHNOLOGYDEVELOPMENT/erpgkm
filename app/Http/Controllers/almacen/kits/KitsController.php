@@ -33,28 +33,40 @@ class KitsController extends Controller
     public function store(Request $request)
     {
         // Validar los datos del formulario
-        $request->validate([
+        $validatedData = $request->validate([
+            'codigo' => 'nullable|string|max:255',
             'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string|max:500',
-            'articulos' => 'required|array', // Validar que se seleccionen artículos
-            'articulos.*' => 'exists:articulos,idArticulos', // Validar que los artículos existan
+            'descripcion' => 'nullable|string|max:255',
+            'precio_compra' => 'nullable|numeric|min:0',
+            'precio_venta' => 'nullable|numeric|min:0', // Este será el campo que corresponde a 'precio' en la BD
+            'fecha' => 'nullable|date',
+            'monedaCompra' => 'nullable|integer|exists:monedas,idMonedas', // Validar contra la tabla 'monedas'
+            'monedaVenta' => 'nullable|integer|exists:monedas,idMonedas',  // Validar contra la tabla 'monedas'
+
         ]);
+
+        Log::info('Datos validados para el kit:', $validatedData);
 
         try {
             // Crear el kit
             $kit = Kit::create([
-                'nombre' => $request->nombre,
-                'descripcion' => $request->descripcion,
-                'estado' => $request->has('estado') ? 1 : 0,
+                'codigo' => $validatedData['codigo'] ?? null,
+                'nombre' => $validatedData['nombre'],
+                'descripcion' => $validatedData['descripcion'] ?? null,
+                'precio_compra' => $validatedData['precio_compra'] ?? null,
+                'precio' => $validatedData['precio_venta'] ?? null, // Mapear precio_venta al campo precio
+                'fecha' => $validatedData['fecha'] ?? now(), // Usar la fecha actual si no se proporciona
+                'monedaCompra' => $validatedData['monedaCompra'] ?? null,
+                'monedaVenta' => $validatedData['monedaVenta'] ?? null,
             ]);
 
-            // Asociar artículos al kit
-            $kit->articulos()->attach($request->articulos);
 
+
+            // Redirigir con un mensaje de éxito
             return redirect()->route('almacen.kits.index')->with('success', 'Kit creado exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al crear el kit: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Hubo un problema al crear el kit.');
+            return redirect()->back()->with('error', 'Hubo un problema al crear el kit. Por favor, intente de nuevo.');
         }
     }
 
@@ -73,12 +85,7 @@ class KitsController extends Controller
     public function update(Request $request, $id)
     {
         // Validar los datos del formulario
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'nullable|string|max:500',
-            'articulos' => 'required|array',
-            'articulos.*' => 'exists:articulos,idArticulos',
-        ]);
+        $request->all();
 
         try {
             // Buscar el kit y actualizarlo

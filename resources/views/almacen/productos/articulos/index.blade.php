@@ -192,7 +192,7 @@
                                             <span id="precio_compra_symbol">S/</span>
                                         </div>
                                         <!-- Campo de entrada para el precio -->
-                                        <input id="precio_compra" name="precio_compra" type="number" step="0.01"
+                                        <input id="precio_compra" name="precio_compra" type="number" 
                                             class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
                                             placeholder="Ingrese el precio de compra" />
                                     </div>
@@ -220,7 +220,7 @@
                                             <span id="precio_venta_symbol">S/</span>
                                         </div>
                                         <!-- Campo de entrada para el precio -->
-                                        <input id="precio_venta" name="precio_venta" type="number" step="0.01"
+                                        <input id="precio_venta" name="precio_venta" type="number" 
                                             class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
                                             placeholder="Ingrese el precio de venta" />
                                     </div>
