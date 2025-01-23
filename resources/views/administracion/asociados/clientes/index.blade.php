@@ -9,6 +9,11 @@
             overflow: visible !important;
             /* Asegura que el modal no restrinja contenido */
         }
+
+        .selected-items {
+            font-size: 0.875rem;
+            color: #374151;
+        }
     </style>
     <div x-data="multipleTable">
         <div>
@@ -100,13 +105,20 @@
                                 <!-- ClienteGeneral -->
                                 <div>
                                     <select id="idClienteGeneral" name="idClienteGeneral[]"
-                                        placeholder="Seleccionar Cliente General" class="select2 w-full" multiple>
+                                        placeholder="Seleccionar Cliente General" multiple>
                                         @foreach ($clientesGenerales as $clienteGeneral)
                                             <option value="{{ $clienteGeneral->idClienteGeneral }}">
                                                 {{ $clienteGeneral->descripcion }}</option>
                                         @endforeach
                                     </select>
                                 </div>
+
+                                <!-- Contenedor para mostrar los seleccionados -->
+                                <div id="selected-items-container">
+                                    <strong>Seleccionados:</strong>
+                                    <div id="selected-items-list" class="flex flex-wrap gap-2"></div>
+                                </div>
+
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -119,10 +131,29 @@
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}</option>
+                                                {{ $tipoDocumento->nombre }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
+
+                                <!-- Contenedor del switch "Es tienda" -->
+                                <div id="esTiendaContainer" class="hidden mt-4">
+                                    <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
+                                    <div class="flex items-center">
+                                        <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
+                                        <input type="hidden" name="esTienda" value="0">
+                                        <div class="w-12 h-6 relative">
+                                            <input type="checkbox" id="esTienda" name="esTienda"
+                                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                                value="1" />
+                                            <span for="esTienda"
+                                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+
                                 <!-- Documento -->
                                 <div>
                                     <label for="documento" class="block text-sm font-medium">Documento</label>
@@ -203,13 +234,54 @@
             csrfToken: '{{ csrf_token() }}', // Define el token CSRF
             routeClienteStore: '{{ route('cliente.store') }}' // Define la ruta del endpoint
         };
+        document.addEventListener("DOMContentLoaded", function() {
+            // Inicializar nice-select2
+            NiceSelect.bind(document.getElementById("idClienteGeneral"));
+
+            const select = document.getElementById('idClienteGeneral');
+            const selectedItemsContainer = document.getElementById('selected-items-list');
+
+            // Función para actualizar los seleccionados
+            function updateSelectedItems() {
+                selectedItemsContainer.innerHTML = ''; // Limpiar el contenedor
+
+                const selectedOptions = Array.from(select.selectedOptions); // Obtener las opciones seleccionadas
+
+                selectedOptions.forEach(option => {
+                    const badge = document.createElement('span');
+                    badge.textContent = option.textContent;
+                    badge.className = 'badge bg-primary'; // Aplicar el estilo del badge
+                    selectedItemsContainer.appendChild(badge); // Agregar el badge al contenedor
+                });
+            }
+
+            // Escuchar cambios en el select
+            select.addEventListener('change', updateSelectedItems);
+
+            // Actualizar los seleccionados al cargar la página
+            updateSelectedItems();
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            const tipoDocumento = document.getElementById("idTipoDocumento");
+            const esTiendaContainer = document.getElementById("esTiendaContainer");
+
+            tipoDocumento.addEventListener("change", function() {
+                // Verificar si el texto del option seleccionado es "RUC"
+                const selectedOptionText = tipoDocumento.options[tipoDocumento.selectedIndex].text;
+
+                if (selectedOptionText === "RUC") {
+                    esTiendaContainer.classList.remove("hidden"); // Muestra el switch
+                } else {
+                    esTiendaContainer.classList.add("hidden"); // Oculta el switch
+                }
+            });
+        });
     </script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
     <script src="{{ asset('assets/js/clientestore.js') }}"></script>
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <script src="{{ asset('assets/js/cliente.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
 
