@@ -1,7 +1,8 @@
 <x-layout.default>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         .panel {
@@ -202,16 +203,6 @@
             csrfToken: '{{ csrf_token() }}', // Define el token CSRF
             routeClienteStore: '{{ route('cliente.store') }}' // Define la ruta del endpoint
         };
-        document.addEventListener("DOMContentLoaded", function() {
-            const selects = document.querySelectorAll(".choices-select");
-            selects.forEach(select => {
-                new Choices(select, {
-                    removeItemButton: true,
-                    searchPlaceholderValue: "Buscar",
-                    placeholder: true,
-                });
-            });
-        });
     </script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
     <script src="{{ asset('assets/js/clientestore.js') }}"></script>

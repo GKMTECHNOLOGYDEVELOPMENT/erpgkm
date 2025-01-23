@@ -5,7 +5,6 @@
             // Cuando se selecciona un departamento, obtener las provincias relacionadas
             $('#departamento').change(function() {
                 var departamentoId = $(this).val();
-
                 if (departamentoId) {
                     $.get('/ubigeo/provincias/' + departamentoId, function(data) {
                         var provinciaSelect = $('#provincia');
