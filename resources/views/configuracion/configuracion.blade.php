@@ -114,6 +114,10 @@
         'Tipo Usuario Soporte' => ['table' => 'tipousuariosoporte', 'data' => $tipoUsuarioSoporte],
         'Unidad' => ['table' => 'unidad', 'data' => $unidad],
         'Moneda' => ['table' => 'monedas', 'data' => $moneda],
+        'Rol' => ['table' => 'rol', 'data' => $rol],
+        'Rol Software' => ['table' => 'rol_software', 'data' => $rolSoftware],
+        'Sexo' => ['table' => 'sexo', 'data' => $sexo],
+        'Importancia' => ['table' => 'importancia', 'data' => $importancia],
     ] as $tipo => $info)
                         <tr class="">
                             <td class="text-center align-middle">{{ $tipo }}</td>

@@ -3,37 +3,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
     <style>
-        /* Scroll transparente y elegante */
-        .modal-scroll {
-            overflow-y: auto;
-            /* Controla la altura máxima del contenido */
-            scrollbar-width: thin;
-            /* Estilo del scroll en navegadores compatibles */
-            scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
-        }
-
-        .modal-scroll::-webkit-scrollbar {
-            width: 8px;
-            background-color: transparent;
-            /* Fondo del scrollbar */
-        }
-
-        .modal-scroll::-webkit-scrollbar-thumb {
-            background-color: rgba(255, 255, 255, 0.5);
-            /* Color del scroll */
-            border-radius: 4px;
-            /* Redondeo del scroll */
-            transition: background-color 0.3s ease;
-        }
-
-        .modal-scroll::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(255, 255, 255, 0.8);
-            /* Color más visible al pasar el mouse */
-        }
-
-        .modal-scroll::-webkit-scrollbar-track {
-            background: transparent;
-            /* Fondo transparente del track */
+        .panel {
+            overflow: visible !important;
+            /* Asegura que el modal no restrinja contenido */
         }
     </style>
 
@@ -128,134 +100,146 @@
                                 </svg>
                             </button>
                         </div>
-                        <div class="modal-scroll">
+                        <div>
                             <!-- Formulario -->
                             <form class="p-5 space-y-4">
                                 <!-- Rejilla de dos columnas -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <!-- Primera Fila -->
+                                    <!-- Nombre completo -->
+                                    <div>
+                                        <label for="nombre" class="block text-sm font-medium">Nombre</label>
+                                        <input id="nombre" name="nombre" type="text"
+                                            class="form-input w-full" placeholder="Nombre">
+                                    </div>
                                     <div>
                                         <label for="apellidoPaterno" class="block text-sm font-medium">Apellido
                                             Paterno</label>
-                                        <input id="apellidoPaterno" x-model="formData.apellidoPaterno" type="text"
+                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text"
                                             class="form-input w-full" placeholder="Apellido Paterno">
                                     </div>
                                     <div>
                                         <label for="apellidoMaterno" class="block text-sm font-medium">Apellido
                                             Materno</label>
-                                        <input id="apellidoMaterno" x-model="formData.apellidoMaterno" type="text"
+                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text"
                                             class="form-input w-full" placeholder="Apellido Materno">
                                     </div>
+
+                                    <!-- Documento y Fecha de nacimiento -->
                                     <div>
-                                        <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                        <input id="nombre" x-model="formData.Nombre" type="text"
-                                            class="form-input w-full" placeholder="Nombre">
+                                        <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
+                                            Documento</label>
+                                        <select id="idTipoDocumento" name="idTipoDocumento"
+                                            class="select2 w-full" style="display:none">
+                                            <option value="" disabled selected>Seleccionar Tipo Documento
+                                            </option>
+                                            <option value="1">DNI</option>
+                                            <option value="2">Pasaporte</option>
+                                        </select>
                                     </div>
-                                    <div x-data="form">
+                                    <div>
+                                        <label for="documento" class="block text-sm font-medium">Nro.
+                                            Documento</label>
+                                        <input id="documento" name="documento" type="text"
+                                            class="form-input w-full" placeholder="Número de Documento">
+                                    </div>
+                                    <div>
                                         <label for="fechaNacimiento" class="block text-sm font-medium">Fecha de
                                             Nacimiento</label>
-                                        <input id="fechaNacimiento" type="text" class="form-input w-full"
+                                        <input id="fechaNacimiento" name="fechaNacimiento" type="text" class="form-input w-full"
                                             placeholder="Seleccione la fecha">
                                     </div>
+
+                                    <!-- Contacto -->
                                     <div>
                                         <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                        <input id="telefono" x-model="formData.telefono" type="text"
-                                            class="form-input w-full" placeholder="Teléfono">
+                                        <input id="telefono" name="telefono" type="text"
+                                            class="form-input w-full" placeholder="Ingresar Teléfono">
                                     </div>
                                     <div>
                                         <label for="correo" class="block text-sm font-medium">Correo</label>
-                                        <input id="correo" x-model="formData.correo" type="email"
+                                        <input id="correo" name="correo" type="email"
                                             class="form-input w-full" placeholder="Correo Electrónico">
                                     </div>
-                                    <!-- Selects -->
-                                    <div>
 
-                                        <select id="idSucursal" x-model="formData.idSucursal" class="select2 w-full">
+                                    <!-- Dirección -->
+                                    <div>
+                                        <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                                        <textarea id="direccion" name="direccion" class="form-input w-full" rows="1"
+                                            placeholder="Ingrese la dirección"></textarea>
+                                    </div>
+
+                                    <!-- Usuario y Clave -->
+                                    <div>
+                                        <label for="usuario" class="block text-sm font-medium">Usuario</label>
+                                        <input id="usuario" name="usuario" type="text"
+                                            class="form-input w-full" placeholder="Usuario">
+                                    </div>
+                                    <div>
+                                        <label for="clave" class="block text-sm font-medium">Clave</label>
+                                        <input id="clave" name="clave" type="password"
+                                            class="form-input w-full" placeholder="Clave">
+                                    </div>
+
+                                    <!-- Datos laborales -->
+                                    <div>
+                                        <label for="idSucursal" class="block text-sm font-medium">Sucursal</label>
+                                        <select id="idSucursal" name="idSucursal" class="select2 w-full" style="display: none">
                                             <option value="" disabled selected>Seleccionar Sucursal</option>
                                             <option value="1">Sucursal 1</option>
                                             <option value="2">Sucursal 2</option>
                                         </select>
                                     </div>
                                     <div>
-
-                                        <select id="idSexo" x-model="formData.idSexo" class="select2 w-full">
-                                            <option value="" disabled selected>Seleccionar Sexo</option>
-                                            <option value="1">Masculino</option>
-                                            <option value="2">Femenino</option>
-                                        </select>
-                                    </div>
-                                    <div>
-
-                                        <select id="idArea" x-model="formData.idArea" class="select2 w-full">
+                                        <label for="idArea" class="block text-sm font-medium">Área</label>
+                                        <select id="idArea" name="idArea" class="select2 w-full" style="display: none">
                                             <option value="" disabled selected>Seleccionar Área</option>
                                             <option value="1">Recursos Humanos</option>
                                             <option value="2">Tecnología</option>
                                         </select>
                                     </div>
                                     <div>
-
-                                        <select id="idRol" x-model="formData.idRol" class="select2 w-full">
+                                        <label for="idRol" class="block text-sm font-medium">Rol</label>
+                                        <select id="idRol" name="idRol" class="select2 w-full" style="display: none">
                                             <option value="" disabled selected>Seleccionar Rol</option>
                                             <option value="1">Gerente</option>
                                             <option value="2">Supervisor</option>
                                         </select>
                                     </div>
                                     <div>
-
-                                        <select id="idTipoUsuario" x-model="formData.idTipoUsuario"
-                                            class="select2 w-full">
+                                        <label for="idTipoUsuario" class="block text-sm font-medium">Tipo
+                                            Usuario</label>
+                                        <select id="idTipoUsuario" name="idTipoUsuario"
+                                            class="select2 w-full" style="display: none">
                                             <option value="" disabled selected>Seleccionar Tipo Usuario</option>
-                                            <option value="1">Usuario 1</option>
-                                            <option value="2">Usuario 2</option>
+                                            <option value="1">Empleado</option>
+                                            <option value="2">Administrador</option>
                                         </select>
                                     </div>
 
-                                    <div>
-
-                                        <select id="idTipoDocumento" x-model="formData.idTipoDocumento"
-                                            class="select2 w-full">
-                                            <option value="" disabled selected>Seleccionar Tipo Documento
-                                            </option>
-                                            <option value="1">DNI 1</option>
-                                            <option value="2">Otro 2</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label for="usuario" class="block text-sm font-medium">Usuario</label>
-                                        <input id="usuario" x-model="formData.usuario" type="text"
-                                            class="form-input w-full" placeholder="Usuario">
-                                    </div>
-                                    <div>
-                                        <label for="clave" class="block text-sm font-medium">Clave</label>
-                                        <input id="clave" x-model="formData.clave" type="password"
-                                            class="form-input w-full" placeholder="Clave">
-                                    </div>
-                                    <div>
-                                        <label for="documento" class="block text-sm font-medium">Nro.Documento</label>
-                                        <input id="documento" x-model="formData.documento" type="text"
-                                            class="form-input w-full" placeholder="Documento">
-                                    </div>
+                                    <!-- Sueldo y Sexo -->
                                     <div>
                                         <label for="sueldoPorHora" class="block text-sm font-medium">Sueldo por
                                             Hora</label>
-                                        <input id="sueldoPorHora" x-model="formData.sueldoPorHora" type="number"
+                                        <input id="sueldoPorHora" name="sueldoPorHora" type="number"
                                             class="form-input w-full" placeholder="Sueldo por Hora">
                                     </div>
-                                    <!-- Dirección (Ocupa 2 columnas) -->
-                                    <div class="md:col-span-2">
-                                        <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                        <textarea id="direccion" x-model="formData.direccion" class="form-input w-full" rows="5" placeholder="Ingrese la dirección"></textarea>
+                                    <div>
+                                        <label for="idSexo" class="block text-sm font-medium">Sexo</label>
+                                        <select id="idSexo" name="idSexo" class="select2 w-full" style="display: none">
+                                            <option value="" disabled selected>Seleccionar Sexo</option>
+                                            <option value="1">Masculino</option>
+                                            <option value="2">Femenino</option>
+                                        </select>
                                     </div>
-
                                 </div>
+
                                 <!-- Botones -->
                                 <div class="flex justify-end items-center mt-4">
-                                    <button type="button" class="btn btn-outline-danger"
-                                        @click="open = false">Cancelar</button>
+                                    <button type="button" class="btn btn-outline-danger">Cancelar</button>
                                     <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                                 </div>
                             </form>
+
                         </div>
                     </div>
                 </div>

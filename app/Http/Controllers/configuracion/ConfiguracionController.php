@@ -30,6 +30,10 @@ class ConfiguracionController extends Controller
         $tipoUsuarioSoporte = DB::table('tipousuariosoporte')->pluck('nombre');
         $unidad = DB::table('unidad')->pluck('nombre');
         $moneda = DB::table('monedas')->pluck('nombre');
+        $rol = DB::table('rol')->pluck('nombre');
+        $rolSoftware = DB::table('rol_software')->pluck('nombre');
+        $sexo = DB::table('sexo')->pluck('nombre');
+        $importancia = DB::table('importancia')->pluck('nombre');
     
         return view('configuracion.configuracion', compact(
             'tipoOperacion',
@@ -51,7 +55,12 @@ class ConfiguracionController extends Controller
             'tipoUsuario',
             'tipoUsuarioSoporte',
             'unidad',
-            'moneda'
+            'moneda',
+            'rol',
+            'rolSoftware',
+            'sexo',
+            'importancia'
+
         ));
     }
     
@@ -86,7 +95,11 @@ class ConfiguracionController extends Controller
             'tipousuario',
             'tipousuariosoporte',
             'unidad',
-            'monedas'
+            'monedas',
+            'rol',
+            'rol_software',
+            'sexo',
+            'importancia'
         ];
     
         if (!in_array($validated['table'], $allowedTables)) {
