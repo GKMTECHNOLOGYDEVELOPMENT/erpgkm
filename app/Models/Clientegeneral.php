@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $idClienteGeneral
  * @property string|null $descripcion
  * @property bool|null $estado
- * @property varbinary|null $foto
  * 
  * @property Collection|Cotizacione[] $cotizaciones
  * @property Collection|Ticket[] $tickets
@@ -30,7 +29,6 @@ class Clientegeneral extends Model
 
 	protected $casts = [
 		'estado' => 'bool',
-		'foto' => 'string'
 	];
 
 	protected $fillable = [

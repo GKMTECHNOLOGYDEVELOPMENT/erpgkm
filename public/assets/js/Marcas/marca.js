@@ -22,7 +22,7 @@ document.addEventListener('alpine:init', () => {
                 })
                 .then((data) => {
                     this.brandData = data;
-
+                    console.log(data);
                     // Inicializar DataTable
                     this.datatable1 = new simpleDatatables.DataTable('#myTable1', {
                         data: {
@@ -89,10 +89,11 @@ document.addEventListener('alpine:init', () => {
                 })
                 .then((data) => {
                     // Detectar nuevas filas
+                    
                     const newData = data.filter(
                         (newMarca) => !this.brandData.some((existingMarca) => existingMarca.idMarca === newMarca.idMarca),
                     );
-
+                    console.log(newData);
                     if (newData.length > 0) {
                         // Agregar filas nuevas a la tabla
                         this.datatable1.rows().add(this.formatDataForTable(newData));

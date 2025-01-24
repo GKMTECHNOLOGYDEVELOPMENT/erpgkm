@@ -99,13 +99,14 @@ Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->na
 Route::get('/administracion/compras', [CompraController::class, 'index'])->name('administracion.compra')->middleware('auth');
 //Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
+
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
 Route::get('/exportar-clientes-general', function () { return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx'); })->name('clientes-general.exportExcel');
 Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF']) ->name('clientes-general.exportPDF')->middleware('auth');
 
 // Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
-Route::post('cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
+Route::post('/cliente-general/store', [ClienteGeneralController::class, 'store'])->name('cliente-general.store');
 Route::get('/ubigeo/provincias/{departamento_id}', [UbigeoController::class, 'getProvinciasByDepartamento']);
 Route::get('/ubigeo/distritos/{provincia_id}', [UbigeoController::class, 'getDistritosByProvincia']);
 Route::get('/get-provincia/{departamentoId}', [UbigeoController::class, 'getProvincias']);

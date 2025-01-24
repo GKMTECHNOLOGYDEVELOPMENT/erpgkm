@@ -32,10 +32,11 @@ document.getElementById('clientGeneralForm').addEventListener('submit', function
 
     let formData = new FormData(this); // Obtiene todos los datos del formulario, incluida la foto
 
-    fetch(Laravel.routeClientStore, {
+    fetch('/cliente-general/store', {
         method: 'POST', // Método POST
         headers: {
-            'X-CSRF-TOKEN': Laravel.csrfToken, // Token CSRF
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            Accept: 'application/json', // Asegura que Laravel devuelva errores en JSON
         },
         body: formData, // Envío de datos en formato multipart
     })

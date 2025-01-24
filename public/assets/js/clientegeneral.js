@@ -5,8 +5,6 @@ document.addEventListener('alpine:init', () => {
         pollInterval: 2000, // Intervalo de polling (en ms)
 
         init() {
-            // console.log("Component initialized");
-
             // Obtener datos iniciales e inicializar la tabla
             this.fetchDataAndInitTable();
 
@@ -46,14 +44,14 @@ document.addEventListener('alpine:init', () => {
                     });
                 })
                 .catch((error) => {
-                    // console.error("Error al inicializar la tabla:", error);
+                    console.error('Error al inicializar la tabla:', error);
                 });
         },
 
         formatDataForTable(data) {
             return data.map((cliente) => [
                 cliente.descripcion, // Columna: Descripción
-                cliente.foto ? `<img src="${cliente.foto}" class="w-10 h-10 rounded-full object-cover" alt="Foto" />` : 'Sin imagen', // Columna: Foto
+                cliente.foto ? `<img src="data:image/jpeg;base64,${cliente.foto}" class="w-10 h-10 rounded-full object-cover" alt="Foto" />` : 'Sin imagen', // Columna: Foto
                 cliente.estado === 'Activo'
                     ? `<span class="badge badge-outline-success">Activo</span>`
                     : `<span class="badge badge-outline-danger">Inactivo</span>`, // Columna: Estado
@@ -64,7 +62,7 @@ document.addEventListener('alpine:init', () => {
             <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
         </svg>
     </a>
-    <button type="button" x-tooltip="Delete" @click="deleteClient(${cliente.idClienteGeneral})">
+    <button type="button" x-tooltip="Eliminar" @click="deleteClient(${cliente.idClienteGeneral})">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
             <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
             <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
