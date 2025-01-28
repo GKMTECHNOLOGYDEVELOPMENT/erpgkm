@@ -66,7 +66,7 @@ class Articulo extends Model
 	];
 
 	protected $fillable = [
-		'codigo',
+		'codigo_barras',
 		'nombre',
 		'stock_total',
 		'stock_minimo',
@@ -75,7 +75,7 @@ class Articulo extends Model
 		'precio_compra',
 		'precio_venta',
 		'foto',
-		'serie',
+		'sku',
 		'peso',
 		'mostrarWeb',
 		'estado',
@@ -112,7 +112,7 @@ class Articulo extends Model
 	public function compras()
 	{
 		return $this->belongsToMany(Compra::class, 'compraarticulo', 'idArticulos', 'idCompra')
-					->withPivot('idCompraArticulo', 'serie', 'nro');
+					->withPivot('idCompraArticulo', 'sku', 'nro');
 	}
 
 	public function detalle_cotizacions()

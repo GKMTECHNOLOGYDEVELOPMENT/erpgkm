@@ -181,4 +181,15 @@ class Ticket extends Model
 	{
 		return $this->hasMany(Visita::class, 'idTickets');
 	}
+	// Relación con el modelo Usuario (Técnico)
+    public function tecnico()
+    {
+        return $this->belongsTo(Usuario::class, 'idTecnico', 'idUsuario');
+    }
+	// Relación con el modelo TipoServicio
+    public function tiposervicio()
+    {
+        // La relación es belongsTo porque un Ticket "pertenece" a un TipoServicio
+        return $this->belongsTo(TipoServicio::class, 'tipoServicio', 'idTipoServicio');
+    }
 }

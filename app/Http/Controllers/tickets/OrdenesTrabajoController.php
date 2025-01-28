@@ -13,7 +13,8 @@ use App\Models\Usuario; // Reemplaza con el modelo correcto
 use App\Models\Tipoticket; // Reemplaza con el modelo correcto
 use App\Models\Cliente; // Reemplaza con el modelo correcto
 use App\Models\Tienda; // Reemplaza con el modelo correcto
-
+use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
+// use Barryvdh\DomPDF\Facade as PDF;
 
 class OrdenesTrabajoController extends Controller
 {
@@ -23,7 +24,7 @@ class OrdenesTrabajoController extends Controller
         // Obtén los datos necesarios para el formulario
         $clientesGenerales = ClienteGeneral::all(); // Reemplaza con el modelo correcto
         $tiposServicio = TipoServicio::all(); // Reemplaza con el modelo correcto
-        $usuarios = Usuario::where('idTipoUsuario', 1)->get();
+        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
         $tiposTickets = Tipoticket::all(); // Obtiene los tipos de tickets
         $clientes = Cliente::all(); // Obtiene todos los clientes
         $tiendas = Tienda::all(); // Obtiene todas las tiendas
@@ -56,11 +57,11 @@ class OrdenesTrabajoController extends Controller
                 'numero_ticket' => $validatedData['nroTicket'],
                 'idClienteGeneral' => $validatedData['idClienteGeneral'],
                 'idCliente' => $validatedData['idCliente'],
-                'IdTienda' => $validatedData['idTienda'],
+                'idTienda' => $validatedData['idTienda'],
                 'idTecnico' => $validatedData['tecnico'],
                 'tipoServicio' => $validatedData['tipoServicio'],
                 'idUsuario' => auth()->id(), // ID del usuario autenticado
-                'idEstadoots' => 1, // Estado inicial de la orden de trabajo
+                'idEstadoots' => 17, // Estado inicial de la orden de trabajo
                 'fecha_creacion' => $fechaCreacion, // Fecha actual en la zona horaria de Perú
             ]);
 
@@ -132,7 +133,6 @@ class OrdenesTrabajoController extends Controller
     }
 
     // Obtener todas las órdenes de trabajo en formato JSON
-    // Obtener todas las órdenes de trabajo en formato JSON
     public function getAll()
     {
         $ordenes = Ticket::with([
@@ -163,6 +163,73 @@ class OrdenesTrabajoController extends Controller
         return response()->json($ordenes);
     }
 
+    public function generarInformePdf($idTickets)
+    {
+        // Obtener la información de la orden con el idTickets
+        $orden = Ticket::where('idTickets', $idTickets)->firstOrFail();
+
+        // Cargar una vista de Blade con los datos
+        $pdf = PDF::loadView('tickets.ordenes-trabajo.pdf.informe', compact('orden'));
+
+        // Mostrar el PDF en el navegador
+        return $pdf->stream('informe_orden_' . $idTickets . '.pdf');
+    }
+
+    public function verInforme($idTickets)
+    {
+        // Obtener la información de la orden con el idTickets
+        $orden = Ticket::where('idTickets', $idTickets)->firstOrFail();
+
+        // Ruta donde se guardará el PDF
+        $pdfDirectory = storage_path('app/public/pdfs');
+
+        // Crear el directorio si no existe
+        if (!File::exists($pdfDirectory)) {
+            File::makeDirectory($pdfDirectory, 0777, true);
+        }
+
+        // Generar el PDF
+        $pdf = PDF::loadView('tickets.ordenes-trabajo.pdf.informe', compact('orden'));
+        // Ruta final donde se guardará el PDF
+        $pdfPath = 'pdfs/informe_orden_' . $idTickets . '.pdf';
+
+        // Guardar el PDF en el directorio especificado
+        $pdf->save(storage_path('app/public/' . $pdfPath));
+
+        // Retornar la URL del PDF
+        return response()->json([
+            'pdfUrl' => url('storage/' . $pdfPath)
+        ]);
+    }
+
+
+    public function verHojaEntrega($idTickets)
+    {
+        // Obtener la información de la orden con el idTickets
+        $orden = Ticket::where('idTickets', $idTickets)->firstOrFail();
+
+        // Ruta donde se guardará el PDF
+        $pdfDirectory = storage_path('app/public/pdfs');
+
+        // Crear el directorio si no existe
+        if (!File::exists($pdfDirectory)) {
+            File::makeDirectory($pdfDirectory, 0777, true);
+        }
+
+        // Generar el PDF de la Hoja de Entrega
+        $pdf = PDF::loadView('tickets.ordenes-trabajo.pdf.hoja_entrega', compact('orden'));
+
+        // Ruta final donde se guardará el PDF
+        $pdfPath = 'pdfs/hoja_entrega_orden_' . $idTickets . '.pdf';
+
+        // Guardar el PDF en el directorio especificado
+        $pdf->save(storage_path('app/public/' . $pdfPath));
+
+        // Retornar la URL del PDF
+        return response()->json([
+            'pdfUrl' => url('storage/' . $pdfPath)
+        ]);
+    }
 
 
     // Validar si un nombre ya existe

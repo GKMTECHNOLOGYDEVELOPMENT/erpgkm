@@ -19,7 +19,10 @@ class ArticulosController extends Controller
     {   
         $unidades= Unidad::all();
         $tiposArticulo= Tipoarticulo::all();
-        $modelos = Modelo::where('estado', 1)->get();
+        $modelos = Modelo::with(['marca','categorium'])
+        -> where('estado', 1)
+        ->get();
+        
         $monedas = Moneda::all();
         // Retorna la vista para artículos
         return view('almacen.productos.articulos.index', compact('unidades','tiposArticulo','modelos', 'monedas'));
@@ -30,7 +33,7 @@ class ArticulosController extends Controller
         try {
             // Validar los datos del formulario
             $validatedData = $request->validate([
-                'codigo' => 'nullable|string|max:255',
+                'codigo_barras' => 'nullable|string|max:255',
                 'nombre' => 'nullable|string|max:255',
                 'stock_total' => 'nullable|integer',
                 'stock_minimo' => 'nullable|integer',
@@ -39,7 +42,7 @@ class ArticulosController extends Controller
                 'precio_compra' => 'nullable|numeric',
                 'precio_venta' => 'nullable|numeric',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'serie' => 'nullable|string|max:255',
+                'sku' => 'nullable|string|max:255',
                 'peso' => 'nullable|numeric',
                 'mostrarWeb' => 'nullable|string|max:255',
                 'estado' => 'nullable|boolean',
@@ -95,7 +98,7 @@ class ArticulosController extends Controller
     {
         try {
             $validatedData = $request->validate([
-                'codigo' => 'nullable|string|max:255',
+                'codigo_barras' => 'nullable|string|max:255',
                 'nombre' => 'required|string|max:255',
                 'stock_total' => 'nullable|integer',
                 'stock_minimo' => 'nullable|integer',
@@ -104,7 +107,7 @@ class ArticulosController extends Controller
                 'precio_compra' => 'nullable|numeric',
                 'precio_venta' => 'nullable|numeric',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'serie' => 'nullable|string|max:255',
+                'sku' => 'nullable|string|max:255',
                 'peso' => 'nullable|numeric',
                 'mostrarWeb' => 'nullable|boolean',
                 'estado' => 'nullable|boolean',
@@ -183,9 +186,9 @@ class ArticulosController extends Controller
                 'foto' => $articulo->foto ? asset($articulo->foto) : null,
                 'nombre' => $articulo->nombre,
                 'unidad' => $articulo->unidad ? $articulo->unidad->nombre : 'Sin Unidad',
-                'codigo' => $articulo->codigo,
+                'codigo_barras' => $articulo->codigo_barras,
                 'stock_total' => $articulo->stock_total,
-                'serie' => $articulo->serie,
+                'sku' => $articulo->sku,
                 'tipo_articulo' => $articulo->tipoarticulo ? $articulo->tipoarticulo->nombre : 'Sin Tipo',
                 'modelo' => $articulo->modelo ? $articulo->modelo->nombre : 'Sin Modelo',
                 'estado' => $articulo->estado ? 'Activo' : 'Inactivo',

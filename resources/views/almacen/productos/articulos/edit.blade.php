@@ -21,9 +21,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Código -->
                 <div>
-                    <label for="codigo" class="block text-sm font-medium">Código</label>
-                    <input id="codigo" name="codigo" type="text" class="form-input w-full"
-                        value="{{ old('codigo', $articulo->codigo) }}" placeholder="Ingrese el código" required>
+                    <label for="codigo_barras" class="block text-sm font-medium">Código</label>
+                    <input id="codigo_barras" name="codigo_barras" type="text" class="form-input w-full"
+                        value="{{ old('codigo_barras', $articulo->codigo_barras) }}" placeholder="Ingrese el codigo_barras" required>
                 </div>
 
                 <!-- Nombre -->
@@ -33,11 +33,11 @@
                         value="{{ old('nombre', $articulo->nombre) }}" placeholder="Ingrese el nombre" required>
                 </div>
 
-                <!-- Nro. Serie -->
+                <!-- Nro. sku -->
                 <div>
-                    <label for="serie" class="block text-sm font-medium">Nro. Serie</label>
-                    <input id="serie" name="serie" type="text" class="form-input w-full"
-                        value="{{ old('serie', $articulo->serie) }}" placeholder="Ingrese la serie">
+                    <label for="sku" class="block text-sm font-medium"> SKU</label>
+                    <input id="sku" name="sku" type="text" class="form-input w-full"
+                        value="{{ old('sku', $articulo->sku) }}" placeholder="Ingrese la sku">
                 </div>
 
                 <!-- Stock Total -->

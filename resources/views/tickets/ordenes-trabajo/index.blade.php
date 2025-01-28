@@ -148,12 +148,11 @@
                                 <!-- Tienda -->
                                 <div>
                                     <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                                    <select id="idTienda" name="idTienda" class="select2 w-full" style="display:none">
+                                    <select id="idTienda" name="idTienda" class="select2 w-full">
                                         <option value="" disabled selected>Seleccionar Tienda</option>
-                                        <!-- Llenar el select con clientes dinámicamente -->
                                         @foreach ($tiendas as $tienda)
                                             <option value="{{ $tienda->idTienda }}"
-                                                {{ old('idCliente') == $tienda->idTienda ? 'selected' : '' }}>
+                                                {{ old('idTienda') == $tienda->idTienda ? 'selected' : '' }}>
                                                 {{ $tienda->nombre }}
                                             </option>
                                         @endforeach

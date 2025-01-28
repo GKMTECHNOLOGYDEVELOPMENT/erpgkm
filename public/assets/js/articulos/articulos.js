@@ -26,7 +26,7 @@ document.addEventListener('alpine:init', () => {
                     // Inicializar DataTable
                     this.datatable1 = new simpleDatatables.DataTable('#myTable1', {
                         data: {
-                            headings: ['Foto', 'Nombre', 'Unidad', 'Código', 'Stock Total', 'Serie', 'Tipo Artículo', 'Modelo', 'Estado', 'Acción'],
+                            headings: ['Foto',  'Código de barras', 'SKU','Nombre', 'Unidad', 'Stock Total',  'Tipo Artículo', 'Modelo', 'Estado', 'Acción'],
                             data: this.formatDataForTable(data),
                         },
                         searchable: true,
@@ -60,11 +60,11 @@ document.addEventListener('alpine:init', () => {
                 `<div style="text-align: center;">
                     <img src="${articulo.foto || 'Sin imagen'}" alt="Foto" class="w-10 h-10 rounded-full">
                 </div>`,
+                `<div style="text-align: center;">${articulo.codigo_barras}</div>`,
+                `<div style="text-align: center;">${articulo.sku || 'N/A'}</div>`,
                 `<div style="text-align: center;">${articulo.nombre}</div>`,
                 `<div style="text-align: center;">${articulo.unidad}</div>`,
-                `<div style="text-align: center;">${articulo.codigo}</div>`,
                 `<div style="text-align: center;">${articulo.stock_total}</div>`,
-                `<div style="text-align: center;">${articulo.serie || 'N/A'}</div>`,
                 `<div style="text-align: center;">${articulo.tipo_articulo}</div>`,
                 `<div style="text-align: center;">${articulo.modelo}</div>`,
                 articulo.estado === 'Activo'
