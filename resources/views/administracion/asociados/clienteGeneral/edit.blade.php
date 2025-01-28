@@ -30,27 +30,27 @@
             </div>
 
             <!-- Campo para la imagen -->
-            <div x-data="{ fotoPreview: '{{ asset($cliente->foto) }}' }">
-                <label for="foto" class="block text-sm font-medium">Foto</label>
-                <input type="file" id="foto" name="foto" accept="image/*"
-                    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
-                    @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ asset($cliente->foto) }}'">
-                <div
-                    class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                    <template x-if="fotoPreview">
-                        <img :src="fotoPreview" alt="Previsualización de la foto"
-                            class="w-40 h-40 object-cover object-center">
-                    </template>
-                    <template x-if="!fotoPreview">
-                        <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
-                            Sin imagen
-                        </div>
-                    </template>
-                </div>
-                @error('foto')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
+            <div x-data="{ fotoPreview: '{{ $cliente->foto ? $cliente->foto : '' }}' }">
+            <label for="foto" class="block text-sm font-medium">Foto</label>
+            <input type="file" id="foto" name="foto" accept="image/*"
+                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
+                @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ $cliente->foto }}'">
+            <div class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+                <template x-if="fotoPreview">
+                    <img :src="fotoPreview" alt="Previsualización de la foto"
+                        class="w-40 h-40 object-cover object-center">
+                </template>
+                <template x-if="!fotoPreview">
+                    <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
+                        Sin imagen
+                    </div>
+                </template>
             </div>
+            @error('foto')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+
 
             <!-- Estado -->
             <div>

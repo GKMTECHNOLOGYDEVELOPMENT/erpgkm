@@ -69,6 +69,11 @@ class ClienteGeneralController extends Controller
     {
         $cliente = ClienteGeneral::findOrFail($id); // Buscar cliente por ID
 
+        // Si hay una imagen, convertirla a base64
+        if ($cliente->foto) {
+            $cliente->foto = 'data:image/jpeg;base64,' . base64_encode($cliente->foto);
+        }
+
         // Retornar vista con los datos del cliente
         return view('administracion.asociados.clienteGeneral.edit', compact('cliente'));
     }
