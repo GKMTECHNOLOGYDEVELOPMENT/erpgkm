@@ -115,7 +115,7 @@ class CastController extends Controller
         // Validación de los datos
         $validatedData = $request->validate([
             'nombre' => 'required|string|max:255',
-            'numeroDocumento' => 'required|string|max:255',
+            'ruc' => 'required|string|max:255',
             'telefono' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:255',
             'departamento' => 'required|string|max:255', // Validar el campo 'departamento'
@@ -131,7 +131,7 @@ class CastController extends Controller
         // Actualizar los campos del cast
         $cast->update([
             'nombre' => $validatedData['nombre'],
-            'numeroDocumento' => $validatedData['numeroDocumento'],
+            'ruc' => $validatedData['ruc'],
             'telefono' => $validatedData['telefono'],
             'email' => $validatedData['email'],
             'departamento' => $validatedData['departamento'],
@@ -235,4 +235,37 @@ class CastController extends Controller
         // Retorna los datos en formato JSON
         return response()->json($castsData);
     }
+
+    // Validar RUC
+public function validarRucCast(Request $request)
+{
+
+         $ruc = $request->ruc;
+         $exists = Cast::where('ruc', $ruc)->exists();
+         return response()->json(['exists' => $exists]);
+}
+// Validar email
+ public function validarEmailCast(Request $request)
+{
+
+     $email = $request->email;
+         $exists = Cast::where('email', $email)->exists();
+         return response()->json(['exists' => $exists]);
+}
+ 
+// Validar celular
+public function validarTelefonoCast(Request $request)
+{
+         $telefono = $request->telefono;
+         $exists = Cast::where('telefono', $telefono)->exists();
+         return response()->json(['exists' => $exists]);
+}
+ 
+// Validar nombre
+public function validarNombreCast(Request $request)
+{
+         $nombre = $request->nombre;
+         $exists = Cast::where('nombre', $nombre)->exists();
+         return response()->json(['exists' => $exists]);
+}
 }

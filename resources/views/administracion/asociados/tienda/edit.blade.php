@@ -33,23 +33,36 @@
                 <div>
                     <label for="ruc" class="block text-sm font-medium">RUC</label>
                     <input id="ruc" name="ruc" type="text" class="form-input w-full"
-                        placeholder="Ingrese el RUC" value="{{ old('ruc', $tienda->ruc) }}">
+                    
+                        placeholder="Ingrese el RUC" 
+                        pattern="^\d{8,}$" required
+                        title="Solo se permiten números y debe ser mayor a 7 digitos"
+                        value="{{ old('ruc', $tienda->ruc) }}">
+
+                        <div id="ruc-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
                 <!-- Nombre -->
                 <div>
                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
                     <input id="nombre" type="text" class="form-input w-full" placeholder="Ingrese el nombre"
-                        name="nombre" value="{{ old('nombre', $tienda->nombre) }}">
+                        name="nombre"
+                        required
+                        value="{{ old('nombre', $tienda->nombre) }}" >
+                        <div id="nombre-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
                 <!-- Dirección -->
                 <div>
                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
                     <input id="direccion" type="text" class="form-input w-full" placeholder="Ingrese la dirección"
-                        name="direccion" value="{{ old('direccion', $tienda->direccion) }}">
+                        name="direccion" 
+                        required
+                        value="{{ old('direccion', $tienda->direccion) }}">
+
+                        <div id="dirrecion-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
                 <!-- Cliente -->
                 <div>
-                    <select id="idCliente" name="idCliente" class="select2 w-full">
+                    <select id="idCliente" name="idCliente" class="select2 w-full" required>
                         <option value="" disabled selected>Seleccionar Cliente</option>
                         @foreach ($clientes as $cliente)
                             <option value="{{ $cliente->idCliente }}"
@@ -58,27 +71,32 @@
                             </option>
                         @endforeach
                     </select>
-                    @error('idCliente')
+                    <div id="idCliente-error" class="text-red-500 text-sm" style="display: none;"></div>
+                    <!-- @error('idCliente')
                         <div class="text-red-500 text-sm">{{ $message }}</div>
-                    @enderror
+                    @enderror -->
                 </div>
                 <!-- Celular -->
                 <div>
                     <label for="celular" class="block text-sm font-medium">Celular</label>
-                    <input id="celular" type="text" class="form-input w-full" placeholder="Ingrese el celular"
-                        name="celular" value="{{ old('celular', $tienda->celular) }}">
+                    <input id="celular" type="text" class="form-input w-full" placeholder="Ingrese el celular" required
+                        name="celular" value="{{ old('celular', $tienda->celular) }}"
+                        pattern="^\d{8,}$" 
+                        title="El número de celular debe contener solo números y ser mayor a 7 dígitos">
+                    <div id="celular-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium">Email</label>
                     <input id="email" type="email" class="form-input w-full" placeholder="Ingrese el email"
-                        name="email" value="{{ old('email', $tienda->email) }}">
+                        name="email" required value="{{ old('email', $tienda->email) }}">
+                        <div id="email-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
                 <!-- Referencia -->
                 <div class="md:col-span-2">
                     <label for="referencia" class="block text-sm font-medium">Referencia</label>
                     <input id="referencia" type="text" class="form-input w-full" placeholder="Ingrese la referencia"
-                        name="referencia" value="{{ old('referencia', $tienda->referencia) }}">
+                        name="referencia" required value="{{ old('referencia', $tienda->referencia) }}">
                 </div>
                 <!-- Latitud -->
                 <div>
@@ -105,6 +123,7 @@
                             </option>
                         @endforeach
                     </select>
+                    <div id="departamento-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
 
                 <!-- Provincia -->
@@ -119,6 +138,7 @@
                             </option>
                         @endforeach
                     </select>
+                    <div id="provincia-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
 
                 <!-- Distrito -->
@@ -133,6 +153,8 @@
                             </option>
                         @endforeach
                     </select>
+
+                    <div id="distrito-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
                 <!-- Estado -->
                 <!-- Estado -->
@@ -243,6 +265,205 @@
             });
         });
     </script>
+
+
+<script>
+           
+    $(document).ready(function() {
+    let formValid = true; // Bandera que indica si el formulario es válido
+
+    // Validar campos vacíos
+function checkEmptyFields() {
+    formValid = true; // Asumimos que el formulario es válido inicialmente
+
+    console.log("Verificando campos vacíos..."); // Log para ver si estamos entrando en la función
+
+    // Definir los campos a validar
+    const camposRequeridos = [
+        '#ruc', '#nombre', '#email', '#celular',  '#referencia', '#dirrecion',
+        '#departamento', '#provincia', '#distrito', '#cliente', '#idCliente'
+    ];
+
+    // Comprobar si algún campo requerido está vacío
+    camposRequeridos.forEach(function(campo) {
+        console.log("Verificando campo: " + campo); // Ver qué campo estamos verificando
+
+        if ($(campo).is('select')) {
+            // Validación para campos de tipo select (comprobar si no se seleccionó una opción válida)
+            if ($(campo).val() === "" || $(campo).val() === null) {
+                formValid = false; // Si algún campo está vacío, desactivar el envío
+                $(campo).addClass('border-red-500'); // Marcar el campo con borde rojo
+                $(campo).siblings('.text-red-500').text('Este campo es obligatorio').show(); // Mostrar el mensaje de error
+                console.log("Campo vacío: " + campo); // Log para mostrar el campo vacío
+            } else {
+                $(campo).removeClass('border-red-500'); // Quitar el borde rojo si no está vacío
+                $(campo).siblings('.text-red-500').hide(); // Ocultar el mensaje de error si no está vacío
+            }
+        } else {
+            // Validación para otros tipos de campos (input)
+            if ($(campo).val() === '') {
+                formValid = false; // Si algún campo está vacío, desactivar el envío
+                $(campo).addClass('border-red-500'); // Marcar el campo con borde rojo
+                $(campo).siblings('.text-red-500').text('Este campo es obligatorio').show(); // Mostrar el mensaje de error
+                console.log("Campo vacío: " + campo); // Log para mostrar el campo vacío
+            } else {
+                $(campo).removeClass('border-red-500'); // Quitar el borde rojo si no está vacío
+                $(campo).siblings('.text-red-500').hide(); // Ocultar el mensaje de error si no está vacío
+            }
+        }
+    });
+}
+// Añadir evento para los select
+$('#departamento, #provincia, #distrito, #idCliente, #dirrecion, #referencia').on('change', function() {
+        checkEmptyFields(); // Revalidar campos vacíos cada vez que cambie la selección
+    });
+
+     // Interceptar el envío del formulario
+     $('#tiendaForm').submit(function(event) {
+        console.log("Formulario a enviar..."); // Log para indicar que estamos interceptando el envío
+        checkEmptyFields(); // Verificar si hay campos vacíos antes de enviar
+
+        if (!formValid) {
+            event.preventDefault(); // Evitar el envío del formulario
+            console.log("Formulario no válido, se ha bloqueado el envío"); // Log para ver que el formulario no es válido
+            alert('Hay campos vacíos o repetidos. Por favor, corrija los errores y vuelva a intentarlo.'); // Mostrar alerta
+        } else {
+            console.log("Formulario válido, se enviará"); // Log para ver que el formulario es válido
+        }
+    });
+
+// Validar RUC en tiempo real
+$('#ruc').on('input', function() {
+    let ruc = $(this).val();
+    console.log("Verificando RUC: " + ruc); // Log para ver el valor del RUC
+
+    // Verificar si el RUC contiene solo números
+    if (/[^0-9]/.test(ruc)) {
+        $('#ruc').addClass('border-red-500');
+        $('#ruc-error').text('El RUC solo debe contener números').show();
+        formValid = false;
+        return;
+    } else {
+        $('#ruc').removeClass('border-red-500');
+        $('#ruc-error').hide();
+    }
+
+    // Verificar que el RUC tenga más de 8 dígitos
+    if (ruc.length < 8) {
+        $('#ruc').addClass('border-red-500');
+        $('#ruc-error').text('El RUC debe tener al menos 8 dígitos').show();
+        formValid = false;
+        return;
+    } else {
+        $('#ruc').removeClass('border-red-500');
+        $('#ruc-error').hide();
+    }
+
+    // Si el RUC tiene más de 8 dígitos, proceder con la validación en el servidor
+    $.post('{{ route("validar.ruc") }}', { ruc: ruc, _token: '{{ csrf_token() }}' }, function(response) {
+        console.log("Respuesta RUC: ", response); // Log para ver la respuesta del servidor
+        if (response.exists) {
+            $('#ruc').addClass('border-red-500');
+            $('#ruc-error').text('El RUC ya está registrado').show();
+            formValid = false; // Desactivar el envío del formulario
+        } else {
+            $('#ruc').removeClass('border-red-500');
+            $('#ruc-error').hide();
+            checkEmptyFields(); // Revalidar campos vacíos
+        }
+    });
+});
+// Validar Nombre en tiempo real
+$('#nombre').on('input', function() {
+    let nombre = $(this).val();
+    console.log("Verificando Nombre: " + nombre); // Log para ver el valor del nombre
+
+    $.post('{{ route("validar.nombre") }}', { nombre: nombre, _token: '{{ csrf_token() }}' }, function(response) {
+        console.log("Respuesta Nombre: ", response); // Log para ver la respuesta del servidor
+        if (response.exists) {
+            $('#nombre').addClass('border-red-500');
+            $('#nombre-error').text('El nombre ya está registrado').show();
+            formValid = false; // Desactivar el envío del formulario
+        } else {
+            $('#nombre').removeClass('border-red-500');
+            $('#nombre-error').hide();
+            checkEmptyFields(); // Revalidar campos vacíos
+        }
+    });
+});
+// Validar Email en tiempo real
+$('#email').on('input', function() {
+    let email = $(this).val();
+    console.log("Verificando Email: " + email); // Log para ver el valor del email
+
+    // Verificar si el correo tiene un formato válido
+    let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailPattern.test(email)) {
+        $('#email').addClass('border-red-500');
+        $('#email-error').text('Por favor ingrese un correo válido').show();
+        formValid = false;
+        return;
+    } else {
+        $('#email').removeClass('border-red-500');
+        $('#email-error').hide();
+    }
+
+    $.post('{{ route("validar.email") }}', { email: email, _token: '{{ csrf_token() }}' }, function(response) {
+        console.log("Respuesta Email: ", response); // Log para ver la respuesta del servidor
+        if (response.exists) {
+            $('#email').addClass('border-red-500');
+            $('#email-error').text('El correo electrónico ya está registrado').show();
+            formValid = false; // Desactivar el envío del formulario
+        } else {
+            $('#email').removeClass('border-red-500');
+            $('#email-error').hide();
+            checkEmptyFields(); // Revalidar campos vacíos
+        }
+    });
+});
+// Validar Celular en tiempo real
+$('#celular').on('input', function() {
+    let celular = $(this).val();
+    console.log("Verificando Celular: " + celular); // Log para ver el valor del celular
+
+    // Verificar si el celular contiene solo números
+    if (/[^0-9]/.test(celular)) {
+        $('#celular').addClass('border-red-500');
+        $('#celular-error').text('El celular solo debe contener números').show();
+        formValid = false;
+        return;
+    } else {
+        $('#celular').removeClass('border-red-500');
+        $('#celular-error').hide();
+    }
+
+    // Verificar que el celular tenga más de 8 dígitos
+    if (celular.length < 9) {  // Esto asegura que el celular tenga al menos 9 dígitos
+        $('#celular').addClass('border-red-500');
+        $('#celular-error').text('El celular debe tener al menos 9 dígitos').show();
+        formValid = false;
+        return;
+    } else {
+        $('#celular').removeClass('border-red-500');
+        $('#celular-error').hide();
+    }
+
+
+    $.post('{{ route("validar.celular") }}', { celular: celular, _token: '{{ csrf_token() }}' }, function(response) {
+        console.log("Respuesta Celular: ", response); // Log para ver la respuesta del servidor
+        if (response.exists) {
+            $('#celular').addClass('border-red-500');
+            $('#celular-error').text('El celular ya está registrado').show();
+            formValid = false; // Desactivar el envío del formulario
+        } else {
+            $('#celular').removeClass('border-red-500');
+            $('#celular-error').hide();
+            checkEmptyFields(); // Revalidar campos vacíos
+        }
+    });
+}); 
+});
+</script>
 
 
     <script>

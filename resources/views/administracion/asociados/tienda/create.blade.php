@@ -37,15 +37,6 @@
             <form id="tiendaForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
                 action="{{ route('tiendas.store') }}">
                 @csrf
-
-                <!-- RUC -->
-                <!-- <div>
-                    <label for="ruc" class="block text-sm font-medium">RUC</label>
-                    <input id="ruc" name="ruc" type="text" class="form-input w-full"
-                        placeholder="Ingrese el RUC">
-                    <div id="ruc-error" class="text-red-500 text-sm" style="display: none;"></div>
-                </div> -->
-
                 <!-- RUC -->
                 <div>
                     <label for="ruc" class="block text-sm font-medium">RUC</label>
@@ -274,22 +265,35 @@ $('#departamento, #provincia, #distrito, #idCliente, #dirrecion, #referencia').o
         checkEmptyFields(); // Revalidar campos vacíos cada vez que cambie la selección
     });
 
-     // Interceptar el envío del formulario
-     $('#tiendaForm').submit(function(event) {
-        console.log("Formulario a enviar..."); // Log para indicar que estamos interceptando el envío
-        checkEmptyFields(); // Verificar si hay campos vacíos antes de enviar
+// Interceptar el envío del formulario
+$('#tiendaForm').submit(function(event) {
+    console.log("Formulario a enviar..."); // Log para indicar que estamos interceptando el envío
+    checkEmptyFields(); // Verificar si hay campos vacíos antes de enviar
 
-        if (!formValid) {
-            event.preventDefault(); // Evitar el envío del formulario
-            console.log("Formulario no válido, se ha bloqueado el envío"); // Log para ver que el formulario no es válido
-            alert('Hay campos vacíos o repetidos. Por favor, corrija los errores y vuelva a intentarlo.'); // Mostrar alerta
-        } else {
-            console.log("Formulario válido, se enviará"); // Log para ver que el formulario es válido
-        }
-    });
+    if (!formValid) {
+        event.preventDefault(); // Evitar el envío del formulario
+        console.log("Formulario no válido, se ha bloqueado el envío"); // Log para ver que el formulario no es válido
 
+        // Crear el div de la alerta
+        var alertDiv = $('<div>', {
+            class: 'flex items-center p-3.5 rounded text-warning bg-warning-light dark:bg-warning-dark-light'
+        }).html(`
+            <span class="ltr:pr-2 rtl:pl-2">
+                <strong class="ltr:mr-1 rtl:ml-1">Warning!</strong>
+                Hay campos vacíos o repetidos. Por favor, corrija los errores y vuelva a intentarlo.
+            </span>
+            <button type="button" class="ltr:ml-auto rtl:mr-auto hover:opacity-80" onclick="this.parentElement.remove();">
+                <svg> ... </svg>
+            </button>
+        `);
 
+        // Insertar el div de la alerta en el DOM (por ejemplo, al principio del formulario)
+        $('#tiendaForm').before(alertDiv);
 
+    } else {
+        console.log("Formulario válido, se enviará"); // Log para ver que el formulario es válido
+    }
+});
 
 
 // Validar RUC en tiempo real

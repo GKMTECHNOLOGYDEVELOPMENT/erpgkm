@@ -5,6 +5,7 @@ namespace App\Http\Controllers\administracion\asociados;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TiendasRequest;
 use App\Models\Cliente;
+use App\Models\Ticket;
 use App\Models\Tienda;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -13,24 +14,26 @@ use Illuminate\Support\Facades\Log;
 
 class TiendaController extends Controller
 {
-    public function index()
-    {
+
+public function index()
+{
         $clientes = Cliente::all();
         // Llamar la vista ubicada en administracion/usuarios.blade.php
         return view('administracion.asociados.tienda.index', compact('clientes')); 
-    }
+}
 
-    public function create(){
+public function create()
+{
+
 
         $clientes = Cliente::where('estado', 1)->get();
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
         return view('administracion.asociados.tienda.create', compact('clientes', 'departamentos'));
-    }
+}
     
-
   // Método para almacenar la tienda
-  public function store(TiendasRequest $request)
-  {
+public function store(TiendasRequest $request)
+{
       // Verificamos los datos que estamos recibiendo en la solicitud
       Log::info('Datos del formulario:', $request->all());
   
@@ -77,7 +80,8 @@ class TiendaController extends Controller
       return redirect()->route('administracion.tienda')->with('success', 'Tienda guardada exitosamente');
   }
 
-public function edit($id)
+
+  public function edit($id)
 {
     // Buscar la tienda que se quiere editar
     $tienda = Tienda::findOrFail($id);
@@ -136,7 +140,6 @@ public function edit($id)
     ));
 }
 
-
 public function exportAllPDF()
 {
     $tiendas = Tienda::with('cliente')->get(); // Ahora la relación funcionará
@@ -193,20 +196,50 @@ public function update(Request $request, $id)
     return redirect()->route('administracion.tienda')->with('success', 'Tienda actualizada exitosamente');
 }
 
+// public function destroy($id)
+// {
+//     $tienda = Tienda::find($id);
+
+//     if (!$tienda) {
+//         return response()->json(['error' => 'Cliente no encontrado'], 404);
+//     }
+//     // Eliminar el cliente
+//     $tienda->delete();
+
+//     // Responder con el estado de la eliminación
+//     return response()->json([
+//         'message' => 'Tienda eliminada con éxito'
+       
+//     ], 200);
+// }
+
+
 public function destroy($id)
 {
+    // Registrar el inicio del proceso
+    Log::info("Intentando eliminar la tienda con ID: $id");
+
     $tienda = Tienda::find($id);
 
     if (!$tienda) {
-        return response()->json(['error' => 'Cliente no encontrado'], 404);
+        Log::warning("No se encontró la tienda con ID: $id");
+        return response()->json(['error' => 'Tienda no encontrada'], 404);
     }
-    // Eliminar el cliente
+
+    // Verificar si hay tickets asociados a esta tienda
+    $ticketsAsociados = Ticket::where('idTienda', $id)->exists();
+    if ($ticketsAsociados) {
+        Log::warning("No se puede eliminar la tienda con ID: $id porque está asociada a un ticket.");
+        return response()->json(['error' => 'No se puede eliminar la tienda porque está asociada a un ticket'], 400);
+    }
+
+    // Eliminar la tienda
     $tienda->delete();
+    Log::info("Tienda con ID: $id eliminada con éxito.");
 
     // Responder con el estado de la eliminación
     return response()->json([
         'message' => 'Tienda eliminada con éxito'
-       
     ], 200);
 }
 
@@ -232,47 +265,39 @@ public function getAll()
     // Retorna los datos en formato JSON
     return response()->json($tiendasData);
 }
+ 
+// Validar RUC
+public function validarRuc(Request $request)
+{
 
-
-    // public function checkNombreTienda (Request $request)
-    // {
-    //     $nombre = $request->input('nombre');
-    //     $exists = Tienda::where('nombre', $nombre)->exists();
-
-    //     return response()->json(['unique' => !$exists]);
-    // }
-
-     // Validar RUC
-     public function validarRuc(Request $request)
-     {
          $ruc = $request->ruc;
          $exists = Tienda::where('ruc', $ruc)->exists();
          return response()->json(['exists' => $exists]);
-     }
- 
-     // Validar email
-     public function validarEmail(Request $request)
-     {
-         $email = $request->email;
+}
+// Validar email
+ public function validarEmail(Request $request)
+{
+
+     $email = $request->email;
          $exists = Tienda::where('email', $email)->exists();
          return response()->json(['exists' => $exists]);
-     }
+}
  
-     // Validar celular
-     public function validarCelular(Request $request)
-     {
+// Validar celular
+public function validarCelular(Request $request)
+{
          $celular = $request->celular;
          $exists = Tienda::where('celular', $celular)->exists();
          return response()->json(['exists' => $exists]);
-     }
+}
  
-     // Validar nombre
-     public function validarNombre(Request $request)
-     {
+// Validar nombre
+public function validarNombre(Request $request)
+{
          $nombre = $request->nombre;
          $exists = Tienda::where('nombre', $nombre)->exists();
          return response()->json(['exists' => $exists]);
-     }
+}
 
 
 }
