@@ -308,7 +308,7 @@ Route::post('/validar/email', [CastController::class, 'validarEmailCast'])->name
 Route::post('/validar/celular', [CastController::class, 'validarTelefonoCast'])->name('validar.telefonocast');
 Route::post('/validar/nombre', [CastController::class, 'validarNombreCast'])->name('validar.nombrecast');
 //Validaciones de proveedores
-Route::post('/validar/ruc', [ProveedoresController::class, 'validarnumeroDocumentoProveedores'])->name('validar.rucproveedores');
+Route::post('/validar/ruc', [ProveedoresController::class, 'validarnumeroDocumentoProveedores'])->name('validar.numerodocumentoproveedores');
 Route::post('/validar/email', [ProveedoresController::class, 'validarEmailProveedores'])->name('validar.emailproveedores');
 Route::post('/validar/celular', [ProveedoresController::class, 'validarTelefonoProveedores'])->name('validar.telefonoproveedores');
 Route::post('/validar/nombre', [ProveedoresController::class, 'validarNombreProveedores'])->name('validar.nombreproveedores');
