@@ -13,6 +13,8 @@ use App\Models\Usuario; // Reemplaza con el modelo correcto
 use App\Models\Tipoticket; // Reemplaza con el modelo correcto
 use App\Models\Cliente; // Reemplaza con el modelo correcto
 use App\Models\Tienda; // Reemplaza con el modelo correcto
+use App\Models\Marca; // Reemplaza con el modelo correcto
+use App\Models\Modelo; // Reemplaza con el modelo correcto
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 // use Barryvdh\DomPDF\Facade as PDF;
 
@@ -28,10 +30,29 @@ class OrdenesTrabajoController extends Controller
         $tiposTickets = Tipoticket::all(); // Obtiene los tipos de tickets
         $clientes = Cliente::all(); // Obtiene todos los clientes
         $tiendas = Tienda::all(); // Obtiene todas las tiendas
+        $marcas = Marca::all(); // Obtener todas las marcas
+        $modelos = Modelo::all(); // Obtener todos los modelos
 
         // Retorna la vista y pasa las variables
-        return view('tickets.ordenes-trabajo.index', compact('clientesGenerales', 'tiposServicio', 'usuarios', 'tiposTickets', 'clientes', 'tiendas')); // Asegúrate de que esta vista exista
+        return view('tickets.ordenes-trabajo.index', compact('clientesGenerales', 'tiposServicio', 'usuarios', 'tiposTickets', 'clientes', 'tiendas', 'marcas', 'modelos')); // Asegúrate de que esta vista exista
     }
+
+    public function create()
+{
+    // Obtener clientes, técnicos, marcas, modelos, tipos de servicio, etc.
+    $clientesGenerales = ClienteGeneral::where('estado', 1)->get();
+    $clientes = Cliente::where('estado', 1)->get();
+    $tiendas = Tienda::all();
+    $usuarios = Usuario::where('idTipoUsuario', 4)->get(); // Técnicos
+    $tiposServicio = TipoServicio::all();
+    $marcas = Marca::all();
+    $modelos = Modelo::all();
+
+    return view('tickets.ordenes-trabajo.create', compact(
+        'clientesGenerales', 'clientes', 'tiendas', 'usuarios', 'tiposServicio', 'marcas', 'modelos'
+    ));
+}
+
 
     // Guardar una nueva orden de trabajo
     public function store(Request $request)

@@ -287,6 +287,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit'); // Editar una orden de trabajo
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update'); // Actualizar una orden de trabajo
     Route::delete('/{id}', [OrdenesTrabajoController::class, 'destroy'])->name('destroy'); // Eliminar una orden de trabajo
+    Route::get('/create', [OrdenesTrabajoController::class, 'create'])->name('create')->middleware('auth');
     Route::get('/export-pdf', [OrdenesTrabajoController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todas las órdenes de trabajo a PDF
     Route::get('/get-all', [OrdenesTrabajoController::class, 'getAll'])->name('getAll'); // Obtener todas las órdenes de trabajo en formato JSON
     Route::post('/check-nombre', [OrdenesTrabajoController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
