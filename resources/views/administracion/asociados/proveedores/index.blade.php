@@ -219,10 +219,10 @@
         };
     </script>
 
-    <script src="{{ asset('assets/js/proveedoresstore.js') }}"></script>
+    <script src="{{ asset('assets/js/proveedores/proveedoresstore.js') }}"></script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
-    <script src="{{ asset('assets/js/proveedores.js') }}"></script>
+    <script src="{{ asset('assets/js/proveedores/proveedores.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 

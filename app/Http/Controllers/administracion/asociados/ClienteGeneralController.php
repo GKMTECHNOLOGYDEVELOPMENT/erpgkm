@@ -79,78 +79,77 @@ class ClienteGeneralController extends Controller
     }
 
 
+    
+
+
     public function update(Request $request, $id)
-    {
-        // Validar los datos del formulario
-        $validatedData = $request->validate([
-            'descripcion' => 'required|string|max:255',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'estado' => 'nullable|boolean',
-        ]);
+{
+    // Validar los datos del formulario
+    $validatedData = $request->validate([
+        'descripcion' => 'required|string|max:255',
+        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'estado' => 'nullable|boolean',
+    ]);
 
-        // Obtener el cliente
-        $cliente = Clientegeneral::findOrFail($id);
+    // Obtener el cliente
+    $cliente = Clientegeneral::findOrFail($id);
 
-        // Log para verificar si el cliente se obtiene correctamente
-        Log::info("Actualizando cliente con ID: $id");
+    // Log para verificar si el cliente se obtiene correctamente
+    Log::info("Actualizando cliente con ID: $id");
 
-        // Actualizar los datos básicos del cliente
-        $cliente->descripcion = $validatedData['descripcion'];
-        $cliente->estado = $request->estado;
+    // Actualizar los datos básicos del cliente
+    $cliente->descripcion = $validatedData['descripcion'];
+    $cliente->estado = $request->estado;
 
-        // Log para verificar la foto antes de proceder
-        Log::info("Ruta almacenada en la base de datos para la foto del cliente $id: " . $cliente->foto);
+    // Log para verificar la foto antes de proceder
+    Log::info("Ruta almacenada en la base de datos para la foto del cliente $id: " . $cliente->foto);
 
-        // Manejar la actualización de la imagen
-        if ($request->hasFile('foto')) {
-            // Log para saber que se está subiendo una nueva imagen
-            Log::info("Se ha recibido una nueva imagen para el cliente $id.");
+    // Manejar la actualización de la imagen
+    if ($request->hasFile('foto')) {
+        // Log para saber que se está subiendo una nueva imagen
+        Log::info("Se ha recibido una nueva imagen para el cliente $id.");
 
-            // Eliminar la imagen anterior si existe
-            if ($cliente->foto) {
-                // Verificar si la foto anterior existe antes de eliminarla
-                $fotoPath = str_replace('storage/', '', $cliente->foto); // Quitar el prefijo 'storage/'
+        // Eliminar la imagen anterior si existe
+        if ($cliente->foto) {
+            // Verificar si la foto anterior existe antes de eliminarla
+            $fotoPath = str_replace('storage/', '', $cliente->foto); // Quitar el prefijo 'storage/'
 
-                // Generar la ruta completa para eliminar el archivo físico
-                $fotoPathCompleta = storage_path('app/public/' . $fotoPath); // Ahora generamos la ruta completa para el archivo
+            // Generar la ruta completa para eliminar el archivo físico
+            $fotoPathCompleta = storage_path('app/public/' . $fotoPath); // Ahora generamos la ruta completa para el archivo
 
-                // Log para verificar la ruta completa generada
-                Log::info("Ruta completa para eliminar la imagen anterior: $fotoPathCompleta");
+            // Log para verificar la ruta completa generada
+            Log::info("Ruta completa para eliminar la imagen anterior: $fotoPathCompleta");
 
-                // Verificar si el archivo existe en la ruta completa
-                if (file_exists($fotoPathCompleta)) {
-                    // Eliminar la imagen anterior
-                    unlink($fotoPathCompleta);
-                    Log::info("Imagen eliminada exitosamente: $fotoPathCompleta");
-                } else {
-                    Log::warning("La imagen anterior no fue encontrada para eliminar: $fotoPathCompleta");
-                }
+            // Verificar si el archivo existe en la ruta completa
+            if (file_exists($fotoPathCompleta)) {
+                // Eliminar la imagen anterior
+                unlink($fotoPathCompleta);
+                Log::info("Imagen eliminada exitosamente: $fotoPathCompleta");
+            } else {
+                Log::warning("La imagen anterior no fue encontrada para eliminar: $fotoPathCompleta");
             }
-
-            // Crear un directorio basado en el ID del cliente
-            $directory = 'img/general/' . $id; // Este es el directorio específico para cada cliente
-
-            // Subir la nueva imagen al directorio específico para el cliente
-            $filePath = $request->file('foto')->store($directory, 'public');
-            $nuevoFoto = 'storage/' . $filePath; // Crear la ruta con el prefijo 'storage/'
-
-            // Log para saber la ruta de la nueva imagen
-            Log::info("Nueva imagen subida para el cliente $id: $nuevoFoto");
-
-            // Actualizar la base de datos con la nueva imagen
-            $cliente->foto = $nuevoFoto;
         }
 
-        // Guardar los cambios en la base de datos
-        $cliente->save();
+        // Leer el contenido de la nueva imagen como binario
+        $binaryImage = file_get_contents($request->file('foto')->getRealPath());
 
-        // Log para confirmar que los datos han sido actualizados correctamente
-        Log::info("Cliente actualizado correctamente con ID: $id");
+        // Log para verificar que la imagen fue leída correctamente
+        Log::info("Imagen leída correctamente para el cliente $id.");
 
-        // Redireccionar con un mensaje de éxito
-        return redirect()->route('administracion.cliente-general')
-            ->with('success', 'Cliente actualizado exitosamente.');
+        // Actualizar la base de datos con la nueva imagen en formato binario
+        $cliente->foto = $binaryImage;
     }
+
+    // Guardar los cambios en la base de datos
+    $cliente->save();
+
+    // Log para confirmar que los datos han sido actualizados correctamente
+    Log::info("Cliente actualizado correctamente con ID: $id");
+
+    // Redireccionar con un mensaje de éxito
+    return redirect()->route('administracion.cliente-general')
+        ->with('success', 'Cliente actualizado exitosamente.');
+}
 
 
 
@@ -215,6 +214,14 @@ class ClienteGeneralController extends Controller
     {
         // Obtener todos los registros de ClienteGeneral
         $clientes = ClienteGeneral::all();
+
+        // Convertir las imágenes a base64
+        foreach ($clientes as $cliente) {
+            if ($cliente->foto) {
+                // Convertir la imagen binaria en base64
+                $cliente->foto_base64 = base64_encode($cliente->foto);
+            }
+        }
 
         // Generar el PDF con la colección completa
         $pdf = Pdf::loadView('administracion.asociados.clienteGeneral.pdf.cliente-general', compact('clientes'))

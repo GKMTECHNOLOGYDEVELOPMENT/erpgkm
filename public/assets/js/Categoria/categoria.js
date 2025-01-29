@@ -2,16 +2,16 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('multipleTable', () => ({
         datatable1: null,
         categoryData: [], // Almacena los datos actuales de la tabla
-        pollInterval: 2000, // Intervalo de polling (en ms)
+        // pollInterval: 2000, // Intervalo de polling (en ms)
 
         init() {
             // Obtener datos iniciales e inicializar la tabla
             this.fetchDataAndInitTable();
 
-            // Configurar polling para verificar actualizaciones
-            setInterval(() => {
-                this.checkForUpdates();
-            }, this.pollInterval);
+            // // Configurar polling para verificar actualizaciones
+            // setInterval(() => {
+            //     this.checkForUpdates();
+            // }, this.pollInterval);
         },
 
         fetchDataAndInitTable() {
@@ -81,28 +81,28 @@ document.addEventListener('alpine:init', () => {
             ]);
         },
 
-        checkForUpdates() {
-            fetch('/api/categoria')
-                .then((response) => {
-                    if (!response.ok) throw new Error('Error al verificar actualizaciones');
-                    return response.json();
-                })
-                .then((data) => {
-                    // Detectar nuevas filas
-                    const newData = data.filter(
-                        (newCategoria) => !this.categoryData.some((existingCategoria) => existingCategoria.idCategoria === newCategoria.idCategoria),
-                    );
+        // checkForUpdates() {
+        //     fetch('/api/categoria')
+        //         .then((response) => {
+        //             if (!response.ok) throw new Error('Error al verificar actualizaciones');
+        //             return response.json();
+        //         })
+        //         .then((data) => {
+        //             // Detectar nuevas filas
+        //             const newData = data.filter(
+        //                 (newCategoria) => !this.categoryData.some((existingCategoria) => existingCategoria.idCategoria === newCategoria.idCategoria),
+        //             );
 
-                    if (newData.length > 0) {
-                        // Agregar filas nuevas a la tabla
-                        this.datatable1.rows().add(this.formatDataForTable(newData));
-                        this.categoryData.push(...newData); // Actualizar categoryData
-                    }
-                })
-                .catch((error) => {
-                    // console.error("Error al verificar actualizaciones:", error);
-                });
-        },
+        //             if (newData.length > 0) {
+        //                 // Agregar filas nuevas a la tabla
+        //                 this.datatable1.rows().add(this.formatDataForTable(newData));
+        //                 this.categoryData.push(...newData); // Actualizar categoryData
+        //             }
+        //         })
+        //         .catch((error) => {
+        //             // console.error("Error al verificar actualizaciones:", error);
+        //         });
+        // },
 
         deleteCategory(idCategoria) {
             new window.Swal({

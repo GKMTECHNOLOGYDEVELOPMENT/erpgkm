@@ -76,6 +76,8 @@ document.getElementById('clienteForm').addEventListener('submit', function (even
                 if (alpineData && alpineData.updateTable) {
                     alpineData.updateTable(); // Actualizar la tabla
                 }
+
+                window.location.reload();
             } else {
                 // Mostrar mensaje de error general
                 showMessage('Hubo un error al guardar el cliente.', 'top-end', true, '', 3000, 'error');

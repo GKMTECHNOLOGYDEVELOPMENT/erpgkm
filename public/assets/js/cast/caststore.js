@@ -57,6 +57,8 @@ document.getElementById('castForm').addEventListener('submit', function(event) {
             if (alpineData && alpineData.updateTable) {
                 alpineData.updateTable();  // Actualizar la tabla en Alpine.js
             }
+
+            window.location.reload();
         } else {
             showMessage('Hubo un error al guardar el cast.', 'top-end');
         }

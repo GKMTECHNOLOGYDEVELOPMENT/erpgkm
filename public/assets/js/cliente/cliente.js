@@ -2,18 +2,18 @@ document.addEventListener("alpine:init", () => {
     Alpine.data("multipleTable", () => ({
         datatable1: null,
         clienteData: [], // Almacena los datos actuales de la tabla de clientes
-        pollInterval: 2000, // Intervalo de polling (en ms)
+        // pollInterval: 2000, // Intervalo de polling (en ms)
 
         init() {
-            console.log("Component initialized for Cliente");
+            // console.log("Component initialized for Cliente");
 
             // Obtener datos iniciales e inicializar la tabla
             this.fetchDataAndInitTable();
 
             // Configurar polling para verificar actualizaciones
-            setInterval(() => {
-                this.checkForUpdates();
-            }, this.pollInterval);
+            // setInterval(() => {
+            //     this.checkForUpdates();
+            // }, this.pollInterval);
         },
 
         fetchDataAndInitTable() {
@@ -97,35 +97,35 @@ document.addEventListener("alpine:init", () => {
             ]);
         },
 
-        checkForUpdates() {
-            fetch("/api/clientes") // Cambiar la URL de la API a /api/clientes
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al verificar actualizaciones");
-                    return response.json();
-                })
-                .then((data) => {
+        // checkForUpdates() {
+        //     fetch("/api/clientes") // Cambiar la URL de la API a /api/clientes
+        //         .then((response) => {
+        //             if (!response.ok) throw new Error("Error al verificar actualizaciones");
+        //             return response.json();
+        //         })
+        //         .then((data) => {
                     
 
-                    // Detectar nuevas filas
-                    const newData = data.filter(
-                        (newCliente) =>
-                            !this.clienteData.some(
-                                (existingCliente) =>
-                                    existingCliente.idCliente === newCliente.idCliente
-                            )
-                    );
+        //             // Detectar nuevas filas
+        //             const newData = data.filter(
+        //                 (newCliente) =>
+        //                     !this.clienteData.some(
+        //                         (existingCliente) =>
+        //                             existingCliente.idCliente === newCliente.idCliente
+        //                     )
+        //             );
 
-                    if (newData.length > 0) {
+        //             if (newData.length > 0) {
 
-                        // Agregar filas nuevas a la tabla
-                        this.datatable1.rows().add(this.formatDataForTable(newData));
-                        this.clienteData.push(...newData); // Actualizar clienteData
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error al verificar actualizaciones:", error);
-                });
-        },
+        //                 // Agregar filas nuevas a la tabla
+        //                 this.datatable1.rows().add(this.formatDataForTable(newData));
+        //                 this.clienteData.push(...newData); // Actualizar clienteData
+        //             }
+        //         })
+        //         .catch((error) => {
+        //             console.error("Error al verificar actualizaciones:", error);
+        //         });
+        // },
 
         deleteCliente(idCliente) {
 

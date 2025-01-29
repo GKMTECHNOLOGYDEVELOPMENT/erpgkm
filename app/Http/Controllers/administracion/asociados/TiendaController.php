@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TiendasRequest;
 use App\Models\Cliente;
 use App\Models\Tienda;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use PDF;
+// use PDF;
 
 class TiendaController extends Controller
 {
@@ -75,8 +76,6 @@ class TiendaController extends Controller
       // Redirigimos a la lista de tiendas o donde desees
       return redirect()->route('administracion.tienda')->with('success', 'Tienda guardada exitosamente');
   }
-
-
 
 public function edit($id)
 {
@@ -152,12 +151,7 @@ public function exportAllPDF()
         return redirect()->back()->with('error', 'Hubo un problema al generar el PDF.');
     }
 }
-
   
-  
-  
-  
-
 public function update(Request $request, $id)
 {
     // Validación de los datos del formulario
@@ -198,9 +192,6 @@ public function update(Request $request, $id)
     // Redirigir al índice de tiendas con un mensaje de éxito
     return redirect()->route('administracion.tienda')->with('success', 'Tienda actualizada exitosamente');
 }
-
-
-
 
 public function destroy($id)
 {
@@ -243,13 +234,45 @@ public function getAll()
 }
 
 
-    public function checkNombreTienda (Request $request)
-    {
-        $nombre = $request->input('nombre');
-        $exists = Tienda::where('nombre', $nombre)->exists();
+    // public function checkNombreTienda (Request $request)
+    // {
+    //     $nombre = $request->input('nombre');
+    //     $exists = Tienda::where('nombre', $nombre)->exists();
 
-        return response()->json(['unique' => !$exists]);
-    }
+    //     return response()->json(['unique' => !$exists]);
+    // }
+
+     // Validar RUC
+     public function validarRuc(Request $request)
+     {
+         $ruc = $request->ruc;
+         $exists = Tienda::where('ruc', $ruc)->exists();
+         return response()->json(['exists' => $exists]);
+     }
+ 
+     // Validar email
+     public function validarEmail(Request $request)
+     {
+         $email = $request->email;
+         $exists = Tienda::where('email', $email)->exists();
+         return response()->json(['exists' => $exists]);
+     }
+ 
+     // Validar celular
+     public function validarCelular(Request $request)
+     {
+         $celular = $request->celular;
+         $exists = Tienda::where('celular', $celular)->exists();
+         return response()->json(['exists' => $exists]);
+     }
+ 
+     // Validar nombre
+     public function validarNombre(Request $request)
+     {
+         $nombre = $request->nombre;
+         $exists = Tienda::where('nombre', $nombre)->exists();
+         return response()->json(['exists' => $exists]);
+     }
 
 
 }

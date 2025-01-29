@@ -280,9 +280,9 @@
         });
     </script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
-    <script src="{{ asset('assets/js/clientestore.js') }}"></script>
+    <script src="{{ asset('assets/js/cliente/clientestore.js') }}"></script>
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
-    <script src="{{ asset('assets/js/cliente.js') }}"></script>
+    <script src="{{ asset('assets/js/cliente/cliente.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 

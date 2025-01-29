@@ -69,6 +69,7 @@ document.getElementById('categoriaForm').addEventListener('submit', function (ev
                 alpineData.updateTable();
                 console.log("Tabla actualizada"); // Depuración: Verificar si la tabla se actualiza
             }
+            window.location.reload();
         } else {
             // Mostrar alerta de error
             showMessage('Hubo un error al guardar la categoría.', 'top-end', true, '', 3000, 'error');
