@@ -94,7 +94,7 @@
                         <div class="mb-5">
                             <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
                             <!-- Campo de archivo -->
-                            <input id="ctnFile" type="file" name="logo" accept="image/*"
+                            <input id="ctnFile" type="file" name="logo" accept="image/*" required
                                 class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
                                 @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual" />
 
@@ -138,11 +138,10 @@
         routeClientStore: '{{ route('cliente-general.store') }}'
         };
     </script>
-        <script src="{{ asset('assets/js/clientegeneralvalidaciones.js') }}"></script>
-
-    <script src="{{ asset('assets/js/clientegeneralstore.js') }}"></script>
+    <script src="{{ asset('assets/js/clientegeneral/clientegeneralvalidaciones.js') }}"></script>
+    <script src="{{ asset('assets/js/clientegeneral/clientegeneralstore.js') }}"></script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
-    <script src="{{ asset('assets/js/clientegeneral.js') }}"></script>
+    <script src="{{ asset('assets/js/clientegeneral/clientegeneral.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
     <!-- Script de NiceSelect -->
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>

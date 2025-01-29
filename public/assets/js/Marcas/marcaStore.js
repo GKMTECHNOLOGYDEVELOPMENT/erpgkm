@@ -59,6 +59,7 @@ document.getElementById('marcaForm').addEventListener('submit', function (event)
                 if (alpineData && alpineData.updateTable) {
                     alpineData.updateTable();
                 }
+                window.location.reload();
             } else {
                 // Mostrar alerta de error
                 showMessage('Hubo un error al guardar la marca.', 'top-end', true, '', 3000, 'error');

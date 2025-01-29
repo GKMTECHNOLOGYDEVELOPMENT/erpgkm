@@ -72,6 +72,8 @@ document.getElementById('proveedorForm').addEventListener('submit', function (ev
                 if (alpineData && alpineData.updateTable) {
                     alpineData.updateTable();
                 }
+
+                window.location.reload();
             } else {
                 showMessage('Hubo un error al guardar el proveedor.', 'top-end');
             }

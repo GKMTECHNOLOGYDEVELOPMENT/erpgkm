@@ -72,11 +72,9 @@
             error: '{{ session('error') }}',
         };
     </script>
-    <script src="{{ asset('assets/js/notificacion.js') }}"></script>
-
-<script src="{{ asset('assets/js/tienda.js') }}"></script>
-
-    <script src="/assets/js/simple-datatables.js"></script>
-    <!-- Script de NiceSelect -->
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+<script src="{{ asset('assets/js/notificacion.js') }}"></script>
+<script src="{{ asset('assets/js/tienda/tienda.js') }}"></script>
+<script src="/assets/js/simple-datatables.js"></script>
+<!-- Script de NiceSelect -->
+<script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 </x-layout.default>

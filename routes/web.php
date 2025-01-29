@@ -298,6 +298,11 @@ Route::get('/ver-informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 've
 Route::get('/ver-hoja-entrega-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verHojaEntrega']);
 
 
+//Validaciones de tienda
+Route::post('/validar/ruc', [TiendaController::class, 'validarRuc'])->name('validar.ruc');
+Route::post('/validar/email', [TiendaController::class, 'validarEmail'])->name('validar.email');
+Route::post('/validar/celular', [TiendaController::class, 'validarCelular'])->name('validar.celular');
+Route::post('/validar/nombre', [TiendaController::class, 'validarNombre'])->name('validar.nombre');
 
 
 

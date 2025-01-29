@@ -2,18 +2,17 @@ document.addEventListener("alpine:init", () => {
     Alpine.data("multipleTable", () => ({
         datatable1: null,
         tiendaData: [], // Almacena los datos actuales de la tabla
-        pollInterval: 2000, // Intervalo de polling (en ms)
+        // pollInterval: 2000, // Intervalo de polling (en ms)
 
         init() {
-            console.log("Component initialized for Tienda");
+            // console.log("Component initialized for Tienda");
 
             // Obtener datos iniciales e inicializar la tabla
             this.fetchDataAndInitTable();
-
             // Configurar polling para verificar actualizaciones
-            setInterval(() => {
-                this.checkForUpdates();
-            }, this.pollInterval);
+            // setInterval(() => {
+            //     this.checkForUpdates();
+            // }, this.pollInterval);
         },
 
         fetchDataAndInitTable() {
@@ -85,37 +84,6 @@ document.addEventListener("alpine:init", () => {
 
 
 
-        checkForUpdates() {
-            fetch("/api/tiendas")
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al verificar actualizaciones");
-                    return response.json();
-                })
-                .then((data) => {
-                    console.log("Datos actuales:", this.tiendaData);
-                    console.log("Datos del servidor:", data);
-
-                    // Detectar nuevas filas
-                    const newData = data.filter(
-                        (newTienda) =>
-                            !this.tiendaData.some(
-                                (existingTienda) =>
-                                    existingTienda.idTienda === newTienda.idTienda
-                            )
-                    );
-
-                    if (newData.length > 0) {
-                        console.log("Nuevos datos detectados:", newData);
-
-                        // Agregar filas nuevas a la tabla
-                        this.datatable1.rows().add(this.formatDataForTable(newData));
-                        this.tiendaData.push(...newData); // Actualizar tiendaData
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error al verificar actualizaciones:", error);
-                });
-        },
 
         deleteTienda(idTienda) {
             new window.Swal({

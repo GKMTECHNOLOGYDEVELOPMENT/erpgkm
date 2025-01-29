@@ -113,8 +113,9 @@
                     <tr>
                         <td>{{ $cliente->descripcion }}</td>
                         <td>
-                            @if ($cliente->foto)
-                                <img src="{{ public_path('/' . $cliente->foto) }}" alt="Foto">
+                            @if ($cliente->foto_base64)
+                                <!-- Imagen en base64 -->
+                                <img src="data:image/jpeg;base64,{{ $cliente->foto_base64 }}" alt="Foto">
                             @else
                                 <span>Sin imagen</span>
                             @endif

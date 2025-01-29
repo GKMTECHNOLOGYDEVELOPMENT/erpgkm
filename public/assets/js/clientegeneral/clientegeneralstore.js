@@ -66,11 +66,8 @@ document.getElementById('clientGeneralForm').addEventListener('submit', function
                     open = false;
                 }
 
-                // Actualizar la tabla (si usas Alpine.js)
-                let alpineData = Alpine.store('multipleTable');
-                if (alpineData && alpineData.updateTable) {
-                    alpineData.updateTable();
-                }
+                // Recargar la página
+                window.location.reload();
             } else {
                 // Mostrar alerta de error
                 showMessage('Hubo un error al guardar el cliente.', 'top-end');
@@ -82,5 +79,6 @@ document.getElementById('clientGeneralForm').addEventListener('submit', function
             showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end');
         });
 });
+
 
 

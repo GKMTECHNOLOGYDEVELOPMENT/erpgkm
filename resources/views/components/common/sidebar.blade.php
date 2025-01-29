@@ -385,7 +385,7 @@
                             <a href="{{ route('administracion.tienda') }}">Tienda</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.cast') }}">CAST</a>
+                            <a href="{{ route('administracion.cast') }}">Cast</a>
                         </li>
                         <li>
                             <a href="{{ route('administracion.clientes') }}">Clientes</a>
