@@ -2,7 +2,31 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    @if(session('error'))
+    <!-- error (rojo) -->
+    <div class="relative flex items-center border p-3.5 rounded before:inline-block before:absolute before:top-1/2 ltr:before:right-0 rtl:before:left-0 rtl:before:rotate-180 before:-mt-2 before:border-r-8 before:border-t-8 before:border-b-8 before:border-t-transparent before:border-b-transparent before:border-r-inherit text-danger bg-danger-light border-danger ltr:border-r-[64px] rtl:border-l-[64px] dark:bg-danger-dark-light">
+        <span class="absolute ltr:-right-11 rtl:-left-11 inset-y-0 text-white w-6 h-6 m-auto">
+            <svg> ... </svg> <!-- Aquí va el icono de error si lo deseas -->
+        </span>
+        <span class="ltr:pr-2 rtl:pl-2"><strong class="ltr:mr-1 rtl:ml-1">¡Error!</strong>{{ session('error') }}</span>
+        <button type="button" class="ltr:ml-auto rtl:mr-auto hover:opacity-80">
+            <svg> ... </svg> <!-- Icono de cerrar -->
+        </button>
+    </div>
+@endif
 
+@if ($errors->any())
+    <!-- validation errors (warning) -->
+    <div class="relative flex items-center border p-3.5 rounded before:absolute before:top-1/2 ltr:before:left-0 rtl:before:right-0 rtl:before:rotate-180 before:-mt-2 before:border-l-8 before:border-t-8 before:border-b-8 before:border-t-transparent before:border-b-transparent before:border-l-inherit text-warning bg-warning-light !border-warning ltr:border-l-[64px] rtl:border-r-[64px] dark:bg-warning-dark-light">
+        <span class="absolute ltr:-left-11 rtl:-right-11 inset-y-0 text-white w-6 h-6 m-auto">
+            <svg> ... </svg> <!-- Aquí va el icono de advertencia -->
+        </span>
+        <span class="ltr:pr-2 rtl:pl-2"><strong class="ltr:mr-1 rtl:ml-1">¡Advertencia!</strong>Por favor revisa los errores en el formulario.</span>
+        <button type="button" class="ltr:ml-auto rtl:mr-auto hover:opacity-80">
+            <svg> ... </svg> <!-- Icono de cerrar -->
+        </button>
+    </div>
+@endif
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse mt-4">
             <li>
@@ -29,13 +53,12 @@
 
         <div class="p-5">
             <form id="ordenTrabajoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
-                action="{{ route('ordenes.store') }}">
+                action="{{ route('ordenes.storehelpdesk') }}">
                 @csrf
-
                 <!-- Número de Ticket -->
                 <div>
-                    <label for="nroTicket" class="block text-sm font-medium">N. Ticket</label>
-                    <input id="nroTicket" name="nroTicket" type="text" class="form-input w-full"
+                    <label for="numero_ticket" class="block text-sm font-medium">N. Ticket</label>
+                    <input id="numero_ticket" name="numero_ticket" type="text" class="form-input w-full"
                         placeholder="Ingrese el número de ticket">
                 </div>
 
@@ -75,11 +98,11 @@
 
                 <!-- Técnico -->
                 <div>
-                    <label for="tecnico" class="block text-sm font-medium">Técnico</label>
-                    <select id="tecnico" name="tecnico" class="select2 w-full" style="display:none">
+                    <label for="idTecnico" class="block text-sm font-medium">Técnico</label>
+                    <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Técnico</option>
                         @foreach ($usuarios as $usuario)
-                            <option value="{{ $usuario->idUsuario }}">{{ $usuario->nombre }}</option>
+                            <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
                         @endforeach
                     </select>
                 </div>
