@@ -2,16 +2,16 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('multipleTable', () => ({
         datatable1: null,
         ordenesData: [], // Almacena los datos actuales de la tabla
-        pollInterval: 2000, // Intervalo de polling (en ms)
+        // pollInterval: 2000, // Intervalo de polling (en ms)
 
         init() {
             // Obtener datos iniciales e inicializar la tabla
             this.fetchDataAndInitTable();
 
             // Configurar polling para verificar actualizaciones
-            setInterval(() => {
-                this.checkForUpdates();
-            }, this.pollInterval);
+            // setInterval(() => {
+            //     this.checkForUpdates();
+            // }, this.pollInterval);
         },
 
         fetchDataAndInitTable() {
@@ -106,26 +106,26 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        checkForUpdates() {
-            fetch('/api/ordenes')
-                .then((response) => {
-                    if (!response.ok) throw new Error('Error al verificar actualizaciones');
-                    return response.json();
-                })
-                .then((data) => {
-                    // Detectar nuevas filas
-                    const newData = data.filter((newOrden) => !this.ordenesData.some((existingOrden) => existingOrden.idTickets === newOrden.idTickets));
+        // checkForUpdates() {
+        //     fetch('/api/ordenes')
+        //         .then((response) => {
+        //             if (!response.ok) throw new Error('Error al verificar actualizaciones');
+        //             return response.json();
+        //         })
+        //         .then((data) => {
+        //             // Detectar nuevas filas
+        //             const newData = data.filter((newOrden) => !this.ordenesData.some((existingOrden) => existingOrden.idTickets === newOrden.idTickets));
 
-                    if (newData.length > 0) {
-                        // Agregar filas nuevas a la tabla
-                        this.datatable1.rows().add(this.formatDataForTable(newData));
-                        this.ordenesData.push(...newData); // Actualizar ordenesData
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error al verificar actualizaciones:', error);
-                });
-        },
+        //             if (newData.length > 0) {
+        //                 // Agregar filas nuevas a la tabla
+        //                 this.datatable1.rows().add(this.formatDataForTable(newData));
+        //                 this.ordenesData.push(...newData); // Actualizar ordenesData
+        //             }
+        //         })
+        //         .catch((error) => {
+        //             console.error('Error al verificar actualizaciones:', error);
+        //         });
+        // },
 
         deleteOrden(idTickets) {
             new window.Swal({

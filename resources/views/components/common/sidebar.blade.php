@@ -949,41 +949,40 @@
                 </h2>
 
                 <li class="menu nav-item">
-                    <button type="button" class="nav-link group"
-                        :class="{ 'active': activeDropdown === 'users' }"
-                        @click="activeDropdown === 'users' ? activeDropdown = null : activeDropdown = 'users'">
-                        <div class="flex items-center">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'users' }"
+        @click="activeDropdown === 'users' ? activeDropdown = null : activeDropdown = 'users'">
+        <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
-                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle opacity="0.5" cx="15" cy="6" r="3" fill="currentColor" />
-                                <ellipse opacity="0.5" cx="16" cy="17" rx="5" ry="3"
-                                    fill="currentColor" />
-                                <circle cx="9.00098" cy="6" r="4" fill="currentColor" />
-                                <ellipse cx="9.00098" cy="17.001" rx="7" ry="4"
-                                    fill="currentColor" />
-                            </svg>
-                            <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Users</span>
-                        </div>
-                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'users' }">
+            <!-- Icono relacionado con Ordenes de Trabajo (Martillo - Trabajo manual) -->
+            <svg class="group-hover:!text-primary shrink-0 w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 2l6 6-10 10-6-6L16 2z" />
+            </svg>
 
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                    </button>
-                    <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
-                        <li>
-                            <a href="/users/profile">Profile</a>
-                        </li>
-                        <li>
-                            <a href="/users/user-account-settings">Account Settings</a>
-                        </li>
-                    </ul>
-                </li>
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes de Trabajo</span>
+        </div>
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'users' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+    <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
+        <li>
+            <a href="{{ route('ordenes.smart') }}">Smart-Tv</a>
+        </li>
+        <li>
+            <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
+        </li>
+    </ul>
+</li>
+
+
+
+
+
+
+
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'pages' }"
