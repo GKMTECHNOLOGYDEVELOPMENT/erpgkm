@@ -72,7 +72,7 @@ class OrdenesTrabajoController extends Controller
         $clientesGenerales = ClienteGeneral::where('estado', 1)->get();
         $clientes = Cliente::where('estado', 1)->get();
         $tiendas = Tienda::all();
-        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
+        $usuarios = Usuario::where('idTipoUsuario', 1)->get();
         $tiposServicio = TipoServicio::all();
         $marcas = Marca::all();
         $modelos = Modelo::all();
@@ -124,7 +124,7 @@ public function storehelpdesk(Request $request)
             'idTecnico' => $validatedData['idTecnico'],
             'tipoServicio' => $validatedData['tipoServicio'],
             'idUsuario' => auth()->id(), // ID del usuario autenticado
-            'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+            'idEstadoots' => 1, // Estado inicial de la orden de trabajo
             'fallaReportada'=> $validatedData['fallaReportada'],
             'fecha_creacion' => now(), // Establece la fecha y hora actuales
 
@@ -181,7 +181,7 @@ public function storesmart(Request $request)
             'fallaReportada' => $validatedData['fallaReportada'],
             'lat' => $validatedData['lat'],
             'lng' => $validatedData['lng'],
-            'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+            'idEstadoots' => 1, // Estado inicial de la orden de trabajo
             'idUsuario' => auth()->id(), // ID del usuario autenticado
             'fecha_creacion' => now(), // Fecha de creación
         ]);
