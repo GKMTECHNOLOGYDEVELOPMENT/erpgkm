@@ -41,6 +41,7 @@ class OrdenesTrabajoController extends Controller
         // Determinar la carpeta de vistas según el rol
         $carpetaVista = match ($rol) {
             'COORDINACION SMART' => 'smart-tv',
+            'ADMIN PRINCIPAL' => 'smart-tv', 'helpdesk',
             'COORDINACION HELP DESK' => 'helpdesk',
             default => '',
         };
@@ -78,6 +79,7 @@ class OrdenesTrabajoController extends Controller
 
         $carpetaVista = match ($rol) {
             'COORDINACION SMART' => 'smart-tv',
+       
             'COORDINACION HELP DESK' => 'helpdesk',
             default => '',
         };
@@ -97,46 +99,6 @@ class OrdenesTrabajoController extends Controller
         }
     }
 
-
-    // Guardar una nueva orden de trabajo
-    // public function storehelpdesk(Request $request)
-    // {
-    //     try {
-    //         // Validar los datos
-    //         $validatedData = $request->validate([
-    //             // 'idTipotickets' => 'required|integer|exists:tipotickets,idTipotickets',
-    //             'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
-    //             'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
-    //             'idCliente' => 'required|integer|exists:cliente,idCliente',
-    //             'idTienda' => 'required|integer|exists:tienda,idTienda',
-    //             'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
-    //             'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
-    //             'fallaReportada' => 'required|string|max:255',
-    //         ]);
-
-
-    //         // Crear la nueva orden de trabajo
-    //         Ticket::create([
-    //             // 'idTipotickets' => $validatedData['idTipotickets'],
-    //             'numero_ticket' => $validatedData['numero_ticket'],
-    //             'idClienteGeneral' => $validatedData['idClienteGeneral'],
-    //             'idCliente' => $validatedData['idCliente'],
-    //             'idTienda' => $validatedData['idTienda'],
-    //             'idTecnico' => $validatedData['idTecnico'],
-    //             'tipoServicio' => $validatedData['tipoServicio'],
-    //             'idUsuario' => auth()->id(), // ID del usuario autenticado
-    //             'idEstadoots' => 17, // Estado inicial de la orden de trabajo
-    //             'fallaReportada'=> $validatedData['fallaReportada'],
-    //         ]);
-
-    //         return redirect()->route('ordenes.index')->with('success', 'Orden de trabajo creada correctamente.');
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         return response()->json(['success' => false, 'message' => 'Errores de validación.', 'errors' => $e->errors()], 422);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error al crear una orden de trabajo: ' . $e->getMessage());
-    //         return response()->json(['success' => false, 'message' => 'Ocurrió un error al crear la orden de trabajo.'], 500);
-    //     }
-    // }
 
     // Guardar una nueva orden de trabajo
 public function storehelpdesk(Request $request)
