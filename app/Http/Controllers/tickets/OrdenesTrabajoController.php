@@ -41,6 +41,7 @@ class OrdenesTrabajoController extends Controller
         // Determinar la carpeta de vistas según el rol
         $carpetaVista = match ($rol) {
             'COORDINACION SMART' => 'smart-tv',
+            'ADMIN PRINCIPAL' => 'smart-tv', 'helpdesk',
             'COORDINACION HELP DESK' => 'helpdesk',
             default => '',
         };
@@ -150,7 +151,7 @@ class OrdenesTrabajoController extends Controller
         $clientesGenerales = ClienteGeneral::where('estado', 1)->get();
         $clientes = Cliente::where('estado', 1)->get();
         $tiendas = Tienda::all();
-        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
+        $usuarios = Usuario::where('idTipoUsuario', 1)->get();
         $tiposServicio = TipoServicio::all();
         $marcas = Marca::all();
         $modelos = Modelo::all();
@@ -199,7 +200,6 @@ class OrdenesTrabajoController extends Controller
         
      }
 
-
     // Guardar una nueva orden de trabajo
 public function storehelpdesk(Request $request)
 {
@@ -224,7 +224,7 @@ public function storehelpdesk(Request $request)
             'idTecnico' => $validatedData['idTecnico'],
             'tipoServicio' => $validatedData['tipoServicio'],
             'idUsuario' => auth()->id(), // ID del usuario autenticado
-            'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+            'idEstadoots' => 1, // Estado inicial de la orden de trabajo
             'fallaReportada'=> $validatedData['fallaReportada'],
             'fecha_creacion' => now(), // Establece la fecha y hora actuales
 
@@ -281,7 +281,7 @@ public function storesmart(Request $request)
             'fallaReportada' => $validatedData['fallaReportada'],
             'lat' => $validatedData['lat'],
             'lng' => $validatedData['lng'],
-            'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+            'idEstadoots' => 1, // Estado inicial de la orden de trabajo
             'idUsuario' => auth()->id(), // ID del usuario autenticado
             'fecha_creacion' => now(), // Fecha de creación
         ]);
@@ -314,7 +314,8 @@ public function storesmart(Request $request)
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
-        $orden = Ticket::findOrFail($id);
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda'])->findOrFail($id);
+        $modelos = Modelo::all(); // Obtén todos los modelos disponibles
 
         $carpetaVista = match ($rol) {
             'COORDINACION SMART' => 'smart-tv',
@@ -323,7 +324,7 @@ public function storesmart(Request $request)
         };
 
         if ($carpetaVista) {
-            return view("tickets.ordenes-trabajo.$carpetaVista.edit", compact('orden'));
+            return view("tickets.ordenes-trabajo.$carpetaVista.edit", compact('orden', 'modelos'));
         } else {
             abort(403, 'No tienes permiso para acceder a esta vista.');
         }
