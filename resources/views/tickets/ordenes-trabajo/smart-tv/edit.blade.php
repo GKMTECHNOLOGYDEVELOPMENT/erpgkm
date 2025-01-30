@@ -86,7 +86,7 @@
                         <!-- Técnico -->
                         <div>
                             <label class="block text-sm font-medium">Técnico</label>
-                            <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tecnico->nombre }}" readonly>
+                            <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tecnico->Nombre }}" readonly>
                         </div>
 
                         <!-- Fecha de Compra -->

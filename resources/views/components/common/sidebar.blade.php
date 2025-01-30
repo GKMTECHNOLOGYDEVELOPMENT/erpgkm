@@ -974,6 +974,13 @@
         <li>
             <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
         </li>
+        <li>
+            <a href="{{ route('ordenes.helpdesk') }}">Tec.Laboratorio</a>
+        </li>
+
+        <li>
+            <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
+        </li>
     </ul>
 </li>
 
