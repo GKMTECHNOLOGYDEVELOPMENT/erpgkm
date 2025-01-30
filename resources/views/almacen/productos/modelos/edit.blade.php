@@ -36,7 +36,7 @@
                 <!-- Etiqueta encima del select -->
                 <label for="idMarca" class="block text-sm font-medium">Marca</label>
                 <select id="idMarca" name="idMarca" class="select2 w-full" style="display:none" required>
-                    <option value="" disabled selected>Seleccione la Marca</option>
+                    <option value="" disabled >Seleccione la Marca</option>
                     @foreach ($marcas as $marca)
                         <option value="{{ $marca->idMarca }}"
                             {{ old('idMarca', $modelo->idMarca) == $marca->idMarca ? 'selected' : '' }}>
@@ -52,7 +52,7 @@
             <div>
                 <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
                 <select id="idCategoria" name="idCategoria" class="select2 w-full" style="display:none" required>
-                    <option value="" disabled selected>Seleccione la Categoría</option>
+                    <option value="" disabled >Seleccione la Categoría</option>
                     @foreach ($categorias as $categoria)
                         <option value="{{ $categoria->idCategoria }}"
                             {{ old('idCategoria', $modelo->idCategoria) == $categoria->idCategoria ? 'selected' : '' }}>

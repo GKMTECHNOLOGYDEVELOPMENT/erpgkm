@@ -27,12 +27,11 @@
                     <input id="nombre" type="text" class="form-input w-full" name="nombre"
                         placeholder="Ingrese el nombre" value="{{ old('nombre', $proveedor->nombre) }}">
                 </div>
-
                 <!-- Tipo Documento -->
                 <div>
                     <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
                     <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Tipo Documento</option>
+                        <option value="" disabled> Seleccionar Tipo Documento</option>
                         @foreach ($tiposDocumento as $tipoDocumento)
                             <option value="{{ $tipoDocumento->idTipoDocumento }}"
                                 {{ old('idTipoDocumento', $proveedor->idTipoDocumento) == $tipoDocumento->idTipoDocumento ? 'selected' : '' }}>
@@ -41,6 +40,7 @@
                         @endforeach
                     </select>
                 </div>
+
 
                 <!-- Número de Documento -->
                 <div>
@@ -84,7 +84,7 @@
                 <div>
                     <label for="idArea" class="block text-sm font-medium">Área</label>
                     <select id="idArea" name="idArea" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Area</option>
+                        <option value="" disabled >Seleccionar Area</option>
 
                         @foreach ($tiposArea as $tipoArea)
                             <option value="{{ $tipoArea->idTipoArea }}"

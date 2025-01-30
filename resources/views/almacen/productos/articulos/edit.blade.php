@@ -60,7 +60,7 @@
                 <div>
                     <label for="idUnidad" class="block text-sm font-medium">Unidad</label>
                     <select id="idUnidad" name="idUnidad" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Unidad</option>
+                        <option value="" disabled>Seleccionar Unidad</option>
                         @foreach ($unidades as $unidad)
                             <option value="{{ $unidad->idUnidad }}"
                                 {{ old('idUnidad', $articulo->idUnidad) == $unidad->idUnidad ? 'selected' : '' }}>
@@ -74,7 +74,7 @@
                 <div>
                     <label for="idTipoArticulo" class="block text-sm font-medium">Tipo de Articulo</label>
                     <select id="idTipoArticulo" name="idTipoArticulo" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Tipo de Artículo</option>
+                        <option value="" disabled >Seleccionar Tipo de Artículo</option>
                         @foreach ($tiposArticulo as $tipoArticulo)
                             <option value="{{ $tipoArticulo->idTipoArticulo }}"
                                 {{ old('idTipoArticulo', $articulo->idTipoArticulo) == $tipoArticulo->idTipoArticulo ? 'selected' : '' }}>
@@ -87,7 +87,7 @@
                 <div>
                     <label for="idModelo" class="block text-sm font-medium">Modelo</label>
                     <select id="idModelo" name="idModelo" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Modelo</option>
+                        <option value="" disabled >Seleccionar Modelo</option>
                         @foreach ($modelos as $modelo)
                             <option value="{{ $modelo->idModelo }}"
                                 {{ old('idModelo', $articulo->idModelo) == $modelo->idModelo ? 'selected' : '' }}>

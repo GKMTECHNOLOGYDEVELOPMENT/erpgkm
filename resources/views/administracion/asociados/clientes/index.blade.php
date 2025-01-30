@@ -128,7 +128,7 @@
                                 </div>
                                 <!-- Tipo Documento -->
                                 <div>
-                                    <label for="idTipoDocumento" class="block text-sm font-medium">Cliente General</label>
+                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
                                     <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
