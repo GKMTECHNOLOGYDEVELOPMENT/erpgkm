@@ -39,7 +39,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
-                        onclick="window.location.href='{{ route('clientes.exportExcel') }}'">
+                    href="{{ route('tienda.create') }}">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -66,20 +66,15 @@
                     </button>
 
 
-                    <!-- Botón Agregar -->
-                    <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
-                    onclick="window.location.href='{{ route('ordenes.create') }}'">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5"
-                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" />
-                        </svg>
-                        <span>Agregar</span>
-                    </button>
+                <!-- Enlace Agregar con icono HelpDesk -->
+                <a href="{{ route('ordenes.createhelpdesk') }}" class="btn btn-primary btn-sm flex items-center gap-2">
+                    <!-- Icono HelpDesk (auricular) en SVG -->
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2a4 4 0 008 0V3m-4 5v7a3 3 0 01-3 3H8a3 3 0 01-3-3V8a3 3 0 013-3h4a3 3 0 013 3z" />
+                    </svg>
+                    <span>Agregar</span>
+                </a>
+
                 </div>
             </div>
 

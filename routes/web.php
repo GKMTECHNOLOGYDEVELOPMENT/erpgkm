@@ -283,7 +283,12 @@ Route::prefix('kits')->name('almacen.kits.')->group(function () {
 /// INICIO ÓRDENES DE TRABAJO ///
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/', [OrdenesTrabajoController::class, 'index'])->name('index'); // Mostrar la vista principal
-    Route::get('/create', [OrdenesTrabajoController::class, 'create'])->name('create')->middleware('auth'); // Crear una nueva orden de trabajo
+    Route::get('/smart', [OrdenesTrabajoController::class, 'smart'])->name('smart');
+    Route::get('/helpdesk', [OrdenesTrabajoController::class, 'helpdesk'])->name('helpdesk');
+    Route::get('/create-smart/', [OrdenesTrabajoController::class, 'createsmart'])->name('createsmart');
+    Route::get('/create-helpdesk', [OrdenesTrabajoController::class, 'createhelpdesk'])->name('createhelpdesk')->middleware('auth'); // Crear una nueva orden de trabajo
+
+
     Route::post('/storehelpdesk', [OrdenesTrabajoController::class, 'storehelpdesk'])->name('storehelpdesk'); // Guardar una nueva orden de trabajo
     Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart'); // Guardar una nueva orden de trabajo
     Route::get('/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit'); // Editar una orden de trabajo
@@ -297,6 +302,11 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     // Validaciones
     Route::post('/check-nombre', [OrdenesTrabajoController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
 });
+
+
+// Rutas para obtener modelos por marca
+Route::get('/modelos/{idMarca}', [OrdenesTrabajoController::class, 'obtenerModelosPorMarca']);
+
 
 
 // Route::get('/informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'generarInformePdf'])->name('informe.pdf');

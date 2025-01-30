@@ -117,27 +117,24 @@
                         placeholder="Ingrese la dirección">
                 </div>
 
-                <!-- Marca -->
-                <div>
-                    <label for="idMarca" class="block text-sm font-medium">Marca</label>
-                    <select id="idMarca" name="idMarca" class="select2 w-full" style="display: none">
-                        <option value="" disabled selected>Seleccionar Marca</option>
-                        @foreach ($marcas as $marca)
-                            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+              <!-- Marca -->
+            <div>
+                <label for="idMarca" class="block text-sm font-medium">Marca</label>
+                <select id="idMarca" name="idMarca"  class="form-input w-full" >
+                    <option value="" disabled selected>Seleccionar Marca</option>
+                    @foreach ($marcas as $marca)
+                        <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-                <!-- Modelo -->
-                <div>
-                    <label for="idModelo" class="block text-sm font-medium">Modelo</label>
-                    <select id="idModelo" name="idModelo" class="select2 w-full" style="display: none">
-                        <option value="" disabled selected>Seleccionar Modelo</option>
-                        @foreach ($modelos as $modelo)
-                            <option value="{{ $modelo->idModelo }}">{{ $modelo->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <!-- Modelo -->
+            <div>
+                <label for="idModelo" class="block text-sm font-medium">Modelo</label>
+                <select id="idModelo" name="idModelo" class="form-input w-full">
+                    <option value="" disabled selected>Seleccionar Modelo</option>
+                </select>
+            </div>
 
                 <!-- Serie -->
                 <div>
@@ -201,29 +198,112 @@
     </div>
 
 
+    <script>
+    $(document).ready(function() {
+        // Cuando cambie la selección de la marca
+        $('#idMarca').change(function() {
+            var idMarca = $(this).val();
+
+            // Si se ha seleccionado una marca
+            if(idMarca) {
+                // Hacer una petición AJAX para obtener los modelos correspondientes
+                $.ajax({
+                    url: '/modelos/' + idMarca, // Ruta para obtener modelos
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        // Limpiar el campo de modelos
+                        $('#idModelo').empty();
+                        $('#idModelo').append('<option value="" disabled selected>Seleccionar Modelo</option>');
+                        
+                        // Añadir los modelos a la lista de opciones
+                        $.each(data, function(key, modelo) {
+                            $('#idModelo').append('<option value="'+ modelo.idModelo +'">'+ modelo.nombre +'</option>');
+                        });
+                    }
+                });
+            } else {
+                // Si no se seleccionó una marca, limpiar el campo de modelos
+                $('#idModelo').empty();
+                $('#idModelo').append('<option value="" disabled selected>Seleccionar Modelo</option>');
+            }
+        });
+    });
+</script>
+
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
-            });
+    document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.select2').forEach(function(select) {
+        NiceSelect.bind(select, {
+            searchable: true
+        }); 
+    });
 
-            const map = L.map('map').setView([-12.0464, -77.0428], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+    const map = L.map('map').setView([-12.0464, -77.0428], 13);  // Coordenadas iniciales de Lima
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-            let marker;
-            map.on('click', function(e) {
-                document.getElementById('latitud').value = e.latlng.lat;
-                document.getElementById('longitud').value = e.latlng.lng;
-                if (marker) marker.setLatLng(e.latlng);
-                else marker = L.marker(e.latlng).addTo(map);
+    let marker;
+
+    // Función para buscar la dirección usando la API de Nominatim
+    function buscarDireccion() {
+        const direccion = document.getElementById("direccion").value.trim();
+
+        if (direccion) {
+            // URL de la API Nominatim para geocodificación
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
+
+            // Hacer la solicitud a Nominatim para obtener las coordenadas
+            $.get(url, function(data) {
+                if (data && data.length > 0) {
+                    // Obtener las coordenadas de la primera coincidencia
+                    const lat = data[0].lat;
+                    const lon = data[0].lon;
+
+                    // Centrar el mapa en la ubicación obtenida
+                    map.setView([lat, lon], 13);
+
+                    // Colocar o mover el marcador
+                    if (marker) {
+                        marker.setLatLng([lat, lon]);
+                    } else {
+                        marker = L.marker([lat, lon]).addTo(map);
+                    }
+
+                    // Actualizar los campos de latitud y longitud en el formulario (si los tienes)
+                    document.getElementById('latitud').value = lat;
+                    document.getElementById('longitud').value = lon;
+                } else {
+                    alert("No se encontraron resultados para esa dirección.");
+                }
             });
-        });
+        }
+    }
+
+    // Agregar el evento input en el campo de dirección
+    document.getElementById("direccion").addEventListener("input", function() {
+        if (this.value.trim() !== "") {
+            buscarDireccion();
+        }
+    });
+
+    // Evento de clic en el mapa para actualizar latitud y longitud
+    map.on('click', function(e) {
+        document.getElementById('latitud').value = e.latlng.lat;
+        document.getElementById('longitud').value = e.latlng.lng;
+
+        // Si ya hay un marcador, se actualiza; si no, se agrega uno nuevo
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            marker = L.marker(e.latlng).addTo(map);
+        }
+    });
+});
+
 
         document.addEventListener("DOMContentLoaded", function() {
     flatpickr("#fechaCompra", {
