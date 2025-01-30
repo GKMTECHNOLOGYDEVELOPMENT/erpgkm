@@ -202,12 +202,6 @@ public function storesmart(Request $request)
     }
 }
 
-
- 
-
-
-
-
     // Editar orden de trabajo según el rol
     public function edit($id)
     {
@@ -215,6 +209,8 @@ public function storesmart(Request $request)
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda'])->findOrFail($id);
+
+        
         $modelos = Modelo::all(); // Obtén todos los modelos disponibles
 
         $carpetaVista = match ($rol) {
