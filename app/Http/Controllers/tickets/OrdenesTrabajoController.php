@@ -149,7 +149,8 @@ class OrdenesTrabajoController extends Controller
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
-        $orden = Ticket::findOrFail($id);
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda'])->findOrFail($id);
+        $modelos = Modelo::all(); // Obtén todos los modelos disponibles
 
         $carpetaVista = match ($rol) {
             'COORDINACION SMART' => 'smart-tv',
@@ -158,7 +159,7 @@ class OrdenesTrabajoController extends Controller
         };
 
         if ($carpetaVista) {
-            return view("tickets.ordenes-trabajo.$carpetaVista.edit", compact('orden'));
+            return view("tickets.ordenes-trabajo.$carpetaVista.edit", compact('orden', 'modelos'));
         } else {
             abort(403, 'No tienes permiso para acceder a esta vista.');
         }
