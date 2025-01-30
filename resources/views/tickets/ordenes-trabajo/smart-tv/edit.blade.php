@@ -85,11 +85,6 @@
 
                     </div>
 
-                        <!-- Técnico -->
-                        <div>
-                            <label class="block text-sm font-medium">Técnico</label>
-                            <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tecnico->Nombre }}" readonly>
-                        </div>
                     <!-- Modelo (Editable) -->
                     <div>
                         <label for="idModelo" class="block text-sm font-medium">Modelo</label>
