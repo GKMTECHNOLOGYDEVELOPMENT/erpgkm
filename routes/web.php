@@ -308,7 +308,16 @@ Route::post('/validar/ruc', [TiendaController::class, 'validarRuc'])->name('vali
 Route::post('/validar/email', [TiendaController::class, 'validarEmail'])->name('validar.email');
 Route::post('/validar/celular', [TiendaController::class, 'validarCelular'])->name('validar.celular');
 Route::post('/validar/nombre', [TiendaController::class, 'validarNombre'])->name('validar.nombre');
-
+//Validaciones de cast
+Route::post('/validar/ruc', [CastController::class, 'validarRucCast'])->name('validar.ruccast');
+Route::post('/validar/email', [CastController::class, 'validarEmailCast'])->name('validar.emailcast');
+Route::post('/validar/celular', [CastController::class, 'validarTelefonoCast'])->name('validar.telefonocast');
+Route::post('/validar/nombre', [CastController::class, 'validarNombreCast'])->name('validar.nombrecast');
+//Validaciones de proveedores
+Route::post('/validar/ruc', [ProveedoresController::class, 'validarnumeroDocumentoProveedores'])->name('validar.numerodocumentoproveedores');
+Route::post('/validar/email', [ProveedoresController::class, 'validarEmailProveedores'])->name('validar.emailproveedores');
+Route::post('/validar/celular', [ProveedoresController::class, 'validarTelefonoProveedores'])->name('validar.telefonoproveedores');
+Route::post('/validar/nombre', [ProveedoresController::class, 'validarNombreProveedores'])->name('validar.nombreproveedores');
 
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');

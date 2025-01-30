@@ -86,6 +86,8 @@ document.addEventListener("alpine:init", () => {
 
 
         deleteTienda(idTienda) {
+            // console.log(`Se ha iniciado la solicitud para eliminar la tienda con ID: ${idTienda}`);
+        
             new window.Swal({
                 icon: 'warning',
                 title: '¿Estás seguro?',
@@ -97,17 +99,27 @@ document.addEventListener("alpine:init", () => {
                 customClass: 'sweet-alerts',
             }).then((result) => {
                 if (result.value) {
+                    // console.log(`Confirmada la eliminación de la tienda con ID: ${idTienda}`);
+        
                     // Hacer la solicitud de eliminación
                     fetch(`/api/tiendas/${idTienda}`, {
                         method: "DELETE",
                     })
                         .then((response) => {
-                            if (!response.ok) throw new Error("Error al eliminar tienda");
+                            // console.log(`Respuesta del servidor para la tienda con ID: ${idTienda}: ${response.status}`);
+                            
+                            // Verificar si la respuesta fue un error 400
+                            if (!response.ok) {
+                                return response.json().then((data) => {
+                                    throw new Error(data.error || "Error desconocido");
+                                });
+                            }
+                            
                             return response.json();
                         })
                         .then(() => {
-                            console.log(`Tienda ${idTienda} eliminada con éxito`);
-
+                            // console.log(`Tienda ${idTienda} eliminada con éxito`);
+        
                             // Actualizar la tabla eliminando la fila
                             this.tiendaData = this.tiendaData.filter(
                                 (tienda) => tienda.idTienda !== idTienda
@@ -116,7 +128,7 @@ document.addEventListener("alpine:init", () => {
                                 (row) =>
                                     row.cells[0].innerHTML === idTienda.toString()
                             );
-
+        
                             // Mostrar notificación de éxito
                             new window.Swal({
                                 title: '¡Eliminado!',
@@ -124,24 +136,28 @@ document.addEventListener("alpine:init", () => {
                                 icon: 'success',
                                 customClass: 'sweet-alerts',
                             }).then(() => {
-                                // Recargar la página después de la eliminación exitosa
+                                // console.log('Recargando la página después de la eliminación exitosa.');
                                 location.reload();
                             });
                         })
                         .catch((error) => {
-                            console.error("Error al eliminar tienda:", error);
-
+                            // console.error("Error al eliminar tienda:", error);
+        
                             // Mostrar notificación de error
                             new window.Swal({
                                 title: 'Error',
-                                text: 'Ocurrió un error al eliminar la tienda.',
+                                text: error.message || 'Ocurrió un error al eliminar la tienda.',
                                 icon: 'error',
                                 customClass: 'sweet-alerts',
                             });
                         });
+                } else {
+                    // console.log(`La eliminación de la tienda con ID: ${idTienda} fue cancelada.`);
                 }
             });
         }
+        
+        
 
     }));
 });

@@ -98,40 +98,55 @@
                         <!-- Formulario -->
                         <form class="p-5 space-y-4" id="castForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                    <input id="nombre" type="text" class="form-input w-full" name="nombre"
-                                        placeholder="Ingrese el nombre">
+                                    <input id="nombre" type="text" class="form-input w-full" placeholder="Ingrese el nombre" required
+                                        name="nombre">
+                                    <div id="nombre-error" class="text-red-500 text-sm" style="display: none;"></div>
+
                                 </div>
                                 <!-- RUC -->
                                 <div>
                                     <label for="ruc" class="block text-sm font-medium">RUC</label>
-                                    <input id="ruc" type="text" class="form-input w-full" name="ruc"
-                                        placeholder="Ingrese el RUC">
+                                    <input id="ruc" name="ruc" type="text" class="form-input w-full" 
+                                        placeholder="Ingrese el RUC" 
+                                        pattern="^\d{8,}$" required
+                                        title="Solo se permiten números y debe ser mayor a 7 digitos">
+                                    <div id="ruc-error" class="text-red-500 text-sm" style="display: none;"></div>
                                 </div>
                                 <!-- Teléfono -->
                                 <div>
                                     <label for="telefono" class="block text-sm font-medium">Teléfono</label>
                                     <input id="telefono" type="text" class="form-input w-full" name="telefono"
-                                        placeholder="Ingrese el teléfono">
+                                    required
+                                    pattern="^\d{8,}$" 
+                                    title="El número de celular debe contener solo números y ser mayor a 7 dígitos"
+                                    placeholder="Ingrese el teléfono">
+                                    <div id="telefono-error" class="text-red-500 text-sm" style="display: none;"></div>
                                 </div>
-                                <!-- Email -->
+                               <!-- Email -->
                                 <div>
                                     <label for="email" class="block text-sm font-medium">Email</label>
-                                    <input id="email" type="email" class="form-input w-full" name="email"
-                                        placeholder="Ingrese el email">
+                                    <input id="email" type="email" class="form-input w-full" placeholder="Ingrese el email"
+                                        name="email" required
+                                        title="Por favor, ingresa un correo electrónico válido. Ejemplo: usuario@dominio.com">
+                                        <div id="email-error" class="text-red-500 text-sm" style="display: none;"></div>
+
                                 </div>
+
                                 <!-- Dirección -->
                                 <div>
                                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                                    <input id="direccion" type="text" name="direccion" class="form-input w-full"
+                                    <input id="direccion" type="text" name="direccion" class="form-input w-full" required
                                         placeholder="Ingrese la dirección">
+                                        <div id="dirrecion-error" class="text-red-500 text-sm" style="display: none;"></div>
                                 </div>
                                 <!-- Departamento -->
                                 <div>
                                     <label for="departamento" class="block text-sm font-medium">Departamento</label>
-                                    <select id="departamento" name="departamento" class="form-input w-full">
+                                    <select id="departamento" name="departamento" class="form-input w-full" required>
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
                                             <option value="{{ $departamento['id_ubigeo'] }}">
@@ -139,27 +154,33 @@
                                             </option>
                                         @endforeach
                                     </select>
+
+                                    <div id="departamento-error" class="text-red-500 text-sm" style="display: none;"></div>
                                 </div>
+                                
                                 <!-- Provincia -->
                                 <div>
                                     <label for="provincia" class="block text-sm font-medium">Provincia</label>
-                                    <select id="provincia" name="provincia" class="form-input w-full" disabled>
+                                    <select id="provincia" name="provincia" class="form-input w-full" disabled required>
                                         <option value="" disabled selected>Seleccionar Provincia</option>
                                     </select>
+                                    <div id="provincia-error" class="text-red-500 text-sm" style="display: none;"></div>
                                 </div>
                                 <!-- Distrito -->
                                 <div>
                                     <label for="distrito" class="block text-sm font-medium">Distrito</label>
-                                    <select id="distrito" name="distrito" class="form-input w-full" disabled>
+                                    <select id="distrito" name="distrito" class="form-input w-full" disabled required>
                                         <option value="" disabled selected>Seleccionar Distrito</option>
                                     </select>
+
+                                    <div id="distrito-error" class="text-red-500 text-sm" style="display: none;"></div>
                                 </div>
                             </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="open = false">Cancelar</button>
-                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4" >Guardar</button>
                             </div>
                         </form>
                     </div>
@@ -167,6 +188,166 @@
             </div>
         </div>
     </div>
+
+    <script>
+$(document).ready(function() {
+    let formValid = true; // Bandera que indica si el formulario es válido
+
+    // Función para deshabilitar o habilitar el botón
+    function toggleSaveButton() {
+        console.log("Estado del formulario:", formValid ? "Válido" : "Inválido");
+        $('#castForm button[type="submit"]').prop('disabled', !formValid); // Habilitar o deshabilitar según formValid
+    }
+
+    // Función para verificar campos vacíos
+    function checkEmptyFields() {
+        formValid = true; // Asumimos que el formulario es válido inicialmente
+        const camposRequeridos = [
+            '#ruc', '#nombre', '#email', '#telefono', '#direccion',
+            '#departamento', '#provincia', '#distrito'
+        ];
+
+        camposRequeridos.forEach(function(campo) {
+            if ($(campo).is('select') && ($(campo).val() === "" || $(campo).val() === null)) {
+                formValid = false;
+                $(campo).addClass('border-red-500');
+                $(campo).siblings('.text-red-500').text('Este campo es obligatorio').show();
+            } else if (!$(campo).is('select') && $(campo).val() === '') {
+                formValid = false;
+                $(campo).addClass('border-red-500');
+                $(campo).siblings('.text-red-500').text('Este campo es obligatorio').show();
+            } else {
+                $(campo).removeClass('border-red-500');
+                $(campo).siblings('.text-red-500').hide();
+            }
+        });
+        toggleSaveButton(); // Llamar después de verificar campos vacíos
+    }
+
+    // Validación en tiempo real del RUC
+    $('#ruc').on('input', function() {
+        let ruc = $(this).val();
+        formValid = true; // Resetear la bandera antes de realizar la validación
+        if (/[^0-9]/.test(ruc) || ruc.length < 8) {
+            $('#ruc').addClass('border-red-500');
+            $('#ruc-error').text('El RUC debe tener al menos 8 dígitos y solo números').show();
+            formValid = false;
+        } else {
+            $.post('{{ route("validar.ruccast") }}', { ruc: ruc, _token: '{{ csrf_token() }}' }, function(response) {
+                if (response.exists) {
+                    $('#ruc').addClass('border-red-500');
+                    $('#ruc-error').text('El RUC ya está registrado').show();
+                    formValid = false;
+                } else {
+                    $('#ruc').removeClass('border-red-500');
+                    $('#ruc-error').hide();
+                }
+                toggleSaveButton(); // Actualizar el estado del botón después de la validación
+            });
+        }
+        toggleSaveButton(); // Asegurarse de que el estado se actualiza
+    });
+
+    // Validación en tiempo real del nombre
+    $('#nombre').on('input', function() {
+        let nombre = $(this).val();
+        formValid = true; // Resetear la bandera antes de realizar la validación
+        $.post('{{ route("validar.nombrecast") }}', { nombre: nombre, _token: '{{ csrf_token() }}' }, function(response) {
+            if (response.exists) {
+                $('#nombre').addClass('border-red-500');
+                $('#nombre-error').text('El nombre ya está registrado').show();
+                formValid = false;
+            } else {
+                $('#nombre').removeClass('border-red-500');
+                $('#nombre-error').hide();
+            }
+            toggleSaveButton(); // Actualizar el estado del botón después de la validación
+        });
+    });
+
+    // Validación en tiempo real del email
+    $('#email').on('input', function() {
+        let email = $(this).val();
+        formValid = true; // Resetear la bandera antes de realizar la validación
+        let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailPattern.test(email)) {
+            $('#email').addClass('border-red-500');
+            $('#email-error').text('Por favor ingrese un correo válido').show();
+            formValid = false;
+        } else {
+            $.post('{{ route("validar.emailcast") }}', { email: email, _token: '{{ csrf_token() }}' }, function(response) {
+                if (response.exists) {
+                    $('#email').addClass('border-red-500');
+                    $('#email-error').text('El correo electrónico ya está registrado').show();
+                    formValid = false;
+                } else {
+                    $('#email').removeClass('border-red-500');
+                    $('#email-error').hide();
+                }
+                toggleSaveButton(); // Actualizar el estado del botón después de la validación
+            });
+        }
+        toggleSaveButton(); // Asegurarse de que el estado se actualiza
+    });
+
+    // Validación en tiempo real del teléfono
+    $('#telefono').on('input', function() {
+        let telefono = $(this).val();
+        formValid = true; // Resetear la bandera antes de realizar la validación
+        if (/[^0-9]/.test(telefono) || telefono.length < 9) {
+            $('#telefono').addClass('border-red-500');
+            $('#telefono-error').text('El teléfono debe tener al menos 9 dígitos').show();
+            formValid = false;
+        } else {
+            $.post('{{ route("validar.telefonocast") }}', { telefono: telefono, _token: '{{ csrf_token() }}' }, function(response) {
+                if (response.exists) {
+                    $('#telefono').addClass('border-red-500');
+                    $('#telefono-error').text('El teléfono ya está registrado').show();
+                    formValid = false;
+                } else {
+                    $('#telefono').removeClass('border-red-500');
+                    $('#telefono-error').hide();
+                }
+                toggleSaveButton(); // Actualizar el estado del botón después de la validación
+            });
+        }
+        toggleSaveButton(); // Asegurarse de que el estado se actualiza
+    });
+
+    // Verificar que todos los campos sean válidos antes de enviar
+    $('#castForm').submit(function(event) {
+        event.preventDefault(); // Prevenir el envío hasta que validemos
+        checkEmptyFields(); // Verificar si hay campos vacíos
+
+        // Verificar que las validaciones asíncronas se han completado
+        $.when(
+            $.post('{{ route("validar.ruccast") }}', { ruc: $('#ruc').val(), _token: '{{ csrf_token() }}' }),
+            $.post('{{ route("validar.nombrecast") }}', { nombre: $('#nombre').val(), _token: '{{ csrf_token() }}' }),
+            $.post('{{ route("validar.emailcast") }}', { email: $('#email').val(), _token: '{{ csrf_token() }}' }),
+            $.post('{{ route("validar.telefonocast") }}', { telefono: $('#telefono').val(), _token: '{{ csrf_token() }}' })
+        ).done(function(rucResp, nombreResp, emailResp, telefonoResp) {
+            formValid = true; // Reseteamos la bandera a verdadero al inicio de la validación
+
+            // Verificamos si alguna de las respuestas indica un error
+            if (rucResp.exists || nombreResp.exists || emailResp.exists || telefonoResp.exists) {
+                formValid = false; // Si hay algún error, deshabilitamos el botón
+            }
+            toggleSaveButton(); // Actualizamos el estado del botón según el valor de formValid
+
+            // Si no hay errores, enviamos el formulario
+            if (formValid) {
+                $('#castForm')[0].submit();
+            } else {
+                alert("Hay campos con datos repetidos o inválidos. Corrija los errores.");
+            }
+        });
+    });
+});
+
+
+
+</script>
+
 
     <script>
         window.sessionMessages = {

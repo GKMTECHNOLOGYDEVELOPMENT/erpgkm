@@ -232,4 +232,39 @@ class ProveedoresController extends Controller
             return response()->json(['error' => 'Error al eliminar el proveedor'], 500);
         }
     }
+
+
+
+        // Validar RUC
+public function validarnumeroDocumentoProveedores(Request $request)
+{
+
+         $numeroDocumento = $request->numeroDocumento;
+         $exists = Proveedore::where('numeroDocumento', $numeroDocumento)->exists();
+         return response()->json(['exists' => $exists]);
+}
+// Validar email
+ public function validarEmailProveedores(Request $request)
+{
+
+     $email = $request->email;
+         $exists = Proveedore::where('email', $email)->exists();
+         return response()->json(['exists' => $exists]);
+}
+ 
+// Validar celular
+public function validarTelefonoProveedores(Request $request)
+{
+         $telefono = $request->telefono;
+         $exists = Proveedore::where('telefono', $telefono)->exists();
+         return response()->json(['exists' => $exists]);
+}
+ 
+// Validar nombre
+public function validarNombreProveedores(Request $request)
+{
+         $nombre = $request->nombre;
+         $exists = Proveedore::where('nombre', $nombre)->exists();
+         return response()->json(['exists' => $exists]);
+}
 }
