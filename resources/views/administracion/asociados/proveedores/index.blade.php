@@ -293,7 +293,7 @@ $(document).ready(function() {
     $('#nombre').on('input', function() {
         let nombre = $(this).val();
         formValid = true; // Resetear la bandera antes de realizar la validación
-        $.post('{{ route("validar.nombrecast") }}', { nombre: nombre, _token: '{{ csrf_token() }}' }, function(response) {
+        $.post('{{ route("validar.nombreproveedores") }}', { nombre: nombre, _token: '{{ csrf_token() }}' }, function(response) {
             if (response.exists) {
                 $('#nombre').addClass('border-red-500');
                 $('#nombre-error').text('El nombre ya está registrado').show();
@@ -362,7 +362,7 @@ $(document).ready(function() {
 
         // Verificar que las validaciones asíncronas se han completado
         $.when(
-            $.post('{{ route("validar.numeroDocumentocast") }}', { numeroDocumento: $('#numeroDocumento').val(), _token: '{{ csrf_token() }}' }),
+            $.post('{{ route("validar.numerodocumentoproveedores") }}', { numeroDocumento: $('#numeroDocumento').val(), _token: '{{ csrf_token() }}' }),
             $.post('{{ route("validar.nombreproveedores") }}', { nombre: $('#nombre').val(), _token: '{{ csrf_token() }}' }),
             $.post('{{ route("validar.emailproveedores") }}', { email: $('#email').val(), _token: '{{ csrf_token() }}' }),
             $.post('{{ route("validar.telefonoproveedores") }}', { telefono: $('#telefono').val(), _token: '{{ csrf_token() }}' })

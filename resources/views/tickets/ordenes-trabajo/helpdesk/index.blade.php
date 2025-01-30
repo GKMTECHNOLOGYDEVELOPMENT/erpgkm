@@ -10,6 +10,19 @@
             /* Asegura que el modal no restrinja contenido */
         }
     </style>
+
+    @if(session('success'))
+        <!-- success (verde) -->
+        <div class="relative flex items-center border p-3.5 rounded before:absolute before:top-1/2 ltr:before:left-0 rtl:before:right-0 rtl:before:rotate-180 before:-mt-2 before:border-l-8 before:border-t-8 before:border-b-8 before:border-t-transparent before:border-b-transparent before:border-l-inherit text-primary bg-primary-light !border-primary ltr:border-l-[64px] rtl:border-r-[64px] dark:bg-primary-dark-light">
+            <span class="absolute ltr:-left-11 rtl:-right-11 inset-y-0 text-white w-6 h-6 m-auto">
+                <svg> ... </svg> <!-- Aquí va el icono de éxito si lo deseas -->
+            </span>
+            <span class="ltr:pr-2 rtl:pl-2"><strong class="ltr:mr-1 rtl:ml-1">¡Éxito!</strong>{{ session('success') }}</span>
+            <button type="button" class="ltr:ml-auto rtl:mr-auto hover:opacity-80">
+                <svg> ... </svg> <!-- Icono de cerrar -->
+            </button>
+        </div>
+    @endif
     <div x-data="multipleTable">
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">

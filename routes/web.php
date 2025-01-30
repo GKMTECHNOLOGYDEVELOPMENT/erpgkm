@@ -284,7 +284,8 @@ Route::prefix('kits')->name('almacen.kits.')->group(function () {
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/', [OrdenesTrabajoController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [OrdenesTrabajoController::class, 'create'])->name('create')->middleware('auth'); // Crear una nueva orden de trabajo
-    Route::post('/store', [OrdenesTrabajoController::class, 'store'])->name('store'); // Guardar una nueva orden de trabajo
+    Route::post('/storehelpdesk', [OrdenesTrabajoController::class, 'storehelpdesk'])->name('storehelpdesk'); // Guardar una nueva orden de trabajo
+    Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart'); // Guardar una nueva orden de trabajo
     Route::get('/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit'); // Editar una orden de trabajo
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update'); // Actualizar una orden de trabajo
     Route::delete('/{id}', [OrdenesTrabajoController::class, 'destroy'])->name('destroy'); // Eliminar una orden de trabajo

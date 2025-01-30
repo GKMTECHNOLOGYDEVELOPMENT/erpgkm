@@ -99,46 +99,149 @@ class OrdenesTrabajoController extends Controller
 
 
     // Guardar una nueva orden de trabajo
-    public function store(Request $request)
-    {
-        try {
-            // Validar los datos
-            $validatedData = $request->validate([
-                'idTipotickets' => 'required|integer|exists:tipotickets,idTipotickets',
-                'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
-                'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
-                'idCliente' => 'required|integer|exists:cliente,idCliente',
-                'idTienda' => 'required|integer|exists:tienda,idTienda',
-                'tecnico' => 'required|integer|exists:usuarios,idUsuario',
-                'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
-            ]);
+    // public function storehelpdesk(Request $request)
+    // {
+    //     try {
+    //         // Validar los datos
+    //         $validatedData = $request->validate([
+    //             // 'idTipotickets' => 'required|integer|exists:tipotickets,idTipotickets',
+    //             'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
+    //             'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+    //             'idCliente' => 'required|integer|exists:cliente,idCliente',
+    //             'idTienda' => 'required|integer|exists:tienda,idTienda',
+    //             'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
+    //             'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
+    //             'fallaReportada' => 'required|string|max:255',
+    //         ]);
 
-            // Establecer la zona horaria explícitamente
-            $fechaCreacion = now()->setTimezone('America/Lima');
 
-            // Crear la nueva orden de trabajo
-            Ticket::create([
-                'idTipotickets' => $validatedData['idTipotickets'],
-                'numero_ticket' => $validatedData['nroTicket'],
-                'idClienteGeneral' => $validatedData['idClienteGeneral'],
-                'idCliente' => $validatedData['idCliente'],
-                'idTienda' => $validatedData['idTienda'],
-                'idTecnico' => $validatedData['tecnico'],
-                'tipoServicio' => $validatedData['tipoServicio'],
-                'idUsuario' => auth()->id(), // ID del usuario autenticado
-                'idEstadoots' => 17, // Estado inicial de la orden de trabajo
-                'fecha_creacion' => $fechaCreacion, // Fecha actual en la zona horaria de Perú
-            ]);
+    //         // Crear la nueva orden de trabajo
+    //         Ticket::create([
+    //             // 'idTipotickets' => $validatedData['idTipotickets'],
+    //             'numero_ticket' => $validatedData['numero_ticket'],
+    //             'idClienteGeneral' => $validatedData['idClienteGeneral'],
+    //             'idCliente' => $validatedData['idCliente'],
+    //             'idTienda' => $validatedData['idTienda'],
+    //             'idTecnico' => $validatedData['idTecnico'],
+    //             'tipoServicio' => $validatedData['tipoServicio'],
+    //             'idUsuario' => auth()->id(), // ID del usuario autenticado
+    //             'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+    //             'fallaReportada'=> $validatedData['fallaReportada'],
+    //         ]);
 
-            return response()->json(['success' => true, 'message' => 'Orden de trabajo creada correctamente.']);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['success' => false, 'message' => 'Errores de validación.', 'errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            Log::error('Error al crear una orden de trabajo: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Ocurrió un error al crear la orden de trabajo.'], 500);
-        }
+    //         return redirect()->route('ordenes.index')->with('success', 'Orden de trabajo creada correctamente.');
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         return response()->json(['success' => false, 'message' => 'Errores de validación.', 'errors' => $e->errors()], 422);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error al crear una orden de trabajo: ' . $e->getMessage());
+    //         return response()->json(['success' => false, 'message' => 'Ocurrió un error al crear la orden de trabajo.'], 500);
+    //     }
+    // }
+
+    // Guardar una nueva orden de trabajo
+public function storehelpdesk(Request $request)
+{
+    try {
+        // Validar los datos
+        $validatedData = $request->validate([
+            'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
+            'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+            'idCliente' => 'required|integer|exists:cliente,idCliente',
+            'idTienda' => 'required|integer|exists:tienda,idTienda',
+            'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
+            'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
+            'fallaReportada' => 'required|string|max:255',
+        ]);
+
+        // Crear la nueva orden de trabajo
+        Ticket::create([
+            'numero_ticket' => $validatedData['numero_ticket'],
+            'idClienteGeneral' => $validatedData['idClienteGeneral'],
+            'idCliente' => $validatedData['idCliente'],
+            'idTienda' => $validatedData['idTienda'],
+            'idTecnico' => $validatedData['idTecnico'],
+            'tipoServicio' => $validatedData['tipoServicio'],
+            'idUsuario' => auth()->id(), // ID del usuario autenticado
+            'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+            'fallaReportada'=> $validatedData['fallaReportada'],
+            'fecha_creacion' => now(), // Establece la fecha y hora actuales
+
+        ]);
+
+        // Redirigir con un mensaje de éxito
+        return redirect()->route('ordenes.index')->with('success', 'Orden de trabajo creada correctamente.');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Si la validación falla, redirigir con los errores
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    } catch (\Exception $e) {
+        // En caso de cualquier otro error
+        return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
     }
+}
 
+
+public function storesmart(Request $request)
+{
+    try {
+        Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
+
+        // Validación de los datos
+        $validatedData = $request->validate([
+            'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
+            'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+            'idCliente' => 'required|integer|exists:cliente,idCliente',
+            'idTienda' => 'required|integer|exists:tienda,idTienda',
+            'direccion' => 'required|string|max:255',
+            'idMarca' => 'required|integer|exists:marca,idMarca',
+            'idModelo' => 'required|integer|exists:modelo,idModelo',
+            'serie' => 'required|string|max:255',
+            'tecnico' => 'required|integer|exists:usuarios,idUsuario',
+            'fechaCompra' => 'required|date_format:Y-m-d', // Asegúrate de usar este formato de fecha
+            'fallaReportada' => 'required|string|max:255',
+            'lat' => 'nullable|string|max:255',
+            'lng' => 'nullable|string|max:255',
+        ]);
+
+        Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
+
+        // Crear la nueva orden de trabajo
+        $ticket = Ticket::create([
+            'numero_ticket' => $validatedData['nroTicket'],
+            'idClienteGeneral' => $validatedData['idClienteGeneral'],
+            'idCliente' => $validatedData['idCliente'],
+            'idTienda' => $validatedData['idTienda'],
+            'direccion' => $validatedData['direccion'],
+            'idMarca' => $validatedData['idMarca'],
+            'idModelo' => $validatedData['idModelo'],
+            'serie' => $validatedData['serie'],
+            'idTecnico' => $validatedData['tecnico'],
+            'fechaCompra' => $validatedData['fechaCompra'],
+            'fallaReportada' => $validatedData['fallaReportada'],
+            'lat' => $validatedData['lat'],
+            'lng' => $validatedData['lng'],
+            'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+            'idUsuario' => auth()->id(), // ID del usuario autenticado
+            'fecha_creacion' => now(), // Fecha de creación
+        ]);
+
+        Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
+
+        // Redirigir con un mensaje de éxito
+        return redirect()->route('ordenes.index')->with('success', 'Orden de trabajo creada correctamente.');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // En caso de error en la validación
+        Log::error('Errores de validación', ['errors' => $e->errors()]);
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    } catch (\Exception $e) {
+        // En caso de cualquier otro error
+        Log::error('Error al crear la orden de trabajo', ['exception' => $e->getMessage()]);
+        return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
+    }
+}
+
+
+ 
 
 
 
