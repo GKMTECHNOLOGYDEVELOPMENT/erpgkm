@@ -192,4 +192,9 @@ class Ticket extends Model
         // La relación es belongsTo porque un Ticket "pertenece" a un TipoServicio
         return $this->belongsTo(TipoServicio::class, 'tipoServicio', 'idTipoServicio');
     }
+
+	public function rol()
+    {
+        return $this->belongsTo(Rol::class, 'idRol', 'id'); // Relación con la tabla "rol"
+    }
 }

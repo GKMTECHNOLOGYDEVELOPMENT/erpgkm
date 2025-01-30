@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\tickets;
 
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Ticket; // Asegúrate de tener este modelo
@@ -20,38 +21,81 @@ use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 
 class OrdenesTrabajoController extends Controller
 {
-    // Mostrar la vista principal
+    // Mostrar la vista principal según el rol del usuario
     public function index()
     {
-        // Obtén los datos necesarios para el formulario
-        $clientesGenerales = ClienteGeneral::all(); // Reemplaza con el modelo correcto
-        $tiposServicio = TipoServicio::all(); // Reemplaza con el modelo correcto
-        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
-        $tiposTickets = Tipoticket::all(); // Obtiene los tipos de tickets
-        $clientes = Cliente::all(); // Obtiene todos los clientes
-        $tiendas = Tienda::all(); // Obtiene todas las tiendas
-        $marcas = Marca::all(); // Obtener todas las marcas
-        $modelos = Modelo::all(); // Obtener todos los modelos
+        // Obtener usuario autenticado y su rol
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
-        // Retorna la vista y pasa las variables
-        return view('tickets.ordenes-trabajo.index', compact('clientesGenerales', 'tiposServicio', 'usuarios', 'tiposTickets', 'clientes', 'tiendas', 'marcas', 'modelos')); // Asegúrate de que esta vista exista
+        // Obtener los datos necesarios
+        $clientesGenerales = ClienteGeneral::all();
+        $tiposServicio = TipoServicio::all();
+        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
+        $tiposTickets = Tipoticket::all();
+        $clientes = Cliente::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+        $modelos = Modelo::all();
+
+        // Determinar la carpeta de vistas según el rol
+        $carpetaVista = match ($rol) {
+            'COORDINACION SMART' => 'smart-tv',
+            'COORDINACION HELP DESK' => 'helpdesk',
+            default => '',
+        };
+
+        if ($carpetaVista) {
+            return view("tickets.ordenes-trabajo.$carpetaVista.index", compact(
+                'clientesGenerales',
+                'tiposServicio',
+                'usuarios',
+                'tiposTickets',
+                'clientes',
+                'tiendas',
+                'marcas',
+                'modelos'
+            ));
+        } else {
+            abort(403, 'No tienes permiso para acceder a esta vista.');
+        }
     }
 
-    public function create()
-{
-    // Obtener clientes, técnicos, marcas, modelos, tipos de servicio, etc.
-    $clientesGenerales = ClienteGeneral::where('estado', 1)->get();
-    $clientes = Cliente::where('estado', 1)->get();
-    $tiendas = Tienda::all();
-    $usuarios = Usuario::where('idTipoUsuario', 4)->get(); // Técnicos
-    $tiposServicio = TipoServicio::all();
-    $marcas = Marca::all();
-    $modelos = Modelo::all();
 
-    return view('tickets.ordenes-trabajo.create', compact(
-        'clientesGenerales', 'clientes', 'tiendas', 'usuarios', 'tiposServicio', 'marcas', 'modelos'
-    ));
-}
+    // Cargar la vista de creación según el rol del usuario
+    public function create()
+    {
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
+
+        $clientesGenerales = ClienteGeneral::where('estado', 1)->get();
+        $clientes = Cliente::where('estado', 1)->get();
+        $tiendas = Tienda::all();
+        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
+        $tiposServicio = TipoServicio::all();
+        $marcas = Marca::all();
+        $modelos = Modelo::all();
+
+        $carpetaVista = match ($rol) {
+            'COORDINACION SMART' => 'smart-tv',
+            'COORDINACION HELP DESK' => 'helpdesk',
+            default => '',
+        };
+
+        if ($carpetaVista) {
+            return view("tickets.ordenes-trabajo.$carpetaVista.create", compact(
+                'clientesGenerales',
+                'clientes',
+                'tiendas',
+                'usuarios',
+                'tiposServicio',
+                'marcas',
+                'modelos'
+            ));
+        } else {
+            abort(403, 'No tienes permiso para acceder a esta vista.');
+        }
+    }
 
 
     // Guardar una nueva orden de trabajo
@@ -99,11 +143,25 @@ class OrdenesTrabajoController extends Controller
 
 
 
-    // Editar una orden de trabajo
+    // Editar orden de trabajo según el rol
     public function edit($id)
     {
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
+
         $orden = Ticket::findOrFail($id);
-        return view('tickets.ordenes-trabajo.edit', compact('orden'));
+
+        $carpetaVista = match ($rol) {
+            'COORDINACION SMART' => 'smart-tv',
+            'COORDINACION HELP DESK' => 'helpdesk',
+            default => '',
+        };
+
+        if ($carpetaVista) {
+            return view("tickets.ordenes-trabajo.$carpetaVista.edit", compact('orden'));
+        } else {
+            abort(403, 'No tienes permiso para acceder a esta vista.');
+        }
     }
 
     // Actualizar una orden de trabajo
@@ -180,7 +238,7 @@ class OrdenesTrabajoController extends Controller
                 'color' => $orden->estado_ot->color ?? '#000000', // Color del estado
             ];
         });
-    
+
         return response()->json($ordenes);
     }
 
