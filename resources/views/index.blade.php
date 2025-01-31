@@ -1,3 +1,5 @@
+
+
 <x-layout.default>
     <script defer src="/assets/js/apexcharts.js"></script>
     <div x-data="sales">

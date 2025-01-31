@@ -48,58 +48,42 @@ use App\Exports\MarcasExport;
 use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UbigeoController;
+use App\Http\Controllers\usuario\UsuarioController;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
 
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+
 // Ruta para mostrar el formulario de login
-Route::get('/', function () { return view('auth.cover-login'); })->name('login');
+// Route::get('/login', function () { return view('auth.login'); })->name('login');
 // Ruta para manejar el envío del formulario de login
-Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login');
 // Ruta para cerrar sesión
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Ruta protegida con middleware 'auth'
 Route::post('/check-email', [AuthController::class, 'checkEmail']);
 // Ruta para la pantalla de bloqueo
 Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->name('auth.lockscreen');
 // Ruta para la pantalla de restablecimiento de contraseña
 Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'show'])->name('auth.password-reset');
-
-
+Route::get('/', [AdministracionController::class, 'index'])->name('index')->middleware('auth');
 Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion')->middleware('auth');
 Route::post('/configuracion', [ConfiguracionController::class, 'store'])->name('configuracion.store')->middleware('auth');
 Route::post('/configuracion/delete', [ConfiguracionController::class, 'delete'])->name('configuracion.delete');
-// Route::view('/auth/boxed-lockscreen', 'auth.boxed-lockscreen');
-// Route::view('/auth/boxed-signin', 'auth.boxed-signin');
-// Route::view('/auth/boxed-signup', 'auth.boxed-signup');
-// Route::view('/auth/boxed-password-reset', 'auth.boxed-password-reset');
-//Route::view('/auth/cover-login', 'auth.cover-login');
-//Route::view('/auth/cover-register', 'auth.cover-register')
-// Route::view('/auth/cover-lockscreen', 'auth.cover-lockscreen');
-//Route::view('/auth/cover-password-reset', 'auth.cover-password-reset');
-
-// Route::view('/analytics', 'analytics');
-// Route::view('/finance', 'finance');
-// Route::view('/crypto', 'crypto');
-// Ruta para el dashboard de administración
-Route::get('/index', [AdministracionController::class, 'index'])->name('index')->middleware('auth');
-
 // Ruta para el dashboard de almacén
 Route::get('/almacen', [AlmacenController::class, 'index'])->name('almacen')->middleware('auth');
-
 // Ruta para el dashboard comercial
 Route::get('/comercial', [ComercialController::class, 'index'])->name('commercial')->middleware('auth');
-
 // Ruta para el dashboard de tickets
 Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->middleware('auth');
-
 // Ruta para Administración de Usuarios
 Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
 // Ruta para Administración de Compras
 Route::get('/administracion/compras', [CompraController::class, 'index'])->name('administracion.compra')->middleware('auth');
 //Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
-
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
 Route::get('/exportar-clientes-general', function () { return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx'); })->name('clientes-general.exportExcel');
 Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF']) ->name('clientes-general.exportPDF')->middleware('auth');
@@ -303,32 +287,35 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::post('/check-nombre', [OrdenesTrabajoController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
 });
 
-
 // Rutas para obtener modelos por marca
 Route::get('/modelos/{idMarca}', [OrdenesTrabajoController::class, 'obtenerModelosPorMarca']);
+Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('perfil');
+Route::get('/usuario', [UsuarioController::class, 'index'])->name('usuario');
 
+Route::get('/create/usuario', [UsuarioController::class, 'create'])->name('usuario.create');
+Route::get('/usuario/{usuario}/edit', [UsuarioController::class, 'edit'])->name('usuario.edit');
+Route::post('/usuario/store', [UsuarioController::class, 'store'])->name('usuarios.store');
+Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
 
 
 // Route::get('/informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'generarInformePdf'])->name('informe.pdf');
 Route::get('/ver-informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verInforme']);
 Route::get('/ver-hoja-entrega-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verHojaEntrega']);
-
-
 //Validaciones de tienda
-Route::post('/validar/ruc', [TiendaController::class, 'validarRuc'])->name('validar.ruc');
-Route::post('/validar/email', [TiendaController::class, 'validarEmail'])->name('validar.email');
-Route::post('/validar/celular', [TiendaController::class, 'validarCelular'])->name('validar.celular');
-Route::post('/validar/nombre', [TiendaController::class, 'validarNombre'])->name('validar.nombre');
+Route::post('/validar/ructienda', [TiendaController::class, 'validarRuc'])->name('validar.ruc');
+Route::post('/validar/emailtienda', [TiendaController::class, 'validarEmail'])->name('validar.email');
+Route::post('/validar/celulartienda', [TiendaController::class, 'validarCelular'])->name('validar.celular');
+Route::post('/validar/nombretienda', [TiendaController::class, 'validarNombre'])->name('validar.nombre');
 //Validaciones de cast
-Route::post('/validar/ruc', [CastController::class, 'validarRucCast'])->name('validar.ruccast');
-Route::post('/validar/email', [CastController::class, 'validarEmailCast'])->name('validar.emailcast');
-Route::post('/validar/celular', [CastController::class, 'validarTelefonoCast'])->name('validar.telefonocast');
-Route::post('/validar/nombre', [CastController::class, 'validarNombreCast'])->name('validar.nombrecast');
+Route::get('/validar/ruccast', [CastController::class, 'validarRucCast'])->name('validar.ruccast');
+Route::get('/validar/emailcast', [CastController::class, 'validarEmailCast'])->name('validar.emailcast');
+Route::get('/validar/celularcast', [CastController::class, 'validarTelefonoCast'])->name('validar.telefonocast');
+Route::get('/validar/nombrecast', [CastController::class, 'validarNombreCast'])->name('validar.nombrecast');
 //Validaciones de proveedores
-Route::post('/validar/ruc', [ProveedoresController::class, 'validarnumeroDocumentoProveedores'])->name('validar.numerodocumentoproveedores');
-Route::post('/validar/email', [ProveedoresController::class, 'validarEmailProveedores'])->name('validar.emailproveedores');
-Route::post('/validar/celular', [ProveedoresController::class, 'validarTelefonoProveedores'])->name('validar.telefonoproveedores');
-Route::post('/validar/nombre', [ProveedoresController::class, 'validarNombreProveedores'])->name('validar.nombreproveedores');
+Route::post('/validar/rucproveedores', [ProveedoresController::class, 'validarnumeroDocumentoProveedores'])->name('validar.numerodocumentoproveedores');
+Route::post('/validar/emailproveedores', [ProveedoresController::class, 'validarEmailProveedores'])->name('validar.emailproveedores');
+Route::post('/validar/celularproveedores', [ProveedoresController::class, 'validarTelefonoProveedores'])->name('validar.telefonoproveedores');
+Route::post('/validar/nombreproveedores', [ProveedoresController::class, 'validarNombreProveedores'])->name('validar.nombreproveedores');
 
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');
@@ -409,7 +396,7 @@ Route::view('/forms/markdown-editor', 'forms.markdown-editor');
 Route::view('/forms/date-picker', 'forms.date-picker');
 Route::view('/forms/clipboard', 'forms.clipboard');
 
-Route::view('/users/profile', 'users.profile');
+
 Route::view('/users/user-account-settings', 'users.user-account-settings');
 
 Route::view('/pages/knowledge-base', 'pages.knowledge-base');

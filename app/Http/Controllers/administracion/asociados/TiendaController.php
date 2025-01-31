@@ -242,8 +242,6 @@ public function destroy($id)
         'message' => 'Tienda eliminada con éxito'
     ], 200);
 }
-
-
 public function getAll()
 {
     // Obtén todos los datos de la tabla tienda
@@ -265,7 +263,6 @@ public function getAll()
     // Retorna los datos en formato JSON
     return response()->json($tiendasData);
 }
- 
 // Validar RUC
 public function validarRuc(Request $request)
 {

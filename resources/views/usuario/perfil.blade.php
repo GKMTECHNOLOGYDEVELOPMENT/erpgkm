@@ -13,7 +13,7 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-5 mb-5">
                 <div class="panel">
                     <div class="flex items-center justify-between mb-5">
-                        <h5 class="font-semibold text-lg dark:text-white-light">Profile</h5>
+                        <h5 class="font-semibold text-lg dark:text-white-light">Perfil</h5>
                         <a href="/users/user-account-settings"
                             class="ltr:ml-auto rtl:mr-auto btn btn-primary p-2 rounded-full">
 
@@ -34,7 +34,7 @@
                         <div class="flex flex-col justify-center items-center">
                             <img src="/assets/images/profile-34.jpeg" alt="image"
                                 class="w-24 h-24 rounded-full object-cover  mb-5" />
-                            <p class="font-semibold text-primary text-xl">Jimmy Turner</p>
+                            <p class="font-semibold text-primary text-xl">{{ $usuario->Nombre }} {{ $usuario->apellidoPaterno}} </p>
                         </div>
                         <ul class="mt-5 flex flex-col max-w-[160px] m-auto space-y-4 font-semibold text-white-dark">
                             <li class="flex items-center gap-2">
@@ -60,7 +60,7 @@
                                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                                         stroke-linejoin="round" />
                                 </svg>
-                                Web Developer
+                                {{ $usuario->rol->nombre }}
                             </li>
                             <li class="flex items-center gap-2">
 
@@ -76,7 +76,7 @@
                                     <path opacity="0.5" d="M2 9H22" stroke="currentColor" stroke-width="1.5"
                                         stroke-linecap="round" />
                                 </svg>
-                                Jan 20, 1989
+                                {{ $usuario->fechaNacimiento }}
                             </li>
                             <li class="flex items-center gap-2">
 
@@ -88,7 +88,7 @@
                                     <circle cx="12" cy="10" r="3" stroke="currentColor"
                                         stroke-width="1.5" />
                                 </svg>
-                                New York, USA
+                               {{ $usuario->direccion }}
                             </li>
                             <li>
                                 <a href="javascript:;" class="flex items-center gap-2">
@@ -102,7 +102,7 @@
                                             d="M6 8L8.1589 9.79908C9.99553 11.3296 10.9139 12.0949 12 12.0949C13.0861 12.0949 14.0045 11.3296 15.8411 9.79908L18 8"
                                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                     </svg>
-                                    <span class="text-primary truncate">jimmy@gmail.com</span></a>
+                                    <span class="text-primary truncate"> {{ $usuario->correo }}</span></a>
                             </li>
                             <li class="flex items-center gap-2">
 
@@ -118,7 +118,7 @@
                                         d="M16.1007 13.3589C16.1007 13.3589 15.0181 14.4353 12.0631 11.4971C9.10807 8.55886 10.1907 7.48242 10.1907 7.48242"
                                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                 </svg>
-                                <span class="whitespace-nowrap" dir="ltr">+1 (530) 555-12121</span>
+                                <span class="whitespace-nowrap" dir="ltr">{{ $usuario->telefono }}</span>
                             </li>
                         </ul>
                         <ul class="mt-7 flex items-center justify-center gap-2">

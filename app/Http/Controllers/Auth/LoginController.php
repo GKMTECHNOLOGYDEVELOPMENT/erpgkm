@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Models\Usuario;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 
-class AuthController extends Controller
+class LoginController extends Controller
 {
-    public function showLoginForm()
+      public function showLoginForm()
     {
-        return view('auth.boxed-signin');
+        return view('auth.login');
     }
 
     public function login(Request $request)
@@ -24,7 +24,7 @@ class AuthController extends Controller
         ]);
     
         // Intentar obtener el usuario por correo
-        $usuario = \App\Models\Usuario::where('correo', $credentials['email'])->first();
+        $usuario = Usuario::where('correo', $credentials['email'])->first();
     
         if (!$usuario) {
             return back()->withErrors([
@@ -45,34 +45,34 @@ class AuthController extends Controller
     
         return redirect()->route('index');
     }
-    
 
-    public function checkEmail(Request $request)
-{
-    $email = $request->input('email');
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
     
-    // Verificar si el correo existe en la base de datos
-    $usuario = Usuario::where('correo', $email)->first();
-
-    if ($usuario) {
-        return response()->json(['exists' => true]);
-    } else {
-        return response()->json(['exists' => false]);
+        // Eliminar la cookie de la sesión manualmente si persiste
+        $cookie = cookie('laravel_session', '', -1); 
+    
+        return redirect('/login')->withCookie($cookie);
     }
-}
-    
 
-    
-public function logout(Request $request)
+    public function someFunction()
 {
-    Auth::logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+    // Obtener el usuario autenticado
+    $usuario = Auth::user();
 
-    // Eliminar la cookie de la sesión manualmente si persiste
-    $cookie = cookie('laravel_session', '', -1); 
-
-    return redirect('/login')->withCookie($cookie);
+    // Pasar el usuario a la vista
+    return view('components.common.header', compact('usuario'));
 }
+
+
+public function show($id)
+{
+    $usuario = Auth::user();  // O lo que necesites para obtener el usuario
+    return view('components.common.header', compact('usuario'));
+}
+
 
 }

@@ -568,7 +568,7 @@
                 </li>
 
                 <li class="menu nav-item">
-                    <a href="{{ route('administracion.usuarios') }}" class="nav-link group">
+                    <a href="{{ route('usuario') }}" class="nav-link group">
                         <div class="flex items-center">
 
                             <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0"

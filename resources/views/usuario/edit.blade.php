@@ -1,17 +1,20 @@
 <x-layout.default>
 
+    <!-- Incluir el archivo CSS de Nice Select -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
                 <a href="javascript:;" class="text-primary hover:underline">Users</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                <span>Account Settings</span>
+                <span>Create Usuario</span>
             </li>
         </ul>
         <div class="pt-5">
             <div class="flex items-center justify-between mb-5">
-                <h5 class="font-semibold text-lg dark:text-white-light">Settings</h5>
+                <h5 class="font-semibold text-lg dark:text-white-light">Crear</h5>
             </div>
             <div x-data="{ tab: 'home' }">
                 <ul
@@ -90,76 +93,82 @@
                 </ul>
                 <template x-if="tab === 'home'">
                     <div>
-                        <form
-                            class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
-                            <h6 class="text-lg font-bold mb-5">General Information</h6>
+                        <form action="{{ route('usuarios.update', $usuario->idUsuario) }}" method="POST" enctype="multipart/form-data" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
+                            @csrf
+                            @method('PUT')
+                            <h6 class="text-lg font-bold mb-5">Información General</h6>
                             <div class="flex flex-col sm:flex-row">
+                                <!-- Imagen de perfil -->
                                 <div class="ltr:sm:mr-4 rtl:sm:ml-4 w-full sm:w-2/12 mb-5">
-                                    <img src="/assets/images/profile-34.jpeg" alt="image"
-                                        class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto" />
+                                    <label for="profile-image">
+                                        <img id="profile-img" src="{{ $usuario->avatar ? 'data:image/jpeg;base64,'.base64_encode($usuario->avatar) : '/assets/images/profile-34.jpeg' }}" alt="image"
+                                            class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto cursor-pointer" />
+                                    </label>
+                                    <input type="file" id="profile-image" name="profile-image" style="display:none;" accept="image/*" onchange="previewImage(event)" />
                                 </div>
+
+                                <!-- Formulario de campos -->
                                 <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <!-- Nombre Completo -->
                                     <div>
-                                        <label for="name">Full Name</label>
-                                        <input id="name" type="text" placeholder="Jimmy Turner"
-                                            class="form-input" />
+                                    <label for="Nombre">Nombre Completo</label>
+                                    <input id="Nombre" name="Nombre" type="text" value="{{ $usuario->Nombre }}" class="form-input" />
                                     </div>
+
+                                    <!-- Apellido Paterno -->
                                     <div>
-                                        <label for="profession">Profession</label>
-                                        <input id="profession" type="text" placeholder="Web Developer"
-                                            class="form-input" />
+                                    <label for="apellidoPaterno">Apellido Paterno</label>
+                                    <input id="apellidoPaterno" name="apellidoPaterno" type="text" value="{{ $usuario->apellidoPaterno }}" class="form-input" />
                                     </div>
+
+                                    <!-- Apellido Materno -->
                                     <div>
-                                        <label for="country">Country</label>
-                                        <select id="country" class="form-select text-white-dark">
-                                            <option>All Countries</option>
-                                            <option selected="">United States</option>
-                                            <option>India</option>
-                                            <option>Japan</option>
-                                            <option>China</option>
-                                            <option>Brazil</option>
-                                            <option>Norway</option>
-                                            <option>Canada</option>
-                                        </select>
+                                    <label for="apellidoMaterno">Apellido Materno</label>
+                                    <input id="apellidoMaterno" name="apellidoMaterno" type="text" value="{{ $usuario->apellidoMaterno }}" class="form-input" />
                                     </div>
+
+                                    <!-- Tipo Documento -->
                                     <div>
-                                        <label for="address">Address</label>
-                                        <input id="address" type="text" placeholder="New York"
-                                            class="form-input" />
-                                    </div>
+                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
+                                        <option value="" disabled>Seleccionar Tipo Documento</option>
+                                        @foreach ($tiposDocumento as $tipoDocumento)
+                                            <option value="{{ $tipoDocumento->idTipoDocumento }}" {{ $tipoDocumento->idTipoDocumento == $usuario->idTipoDocumento ? 'selected' : '' }}>
+                                                {{ $tipoDocumento->nombre }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                    <!-- Documento -->
                                     <div>
-                                        <label for="location">Location</label>
-                                        <input id="location" type="text" placeholder="Location"
-                                            class="form-input" />
+                                    <label for="documento">Documento</label>
+                                    <input id="documento" name="documento" type="text" value="{{ $usuario->documento }}" class="form-input" />
                                     </div>
+
+                                    <!-- Teléfono -->
                                     <div>
-                                        <label for="phone">Phone</label>
-                                        <input id="phone" type="text" placeholder="+1 (530) 555-12121"
-                                            class="form-input" />
+                                         <label for="telefono">Teléfono</label>
+        <input id="telefono" type="text" name="telefono" value="{{ $usuario->telefono }}" class="form-input" />
                                     </div>
+
+                                    <!-- Email -->
                                     <div>
-                                        <label for="email">Email</label>
-                                        <input id="email" type="email" placeholder="Jimmy@gmail.com"
-                                            class="form-input" />
+                                    <label for="correo">Email</label>
+                                    <input id="correo" name="correo" type="email" value="{{ $usuario->correo }}" class="form-input" />
                                     </div>
-                                    <div>
-                                        <label for="web">Website</label>
-                                        <input id="web" type="text" placeholder="Enter URL"
-                                            class="form-input" />
-                                    </div>
-                                    <div>
-                                        <label class="inline-flex cursor-pointer">
-                                            <input type="checkbox" class="form-checkbox" />
-                                            <span class="text-white-dark relative checked:bg-none">Make this my default
-                                                address</span>
-                                        </label>
-                                    </div>
+
+                                    <!-- Botones -->
                                     <div class="sm:col-span-2 mt-3">
-                                        <button type="button" class="btn btn-primary">Save</button>
+                                        <button type="submit" class="btn btn-primary mr-2">Actualizar</button>
+                                        <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
                                     </div>
                                 </div>
                             </div>
                         </form>
+
+
+
                         <form
                             class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
                             <h6 class="text-lg font-bold mb-5">Social</h6>
@@ -567,5 +576,71 @@
             </div>
         </div>
     </div>
+
+    <!-- <script>
+    // Obtener el contexto del lienzo
+    var canvas = document.getElementById('firmaCanvas');
+    var ctx = canvas.getContext('2d');
+    var isDrawing = false;
+
+    // Iniciar dibujo
+    canvas.addEventListener('mousedown', function(e) {
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    // Continuar dibujo
+    canvas.addEventListener('mousemove', function(e) {
+        if (isDrawing) {
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+        }
+    });
+
+    // Detener dibujo
+    canvas.addEventListener('mouseup', function() {
+        isDrawing = false;
+    });
+
+    // Limpiar firma
+    document.getElementById('limpiarFirma').addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+</script> -->
+    <script>
+        // Inicializar Select2
+        document.addEventListener("DOMContentLoaded", function() {
+            // Inicializar todos los select con la clase "select2"
+            document.querySelectorAll('.select2').forEach(function(select) {
+                NiceSelect.bind(select, {
+                    searchable: true
+                });
+            });
+        })
+    </script>
+    <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
+    <!-- Agrega Select2 JS antes del cierre de </body> -->
+
+    <!-- Cargar jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+    <!-- <script>
+    $(document).ready(function() {
+        $('select').niceSelect();  // Aplica Nice Select a todos los selectores en la página
+    });
+</script> -->
+    <script>
+        // Función para mostrar la imagen seleccionada
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                var output = document.getElementById('profile-img');
+                output.src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
 
 </x-layout.default>

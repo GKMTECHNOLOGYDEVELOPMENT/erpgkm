@@ -24,9 +24,6 @@ class CastController extends Controller
     public function edit($id)
     {
         $cast = Cast::findOrFail($id); // Buscar cast por ID
-
-
-
         // Obtener los datos de los archivos JSON
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
         $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
