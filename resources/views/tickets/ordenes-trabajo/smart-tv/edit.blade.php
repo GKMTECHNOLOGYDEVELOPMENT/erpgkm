@@ -89,7 +89,7 @@
 
                     <!-- Modelo (Editable) -->
                     <div>
-                        <label for="idModelo" class="block text-sm font-medium">Modelo</label>
+                        <label for="idModelo" class="block text-sm font-medium">Modelos</label>
                         <select id="idModelo" name="idModelo" class="select2 w-full" style="display:none">
                             <option value="" disabled>Seleccionar Modelo</option>
                             @foreach ($modelos as $modelo)
