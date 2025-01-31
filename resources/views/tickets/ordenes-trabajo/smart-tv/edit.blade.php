@@ -173,34 +173,19 @@
                 <div id="visitasContainer" class="mt-5 space-y-4"></div>
             </div>
 
-            <!-- Modal para seleccionar fecha y hora -->
-            <div id="modalFecha"
+            <!-- Modal para crear visita -->
+            <div id="modalCrearVisita"
                 class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
                 <div class="modal-content bg-white p-4 rounded shadow-lg w-96">
-                    <h5 class="mb-4">Seleccionar Fecha y Hora</h5>
-                    <input id="fechaInput" type="datetime-local" class="form-input w-full p-2 border rounded-lg">
-                    <div class="flex justify-end mt-4">
-                        <button type="button" class="btn btn-outline-danger mr-2"
-                            onclick="cerrarModalFecha()">Cancelar</button>
-                        <button type="button" class="btn btn-primary" onclick="guardarFecha()">Guardar</button>
-                    </div>
-                </div>
-            </div>
-            <!-- Modal para subir/ver imagen -->
-            <div id="modalImagen"
-                class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-                <div class="modal-content bg-white p-4 rounded shadow-lg w-96">
-                    <h5 class="mb-4">Subir Imagen</h5>
-                    <input id="inputImagen" type="file" accept="image/*"
+                    <h5 class="mb-4">Crear Nueva Visita</h5>
+                    <input id="nombreVisitaInput" type="text" placeholder="Nombre de la visita"
+                        class="form-input w-full p-2 border rounded-lg mb-4">
+                    <input id="fechaVisitaInput" type="datetime-local"
                         class="form-input w-full p-2 border rounded-lg">
-                    <div class="mt-4 flex justify-center">
-                        <img id="previewImagen" src="/assets/images/file-preview.svg"
-                            class="w-40 h-40 object-cover hidden">
-                    </div>
                     <div class="flex justify-end mt-4">
                         <button type="button" class="btn btn-outline-danger mr-2"
-                            onclick="cerrarModalImagen()">Cancelar</button>
-                        <button type="button" class="btn btn-primary" onclick="guardarImagen()">Guardar</button>
+                            onclick="cerrarModalCrearVisita()">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="guardarVisita()">Guardar</button>
                     </div>
                 </div>
             </div>
@@ -271,23 +256,17 @@
         document.addEventListener("DOMContentLoaded", function() {
             let visitasContainer = document.getElementById("visitasContainer");
             let crearVisitaBtn = document.getElementById("crearVisitaBtn");
-            let modalFecha = document.getElementById("modalFecha");
-            let modalImagen = document.getElementById("modalImagen");
-            let fechaInput = document.getElementById("fechaInput");
-            let inputImagen = document.getElementById("inputImagen");
-            let previewImagen = document.getElementById("previewImagen");
             let modalCrearVisita = document.getElementById("modalCrearVisita");
             let nombreVisitaInput = document.getElementById("nombreVisitaInput");
             let fechaVisitaInput = document.getElementById("fechaVisitaInput");
+            let modalImagen = document.getElementById("modalImagen");
+            let inputImagen = document.getElementById("inputImagen");
+            let previewImagen = document.getElementById("previewImagen");
             let visitaActual = null;
             let visitaCount = 0;
 
             // Estados disponibles
             const estados = [{
-                    nombre: "Fecha de Programación",
-                    requiereUbicacion: true
-                },
-                {
                     nombre: "Técnico en desplazamiento",
                     requiereUbicacion: true
                 },
@@ -319,7 +298,7 @@
                 return `${año}-${mes}-${dia} ${horas}:${minutos} ${ampm}`;
             }
 
-            // Evento para abrir el modal de creación de visita
+            // ABRIR MODAL AL CREAR VISITA
             crearVisitaBtn.addEventListener("click", function() {
                 visitaCount++;
                 nombreVisitaInput.value = `Visita ${visitaCount}`;
@@ -327,7 +306,7 @@
                 modalCrearVisita.classList.remove("hidden");
             });
 
-            // Función para guardar la visita con fecha programada
+            // GUARDAR VISITA
             function guardarVisita() {
                 if (!fechaVisitaInput.value) {
                     alert("Por favor, selecciona una fecha y hora.");
@@ -347,14 +326,19 @@
                     <span class="text-sm font-medium w-1/4">Fecha de Programación</span>
                     <span class="hora text-sm text-gray-800 w-3/4 text-center">${fechaFormateada}</span>
                 </div>
-                ${estados.slice(1).map((estado, index) => `
-                        <div class="flex items-center justify-between border p-3 rounded-lg bg-gray-100">
-                            <span class="text-sm font-medium w-1/4">${estado.nombre}</span>
-                            <button class="estado-btn bg-gray-300 text-white px-3 py-1 rounded-md">
-                                ✔
+                ${estados.map((estado, index) => `
+                            <div class="flex items-center justify-between border p-3 rounded-lg bg-gray-100">
+                                <span class="text-sm font-medium w-1/4">${estado.nombre}</span>
+                                ${estado.requiereImagen ? `
+                            <button class="btn-modal bg-blue-500 text-white px-3 py-1 rounded-md">
+                                📷
                             </button>
-                        </div>
-                    `).join("")}
+                        ` : ""}
+                                <button class="estado-btn bg-gray-300 text-white px-3 py-1 rounded-md">
+                                    ✔
+                                </button>
+                            </div>
+                        `).join("")}
             </div>
         `;
 
@@ -362,40 +346,20 @@
                 cerrarModalCrearVisita();
             }
 
-            // Función para cerrar el modal de creación de visita
+            // CERRAR MODAL DE CREACIÓN DE VISITA
             function cerrarModalCrearVisita() {
                 modalCrearVisita.classList.add("hidden");
             }
 
-            // Función para abrir el modal de selección de fecha dentro de una visita
-            function abrirModalFecha(event) {
-                modalFecha.classList.remove("hidden");
-                visitaActual = event.target.closest(".border");
-            }
-
-            // Función para guardar la fecha dentro del estado "Fecha de Programación"
-            function guardarFecha() {
-                if (visitaActual && fechaInput.value) {
-                    let fechaSeleccionada = new Date(fechaInput.value);
-                    let fechaFormateada = formatDate(fechaSeleccionada);
-
-                    let horaSpan = visitaActual.querySelector(".hora");
-                    horaSpan.textContent = fechaFormateada;
-                    horaSpan.classList.remove("hidden");
-
-                    visitaActual.classList.add("bg-green-200", "border-green-500");
-                    modalFecha.classList.add("hidden");
-                    fechaInput.value = "";
+            // ABRIR MODAL DE IMAGEN
+            document.addEventListener("click", function(event) {
+                if (event.target.classList.contains("btn-modal")) {
+                    modalImagen.classList.remove("hidden");
+                    visitaActual = event.target.closest(".border");
                 }
-            }
+            });
 
-            // Función para abrir el modal de subida de imagen
-            function abrirModalImagen(event) {
-                modalImagen.classList.remove("hidden");
-                visitaActual = event.target.closest(".border");
-            }
-
-            // Función para guardar la imagen
+            // GUARDAR IMAGEN
             function guardarImagen() {
                 if (visitaActual && inputImagen.files.length > 0) {
                     previewImagen.src = URL.createObjectURL(inputImagen.files[0]);
@@ -405,15 +369,11 @@
                 }
             }
 
-            function cerrarModalFecha() {
-                modalFecha.classList.add("hidden");
-            }
-
             function cerrarModalImagen() {
                 modalImagen.classList.add("hidden");
             }
 
-            // Eventos de los botones en cada visita creada
+            // AVANZAR ESTADOS
             document.addEventListener("click", function(event) {
                 if (event.target.classList.contains("estado-btn")) {
                     let estadoDiv = event.target.closest(".border");
@@ -430,15 +390,13 @@
                     estadoDiv.classList.add("bg-green-200", "border-green-500");
                     event.target.disabled = true;
                 }
-
-                if (event.target.classList.contains("fecha-btn")) {
-                    abrirModalFecha(event);
-                }
-
-                if (event.target.classList.contains("btn-modal")) {
-                    abrirModalImagen(event);
-                }
             });
+
+            // Conectar botones de modal a funciones
+            window.guardarVisita = guardarVisita;
+            window.guardarImagen = guardarImagen;
+            window.cerrarModalCrearVisita = cerrarModalCrearVisita;
+            window.cerrarModalImagen = cerrarModalImagen;
         });
     </script>
 
