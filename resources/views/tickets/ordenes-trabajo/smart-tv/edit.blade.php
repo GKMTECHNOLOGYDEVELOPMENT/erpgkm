@@ -2,11 +2,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <div class="mb-5" x-data="{ tab: 'detalle' }">
         <!-- Tabs -->
-        <ul class="grid grid-cols-4 gap-2 sm:flex sm:flex-wrap sm:justify-center mt-3 mb-5 sm:space-x-3">
+        <ul
+            class="grid grid-cols-4 gap-2 sm:flex sm:flex-wrap sm:justify-center mt-3 mb-5 sm:space-x-3 rtl:space-x-reverse">
             <li>
                 <a href="javascript:;"
-                    class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] hover:bg-success hover:text-white"
-                    :class="{ 'bg-success text-white': tab === 'detalle' }" @click="tab = 'detalle'">
+                    class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-[0_5px_15px_0_rgba(0,0,0,0.30)]"
+                    :class="{ '!bg-success text-white': tab === 'detalle' }" @click="tab = 'detalle'">
                     <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -17,8 +18,8 @@
             </li>
             <li>
                 <a href="javascript:;"
-                    class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] hover:bg-success hover:text-white"
-                    :class="{ 'bg-success text-white': tab === 'visitas' }" @click="tab = 'visitas'">
+                    class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-[0_5px_15px_0_rgba(0,0,0,0.30)]"
+                    :class="{ '!bg-success text-white': tab === 'visitas' }" @click="tab = 'visitas'">
                     <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -29,8 +30,8 @@
             </li>
             <li>
                 <a href="javascript:;"
-                    class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] hover:bg-success hover:text-white"
-                    :class="{ 'bg-success text-white': tab === 'firmas' }" @click="tab = 'firmas'">
+                    class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-[0_5px_15px_0_rgba(0,0,0,0.30)]"
+                    :class="{ '!bg-success text-white': tab === 'firmas' }" @click="tab = 'firmas'">
                     <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -40,6 +41,7 @@
                 </a>
             </li>
         </ul>
+
 
         <!-- Contenido de los tabs -->
         <div class="panel mt-6 p-5 max-w-4xl mx-auto">
@@ -160,8 +162,50 @@
             <!-- Tab visitas -->
             <div x-show="tab === 'visitas'">
                 <h4 class="font-semibold text-2xl mb-4">Visitas</h4>
-                <p>Aquí van las firmas de la orden de trabajo.</p>
+
+                <!-- Botón para crear nuevas visitas -->
+                <button id="crearVisitaBtn"
+                    class="px-4 py-2 bg-success text-white rounded-lg shadow-md hover:bg-green-700 w-full sm:w-auto">
+                    + Crear Visita
+                </button>
+
+                <!-- Contenedor donde se agregarán las visitas -->
+                <div id="visitasContainer" class="mt-5 space-y-4"></div>
             </div>
+
+            <!-- Modal para seleccionar fecha y hora -->
+            <div id="modalFecha"
+                class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+                <div class="modal-content bg-white p-4 rounded shadow-lg w-96">
+                    <h5 class="mb-4">Seleccionar Fecha y Hora</h5>
+                    <input id="fechaInput" type="datetime-local" class="form-input w-full p-2 border rounded-lg">
+                    <div class="flex justify-end mt-4">
+                        <button type="button" class="btn btn-outline-danger mr-2"
+                            onclick="cerrarModalFecha()">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="guardarFecha()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal para subir/ver imagen -->
+            <div id="modalImagen"
+                class="hidden fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+                <div class="modal-content bg-white p-4 rounded shadow-lg w-96">
+                    <h5 class="mb-4">Subir Imagen</h5>
+                    <input id="inputImagen" type="file" accept="image/*"
+                        class="form-input w-full p-2 border rounded-lg">
+                    <div class="mt-4 flex justify-center">
+                        <img id="previewImagen" src="/assets/images/file-preview.svg"
+                            class="w-40 h-40 object-cover hidden">
+                    </div>
+                    <div class="flex justify-end mt-4">
+                        <button type="button" class="btn btn-outline-danger mr-2"
+                            onclick="cerrarModalImagen()">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="guardarImagen()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+
+
 
             <!-- Tab Firmas -->
             <div x-show="tab === 'firmas'">
@@ -219,6 +263,181 @@
                     item.textContent = option.text;
                     selectedItemsList.appendChild(item);
                 });
+            });
+        });
+
+
+        //ESTO ES DE VISITAS!
+        document.addEventListener("DOMContentLoaded", function() {
+            let visitasContainer = document.getElementById("visitasContainer");
+            let crearVisitaBtn = document.getElementById("crearVisitaBtn");
+            let modalFecha = document.getElementById("modalFecha");
+            let modalImagen = document.getElementById("modalImagen");
+            let fechaInput = document.getElementById("fechaInput");
+            let inputImagen = document.getElementById("inputImagen");
+            let previewImagen = document.getElementById("previewImagen");
+            let modalCrearVisita = document.getElementById("modalCrearVisita");
+            let nombreVisitaInput = document.getElementById("nombreVisitaInput");
+            let fechaVisitaInput = document.getElementById("fechaVisitaInput");
+            let visitaActual = null;
+            let visitaCount = 0;
+
+            // Estados disponibles
+            const estados = [{
+                    nombre: "Fecha de Programación",
+                    requiereUbicacion: true
+                },
+                {
+                    nombre: "Técnico en desplazamiento",
+                    requiereUbicacion: true
+                },
+                {
+                    nombre: "Llegada a servicio",
+                    requiereUbicacion: true,
+                    requiereImagen: true
+                },
+                {
+                    nombre: "Inicio de servicio",
+                    requiereUbicacion: true
+                }
+            ];
+
+            const ubicaciones = [
+                "Sucursal Lima Centro",
+                "Sucursal San Isidro",
+                "Sucursal Miraflores"
+            ];
+
+            function formatDate(fecha) {
+                const año = fecha.getFullYear();
+                const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
+                const dia = fecha.getDate().toString().padStart(2, "0");
+                let horas = fecha.getHours();
+                const minutos = fecha.getMinutes().toString().padStart(2, "0");
+                const ampm = horas >= 12 ? "PM" : "AM";
+                horas = horas % 12 || 12;
+                return `${año}-${mes}-${dia} ${horas}:${minutos} ${ampm}`;
+            }
+
+            // Evento para abrir el modal de creación de visita
+            crearVisitaBtn.addEventListener("click", function() {
+                visitaCount++;
+                nombreVisitaInput.value = `Visita ${visitaCount}`;
+                fechaVisitaInput.value = "";
+                modalCrearVisita.classList.remove("hidden");
+            });
+
+            // Función para guardar la visita con fecha programada
+            function guardarVisita() {
+                if (!fechaVisitaInput.value) {
+                    alert("Por favor, selecciona una fecha y hora.");
+                    return;
+                }
+
+                let fechaSeleccionada = new Date(fechaVisitaInput.value);
+                let fechaFormateada = formatDate(fechaSeleccionada);
+
+                let visitaCard = document.createElement("div");
+                visitaCard.classList.add("p-4", "bg-white", "shadow-lg", "rounded-lg", "border", "relative");
+
+                visitaCard.innerHTML = `
+            <h5 class="text-lg font-semibold mb-3 text-center">${nombreVisitaInput.value}</h5>
+            <div class="space-y-2">
+                <div class="flex items-center justify-between border p-3 rounded-lg bg-green-200 border-green-500">
+                    <span class="text-sm font-medium w-1/4">Fecha de Programación</span>
+                    <span class="hora text-sm text-gray-800 w-3/4 text-center">${fechaFormateada}</span>
+                </div>
+                ${estados.slice(1).map((estado, index) => `
+                        <div class="flex items-center justify-between border p-3 rounded-lg bg-gray-100">
+                            <span class="text-sm font-medium w-1/4">${estado.nombre}</span>
+                            <button class="estado-btn bg-gray-300 text-white px-3 py-1 rounded-md">
+                                ✔
+                            </button>
+                        </div>
+                    `).join("")}
+            </div>
+        `;
+
+                visitasContainer.appendChild(visitaCard);
+                cerrarModalCrearVisita();
+            }
+
+            // Función para cerrar el modal de creación de visita
+            function cerrarModalCrearVisita() {
+                modalCrearVisita.classList.add("hidden");
+            }
+
+            // Función para abrir el modal de selección de fecha dentro de una visita
+            function abrirModalFecha(event) {
+                modalFecha.classList.remove("hidden");
+                visitaActual = event.target.closest(".border");
+            }
+
+            // Función para guardar la fecha dentro del estado "Fecha de Programación"
+            function guardarFecha() {
+                if (visitaActual && fechaInput.value) {
+                    let fechaSeleccionada = new Date(fechaInput.value);
+                    let fechaFormateada = formatDate(fechaSeleccionada);
+
+                    let horaSpan = visitaActual.querySelector(".hora");
+                    horaSpan.textContent = fechaFormateada;
+                    horaSpan.classList.remove("hidden");
+
+                    visitaActual.classList.add("bg-green-200", "border-green-500");
+                    modalFecha.classList.add("hidden");
+                    fechaInput.value = "";
+                }
+            }
+
+            // Función para abrir el modal de subida de imagen
+            function abrirModalImagen(event) {
+                modalImagen.classList.remove("hidden");
+                visitaActual = event.target.closest(".border");
+            }
+
+            // Función para guardar la imagen
+            function guardarImagen() {
+                if (visitaActual && inputImagen.files.length > 0) {
+                    previewImagen.src = URL.createObjectURL(inputImagen.files[0]);
+                    previewImagen.classList.remove("hidden");
+                    visitaActual.classList.add("bg-green-200", "border-green-500");
+                    modalImagen.classList.add("hidden");
+                }
+            }
+
+            function cerrarModalFecha() {
+                modalFecha.classList.add("hidden");
+            }
+
+            function cerrarModalImagen() {
+                modalImagen.classList.add("hidden");
+            }
+
+            // Eventos de los botones en cada visita creada
+            document.addEventListener("click", function(event) {
+                if (event.target.classList.contains("estado-btn")) {
+                    let estadoDiv = event.target.closest(".border");
+                    let horaSpan = estadoDiv.querySelector(".hora");
+
+                    if (!horaSpan.textContent) {
+                        let fechaActual = new Date();
+                        let fechaFormateada = formatDate(fechaActual);
+                        horaSpan.textContent = fechaFormateada;
+                        horaSpan.classList.remove("hidden");
+                    }
+
+                    estadoDiv.classList.remove("bg-gray-100");
+                    estadoDiv.classList.add("bg-green-200", "border-green-500");
+                    event.target.disabled = true;
+                }
+
+                if (event.target.classList.contains("fecha-btn")) {
+                    abrirModalFecha(event);
+                }
+
+                if (event.target.classList.contains("btn-modal")) {
+                    abrirModalImagen(event);
+                }
             });
         });
     </script>
