@@ -17,7 +17,7 @@
                     <a href="javascript:;" class="text-primary hover:underline">Administración</a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                    <span>Usuarios</span>
+                    <span>USUARIOS WA</span>
                 </li>
             </ul>
         </div>
