@@ -13,7 +13,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M8 2H16M8 2V6M16 2V6M4 6H20M4 6V22H20V6M9 10H15M9 14H15M9 18H12" />
                     </svg>
-                    Detalles OT
+                    Detalles OTT
                 </a>
             </li>
             <li>
