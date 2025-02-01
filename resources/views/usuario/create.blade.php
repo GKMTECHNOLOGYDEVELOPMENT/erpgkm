@@ -6,16 +6,13 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="javascript:;" class="text-primary hover:underline">Users</a>
+                <a href="javascript:;" class="text-primary hover:underline">Usuarios</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                <span>Create Usuario</span>
+                <span>Agregar Usuario</span>
             </li>
         </ul>
         <div class="pt-5">
-            <div class="flex items-center justify-between mb-5">
-                <h5 class="font-semibold text-lg dark:text-white-light">Crear</h5>
-            </div>
             <div x-data="{ tab: 'home' }">
                 <ul
                     class="sm:flex font-semibold border-b border-[#ebedf2] dark:border-[#191e3a] mb-5 whitespace-nowrap overflow-y-auto">
@@ -173,72 +170,76 @@
 
                         <form
                             class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
-                            <h6 class="text-lg font-bold mb-5">Social</h6>
+                     
+                            <h6 class="text-lg font-bold mb-5">Información Importante</h6>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                            class="w-5 h-5">
-                                            <path
-                                                d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z">
-                                            </path>
-                                            <rect x="2" y="9" width="4" height="12">
-                                            </rect>
-                                            <circle cx="4" cy="4" r="2"></circle>
-                                        </svg>
-                                    </div>
-                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
+                                <!-- Sueldo por Hora -->
+                                <div>
+                                    <label for="sueldoPorHora">Sueldo por Hora</label>
+                                    <input type="number" name="sueldoPorHora" id="sueldoPorHora" placeholder="Ejemplo: 20.5" class="form-input" step="0.01" value="" />
                                 </div>
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                            class="w-5 h-5">
-                                            <path
-                                                d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
+                                <!-- Sucursal -->
+                                <div>
+                                    <label for="idSucursal">Sucursal</label>
+                                    <select name="idSucursal" id="idSucursal" class="form-input">
+                                        <option value="" disabled>Selecciona una Sucursal</option>
+                                        @foreach ($sucursales as $sucursal)
+                                        <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                            class="w-5 h-5">
-                                            <path
-                                                d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
+                                <!-- Tipo de Usuario -->
+                                <div>
+                                    <label for="idTipoUsuario">Tipo de Usuario</label>
+                                    <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
+                                        <option value="" disabled>Selecciona un Tipo de Usuario</option>
+                                        @foreach ($tiposUsuario as $tipoUsuario)
+                                        <option value="{{ $tipoUsuario->idTipoUsuario }}">{{ $tipoUsuario->nombre }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                            class="w-5 h-5">
-                                            <path
-                                                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
+                                <!-- Sexo -->
+                                <div>
+                                    <label for="idSexo">Sexo</label>
+                                    <select name="idSexo" id="idSexo" class="form-input">
+                                        <option value="" disabled>Selecciona un Sexo</option>
+                                        @foreach ($sexos as $sexo)
+                                        <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                            </div>
+
+                                <!-- Rol -->
+                                <div>
+                                    <label for="idRol">Rol</label>
+                                    <select name="idRol" id="idRol" class="form-input">
+                                        <option value="" disabled>Selecciona un Rol</option>
+                                        @foreach ($roles as $rol)
+                                        <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Tipo de Área -->
+                                <div>
+                                    <label for="idTipoArea">Tipo de Área</label>
+                                    <select name="idTipoArea" id="idTipoArea" class="form-input">
+                                        <option value="" disabled>Selecciona un Tipo de Área</option>
+                                        @foreach ($tiposArea as $tipoArea)
+                                        <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Botones -->
+                                <div class="sm:col-span-2 mt-3">
+                                    <button type="submit" class="btn btn-primary mr-2">Actualizar</button>
+                                    <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
+                                </div>
                         </form>
                     </div>
                 </template>

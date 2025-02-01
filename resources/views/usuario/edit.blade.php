@@ -1,5 +1,6 @@
 <x-layout.default>
-
+    <!-- Cargar jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Incluir el archivo CSS de Nice Select -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
@@ -9,13 +10,10 @@
                 <a href="javascript:;" class="text-primary hover:underline">Users</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                <span>Create Usuario</span>
+                <span>Agregar Usuario</span>
             </li>
         </ul>
         <div class="pt-5">
-            <div class="flex items-center justify-between mb-5">
-                <h5 class="font-semibold text-lg dark:text-white-light">Crear</h5>
-            </div>
             <div x-data="{ tab: 'home' }">
                 <ul
                     class="sm:flex font-semibold border-b border-[#ebedf2] dark:border-[#191e3a] mb-5 whitespace-nowrap overflow-y-auto">
@@ -32,7 +30,7 @@
                                 <path d="M12 15L12 18" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" />
                             </svg>
-                            Home
+                            Perfil
                         </a>
                     </li>
                     <li class="inline-block">
@@ -111,52 +109,64 @@
                                 <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <!-- Nombre Completo -->
                                     <div>
-                                    <label for="Nombre">Nombre Completo</label>
-                                    <input id="Nombre" name="Nombre" type="text" value="{{ $usuario->Nombre }}" class="form-input" />
+                                        <label for="Nombre">Nombre Completo</label>
+                                        <input id="Nombre" name="Nombre" type="text" value="{{ $usuario->Nombre }}" class="form-input" />
                                     </div>
 
                                     <!-- Apellido Paterno -->
                                     <div>
-                                    <label for="apellidoPaterno">Apellido Paterno</label>
-                                    <input id="apellidoPaterno" name="apellidoPaterno" type="text" value="{{ $usuario->apellidoPaterno }}" class="form-input" />
+                                        <label for="apellidoPaterno">Apellido Paterno</label>
+                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text" value="{{ $usuario->apellidoPaterno }}" class="form-input" />
                                     </div>
 
                                     <!-- Apellido Materno -->
                                     <div>
-                                    <label for="apellidoMaterno">Apellido Materno</label>
-                                    <input id="apellidoMaterno" name="apellidoMaterno" type="text" value="{{ $usuario->apellidoMaterno }}" class="form-input" />
+                                        <label for="apellidoMaterno">Apellido Materno</label>
+                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text" value="{{ $usuario->apellidoMaterno }}" class="form-input" />
                                     </div>
 
                                     <!-- Tipo Documento -->
                                     <div>
-                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
-                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
-                                        <option value="" disabled>Seleccionar Tipo Documento</option>
-                                        @foreach ($tiposDocumento as $tipoDocumento)
+                                        <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
+                                        <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
+                                            <option value="" disabled>Seleccionar Tipo Documento</option>
+                                            @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}" {{ $tipoDocumento->idTipoDocumento == $usuario->idTipoDocumento ? 'selected' : '' }}>
                                                 {{ $tipoDocumento->nombre }}
                                             </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
                                     <!-- Documento -->
                                     <div>
-                                    <label for="documento">Documento</label>
-                                    <input id="documento" name="documento" type="text" value="{{ $usuario->documento }}" class="form-input" />
+                                        <label for="documento">Documento</label>
+                                        <input id="documento" name="documento" type="text" value="{{ $usuario->documento }}" class="form-input" />
                                     </div>
 
                                     <!-- Teléfono -->
                                     <div>
-                                         <label for="telefono">Teléfono</label>
-        <input id="telefono" type="text" name="telefono" value="{{ $usuario->telefono }}" class="form-input" />
+                                        <label for="telefono">Teléfono</label>
+                                        <input id="telefono" type="text" name="telefono" value="{{ $usuario->telefono }}" class="form-input" />
                                     </div>
 
                                     <!-- Email -->
                                     <div>
-                                    <label for="correo">Email</label>
-                                    <input id="correo" name="correo" type="email" value="{{ $usuario->correo }}" class="form-input" />
+                                        <label for="correo">Email</label>
+                                        <input id="correo" name="correo" type="email" value="{{ $usuario->correo }}" class="form-input" />
                                     </div>
+
+                                    <!-- Sexo -->
+                                    <div>
+                                        <label for="sexo" class="block text-sm font-medium">Sexo</label>
+                                        <select id="sexo" name="sexo" class="select2 w-full" style="display:none">
+                                            <option value="" disabled>Seleccionar Sexo</option>
+                                            <option value="M" {{ $usuario->sexo == 'M' ? 'selected' : '' }}>Masculino</option>
+                                            <option value="F" {{ $usuario->sexo == 'F' ? 'selected' : '' }}>Femenino</option>
+                                            <option value="O" {{ $usuario->sexo == 'O' ? 'selected' : '' }}>Otro</option>
+                                        </select>
+                                    </div>
+
 
                                     <!-- Botones -->
                                     <div class="sm:col-span-2 mt-3">
@@ -169,124 +179,179 @@
 
 
 
-                        <form
-                            class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
-                            <h6 class="text-lg font-bold mb-5">Social</h6>
+                        <form action="{{ route('usuario.config', $usuario->idUsuario) }}" method="POST" enctype="multipart/form-data" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
+                            @csrf
+                            @method('PUT')
+                            <h6 class="text-lg font-bold mb-5">Información Importante</h6>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                            class="w-5 h-5">
-                                            <path
-                                                d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z">
-                                            </path>
-                                            <rect x="2" y="9" width="4" height="12">
-                                            </rect>
-                                            <circle cx="4" cy="4" r="2"></circle>
-                                        </svg>
-                                    </div>
-                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
+                                <!-- Sueldo por Hora -->
+                                <div>
+                                    <label for="sueldoPorHora">Sueldo por Hora</label>
+                                    <input type="number" name="sueldoPorHora" id="sueldoPorHora" placeholder="Ejemplo: 20.5" class="form-input" step="0.01" value="{{ $usuario->sueldoPorHora }}" />
                                 </div>
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                            class="w-5 h-5">
-                                            <path
-                                                d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
+                                <!-- Sucursal -->
+                                <div>
+                                    <label for="idSucursal">Sucursal</label>
+                                    <select name="idSucursal" id="idSucursal" class="form-input">
+                                        <option value="" disabled>Selecciona una Sucursal</option>
+                                        @foreach ($sucursales as $sucursal)
+                                        <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                            class="w-5 h-5">
-                                            <path
-                                                d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
+                                <!-- Tipo de Usuario -->
+                                <div>
+                                    <label for="idTipoUsuario">Tipo de Usuario</label>
+                                    <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
+                                        <option value="" disabled>Selecciona un Tipo de Usuario</option>
+                                        @foreach ($tiposUsuario as $tipoUsuario)
+                                        <option value="{{ $tipoUsuario->idTipoUsuario }}">{{ $tipoUsuario->nombre }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                            class="w-5 h-5">
-                                            <path
-                                                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
+                                <!-- Sexo -->
+                                <div>
+                                    <label for="idSexo">Sexo</label>
+                                    <select name="idSexo" id="idSexo" class="form-input">
+                                        <option value="" disabled>Selecciona un Sexo</option>
+                                        @foreach ($sexos as $sexo)
+                                        <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Rol -->
+                                <div>
+                                    <label for="idRol">Rol</label>
+                                    <select name="idRol" id="idRol" class="form-input">
+                                        <option value="" disabled>Selecciona un Rol</option>
+                                        @foreach ($roles as $rol)
+                                        <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Tipo de Área -->
+                                <div>
+                                    <label for="idTipoArea">Tipo de Área</label>
+                                    <select name="idTipoArea" id="idTipoArea" class="form-input">
+                                        <option value="" disabled>Selecciona un Tipo de Área</option>
+                                        @foreach ($tiposArea as $tipoArea)
+                                        <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Botones -->
+                                <div class="sm:col-span-2 mt-3">
+                                    <button type="submit" class="btn btn-primary mr-2">Actualizar</button>
+                                    <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
                                 </div>
                             </div>
                         </form>
+
                     </div>
                 </template>
                 <template x-if="tab === 'payment-details'">
                     <div>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-                            <div class="panel">
-                                <div class="mb-5">
-                                    <h5 class="font-semibold text-lg mb-4">Billing Address</h5>
-                                    <p>Changes to your <span class="text-primary">Billing</span> information will take
-                                        effect starting with scheduled payment and will be refelected on your next
-                                        invoice.</p>
-                                </div>
-                                <div class="mb-5">
-                                    <div class="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
-                                        <div class="flex items-start justify-between py-3">
-                                            <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
-                                                Address #1 <span
-                                                    class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">2249
-                                                    Caynor Circle, New Brunswick, New Jersey</span></h6>
-                                            <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                                <button class="btn btn-dark">Edit</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
-                                        <div class="flex items-start justify-between py-3">
-                                            <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
-                                                Address #2 <span
-                                                    class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">4262
-                                                    Leverton Cove Road, Springfield, Massachusetts</span></h6>
-                                            <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                                <button class="btn btn-dark">Edit</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div class="flex items-start justify-between py-3">
-                                            <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
-                                                Address #3 <span
-                                                    class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">2692
-                                                    Berkshire Circle, Knoxville, Tennessee</span></h6>
-                                            <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                                <button class="btn btn-dark">Edit</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button class="btn btn-primary">Add Address</button>
+                        <div class="panel">
+    <div class="mb-5">
+        <h5 class="font-semibold text-lg mb-4">Firma Digital</h5>
+        <p>Por favor, firme en el área de abajo para completar el proceso de validación.</p>
+    </div>
+
+    <!-- Canvas para la firma digital -->
+    <div class="mb-5">
+        <canvas id="signatureCanvas" class="border border-[#ebedf2] dark:border-[#1b2e4b] w-full" width="500" height="150"></canvas>
+    </div>
+
+    <!-- Botones para limpiar la firma y enviar el formulario -->
+    <div class="flex justify-between items-center mb-5">
+        <button type="button" id="clearSignature" class="btn btn-dark">Limpiar Firma</button>
+        <button type="button" id="saveSignature" class="btn btn-primary">Guardar Firma</button>
+    </div>
+
+    <!-- Formulario oculto con la firma en base64 -->
+    <form action="{{ route('usuario.firma' , $usuario->idUsuario) }}" method="POST" id="signatureForm">
+        @csrf
+        @method('PUT')
+        <input type="hidden" name="signature" id="signatureInput">
+        <button type="submit" class="btn btn-primary">Enviar Firma</button>
+    </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById("signatureCanvas");
+            
+            if (canvas) {
+                console.log("Canvas encontrado correctamente");
+                
+                const ctx = canvas.getContext("2d");
+                
+                if (!ctx) {
+                    console.error("No se pudo obtener el contexto 2D del canvas");
+                    return;
+                }
+                
+                console.log("Contexto de dibujo 2D obtenido correctamente");
+
+                // Asegura que el canvas sea visible y tenga un tamaño adecuado
+                canvas.width = 500;
+                canvas.height = 150;
+                
+                let isDrawing = false;
+                const rect = canvas.getBoundingClientRect(); // Obtener la posición del canvas en la pantalla
+
+                // Función para iniciar el dibujo
+                canvas.addEventListener("mousedown", (event) => {
+                    isDrawing = true;
+                    ctx.beginPath();
+                    ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
+                    console.log("Iniciando dibujo en", event.clientX - rect.left, event.clientY - rect.top);
+                });
+
+                // Función para dibujar mientras se mueve el ratón
+                canvas.addEventListener("mousemove", (event) => {
+                    if (isDrawing) {
+                        ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
+                        ctx.stroke();
+                        console.log("Dibujando en", event.clientX - rect.left, event.clientY - rect.top);
+                    }
+                });
+
+                // Terminar el dibujo cuando se suelta el ratón
+                canvas.addEventListener("mouseup", () => {
+                    isDrawing = false;
+                    console.log("Dibujo terminado");
+                });
+
+                // Limpiar el lienzo
+                document.getElementById("clearSignature").addEventListener("click", () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    console.log("Lienzo limpiado");
+                });
+
+                // Guardar la firma y convertirla en base64
+                document.getElementById("saveSignature").addEventListener("click", () => {
+                    const signatureData = canvas.toDataURL(); // Convierte la firma a base64
+                    document.getElementById("signatureInput").value = signatureData; // Pone la firma en el campo oculto
+                    console.log("Firma guardada en base64: ", signatureData);
+                });
+            } else {
+                console.error("No se encontró el canvas con id 'signatureCanvas'");
+            }
+        });
+    </script>
+
+
                             </div>
+
+
                             <div class="panel">
                                 <div class="mb-5">
                                     <h5 class="font-semibold text-lg mb-4">Payment History</h5>
@@ -347,76 +412,111 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
                             <div class="panel">
                                 <div class="mb-5">
-                                    <h5 class="font-semibold text-lg mb-4">Add Billing Address</h5>
-                                    <p>Changes your New <span class="text-primary">Billing</span> Information.</p>
+                                    <h5 class="font-semibold text-lg mb-4">Agregar dirección </h5>
+                                    <!-- <p>Changes your New <span class="text-primary">Billing</span> Information.</p> -->
                                 </div>
                                 <div class="mb-5">
-                                    <form>
+                                    <form action="{{ route('usuario.direccion', $usuario->idUsuario) }}" method="POST">
+                                        @csrf
+                                        @method('PUT') <!-- Usamos el método PUT para actualización -->
+
+                                        <!-- Información Básica -->
                                         <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <!-- Nacionalidad -->
                                             <div>
-                                                <label for="billingName">Name</label>
-                                                <input id="billingName" type="text" placeholder="Enter Name"
-                                                    class="form-input" />
+                                                <label for="nacionalidad">Nacionalidad</label>
+                                                <input id="nacionalidad" name="nacionalidad" type="text"
+                                                    value="{{ old('nacionalidad', $usuario->nacionalidad) }}" class="form-input" />
                                             </div>
+
+                                            <!-- Departamento -->
                                             <div>
-                                                <label for="billingEmail">Email</label>
-                                                <input id="billingEmail" type="email" placeholder="Enter Email"
-                                                    class="form-input" />
-                                            </div>
-                                        </div>
-                                        <div class="mb-5">
-                                            <label for="billingAddress">Address</label>
-                                            <input id="billingAddress" type="text" placeholder="Enter Address"
-                                                class="form-input" />
-                                        </div>
-                                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-5">
-                                            <div class="md:col-span-2">
-                                                <label for="billingCity">City</label>
-                                                <input id="billingCity" type="text" placeholder="Enter City"
-                                                    class="form-input" />
-                                            </div>
-                                            <div>
-                                                <label for="billingState">State</label>
-                                                <select id="billingState" class="form-select text-white-dark">
-                                                    <option>Choose...</option>
-                                                    <option>...</option>
+                                                <label for="departamento" class="block text-sm font-medium">Departamento</label>
+                                                <select id="departamento" name="departamento" class="form-input w-full">
+                                                    <option value="" disabled selected>Seleccionar Departamento</option>
+                                                    @foreach ($departamentos as $departamento)
+                                                    <option value="{{ $departamento['id_ubigeo'] }}"
+                                                        {{ old('departamento', $usuario->departamento) == $departamento['id_ubigeo'] ? 'selected' : '' }}>
+                                                        {{ $departamento['nombre_ubigeo'] }}
+                                                    </option>
+                                                    @endforeach
                                                 </select>
-                                            </div>
-                                            <div>
-                                                <label for="billingZip">Zip</label>
-                                                <input id="billingZip" type="text" placeholder="Enter Zip"
-                                                    class="form-input" />
+                                                <div id="departamento-error" class="text-red-500 text-sm" style="display: none;"></div>
                                             </div>
                                         </div>
-                                        <button type="button" class="btn btn-primary">Add</button>
+
+                                        <!-- Información de Ubicación -->
+                                        <div class="mb-5">
+                                            <!-- Provincia -->
+                                            <div>
+                                                <label for="provincia" class="block text-sm font-medium">Provincia</label>
+                                                <select id="provincia" name="provincia" class="form-input w-full">
+                                                    <option value="" disabled>Seleccionar Provincia</option>
+                                                    @foreach ($provinciasDelDepartamento as $provincia)
+                                                    <option value="{{ $provincia['id_ubigeo'] }}"
+                                                        {{ old('provincia', $usuario->provincia) == $provincia['id_ubigeo'] ? 'selected' : '' }}>
+                                                        {{ $provincia['nombre_ubigeo'] }}
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                                <div id="provincia-error" class="text-red-500 text-sm" style="display: none;"></div>
+                                            </div>
+
+                                            <!-- Distrito -->
+                                            <div>
+                                                <label for="distrito" class="block text-sm font-medium">Distrito</label>
+                                                <select id="distrito" name="distrito" class="form-input w-full">
+                                                    <option value="" disabled>Seleccionar Distrito</option>
+                                                    @foreach ($distritosDeLaProvincia as $distrito)
+                                                    <option value="{{ $distrito['id_ubigeo'] }}"
+                                                        {{ old('distrito', $usuario->distrito) == $distrito['id_ubigeo'] ? 'selected' : '' }}>
+                                                        {{ $distrito['nombre_ubigeo'] }}
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                                <div id="distrito-error" class="text-red-500 text-sm" style="display: none;"></div>
+                                            </div>
+
+                                            <!-- Dirección -->
+                                            <div>
+                                                <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                                                <input id="direccion" name="direccion" type="text" class="form-input w-full"
+                                                    value="{{ old('direccion', $usuario->direccion) }}" placeholder="Ingrese la dirección">
+                                                <div id="direccion-error" class="text-red-500 text-sm" style="display: none;"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Botón de Actualización -->
+                                        <button type="submit" class="btn btn-primary">Actualizar</button>
                                     </form>
+
                                 </div>
                             </div>
                             <div class="panel">
                                 <div class="mb-5">
-                                    <h5 class="font-semibold text-lg mb-4">Add Payment Method</h5>
-                                    <p>Changes your New <span class="text-primary">Payment Method</span> Information.
-                                    </p>
+                                    <h5 class="font-semibold text-lg mb-4">Numero de cuenta</h5>
+                                    <!-- <p>Changes your New <span class="text-primary">Payment Method</span> Information.
+                                    </p> -->
                                 </div>
                                 <div class="mb-5">
                                     <form>
                                         <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label for="payBrand">Card Brand</label>
+                                                <label for="payBrand">Seleccione Tipo de cuenta</label>
                                                 <select id="payBrand" class="form-select text-white-dark">
-                                                    <option selected="">Mastercard</option>
-                                                    <option>American Express</option>
-                                                    <option>Visa</option>
-                                                    <option>Discover</option>
+                                                    <option selected="">Numero interbancario</option>
+                                                    <option>Numeero de cuenta</option>
+                                                    <!-- <option>Visa</option>
+                                                    <option>Discover</option> -->
                                                 </select>
                                             </div>
                                             <div>
-                                                <label for="payNumber">Card Number</label>
+                                                <label for="payNumber">Numero de cuenta</label>
                                                 <input id="payNumber" type="text" placeholder="Card Number"
                                                     class="form-input" />
                                             </div>
                                         </div>
-                                        <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <!-- <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label for="payHolder">Holder Name</label>
                                                 <input id="payHolder" type="text" placeholder="Holder Name"
@@ -434,8 +534,8 @@
                                                 <input id="payExp" type="text" placeholder="Card Expiry"
                                                     class="form-input" />
                                             </div>
-                                        </div>
-                                        <button type="button" class="btn btn-primary">Add</button>
+                                        </div> -->
+                                        <button type="button" class="btn btn-primary">Guardar</button>
                                     </form>
                                 </div>
                             </div>
@@ -577,37 +677,10 @@
         </div>
     </div>
 
-    <!-- <script>
-    // Obtener el contexto del lienzo
-    var canvas = document.getElementById('firmaCanvas');
-    var ctx = canvas.getContext('2d');
-    var isDrawing = false;
 
-    // Iniciar dibujo
-    canvas.addEventListener('mousedown', function(e) {
-        isDrawing = true;
-        ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    });
 
-    // Continuar dibujo
-    canvas.addEventListener('mousemove', function(e) {
-        if (isDrawing) {
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
-        }
-    });
 
-    // Detener dibujo
-    canvas.addEventListener('mouseup', function() {
-        isDrawing = false;
-    });
 
-    // Limpiar firma
-    document.getElementById('limpiarFirma').addEventListener('click', function() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
-</script> -->
     <script>
         // Inicializar Select2
         document.addEventListener("DOMContentLoaded", function() {
@@ -619,11 +692,93 @@
             });
         })
     </script>
+    <script>
+        $(document).ready(function() {
+            // Cargar provincias y distritos al cargar el formulario si ya hay un departamento seleccionado
+            function cargarProvincias(departamentoId) {
+                $.get('/ubigeo/provincias/' + departamentoId, function(data) {
+                    var provinciaSelect = $('#provincia');
+                    provinciaSelect.empty().prop('disabled', false);
+                    provinciaSelect.append(
+                        '<option value="" disabled selected>Seleccionar Provincia</option>');
+
+                    data.forEach(function(provincia) {
+                        provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
+                            provincia.nombre_ubigeo + '</option>');
+                    });
+
+                    // Si hay provincia seleccionada previamente, se selecciona automáticamente
+                    var provinciaSeleccionada = '{{ old('
+                    provincia ', $usuario->provincia) }}';
+                    if (provinciaSeleccionada) {
+                        $('#provincia').val(provinciaSeleccionada).change();
+                    }
+                });
+            }
+
+            function cargarDistritos(provinciaId) {
+                $.get('/ubigeo/distritos/' + provinciaId, function(data) {
+                    var distritoSelect = $('#distrito');
+                    distritoSelect.empty().prop('disabled', false);
+                    distritoSelect.append(
+                        '<option value="" disabled selected>Seleccionar Distrito</option>');
+
+                    data.forEach(function(distrito) {
+                        distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
+                            distrito.nombre_ubigeo + '</option>');
+                    });
+
+                    // Si hay distrito seleccionado previamente, se selecciona automáticamente
+                    var distritoSeleccionado = '{{ old('
+                    distrito ', $usuario->distrito) }}';
+                    if (distritoSeleccionado) {
+                        $('#distrito').val(distritoSeleccionado);
+                    }
+                });
+            }
+
+            // Si ya hay un departamento seleccionado al cargar la página
+            var departamentoId = $('#departamento').val();
+            if (departamentoId) {
+                cargarProvincias(departamentoId);
+            }
+
+            // Cargar distritos si ya hay una provincia seleccionada al cargar la página
+            var provinciaId = $('#provincia').val();
+            if (provinciaId) {
+                cargarDistritos(provinciaId);
+            }
+
+            // Cuando se selecciona un nuevo departamento
+            $('#departamento').change(function() {
+                var departamentoId = $(this).val();
+                if (departamentoId) {
+                    // Limpiar los selects de provincia y distrito
+                    $('#provincia').empty().prop('disabled', true);
+                    $('#distrito').empty().prop('disabled', true);
+
+                    cargarProvincias(departamentoId);
+                }
+            });
+
+            // Cuando se selecciona una provincia
+            $('#provincia').on('change', function() {
+                var provinciaId = $(this).val();
+                if (provinciaId) {
+                    // Limpiar el select de distritos
+                    $('#distrito').empty().prop('disabled', true);
+
+                    cargarDistritos(provinciaId);
+                }
+            });
+        });
+    </script>
+  
+
     <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
     <!-- Agrega Select2 JS antes del cierre de </body> -->
 
-    <!-- Cargar jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <!-- <script>
@@ -642,5 +797,9 @@
             reader.readAsDataURL(event.target.files[0]);
         }
     </script>
+
+
+
+
 
 </x-layout.default>

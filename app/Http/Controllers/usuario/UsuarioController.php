@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\usuario;
 
 use App\Http\Controllers\Controller;
+use App\Models\Rol;
+use App\Models\Sexo;
+use App\Models\Sucursal;
+use App\Models\Tipoarea;
 use App\Models\Tipodocumento;
+use App\Models\Tipousuario;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UsuarioController extends Controller
 {
@@ -30,9 +36,15 @@ class UsuarioController extends Controller
     {
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
         $tiposDocumento = Tipodocumento::all();
+        $tiposDocumento = TipoDocumento::all(); // Si es necesario obtener tipos de documento
+        $sucursales = Sucursal::all(); // Obtener todas las sucursales
+        $tiposUsuario = Tipousuario::all(); // Obtener todos los tipos de usuario
+        $sexos = Sexo::all(); // Obtener todos los sexos
+        $roles = Rol::all(); // Obtener todos los roles
+        $tiposArea = Tipoarea::all(); // Obtener todos los tipos de área
 
         // Create 
-        return view('usuario.create', compact('departamentos', 'tiposDocumento'));
+        return view('usuario.create', compact( 'tiposDocumento','sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea','departamentos'));
 
     }
 
@@ -79,8 +91,53 @@ class UsuarioController extends Controller
 {
     $usuario = Usuario::findOrFail($id); // Buscar al usuario por id
     $tiposDocumento = TipoDocumento::all(); // Si es necesario obtener tipos de documento
-    return view('usuario.edit', compact('usuario', 'tiposDocumento'));
+    $sucursales = Sucursal::all(); // Obtener todas las sucursales
+    $tiposUsuario = Tipousuario::all(); // Obtener todos los tipos de usuario
+    $sexos = Sexo::all(); // Obtener todos los sexos
+    $roles = Rol::all(); // Obtener todos los roles
+    $tiposArea = Tipoarea::all(); // Obtener todos los tipos de área
+      // Obtener los datos de los archivos JSON
+      $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+      $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
+      $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
+  
+      // Buscar el departamento correspondiente a la usuario
+      $departamentoSeleccionado = array_filter($departamentos, function($departamento) use ($usuario) {
+          return $departamento['id_ubigeo'] == $usuario->departamento;
+      });
+      $departamentoSeleccionado = reset($departamentoSeleccionado);  // Obtener el primer valor del array filtrado
+  
+      // Obtener provincias del departamento seleccionado
+      $provinciasDelDepartamento = [];
+      foreach ($provincias as $provincia) {
+          if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
+              $provinciasDelDepartamento[] = $provincia;
+          }
+      }
+  
+      // Buscar la provincia seleccionada en el array de provinciasDelDepartamento
+      $provinciaSeleccionada = null;
+      foreach ($provinciasDelDepartamento as $provincia) {
+          if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $usuario->provincia) {
+              $provinciaSeleccionada = $provincia;
+              break;
+          }
+      }
+  
+      // Obtener los distritos correspondientes a la provincia seleccionada
+      $distritosDeLaProvincia = [];
+      foreach ($distritos as $distrito) {
+          if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
+              $distritosDeLaProvincia[] = $distrito;
+          }
+      }
+  
+      // Definir distritoSeleccionado como null si no es necesario
+      $distritoSeleccionado = null;  // Si no es necesario, puedes omitir esta línea también
+
+    return view('usuario.edit', compact('usuario', 'tiposDocumento','sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea','departamentos','provinciasDelDepartamento','provinciaSeleccionada','distritosDeLaProvincia','distritoSeleccionado'));
 }
+
 
 public function update(Request $request, $id)
 {
@@ -118,6 +175,96 @@ public function update(Request $request, $id)
     return redirect()->route('usuario.edit', ['usuario' => $usuario->idUsuario])
         ->with('success', 'Usuario actualizado correctamente');
 }
+
+public function config(Request $request, $id)
+{
+    // Validación
+    $request->validate([
+        'sueldoPorHora' => 'required|numeric',
+        'idSucursal' => 'required|integer',
+        'idTipoUsuario' => 'required|integer',
+        'idSexo' => 'required|integer',
+        'idRol' => 'required|integer',
+        'idTipoArea' => 'required|integer',
+    ]);
+
+    // Obtener el usuario
+    $usuario = Usuario::findOrFail($id);
+
+    // Actualizar los campos
+    $usuario->sueldoPorHora = $request->sueldoPorHora;
+    $usuario->idSucursal = $request->idSucursal;
+    $usuario->idTipoUsuario = $request->idTipoUsuario;
+    $usuario->idSexo = $request->idSexo;
+    $usuario->idRol = $request->idRol;
+    $usuario->idTipoArea = $request->idTipoArea;
+    
+    // Guardar los cambios
+    $usuario->save();
+
+    return redirect()->route('usuario.edit', ['usuario' => $usuario->idUsuario])
+    ->with('success', 'Usuario actualizado correctamente');
+}
+
+public function direccion(Request $request, $id)
+{
+    // Validar los datos del formulario
+    $request->validate([
+        'nacionalidad' => 'required|string|max:255',
+        'departamento' => 'required|integer',
+        'provincia' => 'required|integer',
+        'distrito' => 'required|integer',
+        'direccion' => 'required|string|max:255',
+    ]);
+
+    // Obtener el usuario con el ID proporcionado
+    $usuario = Usuario::findOrFail($id);
+
+    // Actualizar los datos del usuario
+    $usuario->nacionalidad = $request->nacionalidad;
+    $usuario->departamento = $request->departamento;
+    $usuario->provincia = $request->provincia;
+    $usuario->distrito = $request->distrito;
+    $usuario->direccion = $request->direccion;
+
+    // Guardar los cambios en la base de datos
+    $usuario->save();
+
+    // Redirigir al usuario con un mensaje de éxito
+    return redirect()->route('usuario.index')->with('success', 'Usuario actualizado correctamente');
+}
+
+
+ // Método para actualizar la firma
+ public function actualizarFirma(Request $request, $idUsuario)
+ {
+     // Validar la firma
+     $request->validate([
+         'signature' => 'required|string', // Asegurarse de que la firma no esté vacía
+     ]);
+
+     // Obtener la firma base64 del formulario
+     $signatureBase64 = $request->input('signature');
+
+     // Convertir la firma base64 a binario
+     $signatureBinaria = base64_decode($signatureBase64);
+
+     // Aquí puedes elegir si guardar la firma en una base de datos como un archivo binario
+     // o guardarla como un archivo en el sistema de almacenamiento de Laravel.
+
+     // Si decides guardar la firma como un archivo en el sistema de archivos:
+     $path = Storage::put('public/firmas/' . $idUsuario . '.png', $signatureBinaria);
+
+     // Si decides guardarla en la base de datos (como un campo tipo blob o binario):
+     // Suponiendo que tienes un campo 'firma' en tu modelo Usuario que almacena los datos binarios
+     $usuario = Usuario::findOrFail($idUsuario);
+     $usuario->firma = $signatureBinaria;
+     $usuario->save();
+
+     // Retornar una respuesta, por ejemplo:
+     return redirect()->back()->with('success', 'Firma actualizada correctamente');
+ }
+
 
 
 }
