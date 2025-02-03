@@ -34,7 +34,7 @@ print("Consulta SQL:", query)
 print("Valores a insertar:", values)
 
 # Insertar 100 veces
-for _ in range(1000):
+for _ in range(1000000):
     cursor.execute(query, values)
 
 # Confirmar los cambios

@@ -387,40 +387,85 @@ public function storesmart(Request $request)
     }
 
     // Obtener todas las órdenes de trabajo en formato JSON
-    public function getAll()
+    // public function getAll()
+    // {
+    //     $ordenes = Ticket::with([
+    //         'tecnico:idUsuario,Nombre', // Relación para obtener el nombre del técnico
+    //         'usuario:idUsuario,Nombre', // Relación para obtener el nombre del usuario
+    //         'cliente:idCliente,nombre', // Relación para obtener el nombre del cliente
+    //         'clientegeneral:idClienteGeneral,descripcion', // Relación para el cliente general
+    //         'tiposervicio:idTipoServicio,nombre', // Relación para obtener el nombre del tipo de servicio
+    //         'estado_ot:idEstadoots,descripcion,color', // Relación para obtener la descripción del estado
+    //         'marca:idMarca,nombre',
+    //         'modelo:idModelo,nombre',
+    //     ])->get();
+
+    //     // Formatear el resultado
+    //     $ordenes = $ordenes->map(function ($orden) {
+    //         return [
+    //             'idTickets' => $orden->idTickets,
+    //             'numero_ticket' => $orden->numero_ticket,
+    //             'tecnico' => $orden->tecnico->Nombre ?? 'N/A', // Nombre del técnico
+    //             'usuario' => $orden->usuario->Nombre ?? 'N/A', // Nombre del usuario
+    //             'cliente' => $orden->cliente->nombre ?? 'N/A', // Nombre del cliente
+    //             'marca' => $orden->marca->nombre ?? 'N/A',
+    //             'modelo' => $orden->modelo->nombre ?? 'N/A',
+    //             'serie' => $orden->serie ?? 'N/A',
+    //             'cliente_general' => $orden->clientegeneral->descripcion ?? 'N/A', // Nombre del cliente general
+    //             'tipoServicio' => $orden->tiposervicio->nombre ?? 'N/A', // Nombre del tipo de servicio
+    //             'estado' => $orden->estado_ot->descripcion ?? 'N/A', // Descripción del estado
+    //             'fecha_creacion' => $orden->fecha_creacion ? $orden->fecha_creacion->format('d/m/Y H:i') : 'N/A', // Formato de fecha
+    //             'color' => $orden->estado_ot->color ?? '#000000', // Color del estado
+    //         ];
+    //     });
+
+    //     return response()->json($ordenes);
+    // }
+
+    public function getAll(Request $request)
     {
-        $ordenes = Ticket::with([
-            'tecnico:idUsuario,Nombre', // Relación para obtener el nombre del técnico
-            'usuario:idUsuario,Nombre', // Relación para obtener el nombre del usuario
-            'cliente:idCliente,nombre', // Relación para obtener el nombre del cliente
-            'clientegeneral:idClienteGeneral,descripcion', // Relación para el cliente general
-            'tiposervicio:idTipoServicio,nombre', // Relación para obtener el nombre del tipo de servicio
-            'estado_ot:idEstadoots,descripcion,color', // Relación para obtener la descripción del estado
+        $ordenesQuery = Ticket::with([
+            'tecnico:idUsuario,Nombre',
+            'usuario:idUsuario,Nombre',
+            'cliente:idCliente,nombre',
+            'clientegeneral:idClienteGeneral,descripcion',
+            'tiposervicio:idTipoServicio,nombre',
+            'estado_ot:idEstadoots,descripcion,color',
             'marca:idMarca,nombre',
             'modelo:idModelo,nombre',
-        ])->get();
+        ]);
+    
+        // Filtro por marca si es proporcionado
+        if ($request->has('marca') && $request->marca != '') {
+            $ordenesQuery->where('idMarca', $request->marca);
+        }
+    
+        $ordenes = $ordenesQuery->paginate(10);
+        return response()->json($ordenes);
+    }
+    
+    public function marcaapi()
+    {
+        $marcas = Marca::all(); // O lo que sea necesario para recuperar las marcas
+        return response()->json($marcas);
+    }
 
-        // Formatear el resultado
-        $ordenes = $ordenes->map(function ($orden) {
-            return [
-                'idTickets' => $orden->idTickets,
-                'numero_ticket' => $orden->numero_ticket,
-                'tecnico' => $orden->tecnico->Nombre ?? 'N/A', // Nombre del técnico
-                'usuario' => $orden->usuario->Nombre ?? 'N/A', // Nombre del usuario
-                'cliente' => $orden->cliente->nombre ?? 'N/A', // Nombre del cliente
-                'marca' => $orden->marca->nombre ?? 'N/A',
-                'modelo' => $orden->modelo->nombre ?? 'N/A',
-                'serie' => $orden->serie ?? 'N/A',
-                'cliente_general' => $orden->clientegeneral->descripcion ?? 'N/A', // Nombre del cliente general
-                'tipoServicio' => $orden->tiposervicio->nombre ?? 'N/A', // Nombre del tipo de servicio
-                'estado' => $orden->estado_ot->descripcion ?? 'N/A', // Descripción del estado
-                'fecha_creacion' => $orden->fecha_creacion ? $orden->fecha_creacion->format('d/m/Y H:i') : 'N/A', // Formato de fecha
-                'color' => $orden->estado_ot->color ?? '#000000', // Color del estado
-            ];
-        });
+    public function getOrdenes(Request $request)
+    {
+        $query = marca::query();
+
+        // Filtrar por marca si es necesario
+        if ($request->has('marca') && $request->marca) {
+            $query->where('marca_id', $request->marca); // Ajusta 'marca_id' al nombre real de tu columna
+        }
+
+        // Obtener los resultados paginados
+        $ordenes = $query->paginate(10); // Ajusta el número de registros por página si es necesario
 
         return response()->json($ordenes);
     }
+
+
 
     public function generarInformePdf($idTickets)
     {
