@@ -398,6 +398,8 @@ public function storesmart(Request $request)
             'clientegeneral:idClienteGeneral,descripcion', // Relación para el cliente general
             'tiposervicio:idTipoServicio,nombre', // Relación para obtener el nombre del tipo de servicio
             'estado_ot:idEstadoots,descripcion,color', // Relación para obtener la descripción del estado
+            'marca:idMarca,nombre',
+            'modelo:idModelo,nombre',
         ])->get();
 
         // Formatear el resultado
@@ -408,6 +410,9 @@ public function storesmart(Request $request)
                 'tecnico' => $orden->tecnico->Nombre ?? 'N/A', // Nombre del técnico
                 'usuario' => $orden->usuario->Nombre ?? 'N/A', // Nombre del usuario
                 'cliente' => $orden->cliente->nombre ?? 'N/A', // Nombre del cliente
+                'marca' => $orden->marca->nombre ?? 'N/A',
+                'modelo' => $orden->modelo->nombre ?? 'N/A',
+                'serie' => $orden->serie ?? 'N/A',
                 'cliente_general' => $orden->clientegeneral->descripcion ?? 'N/A', // Nombre del cliente general
                 'tipoServicio' => $orden->tiposervicio->nombre ?? 'N/A', // Nombre del tipo de servicio
                 'estado' => $orden->estado_ot->descripcion ?? 'N/A', // Descripción del estado
