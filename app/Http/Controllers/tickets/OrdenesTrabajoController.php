@@ -16,6 +16,7 @@ use App\Models\Cliente; // Reemplaza con el modelo correcto
 use App\Models\Tienda; // Reemplaza con el modelo correcto
 use App\Models\Marca; // Reemplaza con el modelo correcto
 use App\Models\Modelo; // Reemplaza con el modelo correcto
+use App\Models\TipoDocumento; // Reemplaza con el modelo correcto
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 // use Barryvdh\DomPDF\Facade as PDF;
 
@@ -155,6 +156,7 @@ class OrdenesTrabajoController extends Controller
         $tiposServicio = TipoServicio::all();
         $marcas = Marca::all();
         $modelos = Modelo::all();
+        $tiposDocumento = TipoDocumento::all();
 
        
 
@@ -166,7 +168,7 @@ class OrdenesTrabajoController extends Controller
                 'usuarios',
                 'tiposServicio',
                 'marcas',
-                'modelos'
+                'modelos', 'tiposDocumento'
             ));
        
     }
@@ -333,7 +335,7 @@ public function storesmart(Request $request)
         };
 
         if ($carpetaVista) {
-            return view("tickets.ordenes-trabajo.$carpetaVista.edit", compact('orden', 'modelos'));
+            return view("tickets.ordenes-trabajo.$carpetaVista.edit", compact('orden', 'modelos', 'usuario'));	
         } else {
             abort(403, 'No tienes permiso para acceder a esta vista.');
         }

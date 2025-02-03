@@ -1,5 +1,14 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <style>
+        .panel {
+            overflow: visible !important;
+            /* Asegura que el modal no restrinja contenido */
+        }
+
+    </style>
     <div class="mb-5" x-data="{ tab: 'detalle' }">
         <!-- Tabs -->
         <ul
@@ -13,7 +22,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M8 2H16M8 2V6M16 2V6M4 6H20M4 6V22H20V6M9 10H15M9 14H15M9 18H12" />
                     </svg>
-                    Detalles OTT
+                    Detalles OT
                 </a>
             </li>
             <li>
@@ -58,5 +67,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     {{-- <script src="{{ asset('assets/js/tickets/smart/smart.js') }}"></script> --}}
 </x-layout.default>
