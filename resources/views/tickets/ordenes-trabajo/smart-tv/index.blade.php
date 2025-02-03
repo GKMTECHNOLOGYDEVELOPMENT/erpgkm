@@ -69,7 +69,7 @@
     </div>
 
 
-    <script src="{{ asset('assets/js/ordenes/ordenes.js') }}"></script>
+    <script src="{{ asset('assets/js/tickets/smart/list.js') }}"></script>
     <script src="{{ asset('assets/js/ordenes/ordenesStore.js') }}"></script>
     <script src="{{ asset('assets/js/ordenes/ordenesValidaciones.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
