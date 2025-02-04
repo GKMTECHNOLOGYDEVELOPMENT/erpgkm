@@ -22,7 +22,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M8 2H16M8 2V6M16 2V6M4 6H20M4 6V22H20V6M9 10H15M9 14H15M9 18H12" />
                     </svg>
-                    Detalles OTT
+                    Detalle Ticket
                 </a>
             </li>
             <li>
@@ -35,6 +35,18 @@
                             d="M12 19l3-3m-3 3H5v-3l9-9a2 2 0 012.828 0l2.172 2.172a2 2 0 010 2.828l-9 9z" />
                     </svg>
                     Visitas
+                </a>
+            </li>
+            <li>
+                <a href="javascript:;"
+                    class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-[0_5px_15px_0_rgba(0,0,0,0.30)]"
+                    :class="{ '!bg-success text-white': tab === 'informacion' }" @click="tab = 'informacion'">
+                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 19l3-3m-3 3H5v-3l9-9a2 2 0 012.828 0l2.172 2.172a2 2 0 010 2.828l-9 9z" />
+                    </svg>
+                    Información
                 </a>
             </li>
             <li>
@@ -59,6 +71,9 @@
             </div>
             <div x-show="tab === 'visitas'">
                 @include('tickets.ordenes-trabajo.smart-tv.visitas.index')
+            </div>
+            <div x-show="tab === 'informacion'">
+                @include('tickets.ordenes-trabajo.smart-tv.informacion.index')
             </div>
             <div x-show="tab === 'firmas'">
                 @include('tickets.ordenes-trabajo.smart-tv.firmas.index')

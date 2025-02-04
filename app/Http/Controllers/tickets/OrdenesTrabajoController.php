@@ -13,6 +13,7 @@ use App\Models\TipoServicio; // Reemplaza con el modelo correcto
 use App\Models\Usuario; // Reemplaza con el modelo correcto
 use App\Models\Tipoticket; // Reemplaza con el modelo correcto
 use App\Models\Cliente; // Reemplaza con el modelo correcto
+use App\Models\ClienteClientegeneral;
 use App\Models\Tienda; // Reemplaza con el modelo correcto
 use App\Models\Marca; // Reemplaza con el modelo correcto
 use App\Models\Modelo; // Reemplaza con el modelo correcto
@@ -328,17 +329,20 @@ public function storesmart(Request $request)
         
         $modelos = Modelo::all(); // Obtén todos los modelos disponibles
 
-        // $carpetaVista = match ($rol) {
-        //     'COORDINACION SMART' => 'smart-tv',
-        //     'COORDINACION HELP DESK' => 'helpdesk',
-        //     default => '',
-        // };
-
-
             return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario'));	
       
     }
 
+
+    public function getClientesGenerales($idCliente)
+    {
+        // Obtener los clientes generales asociados al cliente
+        $clientesGenerales = ClienteClientegeneral::where('idCliente', $idCliente)
+            ->with('clienteGeneral') // Asegúrate de definir la relación en tu modelo
+            ->get();
+
+        return response()->json($clientesGenerales);
+    }
 
 
     // Actualizar una orden de trabajo

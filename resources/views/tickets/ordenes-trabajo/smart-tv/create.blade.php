@@ -33,15 +33,7 @@
     <div x-data="{ openClienteModal: false }" class="panel mt-6 p-5 max-w-2xl mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Orden de Trabajo</h2>
 
-        @if (session('success'))
-            <div class="alert alert-success mb-4">
-                <strong>Éxito!</strong> {{ session('success') }}
-            </div>
-        @elseif (session('error'))
-            <div class="alert alert-danger mb-4">
-                <strong>Error!</strong> {{ session('error') }}
-            </div>
-        @endif
+     
 
         <div class="p-5">
             <form id="ordenTrabajoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
@@ -55,17 +47,7 @@
                         placeholder="Ingrese el número de ticket">
                 </div>
 
-                <!-- Cliente General -->
-                <div>
-                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Cliente General</option>
-                        @foreach ($clientesGenerales as $cliente)
-                            <option value="{{ $cliente->idClienteGeneral }}">{{ $cliente->descripcion }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
+                
                 <!-- Cliente: Seleccionar o crear nuevo -->
                 <div class="col-span-1">
                     <div class="flex items-center space-x-2">
@@ -86,6 +68,15 @@
                         @endforeach
                     </select>
                 </div>
+
+                <!-- Cliente General -->
+                <div>
+                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display:none">
+                        <option value="" disabled selected>Seleccionar Cliente General</option>
+                    </select>
+                </div>
+
 
                 <!-- Tienda -->
                 <div>
@@ -433,4 +424,45 @@
             });
         });
     </script>
+
+<script>
+    function cargarClientesGenerales() {
+        var idCliente = document.getElementById('idCliente').value;
+        console.log('idCliente seleccionado:', idCliente); // Imprimir el idCliente seleccionado
+
+        if(idCliente) {
+            console.log('Realizando fetch para obtener clientes generales para el idCliente:', idCliente);
+
+            fetch(`/clientes-generales/${idCliente}`)
+                .then(response => {
+                    console.log('Respuesta recibida:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Datos recibidos:', data); // Imprimir los datos recibidos del servidor
+
+                    let selectClienteGeneral = document.getElementById('idClienteGeneral');
+                    selectClienteGeneral.innerHTML = '<option value="" disabled selected>Seleccionar Cliente General</option>'; // Limpiar las opciones actuales
+
+                    data.forEach(clienteGeneral => {
+                        console.log('Procesando cliente general:', clienteGeneral); // Imprimir cada cliente general
+                        let option = document.createElement('option');
+                        option.value = clienteGeneral.clienteGeneral.idClienteGeneral; // Asumiendo que `clienteGeneral` tiene la propiedad `idClienteGeneral`
+                        option.textContent = clienteGeneral.clienteGeneral.descripcion;
+                        selectClienteGeneral.appendChild(option);
+                    });
+
+                    // Mostrar el select de Cliente General
+                    console.log('Mostrando el select de Cliente General');
+                    $(selectClienteGeneral).show();
+                })
+                .catch(error => {
+                    console.log('Error al realizar el fetch:', error); // En caso de error
+                });
+        } else {
+            console.log('No se seleccionó un cliente');
+        }
+    }
+</script>
+
 </x-layout.default>

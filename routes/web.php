@@ -261,6 +261,8 @@ Route::prefix('kits')->name('almacen.kits.')->group(function () {
     Route::get('/get-all', [KitsController::class, 'getAll'])->name('getAll'); // Obtener datos en JSON
 });
 
+Route::get('/clientes-generales/{idCliente}', [OrdenesTrabajoController::class, 'getClientesGenerales'])->name('clientes.generales');
+
 
 //INICIO TICKETS///
 
