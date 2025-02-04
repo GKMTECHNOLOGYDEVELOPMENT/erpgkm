@@ -65,7 +65,7 @@
 
 
         <!-- Contenido de los Tabs -->
-        <div class="panel mt-6 p-5 max-w-4xl mx-auto">
+        <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
             <div x-show="tab === 'detalle'">
                 @include('tickets.ordenes-trabajo.smart-tv.detalle.index', ['orden' => $orden, 'modelos' => $modelos])
             </div>

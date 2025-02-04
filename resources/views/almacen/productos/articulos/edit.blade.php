@@ -10,7 +10,7 @@
             </li>
         </ul>
     </div>
-    <div class="panel mt-6 p-5 max-w-4xl mx-auto">
+    <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR ARTÍCULO</h2>
 
         <form action="{{ route('articulos.update', $articulo->idArticulos) }}" method="POST"

@@ -252,7 +252,7 @@
                                     </template>
                                     <template x-if="!fotoPreview">
                                         <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
-                                            class="w-40 h-40 object-cover">
+                                            class="w-50 h-40 object-cover">
                                     </template>
                                 </div>
                             </div>

@@ -14,7 +14,7 @@
         </ul>
     </div>
     <!-- Formulario de Editar Cliente -->
-    <div class="panel mt-6 p-5 max-w-2xl mx-auto">
+    <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR CLIENTES</h2>
         <div class="p-5">
             <form id="clienteForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
