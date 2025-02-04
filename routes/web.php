@@ -271,11 +271,9 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/helpdesk', [OrdenesTrabajoController::class, 'helpdesk'])->name('helpdesk');
     Route::get('/create-smart/', [OrdenesTrabajoController::class, 'createsmart'])->name('createsmart');
     Route::get('/create-helpdesk', [OrdenesTrabajoController::class, 'createhelpdesk'])->name('createhelpdesk')->middleware('auth'); // Crear una nueva orden de trabajo
-
-
     Route::post('/storehelpdesk', [OrdenesTrabajoController::class, 'storehelpdesk'])->name('storehelpdesk'); // Guardar una nueva orden de trabajo
     Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart'); // Guardar una nueva orden de trabajo
-    Route::get('/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit'); // Editar una orden de trabajo
+    Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit'); // Editar una orden de trabajo
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update'); // Actualizar una orden de trabajo
     Route::delete('/{id}', [OrdenesTrabajoController::class, 'destroy'])->name('destroy'); // Eliminar una orden de trabajo
 

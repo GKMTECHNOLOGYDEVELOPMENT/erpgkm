@@ -328,18 +328,18 @@ public function storesmart(Request $request)
         
         $modelos = Modelo::all(); // Obtén todos los modelos disponibles
 
-        $carpetaVista = match ($rol) {
-            'COORDINACION SMART' => 'smart-tv',
-            'COORDINACION HELP DESK' => 'helpdesk',
-            default => '',
-        };
+        // $carpetaVista = match ($rol) {
+        //     'COORDINACION SMART' => 'smart-tv',
+        //     'COORDINACION HELP DESK' => 'helpdesk',
+        //     default => '',
+        // };
 
-        if ($carpetaVista) {
-            return view("tickets.ordenes-trabajo.$carpetaVista.edit", compact('orden', 'modelos', 'usuario'));	
-        } else {
-            abort(403, 'No tienes permiso para acceder a esta vista.');
-        }
+
+            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario'));	
+      
     }
+
+
 
     // Actualizar una orden de trabajo
     public function update(Request $request, $id)
