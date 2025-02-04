@@ -262,6 +262,9 @@ Route::prefix('kits')->name('almacen.kits.')->group(function () {
 });
 
 Route::get('/clientes-generales/{idCliente}', [OrdenesTrabajoController::class, 'getClientesGenerales'])->name('clientes.generales');
+Route::get('/clientesdatos', [OrdenesTrabajoController::class, 'getClientes'])->name('clientes.get');
+Route::post('/guardar-cliente', [OrdenesTrabajoController::class, 'guardarCliente'])->name('guardar.cliente');
+Route::get('/clientesdatoscliente', [OrdenesTrabajoController::class, 'getClientesdatosclientes'])->name('clientes.get');
 
 
 //INICIO TICKETS///

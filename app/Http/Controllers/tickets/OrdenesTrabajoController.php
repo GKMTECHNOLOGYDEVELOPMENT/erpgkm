@@ -19,6 +19,8 @@ use App\Models\Marca; // Reemplaza con el modelo correcto
 use App\Models\Modelo; // Reemplaza con el modelo correcto
 use App\Models\TipoDocumento; // Reemplaza con el modelo correcto
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
+use Illuminate\Support\Facades\Validator;
+
 // use Barryvdh\DomPDF\Facade as PDF;
 
 class OrdenesTrabajoController extends Controller
@@ -149,7 +151,7 @@ class OrdenesTrabajoController extends Controller
     {
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
-
+        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
         $clientesGenerales = ClienteGeneral::where('estado', 1)->get();
         $clientes = Cliente::where('estado', 1)->get();
         $tiendas = Tienda::all();
@@ -169,7 +171,7 @@ class OrdenesTrabajoController extends Controller
                 'usuarios',
                 'tiposServicio',
                 'marcas',
-                'modelos', 'tiposDocumento'
+                'modelos', 'tiposDocumento', 'departamentos'
             ));
        
     }
@@ -323,13 +325,13 @@ public function storesmart(Request $request)
     {
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
-
+ 
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda'])->findOrFail($id);
 
         
         $modelos = Modelo::all(); // Obtén todos los modelos disponibles
 
-            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario'));	
+            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario', 'departamentos'));	
       
     }
 
@@ -343,6 +345,15 @@ public function storesmart(Request $request)
 
         return response()->json($clientesGenerales);
     }
+
+    public function getClientes()
+{
+    // Obtener todos los clientes
+    $clientes = Cliente::all(); // Asegúrate de que esto devuelva los campos necesarios
+
+    return response()->json($clientes);
+}
+
 
 
     // Actualizar una orden de trabajo
@@ -392,42 +403,7 @@ public function storesmart(Request $request)
         return $pdf->download('reporte-ordenes-trabajo.pdf');
     }
 
-    // Obtener todas las órdenes de trabajo en formato JSON
-    // public function getAll()
-    // {
-    //     $ordenes = Ticket::with([
-    //         'tecnico:idUsuario,Nombre', // Relación para obtener el nombre del técnico
-    //         'usuario:idUsuario,Nombre', // Relación para obtener el nombre del usuario
-    //         'cliente:idCliente,nombre', // Relación para obtener el nombre del cliente
-    //         'clientegeneral:idClienteGeneral,descripcion', // Relación para el cliente general
-    //         'tiposervicio:idTipoServicio,nombre', // Relación para obtener el nombre del tipo de servicio
-    //         'estado_ot:idEstadoots,descripcion,color', // Relación para obtener la descripción del estado
-    //         'marca:idMarca,nombre',
-    //         'modelo:idModelo,nombre',
-    //     ])->get();
-
-    //     // Formatear el resultado
-    //     $ordenes = $ordenes->map(function ($orden) {
-    //         return [
-    //             'idTickets' => $orden->idTickets,
-    //             'numero_ticket' => $orden->numero_ticket,
-    //             'tecnico' => $orden->tecnico->Nombre ?? 'N/A', // Nombre del técnico
-    //             'usuario' => $orden->usuario->Nombre ?? 'N/A', // Nombre del usuario
-    //             'cliente' => $orden->cliente->nombre ?? 'N/A', // Nombre del cliente
-    //             'marca' => $orden->marca->nombre ?? 'N/A',
-    //             'modelo' => $orden->modelo->nombre ?? 'N/A',
-    //             'serie' => $orden->serie ?? 'N/A',
-    //             'cliente_general' => $orden->clientegeneral->descripcion ?? 'N/A', // Nombre del cliente general
-    //             'tipoServicio' => $orden->tiposervicio->nombre ?? 'N/A', // Nombre del tipo de servicio
-    //             'estado' => $orden->estado_ot->descripcion ?? 'N/A', // Descripción del estado
-    //             'fecha_creacion' => $orden->fecha_creacion ? $orden->fecha_creacion->format('d/m/Y H:i') : 'N/A', // Formato de fecha
-    //             'color' => $orden->estado_ot->color ?? '#000000', // Color del estado
-    //         ];
-    //     });
-
-    //     return response()->json($ordenes);
-    // }
-
+ 
     public function getAll(Request $request)
     {
         $ordenesQuery = Ticket::with([
@@ -560,4 +536,62 @@ public function storesmart(Request $request)
         return response()->json($modelos);
 
     }
+
+
+    public function guardarCliente(Request $request)
+    {
+        // Mostrar los datos recibidos en el log (para depuración)
+        Log::info('Datos recibidos en el controlador para guardar cliente:', $request->all());
+    
+        // Validar los datos del formulario
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255',
+            'documento' => 'required|unique:cliente,documento',
+            'telefono' => 'required|unique:cliente,telefono',
+            'email' => 'required|email|unique:cliente,email',
+            'direccion' => 'required|string|max:255',
+            'departamento' => 'required',
+            'provincia' => 'required',
+            'distrito' => 'required',
+            'esTienda' => 'required|boolean',
+            'idTipoDocumento' => 'required|exists:tipodocumento,idTipoDocumento',
+            // Si hay más validaciones, agrégalas aquí
+        ]);
+        // Si la validación falla, devolver errores
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput(); // Redirigir con los errores y los valores previos
+        }
+    
+        // Si pasa la validación, crear el cliente
+        $cliente = Cliente::create([
+            'nombre' => $request->nombre,
+            'documento' => $request->documento,
+            'telefono' => $request->telefono,
+            'email' => $request->email,
+            'direccion' => $request->direccion,
+            'departamento' => $request->departamento,
+            'provincia' => $request->provincia,
+            'distrito' => $request->distrito,
+            'esTienda' => $request->esTienda,
+            'idTipoDocumento' => $request->idTipoDocumento,
+            // Otros campos si es necesario
+        ]);
+    
+        // Log de éxito al guardar el cliente
+        Log::info('Cliente guardado exitosamente:', ['cliente' => $cliente]);
+    
+        // Devolver la respuesta exitosa
+        return response()->json(['message' => 'Cliente guardado exitosamente', 'cliente' => $cliente], 200);
+    }
+
+
+    public function getClientesdatosclientes()
+{
+    $clientes = Cliente::all(); // Obtiene todos los clientes
+
+    return response()->json($clientes);
+}
+
 }

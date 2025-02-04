@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class ClienteClientegeneral extends Model
+class 	ClienteClientegeneral extends Model
 {
 	protected $table = 'cliente_clientegeneral';
 	protected $primaryKey = 'idClienteClienteGeneral';
@@ -32,4 +32,18 @@ class ClienteClientegeneral extends Model
 		'idCliente',
 		'idClienteGeneral'
 	];
+
+
+	   // Relación con Cliente
+	   public function cliente()
+	   {
+		   return $this->belongsTo(Cliente::class, 'idCliente');
+	   }
+   
+	   // Relación con ClienteGeneral
+	   public function clienteGeneral()
+	   {
+		   return $this->belongsTo(ClienteGeneral::class, 'idClienteGeneral');
+	   }
 }
+

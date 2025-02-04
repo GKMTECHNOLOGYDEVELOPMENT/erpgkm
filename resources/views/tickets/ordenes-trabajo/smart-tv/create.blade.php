@@ -29,6 +29,25 @@
         </ul>
     </div>
 
+    <!-- Verificar si hay errores y mostrarlos -->
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<!-- Mostrar mensaje de éxito si hay una variable de sesión 'success' -->
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+
     <!-- Contenedor principal -->
     <div x-data="{ openClienteModal: false }" class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Orden de Trabajo</h2>
@@ -59,24 +78,19 @@
                             </svg>
                         </button>
                     </div>
-                    <select id="idCliente" name="idCliente" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Cliente</option>
-                        @foreach ($clientes as $cliente)
-                            <option value="{{ $cliente->idCliente }}" data-tienda="{{ $cliente->esTienda }}">
-                                {{ $cliente->nombre }} - {{ $cliente->documento }}
-                            </option>
-                        @endforeach
+                    <select id="idCliente" name="idCliente" class="form-input w-full">
+                        <option value="" selected>Seleccionar Modelo</option>
                     </select>
+
                 </div>
 
                 <!-- Cliente General -->
                 <div>
                     <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Cliente General</option>
+                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+                        <option value="" selected>Seleccionar Cliente General</option>
                     </select>
                 </div>
-
 
                 <!-- Tienda -->
                 <div>
@@ -186,9 +200,29 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario para nuevo Cliente -->
-                        <form id="clienteForm" class="p-5 space-y-4" method="post" enctype="multipart/form-data">
-                            @csrf
+                       <!-- Formulario -->
+                       <form class="p-5 space-y-4" id="clienteForm" method="POST" enctype="multipart/form-data" >
+                            @csrf <!-- Asegúrate de incluir el token CSRF -->
+                            
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- ClienteGeneral -->
+                                <div>
+                                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                                    <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
+                                        placeholder="Seleccionar Cliente General" multiple  class="select2 w-full">
+                                        @foreach ($clientesGenerales as $clienteGeneral)
+                                            <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                                {{ $clienteGeneral->descripcion }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                               <!-- Contenedor para mostrar los seleccionados -->
+                               <div id="selected-items-container">
+                                    <strong>Seleccionados:</strong>
+                                    <div id="selected-items-list" class="flex flex-wrap gap-2"></div>
+                                </div>
+
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -197,29 +231,17 @@
                                 </div>
                                 <!-- Tipo Documento -->
                                 <div>
-                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
-                                        Documento</label>
-                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full"
-                                        style="display:none">
+                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}</option>
+                                                {{ $tipoDocumento->nombre }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <!-- Documento -->
-                                <div>
-                                    <label for="documento" class="block text-sm font-medium">Documento</label>
-                                    <input id="documento" type="text" name="documento" class="form-input w-full"
-                                        placeholder="Ingrese el documento">
-                                </div>
-                                <!-- Teléfono -->
-                                <div>
-                                    <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                    <input id="telefono" type="text" name="telefono" class="form-input w-full"
-                                        placeholder="Ingrese el teléfono">
-                                </div>
+
                                 <!-- Contenedor del switch "Es tienda" -->
                                 <div id="esTiendaContainer" class="hidden mt-4">
                                     <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
@@ -235,13 +257,66 @@
                                         </div>
                                     </div>
                                 </div>
+
+
+                                <!-- Documento -->
+                                <div>
+                                    <label for="documento" class="block text-sm font-medium">Documento</label>
+                                    <input id="documento" type="text" name="documento" class="form-input w-full"
+                                        placeholder="Ingrese el documento">
+                                </div>
+                                <!-- Teléfono -->
+                                <div>
+                                    <label for="telefono" class="block text-sm font-medium">Teléfono</label>
+                                    <input id="telefono" type="text" name="telefono" class="form-input w-full"
+                                        placeholder="Ingrese el teléfono">
+                                </div>
+                                <!-- Email -->
+                                <div>
+                                    <label for="email" class="block text-sm font-medium">Email</label>
+                                    <input id="email" type="email" class="form-input w-full" name="email"
+                                        placeholder="Ingrese el email">
+                                </div>
+                                <!-- departamento -->
+                                <div>
+                                    <label for="departamento" class="block text-sm font-medium">Departamento</label>
+                                    <select id="departamento" name="departamento" class="form-input w-full">
+                                        <option value="" disabled selected>Seleccionar Departamento</option>
+                                        @foreach ($departamentos as $departamento)
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Provincia -->
+                                <div>
+                                    <label for="provincia" class="block text-sm font-medium">Provincia</label>
+                                    <select id="provincia" name="provincia" class="form-input w-full" disabled>
+                                        <option value="" disabled selected>Seleccionar Provincia</option>
+                                    </select>
+                                </div>
+
+                                <!-- Distrito -->
+                                <div>
+                                    <label for="distrito" class="block text-sm font-medium">Distrito</label>
+                                    <select id="distrito" name="distrito" class="form-input w-full" disabled>
+                                        <option value="" disabled selected>Seleccionar Distrito</option>
+                                    </select>
+                                </div>
+                                <!-- Dirección (Ocupa 2 columnas) -->
+                                <div>
+                                    <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                                    <input id="direccion" type="text" name="direccion" class="form-input w-full"
+                                        placeholder="Ingrese el direccion">
+                                </div>
                             </div>
-                            <div class="flex justify-end items-center mt-4 gap-2">
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
-                                    @click="openClienteModal = false">
-                                    Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-primary ml-4">Guardar</button>
+                                    @click="open = false">Cancelar</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
                     </div>
@@ -250,7 +325,11 @@
         </div>
     </div>
 
+    <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <!-- Scripts de inicialización -->
+     <!-- Incluir Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -426,43 +505,158 @@
     </script>
 
 <script>
-    function cargarClientesGenerales() {
-        var idCliente = document.getElementById('idCliente').value;
-        console.log('idCliente seleccionado:', idCliente); // Imprimir el idCliente seleccionado
+  document.getElementById('idCliente').addEventListener('change', cargarClientesGenerales);
 
-        if(idCliente) {
-            console.log('Realizando fetch para obtener clientes generales para el idCliente:', idCliente);
+function cargarClientesGenerales() {
+    var idCliente = document.getElementById('idCliente').value;
+    console.log('idCliente seleccionado:', idCliente); // Imprimir el idCliente seleccionado
 
-            fetch(`/clientes-generales/${idCliente}`)
-                .then(response => {
-                    console.log('Respuesta recibida:', response);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Datos recibidos:', data); // Imprimir los datos recibidos del servidor
+    if(idCliente) {
+        console.log('Realizando fetch para obtener clientes generales para el idCliente:', idCliente);
 
-                    let selectClienteGeneral = document.getElementById('idClienteGeneral');
-                    selectClienteGeneral.innerHTML = '<option value="" disabled selected>Seleccionar Cliente General</option>'; // Limpiar las opciones actuales
+        fetch(`/clientes-generales/${idCliente}`)
+            .then(response => {
+                console.log('Respuesta recibida:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Datos recibidos:', data); // Imprimir los datos recibidos del servidor
 
-                    data.forEach(clienteGeneral => {
-                        console.log('Procesando cliente general:', clienteGeneral); // Imprimir cada cliente general
-                        let option = document.createElement('option');
-                        option.value = clienteGeneral.clienteGeneral.idClienteGeneral; // Asumiendo que `clienteGeneral` tiene la propiedad `idClienteGeneral`
-                        option.textContent = clienteGeneral.clienteGeneral.descripcion;
-                        selectClienteGeneral.appendChild(option);
-                    });
+                let selectClienteGeneral = document.getElementById('idClienteGeneral');
+                selectClienteGeneral.innerHTML = '<option value="" disabled selected>Seleccionar Cliente General</option>'; // Limpiar las opciones actuales
 
-                    // Mostrar el select de Cliente General
-                    console.log('Mostrando el select de Cliente General');
-                    $(selectClienteGeneral).show();
-                })
-                .catch(error => {
-                    console.log('Error al realizar el fetch:', error); // En caso de error
+                data.forEach(clienteGeneral => {
+                    console.log('Procesando cliente general:', clienteGeneral); // Imprimir cada cliente general
+                    let option = document.createElement('option');
+                    option.value = clienteGeneral.cliente_general.idClienteGeneral; // Cambié la propiedad de 'clienteGeneral' a 'cliente_general'
+                    option.textContent = clienteGeneral.cliente_general.descripcion; // También corregí aquí el acceso
+                    selectClienteGeneral.appendChild(option);
                 });
-        } else {
-            console.log('No se seleccionó un cliente');
-        }
+
+                // Mostrar el select de Cliente General
+                console.log('Mostrando el select de Cliente General');
+                $(selectClienteGeneral).show();
+            })
+            .catch(error => {
+                console.log('Error al realizar el fetch:', error); // En caso de error
+            });
+    } else {
+        console.log('No se seleccionó un cliente');
     }
+}
+
 </script>
+
+
+<script>
+       
+        document.addEventListener("DOMContentLoaded", function() {
+            // Inicializar nice-select2
+            NiceSelect.bind(document.getElementById("idClienteGeneraloption"));
+
+            const select = document.getElementById('idClienteGeneraloption');
+            const selectedItemsContainer = document.getElementById('selected-items-list');
+
+            // Función para actualizar los seleccionados
+            function updateSelectedItems() {
+                selectedItemsContainer.innerHTML = ''; // Limpiar el contenedor
+
+                const selectedOptions = Array.from(select.selectedOptions); // Obtener las opciones seleccionadas
+
+                selectedOptions.forEach(option => {
+                    const badge = document.createElement('span');
+                    badge.textContent = option.textContent;
+                    badge.className = 'badge bg-primary'; // Aplicar el estilo del badge
+                    selectedItemsContainer.appendChild(badge); // Agregar el badge al contenedor
+                });
+            }
+
+            // Escuchar cambios en el select
+            select.addEventListener('change', updateSelectedItems);
+
+            // Actualizar los seleccionados al cargar la página
+            updateSelectedItems();
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            const tipoDocumento = document.getElementById("idTipoDocumento");
+            const esTiendaContainer = document.getElementById("esTiendaContainer");
+
+            tipoDocumento.addEventListener("change", function() {
+                // Verificar si el texto del option seleccionado es "RUC"
+                const selectedOptionText = tipoDocumento.options[tipoDocumento.selectedIndex].text;
+
+                if (selectedOptionText === "RUC") {
+                    esTiendaContainer.classList.remove("hidden"); // Muestra el switch
+                } else {
+                    esTiendaContainer.classList.add("hidden"); // Oculta el switch
+                }
+            });
+        });
+    </script>
+
+
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+    // Función para cargar los clientes
+    function cargarClientes() {
+        fetch('/clientesdatoscliente')  // Llamada a la ruta que devuelve los clientes
+            .then(response => response.json()) // Obtener los datos en formato JSON
+            .then(data => {
+                let select = document.getElementById('idCliente');
+                select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>'; // Limpiar las opciones anteriores
+
+                data.forEach(cliente => {
+                    let option = document.createElement('option');
+                    option.value = cliente.idCliente;
+                    option.textContent = `${cliente.nombre} - ${cliente.documento}`;
+                    option.setAttribute('data-tienda', cliente.esTienda);  // Agregar atributo de tienda si es necesario
+                    select.appendChild(option);
+                });
+
+                // Inicializar el select2 (si lo estás utilizando)
+                $(select).select2();
+            })
+            .catch(error => console.error('Error al cargar clientes:', error));
+    }
+
+    // Cargar los clientes cuando la página se cargue
+    cargarClientes();
+
+    // Si tienes algún evento que guarda un nuevo cliente, debes recargar los clientes
+    // Suponiendo que tienes un formulario de creación de cliente
+    document.getElementById('clienteForm').addEventListener('submit', function(event) {
+        event.preventDefault();  // Evitar el envío normal del formulario
+
+        let formData = new FormData(this); // Obtener los datos del formulario
+
+        fetch('/guardar-cliente', {
+            method: 'POST',
+            body: formData, // Enviar los datos del formulario
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.errors) {
+                // Mostrar errores si los hay
+                mostrarErrores(data.errors);
+            } else {
+                // Mostrar mensaje de éxito
+                alert(data.message);
+
+                // Recargar los clientes después de guardar el cliente
+                cargarClientes();
+
+                // Limpiar el formulario y cerrar el modal si es necesario
+                document.getElementById('clienteForm').reset();
+                openClienteModal = false;  // Cerrar el modal si lo tienes
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+
+</script>
+
 
 </x-layout.default>
