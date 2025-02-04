@@ -53,7 +53,7 @@
                             <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" />
                         </svg>
-                        Agregar
+                        Agregar Cliente General
                     </button>
                 </div>
             </div>
