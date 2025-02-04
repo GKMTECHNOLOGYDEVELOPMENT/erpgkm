@@ -20,7 +20,7 @@
             </li>
         </ul>
     </div>
-    <div class="panel mt-6 p-5 max-w-2xl mx-auto">
+    <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR TIENDA</h2>
         <!-- Formulario -->
         <div class="p-5">

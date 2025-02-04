@@ -13,7 +13,7 @@
         </ul>
     </div>
 
-    <div class="panel mt-6 p-5 max-w-2xl mx-auto">
+    <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR MODELO</h2>
 
         <form id="modeloForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"

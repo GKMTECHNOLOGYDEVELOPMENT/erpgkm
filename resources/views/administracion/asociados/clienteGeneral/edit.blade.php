@@ -10,7 +10,7 @@
             </li>
         </ul>
     </div>
-    <div class="panel mt-6 p-5 max-w-2xl mx-auto">
+    <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR CLIENTE GENERAL</h2>
 
         <form action="{{ route('cliente-general.update', $cliente->idClienteGeneral) }}" method="POST"

@@ -30,7 +30,7 @@
     </div>
 
     <!-- Contenedor principal -->
-    <div x-data="{ openClienteModal: false }" class="panel mt-6 p-5 max-w-2xl mx-auto">
+    <div x-data="{ openClienteModal: false }" class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Orden de Trabajo</h2>
 
         @if (session('success'))
