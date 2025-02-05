@@ -29,7 +29,6 @@
         </ul>
     </div>
 
-    Verificar si hay errores y mostrarlos
 @if ($errors->any())
     <div class="alert alert-danger">
         <ul>

@@ -83,28 +83,28 @@
     <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
     <!-- Drop zone: tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">
-        <table class="min-w-[600px] border-collapse">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="px-4 py-2 text-center">Estado</th>
-                    <th class="px-4 py-2 text-center">Usuario</th>
-                    <th class="px-4 py-2 text-center">Fecha</th>
-                    <th class="px-4 py-2 text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="estadosTableBody">
-                <!-- Fila inicial (no se podrá eliminar) -->
-                <tr class="bg-dark-dark-light border-dark-dark-light">
-                    <td class="px-4 py-2 text-center">Pendiente por Coordinar</td>
-                    <td class="px-4 py-2 text-center">Usuario Actual</td>
-                    <td class="px-4 py-2 text-center min-w-[200px]" id="estadoInicialFecha"></td>
-                    <td class="px-4 py-2 text-center">
-                        <!-- Sin botón de eliminar -->
-                        <span class="text-gray-500">-</span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+      <table class="min-w-[600px] border-collapse">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="px-4 py-2 text-center">Estado</th>
+            <th class="px-4 py-2 text-center">Usuario</th>
+            <th class="px-4 py-2 text-center">Fecha</th>
+            <th class="px-4 py-2 text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="estadosTableBody">
+          <!-- Fila inicial (no se podrá eliminar) -->
+          <tr class="bg-dark-dark-light border-dark-dark-light">
+          <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
+          <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
+            <td class="px-4 py-2 text-center min-w-[200px]" id="">{{ $orden->fecha_creacion ?? 'sin fecha'}}</td>
+            <td class="px-4 py-2 text-center">
+              <!-- Sin botón de eliminar -->
+              <span class="text-gray-500">-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <!-- Estados disponibles (draggables) -->
     <div class="mt-3 overflow-x-auto">

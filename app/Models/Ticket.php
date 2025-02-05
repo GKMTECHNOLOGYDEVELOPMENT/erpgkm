@@ -72,6 +72,7 @@ class Ticket extends Model
 		'idTienda' => 'int',
 		'idMarca' => 'int',
 		'idModelo' => 'int',
+		'idEstadflujo' => 'int',
 		'fechaCompra' => 'datetime'
 	];
 
@@ -83,6 +84,7 @@ class Ticket extends Model
 		'fecha_creacion',
 		'idTipotickets',
 		'idEstadoots',
+		'idEstadflujo',
 		'idTecnico',
 		'idUsuario',
 		'idTienda',
@@ -105,6 +107,11 @@ class Ticket extends Model
 	public function estado_ot()
 	{
 		return $this->belongsTo(EstadoOt::class, 'idEstadoots');
+	}
+
+	public function estadoflujo()
+	{
+		return $this->belongsTo(EstadoFlujo::class, 'idEstadflujo');
 	}
 
 	public function cliente()
