@@ -29,7 +29,7 @@
         </ul>
     </div>
 
-    <!-- Verificar si hay errores y mostrarlos -->
+    Verificar si hay errores y mostrarlos
 @if ($errors->any())
     <div class="alert alert-danger">
         <ul>
@@ -78,10 +78,9 @@
                             </svg>
                         </button>
                     </div>
-                    <select id="idCliente" name="idCliente" class="form-input w-full">
-                        <option value="" selected>Seleccionar Modelo</option>
+                    <select id="idCliente" name="idCliente" class="select2 w-full">
+                        <option value="" selected >Seleccionar Cliente </option>
                     </select>
-
                 </div>
 
                 <!-- Cliente General -->
@@ -174,7 +173,7 @@
                 <!-- Botones -->
                 <div class="col-span-1 md:col-span-2 flex justify-end mt-4 gap-2">
                     <a href="{{ route('ordenes.index') }}" class="btn btn-outline-danger">Cancelar</a>
-                    <button type="submit" class="btn btn-primary ml-4">Guardar</button>
+                    <button type="submit"  id="btnGuardar" class="btn btn-primary ml-4">Guardar</button>
                 </div>
             </form>
         </div>
@@ -326,10 +325,8 @@
     </div>
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
-    <!-- Scripts de inicialización -->
-     <!-- Incluir Select2 -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -339,7 +336,7 @@
         $(document).ready(function() {
             // Inicializar Nice Select en todos los selects con clase .select2
             document.querySelectorAll('.select2').forEach(function(select) {
-                console.log("Inicializando select:", select);
+                // console.log("Inicializando select:", select);
                 NiceSelect.bind(select, {
                     searchable: true
                 });
@@ -504,52 +501,129 @@
         });
     </script>
 
-<script>
-  document.getElementById('idCliente').addEventListener('change', cargarClientesGenerales);
+   
 
-function cargarClientesGenerales() {
-    var idCliente = document.getElementById('idCliente').value;
-    console.log('idCliente seleccionado:', idCliente); // Imprimir el idCliente seleccionado
 
-    if(idCliente) {
-        console.log('Realizando fetch para obtener clientes generales para el idCliente:', idCliente);
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
 
-        fetch(`/clientes-generales/${idCliente}`)
-            .then(response => {
-                console.log('Respuesta recibida:', response);
-                return response.json();
-            })
-            .then(data => {
-                console.log('Datos recibidos:', data); // Imprimir los datos recibidos del servidor
+        // Función para cargar los clientes
+        function cargarClientes() {
+            console.log('Intentando cargar clientes...');
+            fetch('/clientesdatoscliente')  // Llamada a la ruta que devuelve los clientes
+                .then(response => response.json()) // Obtener los datos en formato JSON
+                .then(data => {
+                    console.log('Clientes recibidos:', data); // Ver los datos de los clientes
+                    let select = document.getElementById('idCliente');
+                    select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>'; // Limpiar las opciones anteriores
 
-                let selectClienteGeneral = document.getElementById('idClienteGeneral');
-                selectClienteGeneral.innerHTML = '<option value="" disabled selected>Seleccionar Cliente General</option>'; // Limpiar las opciones actuales
+                    // Agregar las nuevas opciones
+                    data.forEach(cliente => {
+                        let option = document.createElement('option');
+                        option.value = cliente.idCliente;
+                        option.textContent = `${cliente.nombre} - ${cliente.documento}`;
+                        option.setAttribute('data-tienda', cliente.esTienda);  // Agregar atributo de tienda si es necesario
+                        select.appendChild(option);
+                    });
 
-                data.forEach(clienteGeneral => {
-                    console.log('Procesando cliente general:', clienteGeneral); // Imprimir cada cliente general
-                    let option = document.createElement('option');
-                    option.value = clienteGeneral.cliente_general.idClienteGeneral; // Cambié la propiedad de 'clienteGeneral' a 'cliente_general'
-                    option.textContent = clienteGeneral.cliente_general.descripcion; // También corregí aquí el acceso
-                    selectClienteGeneral.appendChild(option);
+                    // Mostrar el select después de cargar
+                    select.style.display = 'block'; // Asegurarse de que el select se vea
+                    select.style.visibility = 'visible'; // Hacerlo visible
+
+                    // Inicializar NiceSelect en el select de clientes
+                    NiceSelect.bind(select, {
+                        searchable: true
+                    });
+
+                })
+                .catch(error => {
+                    console.error('Error al cargar clientes:', error);
                 });
+        }
 
-                // Mostrar el select de Cliente General
-                console.log('Mostrando el select de Cliente General');
-                $(selectClienteGeneral).show();
+        // Ocultar el select de clientes inicialmente
+        let selectCliente = document.getElementById('idCliente');
+        selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
+
+        // Cargar los clientes solo si no se han cargado previamente
+        if (!clientesCargados) {
+            cargarClientes();
+            clientesCargados = true;
+        }
+
+        // Evento para cuando se selecciona un cliente
+        document.getElementById('idCliente').addEventListener('change', function () {
+            let clienteId = this.value;
+            if (clienteId) {
+                console.log('Cliente seleccionado:', clienteId); // Verificar si el cliente es seleccionado
+                fetch(`/clientes-generales/${clienteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let select = document.getElementById('idClienteGeneral');
+                        select.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
+
+                        // Verificar si se recibió algún dato
+                        console.log('Clientes generales:', data); // Verifica que se reciban los clientes generales
+
+                        data.forEach(clienteGeneral => {
+                            let option = document.createElement('option');
+                            option.value = clienteGeneral.idClienteGeneral;
+                            option.textContent = clienteGeneral.descripcion;
+                            select.appendChild(option);
+                        });
+
+                        // No inicializamos NiceSelect en el select de Cliente General
+                        // Simplemente utilizamos el select estándar
+                    })
+                    .catch(error => console.error('Error al cargar clientes generales:', error));
+            } else {
+                // Limpiar el select si no hay cliente seleccionado
+                document.getElementById('idClienteGeneral').innerHTML = '<option value="" selected>Seleccionar Cliente General</option>';
+            }
+        });
+
+        // Evento de envío del formulario de cliente
+        document.getElementById('clienteForm').addEventListener('submit', function (event) {
+            event.preventDefault();  // Evitar el envío normal del formulario
+
+            let formData = new FormData(this); // Obtener los datos del formulario
+            console.log('Datos del formulario:', Object.fromEntries(formData.entries()));  // Ver los datos del formulario
+
+            fetch('/guardar-cliente', {
+                method: 'POST',
+                body: formData,  // Enviar los datos del formulario
             })
-            .catch(error => {
-                console.log('Error al realizar el fetch:', error); // En caso de error
-            });
-    } else {
-        console.log('No se seleccionó un cliente');
-    }
-}
+                .then(response => response.json())  // Parsear la respuesta como JSON
+                .then(data => {
+                    console.log('Respuesta del servidor (JSON):', data);  // Verificar la respuesta
+                    if (data.errors) {
+                        // Mostrar errores si los hay
+                        mostrarErrores(data.errors);
+                    } else {
+                        // Mostrar mensaje de éxito
+                        alert(data.message);
 
-</script>
+                        // Recargar los clientes después de guardar el cliente
+                        cargarClientes();
+
+                        // Limpiar el formulario y cerrar el modal si es necesario
+                        document.getElementById('clienteForm').reset();
+                        openClienteModal = false;  // Cerrar el modal si lo tienes
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al guardar el cliente:', error);
+                });
+        });
+
+    });
+    </script>
 
 
 <script>
-       
+        
         document.addEventListener("DOMContentLoaded", function() {
             // Inicializar nice-select2
             NiceSelect.bind(document.getElementById("idClienteGeneraloption"));
@@ -594,69 +668,71 @@ function cargarClientesGenerales() {
         });
     </script>
 
-
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
-    // Función para cargar los clientes
-    function cargarClientes() {
-        fetch('/clientesdatoscliente')  // Llamada a la ruta que devuelve los clientes
-            .then(response => response.json()) // Obtener los datos en formato JSON
+    document.getElementById('btnGuardar').addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const nroTicket = document.getElementById('nroTicket').value;
+
+        fetch(`/validar-ticket/${nroTicket}`)
+            .then(response => response.json())
             .then(data => {
-                let select = document.getElementById('idCliente');
-                select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>'; // Limpiar las opciones anteriores
-
-                data.forEach(cliente => {
-                    let option = document.createElement('option');
-                    option.value = cliente.idCliente;
-                    option.textContent = `${cliente.nombre} - ${cliente.documento}`;
-                    option.setAttribute('data-tienda', cliente.esTienda);  // Agregar atributo de tienda si es necesario
-                    select.appendChild(option);
-                });
-
-                // Inicializar el select2 (si lo estás utilizando)
-                $(select).select2();
+                if (data.existe) {
+                    // Usando showMessage para mostrar la alerta personalizada en rojo
+                    showMessage(
+                        'El número de ticket ya está en uso. Por favor, ingrese otro número.',
+                        'top-end',
+                        true, // Mostrar el botón de cierre
+                        '',
+                        5000, // Duración de la alerta
+                        'error' // Tipo de alerta (error)
+                    );
+                } else {
+                    document.getElementById('ordenTrabajoForm').submit();
+                }
             })
-            .catch(error => console.error('Error al cargar clientes:', error));
-    }
-
-    // Cargar los clientes cuando la página se cargue
-    cargarClientes();
-
-    // Si tienes algún evento que guarda un nuevo cliente, debes recargar los clientes
-    // Suponiendo que tienes un formulario de creación de cliente
-    document.getElementById('clienteForm').addEventListener('submit', function(event) {
-        event.preventDefault();  // Evitar el envío normal del formulario
-
-        let formData = new FormData(this); // Obtener los datos del formulario
-
-        fetch('/guardar-cliente', {
-            method: 'POST',
-            body: formData, // Enviar los datos del formulario
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.errors) {
-                // Mostrar errores si los hay
-                mostrarErrores(data.errors);
-            } else {
-                // Mostrar mensaje de éxito
-                alert(data.message);
-
-                // Recargar los clientes después de guardar el cliente
-                cargarClientes();
-
-                // Limpiar el formulario y cerrar el modal si es necesario
-                document.getElementById('clienteForm').reset();
-                openClienteModal = false;  // Cerrar el modal si lo tienes
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+            .catch(error => {
+                console.error('Error al verificar el ticket:', error);
+                showMessage(
+                    'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.',
+                    'top-end',
+                    true, // Mostrar el botón de cierre
+                    '',
+                    5000, // Duración de la alerta
+                    'error' // Tipo de alerta (error)
+                );
+            });
     });
-});
 
+    // Función para mostrar la alerta con SweetAlert
+    function showMessage(
+        msg = 'Example notification text.',
+        position = 'top-end',
+        showCloseButton = true,
+        closeButtonHtml = '',
+        duration = 3000,
+        type = 'success',
+    ) {
+        const toast = window.Swal.mixin({
+            toast: true,
+            position: position || 'top-end',
+            showConfirmButton: false,
+            timer: duration,
+            showCloseButton: showCloseButton,
+            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+            background: type === 'success' ? '#28a745' : '#dc3545', // Rojo para error, verde para éxito
+            iconColor: 'white', // Color del icono
+            customClass: {
+                title: 'text-white', // Asegura que el texto sea blanco
+            },
+        });
+
+        toast.fire({
+            title: msg,
+        });
+    }
 </script>
+
 
 
 </x-layout.default>

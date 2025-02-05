@@ -8,7 +8,40 @@
             /* Asegura que el modal no restrinja contenido */
         }
 
+        
+        .alert {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.alert-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+
     </style>
+
+    
+
+@if(session('success'))
+    <div class="alert alert-success">S
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
     <div class="mb-5" x-data="{ tab: 'detalle' }">
         <!-- Tabs -->
         <ul
@@ -80,6 +113,9 @@
             </div>
         </div>
     </div>
+
+ 
+
 
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
