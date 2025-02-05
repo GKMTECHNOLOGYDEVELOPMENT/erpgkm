@@ -18,7 +18,10 @@ use App\Models\Tienda; // Reemplaza con el modelo correcto
 use App\Models\Marca; // Reemplaza con el modelo correcto
 use App\Models\Modelo; // Reemplaza con el modelo correcto
 use App\Models\TipoDocumento; // Reemplaza con el modelo correcto
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
+use Illuminate\Support\Facades\Validator;
+
 // use Barryvdh\DomPDF\Facade as PDF;
 
 class OrdenesTrabajoController extends Controller
@@ -149,7 +152,7 @@ class OrdenesTrabajoController extends Controller
     {
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
-
+        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
         $clientesGenerales = ClienteGeneral::where('estado', 1)->get();
         $clientes = Cliente::where('estado', 1)->get();
         $tiendas = Tienda::all();
@@ -169,7 +172,7 @@ class OrdenesTrabajoController extends Controller
                 'usuarios',
                 'tiposServicio',
                 'marcas',
-                'modelos', 'tiposDocumento'
+                'modelos', 'tiposDocumento', 'departamentos'
             ));
        
     }
@@ -273,7 +276,6 @@ public function storesmart(Request $request)
             'idMarca' => 'required|integer|exists:marca,idMarca',
             'idModelo' => 'required|integer|exists:modelo,idModelo',
             'serie' => 'required|string|max:255',
-            'tecnico' => 'required|integer|exists:usuarios,idUsuario',
             'fechaCompra' => 'required|date_format:Y-m-d', // Asegúrate de usar este formato de fecha
             'fallaReportada' => 'required|string|max:255',
             'lat' => 'nullable|string|max:255',
@@ -292,20 +294,21 @@ public function storesmart(Request $request)
             'idMarca' => $validatedData['idMarca'],
             'idModelo' => $validatedData['idModelo'],
             'serie' => $validatedData['serie'],
-            'idTecnico' => $validatedData['tecnico'],
             'fechaCompra' => $validatedData['fechaCompra'],
             'fallaReportada' => $validatedData['fallaReportada'],
             'lat' => $validatedData['lat'],
             'lng' => $validatedData['lng'],
-            'idEstadoots' => 1, // Estado inicial de la orden de trabajo
+            'idEstadoots' => 17, // Estado inicial de la orden de trabajo
             'idUsuario' => auth()->id(), // ID del usuario autenticado
             'fecha_creacion' => now(), // Fecha de creación
         ]);
 
         Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
 
-        // Redirigir con un mensaje de éxito
-        return redirect()->route('ordenes.index')->with('success', 'Orden de trabajo creada correctamente.');
+        // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
+        return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
+        ->with('success', 'Orden de trabajo creada correctamente.');
+
 
     } catch (\Illuminate\Validation\ValidationException $e) {
         // En caso de error en la validación
@@ -318,12 +321,24 @@ public function storesmart(Request $request)
     }
 }
 
+public function validarTicket($nroTicket)
+{
+    // Verifica si el número de ticket ya existe
+    $ticketExistente = Ticket::where('numero_ticket', $nroTicket)->exists();
+
+    // Devuelve la respuesta en formato JSON
+    return response()->json([
+        'existe' => $ticketExistente
+    ]);
+}
+
+
     // Editar orden de trabajo según el rol
     public function edit($id)
     {
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
-
+ 
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda'])->findOrFail($id);
 
         
@@ -343,6 +358,15 @@ public function storesmart(Request $request)
 
         return response()->json($clientesGenerales);
     }
+
+    public function getClientes()
+{
+    // Obtener todos los clientes
+    $clientes = Cliente::all(); // Asegúrate de que esto devuelva los campos necesarios
+
+    return response()->json($clientes);
+}
+
 
 
     // Actualizar una orden de trabajo
@@ -392,42 +416,7 @@ public function storesmart(Request $request)
         return $pdf->download('reporte-ordenes-trabajo.pdf');
     }
 
-    // Obtener todas las órdenes de trabajo en formato JSON
-    // public function getAll()
-    // {
-    //     $ordenes = Ticket::with([
-    //         'tecnico:idUsuario,Nombre', // Relación para obtener el nombre del técnico
-    //         'usuario:idUsuario,Nombre', // Relación para obtener el nombre del usuario
-    //         'cliente:idCliente,nombre', // Relación para obtener el nombre del cliente
-    //         'clientegeneral:idClienteGeneral,descripcion', // Relación para el cliente general
-    //         'tiposervicio:idTipoServicio,nombre', // Relación para obtener el nombre del tipo de servicio
-    //         'estado_ot:idEstadoots,descripcion,color', // Relación para obtener la descripción del estado
-    //         'marca:idMarca,nombre',
-    //         'modelo:idModelo,nombre',
-    //     ])->get();
-
-    //     // Formatear el resultado
-    //     $ordenes = $ordenes->map(function ($orden) {
-    //         return [
-    //             'idTickets' => $orden->idTickets,
-    //             'numero_ticket' => $orden->numero_ticket,
-    //             'tecnico' => $orden->tecnico->Nombre ?? 'N/A', // Nombre del técnico
-    //             'usuario' => $orden->usuario->Nombre ?? 'N/A', // Nombre del usuario
-    //             'cliente' => $orden->cliente->nombre ?? 'N/A', // Nombre del cliente
-    //             'marca' => $orden->marca->nombre ?? 'N/A',
-    //             'modelo' => $orden->modelo->nombre ?? 'N/A',
-    //             'serie' => $orden->serie ?? 'N/A',
-    //             'cliente_general' => $orden->clientegeneral->descripcion ?? 'N/A', // Nombre del cliente general
-    //             'tipoServicio' => $orden->tiposervicio->nombre ?? 'N/A', // Nombre del tipo de servicio
-    //             'estado' => $orden->estado_ot->descripcion ?? 'N/A', // Descripción del estado
-    //             'fecha_creacion' => $orden->fecha_creacion ? $orden->fecha_creacion->format('d/m/Y H:i') : 'N/A', // Formato de fecha
-    //             'color' => $orden->estado_ot->color ?? '#000000', // Color del estado
-    //         ];
-    //     });
-
-    //     return response()->json($ordenes);
-    // }
-
+ 
     public function getAll(Request $request)
     {
         $ordenesQuery = Ticket::with([
@@ -560,4 +549,102 @@ public function storesmart(Request $request)
         return response()->json($modelos);
 
     }
+
+
+    public function guardarCliente(Request $request)
+    {
+        try {
+            // Validar los datos del formulario
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'documento' => 'required|string|max:255|unique:cliente,documento',
+                'telefono' => 'nullable|string|max:15',
+                'email' => 'nullable|email|max:255',
+                'direccion' => 'required|string|max:255',
+                'departamento' => 'required|string|max:255',
+                'provincia' => 'required|string|max:255',
+                'distrito' => 'required|string|max:255',
+                'esTienda' => 'nullable|boolean',
+                'idTipoDocumento' => 'required|exists:tipodocumento,idTipoDocumento',
+                'idClienteGeneraloption' => 'required|array', // Asegurarse de que es un array
+                'idClienteGeneraloption.*' => 'integer|exists:clientegeneral,idClienteGeneral', // Validar cada elemento
+            ]);
+    
+            // Establecer valores predeterminados
+            $validatedData['estado'] = 1; // Valor predeterminado para 'estado'
+            $validatedData['fecha_registro'] = now(); // Fecha de registro
+    
+            // Convertir el valor de esTienda a booleano si está presente
+            $validatedData['esTienda'] = isset($validatedData['esTienda']) && $validatedData['esTienda'] == 1 ? true : false;
+    
+            // Extraer y eliminar 'idClienteGeneral' del array validado
+            $idClienteGenerales = $validatedData['idClienteGeneraloption'];
+            unset($validatedData['idClienteGeneraloption']); // Remover el campo para que no se pase a la creación del cliente
+    
+            // Crear el cliente en la base de datos
+            $cliente = Cliente::create($validatedData);
+    
+            // Asociar los idClienteGeneral en la tabla pivote
+            if (!empty($idClienteGenerales)) {
+                // Preparar los datos para la inserción en la tabla pivote
+                $clienteGenerales = collect($idClienteGenerales)->map(function ($idClienteGeneral) use ($cliente) {
+                    return [
+                        'idCliente' => $cliente->idCliente,
+                        'idClienteGeneral' => $idClienteGeneral,
+                    ];
+                });
+    
+                // Insertar los datos en la tabla pivote
+                DB::table('cliente_clientegeneral')->insert($clienteGenerales->toArray());
+            }
+    
+            // Responder con éxito
+            return response()->json([
+                'success' => true,
+                'message' => 'Cliente agregado correctamente',
+                'data' => $cliente,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Capturar errores de validación y devolverlos
+            Log::error('Errores de validación:', $e->errors());
+            return response()->json([
+                'success' => false,
+                'message' => 'Errores de validación.',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            // Capturar errores generales
+            Log::error('Error al guardar el cliente: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al guardar el cliente.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
+
+
+    public function getClientesdatosclientes()
+{
+    $clientes = Cliente::all(); // Obtiene todos los clientes
+
+    return response()->json($clientes);
+}
+
+
+public function getClientesGeneraless($idCliente)
+{
+    // Obtener los clientes generales asociados al cliente usando la tabla intermedia cliente_clientegeneral
+    $clientesGenerales = ClienteGeneral::join('cliente_clientegeneral', 'cliente_clientegeneral.idClienteGeneral', '=', 'clientegeneral.idClienteGeneral')
+        ->where('cliente_clientegeneral.idCliente', $idCliente)  // Filtro por el cliente seleccionado
+        ->get(['clientegeneral.idClienteGeneral', 'clientegeneral.descripcion']);  // Seleccionar los campos necesarios
+
+    return response()->json($clientesGenerales);
+}
+
+
+
+
+
 }

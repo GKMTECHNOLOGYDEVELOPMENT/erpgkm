@@ -29,6 +29,25 @@
         </ul>
     </div>
 
+    Verificar si hay errores y mostrarlos
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+<!-- Mostrar mensaje de éxito si hay una variable de sesión 'success' -->
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+
     <!-- Contenedor principal -->
     <div x-data="{ openClienteModal: false }" class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Orden de Trabajo</h2>
@@ -59,24 +78,18 @@
                             </svg>
                         </button>
                     </div>
-                    <select id="idCliente" name="idCliente" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Cliente</option>
-                        @foreach ($clientes as $cliente)
-                            <option value="{{ $cliente->idCliente }}" data-tienda="{{ $cliente->esTienda }}">
-                                {{ $cliente->nombre }} - {{ $cliente->documento }}
-                            </option>
-                        @endforeach
+                    <select id="idCliente" name="idCliente" class="select2 w-full">
+                        <option value="" selected >Seleccionar Cliente </option>
                     </select>
                 </div>
 
                 <!-- Cliente General -->
                 <div>
                     <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Cliente General</option>
+                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+                        <option value="" selected>Seleccionar Cliente General</option>
                     </select>
                 </div>
-
 
                 <!-- Tienda -->
                 <div>
@@ -160,7 +173,7 @@
                 <!-- Botones -->
                 <div class="col-span-1 md:col-span-2 flex justify-end mt-4 gap-2">
                     <a href="{{ route('ordenes.index') }}" class="btn btn-outline-danger">Cancelar</a>
-                    <button type="submit" class="btn btn-primary ml-4">Guardar</button>
+                    <button type="submit"  id="btnGuardar" class="btn btn-primary ml-4">Guardar</button>
                 </div>
             </form>
         </div>
@@ -186,9 +199,29 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario para nuevo Cliente -->
-                        <form id="clienteForm" class="p-5 space-y-4" method="post" enctype="multipart/form-data">
-                            @csrf
+                       <!-- Formulario -->
+                       <form class="p-5 space-y-4" id="clienteForm" method="POST" enctype="multipart/form-data" >
+                            @csrf <!-- Asegúrate de incluir el token CSRF -->
+                            
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- ClienteGeneral -->
+                                <div>
+                                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                                    <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
+                                        placeholder="Seleccionar Cliente General" multiple  class="select2 w-full">
+                                        @foreach ($clientesGenerales as $clienteGeneral)
+                                            <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                                {{ $clienteGeneral->descripcion }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                               <!-- Contenedor para mostrar los seleccionados -->
+                               <div id="selected-items-container">
+                                    <strong>Seleccionados:</strong>
+                                    <div id="selected-items-list" class="flex flex-wrap gap-2"></div>
+                                </div>
+
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -197,29 +230,17 @@
                                 </div>
                                 <!-- Tipo Documento -->
                                 <div>
-                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
-                                        Documento</label>
-                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full"
-                                        style="display:none">
+                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}</option>
+                                                {{ $tipoDocumento->nombre }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <!-- Documento -->
-                                <div>
-                                    <label for="documento" class="block text-sm font-medium">Documento</label>
-                                    <input id="documento" type="text" name="documento" class="form-input w-full"
-                                        placeholder="Ingrese el documento">
-                                </div>
-                                <!-- Teléfono -->
-                                <div>
-                                    <label for="telefono" class="block text-sm font-medium">Teléfono</label>
-                                    <input id="telefono" type="text" name="telefono" class="form-input w-full"
-                                        placeholder="Ingrese el teléfono">
-                                </div>
+
                                 <!-- Contenedor del switch "Es tienda" -->
                                 <div id="esTiendaContainer" class="hidden mt-4">
                                     <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
@@ -235,13 +256,66 @@
                                         </div>
                                     </div>
                                 </div>
+
+
+                                <!-- Documento -->
+                                <div>
+                                    <label for="documento" class="block text-sm font-medium">Documento</label>
+                                    <input id="documento" type="text" name="documento" class="form-input w-full"
+                                        placeholder="Ingrese el documento">
+                                </div>
+                                <!-- Teléfono -->
+                                <div>
+                                    <label for="telefono" class="block text-sm font-medium">Teléfono</label>
+                                    <input id="telefono" type="text" name="telefono" class="form-input w-full"
+                                        placeholder="Ingrese el teléfono">
+                                </div>
+                                <!-- Email -->
+                                <div>
+                                    <label for="email" class="block text-sm font-medium">Email</label>
+                                    <input id="email" type="email" class="form-input w-full" name="email"
+                                        placeholder="Ingrese el email">
+                                </div>
+                                <!-- departamento -->
+                                <div>
+                                    <label for="departamento" class="block text-sm font-medium">Departamento</label>
+                                    <select id="departamento" name="departamento" class="form-input w-full">
+                                        <option value="" disabled selected>Seleccionar Departamento</option>
+                                        @foreach ($departamentos as $departamento)
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Provincia -->
+                                <div>
+                                    <label for="provincia" class="block text-sm font-medium">Provincia</label>
+                                    <select id="provincia" name="provincia" class="form-input w-full" disabled>
+                                        <option value="" disabled selected>Seleccionar Provincia</option>
+                                    </select>
+                                </div>
+
+                                <!-- Distrito -->
+                                <div>
+                                    <label for="distrito" class="block text-sm font-medium">Distrito</label>
+                                    <select id="distrito" name="distrito" class="form-input w-full" disabled>
+                                        <option value="" disabled selected>Seleccionar Distrito</option>
+                                    </select>
+                                </div>
+                                <!-- Dirección (Ocupa 2 columnas) -->
+                                <div>
+                                    <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                                    <input id="direccion" type="text" name="direccion" class="form-input w-full"
+                                        placeholder="Ingrese el direccion">
+                                </div>
                             </div>
-                            <div class="flex justify-end items-center mt-4 gap-2">
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
-                                    @click="openClienteModal = false">
-                                    Cancelar
-                                </button>
-                                <button type="submit" class="btn btn-primary ml-4">Guardar</button>
+                                    @click="open = false">Cancelar</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
                     </div>
@@ -250,7 +324,9 @@
         </div>
     </div>
 
-    <!-- Scripts de inicialización -->
+    <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -260,7 +336,7 @@
         $(document).ready(function() {
             // Inicializar Nice Select en todos los selects con clase .select2
             document.querySelectorAll('.select2').forEach(function(select) {
-                console.log("Inicializando select:", select);
+                // console.log("Inicializando select:", select);
                 NiceSelect.bind(select, {
                     searchable: true
                 });
@@ -425,44 +501,238 @@
         });
     </script>
 
-<script>
-    function cargarClientesGenerales() {
-        var idCliente = document.getElementById('idCliente').value;
-        console.log('idCliente seleccionado:', idCliente); // Imprimir el idCliente seleccionado
+   
 
-        if(idCliente) {
-            console.log('Realizando fetch para obtener clientes generales para el idCliente:', idCliente);
 
-            fetch(`/clientes-generales/${idCliente}`)
-                .then(response => {
-                    console.log('Respuesta recibida:', response);
-                    return response.json();
-                })
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
+
+        // Función para cargar los clientes
+        function cargarClientes() {
+            console.log('Intentando cargar clientes...');
+            fetch('/clientesdatoscliente')  // Llamada a la ruta que devuelve los clientes
+                .then(response => response.json()) // Obtener los datos en formato JSON
                 .then(data => {
-                    console.log('Datos recibidos:', data); // Imprimir los datos recibidos del servidor
+                    console.log('Clientes recibidos:', data); // Ver los datos de los clientes
+                    let select = document.getElementById('idCliente');
+                    select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>'; // Limpiar las opciones anteriores
 
-                    let selectClienteGeneral = document.getElementById('idClienteGeneral');
-                    selectClienteGeneral.innerHTML = '<option value="" disabled selected>Seleccionar Cliente General</option>'; // Limpiar las opciones actuales
-
-                    data.forEach(clienteGeneral => {
-                        console.log('Procesando cliente general:', clienteGeneral); // Imprimir cada cliente general
+                    // Agregar las nuevas opciones
+                    data.forEach(cliente => {
                         let option = document.createElement('option');
-                        option.value = clienteGeneral.clienteGeneral.idClienteGeneral; // Asumiendo que `clienteGeneral` tiene la propiedad `idClienteGeneral`
-                        option.textContent = clienteGeneral.clienteGeneral.descripcion;
-                        selectClienteGeneral.appendChild(option);
+                        option.value = cliente.idCliente;
+                        option.textContent = `${cliente.nombre} - ${cliente.documento}`;
+                        option.setAttribute('data-tienda', cliente.esTienda);  // Agregar atributo de tienda si es necesario
+                        select.appendChild(option);
                     });
 
-                    // Mostrar el select de Cliente General
-                    console.log('Mostrando el select de Cliente General');
-                    $(selectClienteGeneral).show();
+                    // Mostrar el select después de cargar
+                    select.style.display = 'block'; // Asegurarse de que el select se vea
+                    select.style.visibility = 'visible'; // Hacerlo visible
+
+                    // Inicializar NiceSelect en el select de clientes
+                    NiceSelect.bind(select, {
+                        searchable: true
+                    });
+
                 })
                 .catch(error => {
-                    console.log('Error al realizar el fetch:', error); // En caso de error
+                    console.error('Error al cargar clientes:', error);
                 });
-        } else {
-            console.log('No se seleccionó un cliente');
         }
+
+        // Ocultar el select de clientes inicialmente
+        let selectCliente = document.getElementById('idCliente');
+        selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
+
+        // Cargar los clientes solo si no se han cargado previamente
+        if (!clientesCargados) {
+            cargarClientes();
+            clientesCargados = true;
+        }
+
+        // Evento para cuando se selecciona un cliente
+        document.getElementById('idCliente').addEventListener('change', function () {
+            let clienteId = this.value;
+            if (clienteId) {
+                console.log('Cliente seleccionado:', clienteId); // Verificar si el cliente es seleccionado
+                fetch(`/clientes-generales/${clienteId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let select = document.getElementById('idClienteGeneral');
+                        select.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
+
+                        // Verificar si se recibió algún dato
+                        console.log('Clientes generales:', data); // Verifica que se reciban los clientes generales
+
+                        data.forEach(clienteGeneral => {
+                            let option = document.createElement('option');
+                            option.value = clienteGeneral.idClienteGeneral;
+                            option.textContent = clienteGeneral.descripcion;
+                            select.appendChild(option);
+                        });
+
+                        // No inicializamos NiceSelect en el select de Cliente General
+                        // Simplemente utilizamos el select estándar
+                    })
+                    .catch(error => console.error('Error al cargar clientes generales:', error));
+            } else {
+                // Limpiar el select si no hay cliente seleccionado
+                document.getElementById('idClienteGeneral').innerHTML = '<option value="" selected>Seleccionar Cliente General</option>';
+            }
+        });
+
+        // Evento de envío del formulario de cliente
+        document.getElementById('clienteForm').addEventListener('submit', function (event) {
+            event.preventDefault();  // Evitar el envío normal del formulario
+
+            let formData = new FormData(this); // Obtener los datos del formulario
+            console.log('Datos del formulario:', Object.fromEntries(formData.entries()));  // Ver los datos del formulario
+
+            fetch('/guardar-cliente', {
+                method: 'POST',
+                body: formData,  // Enviar los datos del formulario
+            })
+                .then(response => response.json())  // Parsear la respuesta como JSON
+                .then(data => {
+                    console.log('Respuesta del servidor (JSON):', data);  // Verificar la respuesta
+                    if (data.errors) {
+                        // Mostrar errores si los hay
+                        mostrarErrores(data.errors);
+                    } else {
+                        // Mostrar mensaje de éxito
+                        alert(data.message);
+
+                        // Recargar los clientes después de guardar el cliente
+                        cargarClientes();
+
+                        // Limpiar el formulario y cerrar el modal si es necesario
+                        document.getElementById('clienteForm').reset();
+                        openClienteModal = false;  // Cerrar el modal si lo tienes
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al guardar el cliente:', error);
+                });
+        });
+
+    });
+    </script>
+
+
+<script>
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            // Inicializar nice-select2
+            NiceSelect.bind(document.getElementById("idClienteGeneraloption"));
+
+            const select = document.getElementById('idClienteGeneraloption');
+            const selectedItemsContainer = document.getElementById('selected-items-list');
+
+            // Función para actualizar los seleccionados
+            function updateSelectedItems() {
+                selectedItemsContainer.innerHTML = ''; // Limpiar el contenedor
+
+                const selectedOptions = Array.from(select.selectedOptions); // Obtener las opciones seleccionadas
+
+                selectedOptions.forEach(option => {
+                    const badge = document.createElement('span');
+                    badge.textContent = option.textContent;
+                    badge.className = 'badge bg-primary'; // Aplicar el estilo del badge
+                    selectedItemsContainer.appendChild(badge); // Agregar el badge al contenedor
+                });
+            }
+
+            // Escuchar cambios en el select
+            select.addEventListener('change', updateSelectedItems);
+
+            // Actualizar los seleccionados al cargar la página
+            updateSelectedItems();
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            const tipoDocumento = document.getElementById("idTipoDocumento");
+            const esTiendaContainer = document.getElementById("esTiendaContainer");
+
+            tipoDocumento.addEventListener("change", function() {
+                // Verificar si el texto del option seleccionado es "RUC"
+                const selectedOptionText = tipoDocumento.options[tipoDocumento.selectedIndex].text;
+
+                if (selectedOptionText === "RUC") {
+                    esTiendaContainer.classList.remove("hidden"); // Muestra el switch
+                } else {
+                    esTiendaContainer.classList.add("hidden"); // Oculta el switch
+                }
+            });
+        });
+    </script>
+
+<script>
+    document.getElementById('btnGuardar').addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const nroTicket = document.getElementById('nroTicket').value;
+
+        fetch(`/validar-ticket/${nroTicket}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.existe) {
+                    // Usando showMessage para mostrar la alerta personalizada en rojo
+                    showMessage(
+                        'El número de ticket ya está en uso. Por favor, ingrese otro número.',
+                        'top-end',
+                        true, // Mostrar el botón de cierre
+                        '',
+                        5000, // Duración de la alerta
+                        'error' // Tipo de alerta (error)
+                    );
+                } else {
+                    document.getElementById('ordenTrabajoForm').submit();
+                }
+            })
+            .catch(error => {
+                console.error('Error al verificar el ticket:', error);
+                showMessage(
+                    'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.',
+                    'top-end',
+                    true, // Mostrar el botón de cierre
+                    '',
+                    5000, // Duración de la alerta
+                    'error' // Tipo de alerta (error)
+                );
+            });
+    });
+
+    // Función para mostrar la alerta con SweetAlert
+    function showMessage(
+        msg = 'Example notification text.',
+        position = 'top-end',
+        showCloseButton = true,
+        closeButtonHtml = '',
+        duration = 3000,
+        type = 'success',
+    ) {
+        const toast = window.Swal.mixin({
+            toast: true,
+            position: position || 'top-end',
+            showConfirmButton: false,
+            timer: duration,
+            showCloseButton: showCloseButton,
+            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+            background: type === 'success' ? '#28a745' : '#dc3545', // Rojo para error, verde para éxito
+            iconColor: 'white', // Color del icono
+            customClass: {
+                title: 'text-white', // Asegura que el texto sea blanco
+            },
+        });
+
+        toast.fire({
+            title: msg,
+        });
     }
 </script>
+
+
 
 </x-layout.default>

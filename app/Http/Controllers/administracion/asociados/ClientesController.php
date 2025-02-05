@@ -104,6 +104,25 @@ class ClientesController extends Controller
         }
     }
 
+    public function agregarClientesGenerales(Request $request, $idCliente)
+{
+    $clientesGenerales = $request->input('clientesGenerales');
+
+    // Eliminar todos los clientes generales actuales de la base de datos para este cliente
+    DB::table('cliente_clientegeneral')->where('idCliente', $idCliente)->delete();
+
+    // Insertar los nuevos clientes generales seleccionados
+    foreach ($clientesGenerales as $idClienteGeneral) {
+        DB::table('cliente_clientegeneral')->insert([
+            'idCliente' => $idCliente,
+            'idClienteGeneral' => $idClienteGeneral,
+        ]);
+    }
+
+    return response()->json(['success' => true]);
+}
+
+
 
 
 
@@ -113,6 +132,12 @@ class ClientesController extends Controller
         $cliente = Cliente::findOrFail($id); // Buscar cliente por ID
 
         $clientesGenerales = ClienteGeneral::all(); // Obtener todos los clientes generales
+        $clientesGeneralesAsociados = ClienteGeneral::whereIn('idClienteGeneral', function($query) use ($cliente) {
+            $query->select('idClienteGeneral')
+                  ->from('cliente_clientegeneral')
+                  ->where('idCliente', $cliente->idCliente); // Asociado al cliente actual
+        })->get(); // Clientes generales asociados al cliente específico
+
         $tiposDocumento = TipoDocumento::all(); // Obtener todos los tipos de documento
 
         // Obtener los datos de los archivos JSON
@@ -162,10 +187,123 @@ class ClientesController extends Controller
             'provinciasDelDepartamento',
             'provinciaSeleccionada',
             'distritosDeLaProvincia',
-            'distritoSeleccionado'
+            'distritoSeleccionado',
+            'clientesGeneralesAsociados'
         ));
     }
 
+    public function clientesGeneralesAsociados($idCliente)
+    {
+        $clientesGeneralesAsociados = ClienteGeneral::whereIn('idClienteGeneral', function($query) use ($idCliente) {
+            $query->select('idClienteGeneral')
+                  ->from('cliente_clientegeneral')
+                  ->where('idCliente', $idCliente); // Asociado al cliente específico
+        })->get();
+    
+        return response()->json($clientesGeneralesAsociados);
+    }
+    
+    public function obtenerClientesGeneralesAsociados($idCliente)
+{
+    // Obtener los clientes generales asociados
+    $clientesGenerales = DB::table('cliente_clientegeneral')
+        ->join('clientes_generales', 'cliente_clientegeneral.idClienteGeneral', '=', 'clientes_generales.idClienteGeneral')
+        ->where('cliente_clientegeneral.idCliente', $idCliente)
+        ->select('clientes_generales.idClienteGeneral', 'clientes_generales.descripcion')
+        ->get();
+
+    return response()->json($clientesGenerales);
+}
+
+// Método para agregar cliente general
+// public function agregarClienteGeneral($idCliente, $idClienteGeneral)
+// {
+//     // Verificar si la relación ya existe
+//     $exists = DB::table('cliente_clientegeneral')
+//                 ->where('idCliente', $idCliente)
+//                 ->where('idClienteGeneral', $idClienteGeneral)
+//                 ->exists();
+
+//     if (!$exists) {
+//         DB::table('cliente_clientegeneral')->insert([
+//             'idCliente' => $idCliente,
+//             'idClienteGeneral' => $idClienteGeneral
+//         ]);
+//         return response()->json(['success' => true]);
+//     } else {
+//         return response()->json(['success' => false, 'message' => 'La relación ya existe.']);
+//     }
+// }
+
+// Método para agregar cliente general
+public function agregarClienteGeneral($idCliente, $idClienteGeneral)
+{
+    // Verificar si la relación ya existe
+    $exists = DB::table('cliente_clientegeneral')
+                ->where('idCliente', $idCliente)
+                ->where('idClienteGeneral', $idClienteGeneral)
+                ->exists();
+
+    if (!$exists) {
+        DB::table('cliente_clientegeneral')->insert([
+            'idCliente' => $idCliente,
+            'idClienteGeneral' => $idClienteGeneral
+        ]);
+        return response()->json(['success' => true]);
+    } else {
+        return response()->json(['success' => false, 'message' => 'La relación ya existe.']);
+    }
+}
+
+
+
+
+
+
+    public function eliminarClienteGeneral($idCliente, $idClienteGeneral)
+    {
+        // Log para verificar los valores de los parámetros
+        Log::debug('Eliminando cliente general', [
+            'idCliente' => $idCliente,
+            'idClienteGeneral' => $idClienteGeneral
+        ]);
+        
+        // Verificar si existe la relación antes de eliminarla
+        $relacionExistente = DB::table('cliente_clientegeneral')
+            ->where('idCliente', $idCliente)
+            ->where('idClienteGeneral', $idClienteGeneral)
+            ->exists();
+    
+        if (!$relacionExistente) {
+            Log::warning('No se encontró la relación entre cliente y cliente general', [
+                'idCliente' => $idCliente,
+                'idClienteGeneral' => $idClienteGeneral
+            ]);
+            return response()->json(['success' => false, 'message' => 'No se encontró la relación']);
+        }
+        
+        // Eliminar la relación en la tabla cliente_clientegeneral
+        $deleted = DB::table('cliente_clientegeneral')
+            ->where('idCliente', $idCliente)
+            ->where('idClienteGeneral', $idClienteGeneral)
+            ->delete();
+        
+        // Verificar si la eliminación fue exitosa
+        if ($deleted) {
+            Log::debug('Cliente general eliminado con éxito', [
+                'idCliente' => $idCliente,
+                'idClienteGeneral' => $idClienteGeneral
+            ]);
+            return response()->json(['success' => true]);
+        } else {
+            Log::error('No se pudo eliminar el cliente general', [
+                'idCliente' => $idCliente,
+                'idClienteGeneral' => $idClienteGeneral
+            ]);
+            return response()->json(['success' => false, 'message' => 'Error al eliminar la relación']);
+        }
+    }
+    
 
 
     // Método para actualizar el cliente

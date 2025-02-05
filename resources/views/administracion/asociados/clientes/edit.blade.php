@@ -1,8 +1,39 @@
 <x-layout.default>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
 
 
+<style>
+    .badge {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 12px;
+    color: white;
+    background-color: #007bff; /* Azul */
+    margin: 5px;
+}
+
+.badge-blue {
+    background-color:rgb(51, 0, 255); /* Azul */
+}
+
+.remove-client {
+    background: transparent;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.remove-client:hover {
+    color: red;
+}
+
+
+</style>
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
@@ -21,6 +52,22 @@
                 action="{{ route('clientes.update', $cliente->idCliente) }}">
                 @csrf
                 @method('PUT')
+
+      <!-- Clientes Generales asociados -->
+        <div>
+            <strong>Clientes Generales Asociados:</strong>
+            <div id="selected-items-list" class="flex flex-wrap gap-2">
+                @foreach($clientesGeneralesAsociados as $clienteGeneral)
+                    <span class="badge badge-blue">
+                        {{ $clienteGeneral->descripcion }}
+                        <button class="remove-client text-white ml-2" data-id="{{ $clienteGeneral->idClienteGeneral }}">X</button>
+                    </span>
+                @endforeach
+            </div>
+        </div>
+
+
+
 
                 <!-- ClienteGeneral -->
                 <div>
@@ -152,6 +199,8 @@
         </div>
     </div>
 
+    
+
 
     <script>
         $(document).ready(function() {
@@ -241,5 +290,120 @@
             });
         });
     </script>
+
+
+
+
+    <script>
+$(document).ready(function() {
+    $('#idCliente').change(function() {
+        var idCliente = $(this).val();
+        
+        if (idCliente) {
+            $.get('/clientes/generales/asociados/' + idCliente, function(data) {
+                // Limpiar los items previos
+                $('#selected-items-list').empty();
+
+                // Agregar los nuevos badges
+                data.forEach(function(clienteGeneral) {
+                    $('#selected-items-list').append('<span class="badge badge-blue">' + clienteGeneral.descripcion + '</span>');
+                });
+            });
+        }
+    });
+});
+
+
+    </script>
+
+
+<script>
+$(document).ready(function() {
+    // Inicializar Select2
+    $('#idClienteGeneral').select2();
+
+    // Evento cuando se selecciona un cliente general
+    $('#idClienteGeneral').change(function() {
+        var idClienteGeneral = $(this).val(); // Obtener el ID del cliente general seleccionado
+        var descripcionClienteGeneral = $("#idClienteGeneral option:selected").text(); // Obtener el nombre del cliente general
+
+        // Verificar si hay una opción seleccionada
+        if (idClienteGeneral) {
+            // Comprobar si el cliente general ya está en la lista
+            var existingBadge = $('#selected-items-list').find('[data-id="' + idClienteGeneral + '"]');
+
+            if (existingBadge.length > 0) {
+                alert("Este cliente general ya está asociado.");
+                return; // Evitar agregarlo de nuevo
+            }
+
+            // Agregar el nuevo cliente general a la lista
+            var newBadge = '<span class="badge badge-blue" data-id="' + idClienteGeneral + '">' +
+                               descripcionClienteGeneral +
+                               '<button class="remove-client text-white ml-2" data-id="' + idClienteGeneral + '">X</button>' +
+                            '</span>';
+
+            $('#selected-items-list').append(newBadge);
+
+            // Enviar al servidor para almacenar la relación
+            $.ajax({
+                url: '/clientes/' + '{{ $cliente->idCliente }}' + '/agregar-cliente-general/' + idClienteGeneral,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}', // Token CSRF
+                    idClienteGeneral: idClienteGeneral,
+                },
+                success: function(response) {
+                    if (response.success) {
+                        console.log('Cliente general agregado exitosamente');
+                    } else {
+                        console.error('Error al agregar el cliente general:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al agregar el cliente general:', error);
+                    alert("Hubo un error al agregar el cliente general.");
+                }
+            });
+        }
+    });
+
+    // Eliminar un cliente general de la lista
+    $('#selected-items-list').on('click', '.remove-client', function(event) {
+        event.preventDefault(); // Evitar que se recargue la página
+
+        var idClienteGeneral = $(this).data('id');
+        var badge = $(this).parent();
+
+        // Enviar al servidor para eliminar la relación
+        $.ajax({
+            url: '/clientes/' + '{{ $cliente->idCliente }}' + '/eliminar-cliente-general/' + idClienteGeneral,
+            type: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}', // Token CSRF
+            },
+            success: function(response) {
+                // Si la eliminación es exitosa, eliminar el badge
+                if (response.success) {
+                    badge.remove();
+                } else {
+                    alert("Hubo un error al eliminar el cliente general.");
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al eliminar el cliente general', error);
+                alert("Hubo un error al eliminar el cliente general.");
+            }
+        });
+    });
+});
+</script>
+
+
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
 </x-layout.default>
