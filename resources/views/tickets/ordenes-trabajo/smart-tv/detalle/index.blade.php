@@ -1,3 +1,5 @@
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo</span>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -59,15 +61,19 @@
     <!-- Fecha de Compra -->
     <div>
         <label class="block text-sm font-medium">Fecha de Compra</label>
-        <input id="fechaCompra" name="fechaCompra" type="text" class="form-input w-full bg-gray-100"
-            value="{{ \Carbon\Carbon::parse($orden->fechaCompra)->format('Y-m-d') }}" readonly>
-
+        <input id="fechaCompra" name="fechaCompra" type="text" class="form-input w-full"
+            value="{{ \Carbon\Carbon::parse($orden->fechaCompra)->format('Y-m-d') }}">
     </div>
-
     <!-- Falla Reportada -->
     <div class="">
         <label class="block text-sm font-medium">Falla Reportada</label>
         <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full bg-gray-100" readonly>{{ $orden->fallaReportada }}</textarea>
+    </div>
+    <!-- Botón de GUARDAR -->
+    <div class="mt-5 w-full md:w-auto">
+        <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">
+            GUARDAR
+        </button>
     </div>
 
 </div>
@@ -77,49 +83,50 @@
     <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
     <!-- Drop zone: tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">
-      <table class="min-w-[600px] border-collapse">
-        <thead>
-          <tr class="bg-gray-200">
-            <th class="px-4 py-2 text-center">Estado</th>
-            <th class="px-4 py-2 text-center">Usuario</th>
-            <th class="px-4 py-2 text-center">Fecha</th>
-            <th class="px-4 py-2 text-center">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="estadosTableBody">
-          <!-- Fila inicial (no se podrá eliminar) -->
-          <tr class="bg-dark-dark-light border-dark-dark-light">
-            <td class="px-4 py-2 text-center">Pendiente por Coordinar</td>
-            <td class="px-4 py-2 text-center">Usuario Actual</td>
-            <td class="px-4 py-2 text-center min-w-[200px]" id="estadoInicialFecha"></td>
-            <td class="px-4 py-2 text-center">
-              <!-- Sin botón de eliminar -->
-              <span class="text-gray-500">-</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <table class="min-w-[600px] border-collapse">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="px-4 py-2 text-center">Estado</th>
+                    <th class="px-4 py-2 text-center">Usuario</th>
+                    <th class="px-4 py-2 text-center">Fecha</th>
+                    <th class="px-4 py-2 text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="estadosTableBody">
+                <!-- Fila inicial (no se podrá eliminar) -->
+                <tr class="bg-dark-dark-light border-dark-dark-light">
+                    <td class="px-4 py-2 text-center">Pendiente por Coordinar</td>
+                    <td class="px-4 py-2 text-center">Usuario Actual</td>
+                    <td class="px-4 py-2 text-center min-w-[200px]" id="estadoInicialFecha"></td>
+                    <td class="px-4 py-2 text-center">
+                        <!-- Sin botón de eliminar -->
+                        <span class="text-gray-500">-</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
     <!-- Estados disponibles (draggables) -->
     <div class="mt-3 overflow-x-auto">
-      <div id="draggableContainer" class="flex space-x-2">
-        <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Recojo">
-          Recojo
+        <div id="draggableContainer" class="flex space-x-2">
+            <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true"
+                data-state="Recojo">
+                Recojo
+            </div>
+            <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true"
+                data-state="Coordinado">
+                Coordinado
+            </div>
+            <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true"
+                data-state="Operativo">
+                Operativo
+            </div>
         </div>
-        <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Coordinado">
-          Coordinado
-        </div>
-        <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Operativo">
-          Operativo
-        </div>
-      </div>
     </div>
-  </div>
-  
+</div>
 
-
-
-
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar NiceSelect2
@@ -127,6 +134,13 @@
             NiceSelect.bind(select, {
                 searchable: true
             });
+        });
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+        // Inicializar Flatpickr en el campo de fecha de compra
+        flatpickr("#fechaCompra", {
+            dateFormat: "Y-m-d", // Formato de fecha
+            allowInput: true, // Permitir edición manual
         });
     });
 

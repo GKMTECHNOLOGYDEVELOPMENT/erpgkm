@@ -55,7 +55,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M8 2H16M8 2V6M16 2V6M4 6H20M4 6V22H20V6M9 10H15M9 14H15M9 18H12" />
                     </svg>
-                    Detalle Ticket
+                    Ticket
                 </a>
             </li>
             <li>
@@ -79,7 +79,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 19l3-3m-3 3H5v-3l9-9a2 2 0 012.828 0l2.172 2.172a2 2 0 010 2.828l-9 9z" />
                     </svg>
-                    Información
+                    Informe
                 </a>
             </li>
             <li>

@@ -1,8 +1,14 @@
 <!-- Botón para abrir el modal de crear visita -->
-<button id="crearVisitaBtn"
-    class="px-4 py-2 bg-success text-white rounded-lg shadow-md hover:bg-green-700 w-full sm:w-auto">
-    Crear Visita
-</button>
+<div class="flex gap-2 justify-center">
+    <button id="crearVisitaBtn" class="px-4 py-2 btn btn-success text-white rounded-lg shadow-md flex items-center">
+        📅 Visita
+    </button>
+    <button id="crearRecojoBtn" class="px-4 py-2 btn btn-warning text-white rounded-lg shadow-md flex items-center">
+        🚛 Recojo
+    </button>
+</div>
+
+
 
 <!-- Contenedor donde se agregarán las visitas -->
 <div id="visitasContainer" class="mt-5 flex flex-col space-y-4"></div>
@@ -44,18 +50,16 @@
                             </div>
                         </div>
                         <!-- Rango de Hora -->
-                        <div class="flex space-x-2">
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium">Hora de Inicio</label>
-                                <input id="horaInicioInput" type="text" class="form-input w-full"
+                        <div class="w-full">
+                            <label class="block text-sm font-medium mb-1">Rango de atención</label>
+                            <div class="flex space-x-2">
+                                <input id="horaInicioInput" type="text" class="form-input w-1/2"
                                     placeholder="Elige la hora de Inicio" required>
-                            </div>
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium">Hora de Fin</label>
-                                <input id="horaFinInput" type="text" class="form-input w-full"
+                                <input id="horaFinInput" type="text" class="form-input w-1/2"
                                     placeholder="Elige la hora de Fin" required>
                             </div>
                         </div>
+
                         <!-- Técnico -->
                         <div>
                             <label for="tecnico" class="block text-sm font-medium">Técnico</label>
@@ -105,6 +109,103 @@
     </div>
 </div>
 
+<!-- MODAL PARA CREAR RECOJO USANDO ALPINE.JS -->
+<div x-data="{ openRecojo: false }" class="mb-5" @toggle-modal-recojo.window="openRecojo = !openRecojo">
+    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="openRecojo && '!block'">
+        <div class="flex items-start justify-center min-h-screen px-4" @click.self="openRecojo = false">
+            <div x-show="openRecojo" x-transition.duration.300
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
+                <!-- Header del Modal -->
+                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                    <h5 class="font-bold text-lg">Crear Nuevo Recojo</h5>
+                    <button type="button" class="text-white-dark hover:text-dark" @click="openRecojo = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-scroll">
+                    <!-- Formulario -->
+                    <form class="p-5 space-y-4">
+                        <!-- Nombre del recojo -->
+                        <div class="flex space-x-2">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium">Nombre del Recojo</label>
+                                <input id="nombreRecojoInput" type="text" class="form-input w-full bg-gray-200"
+                                    readonly>
+                            </div>
+                            <!-- Fecha -->
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium">Fecha</label>
+                                <!-- Tipo text para que flatpickr lo maneje -->
+                                <input id="fechaRecojoInput" type="text" class="form-input w-full"
+                                    placeholder="Elige una fecha" required>
+                            </div>
+                        </div>
+                        <!-- Rango de Hora -->
+                        <div class="w-full">
+                            <label class="block text-sm font-medium mb-1">Rango de atención</label>
+                            <div class="flex space-x-2">
+                                <input id="horaInicioRecojoInput" type="text" class="form-input w-1/2"
+                                    placeholder="Elige la hora de Inicio" required>
+                                <input id="horaFinRecojoInput" type="text" class="form-input w-1/2"
+                                    placeholder="Elige la hora de Fin" required>
+                            </div>
+                        </div>
+
+                        <!-- Técnico -->
+                        <div>
+                            <label for="tecnicoRecojo" class="block text-sm font-medium">Técnico</label>
+                            <select id="tecnicoRecojo" name="tecnicoRecojo" class="select2 w-full"
+                                style="display: none">
+                                <option value="" disabled selected>Seleccionar Técnico</option>
+                                <!-- Aquí se itera sobre los usuarios -->
+                                @foreach ($usuario as $usuarios)
+                                    <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <!-- Checkbox Necesita Apoyo -->
+                        <div class="mt-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="necesitaApoyoRecojo" class="form-checkbox">
+                                <span class="ml-2 text-sm font-medium">¿Necesita Apoyo?</span>
+                            </label>
+                        </div>
+                        <!-- Select Múltiple para Técnicos de Apoyo (Inicialmente Oculto) -->
+                        <div id="apoyoSelectContainerRecojo" class="mt-3 hidden">
+                            <label for="idTecnicoApoyoRecojo" class="block text-sm font-medium">Seleccione Técnicos de
+                                Apoyo</label>
+                            <select id="idTecnicoApoyoRecojo" name="idTecnicoApoyoRecojo[]" multiple
+                                placeholder="Seleccionar Técnicos de Apoyo" style="display:none">
+                                <option value="2">María López</option>
+                                <option value="3">Carlos García</option>
+                                <option value="4">Ana Martínez</option>
+                                <option value="5">Pedro Sánchez</option>
+                            </select>
+                        </div>
+                        <!-- Contenedor para mostrar los técnicos seleccionados -->
+                        <div id="selected-items-container-recojo" class="mt-3 hidden">
+                            <strong>Seleccionados:</strong>
+                            <div id="selected-items-list-recojo" class="flex flex-wrap gap-2"></div>
+                        </div>
+                        <!-- Botones -->
+                        <div class="flex justify-end items-center mt-4">
+                            <button type="button" class="btn btn-outline-danger"
+                                @click="openRecojo = false">Cancelar</button>
+                            <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
+                                onclick="guardarRecojo()">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- MODAL PARA SUBIR IMAGEN USANDO ALPINE.JS -->
 <div x-data="{
@@ -139,7 +240,8 @@
                         <!-- Input para subir imagen -->
                         <div>
                             <label class="block text-sm font-medium">Foto</label>
-                            <input type="file" accept="image/*" class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
+                            <input type="file" accept="image/*"
+                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
                                 @change="imagenUrl = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual; 
                                      imagenGuardada = $event.target.files[0]">
                         </div>
@@ -201,7 +303,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // INICIALIZAR FLATPICKR
+        // INICIALIZAR FLATPICKR PARA VISITA
         flatpickr("#fechaVisitaInput", {
             locale: "es",
             dateFormat: "Y-m-d"
@@ -221,19 +323,44 @@
             locale: "es"
         });
 
+        // INICIALIZAR FLATPICKR PARA RECOJO
+        flatpickr("#fechaRecojoInput", {
+            locale: "es",
+            dateFormat: "Y-m-d"
+        });
+        flatpickr("#horaInicioRecojoInput", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            locale: "es"
+        });
+        flatpickr("#horaFinRecojoInput", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            locale: "es"
+        });
+
         let visitasContainer = document.getElementById("visitasContainer");
         let crearVisitaBtn = document.getElementById("crearVisitaBtn");
+        let crearRecojoBtn = document.getElementById("crearRecojoBtn");
         let nombreVisitaInput = document.getElementById("nombreVisitaInput");
-        // En lugar de un input datetime-local, tenemos tres campos:
-        let fechaVisitaInput = document.getElementById("fechaVisitaInput"); // tipo date
-        let horaInicioInput = document.getElementById("horaInicioInput"); // tipo time
-        let horaFinInput = document.getElementById("horaFinInput"); // tipo time
+        let nombreRecojoInput = document.getElementById("nombreRecojoInput");
+        let fechaVisitaInput = document.getElementById("fechaVisitaInput");
+        let horaInicioInput = document.getElementById("horaInicioInput");
+        let horaFinInput = document.getElementById("horaFinInput");
+        let fechaRecojoInput = document.getElementById("fechaRecojoInput");
+        let horaInicioRecojoInput = document.getElementById("horaInicioRecojoInput");
+        let horaFinRecojoInput = document.getElementById("horaFinRecojoInput");
         let visitaCount = 0;
+        let recojoCount = 0;
 
-        // Almacenar datos de las visitas (incluyendo la imagen, si se sube)
+        // Almacenar datos de las visitas y recojo (incluyendo la imagen, si se sube)
         let visitasData = {};
 
-        // Estados disponibles
+        // Estados disponibles para visitas y recojo
         const estados = [{
                 nombre: "Fecha de Programación",
                 requiereUbicacion: true
@@ -273,6 +400,17 @@
             horaInicioInput.value = "";
             horaFinInput.value = "";
             window.dispatchEvent(new Event('toggle-modal'));
+        });
+
+        // ABRIR MODAL AL CREAR RECOJO
+        crearRecojoBtn.addEventListener("click", function() {
+            recojoCount++;
+            nombreRecojoInput.value = `Recojo ${recojoCount}`;
+            // Limpiar los campos de fecha y hora
+            fechaRecojoInput.value = "";
+            horaInicioRecojoInput.value = "";
+            horaFinRecojoInput.value = "";
+            window.dispatchEvent(new Event('toggle-modal-recojo'));
         });
 
         // GUARDAR VISITA
@@ -324,9 +462,9 @@
                     <span class="ubicacion text-sm w-1/4 text-center hidden">Sucursal Lima Centro</span>
                     <div class="flex flex-row items-center space-x-1 w-1/4">
                         <span class="estado-btn badge bg-success cursor-pointer" 
-            data-estado="0" data-visita="${visitaId}">
-            ✔
-        </span>
+                            data-estado="0" data-visita="${visitaId}">
+                            ✔
+                        </span>
                     </div>
                 </div>
             </div>
@@ -334,6 +472,67 @@
 
             visitasContainer.appendChild(visitaCard);
             window.dispatchEvent(new Event('toggle-modal'));
+        };
+
+        // GUARDAR RECOJO
+        window.guardarRecojo = function() {
+            const fecha = fechaRecojoInput.value;
+            const horaInicio = horaInicioRecojoInput.value;
+            const horaFin = horaFinRecojoInput.value;
+
+            if (!fecha || !horaInicio || !horaFin) {
+                alert("Por favor, selecciona la fecha y el rango de hora.");
+                return;
+            }
+
+            const fechaInicio = new Date(fecha + 'T' + horaInicio);
+            const fechaFin = new Date(fecha + 'T' + horaFin);
+
+            if (fechaInicio >= fechaFin) {
+                alert("La hora de inicio debe ser menor a la hora de fin.");
+                return;
+            }
+
+            let fechaFormateada = `${formatDate(fechaInicio)} - ${formatDate(fechaFin)}`;
+            let recojoId = `recojo-${recojoCount}`;
+
+            // Inicializar datos del recojo
+            visitasData[recojoId] = {
+                imagen: null,
+                estados: []
+            };
+
+            let recojoCard = document.createElement("div");
+            recojoCard.classList.add("p-4", "shadow-lg", "rounded-lg", "relative");
+            recojoCard.id = recojoId;
+
+            // Aplicar el color de fondo correspondiente a "Fecha de Programación"
+            let fechaProgramacionColor = "#eaf1ff"; // Color de fondo para "Fecha de Programación"
+
+            // La tarjeta muestra una fila alineada con 4 columnas:
+            recojoCard.innerHTML = `
+            <div class="flex items-center justify-between mb-4">
+                <h5 class="text-lg font-semibold">${nombreRecojoInput.value}</h5>
+                <button class="detalles-btn btn btn-info" data-visita="${recojoId}">Detalles de Recojo</button>
+            </div>
+            <div id="estadoContainer-${recojoId}" class="flex flex-col space-y-2">
+                <!-- Primer estado: Fecha de Programación -->
+                <div class="flex flex-row items-center p-3 rounded-lg estado-row" style="background-color: ${fechaProgramacionColor};">
+                    <span class="text-sm font-medium w-1/4 text-center">Fecha de Programación</span>
+                    <span class="hora text-sm w-1/4 text-center">${fechaFormateada}</span>
+                    <span class="ubicacion text-sm w-1/4 text-center hidden">Sucursal Lima Centro</span>
+                    <div class="flex flex-row items-center space-x-1 w-1/4">
+                        <span class="estado-btn badge bg-success cursor-pointer" 
+                            data-estado="0" data-visita="${recojoId}">
+                            ✔
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            visitasContainer.appendChild(recojoCard);
+            window.dispatchEvent(new Event('toggle-modal-recojo'));
         };
 
         // Función para agregar un nuevo estado (cada estado en una sola fila)
