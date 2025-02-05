@@ -215,25 +215,7 @@ class ClientesController extends Controller
     return response()->json($clientesGenerales);
 }
 
-// Método para agregar cliente general
-// public function agregarClienteGeneral($idCliente, $idClienteGeneral)
-// {
-//     // Verificar si la relación ya existe
-//     $exists = DB::table('cliente_clientegeneral')
-//                 ->where('idCliente', $idCliente)
-//                 ->where('idClienteGeneral', $idClienteGeneral)
-//                 ->exists();
 
-//     if (!$exists) {
-//         DB::table('cliente_clientegeneral')->insert([
-//             'idCliente' => $idCliente,
-//             'idClienteGeneral' => $idClienteGeneral
-//         ]);
-//         return response()->json(['success' => true]);
-//     } else {
-//         return response()->json(['success' => false, 'message' => 'La relación ya existe.']);
-//     }
-// }
 
 // Método para agregar cliente general
 public function agregarClienteGeneral($idCliente, $idClienteGeneral)

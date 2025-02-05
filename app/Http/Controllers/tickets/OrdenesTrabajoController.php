@@ -298,7 +298,7 @@ public function storesmart(Request $request)
             'fallaReportada' => $validatedData['fallaReportada'],
             'lat' => $validatedData['lat'],
             'lng' => $validatedData['lng'],
-            'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+            'idEstadflujo' => 1, // Estado inicial de la orden de trabajo
             'idUsuario' => auth()->id(), // ID del usuario autenticado
             'fecha_creacion' => now(), // Fecha de creación
         ]);
