@@ -14,6 +14,7 @@ use App\Models\Usuario; // Reemplaza con el modelo correcto
 use App\Models\Tipoticket; // Reemplaza con el modelo correcto
 use App\Models\Cliente; // Reemplaza con el modelo correcto
 use App\Models\ClienteClientegeneral;
+use App\Models\EstadoFlujo;
 use App\Models\Tienda; // Reemplaza con el modelo correcto
 use App\Models\Marca; // Reemplaza con el modelo correcto
 use App\Models\Modelo; // Reemplaza con el modelo correcto
@@ -339,12 +340,17 @@ public function validarTicket($nroTicket)
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
  
-        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda'])->findOrFail($id);
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])->findOrFail($id);
 
-        
+          // Obtener el estado de flujo si es necesario
+        $estadoflujo = $orden->estadoflujo; 
+
+        $usuario = $orden->usuario;
+
+        $estadosFlujo = EstadoFlujo::all();
         $modelos = Modelo::all(); // Obtén todos los modelos disponibles
 
-            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario'));	
+            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario','estadosFlujo'));	
       
     }
 

@@ -89,9 +89,9 @@
         <tbody id="estadosTableBody">
           <!-- Fila inicial (no se podrá eliminar) -->
           <tr class="bg-dark-dark-light border-dark-dark-light">
-            <td class="px-4 py-2 text-center">Pendiente por Coordinar</td>
-            <td class="px-4 py-2 text-center">Usuario Actual</td>
-            <td class="px-4 py-2 text-center min-w-[200px]" id="estadoInicialFecha"></td>
+          <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
+          <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
+            <td class="px-4 py-2 text-center min-w-[200px]" id="">{{ $orden->fecha_creacion ?? 'sin fecha'}}</td>
             <td class="px-4 py-2 text-center">
               <!-- Sin botón de eliminar -->
               <span class="text-gray-500">-</span>
