@@ -67,7 +67,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M12 19l3-3m-3 3H5v-3l9-9a2 2 0 012.828 0l2.172 2.172a2 2 0 010 2.828l-9 9z" />
                     </svg>
-                    Visitas
+                    Coordinación
                 </a>
             </li>
             <li>

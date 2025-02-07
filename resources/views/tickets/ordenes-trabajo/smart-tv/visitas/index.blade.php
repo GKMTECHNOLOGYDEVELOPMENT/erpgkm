@@ -1,4 +1,5 @@
 <!-- Botón para abrir el modal de crear visita -->
+<span class="text-lg font-semibold mb-4 badge bg-success">Visitas o Recojo</span>
 <div class="flex gap-2 justify-center">
     <button id="crearVisitaBtn" class="px-4 py-2 btn btn-success text-white rounded-lg shadow-md flex items-center">
         📅 Visita
@@ -252,7 +253,7 @@
                             </template>
                             <template x-if="!imagenUrl">
                                 <img :src="imagenActual" alt="Imagen predeterminada"
-                                    class="w-40 h-40 object-cover">
+                                    class="w-50 h-40 object-cover">
                             </template>
                         </div>
                         <!-- Botones -->
@@ -295,6 +296,62 @@
                     <div class="flex justify-end mt-4">
                         <button type="button" class="btn btn-primary" @click="openDetalle = false">Cerrar</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA CONDICIONES DE INICIO DE SERVICIO -->
+<div x-data="{ openCondiciones: false, condiciones: { mayorEdad: false, familiarAtendio: false, otraCondicion: false } }" class="mb-5" @toggle-modal-condiciones.window="openCondiciones = !openCondiciones">
+    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
+        <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
+            <div x-show="openCondiciones" x-transition.duration.300
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
+                <!-- Header del Modal -->
+                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                    <h5 class="font-bold text-lg">Condiciones de Inicio de Servicio</h5>
+                    <button type="button" class="text-white-dark hover:text-dark" @click="openCondiciones = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-scroll p-5 space-y-4">
+                    <!-- Formulario -->
+                    <form>
+                        <!-- Checkbox para Mayor de Edad -->
+                        <div class="mt-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" x-model="condiciones.mayorEdad" class="form-checkbox">
+                                <span class="ml-2 text-sm font-medium">¿Es mayor de edad?</span>
+                            </label>
+                        </div>
+                        <!-- Checkbox para Familiar Atendió -->
+                        <div class="mt-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" x-model="condiciones.familiarAtendio" class="form-checkbox">
+                                <span class="ml-2 text-sm font-medium">¿Le atendió un familiar?</span>
+                            </label>
+                        </div>
+                        <!-- Otra Condición -->
+                        <div class="mt-4">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" x-model="condiciones.otraCondicion" class="form-checkbox">
+                                <span class="ml-2 text-sm font-medium">Otra condición (especifique)</span>
+                            </label>
+                        </div>
+                        <!-- Botones -->
+                        <div class="flex justify-end items-center mt-4">
+                            <button type="button" class="btn btn-outline-danger"
+                                @click="openCondiciones = false">Cancelar</button>
+                            <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
+                                @click="guardarCondiciones(visitaId)">Guardar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -541,7 +598,6 @@
 
             let estado = estados[estadoIndex];
             let estadoContainer = document.getElementById(`estadoContainer-${visitaId}`);
-            // Definir los colores en hexadecimal
             const estadoColores = [
                 '#eaf1ff', // Fecha de Programación (Primary-Light)
                 "#fff9ed", // Técnico en Desplazamiento (Info-Light)
@@ -551,8 +607,6 @@
 
             let estadoDiv = document.createElement("div");
             estadoDiv.classList.add("flex", "flex-row", "items-center", "p-3", "rounded-lg", 'estado-row');
-
-            // Aplicar color de fondo directamente en el estilo inline
             estadoDiv.style.backgroundColor = estadoColores[estadoIndex];
 
             let html = `
@@ -563,17 +617,22 @@
 
             if (estado.requiereImagen) {
                 html += `
-                <span class="btn-modal badge bg-primary cursor-pointer" data-visita="${visitaId}" onclick="abrirModalImagen('${visitaId}')">
-            📷
-        </span>
-        <span class="estado-btn badge bg-success cursor-pointer" data-estado="${estadoIndex}" data-visita="${visitaId}">
-            ✔
-        </span>`;
+            <span class="btn-modal badge bg-primary cursor-pointer" data-visita="${visitaId}" onclick="abrirModalImagen('${visitaId}')">
+                📷
+            </span>
+            <span class="estado-btn badge bg-success cursor-pointer" data-estado="${estadoIndex}" data-visita="${visitaId}">
+                ✔
+            </span>`;
+            } else if (estado.nombre === "Inicio de servicio") {
+                html += `
+            <span class="estado-btn badge bg-success cursor-pointer" data-estado="${estadoIndex}" data-visita="${visitaId}" onclick="abrirModalCondiciones('${visitaId}')">
+                ✔
+            </span>`;
             } else {
                 html += `
-                <span class="estado-btn badge bg-success cursor-pointer" data-estado="${estadoIndex}" data-visita="${visitaId}">
-            ✔
-        </span>`;
+            <span class="estado-btn badge bg-success cursor-pointer" data-estado="${estadoIndex}" data-visita="${visitaId}">
+                ✔
+            </span>`;
             }
 
             html += `</div>`;
@@ -682,11 +741,15 @@
                 let datos = visitasData[visitaId];
                 // Construir los detalles
                 let detalles = `
-                <strong>Nombre:</strong> ${datos.nombre}<br>
-                <strong>Fecha Programada:</strong> ${datos.rango}<br>
-                <strong>Técnico:</strong> ${datos.tecnico ? datos.tecnico.nombre : "No seleccionado"}<br>
-                <strong>Técnicos de Apoyo:</strong> ${datos.apoyo && datos.apoyo.length ? datos.apoyo.join(", ") : "Ninguno"}
-            `;
+            <strong>Nombre:</strong> ${datos.nombre}<br>
+            <strong>Fecha Programada:</strong> ${datos.rango}<br>
+            <strong>Técnico:</strong> ${datos.tecnico ? datos.tecnico.nombre : "No seleccionado"}<br>
+            <strong>Técnicos de Apoyo:</strong> ${datos.apoyo && datos.apoyo.length ? datos.apoyo.join(", ") : "Ninguno"}<br>
+            <strong>Condiciones:</strong><br>
+            - Mayor de edad: ${datos.condiciones?.mayorEdad ? 'Sí' : 'No'}<br>
+            - Familiar atendió: ${datos.condiciones?.familiarAtendio ? 'Sí' : 'No'}<br>
+            - Otra condición: ${datos.condiciones?.otraCondicion ? 'Sí' : 'No'}
+        `;
                 // Abrir modal de detalles
                 window.dispatchEvent(new CustomEvent('toggle-modal-detalle', {
                     detail: {
@@ -695,5 +758,35 @@
                 }));
             }
         });
+
+        // ABRIR MODAL DE CONDICIONES
+        window.abrirModalCondiciones = function(visitaId) {
+            window.dispatchEvent(new CustomEvent('toggle-modal-condiciones', {
+                detail: {
+                    visitaId
+                }
+            }));
+        };
+
+        // GUARDAR CONDICIONES
+        window.guardarCondiciones = function(visitaId) {
+            let condiciones = Alpine.$data(document.querySelector('[x-data]')).condiciones;
+            visitasData[visitaId].condiciones = condiciones;
+            window.dispatchEvent(new Event('toggle-modal-condiciones'));
+
+            // Marcar el estado como completado
+            let estadoBtn = document.querySelector(
+                `.estado-btn[data-visita="${visitaId}"][data-estado="3"]`);
+            if (estadoBtn) {
+                estadoBtn.disabled = true;
+                let containerDiv = estadoBtn.closest(".estado-row");
+                let horaSpan = containerDiv.querySelector(".hora");
+                let fechaActual = new Date();
+                let fechaFormateada = formatDate(fechaActual);
+                horaSpan.textContent = fechaFormateada;
+                horaSpan.classList.remove("hidden");
+                containerDiv.classList.add("bg-green-200", "border-green-500");
+            }
+        };
     });
 </script>

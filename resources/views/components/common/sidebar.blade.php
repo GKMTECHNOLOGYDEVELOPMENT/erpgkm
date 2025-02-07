@@ -366,7 +366,8 @@
                             </svg>
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Asociados</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark "
+                                style="color: red">Asociados</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'asociados' }">
 
@@ -388,7 +389,7 @@
                             <a href="{{ route('administracion.cast') }}">Cast</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.clientes') }}">Clientes</a>
+                            <a href="{{ route('administracion.clientes') }}" style="color: red">Clientes</a>
                         </li>
                         <li>
                             <a href="{{ route('administracion.proveedores') }}">Proveedores</a>
@@ -716,16 +717,26 @@
                     <a href="{{ route('almacen.kits.index') }}" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path d="M4 9L2 12V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V12L20 9H4Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M2 12H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M7 12V7C7 5.89543 7.89543 5 9 5H15C16.1046 5 17 5.89543 17 7V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M12 15V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M10 15H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <svg class="group-hover:!text-primary shrink-0" xmlns="http://www.w3.org/2000/svg"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M4 9L2 12V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V12L20 9H4Z"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M2 12H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M7 12V7C7 5.89543 7.89543 5 9 5H15C16.1046 5 17 5.89543 17 7V12"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M12 15V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10 15H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
                             </svg>
-                            
+
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Kits de Articulos</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Kits
+                                de Articulos</span>
                         </div>
                     </a>
                 </li>
@@ -949,46 +960,46 @@
                 </h2>
 
                 <li class="menu nav-item">
-    <button type="button" class="nav-link group"
-        :class="{ 'active': activeDropdown === 'users' }"
-        @click="activeDropdown === 'users' ? activeDropdown = null : activeDropdown = 'users'">
-        <div class="flex items-center">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'users' }"
+                        @click="activeDropdown === 'users' ? activeDropdown = null : activeDropdown = 'users'">
+                        <div class="flex items-center">
 
-            <!-- Icono relacionado con Ordenes de Trabajo (Martillo - Trabajo manual) -->
-            <svg class="group-hover:!text-primary shrink-0 w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 2l6 6-10 10-6-6L16 2z" />
-            </svg>
+                            <!-- Icono relacionado con Ordenes de Trabajo (Martillo - Trabajo manual) -->
+                            <svg class="group-hover:!text-primary shrink-0 w-6 h-6" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 2l6 6-10 10-6-6L16 2z" />
+                            </svg>
 
-            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes de Trabajo</span>
-        </div>
-        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'users' }">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-        </div>
-    </button>
-    <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
-        <li>
-            <a href="{{ route('ordenes.smart') }}">Smart-Tv</a>
-        </li>
-        <li>
-            <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
-        </li>
-        <li>
-            <a href="{{ route('ordenes.helpdesk') }}">Tec.Laboratorio</a>
-        </li>
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
+                                style="color: red">Ordenes de Trabajo</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'users' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('ordenes.smart') }}" style="color: red">Smart-Tv</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('ordenes.helpdesk') }}">Tec.Laboratorio</a>
+                        </li>
 
-        <li>
-            <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
-        </li>
-    </ul>
-</li>
-
-
-
-
-
-
+                        <li>
+                            <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
+                        </li>
+                    </ul>
+                </li>
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -1147,17 +1158,21 @@
                     <a href="{{ route('ordenes.index') }}" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 4.5H19.5C20.3284 4.5 21 5.17157 21 6V20.25C21 21.0784 20.3284 21.75 19.5 21.75H4.5C3.67157 21.75 3 21.0784 3 20.25V6C3 5.17157 3.67157 4.5 4.5 4.5H7.5M16.5 4.5H7.5M16.5 4.5V3.75C16.5 2.92157 15.8284 2.25 15 2.25H9C8.17157 2.25 7.5 2.92157 7.5 3.75V4.5M9 11.25H15M9 15H13.5M10.5 7.5H13.5" />
+                            <svg class="group-hover:!text-primary shrink-0" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                width="20" height="20">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16.5 4.5H19.5C20.3284 4.5 21 5.17157 21 6V20.25C21 21.0784 20.3284 21.75 19.5 21.75H4.5C3.67157 21.75 3 21.0784 3 20.25V6C3 5.17157 3.67157 4.5 4.5 4.5H7.5M16.5 4.5H7.5M16.5 4.5V3.75C16.5 2.92157 15.8284 2.25 15 2.25H9C8.17157 2.25 7.5 2.92157 7.5 3.75V4.5M9 11.25H15M9 15H13.5M10.5 7.5H13.5" />
                             </svg>
-                                                      
+
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes de Trabajo</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes
+                                de Trabajo</span>
                         </div>
                     </a>
                 </li>
 
-                
+
 
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
@@ -1173,11 +1188,12 @@
                     <a href="{{ route('configuracion') }}" class="nav-link group">
                         <div class="flex items-center">
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" clip-rule="evenodd"
                                     d="M12 2C12.5523 2 13 2.44772 13 3V5.05884C14.1143 5.27789 15.1627 5.73961 16.07 6.41L17.657 4.82322C18.047 4.43317 18.6806 4.43317 19.0706 4.82322L19.1768 4.92941C19.5668 5.31946 19.5668 5.95302 19.1768 6.34307L17.59 7.93C18.2604 8.83734 18.7221 9.88569 18.9412 11H21C21.5523 11 22 11.4477 22 12C22 12.5523 21.5523 13 21 13H18.9412C18.7221 14.1143 18.2604 15.1627 17.59 16.07L19.1768 17.657C19.5668 18.047 19.5668 18.6806 19.1768 19.0706L19.0706 19.1768C18.6806 19.5668 18.047 19.5668 17.657 19.1768L16.07 17.59C15.1627 18.2604 14.1143 18.7221 13 18.9412V21C13 21.5523 12.5523 22 12 22C11.4477 22 11 21.5523 11 21V18.9412C9.88569 18.7221 8.83734 18.2604 7.93 17.59L6.34315 19.1768C5.9531 19.5668 5.31954 19.5668 4.92949 19.1768L4.8233 19.0706C4.43325 18.6806 4.43325 18.047 4.8233 17.657L6.41 16.07C5.73961 15.1627 5.27789 14.1143 5.05884 13H3C2.44772 13 2 12.5523 2 12C2 11.4477 2.44772 11 3 11H5.05884C5.27789 9.88569 5.73961 8.83734 6.41 7.93L4.82322 6.34315C4.43317 5.9531 4.43317 5.31954 4.82322 4.92949L4.92941 4.8233C5.31946 4.43325 5.95302 4.43325 6.34307 4.8233L7.93 6.41C8.83734 5.73961 9.88569 5.27789 11 5.05884V3C11 2.44772 11.4477 2 12 2ZM12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8Z"
                                     fill="currentColor" />
-                            </svg>                            
+                            </svg>
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Configuración</span>
                         </div>
