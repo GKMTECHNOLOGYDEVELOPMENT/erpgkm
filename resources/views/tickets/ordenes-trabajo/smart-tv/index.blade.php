@@ -1,155 +1,134 @@
 <x-layout.default>
+    <!-- Scripts y estilos -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  
     <style>
-        .panel {
-            overflow: visible !important;
-            /* Asegura que el modal no restrinja contenido */
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
+      .panel {
+        overflow: visible !important;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .animate-spin {
+        animation: spin 1s linear infinite;
+      }
     </style>
-
+  
     <div x-data="multipleTable">
+      <!-- Breadcrumb -->
+      <div class="mb-6">
+        <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
+          <li>
+            <a href="javascript:;" class="text-primary hover:underline">Tickets</a>
+          </li>
+          <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+            <span>Ordenes de Trabajo</span>
+          </li>
+        </ul>
+      </div>
+  
+      <!-- Filtros -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <!-- Fecha de Inicio -->
         <div>
-            <ul class="flex space-x-2 rtl:space-x-reverse">
-                <li>
-                    <a href="javascript:;" class="text-primary hover:underline">Tickets</a>
-                </li>
-                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                    <span>Ordenes de Trabajo</span>
-                </li>
-            </ul>
+          <label for="startDate" class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
+          <input type="text" id="startDate" x-model="startDate" placeholder="Seleccionar Fecha"
+            class="form-input w-full" x-init="flatpickr($el, { 
+                dateFormat: 'Y-m-d', 
+                onChange: function(selectedDates, dateStr) { 
+                  startDate = dateStr; 
+                  fetchDataAndInitTable(); 
+                } 
+              })" />
         </div>
-
-        <!-- Filtros -->
-        <div class="flex flex-wrap gap-4 mb-4">
-            <!-- Fecha de Inicio -->
-            <div>
-                <label for="startDate" class="font-semibold block mb-1">Fecha Inicio</label>
-                <input type="date"
-                    id="startDate"
-                    x-model="startDate"
-                    class="p-2 border rounded-md w-full"
-                    @input="fetchDataAndInitTable()" />
-            </div>
-
-            <!-- Fecha de Fin -->
-            <div>
-                <label for="endDate" class="font-semibold block mb-1">Fecha Fin</label>
-                <input type="date"
-                    id="endDate"
-                    x-model="endDate"
-                    class="p-2 border rounded-md w-full"
-                    @input="fetchDataAndInitTable()" />
-            </div>
-
-            <!-- Filtrar por Marca -->
-            <div x-data="{ marcas: [], marcaFilter: '' }"
-                x-init="
-                    fetch('http://127.0.0.1:8000/api/marcas')
-                        .then(response => response.json())
-                        .then(data => { marcas = data; })
-                        .catch(error => console.error('Error loading marcas:', error))
-                "
-                class="mb-4">
-                <label for="marcaFilter" class="font-semibold block mb-1">Filtrar por Marca</label>
-                <select id="marcaFilter"
-                    x-model="marcaFilter"
-                    class="nice-select2 w-full p-2 border rounded-md"
-                    @change="fetchDataAndInitTable()">
-                    <option value="">Todas las marcas</option>
-                    <template x-if="marcas.length > 0">
-                        <template x-for="marca in marcas" :key="marca.idMarca">
-                            <option :value="marca.idMarca" x-text="marca.nombre"></option>
-                        </template>
-                    </template>
-                </select>
-            </div>
-
-            <!-- Enlace Agregar -->
-            <a href="{{ route('ordenes.createsmart') }}" class="btn btn-primary btn-xs flex items-center gap-1 p-1 max-w-[50px]">
-                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 3h16c1.104 0 1.99.886 1.99 1.99L22 18H2V4.99C2 3.886 2.886 3 4 3z" />
-                </svg>
-                <span class="text-xs">Agregar</span>
-            </a>
-
-            <!-- Dropdown para Exportar a PDF y Excel -->
-            <div x-data="dropdown" @click.outside="open = false" class="dropdown">
-                <!-- Botón de Dropdown -->
-                <button class="btn btn-success dropdown-toggle" @click="toggle">
-                    <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5h16M4 3h16c1.104 0 1.99.886 1.99 1.99L22 18H2V4.99C2 3.886 2.886 3 4 3z" />
-                    </svg>
-                    <span class="text-xs"> Exportar</span>
-                </button>
-
-                <ul x-cloak x-show="open" x-transition x-transition.duration.300ms class="ltr:right-0 rtl:left-0 whitespace-nowrap">
-                    <!-- Opción Exportar a PDF -->
-                    <li><a href="javascript:;" class="dropdown-item" @click="window.location.href = '{{ route('reporte.clientes') }}'">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3">
-                                <path d="M2 5H22M2 5H22C22 6.10457 21.1046 7 20 7H4C2.89543 7 2 6.10457 2 5ZM2 5V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V5M9 14L15 14" stroke="currentColor" stroke-width="1.5" />
-                                <path d="M12 11L12 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            </svg>
-                            PDF</a>
-                    </li>
-
-                    <!-- Opción Exportar a Excel -->
-                    <li><a href="javascript:;" class="dropdown-item" onclick="window.location.href='{{ route('clientes.exportExcel') }}'">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3">
-                                <path d="M4 3H20C21.1046 3 22 3.89543 22 5V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19V5C2 3.89543 2 3 4 3Z" stroke="currentColor" stroke-width="1.5" />
-                                <path d="M16 10L8 14M8 10L16 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            </svg>
-                            Excel</a>
-                    </li>
-                </ul>
-            </div>
-
-
-            <!-- Botón Refrescar -->
-            <button type="button" class="btn btn-secondary btn-xs flex items-center gap-1 p-1 max-w-[50px]"
-                @click="startDate = ''; endDate = ''; marcaFilter = ''; fetchDataAndInitTable()">
-                <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4V1L1 4l3 3V6a9 9 0 1 1 9 9h-3a6 6 0 1 0-6-6h2l-3 3 3 3 3-3h-2a9 9 0 0 1-9-9h3a6 6 0 1 0 6 6h-2l3-3-3-3z" />
-                </svg>
-                <span class="text-xs">Refrescar</span>
+        <!-- Fecha de Fin -->
+        <div>
+          <label for="endDate" class="block text-sm font-medium text-gray-700">Fecha Fin</label>
+          <input type="text" id="endDate" x-model="endDate" placeholder="Seleccionar Fecha"
+            class="form-input w-full" x-init="flatpickr($el, { 
+                dateFormat: 'Y-m-d', 
+                onChange: function(selectedDates, dateStr) { 
+                  endDate = dateStr; 
+                  fetchDataAndInitTable(); 
+                } 
+              })" />
+        </div>
+        <!-- Filtrar por Marca -->
+        <div x-data="{ marcas: [], marcaFilter: '' }" x-init="
+            fetch('http://127.0.0.1:8000/api/marcas')
+              .then(response => response.json())
+              .then(data => { 
+                marcas = data; 
+                $nextTick(() => { new NiceSelect(document.getElementById('marcaFilter')); });
+              })
+              .catch(error => console.error('Error loading marcas:', error))
+          ">
+          <label for="marcaFilter" class="block text-sm font-medium text-gray-700">Filtrar por Marca</label>
+          <select id="marcaFilter" x-model="marcaFilter"
+            class="form-select w-full text-white-dark" @change="fetchDataAndInitTable()">
+            <option value="">Todas las marcas</option>
+            <template x-for="marca in marcas" :key="marca.idMarca">
+              <option :value="marca.idMarca" x-text="marca.nombre"></option>
+            </template>
+          </select>
+        </div>
+        <!-- Botones de Acción -->
+        <div class="flex flex-wrap items-end gap-2">
+          <!-- Botón Agregar -->
+          <a href="{{ route('ordenes.createsmart') }}" class="btn btn-primary btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </a>
+          <!-- Botón Exportar (Excel) -->
+          <div x-data="{ open: false }" class="relative">
+            <button @click="open = !open" class="btn btn-success btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2H6Z" fill="#2E7D32"/>
+                <path d="M14 2V8H20" fill="#1B5E20"/>
+                <path d="M9 13L15 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15 13L9 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </button>
+          </div>
+          <!-- Botón Refrescar -->
+          <button @click="startDate = ''; endDate = ''; marcaFilter = ''; fetchDataAndInitTable()" class="btn btn-secondary btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0114.36-3.36L23 10" />
+              <path d="M20.49 15a9 9 0 01-14.36 3.36L1 14" />
+            </svg>
+          </button>
         </div>
-
-        <!-- Tabla y Paginación -->
-        <div class="panel mt-6">
-            <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
-                <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
-                    <!-- Aquí van otros elementos si es necesario -->
-                </div>
-            </div>
-
-            <div class="relative">
-                <table id="myTable1" class="whitespace-nowrap w-full"></table>
-                <div id="pagination" class="flex justify-center mt-4"></div>
-
-                <!-- Preloader dentro del contenedor de la tabla -->
-                <div x-show="isLoading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75">
-                    <span class="w-10 h-10">
-                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-primary"></span>
-                    </span>
-                </div>
-            </div>
+      </div>
+  
+      <!-- Tabla y Paginación -->
+      <div class="panel mt-6">
+        <div class="relative overflow-x-auto">
+          <!-- Tabla con clases Bootstrap/DataTables -->
+          <table id="myTable1" class="table table-striped table-bordered dt-responsive nowrap"></table>
+  
+          <!-- Preloader -->
+          <div x-show="isLoading" class="absolute inset-0 flex items-center justify-center bg-white bg-opaacity-75">
+            <span class="w-10 h-10">
+              <span class="animate-ping inline-flex h-full w-full rounded-full bg-primary"></span>
+            </span>
+          </div>
         </div>
+        <!-- Paginación -->
+        <div id="pagination" class="flex justify-center mt-4"></div>
+      </div>
     </div>
-
+  
+    <!-- Scripts adicionales -->
     <script src="{{ asset('assets/js/tickets/smart/list.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-</x-layout.default>
+  </x-layout.default>
+  

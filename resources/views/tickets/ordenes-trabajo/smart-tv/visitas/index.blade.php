@@ -302,13 +302,21 @@
     </div>
 </div>
 
-<!-- MODAL PARA CONDICIONES DE INICIO DE SERVICIO -->
-<div x-data="{ openCondiciones: false, condiciones: { mayorEdad: false, familiarAtendio: false, otraCondicion: false } }" class="mb-5" @toggle-modal-condiciones.window="openCondiciones = !openCondiciones">
-    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
+<!-- Modal de Condiciones de Inicio de Servicio -->
+<div x-data="{
+    openCondiciones: false,
+    condiciones: {
+        esTitular: true,
+        noAtiende: false,
+        titularNoEsTitular: { nombre: '', dni: '', telefono: '' },
+        motivoNoAtiende: ''
+    }
+}" class="mb-5" @toggle-modal-condiciones.window="openCondiciones = !openCondiciones">
+    <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
             <div x-show="openCondiciones" x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
-                <!-- Header del Modal -->
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8">
+                <!-- Header -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                     <h5 class="font-bold text-lg">Condiciones de Inicio de Servicio</h5>
                     <button type="button" class="text-white-dark hover:text-dark" @click="openCondiciones = false">
@@ -321,35 +329,78 @@
                     </button>
                 </div>
                 <div class="modal-scroll p-5 space-y-4">
-                    <!-- Formulario -->
                     <form>
-                        <!-- Checkbox para Mayor de Edad -->
-                        <div class="mt-4">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" x-model="condiciones.mayorEdad" class="form-checkbox">
-                                <span class="ml-2 text-sm font-medium">¿Es mayor de edad?</span>
+                        <!-- Se muestra solo si "No se atiende" NO está activado -->
+                        <template x-if="!condiciones.noAtiende">
+                            <div>
+                                <!-- Switch "¿Es titular?" -->
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium">¿Es titular?</span>
+                                    <label class="w-12 h-6 relative">
+                                        <input type="checkbox" x-model="condiciones.esTitular"
+                                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                            id="esTitularSwitch" />
+                                        <span
+                                            class="outline_checkbox bg-icon border-2 border-[#ebedf2] dark:border-white-dark block h-full rounded-full
+                                             before:absolute before:left-1 before:bg-[#ebedf2] dark:before:bg-white-dark before:bottom-1 before:w-4 before:h-4
+                                             before:rounded-full before:bg-[url(/assets/images/close.svg)] before:bg-no-repeat before:bg-center
+                                             peer-checked:before:left-7 peer-checked:before:bg-[url(/assets/images/checked.svg)]
+                                             peer-checked:border-primary peer-checked:before:bg-primary before:transition-all before:duration-300"></span>
+                                    </label>
+                                </div>
+                                <!-- Si no es titular, mostrar campos para Nombre, DNI y Teléfono -->
+                                <div x-show="!condiciones.esTitular" class="space-y-3 mt-2">
+                                    <div>
+                                        <label class="block text-sm font-medium">Nombre</label>
+                                        <input type="text" x-model="condiciones.titularNoEsTitular.nombre"
+                                            class="form-input w-full">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">DNI</label>
+                                        <input type="text" x-model="condiciones.titularNoEsTitular.dni"
+                                            class="form-input w-full">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">Teléfono</label>
+                                        <input type="text" x-model="condiciones.titularNoEsTitular.telefono"
+                                            class="form-input w-full">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Switch "¿No se atiende el servicio?" -->
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-sm font-medium">¿No se atiende el servicio?</span>
+                            <label class="w-12 h-6 relative">
+                                <input type="checkbox" x-model="condiciones.noAtiende"
+                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                    id="noAtiendeSwitch" />
+                                <span
+                                    class="outline_checkbox bg-icon border-2 border-[#ebedf2] dark:border-white-dark block h-full rounded-full
+                                    before:absolute before:left-1 before:bg-[#ebedf2] dark:before:bg-white-dark before:bottom-1 before:w-4 before:h-4
+                                    before:rounded-full before:bg-[url(/assets/images/close.svg)] before:bg-no-repeat before:bg-center
+                                    peer-checked:before:left-7 peer-checked:before:bg-[url(/assets/images/checked.svg)]
+                                    peer-checked:border-primary peer-checked:before:bg-primary before:transition-all before:duration-300"></span>
                             </label>
                         </div>
-                        <!-- Checkbox para Familiar Atendió -->
-                        <div class="mt-4">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" x-model="condiciones.familiarAtendio" class="form-checkbox">
-                                <span class="ml-2 text-sm font-medium">¿Le atendió un familiar?</span>
-                            </label>
+                        <!-- Campo de motivo cuando "No se atiende" está activado -->
+                        <div x-show="condiciones.noAtiende" class="space-y-3 mt-2">
+                            <div>
+                                <label class="block text-sm font-medium">Motivo</label>
+                                <textarea x-model="condiciones.motivoNoAtiende" class="form-textarea w-full" rows="3"></textarea>
+                            </div>
                         </div>
-                        <!-- Otra Condición -->
-                        <div class="mt-4">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" x-model="condiciones.otraCondicion" class="form-checkbox">
-                                <span class="ml-2 text-sm font-medium">Otra condición (especifique)</span>
-                            </label>
-                        </div>
+
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
-                            <button type="button" class="btn btn-outline-danger"
-                                @click="openCondiciones = false">Cancelar</button>
+                            <button type="button" class="btn btn-outline-danger" @click="openCondiciones = false">
+                                Cancelar
+                            </button>
                             <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                                @click="guardarCondiciones(visitaId)">Guardar</button>
+                                @click="guardarCondiciones(visitaId)">
+                                Guardar
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -357,6 +408,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -771,10 +823,26 @@
         // GUARDAR CONDICIONES
         window.guardarCondiciones = function(visitaId) {
             let condiciones = Alpine.$data(document.querySelector('[x-data]')).condiciones;
+
+            // Si "No se atiende" está activo, se valida solo el campo de motivo.
+            if (condiciones.noAtiende) {
+                if (!condiciones.motivoNoAtiende) {
+                    alert("Por favor, ingrese el motivo por el cual no se atiende el servicio.");
+                    return;
+                }
+            } else if (!condiciones.esTitular) { // Si no es titular, validar campos correspondientes.
+                if (!condiciones.titularNoEsTitular.nombre || !condiciones.titularNoEsTitular.dni || !
+                    condiciones.titularNoEsTitular.telefono) {
+                    alert("Por favor, complete todos los campos para 'No es el titular'.");
+                    return;
+                }
+            }
+
+            // Guardar condiciones en visitasData (se asume que esta variable existe)
             visitasData[visitaId].condiciones = condiciones;
             window.dispatchEvent(new Event('toggle-modal-condiciones'));
 
-            // Marcar el estado como completado
+            // Marcar estado como completado (lógica original)
             let estadoBtn = document.querySelector(
                 `.estado-btn[data-visita="${visitaId}"][data-estado="3"]`);
             if (estadoBtn) {
