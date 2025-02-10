@@ -380,19 +380,19 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'asociados'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('administracion.cliente-general') }}">Cliente General</a>
+                            <a href="{{ route('administracion.cliente-general') }}" style="color: red">Cliente General</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.tienda') }}">Tienda</a>
+                            <a href="{{ route('administracion.tienda') }}" style="color: red">Tienda</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.cast') }}">Cast</a>
+                            <a href="{{ route('administracion.cast') }}" style="color: red">Cast</a>
                         </li>
                         <li>
                             <a href="{{ route('administracion.clientes') }}" style="color: red">Clientes</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.proveedores') }}">Proveedores</a>
+                            <a href="{{ route('administracion.proveedores') }}" style="color: red">Proveedores</a>
                         </li>
                     </ul>
                 </li>
@@ -922,7 +922,7 @@
                             </svg>
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Productos</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark" style="color: red">Productos</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'productos' }">
 
@@ -935,16 +935,16 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('articulos.index') }}">Articulos</a>
+                            <a href="{{ route('articulos.index') }}" style="color: red">Articulos</a>
                         </li>
                         <li>
-                            <a href="{{ route('modelos.index') }}">Modelos</a>
+                            <a href="{{ route('modelos.index') }}" style="color: red">Modelos</a>
                         </li>
                         <li>
-                            <a href="{{ route('marcas.index') }}">Marcas</a>
+                            <a href="{{ route('marcas.index') }}" style="color: red">Marcas</a>
                         </li>
                         <li>
-                            <a href="{{ route('categorias.index') }}">Categoria</a>
+                            <a href="{{ route('categorias.index') }}" style="color: red">Categoria</a>
                         </li>
                     </ul>
                 </li>
@@ -1153,27 +1153,6 @@
                         </li>
                     </ul>
                 </li>
-
-                <li class="menu nav-item">
-                    <a href="{{ route('ordenes.index') }}" class="nav-link group">
-                        <div class="flex items-center">
-
-                            <svg class="group-hover:!text-primary shrink-0" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                width="20" height="20">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M16.5 4.5H19.5C20.3284 4.5 21 5.17157 21 6V20.25C21 21.0784 20.3284 21.75 19.5 21.75H4.5C3.67157 21.75 3 21.0784 3 20.25V6C3 5.17157 3.67157 4.5 4.5 4.5H7.5M16.5 4.5H7.5M16.5 4.5V3.75C16.5 2.92157 15.8284 2.25 15 2.25H9C8.17157 2.25 7.5 2.92157 7.5 3.75V4.5M9 11.25H15M9 15H13.5M10.5 7.5H13.5" />
-                            </svg>
-
-                            <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes
-                                de Trabajo</span>
-                        </div>
-                    </a>
-                </li>
-
-
-
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
@@ -1195,7 +1174,7 @@
                                     fill="currentColor" />
                             </svg>
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Configuración</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark" style="color: red">Configuración</span>
                         </div>
                     </a>
                 </li>
