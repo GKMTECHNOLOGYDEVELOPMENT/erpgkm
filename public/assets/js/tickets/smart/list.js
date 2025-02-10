@@ -186,7 +186,7 @@ document.addEventListener('alpine:init', () => {
             wrap(orden.tipo || 'N/A'),
             wrap(orden.marca ? orden.marca.nombre : 'N/A'),
             wrap(orden.modelo ? orden.modelo.nombre : 'N/A'),
-            wrap(orden.serie),
+            wrap(orden.serie ? orden.serie : 'N/A'),
             wrap(orden.cliente ? orden.cliente.nombre : 'N/A'),
             wrap(orden.direccion || 'N/A'),
             `<div class="flex justify-center items-center">

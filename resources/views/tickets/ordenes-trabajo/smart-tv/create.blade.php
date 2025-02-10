@@ -29,29 +29,29 @@
         </ul>
     </div>
 
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-<!-- Mostrar mensaje de éxito si hay una variable de sesión 'success' -->
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
+    <!-- Mostrar mensaje de éxito si hay una variable de sesión 'success' -->
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
 
     <!-- Contenedor principal -->
     <div x-data="{ openClienteModal: false }" class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Orden de Trabajo</h2>
 
-     
+
 
         <div class="p-5">
             <form id="ordenTrabajoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
@@ -65,7 +65,7 @@
                         placeholder="Ingrese el número de ticket">
                 </div>
 
-                
+
                 <!-- Cliente: Seleccionar o crear nuevo -->
                 <div class="col-span-1">
                     <div class="flex items-center space-x-2">
@@ -77,10 +77,12 @@
                             </svg>
                         </button>
                     </div>
-                    <select id="idCliente" name="idCliente" class="select2 w-full">
-                        <option value="" selected >Seleccionar Cliente </option>
+                    <!-- Se usa nice-select2 (clase select2) -->
+                    <select id="idCliente" name="idCliente">
+
                     </select>
                 </div>
+
 
                 <!-- Cliente General -->
                 <div>
@@ -90,7 +92,7 @@
                     </select>
                 </div>
 
-                <!-- Tienda -->
+                <!-- Tienda (usa nice-select2) -->
                 <div>
                     <label for="idTienda" class="block text-sm font-medium">Tienda</label>
                     <select id="idTienda" name="idTienda" class="select2 w-full" style="display:none">
@@ -172,7 +174,7 @@
                 <!-- Botones -->
                 <div class="col-span-1 md:col-span-2 flex justify-end mt-4 gap-2">
                     <a href="{{ route('ordenes.index') }}" class="btn btn-outline-danger">Cancelar</a>
-                    <button type="submit"  id="btnGuardar" class="btn btn-primary ml-4">Guardar</button>
+                    <button type="submit" id="btnGuardar" class="btn btn-primary ml-4">Guardar</button>
                 </div>
             </form>
         </div>
@@ -198,16 +200,17 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario para nuevo Cliente -->
-                       <!-- Formulario -->
-                       <form class="p-5 space-y-4" id="clienteForm" method="POST" enctype="multipart/form-data" >
+                        <!-- Formulario -->
+                        <form class="p-5 space-y-4" id="clienteForm" method="POST" enctype="multipart/form-data">
                             @csrf <!-- Asegúrate de incluir el token CSRF -->
-                            
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- ClienteGeneral -->
                                 <div>
-                                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente
+                                        General</label>
                                     <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
-                                        placeholder="Seleccionar Cliente General" multiple  class="select2 w-full">
+                                        placeholder="Seleccionar Cliente General" multiple style="display:none">
                                         @foreach ($clientesGenerales as $clienteGeneral)
                                             <option value="{{ $clienteGeneral->idClienteGeneral }}">
                                                 {{ $clienteGeneral->descripcion }}</option>
@@ -215,8 +218,8 @@
                                     </select>
                                 </div>
 
-                               <!-- Contenedor para mostrar los seleccionados -->
-                               <div id="selected-items-container">
+                                <!-- Contenedor para mostrar los seleccionados -->
+                                <div id="selected-items-container">
                                     <strong>Seleccionados:</strong>
                                     <div id="selected-items-list" class="flex flex-wrap gap-2"></div>
                                 </div>
@@ -229,8 +232,10 @@
                                 </div>
                                 <!-- Tipo Documento -->
                                 <div>
-                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
-                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
+                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
+                                        Documento</label>
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full"
+                                        style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}">
@@ -324,8 +329,6 @@
     </div>
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -333,9 +336,8 @@
 
     <script>
         $(document).ready(function() {
-            // Inicializar Nice Select en todos los selects con clase .select2
+            // Inicializar nice-select2 en todos los selects con clase .select2
             document.querySelectorAll('.select2').forEach(function(select) {
-                // console.log("Inicializando select:", select);
                 NiceSelect.bind(select, {
                     searchable: true
                 });
@@ -344,43 +346,32 @@
             // Cambio de marca para cargar modelos vía AJAX
             $('#idMarca').change(function() {
                 var idMarca = $(this).val();
-                console.log("Marca seleccionada:", idMarca);
                 if (idMarca) {
                     $.ajax({
                         url: '/modelos/' + idMarca,
                         type: 'GET',
                         dataType: 'json',
                         success: function(data) {
-                            console.log("Respuesta AJAX:", data);
                             var $modeloSelect = $('#idModelo');
                             $modeloSelect.empty();
                             $modeloSelect.append(
                                 '<option value="" disabled selected>Seleccionar Modelo</option>'
                             );
                             $.each(data, function(key, modelo) {
-                                console.log("Agregando modelo:", modelo);
                                 $modeloSelect.append('<option value="' + modelo
                                     .idModelo + '">' + modelo.nombre + '</option>');
                             });
-
-                            // Si ya existe una instancia de NiceSelect, la destruimos (si el método destroy existe)
+                            // Si existe instancia previa se destruye y se reinicializa (solo para selects que usen nice-select2)
                             if ($modeloSelect.data('niceSelectInstance')) {
-                                console.log("Destruyendo instancia previa de NiceSelect");
                                 $modeloSelect.data('niceSelectInstance').destroy();
                             }
-                            // Re-inicializamos el select con NiceSelect
-                            var instance = new NiceSelect($modeloSelect[0], {
-                                searchable: true
-                            });
-                            $modeloSelect.data('niceSelectInstance', instance);
-                            console.log("Reinicializado el select de modelo con NiceSelect");
+                            // Nota: idModelo no usará nice-select2
                         },
                         error: function(xhr, status, error) {
                             console.error("Error en AJAX:", error);
                         }
                     });
                 } else {
-                    console.log("No hay marca seleccionada, reiniciando select de modelo");
                     $('#idModelo').empty();
                     $('#idModelo').append('<option value="" disabled selected>Seleccionar Modelo</option>');
                 }
@@ -500,129 +491,127 @@
         });
     </script>
 
-   
 
 
-    
+
+
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
+        document.addEventListener('DOMContentLoaded', function() {
+            let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
 
-        // Función para cargar los clientes
-        function cargarClientes() {
-            console.log('Intentando cargar clientes...');
-            fetch('/clientesdatoscliente')  // Llamada a la ruta que devuelve los clientes
-                .then(response => response.json()) // Obtener los datos en formato JSON
-                .then(data => {
-                    console.log('Clientes recibidos:', data); // Ver los datos de los clientes
-                    let select = document.getElementById('idCliente');
-                    select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>'; // Limpiar las opciones anteriores
-
-                    // Agregar las nuevas opciones
-                    data.forEach(cliente => {
-                        let option = document.createElement('option');
-                        option.value = cliente.idCliente;
-                        option.textContent = `${cliente.nombre} - ${cliente.documento}`;
-                        option.setAttribute('data-tienda', cliente.esTienda);  // Agregar atributo de tienda si es necesario
-                        select.appendChild(option);
-                    });
-
-                    // Mostrar el select después de cargar
-                    select.style.display = 'block'; // Asegurarse de que el select se vea
-                    select.style.visibility = 'visible'; // Hacerlo visible
-
-                    // Inicializar NiceSelect en el select de clientes
-                    NiceSelect.bind(select, {
-                        searchable: true
-                    });
-
-                })
-                .catch(error => {
-                    console.error('Error al cargar clientes:', error);
-                });
-        }
-
-        // Ocultar el select de clientes inicialmente
-        let selectCliente = document.getElementById('idCliente');
-        selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
-
-        // Cargar los clientes solo si no se han cargado previamente
-        if (!clientesCargados) {
-            cargarClientes();
-            clientesCargados = true;
-        }
-
-        // Evento para cuando se selecciona un cliente
-        document.getElementById('idCliente').addEventListener('change', function () {
-            let clienteId = this.value;
-            if (clienteId) {
-                console.log('Cliente seleccionado:', clienteId); // Verificar si el cliente es seleccionado
-                fetch(`/clientes-generales/${clienteId}`)
+            // Función para cargar los clientes
+            function cargarClientes() {
+                fetch('/clientesdatoscliente')
                     .then(response => response.json())
                     .then(data => {
-                        let select = document.getElementById('idClienteGeneral');
-                        select.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
-
-                        // Verificar si se recibió algún dato
-                        console.log('Clientes generales:', data); // Verifica que se reciban los clientes generales
-
-                        data.forEach(clienteGeneral => {
-                            let option = document.createElement('option');
-                            option.value = clienteGeneral.idClienteGeneral;
-                            option.textContent = clienteGeneral.descripcion;
+                        const select = document.getElementById('idCliente');
+                        // Vaciar y llenar el select con las opciones
+                        select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
+                        data.forEach(cliente => {
+                            const option = document.createElement('option');
+                            option.value = cliente.idCliente;
+                            option.textContent = `${cliente.nombre} - ${cliente.documento}`;
+                            option.dataset.tienda = cliente.esTienda;
                             select.appendChild(option);
                         });
 
-                        // No inicializamos NiceSelect en el select de Cliente General
-                        // Simplemente utilizamos el select estándar
+                        // Si ya existe una instancia previa, la destruye
+                        if (select.niceSelectInstance) {
+                            select.niceSelectInstance.destroy();
+                        }
+                        // Inicializa nice-select y guarda la instancia en el select
+                        select.niceSelectInstance = NiceSelect.bind(select, {
+                            searchable: true
+                        });
                     })
-                    .catch(error => console.error('Error al cargar clientes generales:', error));
-            } else {
-                // Limpiar el select si no hay cliente seleccionado
-                document.getElementById('idClienteGeneral').innerHTML = '<option value="" selected>Seleccionar Cliente General</option>';
+                    .catch(error => console.error('Error al cargar clientes:', error));
             }
+
+            // Ocultar el select de clientes inicialmente
+            let selectCliente = document.getElementById('idCliente');
+            selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
+
+            // Cargar los clientes solo si no se han cargado previamente
+            if (!clientesCargados) {
+                cargarClientes();
+                clientesCargados = true;
+            }
+
+            // Evento para cuando se selecciona un cliente
+            document.getElementById('idCliente').addEventListener('change', function() {
+                let clienteId = this.value;
+                if (clienteId) {
+                    console.log('Cliente seleccionado:',
+                        clienteId); // Verificar si el cliente es seleccionado
+                    fetch(`/clientes-generales/${clienteId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let select = document.getElementById('idClienteGeneral');
+                            select.innerHTML =
+                                '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
+
+                            // Verificar si se recibió algún dato
+                            console.log('Clientes generales:',
+                                data); // Verifica que se reciban los clientes generales
+
+                            data.forEach(clienteGeneral => {
+                                let option = document.createElement('option');
+                                option.value = clienteGeneral.idClienteGeneral;
+                                option.textContent = clienteGeneral.descripcion;
+                                select.appendChild(option);
+                            });
+
+                            // No inicializamos NiceSelect en el select de Cliente General
+                            // Simplemente utilizamos el select estándar
+                        })
+                        .catch(error => console.error('Error al cargar clientes generales:', error));
+                } else {
+                    // Limpiar el select si no hay cliente seleccionado
+                    document.getElementById('idClienteGeneral').innerHTML =
+                        '<option value="" selected>Seleccionar Cliente General</option>';
+                }
+            });
+
+            // Evento de envío del formulario de cliente
+            document.getElementById('clienteForm').addEventListener('submit', function(event) {
+                event.preventDefault(); // Evitar el envío normal del formulario
+
+                let formData = new FormData(this); // Obtener los datos del formulario
+                console.log('Datos del formulario:', Object.fromEntries(formData
+                    .entries())); // Ver los datos del formulario
+
+                fetch('/guardar-cliente', {
+                        method: 'POST',
+                        body: formData, // Enviar los datos del formulario
+                    })
+                    .then(response => response.json()) // Parsear la respuesta como JSON
+                    .then(data => {
+                        console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
+                        if (data.errors) {
+                            // Mostrar errores si los hay
+                            mostrarErrores(data.errors);
+                        } else {
+                            // Mostrar mensaje de éxito
+                            alert(data.message);
+
+                            // Recargar los clientes después de guardar el cliente
+                            cargarClientes();
+
+                            // Limpiar el formulario y cerrar el modal si es necesario
+                            document.getElementById('clienteForm').reset();
+                            openClienteModal = false; // Cerrar el modal si lo tienes
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al guardar el cliente:', error);
+                    });
+            });
+
         });
-
-        // Evento de envío del formulario de cliente
-        document.getElementById('clienteForm').addEventListener('submit', function (event) {
-            event.preventDefault();  // Evitar el envío normal del formulario
-
-            let formData = new FormData(this); // Obtener los datos del formulario
-            console.log('Datos del formulario:', Object.fromEntries(formData.entries()));  // Ver los datos del formulario
-
-            fetch('/guardar-cliente', {
-                method: 'POST',
-                body: formData,  // Enviar los datos del formulario
-            })
-                .then(response => response.json())  // Parsear la respuesta como JSON
-                .then(data => {
-                    console.log('Respuesta del servidor (JSON):', data);  // Verificar la respuesta
-                    if (data.errors) {
-                        // Mostrar errores si los hay
-                        mostrarErrores(data.errors);
-                    } else {
-                        // Mostrar mensaje de éxito
-                        alert(data.message);
-
-                        // Recargar los clientes después de guardar el cliente
-                        cargarClientes();
-
-                        // Limpiar el formulario y cerrar el modal si es necesario
-                        document.getElementById('clienteForm').reset();
-                        openClienteModal = false;  // Cerrar el modal si lo tienes
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al guardar el cliente:', error);
-                });
-        });
-
-    });
     </script>
 
 
-<script>
-        
+    <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Inicializar nice-select2
             NiceSelect.bind(document.getElementById("idClienteGeneraloption"));
@@ -667,70 +656,70 @@
         });
     </script>
 
-<script>
-    document.getElementById('btnGuardar').addEventListener('click', function (e) {
-        e.preventDefault();
+    <script>
+        document.getElementById('btnGuardar').addEventListener('click', function(e) {
+            e.preventDefault();
 
-        const nroTicket = document.getElementById('nroTicket').value;
+            const nroTicket = document.getElementById('nroTicket').value;
 
-        fetch(`/validar-ticket/${nroTicket}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.existe) {
-                    // Usando showMessage para mostrar la alerta personalizada en rojo
+            fetch(`/validar-ticket/${nroTicket}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.existe) {
+                        // Usando showMessage para mostrar la alerta personalizada en rojo
+                        showMessage(
+                            'El número de ticket ya está en uso. Por favor, ingrese otro número.',
+                            'top-end',
+                            true, // Mostrar el botón de cierre
+                            '',
+                            5000, // Duración de la alerta
+                            'error' // Tipo de alerta (error)
+                        );
+                    } else {
+                        document.getElementById('ordenTrabajoForm').submit();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al verificar el ticket:', error);
                     showMessage(
-                        'El número de ticket ya está en uso. Por favor, ingrese otro número.',
+                        'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.',
                         'top-end',
                         true, // Mostrar el botón de cierre
                         '',
                         5000, // Duración de la alerta
                         'error' // Tipo de alerta (error)
                     );
-                } else {
-                    document.getElementById('ordenTrabajoForm').submit();
-                }
-            })
-            .catch(error => {
-                console.error('Error al verificar el ticket:', error);
-                showMessage(
-                    'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.',
-                    'top-end',
-                    true, // Mostrar el botón de cierre
-                    '',
-                    5000, // Duración de la alerta
-                    'error' // Tipo de alerta (error)
-                );
+                });
+        });
+
+        // Función para mostrar la alerta con SweetAlert
+        function showMessage(
+            msg = 'Example notification text.',
+            position = 'top-end',
+            showCloseButton = true,
+            closeButtonHtml = '',
+            duration = 3000,
+            type = 'success',
+        ) {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: position || 'top-end',
+                showConfirmButton: false,
+                timer: duration,
+                showCloseButton: showCloseButton,
+                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
+                background: type === 'success' ? '#28a745' : '#dc3545', // Rojo para error, verde para éxito
+                iconColor: 'white', // Color del icono
+                customClass: {
+                    title: 'text-white', // Asegura que el texto sea blanco
+                },
             });
-    });
 
-    // Función para mostrar la alerta con SweetAlert
-    function showMessage(
-        msg = 'Example notification text.',
-        position = 'top-end',
-        showCloseButton = true,
-        closeButtonHtml = '',
-        duration = 3000,
-        type = 'success',
-    ) {
-        const toast = window.Swal.mixin({
-            toast: true,
-            position: position || 'top-end',
-            showConfirmButton: false,
-            timer: duration,
-            showCloseButton: showCloseButton,
-            icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-            background: type === 'success' ? '#28a745' : '#dc3545', // Rojo para error, verde para éxito
-            iconColor: 'white', // Color del icono
-            customClass: {
-                title: 'text-white', // Asegura que el texto sea blanco
-            },
-        });
-
-        toast.fire({
-            title: msg,
-        });
-    }
-</script>
+            toast.fire({
+                title: msg,
+            });
+        }
+    </script>
 
 
 
