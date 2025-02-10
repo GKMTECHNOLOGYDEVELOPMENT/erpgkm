@@ -59,4 +59,5 @@ Route::delete('/clientes/{id}', [ClientesController::class, 'destroy']);
 Route::delete('/proveedores/{id}', [ProveedoresController::class, 'destroy']);
 Route::delete('/cast/{id}', [CastController::class, 'destroy']);
 Route::get('marcas', [OrdenesTrabajoController::class, 'marcaapi']);
+Route::get('/clientegenerales', [OrdenesTrabajoController::class, 'clienteGeneralApi']);
 

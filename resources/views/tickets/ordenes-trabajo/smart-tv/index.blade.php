@@ -57,7 +57,7 @@
                 } 
               })" />
         </div>
-        <!-- Filtrar por Marca -->
+        <!-- Filtrar por Marca
         <div x-data="{ marcas: [], marcaFilter: '' }" x-init="
             fetch('http://127.0.0.1:8000/api/marcas')
               .then(response => response.json())
@@ -75,7 +75,34 @@
               <option :value="marca.idMarca" x-text="marca.nombre"></option>
             </template>
           </select>
-        </div>
+        </div> -->
+
+
+        <!-- Filtrar por Cliente General -->
+<div x-data="{ clienteGenerales: [], clienteGeneralFilter: '' }" x-init="
+    fetch('/api/clientegenerales')
+        .then(response => response.json())
+        .then(data => { 
+            console.log('Datos de clientes generales:', data); // Añadir log para inspeccionar los datos
+            clienteGenerales = data; 
+            $nextTick(() => { new NiceSelect(document.getElementById('clienteGeneralFilter')); });
+        })
+        .catch(error => console.error('Error al cargar clientes generales:', error))
+"
+>
+  <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente General</label>
+  <select id="clienteGeneralFilter" x-model="clienteGeneralFilter"
+    class="form-select w-full text-white-dark" @change="fetchDataAndInitTable()">
+    <option value="">Todos los clientes generales</option>
+    <template x-for="cliente in clienteGenerales" :key="cliente.idClienteGeneral">
+      <option :value="cliente.idClienteGeneral" x-text="cliente.descripcion"></option>
+    </template>
+  </select>
+</div>
+
+
+
+
         <!-- Botones de Acción -->
         <div class="flex flex-wrap items-end gap-2">
           <!-- Botón Agregar -->

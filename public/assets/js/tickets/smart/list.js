@@ -29,6 +29,7 @@ document.addEventListener('alpine:init', () => {
         this.isLoading = true;
         let url = `/api/ordenes?page=${page}`;
         if (this.marcaFilter) url += `&marca=${this.marcaFilter}`;
+        if (this.clienteGeneralFilter) url += `&clienteGeneral=${this.clienteGeneralFilter}`;
         if (this.startDate) url += `&start_date=${this.startDate}`;
         if (this.endDate) url += `&end_date=${this.endDate}`;
   
@@ -52,7 +53,8 @@ document.addEventListener('alpine:init', () => {
                   'F. TICKET',
                   'F. VISITA',
                   'CATEGORIA',
-                  'MARCA',
+                  // 'MARCA',
+                  'GENERAL',
                   'MODELO',
                   'SERIE',
                   'CLIENTE',
@@ -183,8 +185,9 @@ document.addEventListener('alpine:init', () => {
             wrap(orden.numero_ticket || 'N/A'),
             wrap(fechaTicket),
             wrap(fechaVisita),
-            wrap(orden.tipo || 'N/A'),
-            wrap(orden.marca ? orden.marca.nombre : 'N/A'),
+            wrap(orden.modelo && orden.modelo.categorium  ? orden.modelo.categorium .nombre : 'N/A'), // Aquí se agrega el nombre de la categoría
+            // wrap(orden.marca ? orden.marca.nombre : 'N/A'),
+            wrap(orden.clientegeneral ? orden.clientegeneral.descripcion: 'N/A' ),
             wrap(orden.modelo ? orden.modelo.nombre : 'N/A'),
             wrap(orden.serie ? orden.serie : 'N/A'),
             wrap(orden.cliente ? orden.cliente.nombre : 'N/A'),

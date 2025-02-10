@@ -424,32 +424,56 @@ public function validarTicket($nroTicket)
 
  
     public function getAll(Request $request)
-    {
-        $ordenesQuery = Ticket::with([
-            'tecnico:idUsuario,Nombre',
-            'usuario:idUsuario,Nombre',
-            'cliente:idCliente,nombre',
-            'clientegeneral:idClienteGeneral,descripcion',
-            'tiposervicio:idTipoServicio,nombre',
-            'estado_ot:idEstadoots,descripcion,color',
-            'marca:idMarca,nombre',
-            'modelo:idModelo,nombre',
-        ]);
-    
-        // Filtro por marca si es proporcionado
-        if ($request->has('marca') && $request->marca != '') {
-            $ordenesQuery->where('idMarca', $request->marca);
-        }
-    
-        $ordenes = $ordenesQuery->paginate(10);
-        return response()->json($ordenes);
+{
+    $ordenesQuery = Ticket::with([
+        'tecnico:idUsuario,Nombre',
+        'usuario:idUsuario,Nombre',
+        'cliente:idCliente,nombre',
+        'clientegeneral:idClienteGeneral,descripcion',
+        'tiposervicio:idTipoServicio,nombre',
+        'estado_ot:idEstadoots,descripcion,color',
+        'marca:idMarca,nombre',
+        'modelo:idModelo,nombre',
+        'modelo.categorium:idCategoria,nombre', // Cargar la categoría a través del modelo
+
+        
+    ]);
+
+    // Filtro por marca si es proporcionado
+    if ($request->has('marca') && $request->marca != '') {
+        $ordenesQuery->where('idMarca', $request->marca);
     }
+
+    // Filtro por cliente general si es proporcionado
+    if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
+        $ordenesQuery->where('idClienteGeneral', $request->clienteGeneral);
+    }
+
+    $ordenes = $ordenesQuery->paginate(10);
+    return response()->json($ordenes);
+}
+
+
+
+
     
     public function marcaapi()
     {
         $marcas = Marca::all(); // O lo que sea necesario para recuperar las marcas
         return response()->json($marcas);
     }
+
+    public function clienteGeneralApi()
+{
+    // Obtener los datos completos, no solo la descripción
+    $clientesGenerales = ClienteGeneral::select('idClienteGeneral', 'descripcion')->get();
+
+    // Registrar los datos en el log para inspección
+    Log::info('Datos recuperados de ClienteGeneral:', ['clientesGenerales' => $clientesGenerales]);
+
+    // Enviar la respuesta JSON con el Content-Type adecuado
+    return response()->json($clientesGenerales)->header('Content-Type', 'application/json; charset=utf-8');
+}
 
     public function getOrdenes(Request $request)
     {

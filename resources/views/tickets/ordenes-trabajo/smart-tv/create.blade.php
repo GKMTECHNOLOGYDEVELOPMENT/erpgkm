@@ -58,11 +58,12 @@
                 action="{{ route('ordenes.storesmart') }}">
                 @csrf
 
-                <!-- Número de Ticket -->
+              <!-- Número de Ticket -->
                 <div>
                     <label for="nroTicket" class="block text-sm font-medium">N. Ticket</label>
                     <input id="nroTicket" name="nroTicket" type="text" class="form-input w-full"
                         placeholder="Ingrese el número de ticket">
+                    <p id="errorTicket" class="text-sm text-red-500 mt-2 hidden">El número de ticket ya está en uso. Por favor, ingrese otro número.</p>
                 </div>
 
 
@@ -655,71 +656,49 @@
             });
         });
     </script>
+<script>
+    // Agregar un evento al campo nroTicket para verificar en tiempo real
+    document.getElementById('nroTicket').addEventListener('input', function() {
+        const nroTicket = document.getElementById('nroTicket').value;
+        const inputTicket = document.getElementById('nroTicket'); // Referencia al input
+        const errorTicket = document.getElementById('errorTicket'); // Referencia al mensaje de error
 
-    <script>
-        document.getElementById('btnGuardar').addEventListener('click', function(e) {
-            e.preventDefault();
-
-            const nroTicket = document.getElementById('nroTicket').value;
-
-            fetch(`/validar-ticket/${nroTicket}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.existe) {
-                        // Usando showMessage para mostrar la alerta personalizada en rojo
-                        showMessage(
-                            'El número de ticket ya está en uso. Por favor, ingrese otro número.',
-                            'top-end',
-                            true, // Mostrar el botón de cierre
-                            '',
-                            5000, // Duración de la alerta
-                            'error' // Tipo de alerta (error)
-                        );
-                    } else {
-                        document.getElementById('ordenTrabajoForm').submit();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al verificar el ticket:', error);
-                    showMessage(
-                        'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.',
-                        'top-end',
-                        true, // Mostrar el botón de cierre
-                        '',
-                        5000, // Duración de la alerta
-                        'error' // Tipo de alerta (error)
-                    );
-                });
-        });
-
-        // Función para mostrar la alerta con SweetAlert
-        function showMessage(
-            msg = 'Example notification text.',
-            position = 'top-end',
-            showCloseButton = true,
-            closeButtonHtml = '',
-            duration = 3000,
-            type = 'success',
-        ) {
-            const toast = window.Swal.mixin({
-                toast: true,
-                position: position || 'top-end',
-                showConfirmButton: false,
-                timer: duration,
-                showCloseButton: showCloseButton,
-                icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-                background: type === 'success' ? '#28a745' : '#dc3545', // Rojo para error, verde para éxito
-                iconColor: 'white', // Color del icono
-                customClass: {
-                    title: 'text-white', // Asegura que el texto sea blanco
-                },
-            });
-
-            toast.fire({
-                title: msg,
-            });
+        // Evitar la validación si el campo está vacío
+        if (nroTicket.trim() === "") {
+            inputTicket.classList.remove('border-red-500');
+            inputTicket.classList.remove('border-green-500');
+            errorTicket.classList.add('hidden'); // Ocultar el mensaje de error si está vacío
+            return;
         }
-    </script>
+
+        // Realizar la petición a la API para verificar si el ticket existe
+        fetch(`/validar-ticket/${nroTicket}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.existe) {
+                    // Agregar clase de error al campo
+                    inputTicket.classList.add('border-red-500'); // Borde rojo
+                    inputTicket.classList.remove('border-green-500'); // Eliminar borde verde (si existe)
+
+                    // Mostrar el mensaje de error
+                    errorTicket.classList.remove('hidden'); // Mostrar el mensaje de error
+                } else {
+                    // Si el ticket no está repetido, eliminar el borde rojo y mostrar borde verde
+                    inputTicket.classList.remove('border-red-500');
+                    inputTicket.classList.add('border-green-500'); // Borde verde si está disponible
+
+                    // Ocultar el mensaje de error si el ticket es válido
+                    errorTicket.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error al verificar el ticket:', error);
+                errorTicket.textContent = 'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.';
+                errorTicket.classList.remove('hidden');
+                inputTicket.classList.add('border-red-500'); // Borde rojo en caso de error
+            });
+    });
+</script>
 
 
 
