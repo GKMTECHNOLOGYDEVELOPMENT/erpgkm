@@ -332,106 +332,96 @@
 
 
 
-
-
     <script>
-    // Agregar un evento al campo nroTicket para verificar en tiempo real
-    document.getElementById('nroTicket').addEventListener('input', function() {
-        const nroTicket = document.getElementById('nroTicket').value;
-        const inputTicket = document.getElementById('nroTicket'); // Referencia al input
-        const errorTicket = document.getElementById('errorTicket'); // Referencia al mensaje de error
-
-        // Evitar la validación si el campo está vacío
-        if (nroTicket.trim() === "") {
-            inputTicket.classList.remove('border-red-500');
-            inputTicket.classList.remove('border-green-500');
-            errorTicket.classList.add('hidden'); // Ocultar el mensaje de error si está vacío
-            return;
-        }
-
-        // Realizar la petición a la API para verificar si el ticket existe
-        fetch(`/validar-ticket/${nroTicket}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.existe) {
-                    // Si el ticket ya está en uso
-                    inputTicket.classList.add('border-red-500'); // Borde rojo
-                    inputTicket.classList.remove('border-green-500'); // Eliminar borde verde (si existe)
-
-                    // Mostrar el mensaje de error (número de ticket ya en uso)
-                    errorTicket.textContent = 'El número de ticket ya está en uso. Por favor, ingrese otro número.';
+        // Validación en tiempo real para el número de ticket
+        document.getElementById('nroTicket').addEventListener('input', function() {
+            const inputTicket = document.getElementById('nroTicket');
+            const errorTicket = document.getElementById('errorTicket');
+            const nroTicketValue = inputTicket.value.trim();
+        
+            if (nroTicketValue === "") {
+                inputTicket.classList.remove('border-red-500', 'border-green-500');
+                errorTicket.classList.add('hidden');
+                return;
+            }
+        
+            fetch(`/validar-ticket/${nroTicketValue}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.existe) {
+                        inputTicket.classList.add('border-red-500');
+                        inputTicket.classList.remove('border-green-500');
+                        errorTicket.textContent = 'El número de ticket ya está en uso. Por favor, ingrese otro número.';
+                        errorTicket.classList.remove('hidden');
+                    } else {
+                        inputTicket.classList.remove('border-red-500');
+                        inputTicket.classList.add('border-green-500');
+                        errorTicket.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al verificar el ticket:', error);
+                    inputTicket.classList.add('border-red-500');
+                    errorTicket.textContent = 'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.';
                     errorTicket.classList.remove('hidden');
+                });
+        });
+        
+        // Validación al enviar el formulario (campos vacíos)
+        // Se excluye 'nroTicket' ya que se valida por separado
+        document.getElementById('ordenTrabajoForm').addEventListener('submit', function(event) {
+            let errorFound = false;
+            const camposObligatorios = [
+                'idCliente', 'idClienteGeneral', 'idTienda', 
+                'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada'
+            ];
+        
+            camposObligatorios.forEach(campo => {
+                const input = document.getElementById(campo);
+                const errorId = `error-${campo}`;
+                let errorText = document.getElementById(errorId);
+                if (!input) return;
+        
+                if (input.value.trim() === "") {
+                    errorFound = true;
+                    input.classList.add('border-red-500');
+        
+                    // Si es un select oculto (por ejemplo, por select2), se usa el contenedor visible
+                    let target = input;
+                    if (input.tagName === 'SELECT' && input.style.display === 'none' && input.nextElementSibling) {
+                        target = input.nextElementSibling;
+                    }
+                    if (!errorText) {
+                        errorText = document.createElement('p');
+                        errorText.id = errorId;
+                        errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
+                        // Se agrega al final del contenedor para que quede debajo del campo
+                        target.parentNode.appendChild(errorText);
+                    }
+                    errorText.textContent = "Campo vacío";
                 } else {
-                    // Si el ticket no está repetido, eliminar el borde rojo y mostrar borde verde
-                    inputTicket.classList.remove('border-red-500');
-                    inputTicket.classList.add('border-green-500'); // Borde verde si está disponible
-
-                    // Ocultar el mensaje de error si el ticket es válido
-                    errorTicket.classList.add('hidden');
+                    input.classList.remove('border-red-500');
+                    if (errorText) {
+                        errorText.remove();
+                    }
                 }
-            })
-            .catch(error => {
-                console.error('Error al verificar el ticket:', error);
-                errorTicket.textContent = 'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.';
-                errorTicket.classList.remove('hidden');
-                inputTicket.classList.add('border-red-500'); // Borde rojo en caso de error
             });
-    });
-
-    // Validación al intentar enviar el formulario
-    document.getElementById('ordenTrabajoForm').addEventListener('submit', function(event) {
-        let errorFound = false;
-
-        // Campos que deben ser validados (excepto latitud y longitud)
-        const camposObligatorios = [
-            'nroTicket', 'idCliente', 'idClienteGeneral', 'idTienda', 
-            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada'
-        ];
-
-        // Iterar sobre los campos obligatorios
-        for (const campo of camposObligatorios) {
-            const input = document.getElementById(campo);
-            
-            // Verificar si el campo está vacío y si no es latitud o longitud
-            if ((campo !== 'latitud' && campo !== 'longitud') && input && input.value.trim() === "") {
+        
+            // Validación específica para nroTicket (si está vacío o con error)
+            const nroTicketInput = document.getElementById('nroTicket');
+            const errorTicket = document.getElementById('errorTicket');
+            if (nroTicketInput.value.trim() === "" || nroTicketInput.classList.contains('border-red-500')) {
                 errorFound = true;
-                toastr.error(`El campo ${input.previousElementSibling.textContent} es obligatorio.`);
-                break;
-            }
-        }
-
-        // Validar si el campo nroTicket tiene error
-        const nroTicket = document.getElementById('nroTicket');
-        const inputTicket = nroTicket.value.trim();
-        const errorTicket = document.getElementById('errorTicket');
-
-        // Si el nroTicket está vacío o tiene error, mostrar alerta
-        if (inputTicket === "" || nroTicket.classList.contains('border-red-500')) {
-            errorFound = true;
-            if (inputTicket === "") {
-                // Si está vacío
-                // toastr.error('Por favor, ingrese el número de ticket.');
-                errorTicket.textContent = 'Campo vacío'; // Mostrar mensaje de "Campo vacío"
-                errorTicket.classList.remove('hidden');
-            } else {
-                // Si está repetido
-                toastr.error('El número de ticket ya está en uso. Por favor, ingrese otro número.');
-                errorTicket.textContent = 'El número de ticket ya está en uso. Por favor, ingrese otro número.';
                 errorTicket.classList.remove('hidden');
             }
-        }
-
-        // Si se detectó un error, prevenir el envío del formulario
-        if (errorFound) {
-            event.preventDefault(); // Prevenir el envío del formulario
-        }
-    });
-</script>
-
-
-
-
-
+        
+            if (errorFound) {
+                event.preventDefault();
+            }
+        });
+        </script>
+        
+    
 
 
 </x-layout.default>
