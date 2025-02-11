@@ -264,6 +264,7 @@ class OrdenesTrabajoController extends Controller
 
 public function storesmart(Request $request)
 {
+
     try {
         Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
 
