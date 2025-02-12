@@ -15,37 +15,92 @@
   }
 </style>
 
-<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo</span>
+<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo N° {{ $orden->idTickets}}</span>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-  <div>
-    <label class="block text-sm font-medium">Cliente General</label>
-    <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->clienteGeneral->descripcion }}" readonly>
+
+
+
+
+<div>
+  <form action="">
+    <label class="block text-sm font-medium">TICKET</label>
+    <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}" readonly>
   </div>
 
   <!-- Cliente -->
-  <div>
+  <!-- <div>
     <label class="block text-sm font-medium">Cliente</label>
-    <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->cliente->nombre }} - {{ $orden->cliente->documento }}" readonly>
-  </div>
+    <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->cliente->nombre }} - {{ $orden->cliente->documento }}" >
+  </div> -->
 
-  <!-- Tienda -->
-  <div>
-    <label class="block text-sm font-medium">Tienda</label>
-    <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->nombre }}" readonly>
-  </div>
+  <!-- Cliente -->
+<div>
+  <label class="block text-sm font-medium">Cliente</label>
+  <select name="idCliente" class="select2 w-full bg-gray-100" style="display:none">
+    <option value="" disabled >Seleccionar Cliente</option>
+    @foreach ($clientes as $cliente)
+      <option value="{{ $cliente->idCliente }}" 
+        {{ $cliente->idCliente == $orden->cliente->idCliente ? 'selected' : '' }}>
+        {{ $cliente->nombre }} - {{ $cliente->documento }}
+      </option>
+    @endforeach
+  </select>
+</div>
+
+
+
+<!-- Cliente General -->
+<div>
+  <label class="block text-sm font-medium">Cliente General</label>
+  <select name="idClienteGeneral" class="select2 w-full bg-gray-100" style="display: none;">
+    <option value="" disabled>Seleccionar Cliente General</option>
+    @foreach ($clientesGenerales as $clienteGeneral)
+      <option value="{{ $clienteGeneral->idClienteGeneral }}" 
+        {{ $clienteGeneral->idClienteGeneral == $orden->clienteGeneral->idClienteGeneral ? 'selected' : '' }}>
+        {{ $clienteGeneral->descripcion }}
+      </option>
+    @endforeach
+  </select>
+</div>
+
+  
+
+<!-- Tienda -->
+<div>
+  <label class="block text-sm font-medium">Tienda</label>
+  <select name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
+    <option value="" disabled>Seleccionar Tienda</option>
+    @foreach ($tiendas as $tienda)
+      <option value="{{ $tienda->idTienda }}" 
+        {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
+        {{ $tienda->nombre }}
+      </option>
+    @endforeach
+  </select>
+</div>
+
 
   <!-- Dirección -->
   <div>
     <label class="block text-sm font-medium">Dirección</label>
-    <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->direccion }}" readonly>
+    <input type="text" class="form-input w-full " value="{{ $orden->direccion }}" >
   </div>
 
-  <!-- Marca -->
-  <div>
-    <label class="block text-sm font-medium">Marca</label>
-    <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->marca?->nombre ?? 'No asignado' }}" readonly>
-  </div>
+ <!-- Marca -->
+<div>
+  <label class="block text-sm font-medium">Marca</label>
+  <select name="idMarca" class="select2 w-full bg-gray-100" style="display: none;">
+    <option value="" disabled>Seleccionar Marca</option>
+    @foreach ($marcas as $marca)
+      <option value="{{ $marca->idMarca }}" 
+        {{ $marca->idMarca == $orden->idMarca ? 'selected' : '' }}>
+        {{ $marca->nombre }}
+      </option>
+    @endforeach
+  </select>
+</div>
+
 
   <!-- Modelo (Editable) -->
   <div>
@@ -75,14 +130,21 @@
   <!-- Falla Reportada -->
   <div>
     <label for="fallaReportada" class="block text-sm font-medium">Falla Reportada</label>
-    <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full bg-gray-100" readonly>{{ $orden->fallaReportada }}</textarea>
+    <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full bg-gray-100" >{{ $orden->fallaReportada }}</textarea>
   </div>
   
   <!-- Botón de GUARDAR -->
   <div class="mt-5 w-full md:w-auto">
-    <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">GUARDAR</button>
+    <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
   </div>
+
+  </form>
 </div>
+
+
+
+
+
 
 <!-- Nueva Card: Historial de Estados -->
 <div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">

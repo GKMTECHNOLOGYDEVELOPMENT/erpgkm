@@ -46,7 +46,7 @@ class Modelo extends Model
 		return $this->belongsTo(Marca::class, 'idMarca');
 	}
 
-	public function categorium()
+	public function categoria()
 	{
 		return $this->belongsTo(Categoria::class, 'idCategoria');
 	}

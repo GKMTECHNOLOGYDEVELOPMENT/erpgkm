@@ -26,4 +26,12 @@ class EstadoFlujo extends Model
 
     // Indicar que no se está usando la marca de tiempo 'created_at' y 'updated_at'
     public $timestamps = false;
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'idEstadflujo', 'idEstadflujo');
+    }
+
+
+
 }

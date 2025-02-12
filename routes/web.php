@@ -268,6 +268,7 @@ Route::post('/guardar-cliente', [OrdenesTrabajoController::class, 'guardarClient
 Route::get('/clientesdatoscliente', [OrdenesTrabajoController::class, 'getClientesdatosclientes'])->name('clientes.get');
 Route::post('/clientes/{idCliente}/agregar-clientes-generales', [ClientesController::class, 'agregarClientesGenerales']);
 Route::delete('/clientes/{idCliente}/eliminar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'eliminarClienteGeneral']);
+Route::get('/tickets-por-serie/{serie}', [OrdenesTrabajoController::class, 'getTicketsPorSerie']);
 
 
 //INICIO TICKETS///
@@ -275,7 +276,7 @@ Route::delete('/clientes/{idCliente}/eliminar-cliente-general/{idClienteGeneral}
 /// INICIO ÓRDENES DE TRABAJO ///
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/', [OrdenesTrabajoController::class, 'index'])->name('index'); // Mostrar la vista principal
-    Route::get('/smart', [OrdenesTrabajoController::class, 'smart'])->name('smart');
+    Route::get('/smart', [OrdenesTrabajoController::class, 'smarttable'])->name('smart');
     Route::get('/helpdesk', [OrdenesTrabajoController::class, 'helpdesk'])->name('helpdesk');
     Route::get('/create-smart/', [OrdenesTrabajoController::class, 'createsmart'])->name('createsmart')->middleware('auth');
     Route::get('/create-helpdesk', [OrdenesTrabajoController::class, 'createhelpdesk'])->name('createhelpdesk')->middleware('auth'); // Crear una nueva orden de trabajo

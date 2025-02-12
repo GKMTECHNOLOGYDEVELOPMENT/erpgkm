@@ -45,19 +45,12 @@
                 action="{{ route('ordenes.storesmart') }}">
                 @csrf
 
-              <!-- Número de Ticket -->
-                <div>
-                    <label for="nroTicket" class="block text-sm font-medium">N. Ticket</label>
-                    <input id="nroTicket" name="nroTicket" type="text" class="form-input w-full"
-                        placeholder="Ingrese el número de ticket">
-                        <p id="errorTicket" class="text-sm text-red-500 mt-2 hidden"></p>
-                        </div>
-
+              
 
                 <!-- Cliente: Seleccionar o crear nuevo -->
                 <div class="col-span-1">
                     <div class="flex items-center space-x-2">
-                        <label for="idCliente" class="block text-sm font-medium">Cliente</label>
+                        <label for="idCliente" class="block text-sm font-medium">Usuario Final</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openClienteModal = true">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="2">
@@ -67,20 +60,28 @@
                     </div>
                     <!-- Se usa nice-select2 (clase select2) -->
                     <select id="idCliente" name="idCliente">
-
                     </select>
                 </div>
 
-
+                
                 <!-- Cliente General -->
                 <div>
                     <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
                     <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
                         <option value="" selected>Seleccionar Cliente General</option>
-                    </select>
-
-                    
+                    </select>                   
                 </div>
+
+                <!-- Número de Ticket -->
+                <div>
+                    <label for="nroTicket" class="block text-sm font-medium">N. Ticket</label>
+                    <input id="nroTicket" name="nroTicket" type="text" class="form-input w-full"
+                        placeholder="Ingrese el número de ticket">
+                        <p id="errorTicket" class="text-sm text-red-500 mt-2 hidden"></p>
+                        </div>
+
+
+
 
                 <!-- Tienda (usa nice-select2) -->
                 <div>
@@ -133,6 +134,17 @@
                         placeholder="Ingrese la serie">
                 </div>
 
+              
+<!-- Selección de Tickets -->
+<div id="ticketSelectionContainer">
+    <label for="selectTickets" class="block text-sm font-medium">Seleccionar Ticket</label>
+    <select id="selectTickets" name="selectTickets" class="form-input w-full" style="display: none;">
+        <option value="" selected>Seleccionar Ticket</option>
+    </select>
+</div>
+
+
+
 
                 <!-- Falla Reportada -->
                 <div class="">
@@ -168,6 +180,9 @@
                 </div>
             </form>
         </div>
+
+
+
 
         <!-- Modal para crear nuevo Cliente (opcional) -->
         <div x-show="openClienteModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
@@ -328,23 +343,27 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
 
-
-
-
-
     <script>
-        // Validación en tiempo real para el número de ticket
-        document.getElementById('nroTicket').addEventListener('input', function() {
-            const inputTicket = document.getElementById('nroTicket');
-            const errorTicket = document.getElementById('errorTicket');
-            const nroTicketValue = inputTicket.value.trim();
-        
-            if (nroTicketValue === "") {
-                inputTicket.classList.remove('border-red-500', 'border-green-500');
-                errorTicket.classList.add('hidden');
-                return;
-            }
-        
+    // Función para mostrar un toastr de error
+    function showToast(message) {
+        toastr.error(message, "Error", {
+            positionClass: "toast-top-right", // Posición en la pantalla
+            timeOut: 3000, // Duración de la notificación
+            closeButton: true
+        });
+    }
+
+    // Validación en tiempo real para el número de ticket
+    document.getElementById('nroTicket').addEventListener('input', function() {
+        const inputTicket = document.getElementById('nroTicket');
+        const errorTicket = document.getElementById('errorTicket');
+        const nroTicketValue = inputTicket.value.trim();
+
+        if (nroTicketValue === "") {
+            inputTicket.classList.remove('border-red-500', 'border-green-500');
+            errorTicket.textContent = "Campo vacío";  // Mostrar mensaje de campo vacío
+            errorTicket.classList.remove('hidden');
+        } else {
             fetch(`/validar-ticket/${nroTicketValue}`)
                 .then(response => response.json())
                 .then(data => {
@@ -353,6 +372,8 @@
                         inputTicket.classList.remove('border-green-500');
                         errorTicket.textContent = 'El número de ticket ya está en uso. Por favor, ingrese otro número.';
                         errorTicket.classList.remove('hidden');
+                        // Mostrar toastr
+                        showToast('El número de ticket ya está en uso. Por favor, ingrese otro número.');
                     } else {
                         inputTicket.classList.remove('border-red-500');
                         inputTicket.classList.add('border-green-500');
@@ -364,63 +385,151 @@
                     inputTicket.classList.add('border-red-500');
                     errorTicket.textContent = 'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.';
                     errorTicket.classList.remove('hidden');
+                    // Mostrar toastr
+                    showToast('Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.');
                 });
+        }
+    });
+
+    // Validación en tiempo real para campos obligatorios
+    const camposObligatorios = [
+        'idCliente', 'idClienteGeneral', 'idTienda', 
+        'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada'
+    ];
+
+    camposObligatorios.forEach(campo => {
+        const input = document.getElementById(campo);
+
+        // Agregar evento de "input" o "change" para validación en tiempo real
+        input.addEventListener('input', function() {
+            validateCampo(input);
         });
-        
-        // Validación al enviar el formulario (campos vacíos)
-        // Se excluye 'nroTicket' ya que se valida por separado
-        document.getElementById('ordenTrabajoForm').addEventListener('submit', function(event) {
-            let errorFound = false;
-            const camposObligatorios = [
-                'idCliente', 'idClienteGeneral', 'idTienda', 
-                'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada'
-            ];
-        
-            camposObligatorios.forEach(campo => {
-                const input = document.getElementById(campo);
-                const errorId = `error-${campo}`;
-                let errorText = document.getElementById(errorId);
-                if (!input) return;
-        
-                if (input.value.trim() === "") {
-                    errorFound = true;
-                    input.classList.add('border-red-500');
-        
-                    // Si es un select oculto (por ejemplo, por select2), se usa el contenedor visible
-                    let target = input;
-                    if (input.tagName === 'SELECT' && input.style.display === 'none' && input.nextElementSibling) {
-                        target = input.nextElementSibling;
-                    }
-                    if (!errorText) {
-                        errorText = document.createElement('p');
-                        errorText.id = errorId;
-                        errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
-                        // Se agrega al final del contenedor para que quede debajo del campo
-                        target.parentNode.appendChild(errorText);
-                    }
-                    errorText.textContent = "Campo vacío";
-                } else {
-                    input.classList.remove('border-red-500');
-                    if (errorText) {
-                        errorText.remove();
-                    }
-                }
+
+        // Para campos de tipo "select" o "date", se usa el evento "change"
+        if (input.tagName === 'SELECT' || input.type === 'date') {
+            input.addEventListener('change', function() {
+                validateCampo(input);
             });
+        }
+
+        // También puedes agregar evento "focusout" para perder foco (cuando el usuario termina de escribir)
+        input.addEventListener('focusout', function() {
+            validateCampo(input);
+        });
+    });
+
+    // Función para validar el campo y mostrar/ocultar el mensaje "Campo vacío"
+    function validateCampo(input) {
+        const errorId = `error-${input.id}`;
+        let errorText = document.getElementById(errorId);
         
-            // Validación específica para nroTicket (si está vacío o con error)
-            const nroTicketInput = document.getElementById('nroTicket');
-            const errorTicket = document.getElementById('errorTicket');
-            if (nroTicketInput.value.trim() === "" || nroTicketInput.classList.contains('border-red-500')) {
-                errorFound = true;
-                errorTicket.classList.remove('hidden');
+        if (!input.value.trim()) {
+            // Si está vacío
+            input.classList.add('border-red-500');
+            if (!errorText) {
+                errorText = document.createElement('p');
+                errorText.id = errorId;
+                errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
+                input.parentNode.appendChild(errorText);
             }
-        
-            if (errorFound) {
-                event.preventDefault();
+            errorText.textContent = "Campo vacío";
+        } else {
+            // Si tiene contenido
+            input.classList.remove('border-red-500');
+            if (errorText) {
+                errorText.remove();
+            }
+        }
+    }
+
+    // Validación al enviar el formulario
+    document.getElementById('ordenTrabajoForm').addEventListener('submit', function(event) {
+        let errorFound = false;
+        let errorMessages = []; // Para almacenar los mensajes de error
+
+        // Validar todos los campos obligatorios antes de enviar
+        camposObligatorios.forEach(campo => {
+            const input = document.getElementById(campo);
+            if (input.value.trim() === "") {
+                errorFound = true;
+                validateCampo(input); // Ejecuta la validación en caso de que falte contenido
+                errorMessages.push(`El campo ${input.id} está vacío. Por favor, complete el campo.`);
             }
         });
-        </script>
-        
+
+        // Validación específica para nroTicket (si está vacío o con error)
+        const nroTicketInput = document.getElementById('nroTicket');
+        const errorTicket = document.getElementById('errorTicket');
+        if (nroTicketInput.value.trim() === "" || nroTicketInput.classList.contains('border-red-500')) {
+            errorFound = true;
+            errorTicket.classList.remove('hidden');
+            errorMessages.push('El número de ticket está vacío o inválido.');
+        }
+
+        // Si hay errores, mostrar solo el primer mensaje de error
+        if (errorFound) {
+            event.preventDefault();
+            // Mostrar el primer mensaje de error en el toastr
+            showToast(errorMessages[0]);
+        }
+    });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Evento para cuando se ingresa un número de serie
+    document.getElementById('serie').addEventListener('input', function() {
+        let serie = this.value.trim();  // Obtener el valor de la serie
+        let select = document.getElementById('selectTickets'); // El select donde se mostrarán los tickets
+
+        // Si el campo serie no está vacío
+        if (serie.length > 0) { 
+            fetch(`/tickets-por-serie/${serie}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Limpiar las opciones previas
+                    select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>';
+
+                    // Si hay tickets asociados a la serie, los mostramos
+                    if (data.length > 0) {
+                        // Mostrar el select de tickets
+                        select.style.display = 'block'; // Mostrar el select
+
+                        data.forEach(ticket => {
+                            let option = document.createElement('option');
+                            option.value = ticket.idTickets; // El valor será el id del ticket
+                            option.textContent = `Ticket N°: ${ticket.numero_ticket} - Fecha: ${ticket.fecha_creacion}`; // Mostrar detalles del ticket
+                            select.appendChild(option);
+                        });
+                    } else {
+                        // Si no hay tickets, mostrar un mensaje y ocultar el select
+                        select.style.display = 'none'; // Ocultar el select
+
+                        let option = document.createElement('option');
+                        option.value = "";
+                        option.textContent = "No hay tickets asociados a esta serie";
+                        select.appendChild(option);
+                    }
+                })
+                .catch(error => console.error('Error al cargar los tickets:', error));
+        } else {
+            // Limpiar el select y ocultarlo si no se ingresa una serie
+            select.style.display = 'none'; // Ocultar el select
+            select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>'; // Limpiar las opciones previas
+        }
+    });
+
+    // Evento para cuando se selecciona un ticket
+    document.getElementById('selectTickets').addEventListener('change', function() {
+        let ticketId = this.value; // Obtener el id del ticket seleccionado
+        if (ticketId) {
+            // Redirigir a la página de edición del ticket en una nueva pestaña
+            window.open(`/ordenes/smart/${ticketId}/edit`, '_blank');  // Abre la URL en una nueva pestaña
+        }
+    });
+});
+</script>
+
+
     
 
 
