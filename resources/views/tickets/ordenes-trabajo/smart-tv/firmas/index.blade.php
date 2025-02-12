@@ -1,34 +1,37 @@
 <span class="text-lg font-semibold mb-4 badge bg-success">Firmas</span>
 
-<div class="flex flex-col md:flex-row md:space-x-4 space-y-6 md:space-y-0">
-    <!-- Canvas para la firma del Técnico -->
-    <div class="w-full md:w-1/2 flex flex-col items-center">
+<!-- Contenedor general -->
+<div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">
+    <!-- Firma del Técnico -->
+    <div class="w-full md:w-[500px] flex flex-col items-center">
         <p class="mb-2 text-lg font-medium text-center">Firma del Técnico</p>
-        <div class="w-full h-64 md:h-96 border-2 border-gray-300 rounded-lg  relative">
+        <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
             <canvas id="signatureCanvasTecnico" class="w-full h-full"></canvas>
         </div>
         <div class="flex space-x-3 mt-4">
             <button type="button" onclick="clearSignature('signatureCanvasTecnico')" class="btn btn-danger">
-                🗑 Limpiar
+                Limpiar
             </button>
-            <button type="button" onclick="saveSignature('signatureCanvasTecnico', 'FirmaTecnico')" class="btn btn-success">
-                💾 Guardar
+            <button type="button" onclick="saveSignature('signatureCanvasTecnico', 'FirmaTecnico')"
+                class="btn btn-success">
+                Guardar
             </button>
         </div>
     </div>
 
-    <!-- Canvas para la firma del Cliente -->
-    <div class="w-full md:w-1/2 flex flex-col items-center">
+    <!-- Firma del Cliente -->
+    <div class="w-full md:w-[500px] flex flex-col items-center">
         <p class="mb-2 text-lg font-medium text-center">Firma del Cliente</p>
-        <div class="w-full h-64 md:h-96 border-2 border-gray-300 rounded-lg  relative">
+        <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
             <canvas id="signatureCanvasCliente" class="w-full h-full"></canvas>
         </div>
         <div class="flex space-x-3 mt-4">
             <button type="button" onclick="clearSignature('signatureCanvasCliente')" class="btn btn-danger">
-                🗑 Limpiar
+                Limpiar
             </button>
-            <button type="button" onclick="saveSignature('signatureCanvasCliente', 'FirmaCliente')" class="btn btn-success">
-                💾 Guardar
+            <button type="button" onclick="saveSignature('signatureCanvasCliente', 'FirmaCliente')"
+                class="btn btn-success">
+                Guardar
             </button>
         </div>
     </div>
@@ -36,25 +39,18 @@
 
 <!-- Botones adicionales -->
 <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <button type="button" class="btn btn-primary w-full" onclick="finalizarServicio()">
-        ✅ Finalizar Servicio
-    </button>
-    <button type="button" class="btn btn-secondary w-full" onclick="coordinarRecojo()">
-        📅 Coordinar Recojo
-    </button>
-    <button type="button" class="btn btn-warning w-full" onclick="fueraDeGarantia()">
-        ⚠️ Fuera de Garantía
-    </button>
-    <button type="button" class="btn btn-info w-full" onclick="pendienteRepuestos()">
-        ⏳ Pendiente por Coordinar Repuestos
-    </button>
+    <button type="button" class="btn btn-primary w-full" onclick="finalizarServicio()">✅ Finalizar Servicio</button>
+    <button type="button" class="btn btn-secondary w-full" onclick="coordinarRecojo()">📅 Coordinar Recojo</button>
+    <button type="button" class="btn btn-warning w-full" onclick="fueraDeGarantia()">⚠️ Fuera de Garantía</button>
+    <button type="button" class="btn btn-info w-full" onclick="pendienteRepuestos()">⏳ Pendiente por Coordinar
+        Repuestos</button>
 </div>
 
 <!-- Incluir SignaturePad.js -->
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
 <script>
-    // Objetos para almacenar las instancias de SignaturePad
+    // Objeto para almacenar las instancias de SignaturePad
     let signaturePads = {
         signatureCanvasTecnico: null,
         signatureCanvasCliente: null
@@ -63,36 +59,37 @@
     // Inicializar SignaturePad en un canvas
     function initializeSignature(canvasId) {
         const canvas = document.getElementById(canvasId);
-        const container = canvas.parentElement;
+        const ctx = canvas.getContext("2d");
 
-        // Crear una instancia de SignaturePad
-        signaturePads[canvasId] = new SignaturePad(canvas, {
+        // Configuración del contexto
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2;
 
-            penColor: "#000000" // Color de la firma
-        });
-
-        // Redimensionar el canvas al tamaño del contenedor
+        // Función para redimensionar el canvas usando sus dimensiones reales
         function resizeCanvas() {
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            const width = container.offsetWidth;
-            const height = container.offsetHeight;
-
-            // Guardar la firma actual
-            const data = signaturePads[canvasId].toData();
-
-            // Ajustar el tamaño del canvas
-            canvas.width = width * ratio;
-            canvas.height = height * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-
-            // Limpiar y redibujar la firma
-            signaturePads[canvasId].clear();
-            signaturePads[canvasId].fromData(data);
+            // Usamos canvas.offsetWidth/Height para obtener el tamaño visual
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            // Aplicamos la escala al contexto
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
         }
 
-        // Redimensionar el canvas cuando cambie el tamaño de la ventana
+        // Crear la instancia de SignaturePad
+        signaturePads[canvasId] = new SignaturePad(canvas, {
+            penColor: "#000000",
+            backgroundColor: "rgba(255, 255, 255, 0)",
+            velocityFilterWeight: 0.7,
+            minWidth: 0.5,
+            maxWidth: 2.5,
+            throttle: 16
+        });
+
+        // Ajustar el canvas inicialmente y en cada resize
+        resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
-        resizeCanvas(); // Llamar a la función inicialmente
     }
 
     // Limpiar la firma en un canvas específico
@@ -108,7 +105,7 @@
             if (signaturePads[canvasId].isEmpty()) {
                 alert("Por favor, realiza la firma primero.");
             } else {
-                const signatureData = signaturePads[canvasId].toDataURL(); // Obtener la firma como imagen base64
+                const signatureData = signaturePads[canvasId].toDataURL();
                 console.log(`${name}:`, signatureData);
                 alert(`${name} guardada correctamente.`);
             }
