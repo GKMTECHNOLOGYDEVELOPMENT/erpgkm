@@ -110,12 +110,11 @@ class OrdenesTrabajoController extends Controller
 
 
       // Mostrar la vista principal según el rol del usuario
-    public function smart()
+    public function smarttable()
     {
         // Obtener usuario autenticado y su rol
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
-
         // Obtener los datos necesarios
         $clientesGenerales = ClienteGeneral::all();
         $tiposServicio = TipoServicio::all();
@@ -124,16 +123,8 @@ class OrdenesTrabajoController extends Controller
         $clientes = Cliente::all();
         $tiendas = Tienda::all();
         $marcas = Marca::all();
-        $modelos = Modelo::all();
+        $modelos = Modelo::with('categoria')->get();
 
-        // Determinar la carpeta de vistas según el rol
-        $carpetaVista = match ($rol) {
-            'COORDINACION SMART' => 'smart-tv',
-            'COORDINACION HELP DESK' => 'helpdesk',
-            default => '',
-        };
-
-      
             return view("tickets.ordenes-trabajo.smart-tv.index", compact(
                 'clientesGenerales',
                 'tiposServicio',
@@ -347,11 +338,19 @@ public function validarTicket($nroTicket)
         $estadoflujo = $orden->estadoflujo; 
 
         $usuario = $orden->usuario;
-
+        // Obtener todos los clientes disponibles
+          $clientes = Cliente::all();
+ // Obtener todos los clientes generales disponibles
+ $clientesGenerales = ClienteGeneral::all();
         $estadosFlujo = EstadoFlujo::all();
         $modelos = Modelo::all(); // Obtén todos los modelos disponibles
+        // Obtener todas las tiendas disponibles
+    $tiendas = Tienda::all();
 
-            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario','estadosFlujo'));	
+     // Obtener todas las marcas disponibles
+     $marcas = Marca::all();
+
+            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario','estadosFlujo','clientes','clientesGenerales','tiendas','marcas'));	
       
     }
 
@@ -434,8 +433,8 @@ public function validarTicket($nroTicket)
         'tiposervicio:idTipoServicio,nombre',
         'estado_ot:idEstadoots,descripcion,color',
         'marca:idMarca,nombre',
-        'modelo:idModelo,nombre',
-        'modelo.categorium:idCategoria,nombre', // Cargar la categoría a través del modelo
+        'modelo.categoria:idCategoria,nombre', // Cargar la categoría a través del modelo
+        'estadoflujo:idEstadflujo,descripcion,color', // Cargar toda la relación estadoflujo
 
         
     ]);
@@ -672,6 +671,17 @@ public function getClientesGeneraless($idCliente)
         ->get(['clientegeneral.idClienteGeneral', 'clientegeneral.descripcion']);  // Seleccionar los campos necesarios
 
     return response()->json($clientesGenerales);
+}
+
+
+
+public function getTicketsPorSerie($serie)
+{
+    // Buscar los tickets donde el campo 'serie' coincida con el valor recibido
+    $tickets = Ticket::where('serie', 'like', '%' . $serie . '%') // Filtrar por la serie
+        ->get(['idTickets', 'numero_ticket', 'fecha_creacion']);  // Seleccionar los campos necesarios
+
+    return response()->json($tickets);  // Devolver los tickets como JSON
 }
 
 

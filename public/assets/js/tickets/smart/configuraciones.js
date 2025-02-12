@@ -204,40 +204,7 @@ document.addEventListener("DOMContentLoaded", function() {
             clientesCargados = true;
         }
 
-        // Evento para cuando se selecciona un cliente
-        document.getElementById('idCliente').addEventListener('change', function() {
-            let clienteId = this.value;
-            if (clienteId) {
-                console.log('Cliente seleccionado:',
-                    clienteId); // Verificar si el cliente es seleccionado
-                fetch(`/clientes-generales/${clienteId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        let select = document.getElementById('idClienteGeneral');
-                        select.innerHTML =
-                            '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
 
-                        // Verificar si se recibió algún dato
-                        console.log('Clientes generales:',
-                            data); // Verifica que se reciban los clientes generales
-
-                        data.forEach(clienteGeneral => {
-                            let option = document.createElement('option');
-                            option.value = clienteGeneral.idClienteGeneral;
-                            option.textContent = clienteGeneral.descripcion;
-                            select.appendChild(option);
-                        });
-
-                        // No inicializamos NiceSelect en el select de Cliente General
-                        // Simplemente utilizamos el select estándar
-                    })
-                    .catch(error => console.error('Error al cargar clientes generales:', error));
-            } else {
-                // Limpiar el select si no hay cliente seleccionado
-                document.getElementById('idClienteGeneral').innerHTML =
-                    '<option value="" selected>Seleccionar Cliente General</option>';
-            }
-        });
 
         // Evento de envío del formulario de cliente
         document.getElementById('clienteForm').addEventListener('submit', function(event) {
