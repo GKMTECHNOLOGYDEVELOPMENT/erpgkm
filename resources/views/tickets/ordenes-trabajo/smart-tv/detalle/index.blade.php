@@ -134,7 +134,7 @@
   </div>
   
   <!-- Botón de GUARDAR -->
-  <div class="mt-5 w-full md:w-auto">
+  <div class="w-full md:w-auto">
     <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
   </div>
 
