@@ -13,6 +13,7 @@
             rel="stylesheet">
 
         @vite(['resources/css/app.css'])
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <script src="/assets/js/perfect-scrollbar.min.js"></script>
     <script defer src="/assets/js/popper.min.js"></script>

@@ -1,5 +1,11 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 
 <!-- Estilos adicionales para el log -->
 <style>
@@ -19,26 +25,20 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 
-
-
-
 <div>
-  <form action="">
+  <form action="formActualizarOrden" enctype="multipart/form-data" method="POST">
+    @CSRF
     <label class="block text-sm font-medium">TICKET</label>
     <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}" readonly>
   </div>
 
-  <!-- Cliente -->
-  <!-- <div>
-    <label class="block text-sm font-medium">Cliente</label>
-    <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->cliente->nombre }} - {{ $orden->cliente->documento }}" >
-  </div> -->
+  
 
-  <!-- Cliente -->
+<!-- Cliente -->
 <div>
   <label class="block text-sm font-medium">Cliente</label>
-  <select name="idCliente" class="select2 w-full bg-gray-100" style="display:none">
-    <option value="" disabled >Seleccionar Cliente</option>
+  <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display:none">
+    <option value="" disabled>Seleccionar Cliente</option>
     @foreach ($clientes as $cliente)
       <option value="{{ $cliente->idCliente }}" 
         {{ $cliente->idCliente == $orden->cliente->idCliente ? 'selected' : '' }}>
@@ -48,28 +48,25 @@
   </select>
 </div>
 
-
-
 <!-- Cliente General -->
 <div>
-  <label class="block text-sm font-medium">Cliente General</label>
-  <select name="idClienteGeneral" class="select2 w-full bg-gray-100" style="display: none;">
-    <option value="" disabled>Seleccionar Cliente General</option>
-    @foreach ($clientesGenerales as $clienteGeneral)
-      <option value="{{ $clienteGeneral->idClienteGeneral }}" 
-        {{ $clienteGeneral->idClienteGeneral == $orden->clienteGeneral->idClienteGeneral ? 'selected' : '' }}>
-        {{ $clienteGeneral->descripcion }}
-      </option>
-    @endforeach
+  <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+  <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+    <option value="" selected>Seleccionar Cliente General</option>
+    <!-- Aquí cargaremos el cliente general por defecto usando Blade -->
+    <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+      {{ $orden->clienteGeneral->descripcion }}
+    </option>
   </select>
 </div>
+
 
   
 
 <!-- Tienda -->
 <div>
   <label class="block text-sm font-medium">Tienda</label>
-  <select name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
+  <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
     <option value="" disabled>Seleccionar Tienda</option>
     @foreach ($tiendas as $tienda)
       <option value="{{ $tienda->idTienda }}" 
@@ -84,13 +81,12 @@
   <!-- Dirección -->
   <div>
     <label class="block text-sm font-medium">Dirección</label>
-    <input type="text" class="form-input w-full " value="{{ $orden->direccion }}" >
+    <input id="direccion" name="direccion" type="text" class="form-input w-full " value="{{ $orden->direccion }}" >
   </div>
-
- <!-- Marca -->
+<!-- Marca -->
 <div>
   <label class="block text-sm font-medium">Marca</label>
-  <select name="idMarca" class="select2 w-full bg-gray-100" style="display: none;">
+  <select name="idMarca" id="idMarca" class="select2 w-full bg-gray-100" style="display: none;">
     <option value="" disabled>Seleccionar Marca</option>
     @foreach ($marcas as $marca)
       <option value="{{ $marca->idMarca }}" 
@@ -101,19 +97,18 @@
   </select>
 </div>
 
+<!-- Modelo -->
+<div>
+  <label for="idModelo" class="block text-sm font-medium">Modelo</label>
+  <select id="idModelo" name="idModelo" class="form-input w-full">
+    <option value="" selected>Seleccionar Modelo</option>
+    <!-- Aquí cargaremos el modelo por defecto usando Blade -->
+    <option value="{{ $orden->idModelo }}" selected>
+      {{ $orden->modelo->nombre }}
+    </option>
+  </select>
+</div>
 
-  <!-- Modelo (Editable) -->
-  <div>
-    <label for="idModelo" class="block text-sm font-medium">Modelos</label>
-    <select id="idModelo" name="idModelo" class="select2 w-full" style="display:none">
-      <option value="" disabled>Seleccionar Modelo</option>
-      @foreach ($modelos as $modelo)
-        <option value="{{ $modelo->idModelo }}" {{ $orden->idModelo == $modelo->idModelo ? 'selected' : '' }}>
-          {{ $modelo->nombre }}
-        </option>
-      @endforeach
-    </select>
-  </div>
 
   <!-- Serie (Editable) -->
   <div>
@@ -192,6 +187,10 @@
     </div>
   </div>
 </div>
+
+
+
+
 
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -337,4 +336,166 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 });
+</script>
+
+
+<script>
+document.getElementById('idCliente').addEventListener('change', function() {
+  var clienteId = this.value; // Obtén el ID del cliente seleccionado
+  console.log('Cliente seleccionado:', clienteId); // Para depurar
+
+  // Si se seleccionó un cliente
+  if (clienteId) {
+    console.log('Haciendo la petición para obtener los clientes generales...');
+    
+    // Realizamos la petición para obtener los clientes generales asociados a este cliente
+    fetch(`/get-clientes-generales/${clienteId}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log('Datos recibidos:', data); // Para depurar
+
+        // Obtener el select de "Cliente General"
+        var clienteGeneralSelect = document.getElementById('idClienteGeneral');
+
+        // Limpiar las opciones anteriores del select de Cliente General
+        clienteGeneralSelect.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>';
+
+        // Comprobar si hay datos
+        if (data.length > 0) {
+          console.log('Hay clientes generales asociados. Agregando opciones...');
+          // Si hay clientes generales, agregarlos al select
+          data.forEach(function(clienteGeneral) {
+            var option = document.createElement('option');
+            option.value = clienteGeneral.idClienteGeneral;
+            option.textContent = clienteGeneral.descripcion;
+            clienteGeneralSelect.appendChild(option);
+          });
+          // Mostrar el select de Cliente General
+          clienteGeneralSelect.style.display = 'block';
+        } else {
+          console.log('No hay clientes generales asociados.');
+          // Si no hay clientes generales, ocultar el select
+          clienteGeneralSelect.style.display = 'none';
+        }
+      })
+      .catch(error => {
+        console.error('Error al obtener los clientes generales:', error);
+        alert('Hubo un error al cargar los clientes generales.');
+      });
+  } else {
+    console.log('No se seleccionó ningún cliente. Ocultando el select de Cliente General...');
+    // Si no hay cliente seleccionado, ocultar el select de Cliente General
+    document.getElementById('idClienteGeneral').style.display = 'none';
+  }
+});
+</script>
+
+<script>
+document.getElementById('idMarca').addEventListener('change', function() {
+  var marcaId = this.value; // Obtén el ID de la marca seleccionada
+  console.log('Marca seleccionada:', marcaId); // Para depurar
+
+  // Si se seleccionó una marca
+  if (marcaId) {
+    console.log('Haciendo la petición para obtener los modelos asociados a esta marca...');
+    
+    // Realizamos la petición para obtener los modelos asociados a esta marca
+    fetch(`/get-modelos/${marcaId}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log('Datos de modelos recibidos:', data); // Para depurar
+
+        // Obtener el select de "Modelo"
+        var modeloSelect = document.getElementById('idModelo');
+
+        // Limpiar las opciones anteriores del select de Modelo
+        modeloSelect.innerHTML = '<option value="" disabled>Seleccionar Modelo</option>';
+
+        // Comprobar si hay datos
+        if (data.length > 0) {
+          console.log('Hay modelos asociados a esta marca. Agregando opciones...');
+          // Si hay modelos, agregarlos al select
+          data.forEach(function(modelo) {
+            var option = document.createElement('option');
+            option.value = modelo.idModelo;
+            option.textContent = modelo.nombre;
+            modeloSelect.appendChild(option);
+          });
+          // Mostrar el select de Modelo
+          modeloSelect.style.display = 'block';
+        } else {
+          console.log('No hay modelos asociados a esta marca.');
+          // Si no hay modelos, ocultar el select
+          modeloSelect.style.display = 'none';
+        }
+      })
+      .catch(error => {
+        console.error('Error al obtener los modelos:', error);
+        alert('Hubo un error al cargar los modelos.');
+      });
+  } else {
+    console.log('No se seleccionó ninguna marca. Ocultando el select de Modelo...');
+    // Si no hay marca seleccionada, ocultar el select de Modelo
+    document.getElementById('idModelo').style.display = 'none';
+  }
+});
+</script>
+
+
+<script>
+  $(document).ready(function() {
+    var idOrden = @json($orden->idTickets);
+
+    $('#guardarFallaReportada').on('click', function(e) {
+      e.preventDefault(); // Prevenir que se recargue la página
+
+      // Recoger los datos del formulario
+      var formData = {
+        idCliente: $('#idCliente').val(),
+        idClienteGeneral: $('#idClienteGeneral').val(),
+        idTienda: $('#idTienda').val(),
+        direccion: $('input[name="direccion"]').val(),
+        idMarca: $('#idMarca').val(),
+        idModelo: $('#idModelo').val(),
+        serie: $('input[name="serie"]').val(),
+        fechaCompra: $('input[name="fechaCompra"]').val(),
+        fallaReportada: $('textarea[name="fallaReportada"]').val(),
+      };
+
+      // Mostrar los datos del formulario en la consola
+      console.log("Datos del formulario:", formData);
+
+      // Obtener el token CSRF desde la página
+      var csrfToken = $('meta[name="csrf-token"]').attr('content');
+      console.log("Token CSRF obtenido:", csrfToken); // Asegúrate de que el token se obtiene correctamente
+
+      // Verificar si el token CSRF es válido
+      if (!csrfToken) {
+        console.error("Token CSRF no encontrado.");
+      }
+
+      // Enviar datos por AJAX
+      $.ajax({
+        url: '/actualizar-orden/' + idOrden,  // Pasar el id de la orden en la URL
+        method: 'PUT', // Usar PUT para la actualización
+        data: formData,
+        headers: {
+          'X-CSRF-TOKEN': csrfToken  // Agregar el token CSRF
+        },
+        success: function(response) {
+          console.log("Respuesta del servidor:", response);
+
+          // Mostrar un mensaje de éxito con Toastr
+          toastr.success('Orden actualizada con éxito');
+        },
+        error: function(xhr, status, error) {
+          console.log("Error al actualizar:", error);
+          console.log("Detalles de la respuesta del error:", xhr.responseText);
+
+          // Mostrar un mensaje de error con Toastr
+          toastr.error('Hubo un error al actualizar la orden');
+        }
+      });
+    });
+  });
 </script>

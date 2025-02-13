@@ -51,6 +51,7 @@ use App\Exports\ModeloExport;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
+use App\Models\Modelo;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
 
@@ -301,6 +302,17 @@ Route::get('validar-ticket/{nroTicket}', [OrdenesTrabajoController::class, 'vali
 
 Route::get('/clientes/generales/asociados/{idCliente}', [ClientesController::class, 'clientesGeneralesAsociados']);
 Route::post('/clientes/{idCliente}/agregar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'agregarClienteGeneral']);
+Route::get('/get-clientes-generales/{idCliente}', [OrdenesTrabajoController::class, 'getClientesGeneralesss']);
+// Ruta para obtener modelos de una marca
+Route::get('/get-modelos/{marcaId}', function($marcaId) {
+    // Obtener los modelos asociados a la marca seleccionada
+    $modelos = Modelo::where('idMarca', $marcaId)->get();
+
+    // Retornar los modelos como respuesta JSON
+    return response()->json($modelos);
+});
+Route::put('actualizar-orden/{id}', [OrdenesTrabajoController::class, 'actualizarOrden'])->name('formActualizarOrden');
+
 
 
 
