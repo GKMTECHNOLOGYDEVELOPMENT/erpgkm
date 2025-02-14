@@ -59,7 +59,8 @@ class Visita extends Model
 		'idTickets',
 		'fecha_inicio_hora',   // Añadimos fecha_inicio_hora
         'fecha_final_hora',
-		'necesita_apoyo',     // Añadimos fecha_final_hora
+		'necesita_apoyo',    
+		'idTecnico', // Añadimos fecha_final_hora
 	];
 
 	public function ticket()
@@ -76,9 +77,26 @@ class Visita extends Model
 	{
 		return $this->hasOne(AnexosVisita::class, 'idVisitas');
 	}
-	// Relación con TicketApoyo
-    public function ticketApoyo()
+	// // Relación con TicketApoyo
+    // public function ticketApoyo()
+    // {
+    //     return $this->hasOne(TicketApoyo::class, 'idVisita', 'idVisitas');
+    // }
+	// En el modelo de Visita (Visita.php)
+	public function ticketApoyos()
+	{
+		return $this->hasMany(TicketApoyo::class, 'idVisita');
+	}
+
+	// En el modelo de TicketApoyo (TicketApoyo.php)
+	public function visita()
+	{
+		return $this->belongsTo(Visita::class, 'idVisita');
+	}
+
+	// Relación con Usuario (Técnico)
+    public function tecnico()
     {
-        return $this->hasOne(TicketApoyo::class, 'idVisita', 'idVisitas');
+        return $this->belongsTo(Usuario::class, 'idTecnico', 'idUsuario');
     }
 }

@@ -28,12 +28,14 @@ class Ticketapoyo extends Model
 
 	protected $casts = [
 		'idTecnico' => 'int',
-		'idTicket' => 'int'
+		'idTicket' => 'int',
+		'idVisita' => 'int'
 	];
 
 	protected $fillable = [
 		'idTecnico',
-		'idTicket'
+		'idTicket',
+		'idVisita'
 	];
 
 	public function usuario()

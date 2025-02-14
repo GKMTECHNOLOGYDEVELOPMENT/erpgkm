@@ -802,66 +802,91 @@ public function obtenerUltimaModificacion($idTickets)
 
 public function guardarVisita(Request $request)
 {
-    // Validar los datos del request
-    $request->validate([
-        'nombre' => 'required|string|max:255',
-        'fecha_programada' => 'required|date',
-        'hora_inicio' => 'required|date_format:H:i',
-        'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
-        'tecnico_id' => 'required|exists:usuarios,idUsuario',
-        'necesita_apoyo' => 'nullable|boolean',
-        'tecnico_apoyo' => 'nullable|array',
-        'ticket_id' => 'required|exists:tickets,idTickets', // Asegúrate de que este campo se recibe
-    ]);
+    try {
+        // Validar los datos del request
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'fecha_programada' => 'required|date',
+            'hora_inicio' => 'required|date_format:H:i',
+            'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+            'tecnico_id' => 'required|exists:usuarios,idUsuario',
+            'necesita_apoyo' => 'nullable|boolean',
+            'tecnico_apoyo' => 'nullable|array',
+            'ticket_id' => 'required|exists:tickets,idTickets',
+        ]);
 
-    // Log de los datos recibidos
-    Log::info('Datos recibidos en guardarVisita:', $request->all());
+        // Log de los datos recibidos
+        Log::info('Datos recibidos en guardarVisita:', $request->all());
 
-    // Obtener el ticket por su id
-    $ticket = Ticket::findOrFail($request->ticket_id); // Aquí obtenemos el ticket por id
-    Log::info('Ticket encontrado:', ['ticket_id' => $ticket->idTickets]);
+        // Obtener el ticket por su id
+        $ticket = Ticket::findOrFail($request->ticket_id);
+        Log::info('Ticket encontrado:', ['ticket_id' => $ticket->idTickets]);
 
-    // Crear la visita en la base de datos
-    $visita = new Visita();
-    $visita->nombre = $request->nombre;
-    $visita->fecha_programada = $request->fecha_programada;
-    $visita->fecha_inicio = $request->hora_inicio;
-    $visita->fecha_final = $request->hora_fin;
-    $visita->fecha_inicio_hora = date('H:i', strtotime($request->hora_inicio));
-    $visita->fecha_final_hora = date('H:i', strtotime($request->hora_fin));
-    $visita->estado = 1; // Estado activo o "pendiente" por ejemplo
-    $visita->idTickets = $ticket->idTickets; // Asociamos el id del ticket correctamente
-    Log::info('Datos de visita antes de guardar:', [
-        'nombre' => $visita->nombre,
-        'fecha_programada' => $visita->fecha_programada,
-        'hora_inicio' => $visita->fecha_inicio,
-        'hora_fin' => $visita->fecha_final,
-    ]);
-    $visita->save();
+        // Crear la visita en la base de datos
+        $visita = new Visita();
+        $visita->nombre = $request->nombre;
+        $visita->fecha_programada = $request->fecha_programada;
+        $visita->fecha_inicio = $request->hora_inicio;
+        $visita->fecha_final = $request->hora_fin;
+        $visita->fecha_inicio_hora = date('H:i', strtotime($request->hora_inicio));
+        $visita->fecha_final_hora = date('H:i', strtotime($request->hora_fin));
+        $visita->estado = 1; // Estado activo o "pendiente"
+        $visita->idTickets = $ticket->idTickets;
+        Log::info('Datos de visita antes de guardar:', [
+            'nombre' => $visita->nombre,
+            'fecha_programada' => $visita->fecha_programada,
+            'hora_inicio' => $visita->fecha_inicio,
+            'hora_fin' => $visita->fecha_final,
+        ]);
+        $visita->save();
+        Log::info('Visita guardada con éxito, ID Visita:', ['idVisita' => $visita->idVisitas]);
 
-    // Relacionar el técnico con la visita
-    $tecnico = Usuario::find($request->tecnico_id);
-    Log::info('Técnico asignado:', ['tecnico_id' => $tecnico->idUsuario, 'nombre_tecnico' => $tecnico->nombre]);
-    $visita->idTecnico = $tecnico->idUsuario;
-    $visita->save();
+        // Relacionar el técnico con la visita
+        $tecnico = Usuario::find($request->tecnico_id);
+        Log::info('Técnico asignado:', ['tecnico_id' => $tecnico->idUsuario, 'Nombre' => $tecnico->Nombre]);
+        $visita->idTecnico = $tecnico->idUsuario;
+        $visita->save();
 
-    // Si se necesita apoyo, guardar los técnicos de apoyo en la tabla ticketapoyo
-    if ($request->necesita_apoyo) {
-        Log::info('Técnicos de apoyo a asignar:', $request->tecnico_apoyo);
-        $tecnicosDeApoyo = $request->tecnico_apoyo;
-        foreach ($tecnicosDeApoyo as $idTecnico) {
-            TicketApoyo::create([
-                'idTecnico' => $idTecnico,
-                'idTicket' => $ticket->idTickets, // Usamos el ticket encontrado
-                'idVisita' => $visita->idVisitas, // Relacionamos la visita recién creada
-            ]);
-            Log::info('Técnico de apoyo asignado:', ['idTecnico' => $idTecnico]);
+        // Si se necesita apoyo, guardar los técnicos de apoyo en la tabla ticketapoyo
+        if ($request->necesita_apoyo && !empty($request->tecnico_apoyo)) {
+            Log::info('Técnicos de apoyo a asignar:', $request->tecnico_apoyo);
+            $tecnicosDeApoyo = $request->tecnico_apoyo;
+
+            // Guardar técnicos de apoyo en la tabla ticketapoyo
+            foreach ($tecnicosDeApoyo as $idTecnico) {
+                // Asegúrate de que el 'idVisita' es el correcto y que la visita ya está guardada
+                TicketApoyo::create([
+                    'idTecnico' => $idTecnico, // El ID del técnico de apoyo
+                    'idTicket' => $ticket->idTicket, // ID del ticket
+                    'idVisita' => $visita->idVisita, // ID de la visita recién creada
+                ]);
+                Log::info('Técnico de apoyo asignado:', ['idTecnico' => $idTecnico, 'idVisita' => $visita->idVisitas]);
+            }
         }
-    }
 
-    // Respuesta de éxito
-    Log::info('Visita guardada con éxito:', ['visita_id' => $visita->idVisitas]);
-    return response()->json(['success' => true, 'message' => 'Visita guardada con éxito'], 200);
+        // Respuesta de éxito
+        Log::info('Visita guardada con éxito:', ['visita_id' => $visita->idVisitas]);
+        return response()->json(['success' => true, 'message' => 'Visita guardada con éxito'], 200);
+    } catch (\Exception $e) {
+        // Capturar cualquier error y registrar un log
+        Log::error('Error al guardar la visita:', [
+            'error' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        // Respuesta de error
+        return response()->json(['success' => false, 'message' => 'Error al guardar la visita'], 500);
+    }
+}
+
+
+public function obtenerVisitas($ticketId) {
+    // Obtener todas las visitas del ticket
+    $visitas = Visita::where('idTickets', $ticketId)->get(); // Modificar según tu lógica
+    
+    return response()->json($visitas);
 }
 
 

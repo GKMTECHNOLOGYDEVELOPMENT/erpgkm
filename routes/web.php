@@ -52,6 +52,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Modelo;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 Auth::routes();
 
@@ -271,6 +272,11 @@ Route::post('/clientes/{idCliente}/agregar-clientes-generales', [ClientesControl
 Route::delete('/clientes/{idCliente}/eliminar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'eliminarClienteGeneral']);
 Route::get('/tickets-por-serie/{serie}', [OrdenesTrabajoController::class, 'getTicketsPorSerie']);
 Route::post('/guardar-visita', [OrdenesTrabajoController::class, 'guardarVisita']);
+Route::get('/obtener-visitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
+Route::get('/obtener-numero-visitas/{ticketId}', function($ticketId) {
+    $numeroVisitas = DB::table('visitas')->where('idTickets', $ticketId)->count();
+    return response()->json(['numeroVisitas' => $numeroVisitas]);
+});
 
 
 //INICIO TICKETS///
