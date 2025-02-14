@@ -103,8 +103,8 @@
   <select id="idModelo" name="idModelo" class="form-input w-full">
     <option value="" selected>Seleccionar Modelo</option>
     <!-- Aquí cargaremos el modelo por defecto usando Blade -->
-    <option value="{{ $orden->idModelo }}" selected>
-      {{ $orden->modelo->nombre }}
+    <option value="{{ $orden->idModelo ?? '' }}" selected>
+      {{ $orden->modelo->nombre ?? 'Sin Modelo' }}
     </option>
   </select>
 </div>
@@ -216,13 +216,75 @@ document.addEventListener("DOMContentLoaded", function() {
     return `${año}-${mes}-${dia} ${horas}:${minutos} ${ampm}`;
   }
 
-  // Función para actualizar el log de modificación
-  function updateModificationLog(field, oldValue, newValue) {
-    const usuario = "{{ auth()->user()->name }}";
+ 
+  $(document).ready(function() {
+    // Obtener el idTickets de la variable de Blade
+    const idTickets = "{{ $orden->idTickets }}";
+
+    // Llamar al backend para obtener la última modificación
+    $.ajax({
+        url: '/ultima-modificacion/' + idTickets,  // Obtener la última modificación del ticket
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const ultimaModificacion = response.ultima_modificacion;
+                const fechaUltimaModificacion = formatDate(new Date(ultimaModificacion.created_at));  // Formatear la fecha
+                const usuarioUltimaModificacion = ultimaModificacion.usuario;
+                const campoUltimaModificacion = ultimaModificacion.campo;
+                const oldValueUltimaModificacion = ultimaModificacion.valor_antiguo;
+                const newValueUltimaModificacion = ultimaModificacion.valor_nuevo;
+
+                // Actualizar el log de modificación con la última modificación
+                document.getElementById('ultimaModificacion').textContent =
+                    `${fechaUltimaModificacion} por ${usuarioUltimaModificacion}: Se modificó ${campoUltimaModificacion} de "${oldValueUltimaModificacion}" a "${newValueUltimaModificacion}"`;
+
+            } else {
+                // Si no hay modificaciones previas, mostrar mensaje de no hay cambios
+                document.getElementById('ultimaModificacion').textContent = "No hay modificaciones previas.";
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al obtener la última modificación:', error);
+        }
+    });
+});
+
+// Función para actualizar el log de modificación cuando se haga un cambio
+function updateModificationLog(field, oldValue, newValue) {
+    const usuario = "{{ auth()->user()->Nombre }}"; // Usuario logueado
     const fecha = formatDate(new Date());
+    const idTickets = "{{ $orden->idTickets }}"; // Aquí asumo que el id de la orden está disponible en el Blade
+
+    // Actualizar el log de modificación con la nueva modificación
     document.getElementById('ultimaModificacion').textContent =
-      `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
-  }
+        `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
+
+    // Enviar la nueva modificación al servidor para guardarla en la base de datos
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const data = {
+        field: field,
+        oldValue: oldValue,
+        newValue: newValue,
+        usuario: usuario,
+        _token: csrfToken
+    };
+
+    $.ajax({
+        url: '/guardar-modificacion/' + idTickets,  // Ruta para guardar la modificación
+        method: 'POST',
+        data: data,
+        success: function(response) {
+            console.log('Modificación guardada correctamente:', response);
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al guardar la modificación:', error);
+        }
+    });
+}
+
+
+
+
 
   /* ================================
      Registro de cambios en drag & drop
@@ -465,6 +527,36 @@ document.getElementById('idMarca').addEventListener('change', function() {
       // Mostrar los datos del formulario en la consola
       console.log("Datos del formulario:", formData);
 
+      // Verificar si algún campo obligatorio está vacío
+      for (var key in formData) {
+        if (formData[key] === '' || formData[key] === null) {
+          toastr.error('El campo "' + key + '" está vacío. Por favor, complete todos los campos.');
+          return;  // Detener el envío si algún campo está vacío
+        }
+      }
+
+      // Validar que la fecha de compra no sea en el futuro
+      var fechaCompra = new Date(formData.fechaCompra);
+      var fechaActual = new Date();
+
+      // Eliminar la hora de las fechas para compararlas correctamente
+      fechaActual.setHours(0, 0, 0, 0); 
+      fechaCompra.setHours(0, 0, 0, 0); 
+
+      if (fechaCompra > fechaActual) {
+        toastr.error('La fecha de compra no puede ser una fecha futura.');
+        return; // Detener el envío si la fecha de compra es en el futuro
+      }
+
+     // Validar el campo "serie" (permitir letras y números, pero no el signo -)
+     var serie = formData.serie;
+      var serieRegex = /^[a-zA-Z0-9]+$/; // Expresión regular que permite solo letras y números, pero no el signo -
+
+      if (!serie || !serieRegex.test(serie)) {
+        toastr.error('El número de serie no puede contener caracteres especiales o un signo "-".');
+        return; // Detener el envío si el número de serie no es válido
+      }
+
       // Obtener el token CSRF desde la página
       var csrfToken = $('meta[name="csrf-token"]').attr('content');
       console.log("Token CSRF obtenido:", csrfToken); // Asegúrate de que el token se obtiene correctamente
@@ -472,6 +564,8 @@ document.getElementById('idMarca').addEventListener('change', function() {
       // Verificar si el token CSRF es válido
       if (!csrfToken) {
         console.error("Token CSRF no encontrado.");
+        toastr.error('Hubo un error con el CSRF token.');
+        return;  // Detener el envío si el CSRF token no es válido
       }
 
       // Enviar datos por AJAX
@@ -499,3 +593,4 @@ document.getElementById('idMarca').addEventListener('change', function() {
     });
   });
 </script>
+

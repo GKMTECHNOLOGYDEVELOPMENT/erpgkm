@@ -270,6 +270,7 @@ Route::get('/clientesdatoscliente', [OrdenesTrabajoController::class, 'getClient
 Route::post('/clientes/{idCliente}/agregar-clientes-generales', [ClientesController::class, 'agregarClientesGenerales']);
 Route::delete('/clientes/{idCliente}/eliminar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'eliminarClienteGeneral']);
 Route::get('/tickets-por-serie/{serie}', [OrdenesTrabajoController::class, 'getTicketsPorSerie']);
+Route::post('/guardar-visita', [OrdenesTrabajoController::class, 'guardarVisita']);
 
 
 //INICIO TICKETS///
@@ -283,7 +284,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/create-helpdesk', [OrdenesTrabajoController::class, 'createhelpdesk'])->name('createhelpdesk')->middleware('auth'); // Crear una nueva orden de trabajo
     Route::post('/storehelpdesk', [OrdenesTrabajoController::class, 'storehelpdesk'])->name('storehelpdesk'); // Guardar una nueva orden de trabajo
     Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart')->middleware('auth'); // Guardar una nueva orden de trabajo
-    Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit'); // Editar una orden de trabajo
+    Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth'); // Editar una orden de trabajo
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update'); // Actualizar una orden de trabajo
     Route::delete('/{id}', [OrdenesTrabajoController::class, 'destroy'])->name('destroy'); // Eliminar una orden de trabajo
 
@@ -312,6 +313,8 @@ Route::get('/get-modelos/{marcaId}', function($marcaId) {
     return response()->json($modelos);
 });
 Route::put('actualizar-orden/{id}', [OrdenesTrabajoController::class, 'actualizarOrden'])->name('formActualizarOrden');
+Route::post('/guardar-modificacion/{id}', [OrdenesTrabajoController::class, 'guardarModificacion']);
+Route::get('/ultima-modificacion/{idTickets}', [OrdenesTrabajoController::class, 'obtenerUltimaModificacion']);
 
 
 

@@ -18,7 +18,10 @@ use App\Models\EstadoFlujo;
 use App\Models\Tienda; // Reemplaza con el modelo correcto
 use App\Models\Marca; // Reemplaza con el modelo correcto
 use App\Models\Modelo; // Reemplaza con el modelo correcto
+use App\Models\Modificacion;
+use App\Models\Ticketapoyo;
 use App\Models\TipoDocumento; // Reemplaza con el modelo correcto
+use App\Models\Visita;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 use Illuminate\Support\Facades\Validator;
@@ -333,24 +336,27 @@ public function validarTicket($nroTicket)
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
  
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])->findOrFail($id);
-
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])->findOrFail($id);
           // Obtener el estado de flujo si es necesario
         $estadoflujo = $orden->estadoflujo; 
 
         $usuario = $orden->usuario;
+
+        $tecnico = Usuario::where('idRol', 3)->get();
+        $tecnicos_apoyo = Usuario::where('idRol', 3)->get();
+
         // Obtener todos los clientes disponibles
           $clientes = Cliente::all();
- // Obtener todos los clientes generales disponibles
- $clientesGenerales = ClienteGeneral::all();
+        // Obtener todos los clientes generales disponibles
+         $clientesGenerales = ClienteGeneral::all();
         $estadosFlujo = EstadoFlujo::all();
         $modelos = Modelo::all(); // Obtén todos los modelos disponibles
         // Obtener todas las tiendas disponibles
-    $tiendas = Tienda::all();
+       $tiendas = Tienda::all();
+         // Obtener todas las marcas disponibles
+         $marcas = Marca::all();
 
-     // Obtener todas las marcas disponibles
-     $marcas = Marca::all();
-
-            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('orden', 'modelos', 'usuario','estadosFlujo','clientes','clientesGenerales','tiendas','marcas'));	
+            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('ticket','orden', 'modelos', 'usuario','estadosFlujo','clientes','clientesGenerales','tiendas','marcas', 'tecnico','tecnicos_apoyo'));	
       
     }
 
@@ -745,6 +751,118 @@ public function actualizarOrden(Request $request, $id)
     return response()->json(['success' => true]);
 }
 
+
+
+
+public function guardarModificacion(Request $request, $id)
+{
+    // Validar los datos recibidos
+    $request->validate([
+        'field' => 'required|string',
+        'oldValue' => 'required|string',
+        'newValue' => 'required|string',
+        'usuario' => 'required|string',
+    ]);
+
+    // Obtener el valor de idTickets desde el parámetro $id
+    $idTickets = $id;  // El valor de $id proviene de la URL del controlador
+
+    // Crear la modificación en la base de datos
+    Modificacion::create([
+        'idTickets' => $idTickets,  // Usamos el idTickets que proviene de la URL
+        'campo' => $request->input('field'),
+        'valor_antiguo' => $request->input('oldValue'),
+        'valor_nuevo' => $request->input('newValue'),
+        'usuario' => $request->input('usuario'),
+    ]);
+
+    return response()->json(['success' => 'Modificación guardada correctamente']);
+}
+
+
+public function obtenerUltimaModificacion($idTickets)
+{
+    $ultimaModificacion = Modificacion::where('idTickets', $idTickets)
+                                      ->orderBy('created_at', 'desc')
+                                      ->first();
+
+    if ($ultimaModificacion) {
+        return response()->json([
+            'success' => true,
+            'ultima_modificacion' => $ultimaModificacion,
+        ]);
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => 'No hay modificaciones previas.',
+        ]);
+    }
+}
+
+
+public function guardarVisita(Request $request)
+{
+    // Validar los datos del request
+    $request->validate([
+        'nombre' => 'required|string|max:255',
+        'fecha_programada' => 'required|date',
+        'hora_inicio' => 'required|date_format:H:i',
+        'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+        'tecnico_id' => 'required|exists:usuarios,idUsuario',
+        'necesita_apoyo' => 'nullable|boolean',
+        'tecnico_apoyo' => 'nullable|array',
+        'ticket_id' => 'required|exists:tickets,idTickets', // Asegúrate de que este campo se recibe
+    ]);
+
+    // Log de los datos recibidos
+    Log::info('Datos recibidos en guardarVisita:', $request->all());
+
+    // Obtener el ticket por su id
+    $ticket = Ticket::findOrFail($request->ticket_id); // Aquí obtenemos el ticket por id
+    Log::info('Ticket encontrado:', ['ticket_id' => $ticket->idTickets]);
+
+    // Crear la visita en la base de datos
+    $visita = new Visita();
+    $visita->nombre = $request->nombre;
+    $visita->fecha_programada = $request->fecha_programada;
+    $visita->fecha_inicio = $request->hora_inicio;
+    $visita->fecha_final = $request->hora_fin;
+    $visita->fecha_inicio_hora = date('H:i', strtotime($request->hora_inicio));
+    $visita->fecha_final_hora = date('H:i', strtotime($request->hora_fin));
+    $visita->estado = 1; // Estado activo o "pendiente" por ejemplo
+    $visita->idTickets = $ticket->idTickets; // Asociamos el id del ticket correctamente
+    Log::info('Datos de visita antes de guardar:', [
+        'nombre' => $visita->nombre,
+        'fecha_programada' => $visita->fecha_programada,
+        'hora_inicio' => $visita->fecha_inicio,
+        'hora_fin' => $visita->fecha_final,
+    ]);
+    $visita->save();
+
+    // Relacionar el técnico con la visita
+    $tecnico = Usuario::find($request->tecnico_id);
+    Log::info('Técnico asignado:', ['tecnico_id' => $tecnico->idUsuario, 'nombre_tecnico' => $tecnico->nombre]);
+    $visita->idTecnico = $tecnico->idUsuario;
+    $visita->save();
+
+    // Si se necesita apoyo, guardar los técnicos de apoyo en la tabla ticketapoyo
+    if ($request->necesita_apoyo) {
+        Log::info('Técnicos de apoyo a asignar:', $request->tecnico_apoyo);
+        $tecnicosDeApoyo = $request->tecnico_apoyo;
+        foreach ($tecnicosDeApoyo as $idTecnico) {
+            TicketApoyo::create([
+                'idTecnico' => $idTecnico,
+                'idTicket' => $ticket->idTickets, // Usamos el ticket encontrado
+                'idVisita' => $visita->idVisitas, // Relacionamos la visita recién creada
+            ]);
+            Log::info('Técnico de apoyo asignado:', ['idTecnico' => $idTecnico]);
+        }
+    }
+
+    // Respuesta de éxito
+    Log::info('Visita guardada con éxito:', ['visita_id' => $visita->idVisitas]);
+    return response()->json(['success' => true, 'message' => 'Visita guardada con éxito'], 200);
+}
 
 
 

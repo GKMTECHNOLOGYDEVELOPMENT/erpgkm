@@ -202,4 +202,10 @@ class Usuario extends Authenticatable
 	{
 		return $this->hasMany(Ticketsoporte::class, 'idUsuario');
 	}
+
+	// Relación con TicketApoyo
+    public function ticketApoyos()
+    {
+        return $this->hasMany(TicketApoyo::class, 'idTecnico', 'idUsuario');
+    }
 }

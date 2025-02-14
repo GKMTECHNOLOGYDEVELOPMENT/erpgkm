@@ -45,4 +45,9 @@ class Ticketapoyo extends Model
 	{
 		return $this->belongsTo(Ticket::class, 'idTicket');
 	}
+	// Relación con la tabla visitas
+    public function visita()
+    {
+        return $this->belongsTo(Visita::class, 'idVisita', 'idVisitas');
+    }
 }

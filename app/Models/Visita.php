@@ -56,7 +56,10 @@ class Visita extends Model
 		'fecha_inicio',
 		'fecha_final',
 		'estado',
-		'idTickets'
+		'idTickets',
+		'fecha_inicio_hora',   // Añadimos fecha_inicio_hora
+        'fecha_final_hora',
+		'necesita_apoyo',     // Añadimos fecha_final_hora
 	];
 
 	public function ticket()
@@ -73,4 +76,9 @@ class Visita extends Model
 	{
 		return $this->hasOne(AnexosVisita::class, 'idVisitas');
 	}
+	// Relación con TicketApoyo
+    public function ticketApoyo()
+    {
+        return $this->hasOne(TicketApoyo::class, 'idVisita', 'idVisitas');
+    }
 }

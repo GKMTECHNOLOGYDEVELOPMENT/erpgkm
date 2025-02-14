@@ -61,36 +61,36 @@
                             </div>
                         </div>
 
-                        <!-- Técnico -->
-                        <div>
-                            <label for="tecnico" class="block text-sm font-medium">Técnico</label>
-                            <select id="tecnico" name="tecnico" class="select2 w-full" style="display: none">
-                                <option value="" disabled selected>Seleccionar Técnico</option>
-                                <!-- Aquí se itera sobre los usuarios -->
-                                @foreach ($usuario as $usuarios)
-                                    <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                      <!-- Técnico -->
+                    <div>
+                        <label for="tecnico" class="block text-sm font-medium">Técnico</label>
+                        <select id="tecnico" name="tecnico" class="select2 w-full" style="display: none">
+                            <option value="" disabled selected>Seleccionar Técnico</option>
+                            <!-- Aquí se itera sobre los usuarios -->
+                            @foreach ($tecnico as $tecnicos)
+                                <option value="{{ $tecnicos->idUsuario }}">{{ $tecnicos->Nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                         <!-- Checkbox Necesita Apoyo -->
                         <div class="mt-4">
                             <label class="inline-flex items-center">
-                                <input type="checkbox" id="necesitaApoyo" class="form-checkbox">
+                                <input type="checkbox" id="necesitaApoyo" name="necesita_apoyo" class="form-checkbox" value="false">
                                 <span class="ml-2 text-sm font-medium">¿Necesita Apoyo?</span>
                             </label>
                         </div>
-                        <!-- Select Múltiple para Técnicos de Apoyo (Inicialmente Oculto) -->
+                       <!-- Select Múltiple para Técnicos de Apoyo (Inicialmente Oculto) -->
                         <div id="apoyoSelectContainer" class="mt-3 hidden">
-                            <label for="idTecnicoApoyo" class="block text-sm font-medium">Seleccione Técnicos de
-                                Apoyo</label>
-                            <select id="idTecnicoApoyo" name="idTecnicoApoyo[]" multiple
-                                placeholder="Seleccionar Técnicos de Apoyo" style="display:none">
-                                <option value="2">María López</option>
-                                <option value="3">Carlos García</option>
-                                <option value="4">Ana Martínez</option>
-                                <option value="5">Pedro Sánchez</option>
+                            <label for="idTecnicoApoyo" class="block text-sm font-medium">Seleccione Técnicos de Apoyo</label>
+                            <select id="idTecnicoApoyo" name="idTecnicoApoyo[]" multiple placeholder="Seleccionar Técnicos de Apoyo" style="display:none">
+                                <!-- Aquí iteramos sobre los técnicos -->
+                                @foreach ($tecnicos_apoyo as $tecnico)
+                                    <option value="{{ $tecnico->idUsuario }}">{{ $tecnico->Nombre }}</option>
+                                @endforeach
                             </select>
                         </div>
+
                         <!-- Contenedor para mostrar los técnicos seleccionados -->
                         <div id="selected-items-container" class="mt-3 hidden">
                             <strong>Seleccionados:</strong>
@@ -410,6 +410,27 @@
 </div>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // INICIALIZAR FLATPICKR PARA VISITA
@@ -521,67 +542,168 @@
             horaFinRecojoInput.value = "";
             window.dispatchEvent(new Event('toggle-modal-recojo'));
         });
+// GUARDAR VISITA
+window.guardarVisita = function() {
+    const fecha = fechaVisitaInput.value;
+    const horaInicio = horaInicioInput.value;
+    const horaFin = horaFinInput.value;
 
-        // GUARDAR VISITA
-        window.guardarVisita = function() {
-            const fecha = fechaVisitaInput.value;
-            const horaInicio = horaInicioInput.value;
-            const horaFin = horaFinInput.value;
+    // Validaciones de datos
+    if (!fecha || !horaInicio || !horaFin) {
+        alert("Por favor, selecciona la fecha y el rango de hora.");
+        return;
+    }
 
-            if (!fecha || !horaInicio || !horaFin) {
-                alert("Por favor, selecciona la fecha y el rango de hora.");
-                return;
-            }
+    const fechaInicio = new Date(fecha + 'T' + horaInicio);
+    const fechaFin = new Date(fecha + 'T' + horaFin);
 
-            const fechaInicio = new Date(fecha + 'T' + horaInicio);
-            const fechaFin = new Date(fecha + 'T' + horaFin);
+    if (fechaInicio >= fechaFin) {
+        alert("La hora de inicio debe ser menor a la hora de fin.");
+        return;
+    }
 
-            if (fechaInicio >= fechaFin) {
-                alert("La hora de inicio debe ser menor a la hora de fin.");
-                return;
-            }
+    let fechaFormateada = `${formatDate(fechaInicio)} - ${formatDate(fechaFin)}`;
+    let visitaId = `visita-${visitaCount}`;
 
-            let fechaFormateada = `${formatDate(fechaInicio)} - ${formatDate(fechaFin)}`;
-            let visitaId = `visita-${visitaCount}`;
+    // Inicializar datos de la visita (la imagen se almacenará si se sube)
+    visitasData[visitaId] = {
+        imagen: null,
+        estados: []
+    };
 
-            // Inicializar datos de la visita (la imagen se almacenará si se sube)
-            visitasData[visitaId] = {
-                imagen: null,
-                estados: []
-            };
+    let visitaCard = document.createElement("div");
+    visitaCard.classList.add("p-4", "shadow-lg", "rounded-lg", "relative");
+    visitaCard.id = visitaId;
 
-            let visitaCard = document.createElement("div");
-            visitaCard.classList.add("p-4", "shadow-lg", "rounded-lg", "relative");
-            visitaCard.id = visitaId;
+    // Aplicar el color de fondo correspondiente a "Fecha de Programación"
+    let fechaProgramacionColor = "#eaf1ff"; // Color de fondo para "Fecha de Programación"
 
-            // Aplicar el color de fondo correspondiente a "Fecha de Programación"
-            let fechaProgramacionColor = "#eaf1ff"; // Color de fondo para "Fecha de Programación"
-
-            // La tarjeta muestra una fila alineada con 4 columnas:
-            visitaCard.innerHTML = `
-            <div class="flex items-center justify-between mb-4">
-                <h5 class="text-lg font-semibold">${nombreVisitaInput.value}</h5>
-                <button class="detalles-btn btn btn-info" data-visita="${visitaId}">Detalles de Visita</button>
+    // La tarjeta muestra una fila alineada con 4 columnas:
+    visitaCard.innerHTML = `
+    <div class="flex items-center justify-between mb-4">
+        <h5 class="text-lg font-semibold">${nombreVisitaInput.value}</h5>
+        <button class="detalles-btn btn btn-info" data-visita="${visitaId}">Detalles de Visita</button>
+    </div>
+    <div id="estadoContainer-${visitaId}" class="flex flex-col space-y-2">
+        <!-- Primer estado: Fecha de Programación -->
+        <div class="flex flex-row items-center p-3 rounded-lg estado-row" style="background-color: ${fechaProgramacionColor};">
+            <span class="text-sm font-medium w-1/4 text-center">Fecha de Programación</span>
+            <span class="hora text-sm w-1/4 text-center">${fechaFormateada}</span>
+            <span class="ubicacion text-sm w-1/4 text-center hidden">Sucursal Lima Centro</span>
+            <div class="flex flex-row items-center space-x-1 w-1/4">
+                <span class="estado-btn badge bg-success cursor-pointer" 
+                    data-estado="0" data-visita="${visitaId}">
+                    ✔
+                </span>
             </div>
-            <div id="estadoContainer-${visitaId}" class="flex flex-col space-y-2">
-                <!-- Primer estado: Fecha de Programación -->
-                <div class="flex flex-row items-center p-3 rounded-lg estado-row" style="background-color: ${fechaProgramacionColor};">
-                    <span class="text-sm font-medium w-1/4 text-center">Fecha de Programación</span>
-                    <span class="hora text-sm w-1/4 text-center">${fechaFormateada}</span>
-                    <span class="ubicacion text-sm w-1/4 text-center hidden">Sucursal Lima Centro</span>
-                    <div class="flex flex-row items-center space-x-1 w-1/4">
-                        <span class="estado-btn badge bg-success cursor-pointer" 
-                            data-estado="0" data-visita="${visitaId}">
-                            ✔
-                        </span>
-                    </div>
-                </div>
-            </div>
-        `;
+        </div>
+    </div>
+    `;
 
-            visitasContainer.appendChild(visitaCard);
-            window.dispatchEvent(new Event('toggle-modal'));
-        };
+    visitasContainer.appendChild(visitaCard);
+    window.dispatchEvent(new Event('toggle-modal'));
+
+    // Ahora enviamos los datos al backend usando AJAX
+    const tecnicoSeleccionado = document.getElementById('tecnico').value;
+    const necesitaApoyo = document.getElementById('necesitaApoyo').checked;
+    const tecnicoApoyoSeleccionados = necesitaApoyo 
+        ? Array.from(document.getElementById('idTecnicoApoyo').selectedOptions).map(option => option.value)
+        : [];
+
+    // Agregar log para verificar datos antes de enviarlos
+    console.log('Tecnico Seleccionado:', tecnicoSeleccionado);
+    console.log('Necesita Apoyo:', necesitaApoyo);
+    console.log('Técnicos de Apoyo:', tecnicoApoyoSeleccionados);
+
+    // Enviar solicitud AJAX para guardar los datos
+    $.ajax({
+        url: '/guardar-visita', // Ruta en Laravel
+        type: 'POST',
+        data: {
+            _token: '{{ csrf_token() }}',  // CSRF token
+            nombre: nombreVisitaInput.value,
+            fecha_programada: fechaVisitaInput.value,
+            hora_inicio: horaInicio,
+            hora_fin: horaFin,
+            tecnico_id: tecnicoSeleccionado,
+            necesita_apoyo: necesitaApoyo,
+            tecnico_apoyo: tecnicoApoyoSeleccionados,
+            ticket_id: '{{ $ticket->idTickets }}', // ID del ticket (o el que tengas disponible)
+        },
+        success: function(response) {
+            alert('Visita guardada exitosamente');
+            // Aquí puedes hacer más acciones si deseas, como limpiar el formulario o actualizar la interfaz
+            console.log('Respuesta del servidor:', response);
+        },
+        error: function(xhr, status, error) {
+            alert('Hubo un error al guardar la visita');
+            console.log('Error al guardar visita:', error);
+        }
+    });
+};
+
+
+
+        // // GUARDAR VISITA
+        // window.guardarVisita = function() {
+        //     const fecha = fechaVisitaInput.value;
+        //     const horaInicio = horaInicioInput.value;
+        //     const horaFin = horaFinInput.value;
+
+        //     if (!fecha || !horaInicio || !horaFin) {
+        //         alert("Por favor, selecciona la fecha y el rango de hora.");
+        //         return;
+        //     }
+
+        //     const fechaInicio = new Date(fecha + 'T' + horaInicio);
+        //     const fechaFin = new Date(fecha + 'T' + horaFin);
+
+        //     if (fechaInicio >= fechaFin) {
+        //         alert("La hora de inicio debe ser menor a la hora de fin.");
+        //         return;
+        //     }
+
+        //     let fechaFormateada = `${formatDate(fechaInicio)} - ${formatDate(fechaFin)}`;
+        //     let visitaId = `visita-${visitaCount}`;
+
+        //     // Inicializar datos de la visita (la imagen se almacenará si se sube)
+        //     visitasData[visitaId] = {
+        //         imagen: null,
+        //         estados: []
+        //     };
+
+        //     let visitaCard = document.createElement("div");
+        //     visitaCard.classList.add("p-4", "shadow-lg", "rounded-lg", "relative");
+        //     visitaCard.id = visitaId;
+
+        //     // Aplicar el color de fondo correspondiente a "Fecha de Programación"
+        //     let fechaProgramacionColor = "#eaf1ff"; // Color de fondo para "Fecha de Programación"
+
+        //     // La tarjeta muestra una fila alineada con 4 columnas:
+        //     visitaCard.innerHTML = `
+        //     <div class="flex items-center justify-between mb-4">
+        //         <h5 class="text-lg font-semibold">${nombreVisitaInput.value}</h5>
+        //         <button class="detalles-btn btn btn-info" data-visita="${visitaId}">Detalles de Visita</button>
+        //     </div>
+        //     <div id="estadoContainer-${visitaId}" class="flex flex-col space-y-2">
+        //         <!-- Primer estado: Fecha de Programación -->
+        //         <div class="flex flex-row items-center p-3 rounded-lg estado-row" style="background-color: ${fechaProgramacionColor};">
+        //             <span class="text-sm font-medium w-1/4 text-center">Fecha de Programación</span>
+        //             <span class="hora text-sm w-1/4 text-center">${fechaFormateada}</span>
+        //             <span class="ubicacion text-sm w-1/4 text-center hidden">Sucursal Lima Centro</span>
+        //             <div class="flex flex-row items-center space-x-1 w-1/4">
+        //                 <span class="estado-btn badge bg-success cursor-pointer" 
+        //                     data-estado="0" data-visita="${visitaId}">
+        //                     ✔
+        //                 </span>
+        //             </div>
+        //         </div>
+        //     </div>
+        // `;
+
+        //     visitasContainer.appendChild(visitaCard);
+        //     window.dispatchEvent(new Event('toggle-modal'));
+        // };
 
         // GUARDAR RECOJO
         window.guardarRecojo = function() {
