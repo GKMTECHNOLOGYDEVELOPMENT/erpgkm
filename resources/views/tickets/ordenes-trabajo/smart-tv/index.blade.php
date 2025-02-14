@@ -23,6 +23,37 @@
         .animate-spin {
             animation: spin 1s linear infinite;
         }
+
+        #myTable1 thead th {
+            pointer-events: none;
+            /* Evita la interacción con el encabezado */
+        }
+
+        #myTable1 thead .sorting,
+        #myTable1 thead .sorting_asc,
+        #myTable1 thead .sorting_desc {
+            background-image: none !important;
+            /* Oculta los íconos de ordenación */
+        }
+
+        /* SCROLLBAR MODERNO Y REDONDEADO */
+        .custom-scroll {
+            overflow-x: auto !important;
+            scrollbar-width: thin;
+            /* Firefox */
+            scrollbar-color: #a8a8a8 #e0e0e0;
+            /* Gris más sutil */
+        }
+
+        /* WebKit (Chrome, Safari, Edge) */
+        .custom-scroll::-webkit-scrollbar {
+            height: 10px;
+            /* Tamaño del scrollbar */
+            background: #e0e0e0;
+            /* Fondo gris claro */
+            border-radius: 40px;
+        }
+
     </style>
 
     <div x-data="multipleTable">
@@ -149,29 +180,29 @@
 
         <!-- Tabla y Paginación -->
         <div class="panel mt-6">
-            <div class="relative overflow-x-auto">
-                <!-- Tabla con clases Bootstrap/DataTables -->
+            <div class="relative overflow-x-auto custom-scroll">
+                <!-- Tabla con clases Bootstraahi ep/DataTables -->
                 <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
-                  <thead>
-                      <tr>
-                          <th class="text-center px-4 py-2">EDITAR</th>
-                          <th class="text-center px-4 py-2">N. TICKET</th>
-                          <th class="text-center px-4 py-2">F. TICKET</th>
-                          <th class="text-center px-4 py-2">F. VISITA</th>
-                          <th class="text-center px-4 py-2">CATEGORIA</th>
-                          <th class="text-center px-4 py-2">GENERAL</th>
-                          <th class="text-center px-4 py-2">MODELO</th>
-                          <th class="text-center px-4 py-2">SERIE</th>
-                          <th class="text-center px-4 py-2">CLIENTE</th>
-                          <th class="text-center px-4 py-2">DIRECCIÓN</th>
-                          <th class="text-center px-4 py-2">MÁS</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      <!-- Los datos se llenarán dinámicamente -->
-                  </tbody>
-              </table>
-                
+                    <thead>
+                        <tr>
+                            <th class="text-center px-4 py-2">EDITAR</th>
+                            <th class="text-center px-4 py-2">N. TICKET</th>
+                            <th class="text-center px-4 py-2">F. TICKET</th>
+                            <th class="text-center px-4 py-2">F. VISITA</th>
+                            <th class="text-center px-4 py-2">CATEGORIA</th>
+                            <th class="text-center px-4 py-2">GENERAL</th>
+                            <th class="text-center px-4 py-2">MODELO</th>
+                            <th class="text-center px-4 py-2">SERIE</th>
+                            <th class="text-center px-4 py-2">CLIENTE</th>
+                            <th class="text-center px-4 py-2">DIRECCIÓN</th>
+                            <th class="text-center px-4 py-2">MÁS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se llenarán dinámicamente -->
+                    </tbody>
+                </table>
+
                 <!-- Preloader -->
                 <div x-show="isLoading"
                     class="absolute inset-0 flex items-center justify-center bg-white bg-opaacity-75">
