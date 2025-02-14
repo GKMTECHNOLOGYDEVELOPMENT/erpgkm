@@ -84,6 +84,8 @@ document.addEventListener('alpine:init', () => {
                                     }
                                 }
                             });
+                            // Asegurar que el color del texto sea siempre negro
+                            $('#myTable1 tbody td').css('color', 'black');
 
                             // Agregar evento para toggleRowDetails
                             $('#myTable1 tbody').off('click', 'button.toggle-details').on('click', 'button.toggle-details', (event) => {
@@ -164,7 +166,7 @@ document.addEventListener('alpine:init', () => {
                         </svg>
                     </button>
                 </div>`
-                
+
                 ];
             });
         },
@@ -172,13 +174,13 @@ document.addEventListener('alpine:init', () => {
         updatePagination() {
             let paginationDiv = document.getElementById('pagination');
             paginationDiv.innerHTML = '';
-        
+
             let maxPagesToShow = 5;
             let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
             let endPage = Math.min(this.lastPage, startPage + maxPagesToShow - 1);
-        
+
             let paginationHTML = `<ul class="flex flex-wrap justify-center items-center gap-1 md:gap-2">`;
-        
+
             if (startPage > 1) {
                 paginationHTML += `
                     <li>
@@ -187,7 +189,7 @@ document.addEventListener('alpine:init', () => {
                     </li>`;
                 if (startPage > 2) paginationHTML += `<li><span class="px-2 md:px-3">...</span></li>`;
             }
-        
+
             for (let i = startPage; i <= endPage; i++) {
                 paginationHTML += `
                     <li>
@@ -195,7 +197,7 @@ document.addEventListener('alpine:init', () => {
                         @click="fetchDataAndInitTable(${i})">${i}</button>
                     </li>`;
             }
-        
+
             if (endPage < this.lastPage) {
                 if (endPage < this.lastPage - 1) paginationHTML += `<li><span class="px-2 md:px-3">...</span></li>`;
                 paginationHTML += `
@@ -204,9 +206,9 @@ document.addEventListener('alpine:init', () => {
                         @click="fetchDataAndInitTable(${this.lastPage})">${this.lastPage}</button>
                     </li>`;
             }
-        
+
             paginationHTML += `</ul>`;
-        
+
             paginationHTML = `
                 <div class="flex flex-wrap justify-center items-center gap-1 md:gap-3">
                     <button type="button" 
@@ -230,10 +232,9 @@ document.addEventListener('alpine:init', () => {
                     </button>
                 </div>
             `;
-        
+
             paginationDiv.innerHTML = paginationHTML;
         },
-        
 
         toggleRowDetails(event, id) {
             let button = event.currentTarget;
@@ -244,10 +245,10 @@ document.addEventListener('alpine:init', () => {
                 let record = this.ordenesData.find(r => r.idTickets == id);
                 if (record) {
                     let newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
-                    // Aplicar el mismo color de fondo que la fila padre
+                    // Aplicar el mismo color de fondo que la fila padre y asegurar texto negro
                     newRow.find('td').css('background-color', record.estadoflujo?.color || '');
                     newRow.find('td').html(`
-                        <div class="p-2 text-sm">
+                        <div class="p-2 text-sm" style="color: black;">
                             <ul>
                                 <li><strong>SOLUCIÓN:</strong> ${record.solucion || 'N/A'}</li>
                                 <li><strong>ESTADO FLUJO:</strong> ${record.estadoflujo ? record.estadoflujo.descripcion : 'N/A'} </li>
@@ -259,5 +260,6 @@ document.addEventListener('alpine:init', () => {
                 }
             }
         }
+        
     }));
 });
