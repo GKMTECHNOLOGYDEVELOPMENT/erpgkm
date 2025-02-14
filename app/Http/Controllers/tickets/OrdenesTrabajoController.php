@@ -453,6 +453,22 @@ public function validarTicket($nroTicket)
     return response()->json($ordenes);
 }
 
+public function getClientesGeneralesss($idCliente)
+{
+    // Obtener los clientes generales relacionados con el cliente seleccionado
+    $clientesGenerales = DB::table('cliente_clientegeneral')
+        ->join('clientegeneral', 'cliente_clientegeneral.idClienteGeneral', '=', 'clientegeneral.idClienteGeneral')
+        ->where('cliente_clientegeneral.idCliente', $idCliente)
+        ->get(['clientegeneral.idClienteGeneral', 'clientegeneral.descripcion']);
+
+    // Verificar si los clientes generales fueron encontrados
+    if ($clientesGenerales->isEmpty()) {
+        return response()->json([]); // Si no hay clientes generales, retornamos un array vacío
+    }
+
+    return response()->json($clientesGenerales); // Retornamos los clientes generales encontrados
+}
+
 
 
 
@@ -684,6 +700,50 @@ public function getTicketsPorSerie($serie)
     return response()->json($tickets);  // Devolver los tickets como JSON
 }
 
+public function actualizarOrden(Request $request, $id)
+{
+    // Log para ver los datos que se están recibiendo
+    Log::info('Datos recibidos para actualizar la orden:', $request->all());
+    
+    // Validar los datos del formulario
+    $validated = $request->validate([
+        'idCliente' => 'required|exists:cliente,idCliente',
+        'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+        'idTienda' => 'required|exists:tienda,idTienda',
+        'direccion' => 'required|string|max:255',
+        'idMarca' => 'required|exists:marca,idMarca',
+        'idModelo' => 'required|exists:modelo,idModelo',
+        'serie' => 'required|string|max:255',
+        'fechaCompra' => 'required|date',
+        'fallaReportada' => 'nullable|string',
+    ]);
+
+    // Encontrar la orden y actualizarla
+    $orden = Ticket::findOrFail($id); // Usamos findOrFail para asegurarnos que la orden existe
+
+    // Log para verificar que se encontró la orden
+    Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
+
+    // Actualizar los campos de la orden
+    $orden->idCliente = $request->idCliente;
+    $orden->idClienteGeneral = $request->idClienteGeneral;
+    $orden->idTienda = $request->idTienda;
+    $orden->direccion = $request->direccion;
+    $orden->idMarca = $request->idMarca;
+    $orden->idModelo = $request->idModelo;
+    $orden->serie = $request->serie;
+    $orden->fechaCompra = $request->fechaCompra;
+    $orden->fallaReportada = $request->fallaReportada;
+
+    // Guardar los cambios
+    $orden->save();
+
+    // Log para confirmar que los cambios se guardaron
+    Log::info('Orden actualizada:', ['id' => $orden->id, 'nuevos_datos' => $orden->toArray()]);
+
+    // Responder con éxito
+    return response()->json(['success' => true]);
+}
 
 
 

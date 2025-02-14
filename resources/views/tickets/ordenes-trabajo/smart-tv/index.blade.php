@@ -1,4 +1,5 @@
 <x-layout.default>
+
     <!-- Scripts y estilos -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -7,7 +8,6 @@
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 
     <style>
         .panel {
