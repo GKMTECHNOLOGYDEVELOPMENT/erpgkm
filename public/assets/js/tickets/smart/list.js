@@ -86,7 +86,7 @@ document.addEventListener('alpine:init', () => {
                             });
 
                             // Agregar evento para toggleRowDetails
-                            $('#myTable1 tbody').on('click', 'button', (event) => {
+                            $('#myTable1 tbody').off('click', 'button.toggle-details').on('click', 'button.toggle-details', (event) => {
                                 const id = $(event.currentTarget).data('id');
                                 this.toggleRowDetails(event, id);
                             });
@@ -156,14 +156,15 @@ document.addEventListener('alpine:init', () => {
 
                     // Última columna (Botón de detalles)
                     `<div class="flex justify-center items-center">
-                        <button type="button" class="p-1" data-id="${orden.idTickets}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 block mx-auto" fill="currentColor" viewBox="0 0 24 24">
-                                <circle cx="5" cy="12" r="2"/>
-                                <circle cx="12" cy="12" r="2"/>
-                                <circle cx="19" cy="12" r="2"/>
-                            </svg>
-                        </button>
-                    </div>`
+                    <button type="button" class="p-1 toggle-details" data-id="${orden.idTickets}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 block mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                            <circle cx="5" cy="12" r="2"/>
+                            <circle cx="12" cy="12" r="2"/>
+                            <circle cx="19" cy="12" r="2"/>
+                        </svg>
+                    </button>
+                </div>`
+                
                 ];
             });
         },
