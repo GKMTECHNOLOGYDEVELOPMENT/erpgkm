@@ -48,8 +48,9 @@ class Modelo extends Model
 
 	public function categoria()
 	{
-		return $this->belongsTo(Categoria::class, 'idCategoria');
+		return $this->belongsTo(Categoria::class, 'idCategoria', 'idCategoria');
 	}
+	
 
 	public function articulos()
 	{

@@ -113,7 +113,7 @@ class Ticket extends Model
 	{
 		return $this->belongsTo(EstadoFlujo::class, 'idEstadflujo');
 	}
-
+	
 	public function cliente()
 	{
 		return $this->belongsTo(Cliente::class, 'idCliente');
