@@ -409,6 +409,10 @@
         if (input.tagName === 'SELECT' || input.type === 'date') {
             input.addEventListener('change', function() {
                 validateCampo(input);
+                // Validación específica para la fecha de compra
+                if (campo === 'fechaCompra') {
+                    validateFechaCompra(input);
+                }
             });
         }
 
@@ -436,6 +440,33 @@
         } else {
             // Si tiene contenido
             input.classList.remove('border-red-500');
+            if (errorText) {
+                errorText.remove();
+            }
+        }
+    }
+
+    // Función para validar la fecha de compra (no debe ser mayor que la fecha actual)
+    function validateFechaCompra(input) {
+        const fechaCompra = new Date(input.value);
+        const fechaHoy = new Date();
+
+        // Restamos un día de la fecha actual para no permitir fechas futuras
+        fechaHoy.setHours(0, 0, 0, 0); // Aseguramos que solo se compare la fecha sin la hora
+
+        if (fechaCompra > fechaHoy) {
+            input.classList.add('border-red-500');
+            let errorText = document.getElementById(`error-${input.id}`);
+            if (!errorText) {
+                errorText = document.createElement('p');
+                errorText.id = `error-${input.id}`;
+                errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
+                input.parentNode.appendChild(errorText);
+            }
+            errorText.textContent = "La fecha de compra no puede ser mayor a la fecha actual.";
+        } else {
+            input.classList.remove('border-red-500');
+            let errorText = document.getElementById(`error-${input.id}`);
             if (errorText) {
                 errorText.remove();
             }
@@ -474,6 +505,7 @@
         }
     });
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Evento para cuando se ingresa un número de serie

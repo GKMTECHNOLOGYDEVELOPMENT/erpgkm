@@ -162,47 +162,91 @@ document.addEventListener("DOMContentLoaded", function() {
 
         
 
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
+        
+            // Función para cargar los clientes
+            function cargarClientes() {
+                fetch('/clientesdatoscliente')
+                    .then(response => response.json())
+                    .then(data => {
+                        const select = document.getElementById('idCliente');
+                        // Vaciar y llenar el select con las opciones
+                        select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
+                        data.forEach(cliente => {
+                            const option = document.createElement('option');
+                            option.value = cliente.idCliente;
+                            option.textContent = `${cliente.nombre} - ${cliente.documento}`;
+                            option.dataset.tienda = cliente.esTienda;
+                            select.appendChild(option);
+                        });
+        
+                        // Si ya existe una instancia previa, la destruye
+                        if (select.niceSelectInstance) {
+                            select.niceSelectInstance.destroy();
+                        }
+                        // Inicializa nice-select y guarda la instancia en el select
+                        select.niceSelectInstance = NiceSelect.bind(select, {
+                            searchable: true
+                        });
+                    })
+                    .catch(error => console.error('Error al cargar clientes:', error));
+            }
+        
+            // Ocultar el select de clientes inicialmente
+            let selectCliente = document.getElementById('idCliente');
+            selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
+        
+            // Cargar los clientes solo si no se han cargado previamente
+            if (!clientesCargados) {
+                cargarClientes();
+                clientesCargados = true;
+            }
+        
+            // Evento para cuando se selecciona un cliente
+            document.getElementById('idCliente').addEventListener('change', function() {
+                let clienteId = this.value;
+                if (clienteId) {
+                    console.log('Cliente seleccionado:', clienteId); // Verificar si el cliente es seleccionado
+                    fetch(`/clientes-generales/${clienteId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let select = document.getElementById('idClienteGeneral');
+                            select.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
+        
+                            // Verificar si se recibió algún dato
+                            console.log('Clientes generales:', data); // Verifica que se reciban los clientes generales
+        
+                            // Llenar el select con los clientes generales
+                            data.forEach(clienteGeneral => {
+                                let option = document.createElement('option');
+                                option.value = clienteGeneral.idClienteGeneral;
+                                option.textContent = clienteGeneral.descripcion;
+                                select.appendChild(option);
+                            });
+        
+                            // Si hay solo un cliente general, lo seleccionamos automáticamente
+                            if (data.length === 1) {
+                                select.value = data[0].idClienteGeneral; // Seleccionar automáticamente el único cliente
+                            }
+        
+                            // No inicializamos NiceSelect en el select de Cliente General
+                            // Simplemente utilizamos el select estándar
+                        })
+                        .catch(error => console.error('Error al cargar clientes generales:', error));
+                } else {
+                    // Limpiar el select si no hay cliente seleccionado
+                    document.getElementById('idClienteGeneral').innerHTML =
+                        '<option value="" selected>Seleccionar Cliente General</option>';
+                }
+            });
    
-    document.addEventListener('DOMContentLoaded', function() {
-        let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
+        
 
-        // Función para cargar los clientes
-        function cargarClientes() {
-            fetch('/clientesdatoscliente')
-                .then(response => response.json())
-                .then(data => {
-                    const select = document.getElementById('idCliente');
-                    // Vaciar y llenar el select con las opciones
-                    select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
-                    data.forEach(cliente => {
-                        const option = document.createElement('option');
-                        option.value = cliente.idCliente;
-                        option.textContent = `${cliente.nombre} - ${cliente.documento}`;
-                        option.dataset.tienda = cliente.esTienda;
-                        select.appendChild(option);
-                    });
 
-                    // Si ya existe una instancia previa, la destruye
-                    if (select.niceSelectInstance) {
-                        select.niceSelectInstance.destroy();
-                    }
-                    // Inicializa nice-select y guarda la instancia en el select
-                    select.niceSelectInstance = NiceSelect.bind(select, {
-                        searchable: true
-                    });
-                })
-                .catch(error => console.error('Error al cargar clientes:', error));
-        }
 
-        // Ocultar el select de clientes inicialmente
-        let selectCliente = document.getElementById('idCliente');
-        selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
-
-        // Cargar los clientes solo si no se han cargado previamente
-        if (!clientesCargados) {
-            cargarClientes();
-            clientesCargados = true;
-        }
 
 
 

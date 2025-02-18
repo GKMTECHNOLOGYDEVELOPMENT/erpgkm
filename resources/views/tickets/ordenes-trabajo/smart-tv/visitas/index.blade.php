@@ -1,12 +1,12 @@
 <!-- Botón para abrir el modal de crear visita -->
-<span class="text-lg font-semibold mb-4 badge bg-success">Visitas o Recojo</span>
+<span class="text-lg font-semibold mb-4 badge bg-success">Coordinación</span>
 <div class="flex gap-2 justify-center">
     <button id="crearVisitaBtn" class="px-4 py-2 btn btn-success text-white rounded-lg shadow-md flex items-center">
-        📅 Visita
+        📅 Coordinación
     </button>
-    <button id="crearRecojoBtn" class="px-4 py-2 btn btn-warning text-white rounded-lg shadow-md flex items-center">
+    <!-- <button id="crearRecojoBtn" class="px-4 py-2 btn btn-warning text-white rounded-lg shadow-md flex items-center">
         🚛 Recojo
-    </button>
+    </button> -->
 </div>
 
 
@@ -110,102 +110,7 @@
     </div>
 </div>
 
-<!-- MODAL PARA CREAR RECOJO USANDO ALPINE.JS -->
-<div x-data="{ openRecojo: false }" class="mb-5" @toggle-modal-recojo.window="openRecojo = !openRecojo">
-    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="openRecojo && '!block'">
-        <div class="flex items-start justify-center min-h-screen px-4" @click.self="openRecojo = false">
-            <div x-show="openRecojo" x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
-                <!-- Header del Modal -->
-                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg">Crear Nuevo Recojo</h5>
-                    <button type="button" class="text-white-dark hover:text-dark" @click="openRecojo = false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-6 h-6">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-scroll">
-                    <!-- Formulario -->
-                    <form class="p-5 space-y-4">
-                        <!-- Nombre del recojo -->
-                        <div class="flex space-x-2">
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium">Nombre del Recojo</label>
-                                <input id="nombreRecojoInput" type="text" class="form-input w-full bg-gray-200"
-                                    readonly>
-                            </div>
-                            <!-- Fecha -->
-                            <div class="w-1/2">
-                                <label class="block text-sm font-medium">Fecha</label>
-                                <!-- Tipo text para que flatpickr lo maneje -->
-                                <input id="fechaRecojoInput" type="text" class="form-input w-full"
-                                    placeholder="Elige una fecha" required>
-                            </div>
-                        </div>
-                        <!-- Rango de Hora -->
-                        <div class="w-full">
-                            <label class="block text-sm font-medium mb-1">Rango de atención</label>
-                            <div class="flex space-x-2">
-                                <input id="horaInicioRecojoInput" type="text" class="form-input w-1/2"
-                                    placeholder="Elige la hora de Inicio" required>
-                                <input id="horaFinRecojoInput" type="text" class="form-input w-1/2"
-                                    placeholder="Elige la hora de Fin" required>
-                            </div>
-                        </div>
 
-                        <!-- Técnico -->
-                        <div>
-                            <label for="tecnicoRecojo" class="block text-sm font-medium">Técnico</label>
-                            <select id="tecnicoRecojo" name="tecnicoRecojo" class="select2 w-full"
-                                style="display: none">
-                                <option value="" disabled selected>Seleccionar Técnico</option>
-                                <!-- Aquí se itera sobre los usuarios -->
-                                @foreach ($usuario as $usuarios)
-                                    <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <!-- Checkbox Necesita Apoyo -->
-                        <div class="mt-4">
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" id="necesitaApoyoRecojo" class="form-checkbox">
-                                <span class="ml-2 text-sm font-medium">¿Necesita Apoyo?</span>
-                            </label>
-                        </div>
-                        <!-- Select Múltiple para Técnicos de Apoyo (Inicialmente Oculto) -->
-                        <div id="apoyoSelectContainerRecojo" class="mt-3 hidden">
-                            <label for="idTecnicoApoyoRecojo" class="block text-sm font-medium">Seleccione Técnicos de
-                                Apoyo</label>
-                            <select id="idTecnicoApoyoRecojo" name="idTecnicoApoyoRecojo[]" multiple
-                                placeholder="Seleccionar Técnicos de Apoyo" style="display:none">
-                                <option value="2">María López</option>
-                                <option value="3">Carlos García</option>
-                                <option value="4">Ana Martínez</option>
-                                <option value="5">Pedro Sánchez</option>
-                            </select>
-                        </div>
-                        <!-- Contenedor para mostrar los técnicos seleccionados -->
-                        <div id="selected-items-container-recojo" class="mt-3 hidden">
-                            <strong>Seleccionados:</strong>
-                            <div id="selected-items-list-recojo" class="flex flex-wrap gap-2"></div>
-                        </div>
-                        <!-- Botones -->
-                        <div class="flex justify-end items-center mt-4">
-                            <button type="button" class="btn btn-outline-danger"
-                                @click="openRecojo = false">Cancelar</button>
-                            <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                                onclick="guardarRecojo()">Guardar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 <!-- MODAL PARA SUBIR IMAGEN USANDO ALPINE.JS -->
@@ -408,6 +313,16 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -638,7 +553,6 @@ window.guardarVisita = function() {
         }
     });
 };
-
 // Obtener las visitas cuando la página se carga
 window.onload = function() {
     obtenerVisitas('{{ $ticket->idTickets }}');
@@ -657,8 +571,27 @@ function obtenerVisitas(ticketId) {
                 let visitaCard = document.createElement("div");
                 visitaCard.classList.add("p-4", "shadow-lg", "rounded-lg", "relative");
                 visitaCard.id = `visita-${visita.idVisitas}`;
+                const formatDate = (fecha) => {
+  const date = new Date(fecha);
+  
+  // Obtener los componentes en UTC (sin conversión a zona horaria local)
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hour = String(date.getUTCHours()).padStart(2, '0');
+  const minute = String(date.getUTCMinutes()).padStart(2, '0');
+  const second = String(date.getUTCSeconds()).padStart(2, '0');
+  
+  // Devolver la fecha en el formato 'DD/MM/YYYY HH:mm:ss'
+  return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
+};
 
-                let fechaFormateada = `${formatDate(new Date(visita.fecha_inicio))} - ${formatDate(new Date(visita.fecha_final))}`;
+// Asegurarse de que las fechas estén en formato adecuado para el navegador
+let fechaFormateada = `${formatDate(visita.fecha_inicio)} - ${formatDate(visita.fecha_final)}`;
+console.log(fechaFormateada);
+
+
+
 
                 visitaCard.innerHTML = `
                     <div class="flex items-center justify-between mb-4">
@@ -667,7 +600,7 @@ function obtenerVisitas(ticketId) {
                     </div>
                     <div id="estadoContainer-${visita.idVisitas}" class="flex flex-col space-y-2">
                         <div class="flex flex-row items-center p-3 rounded-lg estado-row" style="background-color: #eaf1ff;">
-                            <span class="text-sm font-medium w-1/4 text-center">Fecha de Programación</span>
+                            <span class="text-sm font-medium w-1/4 text-center">Fecha de Programación </span>
                             <span class="hora text-sm w-1/4 text-center">${fechaFormateada}</span>
                             <span class="ubicacion text-sm w-1/4 text-center hidden">Aqui se obtiene la ubicacion de la aplicacion</span>
                             <div class="flex flex-row items-center space-x-1 w-1/4">
@@ -687,6 +620,8 @@ function obtenerVisitas(ticketId) {
         }
     });
 }
+
+
 
 
         
@@ -769,9 +704,9 @@ function obtenerVisitas(ticketId) {
             estadoDiv.style.backgroundColor = estadoColores[estadoIndex];
 
             let html = `
-        <span class="text-sm font-medium w-1/4 text-center">${estado.nombre}de</span>
+        <span class="text-sm font-medium w-1/4 text-center">${estado.nombre}</span>
         <span class="hora text-sm w-1/4 text-center hidden"></span>
-        <span class="ubicacion text-sm w-1/4 text-center hidden">Sucursal Lima Centro</span>
+        <span class="ubicacion text-sm w-1/4 text-center hidden">Tecnico en desplazamiento</span>
         <div class="flex flex-row items-center space-x-1 w-1/4">`;
 
             if (estado.requiereImagen) {

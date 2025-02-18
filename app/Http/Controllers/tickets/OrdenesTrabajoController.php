@@ -884,10 +884,17 @@ public function guardarVisita(Request $request)
 
 public function obtenerVisitas($ticketId) {
     // Obtener todas las visitas del ticket
-    $visitas = Visita::where('idTickets', $ticketId)->get(); // Modificar según tu lógica
-    
+    $visitas = Visita::where('idTickets', $ticketId)->get();
+
+    // Convertir las fechas a formato ISO 8601
+    $visitas->each(function($visita) {
+        $visita->fecha_inicio = $visita->fecha_inicio->toIso8601String();
+        $visita->fecha_final = $visita->fecha_final->toIso8601String();
+    });
+
     return response()->json($visitas);
 }
+
 
 
 
