@@ -27,8 +27,10 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 
     <div>
-        <form action="formActualizarOrden" enctype="multipart/form-data" method="POST">
-            @CSRF
+        <form action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}" enctype="multipart/form-data"
+            method="POST">
+            @csrf
+            @method('PUT')
             <label class="block text-sm font-medium">Ticket</label>
             <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}" readonly>
     </div>
@@ -77,51 +79,37 @@
         </select>
     </div>
 
-
-    <!-- Dirección -->
+    <!-- Técnico -->
     <div>
-        <label class="block text-sm font-medium">Dirección</label>
-        <input id="direccion" name="direccion" type="text" class="form-input w-full "
-            value="{{ $orden->direccion }}">
-    </div>
-    <!-- Marca -->
-    <div>
-        <label class="block text-sm font-medium">Marca</label>
-        <select name="idMarca" id="idMarca" class="select2 w-full bg-gray-100" style="display: none;">
-            <option value="" disabled>Seleccionar Marca</option>
-            @foreach ($marcas as $marca)
-                <option value="{{ $marca->idMarca }}" {{ $marca->idMarca == $orden->idMarca ? 'selected' : '' }}>
-                    {{ $marca->nombre }}
+        <label for="idTecnico" class="block text-sm font-medium">Técnico</label>
+        <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display:none">
+            <option value="" disabled>Seleccionar Técnico</option>
+            @foreach ($usuarios as $usuario)
+                <option value="{{ $usuario->idUsuario }}"
+                    {{ $usuario->idUsuario == $orden->idTecnico ? 'selected' : '' }}>
+                    {{ $usuario->Nombre }}
                 </option>
             @endforeach
         </select>
     </div>
-
-    <!-- Modelo -->
+    <!-- Tipo de Servicio -->
     <div>
-        <label for="idModelo" class="block text-sm font-medium">Modelo</label>
-        <select id="idModelo" name="idModelo" class="form-input w-full">
-            <option value="" selected>Seleccionar Modelo</option>
-            <!-- Aquí cargaremos el modelo por defecto usando Blade -->
-            <option value="{{ $orden->idModelo ?? '' }}" selected>
-                {{ $orden->modelo->nombre ?? 'Sin Modelo' }}
-            </option>
+        <label for="tipoServicio" class="block text-sm font-medium">Tipo de Servicio</label>
+        <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display:none" disabled>
+            <option value="" disabled>Seleccionar Tipo de Servicio</option>
+            @foreach ($tiposServicio as $tipo)
+                <option value="{{ $tipo->idTipoServicio }}"
+                    {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
+                    {{ $tipo->nombre }}
+                </option>
+            @endforeach
         </select>
+        <!-- Input oculto para mantener el valor al enviar el formulario -->
+        <input type="hidden" name="tipoServicio" value="{{ $orden->tipoServicio }}">
     </div>
 
 
-    <!-- Serie (Editable) -->
-    <div>
-        <label for="serie" class="block text-sm font-medium">N. Serie</label>
-        <input id="serie" name="serie" type="text" class="form-input w-full" value="{{ $orden->serie }}">
-    </div>
 
-    <!-- Fecha de Compra (Editable) -->
-    <div>
-        <label for="fechaCompra" class="block text-sm font-medium">Fecha de Compra</label>
-        <input id="fechaCompra" name="fechaCompra" type="text" class="form-input w-full"
-            value="{{ \Carbon\Carbon::parse($orden->fechaCompra)->format('Y-m-d') }}">
-    </div>
 
     <!-- Falla Reportada -->
     <div>
@@ -129,68 +117,63 @@
         <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full bg-gray-100">{{ $orden->fallaReportada }}</textarea>
     </div>
 
-    <!-- Botón de GUARDAR -->
+    <!-- Contenedor del Botón -->
     <div class="md:col-span-2 flex justify-end">
-        <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
+        <button id="guardarFallaReportada" class="btn btn-primary">Modificar</button>
     </div>
+
 
     </form>
 </div>
 
 
 
-
-
-
-<!-- Nueva Card: Historial de Estados -->
+{{-- <!-- Nueva Card: Historial de Estados -->
 <div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">
-    <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
-    <!-- Tabla con scroll horizontal -->
-    <div class="overflow-x-auto mt-4">
-        <table class="min-w-[600px] border-collapse">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="px-4 py-2 text-center">Estado</th>
-                    <th class="px-4 py-2 text-center">Usuario</th>
-                    <th class="px-4 py-2 text-center">Fecha</th>
-                    <th class="px-4 py-2 text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="estadosTableBody">
-                <!-- Fila inicial (no eliminable) -->
-                <tr class="bg-dark-dark-light border-dark-dark-light">
-                    <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
-                    <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
-                    <td class="px-4 py-2 text-center min-w-[200px]">{{ $orden->fecha_creacion ?? 'sin fecha' }}</td>
-                    <td class="px-4 py-2 text-center">
-                        <span class="text-gray-500">-</span>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+  <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
+  <!-- Tabla con scroll horizontal -->
+  <div class="overflow-x-auto mt-4">
+    <table class="min-w-[600px] border-collapse">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="px-4 py-2 text-center">Estado</th>
+          <th class="px-4 py-2 text-center">Usuario</th>
+          <th class="px-4 py-2 text-center">Fecha</th>
+          <th class="px-4 py-2 text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="estadosTableBody">
+        <!-- Fila inicial (no eliminable) -->
+        <tr class="bg-dark-dark-light border-dark-dark-light">
+          <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
+          <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
+          <td class="px-4 py-2 text-center min-w-[200px]">{{ $orden->fecha_creacion ?? 'sin fecha' }}</td>
+          <td class="px-4 py-2 text-center">
+            <span class="text-gray-500">-</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- Div para mostrar la última modificación -->
+  <div class="mt-4">
+    Última modificación: <span id="ultimaModificacion"></span>
+  </div>
+  <!-- Estados disponibles (draggables) -->
+  <div class="mt-3 overflow-x-auto">
+    <div id="draggableContainer" class="flex space-x-2">
+      <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Recojo">
+        Recojo
+      </div>
+      <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Coordinado">
+        Coordinado
+      </div>
+      <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Operativo">
+        Operativo
+      </div>
     </div>
-    <!-- Div para mostrar la última modificación -->
-    <div class="mt-4">
-        Última modificación: <span id="ultimaModificacion"></span>
-    </div>
-    <!-- Estados disponibles (draggables) -->
-    <div class="mt-3 overflow-x-auto">
-        <div id="draggableContainer" class="flex space-x-2">
-            <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Recojo">
-                Recojo
-            </div>
-            <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Coordinado">
-                Coordinado
-            </div>
-            <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Operativo">
-                Operativo
-            </div>
-        </div>
-    </div>
-</div>
+  </div>
+</div> --}}
 
 
 
@@ -233,7 +216,7 @@
             // Llamar al backend para obtener la última modificación
             $.ajax({
                 url: '/ultima-modificacion/' +
-                idTickets, // Obtener la última modificación del ticket
+                    idTickets, // Obtener la última modificación del ticket
                 method: 'GET',
                 success: function(response) {
                     if (response.success) {
@@ -266,7 +249,7 @@
             const usuario = "{{ auth()->user()->Nombre }}"; // Usuario logueado
             const fecha = formatDate(new Date());
             const idTickets =
-            "{{ $orden->idTickets }}"; // Aquí asumo que el id de la orden está disponible en el Blade
+                "{{ $orden->idTickets }}"; // Aquí asumo que el id de la orden está disponible en el Blade
 
             // Actualizar el log de modificación con la nueva modificación
             document.getElementById('ultimaModificacion').textContent =
@@ -578,7 +561,7 @@
             // Validar el campo "serie" (permitir letras y números, pero no el signo -)
             var serie = formData.serie;
             var serieRegex =
-            /^[a-zA-Z0-9]+$/; // Expresión regular que permite solo letras y números, pero no el signo -
+                /^[a-zA-Z0-9]+$/; // Expresión regular que permite solo letras y números, pero no el signo -
 
             if (!serie || !serieRegex.test(serie)) {
                 toastr.error(
@@ -589,7 +572,7 @@
             // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             console.log("Token CSRF obtenido:",
-            csrfToken); // Asegúrate de que el token se obtiene correctamente
+                csrfToken); // Asegúrate de que el token se obtiene correctamente
 
             // Verificar si el token CSRF es válido
             if (!csrfToken) {

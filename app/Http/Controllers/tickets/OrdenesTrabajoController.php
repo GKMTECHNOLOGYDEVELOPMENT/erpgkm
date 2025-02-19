@@ -389,6 +389,36 @@ public function edit($id)
 }
 
 
+    public function editHelpdesk($id)
+    {
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
+    
+        // Obtener la orden con relaciones
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
+                       ->findOrFail($id);
+    
+        // Obtener listas necesarias para el formulario
+        $clientes = Cliente::all();
+        $clientesGenerales = ClienteGeneral::all();
+        $estadosFlujo = EstadoFlujo::all();
+        $modelos = Modelo::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+        
+        // 🔹 Aquí se añade la variable $usuarios para solucionar el error
+        $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
+        $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
+    
+        return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
+            'orden', 'usuarios', 'tiposServicio', 'modelos', 'clientes', 
+            'clientesGenerales', 'tiendas', 'marcas', 'estadosFlujo'
+        ));
+    }
+    
+
+
+
 
     public function getClientesGenerales($idCliente)
     {
@@ -431,6 +461,25 @@ public function edit($id)
             return redirect()->route('ordenes-trabajo.index')->with('error', 'Ocurrió un error al actualizar la orden de trabajo.');
         }
     }
+
+    public function updateHelpdesk(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'numero_ticket' => 'required|string|max:255',
+            'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+            'idCliente' => 'required|integer|exists:cliente,idCliente',
+            'idTienda' => 'required|integer|exists:tienda,idTienda',
+            'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
+            'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
+            'fallaReportada' => 'required|string|max:255',
+        ]);
+
+        $orden = Ticket::findOrFail($id);
+        $orden->update($validatedData);
+
+        return redirect()->route('helpdesk.edit', ['id' => $id])->with('success', 'Orden actualizada correctamente.');
+    }
+
 
     // Eliminar una orden de trabajo
     public function destroy($id)

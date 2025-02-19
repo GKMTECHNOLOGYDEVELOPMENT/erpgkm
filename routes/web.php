@@ -293,27 +293,39 @@ Route::get('/api/obtenerVisitas/{ticketId}', [OrdenesTrabajoController::class, '
 
 /// INICIO ÓRDENES DE TRABAJO ///
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
-    Route::get('/', [OrdenesTrabajoController::class, 'index'])->name('index'); // Mostrar la vista principal
+    // Vista principal de órdenes de trabajo
+    Route::get('/', [OrdenesTrabajoController::class, 'index'])->name('index');
+
+    // ***** RUTAS PARA SMART-TV *****
     Route::get('/smart', [OrdenesTrabajoController::class, 'smarttable'])->name('smart');
-    Route::get('/helpdesk', [OrdenesTrabajoController::class, 'helpdesk'])->name('helpdesk');
     Route::get('/create-smart/', [OrdenesTrabajoController::class, 'createsmart'])->name('createsmart')->middleware('auth');
-    Route::get('/create-helpdesk', [OrdenesTrabajoController::class, 'createhelpdesk'])->name('createhelpdesk')->middleware('auth'); // Crear una nueva orden de trabajo
-    Route::post('/storehelpdesk', [OrdenesTrabajoController::class, 'storehelpdesk'])->name('storehelpdesk'); // Guardar una nueva orden de trabajo
-    Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart')->middleware('auth'); // Guardar una nueva orden de trabajo
-    Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth'); // Editar una orden de trabajo
-    Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update'); // Actualizar una orden de trabajo
-    Route::delete('/{id}', [OrdenesTrabajoController::class, 'destroy'])->name('destroy'); // Eliminar una orden de trabajo
+    Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart')->middleware('auth');
+    Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth');
+
+    // ***** RUTAS PARA HELPDESK *****
+    Route::get('/helpdesk', [OrdenesTrabajoController::class, 'helpdesk'])->name('helpdesk');
+    Route::get('/create-helpdesk', [OrdenesTrabajoController::class, 'createhelpdesk'])->name('createhelpdesk')->middleware('auth');
+    Route::post('/storehelpdesk', [OrdenesTrabajoController::class, 'storehelpdesk'])->name('storehelpdesk');
+    Route::get('helpdesk/{id}/edit', [OrdenesTrabajoController::class, 'editHelpdesk'])->name('helpdesk.edit')->middleware('auth');
+
+    Route::put('/helpdesk/update/{id}', [OrdenesTrabajoController::class, 'updateHelpdesk'])->name('helpdesk.update');
+
+
+    // ***** RUTAS GENERALES *****
+    Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update');
+    Route::delete('/{id}', [OrdenesTrabajoController::class, 'destroy'])->name('destroy');
+
+    // ***** EXPORTACIÓN DE DATOS *****
     Route::get('/export-excel', [OrdenesTrabajoController::class, 'exportToExcel'])->name('export.excel');
-    // Exportar y Reportes
-    Route::get('/export-pdf', [OrdenesTrabajoController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todas las órdenes de trabajo a PDF
-    // Exportar a Excel
+    Route::get('/export-pdf', [OrdenesTrabajoController::class, 'exportAllPDF'])->name('export.pdf');
 
+    // ***** OBTENCIÓN DE DATOS *****
+    Route::get('/get-all', [OrdenesTrabajoController::class, 'getAll'])->name('getAll');
 
-    Route::get('/get-all', [OrdenesTrabajoController::class, 'getAll'])->name('getAll'); // Obtener todas las órdenes de trabajo en formato JSON
-
-    // Validaciones
-    Route::post('/check-nombre', [OrdenesTrabajoController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    // ***** VALIDACIONES *****
+    Route::post('/check-nombre', [OrdenesTrabajoController::class, 'checkNombre'])->name('checkNombre');
 });
+
 
 // Agrega esta ruta en tu archivo de rutas web.php
 
