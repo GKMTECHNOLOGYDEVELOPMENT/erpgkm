@@ -281,13 +281,8 @@ Route::post('/clientes/{idCliente}/agregar-clientes-generales', [ClientesControl
 Route::delete('/clientes/{idCliente}/eliminar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'eliminarClienteGeneral']);
 Route::get('/tickets-por-serie/{serie}', [OrdenesTrabajoController::class, 'getTicketsPorSerie']);
 Route::post('/guardar-visita', [OrdenesTrabajoController::class, 'guardarVisita']);
-<<<<<<< HEAD
-// Route::get('/obtener-visitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
-Route::get('/obtener-numero-visitas/{ticketId}', function($ticketId) {
-=======
 Route::get('/obtener-visitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
->>>>>>> d4ee965290eca3077296fe7343fc4b69eaa50135
     $numeroVisitas = DB::table('visitas')->where('idTickets', $ticketId)->count();
     return response()->json(['numeroVisitas' => $numeroVisitas]);
 });
