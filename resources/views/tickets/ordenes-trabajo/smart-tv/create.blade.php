@@ -31,7 +31,7 @@
         </ul>
     </div>
 
-  
+
 
 
     <!-- Contenedor principal -->
@@ -45,7 +45,7 @@
                 action="{{ route('ordenes.storesmart') }}">
                 @csrf
 
-              
+
 
                 <!-- Cliente: Seleccionar o crear nuevo -->
                 <div class="col-span-1">
@@ -63,13 +63,13 @@
                     </select>
                 </div>
 
-                
+
                 <!-- Cliente General -->
                 <div>
                     <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
                     <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
                         <option value="" selected>Seleccionar Cliente General</option>
-                    </select>                   
+                    </select>
                 </div>
 
                 <!-- Número de Ticket -->
@@ -77,8 +77,8 @@
                     <label for="nroTicket" class="block text-sm font-medium">N. Ticket</label>
                     <input id="nroTicket" name="nroTicket" type="text" class="form-input w-full"
                         placeholder="Ingrese el número de ticket">
-                        <p id="errorTicket" class="text-sm text-red-500 mt-2 hidden"></p>
-                        </div>
+                    <p id="errorTicket" class="text-sm text-red-500 mt-2 hidden"></p>
+                </div>
 
 
 
@@ -134,14 +134,14 @@
                         placeholder="Ingrese la serie">
                 </div>
 
-              
-<!-- Selección de Tickets -->
-<div id="ticketSelectionContainer">
-    <label for="selectTickets" class="block text-sm font-medium">Seleccionar Ticket</label>
-    <select id="selectTickets" name="selectTickets" class="form-input w-full" style="display: none;">
-        <option value="" selected>Seleccionar Ticket</option>
-    </select>
-</div>
+
+                <!-- Selección de Tickets -->
+                <div id="ticketSelectionContainer">
+                    <label for="selectTickets" class="block text-sm font-medium">Seleccionar Ticket</label>
+                    <select id="selectTickets" name="selectTickets" class="form-input w-full" style="display: none;">
+                        <option value="" selected>Seleccionar Ticket</option>
+                    </select>
+                </div>
 
 
 
@@ -208,27 +208,27 @@
                         <!-- Formulario -->
                         <form class="p-5 space-y-4" id="clienteForm" method="POST" enctype="multipart/form-data">
                             @csrf <!-- Asegúrate de incluir el token CSRF -->
+                            <!-- ClienteGeneral -->
+                            <div>
+                                <label for="idClienteGeneral" class="block text-sm font-medium">Cliente
+                                    General</label>
+                                <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
+                                    placeholder="Seleccionar Cliente General" multiple style="display:none">
+                                    @foreach ($clientesGenerales as $clienteGeneral)
+                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                            {{ $clienteGeneral->descripcion }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
+                            <!-- Contenedor para mostrar los seleccionados -->
+                            <div id="selected-items-container">
+                                <strong>Seleccionados:</strong>
+                                <div id="selected-items-list"
+                                    class="overflow-y-auto border border-gray-300 rounded-md p-2 flex flex-wrap gap-2">
+                                </div>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- ClienteGeneral -->
-                                <div>
-                                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente
-                                        General</label>
-                                    <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
-                                        placeholder="Seleccionar Cliente General" multiple style="display:none">
-                                        @foreach ($clientesGenerales as $clienteGeneral)
-                                            <option value="{{ $clienteGeneral->idClienteGeneral }}">
-                                                {{ $clienteGeneral->descripcion }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Contenedor para mostrar los seleccionados -->
-                                <div id="selected-items-container">
-                                    <strong>Seleccionados:</strong>
-                                    <div id="selected-items-list" class="flex flex-wrap gap-2"></div>
-                                </div>
-
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -320,11 +320,11 @@
                                         placeholder="Ingrese el direccion">
                                 </div>
                             </div>
-                            <!-- Botones -->
+                            <!-- Botones del modal -->
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
-                                    @click="open = false">Cancelar</button>
-                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                    @click="openClienteModal = false">Cancelar</button>
+                                    <button type="submit" id="btnGuardarCliente" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
                     </div>
@@ -344,231 +344,228 @@
 
 
     <script>
-    // Función para mostrar un toastr de error
-    function showToast(message) {
-        toastr.error(message, "Error", {
-            positionClass: "toast-top-right", // Posición en la pantalla
-            timeOut: 3000, // Duración de la notificación
-            closeButton: true
-        });
-    }
-
-    // Validación en tiempo real para el número de ticket
-    document.getElementById('nroTicket').addEventListener('input', function() {
-        const inputTicket = document.getElementById('nroTicket');
-        const errorTicket = document.getElementById('errorTicket');
-        const nroTicketValue = inputTicket.value.trim();
-
-        if (nroTicketValue === "") {
-            inputTicket.classList.remove('border-red-500', 'border-green-500');
-            errorTicket.textContent = "Campo vacío";  // Mostrar mensaje de campo vacío
-            errorTicket.classList.remove('hidden');
-        } else {
-            fetch(`/validar-ticket/${nroTicketValue}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.existe) {
-                        inputTicket.classList.add('border-red-500');
-                        inputTicket.classList.remove('border-green-500');
-                        errorTicket.textContent = 'El número de ticket ya está en uso. Por favor, ingrese otro número.';
-                        errorTicket.classList.remove('hidden');
-                        // Mostrar toastr
-                        showToast('El número de ticket ya está en uso. Por favor, ingrese otro número.');
-                    } else {
-                        inputTicket.classList.remove('border-red-500');
-                        inputTicket.classList.add('border-green-500');
-                        errorTicket.classList.add('hidden');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al verificar el ticket:', error);
-                    inputTicket.classList.add('border-red-500');
-                    errorTicket.textContent = 'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.';
-                    errorTicket.classList.remove('hidden');
-                    // Mostrar toastr
-                    showToast('Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.');
-                });
-        }
-    });
-
-    // Validación en tiempo real para campos obligatorios
-    const camposObligatorios = [
-        'idCliente', 'idClienteGeneral', 'idTienda', 
-        'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada'
-    ];
-
-    camposObligatorios.forEach(campo => {
-        const input = document.getElementById(campo);
-
-        // Agregar evento de "input" o "change" para validación en tiempo real
-        input.addEventListener('input', function() {
-            validateCampo(input);
-        });
-
-        // Para campos de tipo "select" o "date", se usa el evento "change"
-        if (input.tagName === 'SELECT' || input.type === 'date') {
-            input.addEventListener('change', function() {
-                validateCampo(input);
-                // Validación específica para la fecha de compra
-                if (campo === 'fechaCompra') {
-                    validateFechaCompra(input);
-                }
+        // Función para mostrar un toastr de error
+        function showToast(message) {
+            toastr.error(message, "Error", {
+                positionClass: "toast-top-right", // Posición en la pantalla
+                timeOut: 3000, // Duración de la notificación
+                closeButton: true
             });
         }
 
-        // También puedes agregar evento "focusout" para perder foco (cuando el usuario termina de escribir)
-        input.addEventListener('focusout', function() {
-            validateCampo(input);
+        // Validación en tiempo real para el número de ticket
+        document.getElementById('nroTicket').addEventListener('input', function() {
+            const inputTicket = document.getElementById('nroTicket');
+            const errorTicket = document.getElementById('errorTicket');
+            const nroTicketValue = inputTicket.value.trim();
+
+            if (nroTicketValue === "") {
+                inputTicket.classList.remove('border-red-500', 'border-green-500');
+                errorTicket.textContent = "Campo vacío"; // Mostrar mensaje de campo vacío
+                errorTicket.classList.remove('hidden');
+            } else {
+                fetch(`/validar-ticket/${nroTicketValue}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.existe) {
+                            inputTicket.classList.add('border-red-500');
+                            inputTicket.classList.remove('border-green-500');
+                            errorTicket.textContent =
+                                'El número de ticket ya está en uso. Por favor, ingrese otro número.';
+                            errorTicket.classList.remove('hidden');
+                            // Mostrar toastr
+                            showToast('El número de ticket ya está en uso. Por favor, ingrese otro número.');
+                        } else {
+                            inputTicket.classList.remove('border-red-500');
+                            inputTicket.classList.add('border-green-500');
+                            errorTicket.classList.add('hidden');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al verificar el ticket:', error);
+                        inputTicket.classList.add('border-red-500');
+                        errorTicket.textContent =
+                            'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.';
+                        errorTicket.classList.remove('hidden');
+                        // Mostrar toastr
+                        showToast('Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.');
+                    });
+            }
         });
-    });
 
-    // Función para validar el campo y mostrar/ocultar el mensaje "Campo vacío"
-    function validateCampo(input) {
-        const errorId = `error-${input.id}`;
-        let errorText = document.getElementById(errorId);
-        
-        if (!input.value.trim()) {
-            // Si está vacío
-            input.classList.add('border-red-500');
-            if (!errorText) {
-                errorText = document.createElement('p');
-                errorText.id = errorId;
-                errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
-                input.parentNode.appendChild(errorText);
-            }
-            errorText.textContent = "Campo vacío";
-        } else {
-            // Si tiene contenido
-            input.classList.remove('border-red-500');
-            if (errorText) {
-                errorText.remove();
-            }
-        }
-    }
+        // Validación en tiempo real para campos obligatorios
+        const camposObligatorios = [
+            'idCliente', 'idClienteGeneral', 'idTienda',
+            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada'
+        ];
 
-    // Función para validar la fecha de compra (no debe ser mayor que la fecha actual)
-    function validateFechaCompra(input) {
-        const fechaCompra = new Date(input.value);
-        const fechaHoy = new Date();
-
-        // Restamos un día de la fecha actual para no permitir fechas futuras
-        fechaHoy.setHours(0, 0, 0, 0); // Aseguramos que solo se compare la fecha sin la hora
-
-        if (fechaCompra > fechaHoy) {
-            input.classList.add('border-red-500');
-            let errorText = document.getElementById(`error-${input.id}`);
-            if (!errorText) {
-                errorText = document.createElement('p');
-                errorText.id = `error-${input.id}`;
-                errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
-                input.parentNode.appendChild(errorText);
-            }
-            errorText.textContent = "La fecha de compra no puede ser mayor a la fecha actual.";
-        } else {
-            input.classList.remove('border-red-500');
-            let errorText = document.getElementById(`error-${input.id}`);
-            if (errorText) {
-                errorText.remove();
-            }
-        }
-    }
-
-    // Validación al enviar el formulario
-    document.getElementById('ordenTrabajoForm').addEventListener('submit', function(event) {
-        let errorFound = false;
-        let errorMessages = []; // Para almacenar los mensajes de error
-
-        // Validar todos los campos obligatorios antes de enviar
         camposObligatorios.forEach(campo => {
             const input = document.getElementById(campo);
-            if (input.value.trim() === "") {
-                errorFound = true;
-                validateCampo(input); // Ejecuta la validación en caso de que falte contenido
-                errorMessages.push(`El campo ${input.id} está vacío. Por favor, complete el campo.`);
+
+            // Agregar evento de "input" o "change" para validación en tiempo real
+            input.addEventListener('input', function() {
+                validateCampo(input);
+            });
+
+            // Para campos de tipo "select" o "date", se usa el evento "change"
+            if (input.tagName === 'SELECT' || input.type === 'date') {
+                input.addEventListener('change', function() {
+                    validateCampo(input);
+                    // Validación específica para la fecha de compra
+                    if (campo === 'fechaCompra') {
+                        validateFechaCompra(input);
+                    }
+                });
             }
+
+            // También puedes agregar evento "focusout" para perder foco (cuando el usuario termina de escribir)
+            input.addEventListener('focusout', function() {
+                validateCampo(input);
+            });
         });
 
-        // Validación específica para nroTicket (si está vacío o con error)
-        const nroTicketInput = document.getElementById('nroTicket');
-        const errorTicket = document.getElementById('errorTicket');
-        if (nroTicketInput.value.trim() === "" || nroTicketInput.classList.contains('border-red-500')) {
-            errorFound = true;
-            errorTicket.classList.remove('hidden');
-            errorMessages.push('El número de ticket está vacío o inválido.');
+        // Función para validar el campo y mostrar/ocultar el mensaje "Campo vacío"
+        function validateCampo(input) {
+            const errorId = `error-${input.id}`;
+            let errorText = document.getElementById(errorId);
+
+            if (!input.value.trim()) {
+                // Si está vacío
+                input.classList.add('border-red-500');
+                if (!errorText) {
+                    errorText = document.createElement('p');
+                    errorText.id = errorId;
+                    errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
+                    input.parentNode.appendChild(errorText);
+                }
+                errorText.textContent = "Campo vacío";
+            } else {
+                // Si tiene contenido
+                input.classList.remove('border-red-500');
+                if (errorText) {
+                    errorText.remove();
+                }
+            }
         }
 
-        // Si hay errores, mostrar solo el primer mensaje de error
-        if (errorFound) {
-            event.preventDefault();
-            // Mostrar el primer mensaje de error en el toastr
-            showToast(errorMessages[0]);
+        // Función para validar la fecha de compra (no debe ser mayor que la fecha actual)
+        function validateFechaCompra(input) {
+            const fechaCompra = new Date(input.value);
+            const fechaHoy = new Date();
+
+            // Restamos un día de la fecha actual para no permitir fechas futuras
+            fechaHoy.setHours(0, 0, 0, 0); // Aseguramos que solo se compare la fecha sin la hora
+
+            if (fechaCompra > fechaHoy) {
+                input.classList.add('border-red-500');
+                let errorText = document.getElementById(`error-${input.id}`);
+                if (!errorText) {
+                    errorText = document.createElement('p');
+                    errorText.id = `error-${input.id}`;
+                    errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
+                    input.parentNode.appendChild(errorText);
+                }
+                errorText.textContent = "La fecha de compra no puede ser mayor a la fecha actual.";
+            } else {
+                input.classList.remove('border-red-500');
+                let errorText = document.getElementById(`error-${input.id}`);
+                if (errorText) {
+                    errorText.remove();
+                }
+            }
         }
-    });
-</script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Evento para cuando se ingresa un número de serie
-    document.getElementById('serie').addEventListener('input', function() {
-        let serie = this.value.trim();  // Obtener el valor de la serie
-        let select = document.getElementById('selectTickets'); // El select donde se mostrarán los tickets
+        // Validación al enviar el formulario
+        document.getElementById('ordenTrabajoForm').addEventListener('submit', function(event) {
+            let errorFound = false;
+            let errorMessages = []; // Para almacenar los mensajes de error
 
-        // Si el campo serie no está vacío
-        if (serie.length > 0) { 
-            fetch(`/tickets-por-serie/${serie}`)
-                .then(response => response.json())
-                .then(data => {
-                    // Limpiar las opciones previas
-                    select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>';
+            // Validar todos los campos obligatorios antes de enviar
+            camposObligatorios.forEach(campo => {
+                const input = document.getElementById(campo);
+                if (input.value.trim() === "") {
+                    errorFound = true;
+                    validateCampo(input); // Ejecuta la validación en caso de que falte contenido
+                    errorMessages.push(`El campo ${input.id} está vacío. Por favor, complete el campo.`);
+                }
+            });
 
-                    // Si hay tickets asociados a la serie, los mostramos
-                    if (data.length > 0) {
-                        // Mostrar el select de tickets
-                        select.style.display = 'block'; // Mostrar el select
+            // Validación específica para nroTicket (si está vacío o con error)
+            const nroTicketInput = document.getElementById('nroTicket');
+            const errorTicket = document.getElementById('errorTicket');
+            if (nroTicketInput.value.trim() === "" || nroTicketInput.classList.contains('border-red-500')) {
+                errorFound = true;
+                errorTicket.classList.remove('hidden');
+                errorMessages.push('El número de ticket está vacío o inválido.');
+            }
 
-                        data.forEach(ticket => {
-                            let option = document.createElement('option');
-                            option.value = ticket.idTickets; // El valor será el id del ticket
-                            option.textContent = `Ticket N°: ${ticket.numero_ticket} - Fecha: ${ticket.fecha_creacion}`; // Mostrar detalles del ticket
-                            select.appendChild(option);
-                        });
-                    } else {
-                        // Si no hay tickets, mostrar un mensaje y ocultar el select
-                        select.style.display = 'none'; // Ocultar el select
+            // Si hay errores, mostrar solo el primer mensaje de error
+            if (errorFound) {
+                event.preventDefault();
+                // Mostrar el primer mensaje de error en el toastr
+                showToast(errorMessages[0]);
+            }
+        });
+    </script>
 
-                        let option = document.createElement('option');
-                        option.value = "";
-                        option.textContent = "No hay tickets asociados a esta serie";
-                        select.appendChild(option);
-                    }
-                })
-                .catch(error => console.error('Error al cargar los tickets:', error));
-        } else {
-            // Limpiar el select y ocultarlo si no se ingresa una serie
-            select.style.display = 'none'; // Ocultar el select
-            select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>'; // Limpiar las opciones previas
-        }
-    });
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Evento para cuando se ingresa un número de serie
+            document.getElementById('serie').addEventListener('input', function() {
+                let serie = this.value.trim(); // Obtener el valor de la serie
+                let select = document.getElementById(
+                    'selectTickets'); // El select donde se mostrarán los tickets
 
-    // Evento para cuando se selecciona un ticket
-    document.getElementById('selectTickets').addEventListener('change', function() {
-        let ticketId = this.value; // Obtener el id del ticket seleccionado
-        if (ticketId) {
-            // Redirigir a la página de edición del ticket en una nueva pestaña
-            window.open(`/ordenes/smart/${ticketId}/edit`, '_blank');  // Abre la URL en una nueva pestaña
-        }
-    });
-});
-</script>
+                // Si el campo serie no está vacío
+                if (serie.length > 0) {
+                    fetch(`/tickets-por-serie/${serie}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Limpiar las opciones previas
+                            select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>';
 
+                            // Si hay tickets asociados a la serie, los mostramos
+                            if (data.length > 0) {
+                                // Mostrar el select de tickets
+                                select.style.display = 'block'; // Mostrar el select
 
+                                data.forEach(ticket => {
+                                    let option = document.createElement('option');
+                                    option.value = ticket
+                                        .idTickets; // El valor será el id del ticket
+                                    option.textContent =
+                                        `Ticket N°: ${ticket.numero_ticket} - Fecha: ${ticket.fecha_creacion}`; // Mostrar detalles del ticket
+                                    select.appendChild(option);
+                                });
+                            } else {
+                                // Si no hay tickets, mostrar un mensaje y ocultar el select
+                                select.style.display = 'none'; // Ocultar el select
 
-<script>
-    
-</script>
+                                let option = document.createElement('option');
+                                option.value = "";
+                                option.textContent = "No hay tickets asociados a esta serie";
+                                select.appendChild(option);
+                            }
+                        })
+                        .catch(error => console.error('Error al cargar los tickets:', error));
+                } else {
+                    // Limpiar el select y ocultarlo si no se ingresa una serie
+                    select.style.display = 'none'; // Ocultar el select
+                    select.innerHTML =
+                        '<option value="" selected>Seleccionar Ticket</option>'; // Limpiar las opciones previas
+                }
+            });
 
-
-    
-
+            // Evento para cuando se selecciona un ticket
+            document.getElementById('selectTickets').addEventListener('change', function() {
+                let ticketId = this.value; // Obtener el id del ticket seleccionado
+                if (ticketId) {
+                    // Redirigir a la página de edición del ticket en una nueva pestaña
+                    window.open(`/ordenes/smart/${ticketId}/edit`,
+                        '_blank'); // Abre la URL en una nueva pestaña
+                }
+            });
+        });
+    </script>
 
 </x-layout.default>

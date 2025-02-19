@@ -173,6 +173,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     .then(response => response.json())
                     .then(data => {
                         const select = document.getElementById('idCliente');
+                        
                         // Vaciar y llenar el select con las opciones
                         select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
                         data.forEach(cliente => {
@@ -182,8 +183,8 @@ document.addEventListener("DOMContentLoaded", function() {
                             option.dataset.tienda = cliente.esTienda;
                             select.appendChild(option);
                         });
-        
-                        // Si ya existe una instancia previa, la destruye
+            
+                        // Si ya existe una instancia previa de nice-select, la destruye
                         if (select.niceSelectInstance) {
                             select.niceSelectInstance.destroy();
                         }
@@ -191,6 +192,9 @@ document.addEventListener("DOMContentLoaded", function() {
                         select.niceSelectInstance = NiceSelect.bind(select, {
                             searchable: true
                         });
+            
+                        // Mostrar el select después de cargar los datos
+                        select.style.display = 'block'; // O 'inline-block' según tu diseño
                     })
                     .catch(error => console.error('Error al cargar clientes:', error));
             }
@@ -267,10 +271,10 @@ document.addEventListener("DOMContentLoaded", function() {
                     console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
                     if (data.errors) {
                         // Mostrar errores si los hay
-                        mostrarErrores(data.errors);
+                        toastr.error(data.errors);
                     } else {
                         // Mostrar mensaje de éxito
-                        alert(data.message);
+                        toastr.success(data.message);
 
                         // Recargar los clientes después de guardar el cliente
                         cargarClientes();
