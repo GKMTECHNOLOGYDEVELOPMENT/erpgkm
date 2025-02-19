@@ -34,15 +34,18 @@
                     const fechaFinal = formatDate(visita.fecha_final);
 
                     const card = document.createElement('div');
-                    card.className = 'bg-white border border-gray-200 rounded-lg shadow-sm p-5 max-w-md';
+                    card.className = 'bg-white border border-gray-200 rounded-lg shadow-sm p-5 max-w-md mx-auto';
+                    card.innerHTML = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105';
                     card.innerHTML = `
-                        <h3 class="text-lg font-semibold text-gray-800 mb-3">${visita.nombre}</h3>
-                        <div class="text-gray-600 mb-2">
-                            <span class="font-medium">Fecha de Programación</span><br>
-                            ${fechaInicio} - ${fechaFinal}
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-lg font-semibold text-gray-800">${visita.nombre}</h3>
+                            <button class="bg-blue-500 text-black px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors">
+                                Detalles de Visita
+                            </button>
                         </div>
-                        <div class="text-gray-500">
-                            <span class="font-medium">Detalles de Visita</span>
+                        <div class="text-center text-gray-600 mb-2">
+                            <span class="font-medium">Fecha de Programada</span><br>
+                            <span class="text-gray-800">${fechaInicio} - ${fechaFinal}</span>
                         </div>
                     `;
                     visitasList.appendChild(card);
