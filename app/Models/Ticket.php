@@ -72,7 +72,7 @@ class Ticket extends Model
 		'idTienda' => 'int',
 		'idMarca' => 'int',
 		'idModelo' => 'int',
-		'idEstadflujo' => 'int',
+		'idTicketFlujo' => 'int',
 		'fechaCompra' => 'datetime'
 	];
 
@@ -84,7 +84,7 @@ class Ticket extends Model
 		'fecha_creacion',
 		'idTipotickets',
 		'idEstadoots',
-		'idEstadflujo',
+		'idTicketFlujo',
 		'idTecnico',
 		'idUsuario',
 		'idTienda',
@@ -204,4 +204,11 @@ class Ticket extends Model
     {
         return $this->belongsTo(Rol::class, 'idRol', 'id'); // Relación con la tabla "rol"
     }
+
+	// Define la relación con la tabla ticketflujo
+    public function ticketflujo()
+    {
+        return $this->belongsTo(TicketFlujo::class, 'idTicketFlujo', 'idTicketFlujo');
+    }
+
 }

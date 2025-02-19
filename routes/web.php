@@ -286,6 +286,7 @@ Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
     $numeroVisitas = DB::table('visitas')->where('idTickets', $ticketId)->count();
     return response()->json(['numeroVisitas' => $numeroVisitas]);
 });
+Route::get('/api/obtenerVisitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 
 
 //INICIO TICKETS///
