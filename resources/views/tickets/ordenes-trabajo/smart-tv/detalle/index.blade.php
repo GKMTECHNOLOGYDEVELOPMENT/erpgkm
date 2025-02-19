@@ -158,8 +158,8 @@
       <tbody id="estadosTableBody">
         <!-- Fila inicial (no eliminable) -->
         <tr class="bg-dark-dark-light border-dark-dark-light">
-          <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
-          <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
+        <td class="px-4 py-2 text-center">{{ $descripcionEstadoFlujo ?? 'Sin estado de flujo' }}</td>
+        <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
           <td class="px-4 py-2 text-center min-w-[200px]">{{ $orden->fecha_creacion ?? 'sin fecha' }}</td>
           <td class="px-4 py-2 text-center">
             <span class="text-gray-500">-</span>

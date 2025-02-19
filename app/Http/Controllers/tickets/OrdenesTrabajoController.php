@@ -256,9 +256,9 @@ class OrdenesTrabajoController extends Controller
      }
 
 
+
 public function storesmart(Request $request)
 {
-
     try {
         Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
 
@@ -294,17 +294,36 @@ public function storesmart(Request $request)
             'fallaReportada' => $validatedData['fallaReportada'],
             'lat' => $validatedData['lat'],
             'lng' => $validatedData['lng'],
-            'idEstadflujo' => 1, // Estado inicial de la orden de trabajo
+            // 'idEstadflujo' => 1, // Estado inicial de la orden de trabajo
             'idUsuario' => auth()->id(), // ID del usuario autenticado
             'fecha_creacion' => now(), // Fecha de creación
         ]);
 
         Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
 
+        // Guardar el flujo de la orden de trabajo en la tabla ticketflujo
+        $ticketFlujo = DB::table('ticketflujo')->insertGetId([
+            'idTicket' => $ticket->idTickets, // ID del ticket recién creado
+            'idEstadflujo' => 1,  // Estado inicial de flujo
+            'fecha_creacion' => now(), // Fecha y hora actual de la creación
+        ]);
+
+        Log::info('Flujo de trabajo guardado correctamente', [
+            'idTicket' => $ticket->idTickets,
+            'idEstadflujo' => 1,
+            'fecha_creacion' => now(),
+            'idTicketFlujo' => $ticketFlujo
+        ]);
+
+        // Ahora actualizamos el ticket con el idTicketFlujo recién generado
+        $ticket->idTicketFlujo = $ticketFlujo;  // Asignamos el idTicketFlujo al ticket
+        $ticket->save();  // Guardamos el ticket con el idTicketFlujo
+
+        Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
+
         // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
         return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
-        ->with('success', 'Orden de trabajo creada correctamente.');
-
+            ->with('success', 'Orden de trabajo creada correctamente.');
 
     } catch (\Illuminate\Validation\ValidationException $e) {
         // En caso de error en la validación
@@ -316,6 +335,7 @@ public function storesmart(Request $request)
         return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
     }
 }
+
 
 public function validarTicket($nroTicket)
 {
@@ -329,36 +349,45 @@ public function validarTicket($nroTicket)
 }
 
 
-    // Editar orden de trabajo según el rol
-    public function edit($id)
-    {
-        $usuario = Auth::user();
-        $rol = $usuario->rol->nombre ?? 'Sin Rol';
+public function edit($id)
+{
+    $usuario = Auth::user();
+    $rol = $usuario->rol->nombre ?? 'Sin Rol';
  
-        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])->findOrFail($id);
-        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])->findOrFail($id);
-          // Obtener el estado de flujo si es necesario
-        $estadoflujo = $orden->estadoflujo; 
+    $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
+    $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
 
-        $usuario = $orden->usuario;
+    // Aquí estás obteniendo el ticketId
+    $ticketId = $ticket->idTickets;  // Es lo que te interesa
 
-        $tecnico = Usuario::where('idRol', 3)->get();
-        $tecnicos_apoyo = Usuario::where('idRol', 3)->get();
+    // Acceder al idTicketFlujo desde la relación 'ticketflujo'
+    $idTicketFlujo = $orden->ticketflujo ? $orden->ticketflujo->idTicketFlujo : null;
 
-        // Obtener todos los clientes disponibles
-          $clientes = Cliente::all();
-        // Obtener todos los clientes generales disponibles
-         $clientesGenerales = ClienteGeneral::all();
-        $estadosFlujo = EstadoFlujo::all();
-        $modelos = Modelo::all(); // Obtén todos los modelos disponibles
-        // Obtener todas las tiendas disponibles
-       $tiendas = Tienda::all();
-         // Obtener todas las marcas disponibles
-         $marcas = Marca::all();
+    // Acceder al idEstadflujo desde la relación 'ticketflujo'
+    $idEstadflujo = $orden->ticketflujo ? $orden->ticketflujo->idEstadflujo : null;
 
-            return view("tickets.ordenes-trabajo.smart-tv.edit", compact('ticket','orden', 'modelos', 'usuario','estadosFlujo','clientes','clientesGenerales','tiendas','marcas', 'tecnico','tecnicos_apoyo'));	
-      
-    }
+    // Obtener la descripción del estado de flujo desde la relación 'estadoFlujo'
+    $descripcionEstadoFlujo = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->descripcion : 'Sin estado de flujo';
+
+    // Otros datos que ya estás obteniendo
+    $usuario = $orden->usuario;
+    $encargado = Usuario::whereIn('idTipoUsuario', [3, 5])->get();
+    $tecnicos_apoyo = Usuario::where('idTipoUsuario', 3)->get();
+    $clientes = Cliente::all();
+    $clientesGenerales = ClienteGeneral::all();
+    $estadosFlujo = EstadoFlujo::all();
+    $modelos = Modelo::all();
+    $tiendas = Tienda::all();
+    $marcas = Marca::all();
+
+    // Pasamos el ticketId a la vista
+    return view("tickets.ordenes-trabajo.smart-tv.edit", compact(
+        'ticket', 'orden', 'modelos', 'usuario', 'estadosFlujo', 'clientes', 
+        'clientesGenerales', 'tiendas', 'marcas', 'encargado', 'tecnicos_apoyo', 
+        'idTicketFlujo', 'idEstadflujo', 'descripcionEstadoFlujo', 'ticketId'
+    ));
+}
+
 
 
     public function getClientesGenerales($idCliente)
@@ -802,84 +831,188 @@ public function obtenerUltimaModificacion($idTickets)
 
 public function guardarVisita(Request $request)
 {
-    try {
-        // Validar los datos del request
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'fecha_programada' => 'required|date',
-            'hora_inicio' => 'required|date_format:H:i',
-            'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
-            'tecnico_id' => 'required|exists:usuarios,idUsuario',
-            'necesita_apoyo' => 'nullable|boolean',
-            'tecnico_apoyo' => 'nullable|array',
-            'ticket_id' => 'required|exists:tickets,idTickets',
-        ]);
+    // Validación de los datos
+    $request->validate([
+        'nombre' => 'required|string|max:255',
+        'fecha_visita' => 'required|date',
+        'hora_inicio' => 'required|date_format:H:i',
+        'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+        'encargado' => 'required|integer|exists:usuarios,idUsuario', // Validar que el encargado existe
+        'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
+        'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
+    ]);
 
-        // Log de los datos recibidos
-        Log::info('Datos recibidos en guardarVisita:', $request->all());
+    $fechaInicio = $request->fecha_visita . ' ' . $request->hora_inicio;
+    $fechaFinal = $request->fecha_visita . ' ' . $request->hora_fin;
 
-        // Obtener el ticket por su id
-        $ticket = Ticket::findOrFail($request->ticket_id);
-        Log::info('Ticket encontrado:', ['ticket_id' => $ticket->idTickets]);
+    // Verificar si el técnico ya tiene una visita en ese rango de tiempo
+    $visitasConflicto = DB::table('visitas')
+        ->where('idUsuario', $request->encargado)
+        ->where(function($query) use ($fechaInicio, $fechaFinal) {
+            $query->whereBetween('fecha_inicio', [$fechaInicio, $fechaFinal])
+                  ->orWhereBetween('fecha_final', [$fechaInicio, $fechaFinal])
+                  ->orWhere(function($query) use ($fechaInicio, $fechaFinal) {
+                      $query->where('fecha_inicio', '<=', $fechaFinal)
+                            ->where('fecha_final', '>=', $fechaInicio);
+                  });
+        })
+        ->exists(); // Retorna true si existe un conflicto de horario
 
-        // Crear la visita en la base de datos
-        $visita = new Visita();
-        $visita->nombre = $request->nombre;
-        $visita->fecha_programada = $request->fecha_programada;
-        $visita->fecha_inicio = $request->hora_inicio;
-        $visita->fecha_final = $request->hora_fin;
-        $visita->fecha_inicio_hora = date('H:i', strtotime($request->hora_inicio));
-        $visita->fecha_final_hora = date('H:i', strtotime($request->hora_fin));
-        $visita->estado = 1; // Estado activo o "pendiente"
-        $visita->idTickets = $ticket->idTickets;
-        Log::info('Datos de visita antes de guardar:', [
-            'nombre' => $visita->nombre,
-            'fecha_programada' => $visita->fecha_programada,
-            'hora_inicio' => $visita->fecha_inicio,
-            'hora_fin' => $visita->fecha_final,
-        ]);
-        $visita->save();
-        Log::info('Visita guardada con éxito, ID Visita:', ['idVisita' => $visita->idVisitas]);
-
-        // Relacionar el técnico con la visita
-        $tecnico = Usuario::find($request->tecnico_id);
-        Log::info('Técnico asignado:', ['tecnico_id' => $tecnico->idUsuario, 'Nombre' => $tecnico->Nombre]);
-        $visita->idTecnico = $tecnico->idUsuario;
-        $visita->save();
-
-        // Si se necesita apoyo, guardar los técnicos de apoyo en la tabla ticketapoyo
-        if ($request->necesita_apoyo && !empty($request->tecnico_apoyo)) {
-            Log::info('Técnicos de apoyo a asignar:', $request->tecnico_apoyo);
-            $tecnicosDeApoyo = $request->tecnico_apoyo;
-
-            // Guardar técnicos de apoyo en la tabla ticketapoyo
-            foreach ($tecnicosDeApoyo as $idTecnico) {
-                // Asegúrate de que el 'idVisita' es el correcto y que la visita ya está guardada
-                TicketApoyo::create([
-                    'idTecnico' => $idTecnico, // El ID del técnico de apoyo
-                    'idTicket' => $ticket->idTicket, // ID del ticket
-                    'idVisita' => $visita->idVisita, // ID de la visita recién creada
-                ]);
-                Log::info('Técnico de apoyo asignado:', ['idTecnico' => $idTecnico, 'idVisita' => $visita->idVisitas]);
-            }
-        }
-
-        // Respuesta de éxito
-        Log::info('Visita guardada con éxito:', ['visita_id' => $visita->idVisitas]);
-        return response()->json(['success' => true, 'message' => 'Visita guardada con éxito'], 200);
-    } catch (\Exception $e) {
-        // Capturar cualquier error y registrar un log
-        Log::error('Error al guardar la visita:', [
-            'error' => $e->getMessage(),
-            'line' => $e->getLine(),
-            'file' => $e->getFile(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        // Respuesta de error
-        return response()->json(['success' => false, 'message' => 'Error al guardar la visita'], 500);
+    if ($visitasConflicto) {
+        return response()->json(['success' => false, 'message' => 'El técnico ya tiene una visita asignada en este horario.'], 400);
     }
+
+    // Crear la nueva visita
+    $visita = new Visita();
+    $visita->nombre = $request->nombre;
+    $visita->fecha_programada = $request->fecha_visita;
+    $visita->fecha_inicio = $fechaInicio;  // Concatenar fecha y hora
+    $visita->fecha_final = $fechaFinal; // Concatenar fecha y hora
+    $visita->idUsuario = $request->encargado;
+
+    // Asignar 0 o 1 a "necesita_apoyo"
+    $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
+
+    $visita->tipoServicio = 1; // O el valor correspondiente que quieras
+    $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
+
+    // Guardar la visita
+    $visita->save();
+
+    // Comprobar si el ID de la visita se generó correctamente
+    Log::info('ID de la visita después de guardar:', ['idVisita' => $visita->idVisitas]);
+
+    // Verificar si necesita apoyo y si se seleccionaron técnicos de apoyo
+    if ($visita->necesita_apoyo == 1 && $request->has('tecnicos_apoyo')) {
+        // Guardar técnicos de apoyo en la tabla ticketapoyo
+        foreach ($request->tecnicos_apoyo as $tecnicoId) {
+            DB::table('ticketapoyo')->insert([
+                'idTecnico' => $tecnicoId,
+                'idTicket' => $visita->idTickets, // Usar el idTickets de la visita
+                'idVisita' => $visita->idVisitas,
+            ]);
+        }
+    }
+
+// Verificar si el idTicket existe en la tabla tickets
+// $ticketExiste = DB::table('tickets')->where('idTickets', $request->idTickets)->exists();
+
+// if (!$ticketExiste) {
+//     Log::error('El idTicket no existe en la tabla tickets', ['idTicket' => $request->idTickets]);
+//     return response()->json(['success' => false, 'message' => 'El idTicket no existe en la tabla tickets.'], 400);
+// }
+
+// // Obtener el ticket para verificar si tiene un idTicketFlujo
+// $ticket = DB::table('tickets')->where('idTickets', $request->idTickets)->first();
+
+// if (!$ticket->idTicketFlujo) {
+//     // Si el ticket no tiene un idTicketFlujo asignado, creamos uno nuevo en ticketflujo
+//     $idTicketFlujo = DB::table('ticketflujo')->insertGetId([
+//         'idTicket' => $request->idTickets,  // Asociar el ticket a este flujo
+//         'idEstadflujo' => 2,  // Estado correspondiente (puede cambiar según tu lógica)
+//         'fecha_creacion' => now(),
+//     ]);
+
+//     // Ahora actualizamos el ticket con el nuevo idTicketFlujo
+//     DB::table('tickets')->where('idTickets', $request->idTickets)->update(['idTicketFlujo' => $idTicketFlujo]);
+
+//     Log::info('Se asignó idTicketFlujo al ticket', ['idTicket' => $request->idTickets, 'idTicketFlujo' => $idTicketFlujo]);
+// } else {
+//     Log::info('El ticket ya tiene idTicketFlujo asignado', ['idTicket' => $request->idTickets, 'idTicketFlujo' => $ticket->idTicketFlujo]);
+// }
+
+// // Insertar el flujo de ticketflujo con el nuevo estado
+// DB::table('ticketflujo')->insert([
+//     'idTicket' => $request->idTickets,  // Asociar el ticket al flujo
+//     'idEstadflujo' => 2,  // Estado correspondiente para el flujo (por ejemplo, para Técnico)
+//     'fecha_creacion' => now(),
+// ]);
+
+// Log::info('Flujo insertado correctamente', ['idTicket' => $request->idTickets]);
+
+
+    return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
 }
+
+
+
+
+
+
+
+// public function guardarVisita(Request $request)
+// {
+//     // Validación de los datos
+//     $request->validate([
+//         'nombre' => 'required|string|max:255',
+//         'fecha_visita' => 'required|date',
+//         'hora_inicio' => 'required|date_format:H:i',
+//         'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+//         'encargado' => 'required|integer|exists:usuarios,idUsuario', // Validar que el encargado existe
+//         'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
+//         'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
+//     ]);
+
+//     // Crear la nueva visita
+//     $visita = new Visita();
+//     $visita->nombre = $request->nombre;
+//     $visita->fecha_programada = $request->fecha_visita;
+//     $visita->fecha_inicio = $request->fecha_visita . ' ' . $request->hora_inicio;  // Concatenar fecha y hora
+//     $visita->fecha_final = $request->fecha_visita . ' ' . $request->hora_fin; // Concatenar fecha y hora
+//     $visita->idUsuario = $request->encargado;
+
+//     // Asignar 0 o 1 a "necesita_apoyo"
+//     $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
+
+//     $visita->tipoServicio = 1; // O el valor correspondiente que quieras
+//     $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
+
+//     // Agregar un log para verificar que se han recibido correctamente los datos de la visita
+//     Log::info('Datos de la visita antes de guardar:', [
+//         'nombre' => $visita->nombre,
+//         'fecha_programada' => $visita->fecha_programada,
+//         'fecha_inicio' => $visita->fecha_inicio,
+//         'fecha_final' => $visita->fecha_final,
+//         'idUsuario' => $visita->idUsuario,
+//         'necesita_apoyo' => $visita->necesita_apoyo,
+//         'idTickets' => $visita->idTickets
+//     ]);
+
+//     // Guardar la visita
+//     $visita->save();
+
+//     // Comprobar si el ID de la visita se generó correctamente
+//     Log::info('ID de la visita después de guardar:', ['idVisita' => $visita->idVisitas]);
+
+//     // Obtener el ID de la visita después de guardarla
+//     $idVisita = $visita->idVisitas;  // El ID generado por la base de datos
+
+//     // Verificar si necesita apoyo y si se seleccionaron técnicos de apoyo
+//     if ($visita->necesita_apoyo == 1 && $request->has('tecnicos_apoyo')) {
+//         Log::info('Se seleccionaron técnicos de apoyo. Insertando en ticketapoyo...');
+//         // Guardar cada técnico de apoyo en la tabla ticketapoyo
+//         foreach ($request->tecnicos_apoyo as $tecnicoId) {
+//             Log::info('Insertando técnico en ticketapoyo:', [
+//                 'idTecnico' => $tecnicoId,
+//                 'idTicket' => $request->idTickets,
+//                 'idVisita' => $idVisita
+//             ]);
+            
+//             DB::table('ticketapoyo')->insert([
+//                 'idTecnico' => $tecnicoId,
+//                 'idTicket' => $request->idTickets,
+//                 'idVisita' => $idVisita,  // Usar el ID de la visita recién creada
+//             ]);
+//         }
+//     } else {
+//         Log::info('No se necesita apoyo o no se seleccionaron técnicos.');
+//     }
+
+//     // Devolver la respuesta
+//     return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
+// }
+
+
 
 
 public function obtenerVisitas($ticketId) {

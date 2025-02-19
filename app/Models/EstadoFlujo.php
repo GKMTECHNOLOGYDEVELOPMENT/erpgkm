@@ -33,5 +33,11 @@ class EstadoFlujo extends Model
     }
 
 
+    public function ticketFlujos()
+    {
+        return $this->hasMany(TicketFlujo::class, 'idEstadflujo', 'idEstadflujo');
+    }
+
+
 
 }
