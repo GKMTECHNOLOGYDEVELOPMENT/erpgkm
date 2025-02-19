@@ -206,10 +206,9 @@ class OrdenesTrabajoController extends Controller
     public function storehelpdesk(Request $request)
     {
         try {
-            // Log de depuración: mostrar los datos de la solicitud
-            Log::debug('Datos recibidos en storehelpdesk:', $request->all());
-
-            // Validar los datos
+            Log::info('Inicio de creación de orden de trabajo Helpdesk', ['data' => $request->all()]);
+    
+            // Validación de los datos
             $validatedData = $request->validate([
                 'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
                 'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
@@ -219,43 +218,37 @@ class OrdenesTrabajoController extends Controller
                 'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
                 'fallaReportada' => 'required|string|max:255',
             ]);
-
-            // Log de depuración: mostrar los datos validados
-            Log::debug('Datos validados:', $validatedData);
-
-            // Crear la nueva orden de trabajo
-            Ticket::create([
+    
+            Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
+    
+            // Crear la orden de trabajo
+            $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['numero_ticket'],
                 'idClienteGeneral' => $validatedData['idClienteGeneral'],
                 'idCliente' => $validatedData['idCliente'],
                 'idTienda' => $validatedData['idTienda'],
                 'idTecnico' => $validatedData['idTecnico'],
                 'tipoServicio' => $validatedData['tipoServicio'],
-                'idUsuario' => auth()->id(), // ID del usuario autenticado
-                'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+                'idUsuario' => auth()->id(),
+                'idEstadoots' => 17, // Estado inicial
                 'fallaReportada' => $validatedData['fallaReportada'],
-                'fecha_creacion' => now(), // Establece la fecha y hora actuales
+                'fecha_creacion' => now(),
             ]);
-
-            // Log de depuración: confirmar que se creó la orden de trabajo
-            Log::debug('Orden de trabajo creada correctamente.');
-
-            // Redirigir con un mensaje de éxito
-            return redirect()->route('ordenes.index')->with('success', 'Orden de trabajo creada correctamente.');
+    
+            Log::info('Orden de trabajo Helpdesk creada correctamente', ['ticket' => $ticket]);
+    
+            // Redirigir a la edición de la orden recién creada
+            return redirect()->route('ordenes.helpdesk.edit', ['id' => $ticket->idTickets])
+            ->with('success', 'Orden de trabajo creada correctamente.');            
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Log de depuración: mostrar los errores de validación
-            Log::error('Errores de validación:', $e->errors());
-
-            // Si la validación falla, redirigir con los errores
+            Log::error('Errores de validación en storehelpdesk', ['errors' => $e->errors()]);
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            // Log de depuración: mostrar el error general
-            Log::error('Error al crear la orden de trabajo: ' . $e->getMessage());
-
-            // En caso de cualquier otro error
+            Log::error('Error al crear la orden de trabajo Helpdesk', ['exception' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
+    
 
 
     public function storesmart(Request $request)
@@ -355,9 +348,39 @@ class OrdenesTrabajoController extends Controller
         $tiendas = Tienda::all();
         // Obtener todas las marcas disponibles
         $marcas = Marca::all();
-
+        
         return view("tickets.ordenes-trabajo.smart-tv.edit", compact('ticket', 'orden', 'modelos', 'usuario', 'estadosFlujo', 'clientes', 'clientesGenerales', 'tiendas', 'marcas', 'tecnico', 'tecnicos_apoyo'));
     }
+
+    public function editHelpdesk($id)
+    {
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
+    
+        // Obtener la orden con relaciones
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
+                       ->findOrFail($id);
+    
+        // Obtener listas necesarias para el formulario
+        $clientes = Cliente::all();
+        $clientesGenerales = ClienteGeneral::all();
+        $estadosFlujo = EstadoFlujo::all();
+        $modelos = Modelo::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+        
+        // 🔹 Aquí se añade la variable $usuarios para solucionar el error
+        $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
+        $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
+    
+        return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
+            'orden', 'usuarios', 'tiposServicio', 'modelos', 'clientes', 
+            'clientesGenerales', 'tiendas', 'marcas', 'estadosFlujo'
+        ));
+    }
+    
+
+
 
 
     public function getClientesGenerales($idCliente)
@@ -401,6 +424,25 @@ class OrdenesTrabajoController extends Controller
             return redirect()->route('ordenes-trabajo.index')->with('error', 'Ocurrió un error al actualizar la orden de trabajo.');
         }
     }
+
+    public function updateHelpdesk(Request $request, $id)
+    {
+        $validatedData = $request->validate([
+            'numero_ticket' => 'required|string|max:255',
+            'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+            'idCliente' => 'required|integer|exists:cliente,idCliente',
+            'idTienda' => 'required|integer|exists:tienda,idTienda',
+            'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
+            'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
+            'fallaReportada' => 'required|string|max:255',
+        ]);
+
+        $orden = Ticket::findOrFail($id);
+        $orden->update($validatedData);
+
+        return redirect()->route('helpdesk.edit', ['id' => $id])->with('success', 'Orden actualizada correctamente.');
+    }
+
 
     // Eliminar una orden de trabajo
     public function destroy($id)

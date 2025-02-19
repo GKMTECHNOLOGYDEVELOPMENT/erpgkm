@@ -123,20 +123,20 @@
 
 
                 <!-- Falla Reportada -->
-                <div class="col-span-2">
+                <div class="">
                     <label for="fallaReportada" class="block text-sm font-medium">Falla Reportada</label>
                     <textarea id="fallaReportada" name="fallaReportada" rows="3" class="form-input w-full"
                         placeholder="Describa la falla reportada"></textarea>
                 </div>
 
-                <!-- Checkbox Es Recojo (Oculto por defecto) -->
                 <div id="esRecojoContainer" class="hidden">
-                    <label class="block text-sm font-medium">Opciones Adicionales</label>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="esRecojo" name="esRecojo" class="form-checkbox">
-                        <span>¿Es Recojo?</span>
-                    </div>
-                </div>
+                    <label class="block text-sm font-medium mb-2">¿Es Recojo?</label>
+                    <label class="w-12 h-6 relative inline-block">
+                      <input type="checkbox" id="esRecojo" name="esRecojo" class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                      <span class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                    </label>
+                  </div>
+                  
 
                 <!-- Botones -->
                 <div class="md:col-span-2 flex justify-end mt-4">

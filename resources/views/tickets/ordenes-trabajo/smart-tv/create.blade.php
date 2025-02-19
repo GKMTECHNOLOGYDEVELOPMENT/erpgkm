@@ -67,7 +67,7 @@
                 <!-- Cliente General -->
                 <div>
                     <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full ">
                         <option value="" selected>Seleccionar Cliente General</option>
                     </select>
                 </div>
@@ -137,7 +137,8 @@
 
                 <!-- Selección de Tickets -->
                 <div id="ticketSelectionContainer">
-                    <label for="selectTickets" class="block text-sm font-medium">Seleccionar Ticket</label>
+                    <label for="selectTickets" class="block text-sm font-medium" style="display: none;">Tickets
+                        Relacionados</label>
                     <select id="selectTickets" name="selectTickets" class="form-input w-full" style="display: none;">
                         <option value="" selected>Seleccionar Ticket</option>
                     </select>
@@ -146,10 +147,11 @@
 
 
 
+
                 <!-- Falla Reportada -->
-                <div class="">
+                <div class="col-span-2">
                     <label for="fallaReportada" class="block text-sm font-medium">Falla Reportada</label>
-                    <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full"
+                    <textarea id="fallaReportada" name="fallaReportada" rows="3" class="form-input w-full"
                         placeholder="Describa la falla reportada"></textarea>
                 </div>
 
@@ -324,7 +326,8 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="openClienteModal = false">Cancelar</button>
-                                    <button type="submit" id="btnGuardarCliente" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                <button type="submit" id="btnGuardarCliente"
+                                    class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
                     </div>
@@ -515,6 +518,7 @@
                 let serie = this.value.trim(); // Obtener el valor de la serie
                 let select = document.getElementById(
                     'selectTickets'); // El select donde se mostrarán los tickets
+                let label = document.querySelector("label[for='selectTickets']"); // Seleccionamos el label
 
                 // Si el campo serie no está vacío
                 if (serie.length > 0) {
@@ -524,22 +528,23 @@
                             // Limpiar las opciones previas
                             select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>';
 
-                            // Si hay tickets asociados a la serie, los mostramos
                             if (data.length > 0) {
-                                // Mostrar el select de tickets
-                                select.style.display = 'block'; // Mostrar el select
+                                // Mostrar el select y el label
+                                select.style.display = 'block';
+                                label.style.display = 'block';
 
                                 data.forEach(ticket => {
                                     let option = document.createElement('option');
                                     option.value = ticket
                                         .idTickets; // El valor será el id del ticket
                                     option.textContent =
-                                        `Ticket N°: ${ticket.numero_ticket} - Fecha: ${ticket.fecha_creacion}`; // Mostrar detalles del ticket
+                                        `Ticket N°: ${ticket.numero_ticket} - Fecha: ${ticket.fecha_creacion}`;
                                     select.appendChild(option);
                                 });
                             } else {
-                                // Si no hay tickets, mostrar un mensaje y ocultar el select
-                                select.style.display = 'none'; // Ocultar el select
+                                // Si no hay tickets, ocultar el select y el label
+                                select.style.display = 'none';
+                                label.style.display = 'none';
 
                                 let option = document.createElement('option');
                                 option.value = "";
@@ -549,22 +554,21 @@
                         })
                         .catch(error => console.error('Error al cargar los tickets:', error));
                 } else {
-                    // Limpiar el select y ocultarlo si no se ingresa una serie
-                    select.style.display = 'none'; // Ocultar el select
-                    select.innerHTML =
-                        '<option value="" selected>Seleccionar Ticket</option>'; // Limpiar las opciones previas
+                    // Limpiar el select y ocultarlo junto con el label si no se ingresa una serie
+                    select.style.display = 'none';
+                    label.style.display = 'none';
+                    select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>';
                 }
             });
 
             // Evento para cuando se selecciona un ticket
             document.getElementById('selectTickets').addEventListener('change', function() {
-                let ticketId = this.value; // Obtener el id del ticket seleccionado
+                let ticketId = this.value;
                 if (ticketId) {
-                    // Redirigir a la página de edición del ticket en una nueva pestaña
-                    window.open(`/ordenes/smart/${ticketId}/edit`,
-                        '_blank'); // Abre la URL en una nueva pestaña
+                    window.open(`/ordenes/smart/${ticketId}/edit`, '_blank');
                 }
             });
+
         });
     </script>
 

@@ -1,92 +1,229 @@
 <x-layout.default>
+
+    <!-- Scripts y estilos -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <style>
         .panel {
             overflow: visible !important;
-            /* Asegura que el modal no restrinja contenido */
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        #myTable1 thead th {
+            pointer-events: none;
+            /* Evita la interacción con el encabezado */
+        }
+
+        #myTable1 thead .sorting,
+        #myTable1 thead .sorting_asc,
+        #myTable1 thead .sorting_desc {
+            background-image: none !important;
+            /* Oculta los íconos de ordenación */
+        }
+
+        /* SCROLLBAR MODERNO Y REDONDEADO */
+        .custom-scroll {
+            overflow-x: auto !important;
+            scrollbar-width: thin;
+            /* Firefox */
+            scrollbar-color: #a8a8a8 #e0e0e0;
+            /* Gris más sutil */
+        }
+
+        /* WebKit (Chrome, Safari, Edge) */
+        .custom-scroll::-webkit-scrollbar {
+            height: 10px;
+            /* Tamaño del scrollbar */
+            background: #e0e0e0;
+            /* Fondo gris claro */
+            border-radius: 40px;
         }
     </style>
 
-    @if(session('success'))
-        <!-- success (verde) -->
-        <div class="relative flex items-center border p-3.5 rounded before:absolute before:top-1/2 ltr:before:left-0 rtl:before:right-0 rtl:before:rotate-180 before:-mt-2 before:border-l-8 before:border-t-8 before:border-b-8 before:border-t-transparent before:border-b-transparent before:border-l-inherit text-primary bg-primary-light !border-primary ltr:border-l-[64px] rtl:border-r-[64px] dark:bg-primary-dark-light">
-            <span class="absolute ltr:-left-11 rtl:-right-11 inset-y-0 text-white w-6 h-6 m-auto">
-                <svg> ... </svg> <!-- Aquí va el icono de éxito si lo deseas -->
-            </span>
-            <span class="ltr:pr-2 rtl:pl-2"><strong class="ltr:mr-1 rtl:ml-1">¡Éxito!</strong>{{ session('success') }}</span>
-            <button type="button" class="ltr:ml-auto rtl:mr-auto hover:opacity-80">
-                <svg> ... </svg> <!-- Icono de cerrar -->
-            </button>
-        </div>
-    @endif
     <div x-data="multipleTable">
-        <div>
-            <ul class="flex space-x-2 rtl:space-x-reverse">
+        <!-- Breadcrumb -->
+        <div class="mb-6">
+            <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
                 <li>
                     <a href="javascript:;" class="text-primary hover:underline">Tickets</a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                     <span>Ordenes de Trabajo</span>
                 </li>
+                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                    <span>Help Desk</span>
+                </li>
             </ul>
         </div>
-        <div class="panel mt-6">
-            <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
-                <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
-                    <!-- Botón Exportar a Excel -->
-                    <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
-                    href="{{ route('tienda.create') }}">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <path
-                                d="M4 3H20C21.1046 3 22 3.89543 22 5V19C22 20.1046 21.1046 21 20 21H4C2.89543 21 2 20.1046 2 19V5C2 3.89543 2 3 4 3Z"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M16 10L8 14M8 10L16 14" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        <span>Excel</span>
-                    </button>
+
+        <!-- Filtros -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Fecha de Inicio -->
+            <div>
+                <label for="startDate" class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
+                <input type="text" id="startDate" x-model="startDate" placeholder="Seleccionar Fecha"
+                    class="form-input w-full" x-init="flatpickr($el, {
+                        dateFormat: 'Y-m-d',
+                        onChange: function(selectedDates, dateStr) {
+                            startDate = dateStr;
+                            fetchDataAndInitTable();
+                        }
+                    })" />
+            </div>
+            <!-- Fecha de Fin -->
+            <div>
+                <label for="endDate" class="block text-sm font-medium text-gray-700">Fecha Fin</label>
+                <input type="text" id="endDate" x-model="endDate" placeholder="Seleccionar Fecha"
+                    class="form-input w-full" x-init="flatpickr($el, {
+                        dateFormat: 'Y-m-d',
+                        onChange: function(selectedDates, dateStr) {
+                            endDate = dateStr;
+                            fetchDataAndInitTable();
+                        }
+                    })" />
+            </div>
+            <!-- Filtrar por Marca
+        <div x-data="{ marcas: [], marcaFilter: '' }" x-init="fetch('http://127.0.0.1:8000/api/marcas')
+            .then(response => response.json())
+            .then(data => {
+                marcas = data;
+                $nextTick(() => { new NiceSelect(document.getElementById('marcaFilter')); });
+            })
+            .catch(error => console.error('Error loading marcas:', error))">
+          <label for="marcaFilter" class="block text-sm font-medium text-gray-700">Filtrar por Marca</label>
+          <select id="marcaFilter" x-model="marcaFilter"
+            class="form-select w-full text-white-dark" @change="fetchDataAndInitTable()">
+            <option value="">Todas las marcas</option>
+            <template x-for="marca in marcas" :key="marca.idMarca">
+              <option :value="marca.idMarca" x-text="marca.nombre"></option>
+            </template>
+          </select>
+        </div> -->
 
 
-                    <!-- Botón Exportar a PDF -->
-                    <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                        @click="window.location.href = '{{ route('reporte.clientes') }}'">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                            <path
-                                d="M2 5H22M2 5H22C22 6.10457 21.1046 7 20 7H4C2.89543 7 2 6.10457 2 5ZM2 5V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V5M9 14L15 14"
-                                stroke="currentColor" stroke-width="1.5" />
-                            <path d="M12 11L12 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                        </svg>
-                        <span>PDF</span>
-                    </button>
-
-
-                <!-- Enlace Agregar con icono HelpDesk -->
-                <a href="{{ route('ordenes.createhelpdesk') }}" class="btn btn-primary btn-sm flex items-center gap-2">
-                    <!-- Icono HelpDesk (auricular) en SVG -->
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2a4 4 0 008 0V3m-4 5v7a3 3 0 01-3 3H8a3 3 0 01-3-3V8a3 3 0 013-3h4a3 3 0 013 3z" />
-                    </svg>
-                    <span>Agregar</span>
-                </a>
-
-                </div>
+            <!-- Filtrar por Cliente General -->
+            <div x-data="{ clienteGenerales: [], clienteGeneralFilter: '' }" x-init="fetch('/api/clientegenerales')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Datos de clientes generales:', data); // Añadir log para inspeccionar los datos
+                    clienteGenerales = data;
+                    $nextTick(() => { new NiceSelect(document.getElementById('clienteGeneralFilter')); });
+                })
+                .catch(error => console.error('Error al cargar clientes generales:', error))">
+                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente
+                    General</label>
+                <select id="clienteGeneralFilter" x-model="clienteGeneralFilter"
+                    class="form-select w-full text-white-dark" @change="fetchDataAndInitTable()">
+                    <option value="">Todos los clientes generales</option>
+                    <template x-for="cliente in clienteGenerales" :key="cliente.idClienteGeneral">
+                        <option :value="cliente.idClienteGeneral" x-text="cliente.descripcion"></option>
+                    </template>
+                </select>
             </div>
 
-            <table id="myTable1" class="whitespace-nowrap"></table>
+
+
+
+            <!-- Botones de Acción -->
+            <div class="flex flex-wrap items-end gap-2">
+                <!-- Botón Agregar -->
+                <a href="{{ route('ordenes.createhelpdesk') }}" class="btn btn-primary btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </a>
+                
+
+                <!-- Botón Exportar (Excel) -->
+                <div x-data="{ open: false }" class="relative">
+                    <a href="{{ route('ordenes.export.excel') }}" class="btn btn-success btn-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2H6Z"
+                                fill="#2E7D32" />
+                            <path d="M14 2V8H20" fill="#1B5E20" />
+                            <path d="M9 13L15 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M15 13L9 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- Botón Refrescar -->
+                <button @click="startDate = ''; endDate = ''; marcaFilter = ''; fetchDataAndInitTable()"
+                    class="btn btn-secondary btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <polyline points="23 4 23 10 17 10" />
+                        <polyline points="1 20 1 14 7 14" />
+                        <path d="M3.51 9a9 9 0 0114.36-3.36L23 10" />
+                        <path d="M20.49 15a9 9 0 01-14.36 3.36L1 14" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla y Paginación -->
+        <div class="panel mt-6">
+            <div class="relative overflow-x-auto custom-scroll">
+                <!-- Tabla con clases Bootstraahi ep/DataTables -->
+                <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
+                    <thead>
+                        <tr>
+                            <th class="text-center px-4 py-2">EDITAR</th>
+                            <th class="text-center px-4 py-2">N. TICKET</th>
+                            <th class="text-center px-4 py-2">F. TICKET</th>
+                            <th class="text-center px-4 py-2">F. VISITA</th>
+                            <th class="text-center px-4 py-2">CATEGORIA</th>
+                            <th class="text-center px-4 py-2">GENERAL</th>
+                            <th class="text-center px-4 py-2">MODELO</th>
+                            <th class="text-center px-4 py-2">SERIE</th>
+                            <th class="text-center px-4 py-2">CLIENTE</th>
+                            <th class="text-center px-4 py-2">DIRECCIÓN</th>
+                            <th class="text-center px-4 py-2">MÁS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se llenarán dinámicamente -->
+                    </tbody>
+                </table>
+
+                <!-- Preloader -->
+                <div x-show="isLoading"
+                    class="absolute inset-0 flex items-center justify-center bg-white bg-opaacity-75">
+                    <span class="w-10 h-10">
+                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-primary"></span>
+                    </span>
+                </div>
+            </div>
+            <!-- Paginación -->
+            <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>
         </div>
     </div>
 
-
-    <script src="{{ asset('assets/js/ordenes/ordenes.js') }}"></script>
-    <script src="{{ asset('assets/js/ordenes/ordenesStore.js') }}"></script>
-    <script src="{{ asset('assets/js/ordenes/ordenesValidaciones.js') }}"></script>
-    <script src="/assets/js/simple-datatables.js"></script>
+    <!-- Scripts adicionales -->
+    <script src="{{ asset('assets/js/tickets/helpdesk/list.js') }}"></script>
+    <!-- DataTables JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-
 </x-layout.default>
