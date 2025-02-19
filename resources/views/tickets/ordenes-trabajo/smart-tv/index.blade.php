@@ -53,7 +53,6 @@
             /* Fondo gris claro */
             border-radius: 40px;
         }
-
     </style>
 
     <div x-data="multipleTable">
@@ -148,9 +147,10 @@
                             d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </a>
+
                 <!-- Botón Exportar (Excel) -->
                 <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" class="btn btn-success btn-sm">
+                    <a href="{{ route('ordenes.export.excel') }}" class="btn btn-success btn-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" viewBox="0 0 24 24"
                             fill="currentColor">
                             <path
@@ -162,8 +162,9 @@
                             <path d="M15 13L9 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
                         </svg>
-                    </button>
+                    </a>
                 </div>
+
                 <!-- Botón Refrescar -->
                 <button @click="startDate = ''; endDate = ''; marcaFilter = ''; fetchDataAndInitTable()"
                     class="btn btn-secondary btn-sm">

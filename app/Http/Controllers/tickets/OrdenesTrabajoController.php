@@ -894,41 +894,6 @@ public function guardarVisita(Request $request)
         }
     }
 
-// Verificar si el idTicket existe en la tabla tickets
-// $ticketExiste = DB::table('tickets')->where('idTickets', $request->idTickets)->exists();
-
-// if (!$ticketExiste) {
-//     Log::error('El idTicket no existe en la tabla tickets', ['idTicket' => $request->idTickets]);
-//     return response()->json(['success' => false, 'message' => 'El idTicket no existe en la tabla tickets.'], 400);
-// }
-
-// // Obtener el ticket para verificar si tiene un idTicketFlujo
-// $ticket = DB::table('tickets')->where('idTickets', $request->idTickets)->first();
-
-// if (!$ticket->idTicketFlujo) {
-//     // Si el ticket no tiene un idTicketFlujo asignado, creamos uno nuevo en ticketflujo
-//     $idTicketFlujo = DB::table('ticketflujo')->insertGetId([
-//         'idTicket' => $request->idTickets,  // Asociar el ticket a este flujo
-//         'idEstadflujo' => 2,  // Estado correspondiente (puede cambiar según tu lógica)
-//         'fecha_creacion' => now(),
-//     ]);
-
-//     // Ahora actualizamos el ticket con el nuevo idTicketFlujo
-//     DB::table('tickets')->where('idTickets', $request->idTickets)->update(['idTicketFlujo' => $idTicketFlujo]);
-
-//     Log::info('Se asignó idTicketFlujo al ticket', ['idTicket' => $request->idTickets, 'idTicketFlujo' => $idTicketFlujo]);
-// } else {
-//     Log::info('El ticket ya tiene idTicketFlujo asignado', ['idTicket' => $request->idTickets, 'idTicketFlujo' => $ticket->idTicketFlujo]);
-// }
-
-// // Insertar el flujo de ticketflujo con el nuevo estado
-// DB::table('ticketflujo')->insert([
-//     'idTicket' => $request->idTickets,  // Asociar el ticket al flujo
-//     'idEstadflujo' => 2,  // Estado correspondiente para el flujo (por ejemplo, para Técnico)
-//     'fecha_creacion' => now(),
-// ]);
-
-// Log::info('Flujo insertado correctamente', ['idTicket' => $request->idTickets]);
 
 
     return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
@@ -937,80 +902,6 @@ public function guardarVisita(Request $request)
 
 
 
-
-
-
-// public function guardarVisita(Request $request)
-// {
-//     // Validación de los datos
-//     $request->validate([
-//         'nombre' => 'required|string|max:255',
-//         'fecha_visita' => 'required|date',
-//         'hora_inicio' => 'required|date_format:H:i',
-//         'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
-//         'encargado' => 'required|integer|exists:usuarios,idUsuario', // Validar que el encargado existe
-//         'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
-//         'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
-//     ]);
-
-//     // Crear la nueva visita
-//     $visita = new Visita();
-//     $visita->nombre = $request->nombre;
-//     $visita->fecha_programada = $request->fecha_visita;
-//     $visita->fecha_inicio = $request->fecha_visita . ' ' . $request->hora_inicio;  // Concatenar fecha y hora
-//     $visita->fecha_final = $request->fecha_visita . ' ' . $request->hora_fin; // Concatenar fecha y hora
-//     $visita->idUsuario = $request->encargado;
-
-//     // Asignar 0 o 1 a "necesita_apoyo"
-//     $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
-
-//     $visita->tipoServicio = 1; // O el valor correspondiente que quieras
-//     $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
-
-//     // Agregar un log para verificar que se han recibido correctamente los datos de la visita
-//     Log::info('Datos de la visita antes de guardar:', [
-//         'nombre' => $visita->nombre,
-//         'fecha_programada' => $visita->fecha_programada,
-//         'fecha_inicio' => $visita->fecha_inicio,
-//         'fecha_final' => $visita->fecha_final,
-//         'idUsuario' => $visita->idUsuario,
-//         'necesita_apoyo' => $visita->necesita_apoyo,
-//         'idTickets' => $visita->idTickets
-//     ]);
-
-//     // Guardar la visita
-//     $visita->save();
-
-//     // Comprobar si el ID de la visita se generó correctamente
-//     Log::info('ID de la visita después de guardar:', ['idVisita' => $visita->idVisitas]);
-
-//     // Obtener el ID de la visita después de guardarla
-//     $idVisita = $visita->idVisitas;  // El ID generado por la base de datos
-
-//     // Verificar si necesita apoyo y si se seleccionaron técnicos de apoyo
-//     if ($visita->necesita_apoyo == 1 && $request->has('tecnicos_apoyo')) {
-//         Log::info('Se seleccionaron técnicos de apoyo. Insertando en ticketapoyo...');
-//         // Guardar cada técnico de apoyo en la tabla ticketapoyo
-//         foreach ($request->tecnicos_apoyo as $tecnicoId) {
-//             Log::info('Insertando técnico en ticketapoyo:', [
-//                 'idTecnico' => $tecnicoId,
-//                 'idTicket' => $request->idTickets,
-//                 'idVisita' => $idVisita
-//             ]);
-            
-//             DB::table('ticketapoyo')->insert([
-//                 'idTecnico' => $tecnicoId,
-//                 'idTicket' => $request->idTickets,
-//                 'idVisita' => $idVisita,  // Usar el ID de la visita recién creada
-//             ]);
-//         }
-//     } else {
-//         Log::info('No se necesita apoyo o no se seleccionaron técnicos.');
-//     }
-
-//     // Devolver la respuesta
-//     return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
-// }
 
 
 

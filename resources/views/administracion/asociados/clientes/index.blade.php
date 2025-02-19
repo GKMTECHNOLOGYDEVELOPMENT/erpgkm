@@ -101,25 +101,27 @@
                         <!-- Formulario -->
                         <form class="p-5 space-y-4" id="clienteForm" enctype="multipart/form-data" method="post">
                             @csrf <!-- Asegúrate de incluir el token CSRF -->
+    
+                            <!-- Cliente General (Ocupa todo el ancho) -->
+                            <div>
+                                <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                                <select id="idClienteGeneral" name="idClienteGeneral[]"
+                                    placeholder="Seleccionar Cliente General" multiple style="display:none">
+                                    @foreach ($clientesGenerales as $clienteGeneral)
+                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                            {{ $clienteGeneral->descripcion }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+    
+                            <!-- Contenedor para mostrar los seleccionados (Ocupa todo el ancho) -->
+                            <div id="selected-items-container">
+                                <strong>Seleccionados:</strong>
+                                <div id="selected-items-list" class="overflow-y-auto border border-gray-300 rounded-md p-2 flex flex-wrap gap-2"></div>
+                            </div>
+    
+                            <!-- Resto del formulario (en grid de 2 columnas) -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- ClienteGeneral -->
-                                <div>
-                                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                                    <select id="idClienteGeneral" name="idClienteGeneral[]"
-                                        placeholder="Seleccionar Cliente General" multiple style="display:none">
-                                        @foreach ($clientesGenerales as $clienteGeneral)
-                                            <option value="{{ $clienteGeneral->idClienteGeneral }}">
-                                                {{ $clienteGeneral->descripcion }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Contenedor para mostrar los seleccionados -->
-                                <div id="selected-items-container">
-                                    <strong>Seleccionados:</strong>
-                                    <div id="selected-items-list" class="flex flex-wrap gap-2"></div>
-                                </div>
-
                                 <!-- Nombre -->
                                 <div>
                                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -138,7 +140,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-
+    
                                 <!-- Contenedor del switch "Es tienda" -->
                                 <div id="esTiendaContainer" class="hidden mt-4">
                                     <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
@@ -154,8 +156,7 @@
                                         </div>
                                     </div>
                                 </div>
-
-
+    
                                 <!-- Documento -->
                                 <div>
                                     <label for="documento" class="block text-sm font-medium">Documento</label>
@@ -186,7 +187,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-
+    
                                 <!-- Provincia -->
                                 <div>
                                     <label for="provincia" class="block text-sm font-medium">Provincia</label>
@@ -194,7 +195,7 @@
                                         <option value="" disabled selected>Seleccionar Provincia</option>
                                     </select>
                                 </div>
-
+    
                                 <!-- Distrito -->
                                 <div>
                                     <label for="distrito" class="block text-sm font-medium">Distrito</label>

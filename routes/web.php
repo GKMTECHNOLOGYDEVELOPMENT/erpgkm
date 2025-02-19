@@ -54,6 +54,7 @@ use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Modelo;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+
 Auth::routes();
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -87,8 +88,10 @@ Route::get('/administracion/compras', [CompraController::class, 'index'])->name(
 //Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
-Route::get('/exportar-clientes-general', function () { return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx'); })->name('clientes-general.exportExcel');
-Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF']) ->name('clientes-general.exportPDF')->middleware('auth');
+Route::get('/exportar-clientes-general', function () {
+    return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx');
+})->name('clientes-general.exportExcel');
+Route::get('/clientes-general/export-pdf', [ClienteGeneralController::class, 'exportAllPDF'])->name('clientes-general.exportPDF')->middleware('auth');
 
 // Actualizar los datos del cliente general
 Route::put('administracion/{id}', [ClienteGeneralController::class, 'update'])->name('cliente-general.update');
@@ -105,7 +108,9 @@ Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tiendas.update');
 Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
-Route::get('/exportar-tiendas', function () { return Excel::download(new TiendaExport, 'reporte_tiendas.xlsx'); })->name('tiendas.exportExcel');
+Route::get('/exportar-tiendas', function () {
+    return Excel::download(new TiendaExport, 'reporte_tiendas.xlsx');
+})->name('tiendas.exportExcel');
 Route::get('/reporte-tiendas', [TiendaController::class, 'exportAllPDF'])->name('reporte.tiendas');
 
 
@@ -130,7 +135,9 @@ Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast
 Route::post('/cast/store', [CastController::class, 'store'])->name('cast.store');
 Route::get('/cast/{idCast}/edit', [CastController::class, 'edit'])->name('cast.edit');
 Route::put('/cast/{idCast}', [CastController::class, 'update'])->name('casts.update');
-Route::get('/exportar-cast', function () { return Excel::download(new CastExport, 'cast.xlsx'); })->name('cast.exportExcel');
+Route::get('/exportar-cast', function () {
+    return Excel::download(new CastExport, 'cast.xlsx');
+})->name('cast.exportExcel');
 Route::get('/reporte-cast', [CastController::class, 'exportAllPDF'])->name('reporte.cast');
 
 // Route::get('/casts', [CastController::class, 'getAll']);
@@ -141,8 +148,10 @@ Route::get('/clientes', [ClientesController::class, 'index'])->name('administrac
 Route::post('/cliente/store', [ClientesController::class, 'store'])->name('cliente.store');
 Route::get('/cliente/{idCliente}/edit', [ClientesController::class, 'edit'])->name('cliente.edit');
 Route::put('/clientes/{idCliente}', [ClientesController::class, 'update'])->name('clientes.update');
-Route::get('/exportar-clientes', function () { return Excel::download(new ClientesExport, 'clientes.xlsx'); })->name('clientes.exportExcel');
-Route::get('/reporte-clientes', [ClientesController::class, 'exportAllPDF']) ->name('reporte.clientes');
+Route::get('/exportar-clientes', function () {
+    return Excel::download(new ClientesExport, 'clientes.xlsx');
+})->name('clientes.exportExcel');
+Route::get('/reporte-clientes', [ClientesController::class, 'exportAllPDF'])->name('reporte.clientes');
 
 
 //Ruta para Administracion Proveedores
@@ -150,7 +159,9 @@ Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('admin
 Route::post('/proveedores/store', [ProveedoresController::class, 'store'])->name('proveedor.store');
 Route::get('/proveedores/{idProveedor}/edit', [ProveedoresController::class, 'edit'])->name('proveedor.edit');
 Route::put('/proveedores/{idProveedor}', [ProveedoresController::class, 'update'])->name('proveedores.update');
-Route::get('/exportar-proveedores', function () { return Excel::download(new ProveedoresExport, 'proveedores.xlsx'); })->name('proveedores.exportExcel');
+Route::get('/exportar-proveedores', function () {
+    return Excel::download(new ProveedoresExport, 'proveedores.xlsx');
+})->name('proveedores.exportExcel');
 Route::get('/reporte-proveedores', [ProveedoresController::class, 'exportAllPDF'])->name('proveedores.pdf');
 
 
@@ -182,7 +193,7 @@ Route::get('/apps/calendar', [CalendarController::class, 'index'])->name('apps.c
 Route::prefix('categoria')->name('categorias.')->group(function () {
     Route::get('/', [CategoriaController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [CategoriaController::class, 'store'])->name('store'); // Guardar una nueva categoría
-    Route::get('/{id}/edit', [CategoriaController::class, 'edit'])->name('edit');// Editar una categoría
+    Route::get('/{id}/edit', [CategoriaController::class, 'edit'])->name('edit'); // Editar una categoría
     Route::put('/update/{id}', [CategoriaController::class, 'update'])->name('update'); // Actualizar una categoría
     Route::delete('/{id}', [CategoriaController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
     Route::get('/reporte-categorias', [CategoriaController::class, 'exportAllPDF'])->name('categorias.pdf'); // Exportar todas las categorías a PDF
@@ -191,7 +202,6 @@ Route::prefix('categoria')->name('categorias.')->group(function () {
     Route::get('/exportar-excel', function () {
         return Excel::download(new CategoriaExport, 'categorias.xlsx');
     })->name('exportExcel');
-    
 });
 
 /// FIN CATEGORIA ///
@@ -210,7 +220,6 @@ Route::prefix('marcas')->name('marcas.')->group(function () {
     Route::get('/exportar-excel', function () {
         return Excel::download(new MarcasExport, 'marcas.xlsx');
     })->name('exportExcel');
-    
 });
 
 /// FIN MARCA ///
@@ -272,8 +281,13 @@ Route::post('/clientes/{idCliente}/agregar-clientes-generales', [ClientesControl
 Route::delete('/clientes/{idCliente}/eliminar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'eliminarClienteGeneral']);
 Route::get('/tickets-por-serie/{serie}', [OrdenesTrabajoController::class, 'getTicketsPorSerie']);
 Route::post('/guardar-visita', [OrdenesTrabajoController::class, 'guardarVisita']);
+<<<<<<< HEAD
 // Route::get('/obtener-visitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 Route::get('/obtener-numero-visitas/{ticketId}', function($ticketId) {
+=======
+Route::get('/obtener-visitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
+Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
+>>>>>>> d4ee965290eca3077296fe7343fc4b69eaa50135
     $numeroVisitas = DB::table('visitas')->where('idTickets', $ticketId)->count();
     return response()->json(['numeroVisitas' => $numeroVisitas]);
 });
@@ -294,9 +308,12 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth'); // Editar una orden de trabajo
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update'); // Actualizar una orden de trabajo
     Route::delete('/{id}', [OrdenesTrabajoController::class, 'destroy'])->name('destroy'); // Eliminar una orden de trabajo
-
+    Route::get('/export-excel', [OrdenesTrabajoController::class, 'exportToExcel'])->name('export.excel');
     // Exportar y Reportes
     Route::get('/export-pdf', [OrdenesTrabajoController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todas las órdenes de trabajo a PDF
+    // Exportar a Excel
+
+
     Route::get('/get-all', [OrdenesTrabajoController::class, 'getAll'])->name('getAll'); // Obtener todas las órdenes de trabajo en formato JSON
 
     // Validaciones
@@ -312,7 +329,7 @@ Route::get('/clientes/generales/asociados/{idCliente}', [ClientesController::cla
 Route::post('/clientes/{idCliente}/agregar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'agregarClienteGeneral']);
 Route::get('/get-clientes-generales/{idCliente}', [OrdenesTrabajoController::class, 'getClientesGeneralesss']);
 // Ruta para obtener modelos de una marca
-Route::get('/get-modelos/{marcaId}', function($marcaId) {
+Route::get('/get-modelos/{marcaId}', function ($marcaId) {
     // Obtener los modelos asociados a la marca seleccionada
     $modelos = Modelo::where('idMarca', $marcaId)->get();
 
@@ -451,5 +468,3 @@ Route::view('/pages/error404', 'pages.error404');
 Route::view('/pages/error500', 'pages.error500');
 Route::view('/pages/error503', 'pages.error503');
 Route::view('/pages/maintenence', 'pages.maintenence');
-
-
