@@ -875,7 +875,7 @@ public function guardarVisita(Request $request)
     // Asignar 0 o 1 a "necesita_apoyo"
     $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
 
-    $visita->tipoServicio = 1; // O el valor correspondiente que quieras
+    $visita->estado = 1; // O el valor correspondiente que quieras
     $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
 
     // Guardar la visita
