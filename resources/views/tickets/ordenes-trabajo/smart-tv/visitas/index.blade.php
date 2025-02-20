@@ -12,15 +12,8 @@
     <div id="visitasList" class="space-y-4"></div>
 </div>
 
+
 <script>
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true };
-        return date.toLocaleString('en-US', options).replace(',', '');
-    }
-
-    var ticketId = {{ $ticketId }};
-
     fetch(`/api/obtenerVisitas/${ticketId}`)
     .then(response => response.json())
     .then(data => {
@@ -222,6 +215,55 @@
 </div>
 
 
+
+<script>
+    // Función para formatear las fechas
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');  // Obtener el día con 2 dígitos
+        const month = String(date.getMonth() + 1).padStart(2, '0');  // Obtener el mes (1-12)
+        const year = date.getFullYear();  // Obtener el año
+        const hours = String(date.getHours()).padStart(2, '0');  // Obtener las horas
+        const minutes = String(date.getMinutes()).padStart(2, '0');  // Obtener los minutos
+        
+        return `${day}/${month}/${year} ${hours}:${minutes}`;  // Formato: DD/MM/YYYY HH:MM
+    }
+
+    // Usamos el ticketId obtenido del backend
+    var ticketId = {{ $ticketId }};  // Este ticketId debe ser pasado desde el backend en la vista
+
+    // Hacer una solicitud AJAX para obtener las visitas
+    fetch(`/api/obtenerVisitas/${ticketId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Verifica si hay visitas
+            if (data && data.length > 0) {
+                // Limpiar el contenido actual de la lista
+                const visitasList = document.getElementById('visitasList');
+                visitasList.innerHTML = '';
+
+                // Recorrer las visitas y agregar a la lista
+                data.forEach(visita => {
+                    // Formatear las fechas de inicio y final
+                    const fechaInicio = formatDate(visita.fecha_inicio);
+                    const fechaFinal = formatDate(visita.fecha_final);
+
+                    const li = document.createElement('li');
+                    li.textContent = `Fecha Inicio: ${fechaInicio}, Fecha Final: ${fechaFinal}`;
+                    visitasList.appendChild(li);
+                });
+
+                // Asegurarse de que el contenedor esté visible
+                document.getElementById('visitasContainer').style.display = 'block';
+            } else {
+                alert("No hay visitas para este ticket.");
+            }
+        })
+        .catch(error => {
+            console.error('Error al obtener las visitas:', error);
+            alert('Ocurrió un error al obtener las visitas.');
+        });
+</script>
 
 
 
