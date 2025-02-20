@@ -7,20 +7,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 
-<!-- Estilos adicionales para el log -->
-<style>
-    #ultimaModificacion {
-        background: #f7f7f7;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        color: #333;
-        font-size: 0.9em;
-        margin-top: 8px;
-        display: inline-block;
-    }
-</style>
-
 <span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo N°
     {{ $orden->idTickets }}</span>
 
@@ -171,7 +157,7 @@
     </div>
     <!-- Div para mostrar la última modificación -->
     <div class="mt-4">
-        Última modificación: <span id="ultimaModificacion"></span>
+        Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
     </div>
     <!-- Estados disponibles (draggables) -->
     <div class="mt-3 overflow-x-auto">

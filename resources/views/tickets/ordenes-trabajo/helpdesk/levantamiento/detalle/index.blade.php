@@ -8,18 +8,7 @@
 
 
 <!-- Estilos adicionales para el log -->
-<style>
-    #ultimaModificacion {
-        background: #f7f7f7;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        color: #333;
-        font-size: 0.9em;
-        margin-top: 8px;
-        display: inline-block;
-    }
-</style>
+
 
 <span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo N°
     {{ $orden->idTickets }}</span>
@@ -128,52 +117,25 @@
 
 
 
-{{-- <!-- Nueva Card: Historial de Estados -->
-<div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">
-  <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
-  <!-- Tabla con scroll horizontal -->
-  <div class="overflow-x-auto mt-4">
-    <table class="min-w-[600px] border-collapse">
-      <thead>
-        <tr class="bg-gray-200">
-          <th class="px-4 py-2 text-center">Estado</th>
-          <th class="px-4 py-2 text-center">Usuario</th>
-          <th class="px-4 py-2 text-center">Fecha</th>
-          <th class="px-4 py-2 text-center">Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="estadosTableBody">
-        <!-- Fila inicial (no eliminable) -->
-        <tr class="bg-dark-dark-light border-dark-dark-light">
-          <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
-          <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
-          <td class="px-4 py-2 text-center min-w-[200px]">{{ $orden->fecha_creacion ?? 'sin fecha' }}</td>
-          <td class="px-4 py-2 text-center">
-            <span class="text-gray-500">-</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <!-- Div para mostrar la última modificación -->
-  <div class="mt-4">
-    Última modificación: <span id="ultimaModificacion"></span>
-  </div>
-  <!-- Estados disponibles (draggables) -->
-  <div class="mt-3 overflow-x-auto">
-    <div id="draggableContainer" class="flex space-x-2">
-      <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Recojo">
-        Recojo
-      </div>
-      <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Coordinado">
-        Coordinado
-      </div>
-      <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Operativo">
-        Operativo
-      </div>
+<!-- Nueva Card: Historial de Estados -->
+<div id="estadosCard" class="mt-4 p-4 rounded-lg">
+    {{-- <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span> --}}
+    <!-- Tabla con scroll horizontal -->
+    <div class="overflow-x-auto mt-4">
+        <table class="min-w-[600px] border-collapse">
+            <tbody id="estadosTableBody">
+                <!-- Fila inicial (no eliminable) -->
+            </tbody>
+        </table>
     </div>
-  </div>
-</div> --}}
+    <!-- Div para mostrar la última modificación -->
+    <div class="mt-4">
+      Última modificación: 
+      <span id="ultimaModificacion" class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2">
+      </span>
+    </div>
+
+</div>
 
 
 

@@ -154,7 +154,7 @@
 
                 <!-- Botón Exportar (Excel) -->
                 <div x-data="{ open: false }" class="relative">
-                    <a href="{{ route('ordenes.export.excel') }}" class="btn btn-success btn-sm">
+                    <a href="{{ route('ordenes.export.helpdesk.excel') }}" class="btn btn-success btn-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" viewBox="0 0 24 24"
                             fill="currentColor">
                             <path

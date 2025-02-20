@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class TicketExport implements
+class HelpdeskTicketExport implements
     FromQuery,
     WithMapping,
     WithStyles,
@@ -81,7 +81,7 @@ class TicketExport implements
             ->leftJoin('cliente', 'tickets.idCliente', '=', 'cliente.idCliente')
             ->leftJoin('estado_flujo', 'tickets.idEstadflujo', '=', 'estado_flujo.idEstadflujo')
             ->leftJoin('usuarios', 'tickets.idTecnico', '=', 'usuarios.idUsuario')
-            ->where('tickets.idTipotickets', 1) // 🔹 Filtra solo los tickets con idTipotickets = 1
+            ->where('tickets.idTipotickets', 2) // 🔹 Filtra solo los tickets con idTipotickets = 1
             ->when($this->marca, function ($q) {
                 $q->where('modelo.idMarca', $this->marca);
             })
