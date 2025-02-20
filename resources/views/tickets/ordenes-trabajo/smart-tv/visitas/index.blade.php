@@ -7,59 +7,99 @@
 
 
 </div>
-
 <div id="visitasContainer" class="mt-4">
-    <h2 class="text-xl font-semibold mb-4"></h2>
+    <h2 class="text-xl font-semibold mb-4">Visitas para el Ticket:</h2>
     <div id="visitasList" class="space-y-4"></div>
 </div>
 
+
 <script>
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true };
-        return date.toLocaleString('en-US', options).replace(',', '');
-    }
-
-    var ticketId = {{ $ticketId }};
-
     fetch(`/api/obtenerVisitas/${ticketId}`)
-        .then(response => response.json())
-        .then(data => {
-            const visitasList = document.getElementById('visitasList');
-            visitasList.innerHTML = '';
+    .then(response => response.json())
+    .then(data => {
+        const visitasList = document.getElementById('visitasList');
+        visitasList.innerHTML = '';
 
-            if (data && data.length > 0) {
-                data.forEach(visita => {
-                    const fechaInicio = formatDate(visita.fecha_inicio);
-                    const fechaFinal = formatDate(visita.fecha_final);
+        if (data && data.length > 0) {
+            data.forEach(visita => {
+                const fechaInicio = formatDate(visita.fecha_inicio);
+                const fechaFinal = formatDate(visita.fecha_final);
+                const nombreTecnico = visita.nombre_tecnico; // Nombre del técnico
 
-                    const card = document.createElement('div');
-                    card.className = 'bg-white border border-gray-200 rounded-lg shadow-sm p-5 max-w-md mx-auto';
-                    card.innerHTML = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105';
-                    card.innerHTML = `
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-lg font-semibold text-gray-800">${visita.nombre}</h3>
-                            <button class="bg-blue-500 text-black px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors">
-                                Detalles de Visita
-                            </button>
-                        </div>
-                        <div class="text-center text-gray-600 mb-2">
-                            <span class="font-medium">Fecha de Programada</span><br>
-                            <span class="text-gray-800">${fechaInicio} - ${fechaFinal}</span>
-                        </div>
-                    `;
-                    visitasList.appendChild(card);
+                // Tarjeta de Visita
+                const visitaCard = document.createElement('div');
+                visitaCard.className = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105';
+                visitaCard.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-gray-800">${visita.nombre}</h3>
+                        <button class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors">
+                            Detalles de Visita
+                        </button>
+                    </div>
+                    <div class="text-center text-gray-600 mb-2">
+                        <span class="font-medium">Fecha de Programación</span><br>
+                        <span class="text-gray-800">${fechaInicio} - ${fechaFinal}</span><br>
+                    </div>
+                `;
+                visitasList.appendChild(visitaCard);
+
+                // Tarjeta de Técnico en Desplazamiento con el botón de "like"
+                const tecnicoCard = document.createElement('div');
+                tecnicoCard.className = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+                tecnicoCard.innerHTML = `
+                    <div class="text-center text-gray-600 flex items-center justify-center">
+                        <span class="font-medium mr-2">Técnico en Desplazamiento</span>
+                        <!-- Icono de "like" (corazón) -->
+                        <span class="text-gray-800 ml-2">${nombreTecnico || 'Nombre del Técnico'}</span>
+                        <button class="text-black-500 hover:text-red-600 transition-colors" id="likeButton-${visita.idVisitas}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-green-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                visitasList.appendChild(tecnicoCard);
+
+                // Agregar el evento de clic al botón de like
+                const likeButton = document.getElementById(`likeButton-${visita.idVisitas}`);
+                likeButton.addEventListener('click', function() {
+                    // Fecha de desplazamiento actual (puedes usar la fecha actual o alguna lógica para esto)
+                    const nuevaFechaDesplazamiento = new Date().toISOString();
+
+                    // Realizar la actualización en la base de datos usando la API
+                    fetch(`/api/actualizarVisita/${visita.idVisitas}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            fechas_desplazamiento: nuevaFechaDesplazamiento,
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(updatedVisita => {
+                        if (updatedVisita) {
+                            // Si la actualización es exitosa, puedes hacer alguna acción (por ejemplo, cambiar el color del botón)
+                            alert("Fecha de desplazamiento actualizada exitosamente.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al actualizar la visita:', error);
+                        alert('Hubo un error al actualizar la visita.');
+                    });
                 });
+            });
 
-                document.getElementById('visitasContainer').style.display = 'block';
-            } else {
-                alert("No hay visitas para este ticket.");
-            }
-        })
-        .catch(error => {
-            console.error('Error al obtener las visitas:', error);
-            alert('Ocurrió un error al obtener las visitas.');
-        });
+            document.getElementById('visitasContainer').style.display = 'block';
+        } else {
+            alert("No hay visitas para este ticket.");
+            
+        }
+    })
+    .catch(error => {
+        console.error('Error al obtener las visitas:', error);
+        alert('Ocurrió un error al obtener las visitas.');
+    });
 </script>
 
 <!-- Contenedor donde se agregarán las visitas -->
@@ -175,6 +215,55 @@
 </div>
 
 
+
+<script>
+    // Función para formatear las fechas
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');  // Obtener el día con 2 dígitos
+        const month = String(date.getMonth() + 1).padStart(2, '0');  // Obtener el mes (1-12)
+        const year = date.getFullYear();  // Obtener el año
+        const hours = String(date.getHours()).padStart(2, '0');  // Obtener las horas
+        const minutes = String(date.getMinutes()).padStart(2, '0');  // Obtener los minutos
+        
+        return `${day}/${month}/${year} ${hours}:${minutes}`;  // Formato: DD/MM/YYYY HH:MM
+    }
+
+    // Usamos el ticketId obtenido del backend
+    var ticketId = {{ $ticketId }};  // Este ticketId debe ser pasado desde el backend en la vista
+
+    // Hacer una solicitud AJAX para obtener las visitas
+    fetch(`/api/obtenerVisitas/${ticketId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Verifica si hay visitas
+            if (data && data.length > 0) {
+                // Limpiar el contenido actual de la lista
+                const visitasList = document.getElementById('visitasList');
+                visitasList.innerHTML = '';
+
+                // Recorrer las visitas y agregar a la lista
+                data.forEach(visita => {
+                    // Formatear las fechas de inicio y final
+                    const fechaInicio = formatDate(visita.fecha_inicio);
+                    const fechaFinal = formatDate(visita.fecha_final);
+
+                    const li = document.createElement('li');
+                    li.textContent = `Fecha Inicio: ${fechaInicio}, Fecha Final: ${fechaFinal}`;
+                    visitasList.appendChild(li);
+                });
+
+                // Asegurarse de que el contenedor esté visible
+                document.getElementById('visitasContainer').style.display = 'block';
+            } else {
+                alert("No hay visitas para este ticket.");
+            }
+        })
+        .catch(error => {
+            console.error('Error al obtener las visitas:', error);
+            alert('Ocurrió un error al obtener las visitas.');
+        });
+</script>
 
 
 
@@ -323,11 +412,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 </script>
-
-
-
-
-
 
 
 

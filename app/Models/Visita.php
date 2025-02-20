@@ -97,6 +97,6 @@ class Visita extends Model
 	// Relación con Usuario (Técnico)
     public function tecnico()
     {
-        return $this->belongsTo(Usuario::class, 'idTecnico', 'idUsuario');
+        return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
     }
 }

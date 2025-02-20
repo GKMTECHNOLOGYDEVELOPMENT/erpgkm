@@ -75,8 +75,6 @@ class OrdenesTrabajoController extends Controller
         }
     }
 
-    
-
 
     // Mostrar la vista principal según el rol del usuario
     public function smarttable()
@@ -138,7 +136,8 @@ class OrdenesTrabajoController extends Controller
         ));
     }
 
-    
+   
+
 
 
     public function storesmart(Request $request)
@@ -208,9 +207,8 @@ class OrdenesTrabajoController extends Controller
             Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
 
             // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
-            return redirect()->route('edit', ['id' => $ticket->idTickets])
-            ->with('success', 'Orden de trabajo creada correctamente.');
-              
+            return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
+            ->with('success', 'Orden de trabajo creada correctamente.');        
         } catch (\Illuminate\Validation\ValidationException $e) {
             // En caso de error en la validación
             Log::error('Errores de validación', ['errors' => $e->errors()]);
@@ -287,6 +285,10 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+    
+
+
+
 
 
     public function getClientesGenerales($idCliente)
@@ -331,7 +333,7 @@ class OrdenesTrabajoController extends Controller
         }
     }
 
-    
+
 
     // Eliminar una orden de trabajo
     public function destroy($id)
@@ -352,7 +354,7 @@ class OrdenesTrabajoController extends Controller
         return Excel::download(new TicketExport(), 'tickets.xlsx');
     }
 
-    
+
     // Exportar todas las órdenes de trabajo a PDF
     public function exportAllPDF()
     {

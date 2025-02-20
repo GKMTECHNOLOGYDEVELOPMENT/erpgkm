@@ -11,6 +11,7 @@ class TicketFlujo extends Model
 
     // Nombre de la tabla, ya que Laravel por convención espera el plural de la clase (ticketflujos)
     protected $table = 'ticketflujo';
+	public $timestamps = false;
 
     // Definir los campos que son asignables en masa
     protected $fillable = [
