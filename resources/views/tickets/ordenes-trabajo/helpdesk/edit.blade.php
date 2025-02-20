@@ -105,7 +105,9 @@
                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.detalle.index', ['orden' => $orden, 'modelos' => $modelos])
                 </div>
                 <div x-show="tab === 'visitas'">
+                    <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index')
+                    </div>
                 </div>
                 <div x-show="tab === 'informacion'">
                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.informacion.index')

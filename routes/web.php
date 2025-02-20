@@ -34,6 +34,7 @@ use App\Http\Controllers\Apps\ScrumboardController;
 use App\Http\Controllers\Apps\ContactsController;
 use App\Http\Controllers\Apps\CalendarController;
 use App\Models\Clientegeneral;
+use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Models\Subsidiario;
 use Illuminate\Http\Client\Request;
 use App\Exports\ClientesGeneralExport;
@@ -302,16 +303,16 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart')->middleware('auth');
     Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth');
     Route::get('/export-excel', [OrdenesTrabajoController::class, 'exportToExcel'])->name('export.excel');
-    
+
+
     // ***** RUTAS PARA HELPDESK *****
-    Route::get('/helpdesk', [OrdenesTrabajoController::class, 'helpdesk'])->name('helpdesk');
-    Route::get('/create-helpdesk', [OrdenesTrabajoController::class, 'createhelpdesk'])->name('createhelpdesk')->middleware('auth');
-    Route::post('/storehelpdesk', [OrdenesTrabajoController::class, 'storehelpdesk'])->name('storehelpdesk');
-    Route::get('helpdesk/{id}/edit', [OrdenesTrabajoController::class, 'editHelpdesk'])->name('helpdesk.edit')->middleware('auth');
-    Route::put('/helpdesk/update/{id}', [OrdenesTrabajoController::class, 'updateHelpdesk'])->name('helpdesk.update');
-    Route::get('/export-helpdesk-excel', [OrdenesTrabajoController::class, 'exportHelpdeskToExcel'])->name('export.helpdesk.excel');
-
-
+    Route::get('/helpdesk', [OrdenesHelpdeskController::class, 'helpdesk'])->name('helpdesk');
+    Route::get('/create-helpdesk', [OrdenesHelpdeskController::class, 'createhelpdesk'])->name('createhelpdesk');
+    Route::post('/storehelpdesk', [OrdenesHelpdeskController::class, 'storehelpdesk'])->name('storehelpdesk')->middleware('auth');
+    Route::get('/helpdesk/{id}/edit', [OrdenesHelpdeskController::class, 'editHelpdesk'])->name('helpdesk.edit');
+    Route::put('/helpdesk/update/{id}', [OrdenesHelpdeskController::class, 'updateHelpdesk'])->name('helpdesk.update');
+    Route::get('/export-helpdesk-excel', [OrdenesHelpdeskController::class, 'exportHelpdeskToExcel'])->name('export.helpdesk.excel');
+    Route::get('/helpdesk/get-all', [OrdenesHelpdeskController::class, 'getAll'])->name('helpdesk.getAll');
 
     // ***** RUTAS GENERALES *****
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update');
@@ -327,6 +328,9 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     // ***** VALIDACIONES *****
     Route::post('/check-nombre', [OrdenesTrabajoController::class, 'checkNombre'])->name('checkNombre');
 });
+
+
+
 
 
 // Agrega esta ruta en tu archivo de rutas web.php
