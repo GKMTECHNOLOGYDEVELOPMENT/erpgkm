@@ -118,7 +118,7 @@
 
 
 <!-- Nueva Card: Historial de Estados -->
-<div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">
+<div id="estadosCard" class="mt-4 p-4 rounded-lg">
     {{-- <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span> --}}
     <!-- Tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">

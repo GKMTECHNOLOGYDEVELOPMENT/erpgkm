@@ -27,7 +27,7 @@ document.addEventListener('alpine:init', () => {
 
         fetchDataAndInitTable(page = 1) {
             this.isLoading = true;
-            let url = `/api/ordenes?page=${page}`;
+            let url = `/api/ordenes?page=${page}&tipoTicket=1`;
             if (this.marcaFilter) url += `&marca=${this.marcaFilter}`;
             if (this.clienteGeneralFilter) url += `&clienteGeneral=${this.clienteGeneralFilter}`;
             if (this.startDate) url += `&start_date=${this.startDate}`;

@@ -301,14 +301,16 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/create-smart/', [OrdenesTrabajoController::class, 'createsmart'])->name('createsmart')->middleware('auth');
     Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart')->middleware('auth');
     Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth');
-
+    Route::get('/export-excel', [OrdenesTrabajoController::class, 'exportToExcel'])->name('export.excel');
+    
     // ***** RUTAS PARA HELPDESK *****
     Route::get('/helpdesk', [OrdenesTrabajoController::class, 'helpdesk'])->name('helpdesk');
     Route::get('/create-helpdesk', [OrdenesTrabajoController::class, 'createhelpdesk'])->name('createhelpdesk')->middleware('auth');
     Route::post('/storehelpdesk', [OrdenesTrabajoController::class, 'storehelpdesk'])->name('storehelpdesk');
     Route::get('helpdesk/{id}/edit', [OrdenesTrabajoController::class, 'editHelpdesk'])->name('helpdesk.edit')->middleware('auth');
-
     Route::put('/helpdesk/update/{id}', [OrdenesTrabajoController::class, 'updateHelpdesk'])->name('helpdesk.update');
+    Route::get('/export-helpdesk-excel', [OrdenesTrabajoController::class, 'exportHelpdeskToExcel'])->name('export.helpdesk.excel');
+
 
 
     // ***** RUTAS GENERALES *****
@@ -316,7 +318,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::delete('/{id}', [OrdenesTrabajoController::class, 'destroy'])->name('destroy');
 
     // ***** EXPORTACIÓN DE DATOS *****
-    Route::get('/export-excel', [OrdenesTrabajoController::class, 'exportToExcel'])->name('export.excel');
+
     Route::get('/export-pdf', [OrdenesTrabajoController::class, 'exportAllPDF'])->name('export.pdf');
 
     // ***** OBTENCIÓN DE DATOS *****

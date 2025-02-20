@@ -24,6 +24,7 @@ use App\Models\TipoDocumento; // Reemplaza con el modelo correcto
 use App\Models\Visita;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TicketExport;
+use App\Exports\HelpdeskTicketExport; // Importa el nuevo exportador
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 use Illuminate\Support\Facades\Validator;
@@ -223,8 +224,8 @@ class OrdenesTrabajoController extends Controller
             // Log de depuración: mostrar los datos validados
             Log::debug('Datos validados:', $validatedData);
 
-            // Crear la nueva orden de trabajo
-            Ticket::create([
+            // 🔹 Guardar el ticket en una variable
+            $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['numero_ticket'],
                 'idClienteGeneral' => $validatedData['idClienteGeneral'],
                 'idCliente' => $validatedData['idCliente'],
@@ -235,27 +236,24 @@ class OrdenesTrabajoController extends Controller
                 'idEstadoots' => 17, // Estado inicial de la orden de trabajo
                 'fallaReportada' => $validatedData['fallaReportada'],
                 'fecha_creacion' => now(), // Establece la fecha y hora actuales
+                'idTipotickets' => 2, // Asignar tipo de ticket
             ]);
 
             // Log de depuración: confirmar que se creó la orden de trabajo
             Log::debug('Orden de trabajo creada correctamente.');
 
-            // Redirigir con un mensaje de éxito
-            return redirect()->route('ordenes.index')->with('success', 'Orden de trabajo creada correctamente.');
+            // 🔹 Redirigir a la vista de edición correcta
+            return redirect()->route('ordenes.helpdesk.edit', ['id' => $ticket->idTickets])
+                ->with('success', 'Orden de trabajo creada correctamente.');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Log de depuración: mostrar los errores de validación
             Log::error('Errores de validación:', $e->errors());
-
-            // Si la validación falla, redirigir con los errores
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            // Log de depuración: mostrar el error general
             Log::error('Error al crear la orden de trabajo: ' . $e->getMessage());
-
-            // En caso de cualquier otro error
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
+
 
 
 
@@ -299,6 +297,8 @@ class OrdenesTrabajoController extends Controller
                 // 'idEstadflujo' => 1, // Estado inicial de la orden de trabajo
                 'idUsuario' => auth()->id(), // ID del usuario autenticado
                 'fecha_creacion' => now(), // Fecha de creación
+                'idTipotickets' => 1, // Fecha de creación
+
             ]);
 
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
@@ -324,8 +324,9 @@ class OrdenesTrabajoController extends Controller
             Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
 
             // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
-            return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
-                ->with('success', 'Orden de trabajo creada correctamente.');
+            return redirect()->route('edit', ['id' => $ticket->idTickets])
+            ->with('success', 'Orden de trabajo creada correctamente.');
+              
         } catch (\Illuminate\Validation\ValidationException $e) {
             // En caso de error en la validación
             Log::error('Errores de validación', ['errors' => $e->errors()]);
@@ -520,6 +521,11 @@ class OrdenesTrabajoController extends Controller
         return Excel::download(new TicketExport(), 'tickets.xlsx');
     }
 
+    public function exportHelpdeskToExcel()
+    {
+        return Excel::download(new HelpdeskTicketExport(), 'helpdesk_tickets.xlsx');
+    }
+
     // Exportar todas las órdenes de trabajo a PDF
     public function exportAllPDF()
     {
@@ -543,17 +549,20 @@ class OrdenesTrabajoController extends Controller
             'estado_ot:idEstadoots,descripcion,color',
             'marca:idMarca,nombre',
             'modelo.categoria:idCategoria,nombre', // Cargar la categoría a través del modelo
-            'estadoflujo:idEstadflujo,descripcion,color', // Cargar toda la relación estadoflujo
-
-
+            'estadoflujo:idEstadflujo,descripcion,color' // Cargar toda la relación estadoflujo
         ]);
 
-        // Filtro por marca si es proporcionado
+        // 🔹 Filtrar por tipo de ticket (1 o 2), si no se proporciona, por defecto muestra ambos
+        if ($request->has('tipoTicket') && in_array($request->tipoTicket, [1, 2])) {
+            $ordenesQuery->where('idTipotickets', $request->tipoTicket);
+        }
+
+        // 🔹 Filtro por marca (si es proporcionado)
         if ($request->has('marca') && $request->marca != '') {
             $ordenesQuery->where('idMarca', $request->marca);
         }
 
-        // Filtro por cliente general si es proporcionado
+        // 🔹 Filtro por cliente general (si es proporcionado)
         if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
             $ordenesQuery->where('idClienteGeneral', $request->clienteGeneral);
         }
@@ -561,6 +570,8 @@ class OrdenesTrabajoController extends Controller
         $ordenes = $ordenesQuery->paginate(10);
         return response()->json($ordenes);
     }
+
+
 
     public function getClientesGeneralesss($idCliente)
     {
