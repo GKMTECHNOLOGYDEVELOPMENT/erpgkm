@@ -20,6 +20,7 @@ use App\Models\Marca; // Reemplaza con el modelo correcto
 use App\Models\Modelo; // Reemplaza con el modelo correcto
 use App\Models\Modificacion;
 use App\Models\Ticketapoyo;
+use App\Models\TicketFlujo;
 use App\Models\TipoDocumento; // Reemplaza con el modelo correcto
 use App\Models\Visita;
 use Illuminate\Support\Facades\DB;
@@ -301,23 +302,24 @@ public function storesmart(Request $request)
 
         Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
 
-        // Guardar el flujo de la orden de trabajo en la tabla ticketflujo
-        $ticketFlujo = DB::table('ticketflujo')->insertGetId([
-            'idTicket' => $ticket->idTickets, // ID del ticket recién creado
-            'idEstadflujo' => 1,  // Estado inicial de flujo
-            'fecha_creacion' => now(), // Fecha y hora actual de la creación
-        ]);
+// Guardar el flujo de trabajo
+$ticketFlujo = DB::table('ticketflujo')->insertGetId([
+    'idTicket' => $ticket->idTickets, // ID del ticket recién creado
+    'idEstadflujo' => 1,  // Estado inicial de flujo
+    'fecha_creacion' => now(), // Fecha y hora actual de la creación
+]);
 
-        Log::info('Flujo de trabajo guardado correctamente', [
-            'idTicket' => $ticket->idTickets,
-            'idEstadflujo' => 1,
-            'fecha_creacion' => now(),
-            'idTicketFlujo' => $ticketFlujo
-        ]);
+// Verificar que el valor de $ticketFlujo es correcto (debería ser solo el ID)
+Log::info('Flujo de trabajo guardado correctamente', [
+    'idTicket' => $ticket->idTickets,
+    'idEstadflujo' => 1,
+    'fecha_creacion' => now(),
+    'idTicketFlujo' => $ticketFlujo // Esto debería ser un ID, no un objeto
+]);
 
-        // Ahora actualizamos el ticket con el idTicketFlujo recién generado
-        $ticket->idTicketFlujo = $ticketFlujo;  // Asignamos el idTicketFlujo al ticket
-        $ticket->save();  // Guardamos el ticket con el idTicketFlujo
+// Actualizar el ticket con el idTicketFlujo recién generado
+$ticket->idTicketFlujo = $ticketFlujo; // Aquí asignamos solo el ID
+$ticket->save();  // Guardamos el ticket con el idTicketFlujo
 
         Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
 
@@ -389,36 +391,6 @@ public function edit($id)
 }
 
 
-    public function editHelpdesk($id)
-    {
-        $usuario = Auth::user();
-        $rol = $usuario->rol->nombre ?? 'Sin Rol';
-    
-        // Obtener la orden con relaciones
-        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
-                       ->findOrFail($id);
-    
-        // Obtener listas necesarias para el formulario
-        $clientes = Cliente::all();
-        $clientesGenerales = ClienteGeneral::all();
-        $estadosFlujo = EstadoFlujo::all();
-        $modelos = Modelo::all();
-        $tiendas = Tienda::all();
-        $marcas = Marca::all();
-        
-        // 🔹 Aquí se añade la variable $usuarios para solucionar el error
-        $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
-        $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
-    
-        return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
-            'orden', 'usuarios', 'tiposServicio', 'modelos', 'clientes', 
-            'clientesGenerales', 'tiendas', 'marcas', 'estadosFlujo'
-        ));
-    }
-    
-
-
-
 
     public function getClientesGenerales($idCliente)
     {
@@ -461,25 +433,6 @@ public function edit($id)
             return redirect()->route('ordenes-trabajo.index')->with('error', 'Ocurrió un error al actualizar la orden de trabajo.');
         }
     }
-
-    public function updateHelpdesk(Request $request, $id)
-    {
-        $validatedData = $request->validate([
-            'numero_ticket' => 'required|string|max:255',
-            'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
-            'idCliente' => 'required|integer|exists:cliente,idCliente',
-            'idTienda' => 'required|integer|exists:tienda,idTienda',
-            'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
-            'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
-            'fallaReportada' => 'required|string|max:255',
-        ]);
-
-        $orden = Ticket::findOrFail($id);
-        $orden->update($validatedData);
-
-        return redirect()->route('helpdesk.edit', ['id' => $id])->with('success', 'Orden actualizada correctamente.');
-    }
-
 
     // Eliminar una orden de trabajo
     public function destroy($id)
@@ -956,17 +909,49 @@ public function guardarVisita(Request $request)
 
 
 public function obtenerVisitas($ticketId) {
-    // Obtener todas las visitas del ticket
-    $visitas = Visita::where('idTickets', $ticketId)->get();
+    // Obtener todas las visitas del ticket y cargar la relación 'tecnico'
+    $visitas = Visita::where('idTickets', $ticketId)
+        ->with('tecnico') // Cargar la relación 'tecnico'
+        ->get();
 
-    // Convertir las fechas a formato ISO 8601
+    // Convertir las fechas a formato ISO 8601 y agregar el nombre del técnico
     $visitas->each(function($visita) {
         $visita->fecha_inicio = $visita->fecha_inicio->toIso8601String();
         $visita->fecha_final = $visita->fecha_final->toIso8601String();
+
+        // Verificar si existe un técnico antes de acceder a sus datos
+        if ($visita->tecnico) {
+            // Concatenar el nombre completo del técnico
+            $visita->nombre_tecnico = $visita->tecnico->Nombre . ' ' . $visita->tecnico->apellidoPaterno . ' ' . $visita->tecnico->apellidoMaterno;
+        } else {
+            // Si no hay técnico asignado, asignar un valor por defecto
+            $visita->nombre_tecnico = 'Técnico no asignado';
+        }
     });
 
     return response()->json($visitas);
 }
+
+
+public function actualizarVisita(Request $request, $id)
+{
+    // Encontrar la visita por su ID
+    $visita = Visita::find($id);
+
+    // Si no se encuentra la visita, retornar error
+    if (!$visita) {
+        return response()->json(['message' => 'Visita no encontrada'], 404);
+    }
+
+    // Actualizar el campo fechas_desplazamiento con la fecha actual
+    $visita->fechas_desplazamiento = now();  // `now()` obtiene la fecha y hora actual del servidor
+    $visita->save();
+
+    // Retornar la visita actualizada
+    return response()->json($visita);
+}
+
+
 
 
 

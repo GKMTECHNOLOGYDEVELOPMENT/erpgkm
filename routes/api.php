@@ -60,6 +60,7 @@ Route::delete('/proveedores/{id}', [ProveedoresController::class, 'destroy']);
 Route::delete('/cast/{id}', [CastController::class, 'destroy']);
 Route::get('marcas', [OrdenesTrabajoController::class, 'marcaapi']);
 Route::get('/clientegenerales', [OrdenesTrabajoController::class, 'clienteGeneralApi']);
+Route::patch('/api/actualizarVisita/{id}', [OrdenesTrabajoController::class, 'actualizarVisita']);
 
 
 // Ruta para obtener las visitas de un ticket
