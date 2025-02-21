@@ -309,10 +309,16 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/helpdesk', [OrdenesHelpdeskController::class, 'helpdesk'])->name('helpdesk');
     Route::get('/create-helpdesk', [OrdenesHelpdeskController::class, 'createhelpdesk'])->name('createhelpdesk');
     Route::post('/storehelpdesk', [OrdenesHelpdeskController::class, 'storehelpdesk'])->name('storehelpdesk')->middleware('auth');
-    Route::get('/helpdesk/{id}/edit', [OrdenesHelpdeskController::class, 'editHelpdesk'])->name('helpdesk.edit');
+    Route::get('/helpdesk/levantamiento/{id}/edit', [OrdenesHelpdeskController::class, 'editHelpdesk'])->name('helpdesk.levantamiento.edit');
     Route::put('/helpdesk/update/{id}', [OrdenesHelpdeskController::class, 'updateHelpdesk'])->name('helpdesk.update');
     Route::get('/export-helpdesk-excel', [OrdenesHelpdeskController::class, 'exportHelpdeskToExcel'])->name('export.helpdesk.excel');
     Route::get('/helpdesk/get-all', [OrdenesHelpdeskController::class, 'getAll'])->name('helpdesk.getAll');
+
+
+    Route::get('/helpdesk/soporte/{id}/edit', [OrdenesHelpdeskController::class, 'editSoporte'])
+    ->name('helpdesk.soporte.edit');
+
+
 
     // ***** RUTAS GENERALES *****
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update');

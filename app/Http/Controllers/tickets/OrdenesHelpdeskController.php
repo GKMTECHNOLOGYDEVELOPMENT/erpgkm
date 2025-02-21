@@ -95,7 +95,6 @@ class OrdenesHelpdeskController extends Controller
     public function storehelpdesk(Request $request)
     {
         try {
-            // Log de depuración: mostrar los datos de la solicitud
             Log::debug('Datos recibidos en storehelpdesk:', $request->all());
 
             // Validar los datos
@@ -109,10 +108,9 @@ class OrdenesHelpdeskController extends Controller
                 'fallaReportada' => 'required|string|max:255',
             ]);
 
-            // Log de depuración: mostrar los datos validados
             Log::debug('Datos validados:', $validatedData);
 
-            // 🔹 Guardar el ticket en una variable
+            // Guardar la orden de trabajo
             $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['numero_ticket'],
                 'idClienteGeneral' => $validatedData['idClienteGeneral'],
@@ -120,19 +118,25 @@ class OrdenesHelpdeskController extends Controller
                 'idTienda' => $validatedData['idTienda'],
                 'idTecnico' => $validatedData['idTecnico'],
                 'tipoServicio' => $validatedData['tipoServicio'],
-                'idUsuario' => auth()->id(), // ID del usuario autenticado
-                'idEstadoots' => 17, // Estado inicial de la orden de trabajo
+                'idUsuario' => auth()->id(),
+                'idEstadoots' => 17,
                 'fallaReportada' => $validatedData['fallaReportada'],
-                'fecha_creacion' => now(), // Establece la fecha y hora actuales
-                'idTipotickets' => 2, // Asignar tipo de ticket
+                'fecha_creacion' => now(),
+                'idTipotickets' => 2,
             ]);
 
-            // Log de depuración: confirmar que se creó la orden de trabajo
             Log::debug('Orden de trabajo creada correctamente.');
 
-            // 🔹 Redirigir a la vista de edición correcta
-            return redirect()->route('ordenes.helpdesk.edit', ['id' => $ticket->idTickets])
-                ->with('success', 'Orden de trabajo creada correctamente.');
+            // 🔹 Redirigir según el tipo de servicio seleccionado
+            if ($validatedData['tipoServicio'] == 1) {
+                return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
+                    ->with('success', 'Orden de trabajo creada correctamente (Levantamiento de Información).');
+            } elseif ($validatedData['tipoServicio'] == 2) {
+                return redirect()->route('ordenes.helpdesk.soporte.edit', ['id' => $ticket->idTickets])
+                    ->with('success', 'Orden de trabajo creada correctamente (Soporte On Site).');
+            } else {
+                return redirect()->route('ordenes.helpdesk.index')->with('success', 'Orden de trabajo creada correctamente.');
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Errores de validación:', $e->errors());
             return redirect()->back()->withErrors($e->errors())->withInput();
@@ -141,6 +145,7 @@ class OrdenesHelpdeskController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
+
 
     public function editHelpdesk($id)
     {
@@ -175,6 +180,38 @@ class OrdenesHelpdeskController extends Controller
             'estadosFlujo'
         ));
     }
+    public function editSoporte($id)
+    {
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
+
+        // Obtener la orden con relaciones
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
+            ->findOrFail($id);
+
+        // Obtener listas necesarias para el formulario
+        $clientes = Cliente::all();
+        $clientesGenerales = ClienteGeneral::all();
+        $estadosFlujo = EstadoFlujo::all();
+        $modelos = Modelo::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+        $usuarios = Usuario::all();
+        $tiposServicio = TipoServicio::all();
+
+        return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
+            'orden',
+            'usuarios',
+            'tiposServicio',
+            'modelos',
+            'clientes',
+            'clientesGenerales',
+            'tiendas',
+            'marcas',
+            'estadosFlujo'
+        ));
+    }
+
 
 
     public function updateHelpdesk(Request $request, $id)
