@@ -38,13 +38,10 @@
 </div>
 
 <!-- Botones adicionales -->
-<div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <button type="button" class="btn btn-primary w-full" onclick="finalizarServicio()">✅ Finalizar Servicio</button>
-    <button type="button" class="btn btn-secondary w-full" onclick="coordinarRecojo()">📅 Coordinar Recojo</button>
-    <button type="button" class="btn btn-warning w-full" onclick="fueraDeGarantia()">⚠️ Fuera de Garantía</button>
-    <button type="button" class="btn btn-info w-full" onclick="pendienteRepuestos()">⏳ Pendiente por Coordinar
-        Repuestos</button>
+<div class="mt-10 flex justify-center">
+    <button type="button" class="btn btn-primary w-full sm:w-auto" onclick="finalizarServicio()">✅ Finalizar Servicio</button>
 </div>
+
 
 <!-- Incluir SignaturePad.js -->
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
