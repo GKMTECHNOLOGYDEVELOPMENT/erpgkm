@@ -99,4 +99,13 @@ class Visita extends Model
     {
         return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
     }
+
+
+	 // Relación con el modelo CondicionesTicket
+	 public function condicionesTickets()
+	 {
+		 return $this->hasMany(CondicionesTicket::class, 'idVisitas', 'idVisitas');
+	 }
+
+	
 }

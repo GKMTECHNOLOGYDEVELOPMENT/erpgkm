@@ -30,7 +30,7 @@ class AnexosVisita extends Model
 
 	protected $casts = [
 		'idAnexoVisitas' => 'int',
-		'foto' => 'varbinary',
+
 		'idTipovisita' => 'int',
 		'idVisitas' => 'int'
 	];
