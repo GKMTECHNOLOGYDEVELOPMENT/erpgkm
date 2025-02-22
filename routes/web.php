@@ -386,6 +386,11 @@ Route::post('/validar/celularproveedores', [ProveedoresController::class, 'valid
 Route::post('/validar/nombreproveedores', [ProveedoresController::class, 'validarNombreProveedores'])->name('validar.nombreproveedores');
 
 
+
+
+Route::get('/ticket/{id}/estados', [OrdenesTrabajoController::class, 'loadEstados'])->name('ticket.loadEstados');
+
+
 Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');
 Route::view('/apps/invoice/add', 'apps.invoice.add');

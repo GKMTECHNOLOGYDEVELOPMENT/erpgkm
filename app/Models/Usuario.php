@@ -208,4 +208,9 @@ class Usuario extends Authenticatable
     {
         return $this->hasMany(TicketApoyo::class, 'idTecnico', 'idUsuario');
     }
+
+	public function usuario()
+	{
+		return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
+	}
 }

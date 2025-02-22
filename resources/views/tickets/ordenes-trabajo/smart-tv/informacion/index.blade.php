@@ -7,26 +7,35 @@
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 items-start">
     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="md:col-span-1 mt-4">
-            <label for="estado" class="block text-sm font-medium">Estado</label>
-            <select id="estado" name="estado" class="form-input w-full">
-                <option value="Detalles Esteticos">Detalles Estéticos</option>
-                <option value="Diagnostico">Diagnóstico</option>
-                <option value="Solución">Solución</option>
-                <option value="Observaciones">Observaciones</option>
-            </select>
-        </div>
+    <div class="md:col-span-1 mt-4">
+    <label for="estado" class="block text-sm font-medium">Estado</label>
+    <select id="estado" name="estado" class="form-input w-full" onchange="actualizarColorEstado(this)">
+        @foreach($estadosOTS as $estado)
+            <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}">
+                {{ $estado->descripcion }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
-        <div class="md:col-span-2">
-            <label for="justificacion" class="block text-sm font-medium">Justificación</label>
-            <textarea id="justificacion" name="justificacion" rows="3" class="form-input w-full"></textarea>
-        </div>
+<div class="md:col-span-2">
+    <label for="justificacion" class="block text-sm font-medium">Justificación</label>
+    <textarea id="justificacion" name="justificacion" rows="3" class="form-input w-full"></textarea>
+</div>
     </div>
 
     <div class="col-span-1 md:col-span-2 flex justify-end mt-2">
         <button id="guardarEstado" class="btn btn-primary px-6 py-2">Guardar</button>
     </div>
 </div>
+
+
+<style>
+    .hidden {
+    display: none;
+}
+</style>
+
 
 <div id="cardFotos" class="hidden mt-6 p-5 rounded-lg">
     <span class="text-lg font-semibold mb-4 badge bg-success">Fotos</span>
@@ -62,6 +71,8 @@
         <div class="swiper-pagination"></div>
     </div>
 </div>
+
+
 
 <!-- Modal para agregar imagen -->
 <div id="modalAgregarImagen" class="hidden fixed inset-0 bg-[black]/60 z-[999] flex justify-center items-center">
@@ -321,4 +332,84 @@
         // ✅ Renderizar imágenes al cargar la página
         renderizarImagenes();
     });
+</script>
+
+
+<script>
+    document.getElementById("guardarEstado").addEventListener("click", function() {
+    const estadoSelect = document.getElementById("estado");
+    const estadoId = estadoSelect.value;
+    const justificacion = document.getElementById("justificacion").value;
+
+    // Validar que se haya seleccionado un estado y se haya ingresado una justificación
+    if (!estadoId || !justificacion.trim()) {
+        toastr.error("Debe seleccionar un estado y escribir una justificación.");
+        return;
+    }
+
+    // Enviar los datos al servidor
+    fetch('/api/guardarEstado', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            idEstadoots: estadoId,
+            justificacion: justificacion.trim(),
+            idTickets: {{ $ticket->idTickets }}, // Pasar el ID del ticket
+            idVisitas: {{ $visitaId ?? 'null' }} // Pasar el ID de la visita (si existe)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            toastr.success("Estado guardado correctamente.");
+        } else {
+            toastr.error("Error al guardar el estado.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        toastr.error("Hubo un error al guardar el estado.");
+    });
+});
+</script>
+
+<script>
+document.getElementById("estado").addEventListener("change", function () {
+    const estadoId = this.value;
+    const ticketId = {{ $ticket->idTickets }};
+    const visitaId = {{ $visitaId ?? 'null' }};
+
+    // Obtener la justificación del estado seleccionado
+    fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar la justificación en el textarea
+                document.getElementById("justificacion").value = data.justificacion || "";
+            } else {
+                console.error("Error al obtener la justificación:", data.error);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+
+    // Verificar si el estado seleccionado es igual a 20
+    if (estadoId == 20) {
+    const cardFotos = document.getElementById("cardFotos");
+    if (cardFotos) {
+        cardFotos.style.display = "block"; // Mostrar el elemento
+        console.log("Card de fotos mostrada porque estadoId es 20");
+    }
+} else {
+    const cardFotos = document.getElementById("cardFotos");
+    if (cardFotos) {
+        cardFotos.style.display = "none"; // Ocultar el elemento
+        console.log("Card de fotos oculta porque estadoId no es 20");
+    }
+}
+});
 </script>

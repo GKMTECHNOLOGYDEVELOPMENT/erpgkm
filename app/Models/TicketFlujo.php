@@ -17,6 +17,7 @@ class TicketFlujo extends Model
     protected $fillable = [
         'idTicket',
         'idEstadflujo',
+        'idUsuario',
         'fecha_creacion'
     ];
 
@@ -31,4 +32,10 @@ class TicketFlujo extends Model
     {
         return $this->belongsTo(EstadoFlujo::class, 'idEstadflujo', 'idEstadflujo');
     }
+
+      // Relación con la tabla estado_flujo
+      public function usuario()
+      {
+          return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
+      }
 }

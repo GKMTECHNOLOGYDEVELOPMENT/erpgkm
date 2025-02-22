@@ -211,4 +211,10 @@ class Ticket extends Model
         return $this->belongsTo(TicketFlujo::class, 'idTicketFlujo', 'idTicketFlujo');
     }
 
+	// Relación con el modelo CondicionesTicket
+    public function condicionesTickets()
+    {
+        return $this->hasMany(CondicionesTicket::class, 'idTickets', 'idTickets');
+    }
+
 }

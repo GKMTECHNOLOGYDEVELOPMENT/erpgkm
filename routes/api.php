@@ -60,7 +60,21 @@ Route::delete('/proveedores/{id}', [ProveedoresController::class, 'destroy']);
 Route::delete('/cast/{id}', [CastController::class, 'destroy']);
 Route::get('marcas', [OrdenesTrabajoController::class, 'marcaapi']);
 Route::get('/clientegenerales', [OrdenesTrabajoController::class, 'clienteGeneralApi']);
-Route::patch('/api/actualizarVisita/{id}', [OrdenesTrabajoController::class, 'actualizarVisita']);
+Route::patch('/actualizarVisita/{id}', [OrdenesTrabajoController::class, 'actualizarVisita']);
+// api.php
+
+Route::post('/guardarAnexoVisita', [OrdenesTrabajoController::class, 'guardarAnexoVisita']);
+// Ruta para guardar la foto
+Route::post('/subirFoto', [OrdenesTrabajoController::class, 'guardarFoto']);
+Route::get('/verificarFoto/{idVisitas}', [OrdenesTrabajoController::class, 'verificarFotoExistente']);
+Route::get('/verificarRegistroAnexo/{idVisitas}', [OrdenesTrabajoController::class, 'verificarRegistroAnexo']);
+Route::post('/guardarCondiciones', [OrdenesTrabajoController::class, 'guardar']);
+
+
+
+Route::post('/guardarEstado', [OrdenesTrabajoController::class, 'guardarestado']);
+Route::get('/obtenerJustificacion', [OrdenesTrabajoController::class, 'obtenerJustificacion']);
+Route::post('/guardarImagenes', [OrdenesTrabajoController::class, 'guardarImagenes']);
 
 
 // Ruta para obtener las visitas de un ticket

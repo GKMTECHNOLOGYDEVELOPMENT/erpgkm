@@ -12,102 +12,235 @@
     <div id="visitasList" class="space-y-4"></div>
 </div>
 
-<script>
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true };
-        return date.toLocaleString('en-US', options).replace(',', '');
+
+
+
+
+
+<!-- Modal de Detalles de Visita -->
+<div x-data="{ openDetallesVisita: false }" class="mb-5" @toggle-modal-detalles-visita.window="openDetallesVisita = !openDetallesVisita">
+    <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openDetallesVisita && '!block'">
+        <div class="flex items-start justify-center min-h-screen px-4" @click.self="openDetallesVisita = false">
+            <div x-show="openDetallesVisita" x-transition.duration.300
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8">
+                <!-- Header -->
+                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                    <h5 class="font-bold text-lg">Detalles de la Visita</h5>
+                    <button type="button" class="text-white-dark hover:text-dark" @click="openDetallesVisita = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-scroll p-5 space-y-4">
+                    <!-- Contenido del modal -->
+                    <div>
+                        <h4 class="text-lg font-semibold">Información de la Visita</h4>
+                        <p><strong>Nombre:</strong> <span id="detalleNombre"></span></p>
+                        <p><strong>Fecha de Programación:</strong> <span id="detalleFechaProgramada"></span></p>
+                        <p><strong>Fecha de Asignación:</strong> <span id="detalleFechaAsignada"></span></p>
+                        <p><strong>Fecha de Desplazamiento:</strong> <span id="detalleFechaDesplazamiento"></span></p>
+                        <p><strong>Fecha de Llegada:</strong> <span id="detalleFechaLlegada"></span></p>
+                        <p><strong>Fecha de Inicio:</strong> <span id="detalleFechaInicio"></span></p>
+                        <p><strong>Fecha de Finalización:</strong> <span id="detalleFechaFinal"></span></p>
+                        <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
+                    </div>
+                    <!-- Botones -->
+                    <div class="flex justify-end items-center mt-4">
+                        <button type="button" class="btn btn-outline-danger" @click="openDetallesVisita = false">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div x-data="{
+    openCondiciones: false,
+    condiciones: {
+        esTitular: true,
+        noAtiende: false,
+        titularNoEsTitular: { nombre: '', dni: '', telefono: '' },
+        motivoNoAtiende: ''
+    },
+    guardarCondiciones(condiciones, ticketId, visitaId) {
+if (!condiciones.esTitular) {
+if (!condiciones.titularNoEsTitular.nombre.trim()) {
+            toastr.error('El campo Nombre no puede estar vacío.');
+            return;
+
+             }
+        if (!condiciones.titularNoEsTitular.dni.trim()) {
+            toastr.error('El campo DNI no puede estar vacío.');
+            return;
+        }
+        if (!condiciones.titularNoEsTitular.telefono.trim()) {
+            toastr.error('El campo Teléfono no puede estar vacío.');
+            return;
+        }
     }
 
-    var ticketId = {{ $ticketId }};
+    // Validar campo de motivo si no se atiende el servicio
+    if (condiciones.noAtiende && !condiciones.motivoNoAtiende.trim()) {
+        toastr.error('El campo Motivo no puede estar vacío.');
+        return;
+    }
 
-    fetch(`/api/obtenerVisitas/${ticketId}`)
-    .then(response => response.json())
-    .then(data => {
-        const visitasList = document.getElementById('visitasList');
-        visitasList.innerHTML = '';
 
-        if (data && data.length > 0) {
-            data.forEach(visita => {
-                const fechaInicio = formatDate(visita.fecha_inicio);
-                const fechaFinal = formatDate(visita.fecha_final);
-                const nombreTecnico = visita.nombre_tecnico; // Nombre del técnico
 
-                // Tarjeta de Visita
-                const visitaCard = document.createElement('div');
-                visitaCard.className = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105';
-                visitaCard.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-lg font-semibold text-gray-800">${visita.nombre}</h3>
-                        <button class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors">
-                            Detalles de Visita
+
+        // Preparar los datos para enviar
+        const datos = {
+            idTickets: ticketId,
+            idVisitas: visitaId,
+            titular: condiciones.esTitular ? 1 : 0,
+            nombre: condiciones.esTitular ? null : condiciones.titularNoEsTitular.nombre,
+            dni: condiciones.esTitular ? null : condiciones.titularNoEsTitular.dni,
+            telefono: condiciones.esTitular ? null : condiciones.titularNoEsTitular.telefono,
+            servicio: condiciones.noAtiende ? 1 : 0,
+            motivo: condiciones.noAtiende ? condiciones.motivoNoAtiende : null,
+            fecha_condicion: new Date().toISOString().slice(0, 19).replace('T', ' ')
+        };
+
+        // Enviar los datos al servidor
+        fetch('/api/guardarCondiciones', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}' // Agrega el token CSRF
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success('Condiciones guardadas correctamente.');
+                this.openCondiciones = false; // Cerrar el modal
+            } else {
+                toastr.error('Error al guardar las condiciones.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            toastr.error('Hubo un error al guardar las condiciones.');
+        });
+    }
+}" class="mb-5" @toggle-modal-condiciones.window="openCondiciones = !openCondiciones">
+    <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
+        <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
+            <div x-show="openCondiciones" x-transition.duration.300
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8">
+                <!-- Header -->
+                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                    <h5 class="font-bold text-lg">Condiciones de Inicio de Servicio</h5>
+                    <button type="button" class="text-white-dark hover:text-dark" @click="openCondiciones = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-scroll p-5 space-y-4">
+                    <form>
+                        <!-- Se muestra solo si "No se atiende" NO está activado -->
+                        <template x-if="!condiciones.noAtiende">
+                            <div>
+                                <!-- Switch "¿Es titular?" -->
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium">¿Es titular?</span>
+                                    <label class="w-12 h-6 relative">
+                                        <input type="checkbox" x-model="condiciones.esTitular"
+                                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                            id="esTitularSwitch" />
+                                        <span
+                                            class="outline_checkbox bg-icon border-2 border-[#ebedf2] dark:border-white-dark block h-full rounded-full
+                                             before:absolute before:left-1 before:bg-[#ebedf2] dark:before:bg-white-dark before:bottom-1 before:w-4 before:h-4
+                                             before:rounded-full before:bg-[url(/assets/images/close.svg)] before:bg-no-repeat before:bg-center
+                                             peer-checked:before:left-7 peer-checked:before:bg-[url(/assets/images/checked.svg)]
+                                             peer-checked:border-primary peer-checked:before:bg-primary before:transition-all before:duration-300"></span>
+                                    </label>
+                                </div>
+                                <!-- Si no es titular, mostrar campos para Nombre, DNI y Teléfono -->
+                                <div x-show="!condiciones.esTitular" class="space-y-3 mt-2">
+                                    <div>
+                                        <label class="block text-sm font-medium">Nombre</label>
+                                        <input type="text" x-model="condiciones.titularNoEsTitular.nombre"
+                                            class="form-input w-full">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">DNI</label>
+                                        <input type="text" x-model="condiciones.titularNoEsTitular.dni"
+                                            class="form-input w-full">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium">Teléfono</label>
+                                        <input type="text" x-model="condiciones.titularNoEsTitular.telefono"
+                                            class="form-input w-full">
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Switch "¿No se atiende el servicio?" -->
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-sm font-medium">¿No se atiende el servicio?</span>
+                            <label class="w-12 h-6 relative">
+                                <input type="checkbox" x-model="condiciones.noAtiende"
+                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                    id="noAtiendeSwitch" />
+                                <span
+                                    class="outline_checkbox bg-icon border-2 border-[#ebedf2] dark:border-white-dark block h-full rounded-full
+                                    before:absolute before:left-1 before:bg-[#ebedf2] dark:before:bg-white-dark before:bottom-1 before:w-4 before:h-4
+                                    before:rounded-full before:bg-[url(/assets/images/close.svg)] before:bg-no-repeat before:bg-center
+                                    peer-checked:before:left-7 peer-checked:before:bg-[url(/assets/images/checked.svg)]
+                                    peer-checked:border-primary peer-checked:before:bg-primary before:transition-all before:duration-300"></span>
+                            </label>
+                        </div>
+                        <!-- Campo de motivo cuando "No se atiende" está activado -->
+                        <div x-show="condiciones.noAtiende" class="space-y-3 mt-2">
+                            <div>
+                                <label class="block text-sm font-medium">Motivo</label>
+                                <textarea x-model="condiciones.motivoNoAtiende" class="form-textarea w-full" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end items-center mt-4">
+                            <button type="button" class="btn btn-outline-danger" @click="openCondiciones = false">
+                                Cancelar
+                            </button>
+                            <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
+                            @click="guardarCondiciones(condiciones, {{ $ticketId }}, {{ $visitaId }})">
+                            Guardar
                         </button>
-                    </div>
-                    <div class="text-center text-gray-600 mb-2">
-                        <span class="font-medium">Fecha de Programación</span><br>
-                        <span class="text-gray-800">${fechaInicio} - ${fechaFinal}</span><br>
-                    </div>
-                `;
-                visitasList.appendChild(visitaCard);
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                // Tarjeta de Técnico en Desplazamiento con el botón de "like"
-                const tecnicoCard = document.createElement('div');
-                tecnicoCard.className = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
-                tecnicoCard.innerHTML = `
-                    <div class="text-center text-gray-600 flex items-center justify-center">
-                        <span class="font-medium mr-2">Técnico en Desplazamiento</span>
-                        <!-- Icono de "like" (corazón) -->
-                        <span class="text-gray-800 ml-2">${nombreTecnico || 'Nombre del Técnico'}</span>
-                        <button class="text-black-500 hover:text-red-600 transition-colors" id="likeButton-${visita.idVisitas}">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-green-500">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                        </button>
-                    </div>
-                `;
-                visitasList.appendChild(tecnicoCard);
 
-                // Agregar el evento de clic al botón de like
-                const likeButton = document.getElementById(`likeButton-${visita.idVisitas}`);
-                likeButton.addEventListener('click', function() {
-                    // Fecha de desplazamiento actual (puedes usar la fecha actual o alguna lógica para esto)
-                    const nuevaFechaDesplazamiento = new Date().toISOString();
 
-                    // Realizar la actualización en la base de datos usando la API
-                    fetch(`/api/actualizarVisita/${visita.idVisitas}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            fechas_desplazamiento: nuevaFechaDesplazamiento,
-                        }),
-                    })
-                    .then(response => response.json())
-                    .then(updatedVisita => {
-                        if (updatedVisita) {
-                            // Si la actualización es exitosa, puedes hacer alguna acción (por ejemplo, cambiar el color del botón)
-                            alert("Fecha de desplazamiento actualizada exitosamente.");
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al actualizar la visita:', error);
-                        alert('Hubo un error al actualizar la visita.');
-                    });
-                });
-            });
 
-            document.getElementById('visitasContainer').style.display = 'block';
-        } else {
-            alert("No hay visitas para este ticket.");
-            
-        }
-    })
-    .catch(error => {
-        console.error('Error al obtener las visitas:', error);
-        alert('Ocurrió un error al obtener las visitas.');
-    });
-</script>
+
+
+
+
+
+
+
+
+
 
 <!-- Contenedor donde se agregarán las visitas -->
 <div id="cordinacionContainer" class="mt-5 flex flex-col space-y-4"></div>
@@ -220,6 +353,9 @@
         </div>
     </div>
 </div>
+
+
+
 
 
 
@@ -362,14 +498,14 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
-
-
-
-
-
 });
 
 </script>
+
+
+
+
+
 
 
 
@@ -408,6 +544,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 </script>
+
+<script>
+  
+  var ticketId = {{ $ticketId }};
+</script>
+
+<script src="{{ asset('assets/js/tickets/smart/visitas.js') }}"></script>
+
 
 
 

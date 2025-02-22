@@ -143,15 +143,7 @@
                 </tr>
             </thead>
             <tbody id="estadosTableBody">
-                <!-- Fila inicial (no eliminable) -->
-                <tr class="bg-dark-dark-light border-dark-dark-light">
-                    <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
-                    <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
-                    <td class="px-4 py-2 text-center min-w-[200px]">{{ $orden->fecha_creacion ?? 'sin fecha' }}</td>
-                    <td class="px-4 py-2 text-center">
-                        <span class="text-gray-500">-</span>
-                    </td>
-                </tr>
+                <!-- Aquí se llenarán los estados de flujo -->
             </tbody>
         </table>
     </div>
@@ -162,21 +154,94 @@
     <!-- Estados disponibles (draggables) -->
     <div class="mt-3 overflow-x-auto">
         <div id="draggableContainer" class="flex space-x-2">
-            <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Recojo">
+            <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Recojo">
                 Recojo
             </div>
-            <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Coordinado">
+            <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Coordinado">
                 Coordinado
             </div>
-            <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Operativo">
+            <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Operativo">
                 Operativo
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
+
+        function cargarEstados() {
+            // Llamada AJAX para obtener los estados de flujo
+            fetch(`/ticket/${ticketId}/estados`)
+                .then(response => response.json())
+                .then(data => {
+                    // console.log('Datos recibidos:', data); // Ver los datos
+
+                    const estadosTableBody = document.getElementById("estadosTableBody");
+                    estadosTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar los nuevos estados
+
+                    // Verifica si data.estadosFlujo es un array
+                    if (Array.isArray(data.estadosFlujo)) {
+                        // Iterar sobre todos los estados de flujo
+                        data.estadosFlujo.forEach(ticketFlujo => {
+                            const estado = ticketFlujo.estado_flujo;  // Cada flujo de estado tiene una relación con estado_flujo
+                            const usuario = ticketFlujo.usuario; // Obtener la relación usuario
+
+                            const row = document.createElement("tr");
+
+                            // Crear las celdas de la fila
+                            const estadoCell = document.createElement("td");
+                            estadoCell.classList.add("px-4", "py-2", "text-center");
+                            estadoCell.style.backgroundColor = estado.color; // Color del estado
+                            // estadoCell.style.color = "white"; // Cambia el color del texto a blanco
+                            estadoCell.textContent = estado.descripcion;
+
+                            const usuarioCell = document.createElement("td");
+                            usuarioCell.classList.add("px-4", "py-2", "text-center");
+                            usuarioCell.textContent = usuario ? usuario.Nombre : 'Sin Nombre';
+                            usuarioCell.style.backgroundColor = estado.color; // Color del usuario
+
+
+                            const fechaCell = document.createElement("td");
+                            fechaCell.classList.add("px-4", "py-2", "text-center");
+                            fechaCell.textContent = ticketFlujo.fecha_creacion;
+                            fechaCell.style.backgroundColor = estado.color; // Color de la fecha
+                            fechaCell.style.backgroundColor = estado.color; // Color del usuario
+
+
+                            const accionesCell = document.createElement("td");
+                            accionesCell.classList.add("px-4", "py-2", "text-center");
+                            accionesCell.innerHTML = `<span class="text-gray-500">-</span>`;
+                            accionesCell.style.backgroundColor = estado.color; // Color del usuario
+                            // Agregar las celdas a la fila
+                            row.appendChild(estadoCell);
+                            row.appendChild(usuarioCell);
+                            row.appendChild(fechaCell);
+                            row.appendChild(accionesCell);
+
+                            // Agregar la fila a la tabla
+                            estadosTableBody.appendChild(row);
+                        });
+                    } else {
+                        console.error('La respuesta no contiene un array de estados de flujo:', data.estadosFlujo);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cargando los estados:', error);
+                });
+        }
+
+        // Cargar los estados al iniciar
+        cargarEstados();
+
+
+        // Actualizar los estados cada 5 segundo (3000 ms )
+
+        setInterval(cargarEstados, 30000)
+    });
+</script>
+
 
 
 
@@ -425,7 +490,7 @@
             fetch(`/get-clientes-generales/${clienteId}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Datos recibidos:', data); // Para depurar
+                    // console.log('Datos recibidos:', data); // Para depurar
 
                     // Obtener el select de "Cliente General"
                     var clienteGeneralSelect = document.getElementById('idClienteGeneral');
