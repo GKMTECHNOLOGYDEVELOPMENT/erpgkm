@@ -34,23 +34,56 @@ visitaCard.innerHTML = `
 `;
 visitasList.appendChild(visitaCard);
 
-// Agregar el evento de clic al botón "Detalles de Visita"
+
+// Función que se ejecutará cuando se haga clic en el botón de detalles
 const detallesVisitaButton = document.getElementById(`detallesVisitaButton-${visita.idVisitas}`);
 detallesVisitaButton.addEventListener('click', () => {
-    // Llenar el modal con los detalles de la visita
-    document.getElementById('detalleNombre').textContent = visita.nombre;
-    document.getElementById('detalleFechaProgramada').textContent = formatDate(visita.fecha_programada);
-    document.getElementById('detalleFechaAsignada').textContent = formatDate(visita.fecha_asignada);
-    document.getElementById('detalleFechaDesplazamiento').textContent = formatDate(visita.fechas_desplazamiento);
-    document.getElementById('detalleFechaLlegada').textContent = formatDate(visita.fecha_llegada);
-    document.getElementById('detalleFechaInicio').textContent = formatDate(visita.fecha_inicio);
-    document.getElementById('detalleFechaFinal').textContent = formatDate(visita.fecha_final);
-    document.getElementById('detalleEstado').textContent = visita.estado ? 'Activo' : 'Inactivo';
+    // Obtener el ticketId de la visita
+    const ticketId = visita.idTickets;
 
-    // Mostrar el modal
-    const event = new CustomEvent('toggle-modal-detalles-visita');
-    window.dispatchEvent(event);
-});
+    // Hacer la petición AJAX a la ruta que obtendrá los detalles de la visita
+    fetch(`/visita/${ticketId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            // Llenar el modal con los datos obtenidos de la visita
+            document.getElementById('detalleNombre').textContent = data.nombre;
+            document.getElementById('detalleTicket').textContent = data.numero_ticket;
+            document.getElementById('detalleFechaProgramada').textContent = formatDate(data.fecha_programada);
+            document.getElementById('detalleFechaDesplazamiento').textContent = formatDate(data.fechas_desplazamiento);
+            document.getElementById('detalleFechaLlegada').textContent = formatDate(data.fecha_llegada);
+            document.getElementById('detalleFechaInicio').textContent = formatDate(data.fecha_inicio);
+            document.getElementById('detalleFechaFinal').textContent = formatDate(data.fecha_final);
+            document.getElementById('detalleUsuario').textContent = `${data.usuarios_nombre} ${data.usuarios_apellidoPaterno}`;
+            document.getElementById('detalleEstado').textContent = data.estado ? 'Activo' : 'Inactivo';
+
+            document.getElementById('detalleTicketCliente').textContent = data.idCliente;
+            document.getElementById('detalleTicketServicio').textContent = data.tipoServicio;
+            document.getElementById('detalleTicketFalla').textContent = data.fallaReportada;
+            document.getElementById('detalleTicketDireccion').textContent = data.direccion;
+            document.getElementById('detalleTicketFechaCompra').textContent = formatDate(data.fechaCompra);
+            document.getElementById('detalleTicketLat').textContent = data.lat;
+            document.getElementById('detalleTicketLng').textContent = data.lng;
+
+
+            // Mostrar el modal
+            const event = new CustomEvent('toggle-modal-detalles-visita');
+            window.dispatchEvent(event);
+        })
+        .catch(error => {
+            console.error('Error al obtener los detalles de la visita:', error);
+        });
+
+});         
+
+
+document.getElementById('detalleFechaAsignada').textContent = formatDate(data.fecha_asignada);
+   
+
 
           // Tarjeta de Técnico en Desplazamiento con el botón de "like"
           const tecnicoCard = document.createElement('div');

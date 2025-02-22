@@ -35,18 +35,30 @@
                         </svg>
                     </button>
                 </div>
+
+
                 <div class="modal-scroll p-5 space-y-4">
                     <!-- Contenido del modal -->
                     <div>
                         <h4 class="text-lg font-semibold">Información de la Visita</h4>
                         <p><strong>Nombre:</strong> <span id="detalleNombre"></span></p>
+                        <p><strong>Ticket: </strong><span id="detalleTicket"></span></p>
                         <p><strong>Fecha de Programación:</strong> <span id="detalleFechaProgramada"></span></p>
                         <p><strong>Fecha de Asignación:</strong> <span id="detalleFechaAsignada"></span></p>
                         <p><strong>Fecha de Desplazamiento:</strong> <span id="detalleFechaDesplazamiento"></span></p>
                         <p><strong>Fecha de Llegada:</strong> <span id="detalleFechaLlegada"></span></p>
                         <p><strong>Fecha de Inicio:</strong> <span id="detalleFechaInicio"></span></p>
                         <p><strong>Fecha de Finalización:</strong> <span id="detalleFechaFinal"></span></p>
+                        <p><strong>Usuario:</strong> <span id="detalleUsuario"></span></p>
                         <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
+                        <p><strong>Cliente: </strong><span id="detalleTicketCliente"></span></p>
+                        <p><strong>Servicio: </strong><span id="detalleTicketServicio"></span></p>
+                        <p><strong>Falla: </strong><span id="detalleTicketFalla"></span></p>
+                        <p><strong>Direccion: </strong><span id="detalleTicketDireccion"></span></p>
+                        <p><strong>Fecha de Compra: </strong><span id="detalleTicketFechaCompra"></span></p>
+                        <p><strong>Lat: </strong><span id="detalleTicketLat"></span></p>
+                        <p><strong>Long: </strong><span id="detalleTicketLng"></span></p>
+
                     </div>
                     <!-- Botones -->
                     <div class="flex justify-end items-center mt-4">

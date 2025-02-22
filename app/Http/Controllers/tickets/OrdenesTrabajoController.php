@@ -246,10 +246,20 @@ class OrdenesTrabajoController extends Controller
         // Obtener el idTickets
         $ticketId = $ticket->idTickets;
     
-        // Obtener el idVisitas relacionado con el idTickets
         $visita = DB::table('visitas')
-            ->where('idTickets', $ticketId)
-            ->first();
+        ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+        ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets') // Unimos con la tabla tickets
+        ->where('visitas.idTickets', $ticketId)
+        ->select(
+            'usuarios.Nombre as usuarios_nombre', 
+            'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
+            'visitas.*',
+            'tickets.numero_ticket' // Seleccionamos el numero_ticket de la tabla tickets
+        )
+        ->first();
+    
+        // dd($visita);
+
     
         $visitaId = $visita ? $visita->idVisitas : null; // Si no hay visita, será null
     
@@ -297,8 +307,52 @@ class OrdenesTrabajoController extends Controller
             'descripcionEstadoFlujo',
             'ticketId',
             'visitaId',
-            'estadosOTS' // Pasamos el idVisitas a la vista
+            'estadosOTS',
+            'visita' // Pasamos el idVisitas a la vista
         ));
+    }
+
+
+    public function mostrarDetalles($ticketId)
+    {
+        // Obtener los detalles de la visita junto con el usuario y el número de ticket
+        $visita = DB::table('visitas')
+            ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+            ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets')
+            ->where('visitas.idTickets', $ticketId)
+            ->select(
+                'usuarios.Nombre as usuarios_nombre', 
+            'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
+            'visitas.*',
+            'tickets.numero_ticket',  // Número de ticket
+            'tickets.idClienteGeneral',
+            'tickets.idCliente',
+            'tickets.tipoServicio',
+            'tickets.fecha_creacion',
+            'tickets.idTipotickets',
+            'tickets.idEstadoots',
+            'tickets.idTecnico',
+            'tickets.idUsuario as ticket_idUsuario',  // Usuario que creó el ticket
+            'tickets.idTienda',
+            'tickets.fallaReportada',
+            'tickets.esRecojo',
+            'tickets.direccion',
+            'tickets.idMarca',
+            'tickets.idModelo',
+            'tickets.serie',
+            'tickets.fechaCompra',
+            'tickets.lat',
+            'tickets.lng',
+            'tickets.idTicketFlujo'
+            )
+            ->first();
+
+        // Verificamos si se encontraron los detalles de la visita
+        if ($visita) {
+            return response()->json($visita);
+        }
+
+        return response()->json(['error' => 'Visita no encontrada'], 404);
     }
 
     
