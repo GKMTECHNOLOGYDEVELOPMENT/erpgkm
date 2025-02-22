@@ -118,4 +118,6 @@
             @endif
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </x-layout.default>

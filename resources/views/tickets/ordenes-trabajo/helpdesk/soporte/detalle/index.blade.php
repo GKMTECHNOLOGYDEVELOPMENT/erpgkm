@@ -1,0 +1,600 @@
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<!-- Estilos adicionales para el log -->
+
+
+<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo N°
+    {{ $orden->idTickets }}</span>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+
+    <div>
+        <form action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}" enctype="multipart/form-data"
+            method="POST">
+            @csrf
+            @method('PUT')
+            <label class="block text-sm font-medium">Ticket</label>
+            <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}" readonly>
+    </div>
+
+
+
+    <!-- Cliente -->
+    <div>
+        <label class="block text-sm font-medium">Cliente</label>
+        <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display:none">
+            <option value="" disabled>Seleccionar Cliente</option>
+            @foreach ($clientes as $cliente)
+                <option value="{{ $cliente->idCliente }}"
+                    {{ $cliente->idCliente == $orden->cliente->idCliente ? 'selected' : '' }}>
+                    {{ $cliente->nombre }} - {{ $cliente->documento }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <!-- Cliente General -->
+    <div>
+        <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+        <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+            <option value="" selected>Seleccionar Cliente General</option>
+            <!-- Aquí cargaremos el cliente general por defecto usando Blade -->
+            <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+                {{ $orden->clienteGeneral->descripcion }}
+            </option>
+        </select>
+    </div>
+
+
+
+
+    <!-- Tienda -->
+    <div>
+        <label class="block text-sm font-medium">Tienda</label>
+        <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
+            <option value="" disabled>Seleccionar Tienda</option>
+            @foreach ($tiendas as $tienda)
+                <option value="{{ $tienda->idTienda }}" {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
+                    {{ $tienda->nombre }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
+    <!-- Técnico -->
+    <div>
+        <label for="idTecnico" class="block text-sm font-medium">Técnico</label>
+        <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display:none">
+            <option value="" disabled>Seleccionar Técnico</option>
+            @foreach ($usuarios as $usuario)
+                <option value="{{ $usuario->idUsuario }}"
+                    {{ $usuario->idUsuario == $orden->idTecnico ? 'selected' : '' }}>
+                    {{ $usuario->Nombre }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    <!-- Tipo de Servicio -->
+    <div>
+        <label for="tipoServicio" class="block text-sm font-medium">Tipo de Servicio</label>
+        <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display:none" disabled>
+            <option value="" disabled>Seleccionar Tipo de Servicio</option>
+            @foreach ($tiposServicio as $tipo)
+                <option value="{{ $tipo->idTipoServicio }}"
+                    {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
+                    {{ $tipo->nombre }}
+                </option>
+            @endforeach
+        </select>
+        <!-- Input oculto para mantener el valor al enviar el formulario -->
+        <input type="hidden" name="tipoServicio" value="{{ $orden->tipoServicio }}">
+    </div>
+
+
+
+
+    <!-- Falla Reportada -->
+    <div>
+        <label for="fallaReportada" class="block text-sm font-medium">Falla Reportada</label>
+        <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full bg-gray-100">{{ $orden->fallaReportada }}</textarea>
+    </div>
+
+    <!-- Contenedor del Botón -->
+    <div class="md:col-span-2 flex justify-end">
+        <button id="guardarFallaReportada" class="btn btn-primary">Modificar</button>
+    </div>
+
+
+    </form>
+</div>
+
+
+
+<!-- Nueva Card: Historial de Estados -->
+<div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">
+    <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
+    <!-- Tabla con scroll horizontal -->
+    <div class="overflow-x-auto mt-4">
+        <table class="min-w-[600px] border-collapse">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="px-4 py-2 text-center">Estado</th>
+                    <th class="px-4 py-2 text-center">Usuario</th>
+                    <th class="px-4 py-2 text-center">Fecha</th>
+                    <th class="px-4 py-2 text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="estadosTableBody">
+                <!-- Fila inicial (no eliminable) -->
+                <tr class="bg-dark-dark-light border-dark-dark-light">
+                    <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
+                    <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
+                    <td class="px-4 py-2 text-center min-w-[200px]">{{ $orden->fecha_creacion ?? 'sin fecha' }}</td>
+                    <td class="px-4 py-2 text-center">
+                        <span class="text-gray-500">-</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Div para mostrar la última modificación -->
+    <div class="mt-4">
+        Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
+    </div>
+    <!-- Estados disponibles (draggables) -->
+    <div class="mt-3 overflow-x-auto">
+        <div id="draggableContainer" class="flex space-x-2">
+            <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true"
+                data-state="Recojo">
+                Recojo
+            </div>
+            <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true"
+                data-state="Coordinado">
+                Coordinado
+            </div>
+            <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true"
+                data-state="Operativo">
+                Operativo
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Inicializar NiceSelect2
+        document.querySelectorAll('.select2').forEach(function(select) {
+            NiceSelect.bind(select, {
+                searchable: true
+            });
+        });
+
+        // Inicializar Flatpickr en "Fecha de Compra"
+        flatpickr("#fechaCompra", {
+            dateFormat: "Y-m-d",
+            allowInput: true
+        });
+
+        // Función para formatear la fecha
+        function formatDate(fecha) {
+            const año = fecha.getFullYear();
+            const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
+            const dia = fecha.getDate().toString().padStart(2, "0");
+            let horas = fecha.getHours();
+            const minutos = fecha.getMinutes().toString().padStart(2, "0");
+            const ampm = horas >= 12 ? "PM" : "AM";
+            horas = horas % 12 || 12;
+            return `${año}-${mes}-${dia} ${horas}:${minutos} ${ampm}`;
+        }
+
+
+        $(document).ready(function() {
+            // Obtener el idTickets de la variable de Blade
+            const idTickets = "{{ $orden->idTickets }}";
+
+            // Llamar al backend para obtener la última modificación
+            $.ajax({
+                url: '/ultima-modificacion/' +
+                    idTickets, // Obtener la última modificación del ticket
+                method: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        const ultimaModificacion = response.ultima_modificacion;
+                        const fechaUltimaModificacion = formatDate(new Date(
+                            ultimaModificacion.created_at)); // Formatear la fecha
+                        const usuarioUltimaModificacion = ultimaModificacion.usuario;
+                        const campoUltimaModificacion = ultimaModificacion.campo;
+                        const oldValueUltimaModificacion = ultimaModificacion.valor_antiguo;
+                        const newValueUltimaModificacion = ultimaModificacion.valor_nuevo;
+
+                        // Actualizar el log de modificación con la última modificación
+                        document.getElementById('ultimaModificacion').textContent =
+                            `${fechaUltimaModificacion} por ${usuarioUltimaModificacion}: Se modificó ${campoUltimaModificacion} de "${oldValueUltimaModificacion}" a "${newValueUltimaModificacion}"`;
+
+                    } else {
+                        // Si no hay modificaciones previas, mostrar mensaje de no hay cambios
+                        document.getElementById('ultimaModificacion').textContent =
+                            "No hay modificaciones previas.";
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al obtener la última modificación:', error);
+                }
+            });
+        });
+
+        // Función para actualizar el log de modificación cuando se haga un cambio
+        function updateModificationLog(field, oldValue, newValue) {
+            const usuario = "{{ auth()->user()->Nombre }}"; // Usuario logueado
+            const fecha = formatDate(new Date());
+            const idTickets =
+                "{{ $orden->idTickets }}"; // Aquí asumo que el id de la orden está disponible en el Blade
+
+            // Actualizar el log de modificación con la nueva modificación
+            document.getElementById('ultimaModificacion').textContent =
+                `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
+
+            // Enviar la nueva modificación al servidor para guardarla en la base de datos
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const data = {
+                field: field,
+                oldValue: oldValue,
+                newValue: newValue,
+                usuario: usuario,
+                _token: csrfToken
+            };
+
+            $.ajax({
+                url: '/guardar-modificacion/' + idTickets, // Ruta para guardar la modificación
+                method: 'POST',
+                data: data,
+                success: function(response) {
+                    console.log('Modificación guardada correctamente:', response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al guardar la modificación:', error);
+                }
+            });
+        }
+
+
+
+
+
+        /* ================================
+           Registro de cambios en drag & drop
+        ================================ */
+        const draggables = document.querySelectorAll(".draggable-state");
+        draggables.forEach(function(draggable) {
+            draggable.addEventListener("dragstart", function(e) {
+                e.dataTransfer.setData("text/plain", this.dataset.state);
+            });
+        });
+
+        const dropZone = document.getElementById("estadosTableBody");
+        dropZone.addEventListener("dragover", function(e) {
+            e.preventDefault();
+        });
+        dropZone.addEventListener("drop", function(e) {
+            e.preventDefault();
+            const state = e.dataTransfer.getData("text/plain");
+            if (state) {
+                const draggableEl = document.querySelector(
+                    "#draggableContainer .draggable-state[data-state='" + state + "']");
+                if (draggableEl) {
+                    draggableEl.remove();
+                }
+                const usuario = "{{ auth()->user()->name }}";
+                const fecha = formatDate(new Date());
+                const newRow = document.createElement("tr");
+                let rowClasses = "";
+                if (state === "Recojo") {
+                    rowClasses = "bg-primary/20 border-primary/20";
+                } else if (state === "Coordinado") {
+                    rowClasses = "bg-secondary/20 border-secondary/20";
+                } else if (state === "Operativo") {
+                    rowClasses = "bg-success/20 border-success/20";
+                }
+                newRow.className = rowClasses;
+                newRow.innerHTML = `
+        <td class="px-4 py-2 text-center">${state}</td>
+        <td class="px-4 py-2 text-center">${usuario}</td>
+        <td class="px-4 py-2 text-center">${fecha}</td>
+        <td class="px-4 py-2 text-center flex justify-center items-center">
+          <button class="delete-state btn btn-danger btn-sm">X</button>
+        </td>
+      `;
+                dropZone.appendChild(newRow);
+                // Actualizar log de modificación por cambio de estado
+                document.getElementById('ultimaModificacion').textContent =
+                    `${fecha} por ${usuario}: Se modificó Estado a "${state}"`;
+            }
+        });
+
+        function reinitializeDraggable(element) {
+            element.setAttribute("draggable", "true");
+            element.addEventListener("dragstart", function(e) {
+                e.dataTransfer.setData("text/plain", this.dataset.state);
+            });
+        }
+
+        dropZone.addEventListener("click", function(e) {
+            if (e.target.classList.contains("delete-state")) {
+                const row = e.target.closest("tr");
+                const state = row.querySelector("td").textContent.trim();
+                row.remove();
+                if (!document.querySelector("#draggableContainer .draggable-state[data-state='" +
+                        state + "']")) {
+                    const container = document.getElementById("draggableContainer");
+                    const newDraggable = document.createElement("div");
+                    let colorClass = "";
+                    if (state === "Recojo") {
+                        colorClass = "bg-primary/20";
+                    } else if (state === "Coordinado") {
+                        colorClass = "bg-secondary/20";
+                    } else if (state === "Operativo") {
+                        colorClass = "bg-success/20";
+                    }
+                    newDraggable.className =
+                        `draggable-state ${colorClass} px-3 py-1 rounded cursor-move`;
+                    newDraggable.dataset.state = state;
+                    newDraggable.textContent = state;
+                    reinitializeDraggable(newDraggable);
+                    container.appendChild(newDraggable);
+                }
+            }
+        });
+
+        /* ======================================================
+           Registro global de cambios en todos los campos
+           (input, select, textarea), incluso si están bloqueados
+        ====================================================== */
+        const allFields = document.querySelectorAll("input, select, textarea");
+        allFields.forEach(function(field) {
+            // Si es un select, almacena el texto de la opción seleccionada
+            if (field.tagName.toLowerCase() === "select") {
+                field.dataset.oldValue = field.options[field.selectedIndex].text;
+            } else {
+                field.dataset.oldValue = field.value;
+            }
+            field.addEventListener("change", function() {
+                let oldVal = field.dataset.oldValue;
+                let newVal;
+                if (field.tagName.toLowerCase() === "select") {
+                    newVal = field.options[field.selectedIndex].text;
+                } else {
+                    newVal = field.value;
+                }
+                if (oldVal !== newVal) {
+                    // Se obtiene el label asociado mediante el atributo "for"
+                    let fieldLabel = "";
+                    if (field.id) {
+                        const label = document.querySelector('label[for="' + field.id + '"]');
+                        if (label) {
+                            fieldLabel = label.textContent.trim();
+                        }
+                    }
+                    // Si no se encuentra un label, se usa como fallback el id o name
+                    if (!fieldLabel) {
+                        fieldLabel = field.getAttribute("name") || field.getAttribute("id") ||
+                            "campo desconocido";
+                    }
+                    updateModificationLog(fieldLabel, oldVal, newVal);
+                    field.dataset.oldValue = newVal;
+                }
+            });
+        });
+    });
+</script>
+
+
+<script>
+    document.getElementById('idCliente').addEventListener('change', function() {
+        var clienteId = this.value; // Obtén el ID del cliente seleccionado
+        console.log('Cliente seleccionado:', clienteId); // Para depurar
+
+        // Si se seleccionó un cliente
+        if (clienteId) {
+            console.log('Haciendo la petición para obtener los clientes generales...');
+
+            // Realizamos la petición para obtener los clientes generales asociados a este cliente
+            fetch(`/get-clientes-generales/${clienteId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Datos recibidos:', data); // Para depurar
+
+                    // Obtener el select de "Cliente General"
+                    var clienteGeneralSelect = document.getElementById('idClienteGeneral');
+
+                    // Limpiar las opciones anteriores del select de Cliente General
+                    clienteGeneralSelect.innerHTML =
+                        '<option value="" selected>Seleccionar Cliente General</option>';
+
+                    // Comprobar si hay datos
+                    if (data.length > 0) {
+                        console.log('Hay clientes generales asociados. Agregando opciones...');
+                        // Si hay clientes generales, agregarlos al select
+                        data.forEach(function(clienteGeneral) {
+                            var option = document.createElement('option');
+                            option.value = clienteGeneral.idClienteGeneral;
+                            option.textContent = clienteGeneral.descripcion;
+                            clienteGeneralSelect.appendChild(option);
+                        });
+                        // Mostrar el select de Cliente General
+                        clienteGeneralSelect.style.display = 'block';
+                    } else {
+                        console.log('No hay clientes generales asociados.');
+                        // Si no hay clientes generales, ocultar el select
+                        clienteGeneralSelect.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener los clientes generales:', error);
+                    alert('Hubo un error al cargar los clientes generales.');
+                });
+        } else {
+            console.log('No se seleccionó ningún cliente. Ocultando el select de Cliente General...');
+            // Si no hay cliente seleccionado, ocultar el select de Cliente General
+            document.getElementById('idClienteGeneral').style.display = 'none';
+        }
+    });
+</script>
+
+<script>
+    document.getElementById('idMarca').addEventListener('change', function() {
+        var marcaId = this.value; // Obtén el ID de la marca seleccionada
+        console.log('Marca seleccionada:', marcaId); // Para depurar
+
+        // Si se seleccionó una marca
+        if (marcaId) {
+            console.log('Haciendo la petición para obtener los modelos asociados a esta marca...');
+
+            // Realizamos la petición para obtener los modelos asociados a esta marca
+            fetch(`/get-modelos/${marcaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Datos de modelos recibidos:', data); // Para depurar
+
+                    // Obtener el select de "Modelo"
+                    var modeloSelect = document.getElementById('idModelo');
+
+                    // Limpiar las opciones anteriores del select de Modelo
+                    modeloSelect.innerHTML = '<option value="" disabled>Seleccionar Modelo</option>';
+
+                    // Comprobar si hay datos
+                    if (data.length > 0) {
+                        console.log('Hay modelos asociados a esta marca. Agregando opciones...');
+                        // Si hay modelos, agregarlos al select
+                        data.forEach(function(modelo) {
+                            var option = document.createElement('option');
+                            option.value = modelo.idModelo;
+                            option.textContent = modelo.nombre;
+                            modeloSelect.appendChild(option);
+                        });
+                        // Mostrar el select de Modelo
+                        modeloSelect.style.display = 'block';
+                    } else {
+                        console.log('No hay modelos asociados a esta marca.');
+                        // Si no hay modelos, ocultar el select
+                        modeloSelect.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener los modelos:', error);
+                    alert('Hubo un error al cargar los modelos.');
+                });
+        } else {
+            console.log('No se seleccionó ninguna marca. Ocultando el select de Modelo...');
+            // Si no hay marca seleccionada, ocultar el select de Modelo
+            document.getElementById('idModelo').style.display = 'none';
+        }
+    });
+</script>
+
+
+<script>
+    $(document).ready(function() {
+        var idOrden = @json($orden->idTickets);
+
+        $('#guardarFallaReportada').on('click', function(e) {
+            e.preventDefault(); // Prevenir que se recargue la página
+
+            // Recoger los datos del formulario
+            var formData = {
+                idCliente: $('#idCliente').val(),
+                idClienteGeneral: $('#idClienteGeneral').val(),
+                idTienda: $('#idTienda').val(),
+                direccion: $('input[name="direccion"]').val(),
+                idMarca: $('#idMarca').val(),
+                idModelo: $('#idModelo').val(),
+                serie: $('input[name="serie"]').val(),
+                fechaCompra: $('input[name="fechaCompra"]').val(),
+                fallaReportada: $('textarea[name="fallaReportada"]').val(),
+            };
+
+            // Mostrar los datos del formulario en la consola
+            console.log("Datos del formulario:", formData);
+
+            // Verificar si algún campo obligatorio está vacío
+            for (var key in formData) {
+                if (formData[key] === '' || formData[key] === null) {
+                    toastr.error('El campo "' + key +
+                        '" está vacío. Por favor, complete todos los campos.');
+                    return; // Detener el envío si algún campo está vacío
+                }
+            }
+
+            // Validar que la fecha de compra no sea en el futuro
+            var fechaCompra = new Date(formData.fechaCompra);
+            var fechaActual = new Date();
+
+            // Eliminar la hora de las fechas para compararlas correctamente
+            fechaActual.setHours(0, 0, 0, 0);
+            fechaCompra.setHours(0, 0, 0, 0);
+
+            if (fechaCompra > fechaActual) {
+                toastr.error('La fecha de compra no puede ser una fecha futura.');
+                return; // Detener el envío si la fecha de compra es en el futuro
+            }
+
+            // Validar el campo "serie" (permitir letras y números, pero no el signo -)
+            var serie = formData.serie;
+            var serieRegex =
+                /^[a-zA-Z0-9]+$/; // Expresión regular que permite solo letras y números, pero no el signo -
+
+            if (!serie || !serieRegex.test(serie)) {
+                toastr.error(
+                    'El número de serie no puede contener caracteres especiales o un signo "-".');
+                return; // Detener el envío si el número de serie no es válido
+            }
+
+            // Obtener el token CSRF desde la página
+            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            console.log("Token CSRF obtenido:",
+                csrfToken); // Asegúrate de que el token se obtiene correctamente
+
+            // Verificar si el token CSRF es válido
+            if (!csrfToken) {
+                console.error("Token CSRF no encontrado.");
+                toastr.error('Hubo un error con el CSRF token.');
+                return; // Detener el envío si el CSRF token no es válido
+            }
+
+            // Enviar datos por AJAX
+            $.ajax({
+                url: '/actualizar-orden/' + idOrden, // Pasar el id de la orden en la URL
+                method: 'PUT', // Usar PUT para la actualización
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken // Agregar el token CSRF
+                },
+                success: function(response) {
+                    console.log("Respuesta del servidor:", response);
+
+                    // Mostrar un mensaje de éxito con Toastr
+                    toastr.success('Orden actualizada con éxito');
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error al actualizar:", error);
+                    console.log("Detalles de la respuesta del error:", xhr.responseText);
+
+                    // Mostrar un mensaje de error con Toastr
+                    toastr.error('Hubo un error al actualizar la orden');
+                }
+            });
+        });
+    });
+</script>
