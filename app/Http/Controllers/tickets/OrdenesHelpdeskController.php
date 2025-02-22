@@ -225,12 +225,19 @@ class OrdenesHelpdeskController extends Controller
             'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
             'fallaReportada' => 'required|string|max:255',
         ]);
-
+    
         $orden = Ticket::findOrFail($id);
         $orden->update($validatedData);
-
-        return redirect()->route('helpdesk.edit', ['id' => $id])->with('success', 'Orden actualizada correctamente.');
+    
+        // 🔹 Determinar a qué vista redirigir según el tipo de servicio
+        $rutaEdicion = ($orden->tipoServicio == 1) 
+            ? 'helpdesk.levantamiento.edit' 
+            : 'helpdesk.soporte.edit';
+    
+        return redirect()->route($rutaEdicion, ['id' => $id])
+            ->with('success', 'Orden actualizada correctamente.');
     }
+    
 
     public function exportHelpdeskToExcel()
     {
