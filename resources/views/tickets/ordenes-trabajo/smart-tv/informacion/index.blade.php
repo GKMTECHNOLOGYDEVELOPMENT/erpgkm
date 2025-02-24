@@ -207,7 +207,7 @@
                             preview.innerHTML = `
                         <img src="${imagenSrc}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
                         <span class="text-xs font-semibold text-gray-700 text-center">${img.description ? img.description : "Sin descripción"}</span>
-                       <button onclick="eliminarImagen(${index}, event)" class="btn btn-danger text-white px-2 py-1 text-xs rounded">
+                        <button onclick="eliminarImagen(${index})" class="btn btn-danger text-white px-2 py-1 text-xs rounded">
                             Eliminar
                         </button>
                     `;
