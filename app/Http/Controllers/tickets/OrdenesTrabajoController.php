@@ -1278,11 +1278,18 @@ public function obtenerImagenes($ticketId, $visitaId)
 
 
     // app/Http/Controllers/ImagenController.php
-public function eliminarImagen($id)
-{
-    DB::table('fotostickest')->where('idfotostickest', $id)->delete();
-
-    return response()->json(['success' => true]);
-}
+    public function eliminarImagen($id)
+    {
+        // Buscar la imagen en la base de datos
+        $imagen = DB::table('fotostickest')->where('idfotostickest', $id)->first();
+    
+        if ($imagen) {
+            // Eliminar la imagen
+            DB::table('fotostickest')->where('idfotostickest', $id)->delete();
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['success' => false, 'error' => 'La imagen no existe.']);
+        }
+    }
 
 }

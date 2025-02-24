@@ -80,7 +80,6 @@ Route::post('/guardarImagen', [OrdenesTrabajoController::class, 'guardarImagen']
 // Definir una ruta para obtener las imágenes de un ticket y visita específicos
 Route::get('/imagenes/{ticket_id}/{visita_id}', [OrdenesTrabajoController::class, 'obtenerImagenes']);
 
-Route::get('/api/eliminarImagen/${imagenId}', [OrdenesTrabajoController::class, 'eliminarImagen']);
-
+Route::delete('/eliminarImagen/{id}', [OrdenesTrabajoController::class, 'eliminarImagen']);
 // Ruta para obtener las visitas de un ticket
 

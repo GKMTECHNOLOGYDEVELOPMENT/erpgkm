@@ -97,7 +97,7 @@
                 <!-- Descripción -->
                 <div>
                     <label class="block text-sm font-medium">Descripción</label>
-                    <input type="text" id="descripcionImagen" class="form-input w-full" required>
+                    <input type="text" id="descripcionImagen" class="form-input w-full" >
                 </div>
 
                 <!-- Selección de Imagen -->
@@ -105,7 +105,7 @@
                     <label class="block text-sm font-medium mb-2">Seleccionar Imagen</label>
                     <input type="file" id="imagenInput" accept="image/*"
                         class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
-                        required>
+                        >
                 </div>
 
                 <!-- Botón Agregar -->
@@ -161,20 +161,7 @@
          *  3️⃣ Funciones
          * -------------------------------- */
 
-        // Llamada a la API para obtener las imágenes desde la base de datos
-        function cargarImagenes(ticketId) {
-            fetch(`/api/imagenes/${ticketId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.imagenes) {
-                        imagenes = data.imagenes; // Asignar las imágenes al array de imagenes
-                        renderizarImagenes(); // Renderizar las imágenes en el swiper
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al cargar las imágenes:", error);
-                });
-        }
+
 
         // ✅ Muestra u oculta la sección de imágenes dependiendo del estado seleccionado
         function toggleCardFotos() {
@@ -189,32 +176,48 @@
 function renderizarPrevisualizacion() {
     imagePreviewContainer.innerHTML = ""; // Limpiar el contenedor de previsualización
 
-    if (imagenes.length === 0) {
-        imagePreviewContainer.classList.add("hidden"); // Ocultar si no hay imágenes
-        return;
-    }
+    // Obtener las imágenes desde la base de datos
+    const ticketId = {{ $ticket->idTickets }};
+    const visitaId = {{ $visitaId ?? 'null' }};
 
-    imagePreviewContainer.classList.remove("hidden"); // Mostrar el contenedor
+    fetch(`/api/imagenes/${ticketId}/${visitaId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.imagenes && data.imagenes.length > 0) {
+                imagePreviewContainer.classList.remove("hidden"); // Mostrar el contenedor
 
-    imagenes.forEach((img, index) => {
-        let preview = document.createElement("div");
-        preview.classList.add("preview-item", "flex", "flex-col", "items-center", "gap-2",
-            "p-2", "rounded-lg", "shadow");
+                data.imagenes.forEach((img, index) => {
+                    let preview = document.createElement("div");
+                    preview.classList.add("preview-item", "flex", "flex-col", "items-center", "gap-2",
+                        "p-2", "rounded-lg", "shadow");
 
-        // Asegúrate de que la propiedad `src` esté correctamente definida
-        const imagenSrc = img.src || 'ruta_por_defecto_si_no_hay_imagen'; // Puedes agregar una ruta por defecto si no hay imagen
+                    // Asegúrate de que la propiedad `src` esté correctamente definida
+                    const imagenSrc = img.src || 'ruta_por_defecto_si_no_hay_imagen'; // Puedes agregar una ruta por defecto si no hay imagen
 
-        preview.innerHTML = `
-            <img src="${imagenSrc}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
-            <span class="text-xs font-semibold text-gray-700 text-center">${img.description ? img.description : "Sin descripción"}</span>
-            <button onclick="eliminarImagen(${index})" class="btn btn-danger text-white px-2 py-1 text-xs rounded">
-                Eliminar
-            </button>
-        `;
+                    preview.innerHTML = `
+                        <img src="${imagenSrc}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
+                        <span class="text-xs font-semibold text-gray-700 text-center">${img.description ? img.description : "Sin descripción"}</span>
+                       <button onclick="eliminarImagen(${index}, event)" class="btn btn-danger text-white px-2 py-1 text-xs rounded">
+                            Eliminar
+                        </button>
+                    `;
 
-        imagePreviewContainer.appendChild(preview); // Agregar la previsualización al contenedor
-    });
+                    imagePreviewContainer.appendChild(preview); // Agregar la previsualización al contenedor
+                });
+            } else {
+                imagePreviewContainer.classList.add("hidden"); // Ocultar si no hay imágenes
+            }
+        })
+        .catch(error => {
+            console.error("Error al cargar las imágenes:", error);
+            imagePreviewContainer.classList.add("hidden"); // Ocultar en caso de error
+        });
 }
+
+
+
+
+
 
 
  // ✅ Renderiza las imágenes en el Swiper
@@ -268,32 +271,49 @@ function renderizarImagenes() {
 
 
 
-
-       // ✅ Elimina una imagen (tanto del modal como del Swiper)
+// ✅ Elimina una imagen (tanto del modal como del Swiper)
 window.eliminarImagen = function(index) {
-    const imagenId = imagenes[index].id;
+    // Obtener el ID del ticket y la visita
+    const ticketId = {{ $ticket->idTickets }};
+    const visitaId = {{ $visitaId ?? 'null' }};
 
-    fetch(`/api/eliminarImagen/${imagenId}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            imagenes.splice(index, 1);
-            localStorage.setItem("imagenesSolucion", JSON.stringify(imagenes));
-            renderizarImagenes();
-            renderizarPrevisualizacion();
-        } else {
-            toastr.error("Error al eliminar la imagen.");
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        toastr.error("Hubo un error al eliminar la imagen.");
-    });
+    // Obtener las imágenes desde la API
+    fetch(`/api/imagenes/${ticketId}/${visitaId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.imagenes && data.imagenes[index]) {
+                const imagenId = data.imagenes[index].id; // Obtener el ID de la imagen
+
+                // Enviar solicitud para eliminar la imagen en la base de datos
+                fetch(`/api/eliminarImagen/${imagenId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Recargar las imágenes después de eliminar
+                        renderizarImagenes(); // Actualizar el Swiper
+                        renderizarPrevisualizacion(); // Actualizar el modal
+                        toastr.success("Imagen eliminada correctamente.");
+                    } else {
+                        toastr.error("Error al eliminar la imagen.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    toastr.error("Hubo un error al eliminar la imagen.");
+                });
+            } else {
+                toastr.error("La imagen no existe o no se pudo encontrar.");
+            }
+        })
+        .catch(error => {
+            console.error("Error al cargar las imágenes:", error);
+            toastr.error("Hubo un error al cargar las imágenes.");
+        });
 };
 
         /** -------------------------------
@@ -322,7 +342,7 @@ window.eliminarImagen = function(index) {
             const descripcion = descripcionInput.value.trim();
 
             if (!file || descripcion === "") {
-                alert("Debe seleccionar una imagen y escribir una descripción.");
+                toastr.error("Debe seleccionar una imagen y escribir una descripción.");
                 return;
             }
 
@@ -352,6 +372,8 @@ window.eliminarImagen = function(index) {
                 if (data.success) {
                     toastr.success("Imagen guardada correctamente.");
                     renderizarImagenes(); // Actualizar la vista de imágenes
+                    renderizarPrevisualizacion(); // Actualizar la vista de imágenes en el modal
+
                 } else {
                     toastr.error("Error al guardar la imagen.");
                 }
