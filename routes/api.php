@@ -75,8 +75,12 @@ Route::post('/guardarCondiciones', [OrdenesTrabajoController::class, 'guardar'])
 Route::post('/guardarEstado', [OrdenesTrabajoController::class, 'guardarestado']);
 Route::get('/obtenerJustificacion', [OrdenesTrabajoController::class, 'obtenerJustificacion']);
 Route::post('/guardarImagenes', [OrdenesTrabajoController::class, 'guardarImagenes']);
-Route::post('/api/guardarImagen', [OrdenesTrabajoController::class, 'guardarImagen']);
+Route::post('/guardarImagen', [OrdenesTrabajoController::class, 'guardarImagen']);
+// Route::get('/api/imagenes/{ticket_id}', [OrdenesTrabajoController::class, 'obtenerImagenes']);
+// Definir una ruta para obtener las imágenes de un ticket y visita específicos
+Route::get('/imagenes/{ticket_id}/{visita_id}', [OrdenesTrabajoController::class, 'obtenerImagenes']);
 
+Route::get('/api/eliminarImagen/${imagenId}', [OrdenesTrabajoController::class, 'eliminarImagen']);
 
 // Ruta para obtener las visitas de un ticket
 
