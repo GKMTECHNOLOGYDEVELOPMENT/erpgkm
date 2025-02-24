@@ -1209,35 +1209,35 @@ public function obtenerJustificacion(Request $request)
 }
 
 
-public function guardarImagenes(Request $request)
-    {
-        $idTickets = $request->input('idTickets');
-        $idVisitas = $request->input('idVisitas');
-        $imagenes = $request->file('imagenes');
+public function guardarImagen(Request $request)
+{
+    // Validar la solicitud
+    $request->validate([
+        'imagen' => 'required|image|max:2048', // Validamos que la imagen sea válida y no sea mayor de 2MB
+        'descripcion' => 'required|string|max:255',
+        'ticket_id' => 'required|integer|exists:tickets,idTickets', // Asegúrate de validar el ID del ticket
+        'visita_id' => 'nullable|integer|exists:visitas,idVisitas', // Si tienes visita_id
+    ]);
 
-        try {
-            DB::beginTransaction();
+    // Obtener los datos de la solicitud
+    $imagen = $request->file('imagen'); // Imagen en formato binario
+    $descripcion = $request->input('descripcion');
+    $ticket_id = $request->input('ticket_id');
+    $visita_id = $request->input('visita_id') ?? null;
 
-            foreach ($imagenes as $imagen) {
-                $fotoBinaria = file_get_contents($imagen['foto']->getRealPath());
-                $descripcion = $imagen['descripcion'];
+    // Convertir la imagen a binario
+    $imagen_binaria = file_get_contents($imagen->getRealPath());
 
-                // Insertar en la tabla fotostickest
-                DB::table('fotostickest')->insert([
-                    'idTickets' => $idTickets,
-                    'idVisitas' => $idVisitas,
-                    'foto' => $fotoBinaria,
-                    'descripcion' => $descripcion,
-                ]);
-            }
+    // Crear la entrada en la base de datos
+    $foto = new FotoTicket();
+    $foto->idTickets = $ticket_id;
+    $foto->idVisitas = $visita_id;
+    $foto->foto = $imagen_binaria; // Guardamos la imagen en binario
+    $foto->descripcion = $descripcion;
+    $foto->save();
 
-            DB::commit();
-
-            return response()->json(['success' => true, 'message' => 'Imágenes guardadas correctamente.']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Error al guardar las imágenes.', 'error' => $e->getMessage()]);
-        }
-    }
+    // Devolver una respuesta exitosa
+    return response()->json(['success' => true, 'message' => 'Imagen guardada correctamente.']);
+}
 
 }

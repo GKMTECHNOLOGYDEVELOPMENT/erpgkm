@@ -263,34 +263,48 @@
             descripcionInput.value = "";
         });
 
-        // ✅ Agrega una imagen a la previsualización antes de guardar
-        agregarImagenBtn.addEventListener("click", function() {
-            const file = imagenInput.files[0];
-            const descripcion = descripcionInput.value.trim();
+       // ✅ Agregar imagen y enviarla al servidor para guardar en la base de datos
+agregarImagenBtn.addEventListener("click", function() {
+    const file = imagenInput.files[0];
+    const descripcion = descripcionInput.value.trim();
 
-            if (!file || descripcion === "") {
-                alert("Debe seleccionar una imagen y escribir una descripción.");
-                return;
-            }
+    if (!file || descripcion === "") {
+        alert("Debe seleccionar una imagen y escribir una descripción.");
+        return;
+    }
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                imagenes.push({
-                    src: event.target.result,
-                    description: descripcion
-                });
+    const formData = new FormData(); // Usamos FormData para enviar archivos
+    formData.append("imagen", file); // Agregar el archivo
+    formData.append("descripcion", descripcion); // Agregar la descripción
+    formData.append("ticket_id", {{ $ticket->idTickets }}); // ID del ticket
+    formData.append("visita_id", {{ $visitaId ?? 'null' }}); // ID de la visita (si existe)
 
-                localStorage.setItem("imagenesSolucion", JSON.stringify(imagenes));
+    // Enviar la imagen al servidor usando AJAX
+    fetch('/api/guardarImagen', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: formData // Pasamos los datos como FormData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            toastr.success("Imagen guardada correctamente.");
+            renderizarImagenes(); // Actualizar la vista de imágenes
+        } else {
+            toastr.error("Error al guardar la imagen.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        toastr.error("Hubo un error al guardar la imagen.");
+    });
 
-                renderizarPrevisualizacion(); // Actualiza la previsualización del modal
-                renderizarImagenes(); // Actualiza el Swiper
-            };
-
-            reader.readAsDataURL(file);
-
-            imagenInput.value = "";
-            descripcionInput.value = "";
-        });
+    // Limpiar los campos después de enviar la imagen
+    imagenInput.value = "";
+    descripcionInput.value = "";
+});
 
         // ✅ Guarda las imágenes en localStorage y las muestra en el Swiper
         guardarImagenBtn.addEventListener("click", function() {

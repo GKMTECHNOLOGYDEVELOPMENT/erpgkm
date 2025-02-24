@@ -75,6 +75,7 @@ Route::post('/guardarCondiciones', [OrdenesTrabajoController::class, 'guardar'])
 Route::post('/guardarEstado', [OrdenesTrabajoController::class, 'guardarestado']);
 Route::get('/obtenerJustificacion', [OrdenesTrabajoController::class, 'obtenerJustificacion']);
 Route::post('/guardarImagenes', [OrdenesTrabajoController::class, 'guardarImagenes']);
+Route::post('/api/guardarImagen', [OrdenesTrabajoController::class, 'guardarImagen']);
 
 
 // Ruta para obtener las visitas de un ticket
