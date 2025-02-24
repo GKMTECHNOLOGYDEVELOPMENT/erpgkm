@@ -19,46 +19,51 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
 
         const visitaCard = document.createElement('div');
-visitaCard.className = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105';
-visitaCard.innerHTML = `
-  <div class="flex justify-between items-center mb-3">
-      <h3 class="text-lg font-semibold text-gray-800">${visita.nombre}</h3>
-      <button type="button" class="btn btn-danger" id="detallesVisitaButton-${visita.idVisitas}">
-          Detalles de Visita
-      </button>
-  </div>
-  <div class="text-center text-gray-600 mb-2">
-      <span class="font-medium">Fecha de Programación</span><br>
-      <span class="text-gray-800">${fechaInicio} - ${fechaFinal}</span><br>
-  </div>
+        visitaCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105';
+        visitaCard.style.backgroundColor = "#e3e7fc"; // Color azul claro
+        visitaCard.innerHTML = `
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-3">
+        <h3 class="text-sm sm:text-lg font-semibold text-gray-800">${visita.nombre}</h3>
+        <button type="button" class="bg-primary text-white px-3 py-2 rounded-lg hover:bg-red-700 transition w-full sm:w-auto mt-2 sm:mt-0 flex items-center justify-center gap-2" id="detallesVisitaButton-${visita.idVisitas}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5a6 6 0 000 12 6 6 0 100-12zM21 21l-4.35-4.35" />
+        </svg>
+    </button>
+    
+    </div>
+    <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-blue-100">
+    <span class="text-gray-800 text-sm sm:text-base">Fecha de Programación</span><br>
+    <span class="font-bold">${fechaInicio} - ${fechaFinal}</span>
+</div>
 `;
-visitasList.appendChild(visitaCard);
+        visitasList.appendChild(visitaCard);
 
-// Agregar el evento de clic al botón "Detalles de Visita"
-const detallesVisitaButton = document.getElementById(`detallesVisitaButton-${visita.idVisitas}`);
-detallesVisitaButton.addEventListener('click', () => {
-  // Llenar el modal con los detalles de la visita
-  document.getElementById('detalleNombre').textContent = visita.nombre;
-  document.getElementById('detalleFechaProgramada').textContent = formatDate(visita.fecha_programada);
-  document.getElementById('detalleFechaAsignada').textContent = formatDate(visita.fecha_asignada);
-  document.getElementById('detalleFechaDesplazamiento').textContent = formatDate(visita.fechas_desplazamiento);
-  document.getElementById('detalleFechaLlegada').textContent = formatDate(visita.fecha_llegada);
-  document.getElementById('detalleFechaInicio').textContent = formatDate(visita.fecha_inicio);
-  document.getElementById('detalleFechaFinal').textContent = formatDate(visita.fecha_final);
-  document.getElementById('detalleEstado').textContent = visita.estado ? 'Activo' : 'Inactivo';
+        // Agregar el evento de clic al botón "Detalles de Visita"
+        const detallesVisitaButton = document.getElementById(`detallesVisitaButton-${visita.idVisitas}`);
+        detallesVisitaButton.addEventListener('click', () => {
+          // Llenar el modal con los detalles de la visita
+          document.getElementById('detalleNombre').textContent = visita.nombre;
+          document.getElementById('detalleFechaProgramada').textContent = formatDate(visita.fecha_programada);
+          document.getElementById('detalleFechaAsignada').textContent = formatDate(visita.fecha_asignada);
+          document.getElementById('detalleFechaDesplazamiento').textContent = formatDate(visita.fechas_desplazamiento);
+          document.getElementById('detalleFechaLlegada').textContent = formatDate(visita.fecha_llegada);
+          document.getElementById('detalleFechaInicio').textContent = formatDate(visita.fecha_inicio);
+          document.getElementById('detalleFechaFinal').textContent = formatDate(visita.fecha_final);
+          document.getElementById('detalleEstado').textContent = visita.estado ? 'Activo' : 'Inactivo';
 
-  // Mostrar el modal
-  const event = new CustomEvent('toggle-modal-detalles-visita');
-  window.dispatchEvent(event);
-});
+          // Mostrar el modal
+          const event = new CustomEvent('toggle-modal-detalles-visita');
+          window.dispatchEvent(event);
+        });
 
         // Tarjeta de Técnico en Desplazamiento con el botón de "like"
         const tecnicoCard = document.createElement('div');
-        tecnicoCard.className = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+        tecnicoCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+        tecnicoCard.style.backgroundColor = "#deeffd"; // Color celeste claro
         tecnicoCard.innerHTML = `
-          <div class="text-center text-gray-600 flex items-center justify-center">
-            <span class="font-medium mr-2">Técnico en Desplazamiento: </span>
-            <span class="text-gray-800 ml-2">${nombreTecnico} </span>
+          <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-green-100">
+            <span class="text-gray-800 text-sm sm:text-base">Técnico en Desplazamiento: </span>
+            <span class="font-bold">${nombreTecnico} </span>
             <span id="fechaDesplazamiento-${visita.idVisitas}" class="ml-8 text-gray-500"> ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}</span>
             <button class="text-black-500 hover:text-red-600 transition-colors" id="likeButton-${visita.idVisitas}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-green-500">
@@ -76,11 +81,12 @@ detallesVisitaButton.addEventListener('click', () => {
             if (anexoData && anexoData.idVisitas) {
               // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
               const inicioServicioCard = document.createElement('div');
-              inicioServicioCard.className = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+              inicioServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+              inicioServicioCard.style.backgroundColor = "#d9f2e6"; // Color verde claro
               inicioServicioCard.innerHTML = `
-                <div class="text-center text-gray-600">
-                  <h3 class="text-lg font-semibold text-gray-800">Llegada al Servicio</h3>
-                  <p class="text-gray-800 mt-2">El servicio ha comenzado.</p>
+                <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
+                  <h3 class="text-gray-800 text-sm sm:text-base">Llegada al Servicio</h3>
+                  <p class="font-bold">El servicio ha comenzado.</p>
                 </div>
                 <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
                   Subir Foto
@@ -101,17 +107,17 @@ detallesVisitaButton.addEventListener('click', () => {
                     const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
                     uploadPhotoButton.style.display = 'none';
                     continueButton.style.display = 'block';
-    // Agregar el evento de clic al botón "Continuar"
-    continueButton.addEventListener('click', () => {
-      // Mostrar el modal
-      const event = new CustomEvent('toggle-modal-condiciones');
-      window.dispatchEvent(event);
-    });
-  }
-})
-.catch(error => {
-  console.error('Error al verificar la foto de la visita:', error);
-});
+                    // Agregar el evento de clic al botón "Continuar"
+                    continueButton.addEventListener('click', () => {
+                      // Mostrar el modal
+                      const event = new CustomEvent('toggle-modal-condiciones');
+                      window.dispatchEvent(event);
+                    });
+                  }
+                })
+                .catch(error => {
+                  console.error('Error al verificar la foto de la visita:', error);
+                });
 
               // Agregar el evento de clic al botón de "Subir Foto"
               const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
@@ -143,17 +149,17 @@ detallesVisitaButton.addEventListener('click', () => {
                         uploadPhotoButton.style.display = 'none';
                         continueButton.style.display = 'block';
                         // Agregar el evento de clic al botón "Continuar" después de subir la foto
-        continueButton.addEventListener('click', () => {
-          // Mostrar el modal
-          const event = new CustomEvent('toggle-modal-condiciones');           
-          
-          window.dispatchEvent(event);
+                        continueButton.addEventListener('click', () => {
+                          // Mostrar el modal
+                          const event = new CustomEvent('toggle-modal-condiciones');
 
-        });
-      } else {
-        toastr.error("Hubo un error al subir la foto.");
-      }
-    })
+                          window.dispatchEvent(event);
+
+                        });
+                      } else {
+                        toastr.error("Hubo un error al subir la foto.");
+                      }
+                    })
                     .catch(error => {
                       console.error('Error al subir la foto:', error);
                       toastr.error("Hubo un error al subir la foto.");
@@ -233,7 +239,7 @@ detallesVisitaButton.addEventListener('click', () => {
                                   toastr.success("Tecnico en desplazamiento.");
 
                                   const inicioServicioCard = document.createElement('div');
-                                  inicioServicioCard.className = 'bg-white border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+                                  inicioServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
                                   inicioServicioCard.innerHTML = `
                                     <div class="text-center text-gray-600">
                                       <h3 class="text-lg font-semibold text-gray-800">Llegada al servicio</h3>
@@ -257,65 +263,65 @@ detallesVisitaButton.addEventListener('click', () => {
                                         const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
                                         uploadPhotoButton.style.display = 'none';
                                         continueButton.style.display = 'block';
-                                    // Agregar el evento de clic al botón "Continuar"
-    continueButton.addEventListener('click', () => {
-      // Mostrar el modal
-      const modal = Alpine.$data(document.querySelector('[x-data="modal"]'));
-      modal.toggle();
-    });
-  }
-})
-.catch(error => {
-  console.error('Error al verificar la foto de la visita:', error);
-});
+                                        // Agregar el evento de clic al botón "Continuar"
+                                        continueButton.addEventListener('click', () => {
+                                          // Mostrar el modal
+                                          const modal = Alpine.$data(document.querySelector('[x-data="modal"]'));
+                                          modal.toggle();
+                                        });
+                                      }
+                                    })
+                                    .catch(error => {
+                                      console.error('Error al verificar la foto de la visita:', error);
+                                    });
 
-                                     // Agregar el evento de clic al botón de "Subir Foto"
+                                  // Agregar el evento de clic al botón de "Subir Foto"
                                   const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
                                   const fileInput = document.getElementById(`fileInput-${visita.idVisitas}`);
 
                                   uploadPhotoButton.addEventListener('click', () => {
-                                  fileInput.click(); // Simula el clic en el input de archivo
+                                    fileInput.click(); // Simula el clic en el input de archivo
                                   });
 
-                                           // Manejar la selección de archivo
-              fileInput.addEventListener('change', () => {
-                const file = fileInput.files[0];
-                if (file) {
-                  const formData = new FormData();
-                  formData.append('photo', file);
-                  formData.append('visitaId', visita.idVisitas);
+                                  // Manejar la selección de archivo
+                                  fileInput.addEventListener('change', () => {
+                                    const file = fileInput.files[0];
+                                    if (file) {
+                                      const formData = new FormData();
+                                      formData.append('photo', file);
+                                      formData.append('visitaId', visita.idVisitas);
 
-                  // Hacer la solicitud para subir la foto
-                  fetch('/api/subirFoto', {
-                    method: 'POST',
-                    body: formData,
-                  })
-                    .then(response => response.json())
-                    .then(data => {
-                      if (data.success) {
-                        toastr.success("Foto subida con éxito.");
-                        const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
-                        const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
-                        uploadPhotoButton.style.display = 'none';
-                        continueButton.style.display = 'block';
-                        // Agregar el evento de clic al botón "Continuar" después de subir la foto
-        continueButton.addEventListener('click', () => {
-          // Mostrar el modal
-          const modal = Alpine.$data(document.querySelector('[x-data="modal"]'));
-          modal.toggle();
-        });
-      } else {
-        toastr.error("Hubo un error al subir la foto.");
-      }
-    })
-                    .catch(error => {
-                      console.error('Error al subir la foto:', error);
-                      toastr.error("Hubo un error al subir la foto.");
-                    });
-                } else {
-                  toastr.error("Por favor selecciona una foto.");
-                }
-              });
+                                      // Hacer la solicitud para subir la foto
+                                      fetch('/api/subirFoto', {
+                                        method: 'POST',
+                                        body: formData,
+                                      })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                          if (data.success) {
+                                            toastr.success("Foto subida con éxito.");
+                                            const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
+                                            const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
+                                            uploadPhotoButton.style.display = 'none';
+                                            continueButton.style.display = 'block';
+                                            // Agregar el evento de clic al botón "Continuar" después de subir la foto
+                                            continueButton.addEventListener('click', () => {
+                                              // Mostrar el modal
+                                              const modal = Alpine.$data(document.querySelector('[x-data="modal"]'));
+                                              modal.toggle();
+                                            });
+                                          } else {
+                                            toastr.error("Hubo un error al subir la foto.");
+                                          }
+                                        })
+                                        .catch(error => {
+                                          console.error('Error al subir la foto:', error);
+                                          toastr.error("Hubo un error al subir la foto.");
+                                        });
+                                    } else {
+                                      toastr.error("Por favor selecciona una foto.");
+                                    }
+                                  });
                                 }
                               })
                               .catch(error => {
