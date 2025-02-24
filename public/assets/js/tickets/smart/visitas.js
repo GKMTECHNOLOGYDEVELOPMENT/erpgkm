@@ -19,21 +19,22 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
 
         const visitaCard = document.createElement('div');
-        visitaCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105';
+        visitaCard.className = 'rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105';
         visitaCard.style.backgroundColor = "#e3e7fc"; // Color azul claro
         visitaCard.innerHTML = `
         <div class="flex flex-col sm:flex-row justify-between items-center mb-3">
-        <h3 class="text-sm sm:text-lg font-semibold text-gray-800">${visita.nombre}</h3>
-        <button type="button" class="bg-primary text-white px-3 py-2 rounded-lg hover:bg-red-700 transition w-full sm:w-auto mt-2 sm:mt-0 flex items-center justify-center gap-2" id="detallesVisitaButton-${visita.idVisitas}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <span class="text-lg font-semibold mb-4 badge bg-primary">${visita.nombre}</span>
+        <button type="button" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-700 active:bg-red-800 transition-all w-full sm:w-auto mt-2 sm:mt-0 flex items-center justify-center gap-2 shadow-md relative after:content-[''] after:absolute after:bg-white/30 after:w-full after:h-full after:rounded-lg after:scale-150 after:opacity-0 after:transition-all hover:after:opacity-100 active:scale-95" id="detallesVisitaButton-${visita.idVisitas}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5a6 6 0 000 12 6 6 0 100-12zM21 21l-4.35-4.35" />
         </svg>
+        <span>Detalles</span>
     </button>
     
     </div>
-    <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-blue-100">
-    <span class="text-gray-800 text-sm sm:text-base">Fecha de Programación</span><br>
-    <span class="font-bold">${fechaInicio} - ${fechaFinal}</span>
+    <div class="text-center px-4 py-2 rounded font-semibold mb-2">
+    <span class="text-primary text-sm sm:text-base">Fecha de Programación</span><br>
+    <span class="font-bold" style="color:black">${fechaInicio} - ${fechaFinal}</span>
 </div>
 `;
         visitasList.appendChild(visitaCard);
@@ -58,20 +59,22 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
         // Tarjeta de Técnico en Desplazamiento con el botón de "like"
         const tecnicoCard = document.createElement('div');
-        tecnicoCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+        tecnicoCard.className = 'rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
         tecnicoCard.style.backgroundColor = "#deeffd"; // Color celeste claro
         tecnicoCard.innerHTML = `
-          <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-green-100">
-            <span class="text-gray-800 text-sm sm:text-base">Técnico en Desplazamiento: </span>
-            <span class="font-bold">${nombreTecnico} </span>
-            <span id="fechaDesplazamiento-${visita.idVisitas}" class="ml-8 text-gray-500"> ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}</span>
-            <button class="text-black-500 hover:text-red-600 transition-colors" id="likeButton-${visita.idVisitas}">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="h-6 w-6 text-green-500">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </button>
-          </div>
-        `;
+        <div class="relative px-6 py-4 rounded-lg font-semibold text-center mb-2">
+        <span class="text-primary text-sm sm:text-base">Técnico en Desplazamiento</span>
+        <span class="font-bold text-black text-base sm:text-lg block mt-1">${nombreTecnico}</span>
+        <span id="fechaDesplazamiento-${visita.idVisitas}" class="text-gray-600 text-sm sm:text-base block mt-1">
+            ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
+        </span>
+        <button class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 ease-in-out active:bg-green-500 active:text-white active:border-green-600 focus:ring-2 focus:ring-green-300 p-2 rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center" id="likeButton-${visita.idVisitas}">
+        <i class="fa-solid fa-forward text-lg"></i> <!-- Ícono de Siguiente -->
+    </button>
+    
+    
+    </div>
+`;
         visitasList.appendChild(tecnicoCard);
 
         // Verificar si ya existe un registro de "Inicio de Servicio"
@@ -85,7 +88,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
               inicioServicioCard.style.backgroundColor = "#d9f2e6"; // Color verde claro
               inicioServicioCard.innerHTML = `
                 <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
-                  <h3 class="text-gray-800 text-sm sm:text-base">Llegada al Servicio</h3>
+                  <h3 class="text-primary text-sm sm:text-base">Llegada al Servicio</h3>
                   <p class="font-bold">El servicio ha comenzado.</p>
                 </div>
                 <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">

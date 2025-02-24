@@ -1,14 +1,14 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <!-- Botón para abrir el modal de crear visita -->
 <span class="text-lg font-semibold mb-4 badge bg-success">Coordinación</span>
 <div class="flex gap-2 justify-center">
     <button id="crearCordinacionBtn" class="px-4 py-2 btn btn-success text-white rounded-lg shadow-md flex items-center">
-        📅 Coordinación
+        Coordinación
     </button>
 
 
 </div>
 <div id="visitasContainer" class="mt-4">
-    <h2 class="text-xl font-semibold mb-4">Visitas para el Ticket:</h2>
     <div id="visitasList" class="space-y-4"></div>
 </div>
 
