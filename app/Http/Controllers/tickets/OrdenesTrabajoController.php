@@ -27,6 +27,7 @@ use App\Exports\TicketExport;
 use App\Exports\HelpdeskTicketExport; // Importa el nuevo exportador
 use App\Models\AnexosVisita;
 use App\Models\CondicionesTicket;
+use App\Models\Fotostickest;
 use App\Models\TicketFlujo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
@@ -1229,7 +1230,7 @@ public function guardarImagen(Request $request)
     $imagen_binaria = file_get_contents($imagen->getRealPath());
 
     // Crear la entrada en la base de datos
-    $foto = new FotoTicket();
+    $foto = new Fotostickest();
     $foto->idTickets = $ticket_id;
     $foto->idVisitas = $visita_id;
     $foto->foto = $imagen_binaria; // Guardamos la imagen en binario
