@@ -161,6 +161,21 @@
          *  3️⃣ Funciones
          * -------------------------------- */
 
+        // Llamada a la API para obtener las imágenes desde la base de datos
+        function cargarImagenes(ticketId) {
+            fetch(`/api/imagenes/${ticketId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.imagenes) {
+                        imagenes = data.imagenes; // Asignar las imágenes al array de imagenes
+                        renderizarImagenes(); // Renderizar las imágenes en el swiper
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al cargar las imágenes:", error);
+                });
+        }
+
         // ✅ Muestra u oculta la sección de imágenes dependiendo del estado seleccionado
         function toggleCardFotos() {
             if (estadoSelect.value === "Solución") {
@@ -170,78 +185,116 @@
                 cardFotos.classList.add("hidden");
             }
         }
+// ✅ Renderiza las imágenes seleccionadas en el modal antes de guardarlas
+function renderizarPrevisualizacion() {
+    imagePreviewContainer.innerHTML = ""; // Limpiar el contenedor de previsualización
 
-        // ✅ Renderiza las imágenes seleccionadas en el modal antes de guardarlas
-        function renderizarPrevisualizacion() {
-            imagePreviewContainer.innerHTML = "";
+    if (imagenes.length === 0) {
+        imagePreviewContainer.classList.add("hidden"); // Ocultar si no hay imágenes
+        return;
+    }
 
-            if (imagenes.length === 0) {
-                imagePreviewContainer.classList.add("hidden");
-                return;
-            }
+    imagePreviewContainer.classList.remove("hidden"); // Mostrar el contenedor
 
-            imagePreviewContainer.classList.remove("hidden");
+    imagenes.forEach((img, index) => {
+        let preview = document.createElement("div");
+        preview.classList.add("preview-item", "flex", "flex-col", "items-center", "gap-2",
+            "p-2", "rounded-lg", "shadow");
 
-            imagenes.forEach((img, index) => {
-                let preview = document.createElement("div");
-                preview.classList.add("preview-item", "flex", "flex-col", "items-center", "gap-2",
-                    "p-2", "rounded-lg", "shadow");
+        // Asegúrate de que la propiedad `src` esté correctamente definida
+        const imagenSrc = img.src || 'ruta_por_defecto_si_no_hay_imagen'; // Puedes agregar una ruta por defecto si no hay imagen
 
-                preview.innerHTML = `
-            <img src="${img.src}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
-            <span class="text-xs font-semibold text-gray-700 text-center">${img.description}</span>
+        preview.innerHTML = `
+            <img src="${imagenSrc}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
+            <span class="text-xs font-semibold text-gray-700 text-center">${img.description ? img.description : "Sin descripción"}</span>
             <button onclick="eliminarImagen(${index})" class="btn btn-danger text-white px-2 py-1 text-xs rounded">
                 Eliminar
             </button>
         `;
 
-                imagePreviewContainer.appendChild(preview);
-            });
-        }
+        imagePreviewContainer.appendChild(preview); // Agregar la previsualización al contenedor
+    });
+}
 
 
-        // ✅ Renderiza imágenes en el Swiper
-        function renderizarImagenes() {
-            swiperWrapper.innerHTML = "";
+ // ✅ Renderiza las imágenes en el Swiper
+function renderizarImagenes() {
+    swiperWrapper.innerHTML = ""; // Limpiar el swiper antes de agregar nuevas imágenes
 
-            imagenes.forEach((img, index) => {
-                let swiperSlide = document.createElement("div");
-                swiperSlide.classList.add("swiper-slide", "relative", "flex", "items-center",
-                    "justify-center");
+    // Obtener las imágenes desde la base de datos
+    const ticketId = {{ $ticket->idTickets }};
+    const visitaId = {{ $visitaId ?? 'null' }};
 
-                swiperSlide.innerHTML = `
-                <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
-                    <img src="${img.src}" alt="${img.description}" class="w-full h-full object-cover rounded-lg" />
-                    
-                    <!-- Descripción con fondo translúcido, SCROLL, y tamaño limitado -->
-                    <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium 
-                                max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
-                        <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
-                            ${img.description ? img.description : "Sin descripción"}
+    fetch(`/api/imagenes/${ticketId}/${visitaId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.imagenes) {
+                data.imagenes.forEach((img, index) => {
+                    let swiperSlide = document.createElement("div");
+                    swiperSlide.classList.add("swiper-slide", "relative", "flex", "items-center", "justify-center");
+
+                    swiperSlide.innerHTML = `
+                        <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
+                            <img src="${img.src}" alt="Imagen ${index + 1}" class="w-full h-full object-cover rounded-lg" />
+                            
+                            <!-- Descripción con fondo translúcido, SCROLL, y tamaño limitado -->
+                            <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium 
+                                        max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
+                                <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
+                                    ${img.description ? img.description : "Sin descripción"}
+                                </div>
+                            </div>
+
+                            <!-- Botón para eliminar la imagen -->
+                            <button onclick="eliminarImagen(${index})" class="absolute top-2 right-2 btn btn-danger text-white p-1 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
-                    </div>
+                    `;
+                    swiperWrapper.appendChild(swiperSlide);
+                });
 
-                    <!-- Botón para eliminar la imagen -->
-                    <button onclick="eliminarImagen(${index})" class="absolute top-2 right-2 btn btn-danger text-white p-1 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            `;
-                swiperWrapper.appendChild(swiperSlide);
-            });
+                swiper5.update(); // Actualizar el swiper para que se muestren las nuevas imágenes
+            }
+        })
+        .catch(error => {
+            console.error("Error al cargar las imágenes:", error);
+        });
+}
 
-            swiper5.update();
+        
+
+
+
+
+       // ✅ Elimina una imagen (tanto del modal como del Swiper)
+window.eliminarImagen = function(index) {
+    const imagenId = imagenes[index].id;
+
+    fetch(`/api/eliminarImagen/${imagenId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
         }
-
-        // ✅ Elimina una imagen (tanto del modal como del Swiper)
-        window.eliminarImagen = function(index) {
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
             imagenes.splice(index, 1);
             localStorage.setItem("imagenesSolucion", JSON.stringify(imagenes));
             renderizarImagenes();
             renderizarPrevisualizacion();
-        };
+        } else {
+            toastr.error("Error al eliminar la imagen.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        toastr.error("Hubo un error al eliminar la imagen.");
+    });
+};
 
         /** -------------------------------
          *  4️⃣ Eventos
@@ -263,48 +316,55 @@
             descripcionInput.value = "";
         });
 
-       // ✅ Agregar imagen y enviarla al servidor para guardar en la base de datos
-agregarImagenBtn.addEventListener("click", function() {
-    const file = imagenInput.files[0];
-    const descripcion = descripcionInput.value.trim();
+        // ✅ Agregar imagen y enviarla al servidor para guardar en la base de datos
+        agregarImagenBtn.addEventListener("click", function() {
+            const file = imagenInput.files[0];
+            const descripcion = descripcionInput.value.trim();
 
-    if (!file || descripcion === "") {
-        alert("Debe seleccionar una imagen y escribir una descripción.");
-        return;
-    }
+            if (!file || descripcion === "") {
+                alert("Debe seleccionar una imagen y escribir una descripción.");
+                return;
+            }
 
-    const formData = new FormData(); // Usamos FormData para enviar archivos
-    formData.append("imagen", file); // Agregar el archivo
-    formData.append("descripcion", descripcion); // Agregar la descripción
-    formData.append("ticket_id", {{ $ticket->idTickets }}); // ID del ticket
-    formData.append("visita_id", {{ $visitaId ?? 'null' }}); // ID de la visita (si existe)
+            const formData = new FormData(); // Usamos FormData para enviar archivos
+            formData.append("imagen", file); // Agregar el archivo
+            formData.append("descripcion", descripcion); // Agregar la descripción
+            formData.append("ticket_id", {{ $ticket->idTickets }}); // ID del ticket
+            formData.append("visita_id", {{ $visitaId ?? 'null' }}); // ID de la visita (si existe)
 
-    // Enviar la imagen al servidor usando AJAX
-    fetch('/api/guardarImagen', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: formData // Pasamos los datos como FormData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            toastr.success("Imagen guardada correctamente.");
-            renderizarImagenes(); // Actualizar la vista de imágenes
-        } else {
-            toastr.error("Error al guardar la imagen.");
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        toastr.error("Hubo un error al guardar la imagen.");
-    });
+            // Log para verificar que los datos se están agregando al FormData
+            console.log("Archivo seleccionado:", file);
+            console.log("Descripción:", descripcion);
+            console.log("Ticket ID:", {{ $ticket->idTickets }});
+            console.log("Visita ID:", {{ $visitaId ?? 'null' }});
 
-    // Limpiar los campos después de enviar la imagen
-    imagenInput.value = "";
-    descripcionInput.value = "";
-});
+            // Enviar la imagen al servidor usando AJAX
+            fetch('/api/guardarImagen', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: formData // Pasamos los datos como FormData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Respuesta del servidor:", data); // Log para ver la respuesta del servidor
+                if (data.success) {
+                    toastr.success("Imagen guardada correctamente.");
+                    renderizarImagenes(); // Actualizar la vista de imágenes
+                } else {
+                    toastr.error("Error al guardar la imagen.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                toastr.error("Hubo un error al guardar la imagen.");
+            });
+
+            // Limpiar los campos después de enviar la imagen
+            imagenInput.value = "";
+            descripcionInput.value = "";
+        });
 
         // ✅ Guarda las imágenes en localStorage y las muestra en el Swiper
         guardarImagenBtn.addEventListener("click", function() {
@@ -347,6 +407,15 @@ agregarImagenBtn.addEventListener("click", function() {
         renderizarImagenes();
     });
 </script>
+
+
+
+
+
+
+
+
+
 
 
 <script>

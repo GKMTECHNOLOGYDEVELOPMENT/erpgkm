@@ -1210,6 +1210,8 @@ public function obtenerJustificacion(Request $request)
 }
 
 
+
+
 public function guardarImagen(Request $request)
 {
     // Validar la solicitud
@@ -1226,8 +1228,18 @@ public function guardarImagen(Request $request)
     $ticket_id = $request->input('ticket_id');
     $visita_id = $request->input('visita_id') ?? null;
 
+    // Log para ver los datos recibidos
+    Log::info('Datos recibidos:');
+    Log::info('Descripción: ' . $descripcion);
+    Log::info('Ticket ID: ' . $ticket_id);
+    Log::info('Visita ID: ' . $visita_id);
+    Log::info('Imagen: ' . $imagen->getClientOriginalName()); // Nombre original del archivo
+
     // Convertir la imagen a binario
     $imagen_binaria = file_get_contents($imagen->getRealPath());
+
+    // Log para verificar si la conversión de la imagen fue exitosa
+    Log::info('Tamaño de la imagen binaria: ' . strlen($imagen_binaria));
 
     // Crear la entrada en la base de datos
     $foto = new Fotostickest();
@@ -1237,8 +1249,40 @@ public function guardarImagen(Request $request)
     $foto->descripcion = $descripcion;
     $foto->save();
 
+    // Log para verificar que la imagen se guardó correctamente
+    Log::info('Imagen guardada con éxito en la base de datos.');
+
     // Devolver una respuesta exitosa
     return response()->json(['success' => true, 'message' => 'Imagen guardada correctamente.']);
+}
+
+
+public function obtenerImagenes($ticketId, $visitaId)
+    {
+        $imagenes = DB::table('fotostickest')
+            ->where('idTickets', $ticketId)
+            ->where('idVisitas', $visitaId)
+            ->get();
+
+        // Convertir las imágenes a base64 para poder mostrarlas en el frontend
+        $imagenes = $imagenes->map(function ($imagen) {
+            return [
+                'id' => $imagen->idfotostickest,
+                'src' => 'data:image/jpeg;base64,' . base64_encode($imagen->foto),
+                'description' => $imagen->descripcion
+            ];
+        });
+
+        return response()->json(['imagenes' => $imagenes]);
+    }
+
+
+    // app/Http/Controllers/ImagenController.php
+public function eliminarImagen($id)
+{
+    DB::table('fotostickest')->where('idfotostickest', $id)->delete();
+
+    return response()->json(['success' => true]);
 }
 
 }
