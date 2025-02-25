@@ -94,25 +94,7 @@
                         }
                     })" />
             </div>
-            <!-- Filtrar por Marca
-        <div x-data="{ marcas: [], marcaFilter: '' }" x-init="fetch('http://127.0.0.1:8000/api/marcas')
-            .then(response => response.json())
-            .then(data => {
-                marcas = data;
-                $nextTick(() => { new NiceSelect(document.getElementById('marcaFilter')); });
-            })
-            .catch(error => console.error('Error loading marcas:', error))">
-          <label for="marcaFilter" class="block text-sm font-medium text-gray-700">Filtrar por Marca</label>
-          <select id="marcaFilter" x-model="marcaFilter"
-            class="form-select w-full text-white-dark" @change="fetchDataAndInitTable()">
-            <option value="">Todas las marcas</option>
-            <template x-for="marca in marcas" :key="marca.idMarca">
-              <option :value="marca.idMarca" x-text="marca.nombre"></option>
-            </template>
-          </select>
-        </div> -->
-
-
+ 
             <!-- Filtrar por Cliente General -->
             <div x-data="{ clienteGenerales: [], clienteGeneralFilter: '' }" x-init="fetch('/api/clientegenerales')
                 .then(response => response.json())

@@ -314,6 +314,111 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+    public function firmacliente($id)
+    {
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
+    
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+    // Obtener los estados desde la tabla estado_ots
+    $estadosOTS = DB::table('estado_ots')->get();
+        // Obtener el idTickets
+        $ticketId = $ticket->idTickets;
+    
+        $visita = DB::table('visitas')
+        ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+        ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets') // Unimos con la tabla tickets
+        ->where('visitas.idTickets', $ticketId)
+        ->select(
+            'usuarios.Nombre as usuarios_nombre', 
+            'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
+            'visitas.*',
+            'tickets.numero_ticket' // Seleccionamos el numero_ticket de la tabla tickets
+        )
+        ->first();
+    
+        // dd($visita);
+
+    
+        $visitaId = $visita ? $visita->idVisitas : null; // Si no hay visita, será null
+    
+        // Acceder al idTicketFlujo desde la relación 'ticketflujo'
+        $idTicketFlujo = $orden->ticketflujo ? $orden->ticketflujo->idTicketFlujo : null;
+    
+        // Acceder al idEstadflujo desde la relación 'ticketflujo'
+        $idEstadflujo = $orden->ticketflujo ? $orden->ticketflujo->idEstadflujo : null;
+    
+        // Obtener la descripción del estado de flujo desde la relación 'estadoFlujo'
+        $descripcionEstadoFlujo = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->descripcion : 'Sin estado de flujo';
+    
+        // Obtener todos los estados de flujo para este ticket
+        $estadosFlujo = DB::table('ticketflujo')
+            ->join('estado_flujo', 'ticketflujo.idEstadflujo', '=', 'estado_flujo.idEstadflujo')
+            ->where('ticketflujo.idTicket', $ticketId)  // Solo estados para este ticket
+            ->select('estado_flujo.descripcion', 'ticketflujo.fecha_creacion', 'estado_flujo.color')
+            ->orderBy('ticketflujo.fecha_creacion', 'asc')  // Opcional: Ordenar por fecha de creación
+            ->get();
+    
+        // Otros datos que ya estás obteniendo
+        $encargado = Usuario::whereIn('idTipoUsuario', [3, 5])->get();
+        $tecnicos_apoyo = Usuario::where('idTipoUsuario', 3)->get();
+        $clientes = Cliente::all();
+        $clientesGenerales = ClienteGeneral::all();
+        $modelos = Modelo::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+    
+        // Pasamos los datos a la vista
+        return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
+            'ticket',
+            'orden',
+            'modelos',
+            'usuario',
+            'estadosFlujo',
+            'clientes',
+            'clientesGenerales',
+            'tiendas',
+            'marcas',
+            'encargado',
+            'tecnicos_apoyo',
+            'idTicketFlujo',
+            'idEstadflujo',
+            'descripcionEstadoFlujo',
+            'ticketId',
+            'visitaId',
+            'estadosOTS',
+            'visita',
+            'id' // Pasamos el idVisitas a la vista
+        ));
+    }
+
+
+    public function guardarFirmaCliente(Request $request, $id)
+{
+    // Validar que la firma esté presente
+    $request->validate([
+        'firma' => 'required|string',
+    ]);
+
+    // Obtener el ticket
+    $ticket = Ticket::findOrFail($id);
+
+    // Convertir la firma de base64 a binario
+    $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
+
+    // Guardar la firma en la tabla firmas
+    DB::table('firmas')->insert([
+        'firma_cliente' => $firmaCliente,
+        'idTickets' => $ticket->idTickets,
+        'idCliente' => $ticket->idCliente // Asumiendo que el ticket tiene un idCliente
+       
+    ]);
+
+    // Retornar una respuesta de éxito
+    return response()->json(['message' => 'Firma guardada correctamente'], 200);
+}
+
     public function mostrarDetalles($ticketId)
     {
         // Obtener los detalles de la visita junto con el usuario y el número de ticket
@@ -449,7 +554,7 @@ class OrdenesTrabajoController extends Controller
             'estado_ot:idEstadoots,descripcion,color',
             'marca:idMarca,nombre',
             'modelo.categoria:idCategoria,nombre', // Cargar la categoría a través del modelo
-            'estadoflujo:idEstadflujo,descripcion,color' // Cargar toda la relación estadoflujo
+            'ticketflujo.estadoflujo:idEstadflujo,descripcion,color' // Relacionamos ticketflujo con estadoflujo
         ]);
 
         // 🔹 Filtrar por tipo de ticket (1 o 2), si no se proporciona, por defecto muestra ambos
@@ -878,33 +983,35 @@ class OrdenesTrabajoController extends Controller
     
         // Guardar la visita
         $visita->save();
-
-           // Guardar en la tabla anexos_visitas
-    DB::table('anexos_visitas')->insert([
-        'idVisitas' => $visita->idVisitas,  // Usamos el id de la visita recién creada
-        'idTipovisita' => 1,  // El tipo de visita siempre es 1
-        'foto' => null,  // Puedes pasar la foto aquí si tienes una, o dejarla como null
-        'descripcion' => null,  // Puedes pasar la descripción aquí si tienes alguna, o dejarla como null
-        'lat' => null,  // Puedes pasar la latitud aquí si la tienes, o dejarla como null
-        'lng' => null,  // Puedes pasar la longitud aquí si la tienes, o dejarla como null
-        'ubicacion' => null,  // Puedes pasar la ubicación aquí si la tienes, o dejarla como null
-    ]);
     
-  
+        // Guardar en la tabla anexos_visitas
+        DB::table('anexos_visitas')->insert([
+            'idVisitas' => $visita->idVisitas,  // Usamos el id de la visita recién creada
+            'idTipovisita' => 1,  // El tipo de visita siempre es 1
+            'foto' => null,  // Puedes pasar la foto aquí si tienes una, o dejarla como null
+            'descripcion' => null,  // Puedes pasar la descripción aquí si tienes alguna, o dejarla como null
+            'lat' => null,  // Puedes pasar la latitud aquí si la tienes, o dejarla como null
+            'lng' => null,  // Puedes pasar la longitud aquí si la tienes, o dejarla como null
+            'ubicacion' => null,  // Puedes pasar la ubicación aquí si la tienes, o dejarla como null
+        ]);
     
         $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
-
+    
         // Asignar el idEstadflujo basado en el tipo de encargado
         $idEstadflujo = ($encargado->idTipoUsuario == 3) ? 2 : 4;
     
         // Insertar en la tabla ticketflujo
-        DB::table('ticketflujo')->insert([
+        $ticketflujo = DB::table('ticketflujo')->insertGetId([  // Usamos insertGetId para obtener el ID
             'idTicket' => $visita->idTickets,
             'idEstadflujo' => $idEstadflujo,
             'idUsuario' => auth()->id(),  // Usuario autenticado
-
             'fecha_creacion' => now(),
         ]);
+    
+        // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
+        DB::table('tickets')
+            ->where('idTickets', $visita->idTickets)
+            ->update(['idTicketFlujo' => $ticketflujo]);
     
         // Comprobar si necesita apoyo y si se seleccionaron técnicos de apoyo
         if ($visita->necesita_apoyo == 1 && $request->has('tecnicos_apoyo')) {
@@ -920,6 +1027,7 @@ class OrdenesTrabajoController extends Controller
     
         return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
     }
+    
     
 
 

@@ -507,7 +507,7 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         error: function(xhr, status, error) {
             console.error("Error al guardar visita:", error);
-            toastr.error("Hubo un error al guardar la visita. Intenta nuevamente.");
+            toastr.error("El tecnico ya esta asigando a una hora.");
         }
     });
 });
