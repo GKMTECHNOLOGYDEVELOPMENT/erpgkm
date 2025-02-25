@@ -1089,6 +1089,8 @@ public function verificarFotoExistente($idVisitas)
     }
 }
 
+
+
 public function verificarRegistroAnexo($idVisitas)
 {
     // Verificar si existe un registro en la tabla anexos_visitas con el idVisitas y los campos requeridos
@@ -1291,5 +1293,63 @@ public function obtenerImagenes($ticketId, $visitaId)
             return response()->json(['success' => false, 'error' => 'La imagen no existe.']);
         }
     }
+
+
+    // En el controlador VisitasController.php
+public function actualizarFechaLlegada(Request $request, $idVisitas)
+{
+    // Validar los datos recibidos
+    $request->validate([
+        'fecha_llegada' => 'required|date',
+    ]);
+
+    try {
+        // Actualizar la fecha de llegada en la base de datos
+        $visita = Visita::findOrFail($idVisitas);
+        $visita->fecha_llegada = $request->fecha_llegada;
+        $visita->save();
+
+        // Responder con éxito
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        // Manejar error si no se puede encontrar la visita o actualizar
+        return response()->json(['success' => false, 'error' => $e->getMessage()]);
+    }
+}
+
+
+// use Illuminate\Support\Facades\Log; // Asegúrate de importar Log
+
+public function verificarFechaLlegada($idVisitas)
+{
+    // Log para verificar el ID de visita recibido
+    Log::info("Verificando fecha de llegada para la visita con ID: $idVisitas");
+
+    // Buscar la visita por su ID
+    $visita = Visita::find($idVisitas);
+
+    // Verificar si la visita existe
+    if ($visita) {
+        Log::info("Visita encontrada con ID: $idVisitas");
+
+        // Verificar si tiene una fecha de llegada
+        if ($visita->fecha_llegada) {
+            Log::info("La visita tiene una fecha de llegada: " . $visita->fecha_llegada);
+            return response()->json([
+                'fecha_llegada' => $visita->fecha_llegada
+            ]);
+        } else {
+            Log::info("La visita con ID: $idVisitas no tiene una fecha de llegada.");
+        }
+    } else {
+        Log::warning("No se encontró la visita con ID: $idVisitas");
+    }
+
+    // Si no existe la visita o no tiene fecha de llegada, retornar null
+    return response()->json([
+        'fecha_llegada' => null
+    ]);
+}
+
 
 }

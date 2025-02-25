@@ -82,4 +82,7 @@ Route::get('/imagenes/{ticket_id}/{visita_id}', [OrdenesTrabajoController::class
 
 Route::delete('/eliminarImagen/{id}', [OrdenesTrabajoController::class, 'eliminarImagen']);
 // Ruta para obtener las visitas de un ticket
+Route::post('/actualizarFechaLlegada/{idVisitas}', [OrdenesTrabajoController::class, 'actualizarFechaLlegada']);
 
+
+Route::get('/verificarFechaLlegada/{idVisitas}', [OrdenesTrabajoController::class, 'verificarFechaLlegada']);

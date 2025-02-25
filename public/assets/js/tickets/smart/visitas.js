@@ -77,6 +77,8 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 `;
         visitasList.appendChild(tecnicoCard);
 
+        
+        
         // Verificar si ya existe un registro de "Inicio de Servicio"
         fetch(`/api/verificarRegistroAnexo/${visita.idVisitas}`)
           .then(response => response.json())
@@ -93,21 +95,24 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                 </div>
 
 
-                                              <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}" style="display: none;">
-  Siguiente
-</button>
-
-
-
                 <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
                   Subir Foto
                 </button>
-                <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" style="display: none;">
-                  Continua
+
+                
+                <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}" style="display: none;">
+                  Siguient
                 </button>
+           
                 <input type="file" id="fileInput-${visita.idVisitas}" class="w-full mt-4 p-2 border border-gray-300 rounded-lg" accept="image/*" style="display: none;">
               `;
               visitasList.appendChild(inicioServicioCard);
+
+
+              
+
+
+
 // Agregar el evento de clic al botón "Siguiente"
 const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
 siguienteButton.addEventListener('click', () => {
@@ -117,18 +122,12 @@ siguienteButton.addEventListener('click', () => {
   finalServicioCard.style.backgroundColor = "#f8d7da"; // Color rojo claro para indicar finalización
   finalServicioCard.innerHTML = `
     <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
-      <h3 class="text-primary text-sm sm:text-base">Final de Servicio</h3>
+      <h3 class="text-primary text-sm sm:text-base">Inicio de Servicio</h3>
       <p class="font-bold">El servicio ha finalizado.</p>
     </div>
-    <button type="button" class="btn btn-success" id="continueButton-${visita.idVisitas}">
-      Finalizar
-    </button>
-
-    <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" style="display: none;">
-                                          Continuar
-                                      </button>
-
-    
+       <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" >
+                  Continuar
+                </button>
   `;
 
 
@@ -136,45 +135,72 @@ siguienteButton.addEventListener('click', () => {
 
 
 
-  // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
-  inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
+// Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
+inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
 
-  // Agregar el evento de clic al botón "Finalizar"
-  const finalizarServicioButton = document.getElementById(`continueButton-${visita.idVisitas}`);
-  finalizarServicioButton.addEventListener('click', () => {
+// Agregar el evento de clic al botón "Finalizar"
+const finalizarServicioButton = document.getElementById(`continueButton-${visita.idVisitas}`);
 
- // Agregar el evento de clic al botón "Continuar"
- finalizarServicioButton.addEventListener('click', () => {
-  // Mostrar el modal
-  const event = new CustomEvent('toggle-modal-condiciones');
-  window.dispatchEvent(event);
-});
+// Asegúrate de que solo se agregue un solo evento
+if (finalizarServicioButton) {
+    finalizarServicioButton.addEventListener('click', () => {
+        // Mostrar el modal al hacer clic en "Finalizar"
+        const event = new CustomEvent('toggle-modal-condiciones');
+        window.dispatchEvent(event);
+    });
+}
 
-    
-    // Aquí puedes agregar la lógica para finalizar el servicio en el backend
-    fetch(`/api/finalizarServicio/${visita.idVisitas}`, {
+ // Obtener la fecha actual
+ const fechaLlegada = new Date().toISOString(); // Formato YYYY-MM-DDTHH:mm:ss.sssZ
+
+
+    // Actualizar la fecha de llegada en la base de datos
+    fetch(`/api/actualizarFechaLlegada/${visita.idVisitas}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Si estás usando CSRF en Laravel
       },
+      body: JSON.stringify({
+        fecha_llegada: fechaLlegada
+      })
     })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        toastr.success("Servicio finalizado con éxito.");
-        finalServicioCard.style.display = 'none'; // Ocultar la card de "Final de Servicio"
+        toastr.success('Fecha de llegada actualizada correctamente.');
+
+        // Ocultar el botón "Siguiente"
+
+        // Actualizar la tabla en el frontend
+        actualizarFechaTabla(visita.idVisitas, fechaLlegada);
       } else {
-        toastr.error("Hubo un error al finalizar el servicio.");
+        toastr.error('Hubo un error al actualizar la fecha de llegada.');
       }
     })
     .catch(error => {
-      console.error('Error al finalizar el servicio:', error);
-      toastr.error("Hubo un error al finalizar el servicio.");
+      console.error('Error:', error);
+      toastr.error('Hubo un error al actualizar la fecha de llegada.');
     });
+
+
+    
   });
-});
 
 
+
+// Función para actualizar la tabla en el frontend
+function actualizarFechaTabla(idVisitas, nuevaFecha) {
+  // Buscar la fila en la tabla correspondiente a la visita
+  const filaVisita = document.querySelector(`#fila-visita-${idVisitas}`);
+  if (filaVisita) {
+    // Actualizar la celda de la fecha de llegada con la nueva fecha
+    const fechaLlegadaCell = filaVisita.querySelector('.fecha-llegada');
+    if (fechaLlegadaCell) {
+      fechaLlegadaCell.textContent = new Date(nuevaFecha).toLocaleString();
+    }
+  }
+}
 
 
 
@@ -336,23 +362,28 @@ siguienteButton.addEventListener('click', () => {
                                     </div>
 
                                            
-                                 <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}" style="display: none;">
-  Siguiente
-</button>
+  
 
 
                                     <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
                                           Subir Foto
                                       </button>
-                                      <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" style="display: none;">
-                                          Continuar
-                                      </button>
+
+                                  <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}" style="display: none;">
+                                    Siguiente
+                                  </button>
+                                      
 
 
                                     <input type="file" id="fileInput-${visita.idVisitas}" class="w-full mt-4 p-2 border border-gray-300 rounded-lg" accept="image/*" style="display: none;">
                                   `;
                                   visitasList.appendChild(inicioServicioCard);
 
+
+
+
+
+                                  
 // Agregar el evento de clic al botón "Siguiente"
 const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
 siguienteButton.addEventListener('click', () => {
@@ -362,10 +393,9 @@ siguienteButton.addEventListener('click', () => {
   finalServicioCard.style.backgroundColor = "#f8d7da"; // Color rojo claro para indicar finalización
   finalServicioCard.innerHTML = `
     <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
-      <h3 class="text-primary text-sm sm:text-base">Final de Servicio</h3>
-      <p class="font-bold">El servicio ha finalizado.</p>
+      <h3 class="text-primary text-sm sm:text-base">Inicio de Servicio</h3>
+      <p class="font-bold">Inicio de servicio .</p>
     </div>
-   
   `;
 
   // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
@@ -374,36 +404,20 @@ siguienteButton.addEventListener('click', () => {
   // Agregar el evento de clic al botón "Finalizar"
   const finalizarServicioButton = document.getElementById(`continueButton-${visita.idVisitas}`);
   finalizarServicioButton.addEventListener('click', () => {
+    // Mostrar el modal
+    const event = new CustomEvent('toggle-modal-condiciones');
+    window.dispatchEvent(event);
 
- // Agregar el evento de clic al botón "Continuar"
- finalizarServicioButton.addEventListener('click', () => {
-  // Mostrar el modal
-  const event = new CustomEvent('toggle-modal-condiciones');
-  window.dispatchEvent(event);
-});
-
-    // Aquí puedes agregar la lógica para finalizar el servicio en el backend
-    fetch(`/api/finalizarServicio/${visita.idVisitas}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        toastr.success("Servicio finalizado con éxito.");
-        finalServicioCard.style.display = 'none'; // Ocultar la card de "Final de Servicio"
-      } else {
-        toastr.error("Hubo un error al finalizar el servicio.");
-      }
-    })
-    .catch(error => {
-      console.error('Error al finalizar el servicio:', error);
-      toastr.error("Hubo un error al finalizar el servicio.");
-    });
+    // Aquí ya no hay llamada al fetch, solo se oculta la card de "Final de Servicio"
+    finalServicioCard.style.display = 'none'; // Ocultar la card de "Final de Servicio"
   });
 });
+
+
+
+
+
+
 
 
                                   fetch(`/api/verificarFoto/${visita.idVisitas}`)
