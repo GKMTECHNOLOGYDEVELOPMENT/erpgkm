@@ -303,6 +303,10 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart')->middleware('auth');
     Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth');
     Route::get('/export-excel', [OrdenesTrabajoController::class, 'exportToExcel'])->name('export.excel');
+    Route::get('/smart/informe/{idOt}/pdf', [OrdenesTrabajoController::class, 'generateInformePdf'])
+    ->name('generateInformePdf');
+
+
 
 
     // ***** RUTAS PARA HELPDESK *****

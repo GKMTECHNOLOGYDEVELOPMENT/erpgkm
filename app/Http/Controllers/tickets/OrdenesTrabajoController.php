@@ -1291,5 +1291,20 @@ public function obtenerImagenes($ticketId, $visitaId)
             return response()->json(['success' => false, 'error' => 'La imagen no existe.']);
         }
     }
-
+    public function generateInformePdf($idOt) 
+    {
+        $orden = Ticket::findOrFail($idOt);
+    
+        // Verificar que la vista existe
+        if (!view()->exists('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe')) {
+            abort(404, "La vista no existe");
+        }
+    
+        // Cargar la vista y generar el PDF
+        $pdf = PDF::loadView('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', compact('orden'));
+    
+        // Retornar el PDF en el navegador
+        return $pdf->stream("informe_$idOt.pdf");
+    }
+    
 }
