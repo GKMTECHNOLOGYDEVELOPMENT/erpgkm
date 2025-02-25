@@ -304,7 +304,10 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth');
     Route::get('/export-excel', [OrdenesTrabajoController::class, 'exportToExcel'])->name('export.excel');
     Route::get('/smart/informe/{idOt}/pdf', [OrdenesTrabajoController::class, 'generateInformePdf'])
-    ->name('generateInformePdf');
+        ->name('generateInformePdf');
+    // ✅ Ruta corregida para verificar actualizaciones
+    Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
+        ->name('checkUpdates');
 
 
 
@@ -320,7 +323,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
 
     Route::get('/helpdesk/soporte/{id}/edit', [OrdenesHelpdeskController::class, 'editSoporte'])
-    ->name('helpdesk.soporte.edit');
+        ->name('helpdesk.soporte.edit');
 
 
 

@@ -6,18 +6,43 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const iframe = document.getElementById('informePdfFrame');
+            let ultimaActualizacion = null; // Guardar la última actualización conocida
 
-            // Ajustar altura al tamaño disponible
+            // Ajustar altura automáticamente al tamaño de la ventana
             function ajustarAltura() {
                 iframe.style.height = (window.innerHeight - 150) + 'px';
             }
 
-            // Cargar automáticamente el PDF
-            iframe.src = "{{ route('ordenes.generateInformePdf', ['idOt' => $orden->idTickets]) }}" + '?' + new Date().getTime();
-            
-            // Ajustar altura en carga y redimensionamiento
+            // Cargar el PDF en el iframe
+            function cargarPdf() {
+                console.log("Recargando PDF...");
+                iframe.src = "{{ route('ordenes.generateInformePdf', ['idOt' => $orden->idTickets]) }}" + '?' + new Date().getTime();
+            }
+
+            // Verificar cambios en la base de datos
+            function verificarCambios() {
+                fetch("{{ route('ordenes.checkUpdates', ['idOt' => $orden->idTickets]) }}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.ultimaActualizacion && data.ultimaActualizacion !== ultimaActualizacion) {
+                            ultimaActualizacion = data.ultimaActualizacion; // Actualizar la última fecha
+                            console.log("Se detectaron cambios en la base de datos. Recargando PDF...");
+                            cargarPdf(); // Recargar PDF si hay cambios
+                        }
+                    })
+                    .catch(error => console.error("Error verificando cambios:", error));
+            }
+
+            // Cargar PDF al inicio
             ajustarAltura();
+            cargarPdf();
             window.addEventListener('resize', ajustarAltura);
+
+            // Verificar cambios en la base de datos cada 15 segundos
+            setInterval(verificarCambios, 15000);
+
+            // Recargar PDF automáticamente cada 15 segundos
+            setInterval(cargarPdf, 15000);
         });
     </script>
 @endif

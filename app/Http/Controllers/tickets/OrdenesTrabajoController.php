@@ -32,6 +32,7 @@ use App\Models\TicketFlujo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 use Illuminate\Support\Facades\Validator;
+use App\Models\TransicionStatusTicket;
 
 // use Barryvdh\DomPDF\Facade as PDF;
 
@@ -140,7 +141,7 @@ class OrdenesTrabajoController extends Controller
         ));
     }
 
-   
+
 
 
 
@@ -148,7 +149,7 @@ class OrdenesTrabajoController extends Controller
     {
         try {
             Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
-    
+
             // Validación de los datos
             $validatedData = $request->validate([
                 'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
@@ -164,9 +165,9 @@ class OrdenesTrabajoController extends Controller
                 'lat' => 'nullable|string|max:255',
                 'lng' => 'nullable|string|max:255',
             ]);
-    
+
             Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
-    
+
             // Crear la nueva orden de trabajo
             $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['nroTicket'],
@@ -181,32 +182,32 @@ class OrdenesTrabajoController extends Controller
                 'fallaReportada' => $validatedData['fallaReportada'],
                 'lat' => $validatedData['lat'],
                 'lng' => $validatedData['lng'],
-                'idUsuario' => auth()->id(), 
+                'idUsuario' => auth()->id(),
                 'fecha_creacion' => now(),
-                'idTipotickets' => 1, 
+                'idTipotickets' => 1,
             ]);
-    
+
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
-    
+
             $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
                 'idTicket' => $ticket->idTickets, // ID del ticket recién creado
                 'idEstadflujo' => 1,  // Estado inicial de flujo
                 'idUsuario' => auth()->id(),  // Usuario autenticado
                 'fecha_creacion' => now(),
             ]);
-            
-    
+
+
             Log::info('Flujo de trabajo guardado correctamente', [
                 'idTicket' => $ticket->idTickets,
                 'idTicketFlujo' => $ticketFlujoId
             ]);
-    
+
             // Actualizar el ticket con el idTicketFlujo generado
             $ticket->idTicketFlujo = $ticketFlujoId;
             $ticket->save();
-    
+
             Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
-    
+
             // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
             return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
                 ->with('success', 'Orden de trabajo creada correctamente.');
@@ -220,8 +221,8 @@ class OrdenesTrabajoController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
-    
-    
+
+
 
     public function validarTicket($nroTicket)
     {
@@ -239,40 +240,40 @@ class OrdenesTrabajoController extends Controller
     {
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
-    
+
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-    // Obtener los estados desde la tabla estado_ots
-    $estadosOTS = DB::table('estado_ots')->get();
+        // Obtener los estados desde la tabla estado_ots
+        $estadosOTS = DB::table('estado_ots')->get();
         // Obtener el idTickets
         $ticketId = $ticket->idTickets;
-    
+
         $visita = DB::table('visitas')
-        ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
-        ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets') // Unimos con la tabla tickets
-        ->where('visitas.idTickets', $ticketId)
-        ->select(
-            'usuarios.Nombre as usuarios_nombre', 
-            'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
-            'visitas.*',
-            'tickets.numero_ticket' // Seleccionamos el numero_ticket de la tabla tickets
-        )
-        ->first();
-    
+            ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+            ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets') // Unimos con la tabla tickets
+            ->where('visitas.idTickets', $ticketId)
+            ->select(
+                'usuarios.Nombre as usuarios_nombre',
+                'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
+                'visitas.*',
+                'tickets.numero_ticket' // Seleccionamos el numero_ticket de la tabla tickets
+            )
+            ->first();
+
         // dd($visita);
 
-    
+
         $visitaId = $visita ? $visita->idVisitas : null; // Si no hay visita, será null
-    
+
         // Acceder al idTicketFlujo desde la relación 'ticketflujo'
         $idTicketFlujo = $orden->ticketflujo ? $orden->ticketflujo->idTicketFlujo : null;
-    
+
         // Acceder al idEstadflujo desde la relación 'ticketflujo'
         $idEstadflujo = $orden->ticketflujo ? $orden->ticketflujo->idEstadflujo : null;
-    
+
         // Obtener la descripción del estado de flujo desde la relación 'estadoFlujo'
         $descripcionEstadoFlujo = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->descripcion : 'Sin estado de flujo';
-    
+
         // Obtener todos los estados de flujo para este ticket
         $estadosFlujo = DB::table('ticketflujo')
             ->join('estado_flujo', 'ticketflujo.idEstadflujo', '=', 'estado_flujo.idEstadflujo')
@@ -280,7 +281,7 @@ class OrdenesTrabajoController extends Controller
             ->select('estado_flujo.descripcion', 'ticketflujo.fecha_creacion', 'estado_flujo.color')
             ->orderBy('ticketflujo.fecha_creacion', 'asc')  // Opcional: Ordenar por fecha de creación
             ->get();
-    
+
         // Otros datos que ya estás obteniendo
         $encargado = Usuario::whereIn('idTipoUsuario', [3, 5])->get();
         $tecnicos_apoyo = Usuario::where('idTipoUsuario', 3)->get();
@@ -289,7 +290,7 @@ class OrdenesTrabajoController extends Controller
         $modelos = Modelo::all();
         $tiendas = Tienda::all();
         $marcas = Marca::all();
-    
+
         // Pasamos los datos a la vista
         return view("tickets.ordenes-trabajo.smart-tv.edit", compact(
             'ticket',
@@ -322,29 +323,29 @@ class OrdenesTrabajoController extends Controller
             ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets')
             ->where('visitas.idTickets', $ticketId)
             ->select(
-                'usuarios.Nombre as usuarios_nombre', 
-            'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
-            'visitas.*',
-            'tickets.numero_ticket',  // Número de ticket
-            'tickets.idClienteGeneral',
-            'tickets.idCliente',
-            'tickets.tipoServicio',
-            'tickets.fecha_creacion',
-            'tickets.idTipotickets',
-            'tickets.idEstadoots',
-            'tickets.idTecnico',
-            'tickets.idUsuario as ticket_idUsuario',  // Usuario que creó el ticket
-            'tickets.idTienda',
-            'tickets.fallaReportada',
-            'tickets.esRecojo',
-            'tickets.direccion',
-            'tickets.idMarca',
-            'tickets.idModelo',
-            'tickets.serie',
-            'tickets.fechaCompra',
-            'tickets.lat',
-            'tickets.lng',
-            'tickets.idTicketFlujo'
+                'usuarios.Nombre as usuarios_nombre',
+                'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
+                'visitas.*',
+                'tickets.numero_ticket',  // Número de ticket
+                'tickets.idClienteGeneral',
+                'tickets.idCliente',
+                'tickets.tipoServicio',
+                'tickets.fecha_creacion',
+                'tickets.idTipotickets',
+                'tickets.idEstadoots',
+                'tickets.idTecnico',
+                'tickets.idUsuario as ticket_idUsuario',  // Usuario que creó el ticket
+                'tickets.idTienda',
+                'tickets.fallaReportada',
+                'tickets.esRecojo',
+                'tickets.direccion',
+                'tickets.idMarca',
+                'tickets.idModelo',
+                'tickets.serie',
+                'tickets.fechaCompra',
+                'tickets.lat',
+                'tickets.lng',
+                'tickets.idTicketFlujo'
             )
             ->first();
 
@@ -356,7 +357,7 @@ class OrdenesTrabajoController extends Controller
         return response()->json(['error' => 'Visita no encontrada'], 404);
     }
 
-    
+
 
 
 
@@ -772,13 +773,13 @@ class OrdenesTrabajoController extends Controller
         $ticketFlujos = TicketFlujo::with('estadoFlujo', 'usuario') // Traer la relación con 'usuario'
             ->where('idTicket', $id) // Filtrar por idTicket
             ->get(); // Obtener todos los registros
-        
+
         // Devolver la respuesta con todos los estados de flujo, incluyendo el usuario
         return response()->json([
             'estadosFlujo' => $ticketFlujos,
         ]);
     }
-    
+
 
 
 
@@ -841,10 +842,10 @@ class OrdenesTrabajoController extends Controller
             'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
             'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
         ]);
-    
+
         $fechaInicio = $request->fecha_visita . ' ' . $request->hora_inicio;
         $fechaFinal = $request->fecha_visita . ' ' . $request->hora_fin;
-    
+
         // Verificar si el técnico ya tiene una visita en ese rango de tiempo
         $visitasConflicto = DB::table('visitas')
             ->where('idUsuario', $request->encargado)
@@ -857,11 +858,11 @@ class OrdenesTrabajoController extends Controller
                     });
             })
             ->exists(); // Retorna true si existe un conflicto de horario
-    
+
         if ($visitasConflicto) {
             return response()->json(['success' => false, 'message' => 'El técnico ya tiene una visita asignada en este horario.'], 400);
         }
-    
+
         // Crear la nueva visita
         $visita = new Visita();
         $visita->nombre = $request->nombre;
@@ -869,34 +870,34 @@ class OrdenesTrabajoController extends Controller
         $visita->fecha_inicio = $fechaInicio;  // Concatenar fecha y hora
         $visita->fecha_final = $fechaFinal; // Concatenar fecha y hora
         $visita->idUsuario = $request->encargado;
-    
+
         // Asignar 0 o 1 a "necesita_apoyo"
         $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
-    
+
         $visita->tipoServicio = 1; // O el valor correspondiente que quieras
         $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
-    
+
         // Guardar la visita
         $visita->save();
 
-           // Guardar en la tabla anexos_visitas
-    DB::table('anexos_visitas')->insert([
-        'idVisitas' => $visita->idVisitas,  // Usamos el id de la visita recién creada
-        'idTipovisita' => 1,  // El tipo de visita siempre es 1
-        'foto' => null,  // Puedes pasar la foto aquí si tienes una, o dejarla como null
-        'descripcion' => null,  // Puedes pasar la descripción aquí si tienes alguna, o dejarla como null
-        'lat' => null,  // Puedes pasar la latitud aquí si la tienes, o dejarla como null
-        'lng' => null,  // Puedes pasar la longitud aquí si la tienes, o dejarla como null
-        'ubicacion' => null,  // Puedes pasar la ubicación aquí si la tienes, o dejarla como null
-    ]);
-    
-  
-    
+        // Guardar en la tabla anexos_visitas
+        DB::table('anexos_visitas')->insert([
+            'idVisitas' => $visita->idVisitas,  // Usamos el id de la visita recién creada
+            'idTipovisita' => 1,  // El tipo de visita siempre es 1
+            'foto' => null,  // Puedes pasar la foto aquí si tienes una, o dejarla como null
+            'descripcion' => null,  // Puedes pasar la descripción aquí si tienes alguna, o dejarla como null
+            'lat' => null,  // Puedes pasar la latitud aquí si la tienes, o dejarla como null
+            'lng' => null,  // Puedes pasar la longitud aquí si la tienes, o dejarla como null
+            'ubicacion' => null,  // Puedes pasar la ubicación aquí si la tienes, o dejarla como null
+        ]);
+
+
+
         $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
 
         // Asignar el idEstadflujo basado en el tipo de encargado
         $idEstadflujo = ($encargado->idTipoUsuario == 3) ? 2 : 4;
-    
+
         // Insertar en la tabla ticketflujo
         DB::table('ticketflujo')->insert([
             'idTicket' => $visita->idTickets,
@@ -905,7 +906,7 @@ class OrdenesTrabajoController extends Controller
 
             'fecha_creacion' => now(),
         ]);
-    
+
         // Comprobar si necesita apoyo y si se seleccionaron técnicos de apoyo
         if ($visita->necesita_apoyo == 1 && $request->has('tecnicos_apoyo')) {
             // Guardar técnicos de apoyo en la tabla ticketapoyo
@@ -917,10 +918,10 @@ class OrdenesTrabajoController extends Controller
                 ]);
             }
         }
-    
+
         return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
     }
-    
+
 
 
 
@@ -932,7 +933,7 @@ class OrdenesTrabajoController extends Controller
     {
         // Obtener todas las visitas del ticket, incluyendo el técnico
         $visitas = Visita::with('tecnico')->where('idTickets', $ticketId)->get();
-    
+
         // Convertir las fechas a formato ISO 8601
         $visitas->each(function ($visita) {
             $visita->fecha_inicio = $visita->fecha_inicio->toIso8601String();
@@ -940,324 +941,335 @@ class OrdenesTrabajoController extends Controller
             // Incluir el nombre del técnico
             $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;  // Aquí asumimos que el campo 'nombre' está en el modelo Usuario
         });
-    
+
         return response()->json($visitas);
     }
+
+
+    public function actualizarVisita(Request $request, $id)
+    {
+        try {
+            // Validación
+            $validated = $request->validate([
+                'fechas_desplazamiento' => 'required|date_format:Y-m-d H:i:s',
+            ]);
+
+            // Buscar la visita
+            $visita = Visita::findOrFail($id);
+
+            // Actualizar la fecha de desplazamiento
+            $visita->fechas_desplazamiento = $validated['fechas_desplazamiento'];
+            $visita->save();
+
+            // Retornar la respuesta
+            return response()->json($visita, 200);  // Enviar la visita actualizada
+        } catch (\Exception $e) {
+            // Manejo de errores
+            return response()->json(['error' => 'Error al actualizar visita', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function guardarAnexoVisita(Request $request)
+    {
+        try {
+            // Validación de los datos
+            $validated = $request->validate([
+                'idVisitas' => 'required|integer|exists:visitas,idVisitas',
+                'idTipovisita' => 'required|integer',
+                'lat' => 'required|numeric',
+                'lng' => 'required|numeric',
+                'ubicacion' => 'required|string|max:255',
+            ]);
+
+            // Verificar si ya existe un anexo para la visita y tipo de visita (sin importar lat y lng)
+            $existingAnexo = DB::table('anexos_visitas')
+                ->where('idVisitas', $validated['idVisitas'])
+                ->where('idTipovisita', $validated['idTipovisita'])
+                ->first();
+
+            if ($existingAnexo) {
+                return response()->json(['error' => 'El técnico ya se encuentra en desplazamiento para esta visita.'], 400);
+            }
+
+            // Insertar los datos en la tabla anexos_visitas si no existe
+            DB::table('anexos_visitas')->insert([
+                'idVisitas' => $validated['idVisitas'],
+                'idTipovisita' => $validated['idTipovisita'],
+                'lat' => $validated['lat'],
+                'lng' => $validated['lng'],
+                'ubicacion' => $validated['ubicacion'],
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Anexo guardado correctamente.'], 200);
+        } catch (\Exception $e) {
+            // Manejo de errores
+            return response()->json(['error' => 'Error al guardar el anexo', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+    public function guardarFoto(Request $request)
+    {
+        try {
+            // Validación del archivo y el id de visita
+            $request->validate([
+                'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'visitaId' => 'required|integer'
+            ]);
+
+            // Obtener el archivo
+            $file = $request->file('photo');
+
+            // Registrar en el log el nombre del archivo
+            Log::info('Archivo recibido: ' . $file->getClientOriginalName());
+
+            // Convertir la imagen a binario
+            $foto = file_get_contents($file);
+
+            // Registrar el tamaño de la foto
+            Log::info('Tamaño de la foto: ' . $file->getSize() . ' bytes');
+
+            // Obtener el ID de la visita
+            $visitaId = $request->input('visitaId');
+
+            // Registrar el ID de la visita
+            Log::info('ID de la visita: ' . $visitaId);
+
+            // Asegurarse de que la visita existe antes de guardar el anexo
+            $visita = Visita::find($visitaId);
+            if (!$visita) {
+                Log::error('La visita con ID ' . $visitaId . ' no existe.');
+                return response()->json(['success' => false, 'message' => 'La visita no existe.'], 404);
+            }
+
+            // Guardar la foto en la tabla anexos_visitas
+            $anexo = new AnexosVisita();
+            $anexo->foto = $foto;
+            $anexo->descripcion = 'Inicio de servicio'; // Descripción
+            $anexo->idTipovisita = 3; // Tipo de visita 3
+            $anexo->idVisitas = $visitaId; // ID de la visita
+            $anexo->lat = null; // Latitud (null)
+            $anexo->lng = null; // Longitud (null)
+            $anexo->ubicacion = null; // Ubicación (null)
+
+            $anexo->save();
+
+            Log::info('Foto subida correctamente para la visita con ID ' . $visitaId);
+
+            return response()->json(['success' => true, 'message' => 'Foto subida con éxito.']);
+        } catch (\Exception $e) {
+            // Manejo de error y log de la excepción
+            Log::error('Error al guardar la foto: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error al guardar la foto: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+
+
+
+
+
+    public function verificarFotoExistente($idVisitas)
+    {
+        try {
+            // Verificar si existe una foto para la visita en la tabla anexos_visitas
+            $anexo = AnexosVisita::where('idVisitas', $idVisitas)->whereNotNull('foto')->first();
+
+            if ($anexo) {
+                // Si hay foto asociada, devolver éxito
+                return response()->json(['success' => true, 'message' => 'Foto encontrada.']);
+            } else {
+                // Si no hay foto asociada
+                return response()->json(['success' => false, 'message' => 'No hay foto para esta visita.']);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error al verificar la foto: ' . $e->getMessage()], 500);
+        }
+    }
+
     
 
-public function actualizarVisita(Request $request, $id)
-{
-    try {
-        // Validación
-        $validated = $request->validate([
-            'fechas_desplazamiento' => 'required|date_format:Y-m-d H:i:s',
-        ]);
-
-        // Buscar la visita
-        $visita = Visita::findOrFail($id);
-
-        // Actualizar la fecha de desplazamiento
-        $visita->fechas_desplazamiento = $validated['fechas_desplazamiento'];
-        $visita->save();
-
-        // Retornar la respuesta
-        return response()->json($visita, 200);  // Enviar la visita actualizada
-    } catch (\Exception $e) {
-        // Manejo de errores
-        return response()->json(['error' => 'Error al actualizar visita', 'message' => $e->getMessage()], 500);
+    
+    public function verificarRegistroAnexo($idVisitas)
+    {
+        Log::info("Iniciando verificación de registro en anexos_visitas", ['idVisitas' => $idVisitas]);
+    
+        // Obtener la consulta SQL generada por Laravel
+        $query = AnexosVisita::where('idVisitas', $idVisitas)
+            ->whereNotNull('lat')
+            ->whereNotNull('lng')
+            ->whereNotNull('ubicacion')
+            ->where('idTipovisita', 2);
+    
+        Log::info("Consulta SQL generada:", ['sql' => $query->toSql(), 'bindings' => $query->getBindings()]);
+    
+        // Ejecutar la consulta
+        $registro = $query->first();
+    
+        if ($registro) {
+            Log::info("Registro encontrado", ['idVisitas' => $idVisitas, 'registro' => $registro]);
+            return response()->json($registro);
+        } else {
+            Log::warning("No se encontró registro para el idVisitas", ['idVisitas' => $idVisitas]);
+            return response()->json([], 404);
+        }
     }
-}
+    
+    
 
 
-public function guardarAnexoVisita(Request $request)
-{
-    try {
-        // Validación de los datos
-        $validated = $request->validate([
-            'idVisitas' => 'required|integer|exists:visitas,idVisitas',
-            'idTipovisita' => 'required|integer',
-            'lat' => 'required|numeric',
-            'lng' => 'required|numeric',
-            'ubicacion' => 'required|string|max:255',
+    public function guardar(Request $request)
+    {
+        // Validar los datos
+        $validator = Validator::make($request->all(), [
+            'idTickets' => 'required|integer',
+            'idVisitas' => 'required|integer',
+            'titular' => 'required|integer',
+            'nombre' => 'nullable|string|max:255',
+            'dni' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:255',
+            'servicio' => 'required|integer',
+            'motivo' => 'nullable|string',
+            'fecha_condicion' => 'required|date'
         ]);
 
-        // Verificar si ya existe un anexo para la visita y tipo de visita (sin importar lat y lng)
-        $existingAnexo = DB::table('anexos_visitas')
-            ->where('idVisitas', $validated['idVisitas'])
-            ->where('idTipovisita', $validated['idTipovisita'])
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        // Guardar los datos en la base de datos
+        $condicion = CondicionesTicket::create($request->all());
+
+        if ($condicion) {
+            return response()->json(['success' => true, 'message' => 'Condiciones guardadas correctamente.']);
+        } else {
+            return response()->json(['error' => 'Error al guardar las condiciones.'], 500);
+        }
+    }
+
+
+    public function guardarEstado(Request $request)
+    {
+        // Validar los datos
+        $request->validate([
+            'idTickets' => 'required|integer|exists:tickets,idTickets',
+            'idVisitas' => 'nullable|integer|exists:visitas,idVisitas',
+            'idEstadoots' => 'required|integer|exists:estado_ots,idEstadoots',
+            'justificacion' => 'nullable|string'
+        ]);
+
+        // Buscar si ya existe un registro para este ticket, visita y estado
+        $transicion = DB::table('transicion_status_ticket')
+            ->where('idTickets', $request->idTickets)
+            ->where('idVisitas', $request->idVisitas)
+            ->where('idEstadoots', $request->idEstadoots)
             ->first();
 
-        if ($existingAnexo) {
-            return response()->json(['error' => 'El técnico ya se encuentra en desplazamiento para esta visita.'], 400);
+        if ($transicion) {
+            // Si existe, actualizar la justificación
+            DB::table('transicion_status_ticket')
+                ->where('idTransicionStatus', $transicion->idTransicionStatus)
+                ->update([
+                    'justificacion' => $request->justificacion,
+                    'fechaRegistro' => now()
+                ]);
+        } else {
+            // Si no existe, crear un nuevo registro
+            DB::table('transicion_status_ticket')->insert([
+                'idTickets' => $request->idTickets,
+                'idVisitas' => $request->idVisitas,
+                'idEstadoots' => $request->idEstadoots,
+                'justificacion' => $request->justificacion,
+                'fechaRegistro' => now(),
+                'estado' => 1 // Estado activo
+            ]);
         }
 
-        // Insertar los datos en la tabla anexos_visitas si no existe
-        DB::table('anexos_visitas')->insert([
-            'idVisitas' => $validated['idVisitas'],
-            'idTipovisita' => $validated['idTipovisita'],
-            'lat' => $validated['lat'],
-            'lng' => $validated['lng'],
-            'ubicacion' => $validated['ubicacion'],
-        ]);
-
-        return response()->json(['success' => true, 'message' => 'Anexo guardado correctamente.'], 200);
-    } catch (\Exception $e) {
-        // Manejo de errores
-        return response()->json(['error' => 'Error al guardar el anexo', 'message' => $e->getMessage()], 500);
+        return response()->json(['success' => true, 'message' => 'Estado guardado correctamente.']);
     }
-}
 
 
-
-public function guardarFoto(Request $request)
-{
-    try {
-        // Validación del archivo y el id de visita
+    public function obtenerJustificacion(Request $request)
+    {
+        // Validar los parámetros
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'visitaId' => 'required|integer'
+            'ticketId' => 'required|integer|exists:tickets,idTickets',
+            'visitaId' => 'nullable|integer|exists:visitas,idVisitas',
+            'estadoId' => 'required|integer|exists:estado_ots,idEstadoots'
         ]);
 
-        // Obtener el archivo
-        $file = $request->file('photo');
+        // Buscar la justificación en la base de datos
+        $transicion = DB::table('transicion_status_ticket')
+            ->where('idTickets', $request->ticketId)
+            ->where('idVisitas', $request->visitaId)
+            ->where('idEstadoots', $request->estadoId)
+            ->first();
 
-        // Registrar en el log el nombre del archivo
-        Log::info('Archivo recibido: ' . $file->getClientOriginalName());
+        if ($transicion) {
+            return response()->json([
+                'success' => true,
+                'justificacion' => $transicion->justificacion
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'justificacion' => null // No hay justificación guardada
+            ]);
+        }
+    }
+
+
+
+
+    public function guardarImagen(Request $request)
+    {
+        // Validar la solicitud
+        $request->validate([
+            'imagen' => 'required|image|max:2048', // Validamos que la imagen sea válida y no sea mayor de 2MB
+            'descripcion' => 'required|string|max:255',
+            'ticket_id' => 'required|integer|exists:tickets,idTickets', // Asegúrate de validar el ID del ticket
+            'visita_id' => 'nullable|integer|exists:visitas,idVisitas', // Si tienes visita_id
+        ]);
+
+        // Obtener los datos de la solicitud
+        $imagen = $request->file('imagen'); // Imagen en formato binario
+        $descripcion = $request->input('descripcion');
+        $ticket_id = $request->input('ticket_id');
+        $visita_id = $request->input('visita_id') ?? null;
+
+        // Log para ver los datos recibidos
+        Log::info('Datos recibidos:');
+        Log::info('Descripción: ' . $descripcion);
+        Log::info('Ticket ID: ' . $ticket_id);
+        Log::info('Visita ID: ' . $visita_id);
+        Log::info('Imagen: ' . $imagen->getClientOriginalName()); // Nombre original del archivo
 
         // Convertir la imagen a binario
-        $foto = file_get_contents($file);
+        $imagen_binaria = file_get_contents($imagen->getRealPath());
 
-        // Registrar el tamaño de la foto
-        Log::info('Tamaño de la foto: ' . $file->getSize() . ' bytes');
+        // Log para verificar si la conversión de la imagen fue exitosa
+        Log::info('Tamaño de la imagen binaria: ' . strlen($imagen_binaria));
 
-        // Obtener el ID de la visita
-        $visitaId = $request->input('visitaId');
+        // Crear la entrada en la base de datos
+        $foto = new Fotostickest();
+        $foto->idTickets = $ticket_id;
+        $foto->idVisitas = $visita_id;
+        $foto->foto = $imagen_binaria; // Guardamos la imagen en binario
+        $foto->descripcion = $descripcion;
+        $foto->save();
 
-        // Registrar el ID de la visita
-        Log::info('ID de la visita: ' . $visitaId);
+        // Log para verificar que la imagen se guardó correctamente
+        Log::info('Imagen guardada con éxito en la base de datos.');
 
-        // Asegurarse de que la visita existe antes de guardar el anexo
-        $visita = Visita::find($visitaId);
-        if (!$visita) {
-            Log::error('La visita con ID ' . $visitaId . ' no existe.');
-            return response()->json(['success' => false, 'message' => 'La visita no existe.'], 404);
-        }
-
-        // Guardar la foto en la tabla anexos_visitas
-        $anexo = new AnexosVisita();
-        $anexo->foto = $foto;
-        $anexo->descripcion = 'Inicio de servicio'; // Descripción
-        $anexo->idTipovisita = 3; // Tipo de visita 3
-        $anexo->idVisitas = $visitaId; // ID de la visita
-        $anexo->lat = null; // Latitud (null)
-        $anexo->lng = null; // Longitud (null)
-        $anexo->ubicacion = null; // Ubicación (null)
-
-        $anexo->save();
-
-        Log::info('Foto subida correctamente para la visita con ID ' . $visitaId);
-
-        return response()->json(['success' => true, 'message' => 'Foto subida con éxito.']);
-    } catch (\Exception $e) {
-        // Manejo de error y log de la excepción
-        Log::error('Error al guardar la foto: ' . $e->getMessage());
-        return response()->json(['success' => false, 'message' => 'Error al guardar la foto: ' . $e->getMessage()], 500);
-    }
-}
-
-
-
-
-
-
-
-public function verificarFotoExistente($idVisitas)
-{
-    try {
-        // Verificar si existe una foto para la visita en la tabla anexos_visitas
-        $anexo = AnexosVisita::where('idVisitas', $idVisitas)->whereNotNull('foto')->first();
-
-        if ($anexo) {
-            // Si hay foto asociada, devolver éxito
-            return response()->json(['success' => true, 'message' => 'Foto encontrada.']);
-        } else {
-            // Si no hay foto asociada
-            return response()->json(['success' => false, 'message' => 'No hay foto para esta visita.']);
-        }
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => 'Error al verificar la foto: ' . $e->getMessage()], 500);
-    }
-}
-
-public function verificarRegistroAnexo($idVisitas)
-{
-    // Verificar si existe un registro en la tabla anexos_visitas con el idVisitas y los campos requeridos
-    $registro = AnexosVisita::where('idVisitas', $idVisitas)
-        ->whereNotNull('lat')
-        ->whereNotNull('lng')
-        ->whereNotNull('ubicacion')
-        ->where('idTipovisita', 2) // Asumiendo que el tipo de visita 2 es "Inicio de Servicio"
-        ->first();
-
-    if ($registro) {
-        // Si ya existe el registro, devolverlo
-        return response()->json($registro);
-    } else {
-        // Si no existe el registro, devolver una respuesta vacía o un estado 404
-        return response()->json([], 404);  // O simplemente return response()->json(null);
-    }
-}
-
-
-public function guardar(Request $request)
-{
-    // Validar los datos
-    $validator = Validator::make($request->all(), [
-        'idTickets' => 'required|integer',
-        'idVisitas' => 'required|integer',
-        'titular' => 'required|integer',
-        'nombre' => 'nullable|string|max:255',
-        'dni' => 'nullable|string|max:255',
-        'telefono' => 'nullable|string|max:255',
-        'servicio' => 'required|integer',
-        'motivo' => 'nullable|string',
-        'fecha_condicion' => 'required|date'
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['error' => $validator->errors()], 400);
+        // Devolver una respuesta exitosa
+        return response()->json(['success' => true, 'message' => 'Imagen guardada correctamente.']);
     }
 
-    // Guardar los datos en la base de datos
-    $condicion = CondicionesTicket::create($request->all());
 
-    if ($condicion) {
-        return response()->json(['success' => true, 'message' => 'Condiciones guardadas correctamente.']);
-    } else {
-        return response()->json(['error' => 'Error al guardar las condiciones.'], 500);
-    }
-}
-
-
-public function guardarEstado(Request $request)
-{
-    // Validar los datos
-    $request->validate([
-        'idTickets' => 'required|integer|exists:tickets,idTickets',
-        'idVisitas' => 'nullable|integer|exists:visitas,idVisitas',
-        'idEstadoots' => 'required|integer|exists:estado_ots,idEstadoots',
-        'justificacion' => 'nullable|string'
-    ]);
-
-    // Buscar si ya existe un registro para este ticket, visita y estado
-    $transicion = DB::table('transicion_status_ticket')
-        ->where('idTickets', $request->idTickets)
-        ->where('idVisitas', $request->idVisitas)
-        ->where('idEstadoots', $request->idEstadoots)
-        ->first();
-
-    if ($transicion) {
-        // Si existe, actualizar la justificación
-        DB::table('transicion_status_ticket')
-            ->where('idTransicionStatus', $transicion->idTransicionStatus)
-            ->update([
-                'justificacion' => $request->justificacion,
-                'fechaRegistro' => now()
-            ]);
-    } else {
-        // Si no existe, crear un nuevo registro
-        DB::table('transicion_status_ticket')->insert([
-            'idTickets' => $request->idTickets,
-            'idVisitas' => $request->idVisitas,
-            'idEstadoots' => $request->idEstadoots,
-            'justificacion' => $request->justificacion,
-            'fechaRegistro' => now(),
-            'estado' => 1 // Estado activo
-        ]);
-    }
-
-    return response()->json(['success' => true, 'message' => 'Estado guardado correctamente.']);
-}
-
-
-public function obtenerJustificacion(Request $request)
-{
-    // Validar los parámetros
-    $request->validate([
-        'ticketId' => 'required|integer|exists:tickets,idTickets',
-        'visitaId' => 'nullable|integer|exists:visitas,idVisitas',
-        'estadoId' => 'required|integer|exists:estado_ots,idEstadoots'
-    ]);
-
-    // Buscar la justificación en la base de datos
-    $transicion = DB::table('transicion_status_ticket')
-        ->where('idTickets', $request->ticketId)
-        ->where('idVisitas', $request->visitaId)
-        ->where('idEstadoots', $request->estadoId)
-        ->first();
-
-    if ($transicion) {
-        return response()->json([
-            'success' => true,
-            'justificacion' => $transicion->justificacion
-        ]);
-    } else {
-        return response()->json([
-            'success' => true,
-            'justificacion' => null // No hay justificación guardada
-        ]);
-    }
-}
-
-
-
-
-public function guardarImagen(Request $request)
-{
-    // Validar la solicitud
-    $request->validate([
-        'imagen' => 'required|image|max:2048', // Validamos que la imagen sea válida y no sea mayor de 2MB
-        'descripcion' => 'required|string|max:255',
-        'ticket_id' => 'required|integer|exists:tickets,idTickets', // Asegúrate de validar el ID del ticket
-        'visita_id' => 'nullable|integer|exists:visitas,idVisitas', // Si tienes visita_id
-    ]);
-
-    // Obtener los datos de la solicitud
-    $imagen = $request->file('imagen'); // Imagen en formato binario
-    $descripcion = $request->input('descripcion');
-    $ticket_id = $request->input('ticket_id');
-    $visita_id = $request->input('visita_id') ?? null;
-
-    // Log para ver los datos recibidos
-    Log::info('Datos recibidos:');
-    Log::info('Descripción: ' . $descripcion);
-    Log::info('Ticket ID: ' . $ticket_id);
-    Log::info('Visita ID: ' . $visita_id);
-    Log::info('Imagen: ' . $imagen->getClientOriginalName()); // Nombre original del archivo
-
-    // Convertir la imagen a binario
-    $imagen_binaria = file_get_contents($imagen->getRealPath());
-
-    // Log para verificar si la conversión de la imagen fue exitosa
-    Log::info('Tamaño de la imagen binaria: ' . strlen($imagen_binaria));
-
-    // Crear la entrada en la base de datos
-    $foto = new Fotostickest();
-    $foto->idTickets = $ticket_id;
-    $foto->idVisitas = $visita_id;
-    $foto->foto = $imagen_binaria; // Guardamos la imagen en binario
-    $foto->descripcion = $descripcion;
-    $foto->save();
-
-    // Log para verificar que la imagen se guardó correctamente
-    Log::info('Imagen guardada con éxito en la base de datos.');
-
-    // Devolver una respuesta exitosa
-    return response()->json(['success' => true, 'message' => 'Imagen guardada correctamente.']);
-}
-
-
-public function obtenerImagenes($ticketId, $visitaId)
+    public function obtenerImagenes($ticketId, $visitaId)
     {
         $imagenes = DB::table('fotostickest')
             ->where('idTickets', $ticketId)
@@ -1282,7 +1294,7 @@ public function obtenerImagenes($ticketId, $visitaId)
     {
         // Buscar la imagen en la base de datos
         $imagen = DB::table('fotostickest')->where('idfotostickest', $id)->first();
-    
+
         if ($imagen) {
             // Eliminar la imagen
             DB::table('fotostickest')->where('idfotostickest', $id)->delete();
@@ -1291,20 +1303,42 @@ public function obtenerImagenes($ticketId, $visitaId)
             return response()->json(['success' => false, 'error' => 'La imagen no existe.']);
         }
     }
-    public function generateInformePdf($idOt) 
+    public function generateInformePdf($idOt)
     {
-        $orden = Ticket::findOrFail($idOt);
-    
+        $orden = Ticket::with([
+            'cliente',
+            'tecnico',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot' // Relación con transiciones y estados
+        ])->findOrFail($idOt);
+
+        // Obtener todas las justificaciones organizadas por estado
+        $justificaciones = $orden->transicion_status_tickets->groupBy('idEstadoots');
+
         // Verificar que la vista existe
         if (!view()->exists('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe')) {
             abort(404, "La vista no existe");
         }
-    
+
         // Cargar la vista y generar el PDF
-        $pdf = PDF::loadView('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', compact('orden'));
-    
-        // Retornar el PDF en el navegador
+        $pdf = PDF::loadView('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', [
+            'orden' => $orden,
+            'justificaciones' => $justificaciones, // Pasamos todas las justificaciones agrupadas
+        ]);
+
         return $pdf->stream("informe_$idOt.pdf");
+    }
+    public function checkUpdates($idOt)
+    {
+        // Obtener la última fecha de actualización del ticket en la tabla transicion_status_ticket
+        $ultimaActualizacion = TransicionStatusTicket::where('idTickets', $idOt)
+            ->latest('fechaRegistro') // Ordenar por fecha más reciente
+            ->value('fechaRegistro'); // Obtener solo la fecha
+    
+        return response()->json([
+            'ultimaActualizacion' => $ultimaActualizacion
+        ]);
     }
     
 }
