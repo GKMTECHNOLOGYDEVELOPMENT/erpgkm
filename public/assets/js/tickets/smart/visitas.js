@@ -91,15 +91,95 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                   <h3 class="text-primary text-sm sm:text-base">Llegada al Servicio</h3>
                   <p class="font-bold">El servicio ha comenzado.</p>
                 </div>
+
+
+                                              <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}" style="display: none;">
+  Siguiente
+</button>
+
+
+
                 <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
                   Subir Foto
                 </button>
                 <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" style="display: none;">
-                  Continuar
+                  Continua
                 </button>
                 <input type="file" id="fileInput-${visita.idVisitas}" class="w-full mt-4 p-2 border border-gray-300 rounded-lg" accept="image/*" style="display: none;">
               `;
               visitasList.appendChild(inicioServicioCard);
+// Agregar el evento de clic al botón "Siguiente"
+const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
+siguienteButton.addEventListener('click', () => {
+  // Crear la card de "Final de Servicio"
+  const finalServicioCard = document.createElement('div');
+  finalServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+  finalServicioCard.style.backgroundColor = "#f8d7da"; // Color rojo claro para indicar finalización
+  finalServicioCard.innerHTML = `
+    <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
+      <h3 class="text-primary text-sm sm:text-base">Final de Servicio</h3>
+      <p class="font-bold">El servicio ha finalizado.</p>
+    </div>
+    <button type="button" class="btn btn-success" id="continueButton-${visita.idVisitas}">
+      Finalizar
+    </button>
+
+    <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" style="display: none;">
+                                          Continuar
+                                      </button>
+
+    
+  `;
+
+
+
+
+
+
+  // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
+  inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
+
+  // Agregar el evento de clic al botón "Finalizar"
+  const finalizarServicioButton = document.getElementById(`continueButton-${visita.idVisitas}`);
+  finalizarServicioButton.addEventListener('click', () => {
+
+ // Agregar el evento de clic al botón "Continuar"
+ finalizarServicioButton.addEventListener('click', () => {
+  // Mostrar el modal
+  const event = new CustomEvent('toggle-modal-condiciones');
+  window.dispatchEvent(event);
+});
+
+    
+    // Aquí puedes agregar la lógica para finalizar el servicio en el backend
+    fetch(`/api/finalizarServicio/${visita.idVisitas}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        toastr.success("Servicio finalizado con éxito.");
+        finalServicioCard.style.display = 'none'; // Ocultar la card de "Final de Servicio"
+      } else {
+        toastr.error("Hubo un error al finalizar el servicio.");
+      }
+    })
+    .catch(error => {
+      console.error('Error al finalizar el servicio:', error);
+      toastr.error("Hubo un error al finalizar el servicio.");
+    });
+  });
+});
+
+
+
+
+
+
+
 
               // Verificar si ya existe una foto para la visita
               fetch(`/api/verificarFoto/${visita.idVisitas}`)
@@ -107,9 +187,9 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                 .then(data => {
                   if (data.success) {
                     const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
-                    const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
+                    const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
                     uploadPhotoButton.style.display = 'none';
-                    continueButton.style.display = 'block';
+                    siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
                     // Agregar el evento de clic al botón "Continuar"
                     continueButton.addEventListener('click', () => {
                       // Mostrar el modal
@@ -148,9 +228,9 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                       if (data.success) {
                         toastr.success("Foto subida con éxito.");
                         const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
-                        const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
+                        const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
                         uploadPhotoButton.style.display = 'none';
-                        continueButton.style.display = 'block';
+                        siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
                         // Agregar el evento de clic al botón "Continuar" después de subir la foto
                         continueButton.addEventListener('click', () => {
                           // Mostrar el modal
@@ -176,6 +256,12 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
           .catch(error => {
             console.error('Error al verificar el registro de anexo:', error);
           });
+
+
+
+
+
+          
 
         // Agregar el evento de clic al botón de like
         const likeButton = document.getElementById(`likeButton-${visita.idVisitas}`);
@@ -248,24 +334,86 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                       <h3 class="text-lg font-semibold text-gray-800">Llegada al servicio</h3>
                                       <p class="text-gray-800 mt-2">El servicio ha comenzado.</p>
                                     </div>
+
+                                           
+                                 <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}" style="display: none;">
+  Siguiente
+</button>
+
+
                                     <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
                                           Subir Foto
                                       </button>
                                       <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" style="display: none;">
                                           Continuar
                                       </button>
+
+
                                     <input type="file" id="fileInput-${visita.idVisitas}" class="w-full mt-4 p-2 border border-gray-300 rounded-lg" accept="image/*" style="display: none;">
                                   `;
                                   visitasList.appendChild(inicioServicioCard);
+
+// Agregar el evento de clic al botón "Siguiente"
+const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
+siguienteButton.addEventListener('click', () => {
+  // Crear la card de "Final de Servicio"
+  const finalServicioCard = document.createElement('div');
+  finalServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+  finalServicioCard.style.backgroundColor = "#f8d7da"; // Color rojo claro para indicar finalización
+  finalServicioCard.innerHTML = `
+    <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
+      <h3 class="text-primary text-sm sm:text-base">Final de Servicio</h3>
+      <p class="font-bold">El servicio ha finalizado.</p>
+    </div>
+   
+  `;
+
+  // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
+  inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
+
+  // Agregar el evento de clic al botón "Finalizar"
+  const finalizarServicioButton = document.getElementById(`continueButton-${visita.idVisitas}`);
+  finalizarServicioButton.addEventListener('click', () => {
+
+ // Agregar el evento de clic al botón "Continuar"
+ finalizarServicioButton.addEventListener('click', () => {
+  // Mostrar el modal
+  const event = new CustomEvent('toggle-modal-condiciones');
+  window.dispatchEvent(event);
+});
+
+    // Aquí puedes agregar la lógica para finalizar el servicio en el backend
+    fetch(`/api/finalizarServicio/${visita.idVisitas}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        toastr.success("Servicio finalizado con éxito.");
+        finalServicioCard.style.display = 'none'; // Ocultar la card de "Final de Servicio"
+      } else {
+        toastr.error("Hubo un error al finalizar el servicio.");
+      }
+    })
+    .catch(error => {
+      console.error('Error al finalizar el servicio:', error);
+      toastr.error("Hubo un error al finalizar el servicio.");
+    });
+  });
+});
+
 
                                   fetch(`/api/verificarFoto/${visita.idVisitas}`)
                                     .then(response => response.json())
                                     .then(data => {
                                       if (data.success) {
                                         const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
-                                        const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
+                                        const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
                                         uploadPhotoButton.style.display = 'none';
-                                        continueButton.style.display = 'block';
+                                        siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
                                         // Agregar el evento de clic al botón "Continuar"
                                         continueButton.addEventListener('click', () => {
                                           // Mostrar el modal
@@ -304,9 +452,9 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                           if (data.success) {
                                             toastr.success("Foto subida con éxito.");
                                             const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
-                                            const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
+                                            const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
                                             uploadPhotoButton.style.display = 'none';
-                                            continueButton.style.display = 'block';
+                                            siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
                                             // Agregar el evento de clic al botón "Continuar" después de subir la foto
                                             continueButton.addEventListener('click', () => {
                                               // Mostrar el modal
