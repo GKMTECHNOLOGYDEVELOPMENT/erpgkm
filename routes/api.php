@@ -86,3 +86,5 @@ Route::post('/actualizarFechaLlegada/{idVisitas}', [OrdenesTrabajoController::cl
 
 
 Route::get('/verificarFechaLlegada/{idVisitas}', [OrdenesTrabajoController::class, 'verificarFechaLlegada']);
+// Ruta para verificar si ya existe una fecha de llegada
+Route::get('/verificarFechaExistente/{idVisita}', [OrdenesTrabajoController::class, 'verificarFechaExistente']);

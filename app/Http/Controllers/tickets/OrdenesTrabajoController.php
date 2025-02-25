@@ -1294,6 +1294,26 @@ public function obtenerImagenes($ticketId, $visitaId)
         }
     }
 
+    public function verificarFechaExistente($idVisita)
+    {
+        // Buscar la visita por su ID
+        $visita = Visita::find($idVisita);
+
+        if (!$visita) {
+            return response()->json([
+                'existe' => false,
+                'message' => 'Visita no encontrada.'
+            ], 404);
+        }
+
+        // Verificar si ya existe una fecha de llegada
+        $existeFecha = !is_null($visita->fecha_llegada);
+
+        return response()->json([
+            'existe' => $existeFecha,
+            'message' => $existeFecha ? 'Ya existe una fecha de llegada.' : 'No existe una fecha de llegada.'
+        ]);
+    }
 
     // En el controlador VisitasController.php
 public function actualizarFechaLlegada(Request $request, $idVisitas)

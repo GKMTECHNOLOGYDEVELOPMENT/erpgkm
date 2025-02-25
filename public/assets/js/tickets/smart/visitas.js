@@ -79,37 +79,82 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
         
         
-        // Verificar si ya existe un registro de "Inicio de Servicio"
-        fetch(`/api/verificarRegistroAnexo/${visita.idVisitas}`)
-          .then(response => response.json())
-          .then(anexoData => {
-            if (anexoData && anexoData.idVisitas) {
-              // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
-              const inicioServicioCard = document.createElement('div');
-              inicioServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
-              inicioServicioCard.style.backgroundColor = "#d9f2e6"; // Color verde claro
-              inicioServicioCard.innerHTML = `
-                <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
-                  <h3 class="text-primary text-sm sm:text-base">Llegada al Servicio</h3>
-                  <p class="font-bold">El servicio ha comenzado.</p>
-                </div>
+   // Verificar si ya existe un registro de "Inicio de Servicio"
+fetch(`/api/verificarRegistroAnexo/${visita.idVisitas}`)
+.then(response => response.json())
+.then(anexoData => {
+  if (anexoData && anexoData.idVisitas) {
+    // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
+    const inicioServicioCard = document.createElement('div');
+    inicioServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+    inicioServicioCard.style.backgroundColor = "#d9f2e6"; // Color verde claro
+    inicioServicioCard.innerHTML = `
+      <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
+        <h3 class="text-primary text-sm sm:text-base">Llegada al Servicio</h3>
+        <p class="font-bold">El servicio ha comenzado.</p>
+      </div>
+
+      <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
+        Subir Foto
+      </button>
+
+      <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}">
+        Siguiente
+      </button>
+
+      <input type="file" id="fileInput-${visita.idVisitas}" class="w-full mt-4 p-2 border border-gray-300 rounded-lg" accept="image/*" style="display: none;">
+    `;
+    visitasList.appendChild(inicioServicioCard);
+
+    // Verificar si ya existe una fecha de llegada
+    fetch(`/api/verificarFechaExistente/${visita.idVisitas}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.existe) {
+          // Si ya existe una fecha de llegada, deshabilitar el botón "Siguiente"
+          const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
+          if (siguienteButton) {
+            siguienteButton.disabled = true; // Deshabilitar el botón
+            siguienteButton.classList.add('disabled'); // Opcional: agregar una clase CSS para estilos
+            // toastr.error('Ya existe una fecha de llegada para esta visita.');
+          }
+
+          // Mostrar la tarjeta de "Final de Servicio" automáticamente
+          const finalServicioCard = document.createElement('div');
+          finalServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+          finalServicioCard.style.backgroundColor = "#f8d7da"; // Color rojo claro para indicar finalización
+          finalServicioCard.innerHTML = `
+            <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
+              <h3 class="text-primary text-sm sm:text-base">Final de Servicio</h3>
+              <p class="font-bold">El servicio ha finalizado.</p>
+            </div>
+            <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}">
+              Continuar
+            </button>
+          `;
+
+          // Insertar la tarjeta de "Final de Servicio" debajo de la tarjeta de "Inicio de Servicio"
+          inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
+
+          // Agregar el evento de clic al botón "Continuar"
+          const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
+          if (continueButton) {
+            continueButton.addEventListener('click', () => {
+              // Mostrar el modal al hacer clic en "Continuar"
+              const event = new CustomEvent('toggle-modal-condiciones');
+              window.dispatchEvent(event);
+            });
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        toastr.error('Hubo un error al verificar la fecha de llegada.');
+      });
 
 
-                <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
-                  Subir Foto
-                </button>
-
-                
-                <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}" style="display: none;">
-                  Siguient
-                </button>
-           
-                <input type="file" id="fileInput-${visita.idVisitas}" class="w-full mt-4 p-2 border border-gray-300 rounded-lg" accept="image/*" style="display: none;">
-              `;
-              visitasList.appendChild(inicioServicioCard);
 
 
-              
 
 
 
@@ -130,13 +175,12 @@ siguienteButton.addEventListener('click', () => {
                 </button>
   `;
 
-
-
-
-
-
 // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
 inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
+
+
+
+
 
 // Agregar el evento de clic al botón "Finalizar"
 const finalizarServicioButton = document.getElementById(`continueButton-${visita.idVisitas}`);
@@ -150,38 +194,65 @@ if (finalizarServicioButton) {
     });
 }
 
- // Obtener la fecha actual
- const fechaLlegada = new Date().toISOString(); // Formato YYYY-MM-DDTHH:mm:ss.sssZ
 
 
-    // Actualizar la fecha de llegada en la base de datos
-    fetch(`/api/actualizarFechaLlegada/${visita.idVisitas}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Si estás usando CSRF en Laravel
-      },
-      body: JSON.stringify({
-        fecha_llegada: fechaLlegada
-      })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        toastr.success('Fecha de llegada actualizada correctamente.');
+// Obtener la fecha actual
+const fechaLlegada = new Date().toISOString(); // Formato YYYY-MM-DDTHH:mm:ss.sssZ
 
-        // Ocultar el botón "Siguiente"
-
-        // Actualizar la tabla en el frontend
-        actualizarFechaTabla(visita.idVisitas, fechaLlegada);
-      } else {
-        toastr.error('Hubo un error al actualizar la fecha de llegada.');
+// Verificar si ya existe una fecha de llegada antes de actualizar
+fetch(`/api/verificarFechaExistente/${visita.idVisitas}`)
+  .then(response => response.json())
+  .then(data => {
+    if (data.existe) {
+      // Si ya existe una fecha de llegada, mostrar un error y deshabilitar el botón "Siguiente"
+      toastr.error('Ya existe una fecha de llegada para esta visita.');
+      const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
+      if (siguienteButton) {
+        siguienteButton.disabled = true; // Deshabilitar el botón
+        siguienteButton.classList.add('disabled'); // Opcional: agregar una clase CSS para estilos
       }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      toastr.error('Hubo un error al actualizar la fecha de llegada.');
-    });
+    } else {
+      // Si no existe, proceder con la actualización
+      fetch(`/api/actualizarFechaLlegada/${visita.idVisitas}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}' // Si estás usando CSRF en Laravel
+        },
+        body: JSON.stringify({
+          fecha_llegada: fechaLlegada
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          toastr.success('Fecha de llegada actualizada correctamente.');
+
+          // Deshabilitar el botón "Siguiente" después de actualizar la fecha
+          const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
+          if (siguienteButton) {
+            siguienteButton.disabled = true; // Deshabilitar el botón
+            siguienteButton.classList.add('disabled'); // Opcional: agregar una clase CSS para estilos
+          }
+
+          // Actualizar la tabla en el frontend
+          actualizarFechaTabla(visita.idVisitas, fechaLlegada);
+        } else {
+          toastr.error('Hubo un error al actualizar la fecha de llegada.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        toastr.error('Hubo un error al actualizar la fecha de llegada.');
+      });
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    toastr.error('Hubo un error al verificar la fecha de llegada.');
+  });
+
+
 
 
     
@@ -289,6 +360,12 @@ function actualizarFechaTabla(idVisitas, nuevaFecha) {
 
           
 
+
+
+
+
+
+
         // Agregar el evento de clic al botón de like
         const likeButton = document.getElementById(`likeButton-${visita.idVisitas}`);
         likeButton.addEventListener('click', function () {
@@ -357,12 +434,9 @@ function actualizarFechaTabla(idVisitas, nuevaFecha) {
                                   inicioServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
                                   inicioServicioCard.innerHTML = `
                                     <div class="text-center text-gray-600">
-                                      <h3 class="text-lg font-semibold text-gray-800">Llegada al servicio</h3>
+                                      <h3 class="text-lg font-semibold text-gray-800">Llegada al Servici</h3>
                                       <p class="text-gray-800 mt-2">El servicio ha comenzado.</p>
                                     </div>
-
-                                           
-  
 
 
                                     <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
@@ -396,6 +470,10 @@ siguienteButton.addEventListener('click', () => {
       <h3 class="text-primary text-sm sm:text-base">Inicio de Servicio</h3>
       <p class="font-bold">Inicio de servicio .</p>
     </div>
+
+     <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" >
+                  Continuar
+                </button>
   `;
 
   // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
@@ -409,9 +487,46 @@ siguienteButton.addEventListener('click', () => {
     window.dispatchEvent(event);
 
     // Aquí ya no hay llamada al fetch, solo se oculta la card de "Final de Servicio"
-    finalServicioCard.style.display = 'none'; // Ocultar la card de "Final de Servicio"
+    finalServicioCard.style.display = 'block'; // Ocultar la card de "Final de Servicio"
   });
+
+  // Aquí agregamos la actualización de la fecha de llegada cuando se hace clic en "Siguiente"
+  const fechaLlegada = new Date().toISOString().slice(0, 19).replace("T", " "); // Obtener la fecha y hora actual
+  fetch(`/api/actualizarFechaLlegada/${visita.idVisitas}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}' // Si estás usando CSRF en Laravel
+    },
+    body: JSON.stringify({
+      fecha_llegada: fechaLlegada
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      toastr.success('Fecha de llegada actualizada correctamente.');
+
+       // Deshabilitar el botón "Siguiente" después de actualizar la fecha
+       const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
+       if (siguienteButton) {
+         siguienteButton.disabled = true; // Deshabilitar el botón
+         siguienteButton.classList.add('disabled'); // Opcional: agregar una clase CSS para estilos
+       }
+    } else {
+      toastr.error('Hubo un error al actualizar la fecha de llegada.');
+    }
+  })
+  .catch(error => {
+    console.error('Error al actualizar la fecha de llegada:', error);
+    toastr.error('Hubo un error al actualizar la fecha de llegada.');
+  });
+  
 });
+
+
+
+
 
 
 

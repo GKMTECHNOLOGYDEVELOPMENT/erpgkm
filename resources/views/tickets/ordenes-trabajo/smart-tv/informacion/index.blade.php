@@ -7,7 +7,10 @@
     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="md:col-span-1 mt-4">
             <label for="estado" class="block text-sm font-medium">Estado</label>
+          
             <select id="estado" name="estado" class="selectize" onchange="actualizarColorEstado(this)" style="display: none">
+            <option value="" disabled selected>Selecciona una opción</option>
+
                 @foreach ($estadosOTS as $index => $estado)
                     <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}" {{ $index == 0 ? 'selected' : '' }}>
                         {{ $estado->descripcion }}
