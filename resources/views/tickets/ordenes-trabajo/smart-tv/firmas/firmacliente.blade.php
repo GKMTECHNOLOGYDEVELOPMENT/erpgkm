@@ -24,6 +24,7 @@
 </div>
 
 <input type="hidden" id="ticketId" value="{{ $id }}">
+<input type="hidden" id="visitaId" value="{{ $idVisitas }}"> <!-- Agrega este campo para el idVisitas -->
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -90,36 +91,44 @@
         }
     }
 
-    // Guardar la firma en el servidor
-    function saveSignature(canvasId, name) {
-        if (signaturePadCliente) {
-            if (signaturePadCliente.isEmpty()) {
-                toastr.error("Por favor, realiza la firma primero.");
-            } else {
-                const signatureData = signaturePadCliente.toDataURL(); // Obtener la firma en base64
-                const ticketId = document.getElementById('ticketId').value; // Obtener el id del ticket
+ // Guardar la firma en el servidor
+function saveSignature(canvasId, name) {
+    if (signaturePadCliente) {
+        if (signaturePadCliente.isEmpty()) {
+            toastr.error("Por favor, realiza la firma primero.");
+        } else {
+            const signatureData = signaturePadCliente.toDataURL(); // Obtener la firma en base64
+            const ticketId = document.getElementById('ticketId').value; // Obtener el id del ticket
+            const visitaId = document.getElementById('visitaId').value; // Obtener el id de la visita (debe estar en algún campo en tu HTML)
 
-                // Enviar la firma al servidor usando fetch
-                fetch(`/ordenes/smart/${ticketId}/guardar-firma`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({ firma: signatureData })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    toastr.success(data.message); // Mostrar mensaje de éxito
-                    clearSignature(canvasId); // Limpiar el campo de firma después de guardar
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    toastr.error('Hubo un error al guardar la firma.');
-                });
+            // Verifica que visitaId esté presente
+            if (!visitaId) {
+                toastr.error("No se encontró la visita asociada.");
+                return;
             }
+
+            // Enviar la firma al servidor usando fetch
+            fetch(`/ordenes/smart/${ticketId}/guardar-firma/${visitaId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ firma: signatureData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                toastr.success(data.message); // Mostrar mensaje de éxito
+                // clearSignature(canvasId); // Limpiar el campo de firma después de guardar
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Hubo un error al guardar la firma.');
+            });
         }
     }
+}
+
 
     // Inicializar el canvas cuando el DOM esté listo
     document.addEventListener("DOMContentLoaded", () => {

@@ -7,6 +7,10 @@ function formatDate(dateString) {
 }
 
 
+
+
+
+
 fetch(`/api/obtenerVisitas/${ticketId}`)
   .then(response => response.json())
   .then(data => {
@@ -17,13 +21,28 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const fechaInicio = formatDate(visita.fecha_inicio);
         const fechaFinal = formatDate(visita.fecha_final);
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
+        
+      
 
         const visitaCard = document.createElement('div');
         visitaCard.className = 'rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105';
         visitaCard.style.backgroundColor = "#e3e7fc"; // Color azul claro
         visitaCard.innerHTML = `
         <div class="flex flex-col sm:flex-row justify-between items-center mb-3">
-        <span class="text-lg font-semibold mb-4 badge bg-primary">${visita.nombre}</span>
+
+<button type="button" 
+        class="btn btn-outline-danger seleccionarVisitaButton" 
+        data-id-ticket="${visita.idTickets}" 
+        data-id-visita="${visita.idVisita}" 
+        data-nombre-visita="${visita.nombre_visita}">
+    Seleccionar Visita 
+</button>
+
+
+
+
+
+        <span class="text-lg font-semibold mb-4 badge bg-primary">${visita.nombre} </span>
         <button type="button" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-700 active:bg-red-800 transition-all w-full sm:w-auto mt-2 sm:mt-0 flex items-center justify-center gap-2 shadow-md relative after:content-[''] after:absolute after:bg-white/30 after:w-full after:h-full after:rounded-lg after:scale-150 after:opacity-0 after:transition-all hover:after:opacity-100 active:scale-95" id="detallesVisitaButton-${visita.idVisitas}">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5a6 6 0 000 12 6 6 0 100-12zM21 21l-4.35-4.35" />
@@ -37,7 +56,50 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
     <span class="font-bold" style="color:black">${fechaInicio} - ${fechaFinal}</span>
 </div>
 `;
+
+
+   
+
+
         visitasList.appendChild(visitaCard);
+
+    
+
+        document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
+          button.addEventListener('click', function () {
+              const idTicket = this.getAttribute('data-id-ticket'); // ID del ticket
+              const idVisita = this.getAttribute('data-id-visita'); // ID de la visita
+              const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
+        
+              // Llamada al backend para guardar la visita seleccionada
+              fetch('/api/seleccionar-visita', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF Token si estás usando Blade en Laravel
+                  },
+                  body: JSON.stringify({
+                      idTickets: idTicket,
+                      idVisitas: idVisita,
+                      vistaseleccionada: nombreVisita
+                  })
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      // toastr.success(data.message);  // Muestra el mensaje de éxito
+                  } else {
+                      toastr.error(data.message);  // Muestra el mensaje de error
+                  }
+              })
+              .catch(error => {
+                  console.error('Error al seleccionar la visita:', error);
+                  toastr.error('Hubo un error al seleccionar la visita.');
+              });
+          });
+        });
+       
+        
 
         // Agregar el evento de clic al botón "Detalles de Visita"
         const detallesVisitaButton = document.getElementById(`detallesVisitaButton-${visita.idVisitas}`);
@@ -76,6 +138,11 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
     </div>
 `;
         visitasList.appendChild(tecnicoCard);
+
+
+        
+
+       
 
 
 
@@ -359,7 +426,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
 
 
-
+         
 
 
 
@@ -649,3 +716,6 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
     console.error('Error al obtener las visitas:', error);
     alert('Ocurrió un error al obtener las visitas.');
   });
+
+
+

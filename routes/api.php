@@ -72,7 +72,7 @@ Route::post('/guardarCondiciones', [OrdenesTrabajoController::class, 'guardar'])
 
 
 
-Route::post('/guardarEstado', [OrdenesTrabajoController::class, 'guardarestado']);
+Route::post('/guardarEstado', [OrdenesTrabajoController::class, 'guardarEstado']);
 Route::get('/obtenerJustificacion', [OrdenesTrabajoController::class, 'obtenerJustificacion']);
 Route::post('/guardarImagenes', [OrdenesTrabajoController::class, 'guardarImagenes']);
 Route::post('/guardarImagen', [OrdenesTrabajoController::class, 'guardarImagen']);
@@ -88,3 +88,6 @@ Route::post('/actualizarFechaLlegada/{idVisitas}', [OrdenesTrabajoController::cl
 Route::get('/verificarFechaLlegada/{idVisitas}', [OrdenesTrabajoController::class, 'verificarFechaLlegada']);
 // Ruta para verificar si ya existe una fecha de llegada
 Route::get('/verificarFechaExistente/{idVisita}', [OrdenesTrabajoController::class, 'verificarFechaExistente']);
+
+
+Route::post('/seleccionar-visita', [OrdenesTrabajoController::class, 'seleccionarVisita'])->name('seleccionarVisita');

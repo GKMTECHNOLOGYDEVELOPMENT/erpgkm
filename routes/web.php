@@ -287,6 +287,9 @@ Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
     $numeroVisitas = DB::table('visitas')->where('idTickets', $ticketId)->count();
     return response()->json(['numeroVisitas' => $numeroVisitas]);
 });
+
+
+
 Route::get('/api/obtenerVisitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 
 
@@ -309,7 +312,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
         ->name('checkUpdates');
 
-        Route::get('smart/{id}/firmas', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente')->middleware('auth');
+        Route::get('smart/{id}/firmas/{idVisitas}', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente')->middleware('auth');
 
 
 
@@ -346,9 +349,18 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
 
 
-Route::post('ordenes/smart/{id}/guardar-firma', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])
+Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])
     ->name('guardar.firma.cliente')
     ->middleware('auth');
+
+    Route::get('ordenes/smart/{id}/obtener-firma-cliente', [OrdenesTrabajoController::class, 'obtenerFirmaCliente'])
+    ->name('obtener.firma.cliente')
+    ->middleware('auth');
+
+
+    
+
+
 
 // Agrega esta ruta en tu archivo de rutas web.php
 

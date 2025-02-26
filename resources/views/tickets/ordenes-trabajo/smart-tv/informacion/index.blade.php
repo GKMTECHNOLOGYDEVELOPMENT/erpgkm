@@ -183,31 +183,32 @@
                 cardFotos.classList.add("hidden");
             }
         }
-        // ✅ Renderiza las imágenes seleccionadas en el modal antes de guardarlas
-        function renderizarPrevisualizacion() {
-            imagePreviewContainer.innerHTML = ""; // Limpiar el contenedor de previsualización
 
-            // Obtener las imágenes desde la base de datos
-            const ticketId = {{ $ticket->idTickets }};
-            const visitaId = {{ $visitaId ?? 'null' }};
 
-            fetch(`/api/imagenes/${ticketId}/${visitaId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.imagenes && data.imagenes.length > 0) {
-                        imagePreviewContainer.classList.remove("hidden"); // Mostrar el contenedor
 
-                        data.imagenes.forEach((img, index) => {
-                            let preview = document.createElement("div");
-                            preview.classList.add("preview-item", "flex", "flex-col",
-                                "items-center", "gap-2",
-                                "p-2", "rounded-lg", "shadow");
 
-                            // Asegúrate de que la propiedad `src` esté correctamente definida
-                            const imagenSrc = img.src ||
-                                'ruta_por_defecto_si_no_hay_imagen'; // Puedes agregar una ruta por defecto si no hay imagen
+      // ✅ Renderiza las imágenes seleccionadas en el modal antes de guardarlas
+function renderizarPrevisualizacion() {
+    imagePreviewContainer.innerHTML = ""; // Limpiar el contenedor de previsualización
 
-                            preview.innerHTML = `
+    // Obtener las imágenes desde la base de datos
+    const ticketId = {{ $ticket->idTickets }}; // Obtener el ticketId
+    const visitaId = {{ $visitaId ?? 'null' }}; // Obtener el visitaId, si no es null
+
+    fetch(`/api/imagenes/${ticketId}/${visitaId}`) // Llamada a la API
+        .then(response => response.json())
+        .then(data => {
+            if (data.imagenes && data.imagenes.length > 0) {
+                imagePreviewContainer.classList.remove("hidden"); // Mostrar el contenedor
+
+                data.imagenes.forEach((img, index) => {
+                    let preview = document.createElement("div");
+                    preview.classList.add("preview-item", "flex", "flex-col", "items-center", "gap-2", "p-2", "rounded-lg", "shadow");
+
+                    // Asegúrate de que la propiedad `src` esté correctamente definida
+                    const imagenSrc = img.src || 'ruta_por_defecto_si_no_hay_imagen'; // Ruta por defecto si no hay imagen
+
+                    preview.innerHTML = `
                         <img src="${imagenSrc}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
                         <span class="text-xs font-semibold text-gray-700 text-center">${img.description ? img.description : "Sin descripción"}</span>
                         <button onclick="eliminarImagen(${index})" class="btn btn-danger text-white px-2 py-1 text-xs rounded">
@@ -215,18 +216,18 @@
                         </button>
                     `;
 
-                            imagePreviewContainer.appendChild(
-                                preview); // Agregar la previsualización al contenedor
-                        });
-                    } else {
-                        imagePreviewContainer.classList.add("hidden"); // Ocultar si no hay imágenes
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al cargar las imágenes:", error);
-                    imagePreviewContainer.classList.add("hidden"); // Ocultar en caso de error
+                    imagePreviewContainer.appendChild(preview); // Agregar la previsualización al contenedor
                 });
-        }
+            } else {
+                imagePreviewContainer.classList.add("hidden"); // Ocultar si no hay imágenes
+            }
+        })
+        .catch(error => {
+            console.error("Error al cargar las imágenes:", error);
+            imagePreviewContainer.classList.add("hidden"); // Ocultar en caso de error
+        });
+}
+
 
 
 
@@ -341,6 +342,7 @@
         // ✅ Abre el modal de agregar imagen
         abrirModalBtn.addEventListener("click", function() {
             modalAgregarImagen.classList.remove("hidden");
+            renderizarImagenes();
             renderizarPrevisualizacion(); // Mostrar imágenes al abrir el modal
         });
 
@@ -443,9 +445,9 @@
 
         // ✅ Renderizar imágenes al cargar la página
         renderizarImagenes();
+
     });
 </script>
-
 
 
 
@@ -478,8 +480,7 @@
                 body: JSON.stringify({
                     idEstadoots: estadoId,
                     justificacion: justificacion.trim(),
-                    idTickets: {{ $ticket->idTickets }}, // Pasar el ID del ticket
-                    idVisitas: {{ $visitaId ?? 'null' }} // Pasar el ID de la visita (si existe)
+                    idTickets: {{ $ticket->idTickets }} // Solo se pasa el ID del ticket
                 })
             })
             .then(response => response.json())
@@ -497,42 +498,48 @@
     });
 </script>
 
+
+
+
+
 <script>
-    document.getElementById("estado").addEventListener("change", function() {
-        const estadoId = this.value;
-        const ticketId = {{ $ticket->idTickets }};
-        const visitaId = {{ $visitaId ?? 'null' }};
+  document.getElementById("estado").addEventListener("change", function() {
+    const estadoId = this.value;
+    const ticketId = {{ $ticket->idTickets }};
+    const visitaId = {{ $visitaId ?? 'null' }};
 
-        // Obtener la justificación del estado seleccionado
-        fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Mostrar la justificación en el textarea
-                    document.getElementById("justificacion").value = data.justificacion || "";
-                } else {
-                    console.error("Error al obtener la justificación:", data.error);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
+    // Obtener la justificación del estado seleccionado
+    fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar la justificación en el textarea
+                document.getElementById("justificacion").value = data.justificacion || "";
+            } else {
+                toastr.error(data.message || "Error al obtener la justificación");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            toastr.error("Error al obtener la justificación.");
+        });
 
-        // Verificar si el estado seleccionado es igual a 20
-        if (estadoId == 3) {
-            const cardFotos = document.getElementById("cardFotos");
-            if (cardFotos) {
-                cardFotos.style.display = "block"; // Mostrar el elemento
-                console.log("Card de fotos mostrada porque estadoId es 20");
-            }
-        } else {
-            const cardFotos = document.getElementById("cardFotos");
-            if (cardFotos) {
-                cardFotos.style.display = "none"; // Ocultar el elemento
-                console.log("Card de fotos oculta porque estadoId no es 20");
-            }
+    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
+    if (estadoId == 3) {
+        const cardFotos = document.getElementById("cardFotos");
+        if (cardFotos) {
+            cardFotos.style.display = "block"; // Mostrar el elemento
+
+            renderizarPrevisualizacion();
         }
-    });
+    } else {
+        const cardFotos = document.getElementById("cardFotos");
+        if (cardFotos) {
+            cardFotos.style.display = "none"; // Ocultar el elemento
+        }
+    }
+});
+
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar todos los select con la clase .selectize
         document.querySelectorAll(".selectize").forEach(function(select) {

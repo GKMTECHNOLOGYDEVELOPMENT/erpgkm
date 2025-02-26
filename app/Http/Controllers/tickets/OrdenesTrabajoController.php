@@ -28,7 +28,9 @@ use App\Exports\HelpdeskTicketExport; // Importa el nuevo exportador
 use App\Models\AnexosVisita;
 use App\Models\CondicionesTicket;
 use App\Models\Fotostickest;
+use App\Models\SeleccionarVisita;
 use App\Models\TicketFlujo;
+use App\Models\TransicionStatusTicket;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 use Illuminate\Support\Facades\Validator;
@@ -309,115 +311,111 @@ class OrdenesTrabajoController extends Controller
             'ticketId',
             'visitaId',
             'estadosOTS',
-            'visita' // Pasamos el idVisitas a la vista
-        ));
-    }
-
-
-    public function firmacliente($id)
-    {
-        $usuario = Auth::user();
-        $rol = $usuario->rol->nombre ?? 'Sin Rol';
-    
-        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
-        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-    // Obtener los estados desde la tabla estado_ots
-    $estadosOTS = DB::table('estado_ots')->get();
-        // Obtener el idTickets
-        $ticketId = $ticket->idTickets;
-    
-        $visita = DB::table('visitas')
-        ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
-        ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets') // Unimos con la tabla tickets
-        ->where('visitas.idTickets', $ticketId)
-        ->select(
-            'usuarios.Nombre as usuarios_nombre', 
-            'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
-            'visitas.*',
-            'tickets.numero_ticket' // Seleccionamos el numero_ticket de la tabla tickets
-        )
-        ->first();
-    
-        // dd($visita);
-
-    
-        $visitaId = $visita ? $visita->idVisitas : null; // Si no hay visita, será null
-    
-        // Acceder al idTicketFlujo desde la relación 'ticketflujo'
-        $idTicketFlujo = $orden->ticketflujo ? $orden->ticketflujo->idTicketFlujo : null;
-    
-        // Acceder al idEstadflujo desde la relación 'ticketflujo'
-        $idEstadflujo = $orden->ticketflujo ? $orden->ticketflujo->idEstadflujo : null;
-    
-        // Obtener la descripción del estado de flujo desde la relación 'estadoFlujo'
-        $descripcionEstadoFlujo = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->descripcion : 'Sin estado de flujo';
-    
-        // Obtener todos los estados de flujo para este ticket
-        $estadosFlujo = DB::table('ticketflujo')
-            ->join('estado_flujo', 'ticketflujo.idEstadflujo', '=', 'estado_flujo.idEstadflujo')
-            ->where('ticketflujo.idTicket', $ticketId)  // Solo estados para este ticket
-            ->select('estado_flujo.descripcion', 'ticketflujo.fecha_creacion', 'estado_flujo.color')
-            ->orderBy('ticketflujo.fecha_creacion', 'asc')  // Opcional: Ordenar por fecha de creación
-            ->get();
-    
-        // Otros datos que ya estás obteniendo
-        $encargado = Usuario::whereIn('idTipoUsuario', [3, 5])->get();
-        $tecnicos_apoyo = Usuario::where('idTipoUsuario', 3)->get();
-        $clientes = Cliente::all();
-        $clientesGenerales = ClienteGeneral::all();
-        $modelos = Modelo::all();
-        $tiendas = Tienda::all();
-        $marcas = Marca::all();
-    
-        // Pasamos los datos a la vista
-        return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
-            'ticket',
-            'orden',
-            'modelos',
-            'usuario',
-            'estadosFlujo',
-            'clientes',
-            'clientesGenerales',
-            'tiendas',
-            'marcas',
-            'encargado',
-            'tecnicos_apoyo',
-            'idTicketFlujo',
-            'idEstadflujo',
-            'descripcionEstadoFlujo',
-            'ticketId',
-            'visitaId',
-            'estadosOTS',
             'visita',
             'id' // Pasamos el idVisitas a la vista
         ));
     }
 
-
-    public function guardarFirmaCliente(Request $request, $id)
-{
-    // Validar que la firma esté presente
-    $request->validate([
-        'firma' => 'required|string',
-    ]);
-
-    // Obtener el ticket
-    $ticket = Ticket::findOrFail($id);
-
-    // Convertir la firma de base64 a binario
-    $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
-
-    // Guardar la firma en la tabla firmas
-    DB::table('firmas')->insert([
-        'firma_cliente' => $firmaCliente,
-        'idTickets' => $ticket->idTickets,
-        'idCliente' => $ticket->idCliente // Asumiendo que el ticket tiene un idCliente
-       
-    ]);
-
-    // Retornar una respuesta de éxito
-    return response()->json(['message' => 'Firma guardada correctamente'], 200);
-}
+    public function firmacliente($id, $idVisitas)
+    {
+        // $usuario = Auth::user();
+        // $rol = $usuario->rol->nombre ?? 'Sin Rol';
+        
+        // Obtener el ticket
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+        
+        // Obtener los estados de OTS
+        $estadosOTS = DB::table('estado_ots')->get();
+        $ticketId = $ticket->idTickets;
+    
+        // Obtener la visita usando idVisitas
+      // Verificar que la visita corresponda al ticket
+    $visita = DB::table('visitas')
+    ->where('idVisitas', $idVisitas)
+    ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
+    ->first();
+        
+        // Verificamos que la visita exista, si no, devolver algún mensaje de error
+        if (!$visita) {
+            return view("pages.error404");
+        }
+        
+        
+    
+        // Pasamos todos los datos a la vista
+        return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
+            'ticket',
+            'orden',         
+          
+            'estadosOTS',       
+            'ticketId',
+            'idVisitas', // Asegúrate de pasar idVisitas aquí
+            'visita', // El objeto visita completo
+            'id',
+            'idVisitas' // Pasamos también el id del ticket
+        ));
+    }
+    
+    
+    public function guardarFirmaCliente(Request $request, $id, $idVisitas)
+    {
+        // Validar que la firma esté presente
+        $request->validate([
+            'firma' => 'required|string',
+        ]);
+        
+        // Obtener el ticket
+        $ticket = Ticket::findOrFail($id);
+        
+        // Verificar si la combinación idVisitas y idTickets existe en la tabla visitas
+        $visitaExistente = DB::table('visitas')
+            ->where('idVisitas', $idVisitas)
+            ->where('idTickets', $ticket->idTickets)
+            ->first();
+    
+        // Si no existe una visita válida con esa combinación, retornar un error
+        if (!$visitaExistente) {
+            return response()->json(['message' => 'La combinación de idVisitas y idTickets no es válida.'], 400);
+        }
+        
+        // Convertir la firma de base64 a binario
+        $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
+        
+        // Verificar si ya existe una firma para este ticket y cliente
+        $firmaExistente = DB::table('firmas')
+                            ->where('idTickets', $ticket->idTickets)
+                            ->where('idCliente', $ticket->idCliente)
+                            ->where('idVisitas', $idVisitas) // Verificamos si ya existe con el idVisitas actual
+                            ->first();
+    
+        // Si no existe una firma para este ticket y cliente con el idVisitas actual
+        if (!$firmaExistente) {
+            // Si el idVisitas es diferente, creamos una nueva firma
+            DB::table('firmas')->insert([
+                'firma_cliente' => $firmaCliente,
+                'idTickets' => $ticket->idTickets,
+                'idCliente' => $ticket->idCliente, // Asumiendo que el ticket tiene un idCliente
+                'idVisitas' => $idVisitas, // Guardamos el idVisitas
+            ]);
+            
+            // Retornar una respuesta de éxito con mensaje de creación
+            return response()->json(['message' => 'Firma creada correctamente'], 201);
+        } else {
+            // Si ya existe una firma con el mismo idVisitas, actualizamos la firma
+            DB::table('firmas')
+                ->where('idFirmas', $firmaExistente->idFirmas) // Encontramos la firma existente
+                ->update([
+                    'firma_cliente' => $firmaCliente,
+                ]);
+            
+            // Retornar una respuesta de éxito con mensaje de actualización
+            return response()->json(['message' => 'Firma actualizada correctamente'], 200);
+        }
+    }
+    
+    
+    
 
     public function mostrarDetalles($ticketId)
     {
@@ -1047,11 +1045,17 @@ class OrdenesTrabajoController extends Controller
             $visita->fecha_final = $visita->fecha_final->toIso8601String();
             // Incluir el nombre del técnico
             $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;  // Aquí asumimos que el campo 'nombre' está en el modelo Usuario
+            $visita->idTicket = $visita->idTickets;  // Este es el ID del ticket asociado a la visita
+            $visita->idVisita = $visita->idVisitas;  // Este es el ID de la visita
+            $visita->nombre_visita = $visita->nombre; // Este es el nombre de la visita
         });
     
         return response()->json($visitas);
     }
     
+
+
+
 
 public function actualizarVisita(Request $request, $id)
 {
@@ -1254,20 +1258,37 @@ public function guardarEstado(Request $request)
     // Validar los datos
     $request->validate([
         'idTickets' => 'required|integer|exists:tickets,idTickets',
-        'idVisitas' => 'nullable|integer|exists:visitas,idVisitas',
         'idEstadoots' => 'required|integer|exists:estado_ots,idEstadoots',
         'justificacion' => 'nullable|string'
     ]);
 
+    // Log de la entrada de datos
+    Log::info('Datos recibidos en guardarEstado: ', $request->all());
+
+    // Buscar el idVisitas en la tabla seleccionarvisita con base en el idTickets
+    $seleccionarVisita = DB::table('seleccionarvisita')
+        ->where('idTickets', $request->idTickets)
+        ->first();
+
+    // Verificar si encontramos un idVisitas
+    if ($seleccionarVisita) {
+        $idVisitas = $seleccionarVisita->idVisitas;
+        Log::info("Visita encontrada: idVisitas = $idVisitas");
+    } else {
+        // Si no se encuentra, podría devolver un error o enviar `null`
+        return response()->json(['success' => false, 'message' => 'No se encontró una visita asociada a este ticket.']);
+    }
+
     // Buscar si ya existe un registro para este ticket, visita y estado
     $transicion = DB::table('transicion_status_ticket')
         ->where('idTickets', $request->idTickets)
-        ->where('idVisitas', $request->idVisitas)
+        ->where('idVisitas', $idVisitas)
         ->where('idEstadoots', $request->idEstadoots)
         ->first();
 
     if ($transicion) {
         // Si existe, actualizar la justificación
+        Log::info('Actualizando justificación para transicion: ', (array) $transicion);
         DB::table('transicion_status_ticket')
             ->where('idTransicionStatus', $transicion->idTransicionStatus)
             ->update([
@@ -1276,9 +1297,10 @@ public function guardarEstado(Request $request)
             ]);
     } else {
         // Si no existe, crear un nuevo registro
+        Log::info('Creando nuevo registro para la transicion de ticket');
         DB::table('transicion_status_ticket')->insert([
             'idTickets' => $request->idTickets,
-            'idVisitas' => $request->idVisitas,
+            'idVisitas' => $idVisitas,
             'idEstadoots' => $request->idEstadoots,
             'justificacion' => $request->justificacion,
             'fechaRegistro' => now(),
@@ -1286,64 +1308,111 @@ public function guardarEstado(Request $request)
         ]);
     }
 
+    Log::info('Estado guardado correctamente.');
+
     return response()->json(['success' => true, 'message' => 'Estado guardado correctamente.']);
 }
-
 
 public function obtenerJustificacion(Request $request)
 {
     // Validar los parámetros
     $request->validate([
         'ticketId' => 'required|integer|exists:tickets,idTickets',
-        'visitaId' => 'nullable|integer|exists:visitas,idVisitas',
         'estadoId' => 'required|integer|exists:estado_ots,idEstadoots'
     ]);
 
-    // Buscar la justificación en la base de datos
-    $transicion = DB::table('transicion_status_ticket')
-        ->where('idTickets', $request->ticketId)
-        ->where('idVisitas', $request->visitaId)
-        ->where('idEstadoots', $request->estadoId)
-        ->first();
+    // Log de la entrada de datos
+    Log::info('Datos recibidos en obtenerJustificacion: ', $request->all());
 
-    if ($transicion) {
-        return response()->json([
-            'success' => true,
-            'justificacion' => $transicion->justificacion
-        ]);
+    // Buscar el idVisitas en la tabla seleccionarvisita con base en el idTickets
+    $seleccionada = DB::table('seleccionarvisita')
+        ->where('idTickets', $request->ticketId)
+        ->first();  // Solo buscamos por ticketId
+
+    if ($seleccionada) {
+        // Log de la visita encontrada
+        Log::info('Visita seleccionada encontrada, idVisitas = ' . $seleccionada->idVisitas);
+
+        // Obtener los estados asociados a la visita
+        $estados = DB::table('estado_ots')
+            ->join('transicion_status_ticket', 'estado_ots.idEstadoots', '=', 'transicion_status_ticket.idEstadoots')
+            ->where('transicion_status_ticket.idTickets', $request->ticketId)
+            ->where('transicion_status_ticket.idVisitas', $seleccionada->idVisitas)
+            ->select('estado_ots.idEstadoots', 'estado_ots.descripcion') // Cambié 'nombre' por 'descripcion'
+            ->distinct()
+            ->get();
+
+        // Log de los estados obtenidos
+        Log::info('Estados obtenidos para la visita: ', $estados->toArray());
+
+        // Obtener la justificación de la transicion_status_ticket
+        $transicion = DB::table('transicion_status_ticket')
+            ->where('idTickets', $request->ticketId)
+            ->where('idVisitas', $seleccionada->idVisitas)
+            ->where('idEstadoots', $request->estadoId)
+            ->first();
+
+        if ($transicion) {
+            Log::info('Justificación encontrada: ' . $transicion->justificacion);
+            return response()->json([
+                'success' => true,
+                'justificacion' => $transicion->justificacion,
+                'estados' => $estados
+            ]);
+        } else {
+            Log::info('No hay justificación guardada para este estado');
+            return response()->json([
+                'success' => true,
+                'justificacion' => null,
+                'estados' => $estados
+            ]);
+        }
     } else {
+        Log::info('No se encontró una visita seleccionada para este ticket.');
         return response()->json([
-            'success' => true,
-            'justificacion' => null // No hay justificación guardada
+            'success' => false,
+            'message' => 'No se encontró una visita seleccionada para este ticket.'
         ]);
     }
 }
-
-
 
 
 public function guardarImagen(Request $request)
 {
     // Validar la solicitud
     $request->validate([
-        'imagen' => 'required|image|max:2048', // Validamos que la imagen sea válida y no sea mayor de 2MB
+        'imagen' => 'required|image|max:2048', // Validamos que la imagen sea válida y no mayor de 2MB
         'descripcion' => 'required|string|max:255',
-        'ticket_id' => 'required|integer|exists:tickets,idTickets', // Asegúrate de validar el ID del ticket
-        'visita_id' => 'nullable|integer|exists:visitas,idVisitas', // Si tienes visita_id
+        'ticket_id' => 'required|integer|exists:tickets,idTickets', // Validamos que el ID del ticket exista
     ]);
 
     // Obtener los datos de la solicitud
     $imagen = $request->file('imagen'); // Imagen en formato binario
     $descripcion = $request->input('descripcion');
     $ticket_id = $request->input('ticket_id');
-    $visita_id = $request->input('visita_id') ?? null;
-
-    // Log para ver los datos recibidos
-    Log::info('Datos recibidos:');
+    
+    // Log para verificar los datos recibidos
+    Log::info('Datos recibidos para guardar la imagen:');
     Log::info('Descripción: ' . $descripcion);
     Log::info('Ticket ID: ' . $ticket_id);
-    Log::info('Visita ID: ' . $visita_id);
     Log::info('Imagen: ' . $imagen->getClientOriginalName()); // Nombre original del archivo
+
+    // Buscar el idVisitas asociado con el ticket en la tabla seleccionarvisita
+    $visita = DB::table('seleccionarvisita')
+        ->where('idTickets', $ticket_id)
+        ->first(); // Obtenemos la primera visita asociada con el ticket
+
+    // Verificar si se encontró el visita_id
+    if (!$visita) {
+        Log::error('No se encontró una visita válida para este ticket.');
+        return response()->json(['success' => false, 'message' => 'No se encontró una visita válida para este ticket.'], 400);
+    }
+
+    // Obtener el idVisitas
+    $visita_id = $visita->idVisitas;
+
+    // Log para verificar el idVisitas encontrado
+    Log::info('Visita ID encontrado: ' . $visita_id);
 
     // Convertir la imagen a binario
     $imagen_binaria = file_get_contents($imagen->getRealPath());
@@ -1357,22 +1426,46 @@ public function guardarImagen(Request $request)
     $foto->idVisitas = $visita_id;
     $foto->foto = $imagen_binaria; // Guardamos la imagen en binario
     $foto->descripcion = $descripcion;
-    $foto->save();
 
-    // Log para verificar que la imagen se guardó correctamente
-    Log::info('Imagen guardada con éxito en la base de datos.');
+    try {
+        $foto->save();
+        // Log para verificar que la imagen se guardó correctamente
+        Log::info('Imagen guardada con éxito en la base de datos.');
+    } catch (\Exception $e) {
+        // Log para capturar errores en el proceso de guardado
+        Log::error('Error al guardar la imagen en la base de datos: ' . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Error al guardar la imagen en la base de datos.'], 500);
+    }
 
     // Devolver una respuesta exitosa
     return response()->json(['success' => true, 'message' => 'Imagen guardada correctamente.']);
 }
 
 
-public function obtenerImagenes($ticketId, $visitaId)
-    {
+
+
+public function obtenerImagenes($ticketId)
+{
+    // Buscar el idVisitas en la tabla seleccionarvisita con base en el idTickets
+    $seleccionada = DB::table('seleccionarvisita')
+        ->where('idTickets', $ticketId)
+        ->first();  // Solo buscamos por ticketId
+
+    // Si se encontró una visita asociada al ticket
+    if ($seleccionada) {
+        // Tomamos el idVisitas de la visita seleccionada
+        $visitaId = $seleccionada->idVisitas;
+
+        // Buscar las imágenes asociadas al ticket y la visita
         $imagenes = DB::table('fotostickest')
             ->where('idTickets', $ticketId)
-            ->where('idVisitas', $visitaId)
+            ->where('idVisitas', $visitaId)  // Usamos el idVisitas obtenido
             ->get();
+
+        // Si no hay imágenes asociadas, retornar un mensaje
+        if ($imagenes->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No se encontraron imágenes para este ticket y visita.']);
+        }
 
         // Convertir las imágenes a base64 para poder mostrarlas en el frontend
         $imagenes = $imagenes->map(function ($imagen) {
@@ -1383,24 +1476,39 @@ public function obtenerImagenes($ticketId, $visitaId)
             ];
         });
 
+        // Retornar la respuesta con las imágenes
         return response()->json(['imagenes' => $imagenes]);
+
+    } else {
+        // Si no se encontró una visita para el ticket, devolver error
+        return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada para este ticket.']);
     }
+}
 
 
-    // app/Http/Controllers/ImagenController.php
-    public function eliminarImagen($id)
-    {
-        // Buscar la imagen en la base de datos
-        $imagen = DB::table('fotostickest')->where('idfotostickest', $id)->first();
-    
-        if ($imagen) {
-            // Eliminar la imagen
-            DB::table('fotostickest')->where('idfotostickest', $id)->delete();
-            return response()->json(['success' => true]);
-        } else {
-            return response()->json(['success' => false, 'error' => 'La imagen no existe.']);
-        }
+
+
+
+
+public function eliminarImagen($id)
+{
+    // Buscar la imagen en la base de datos
+    $imagen = DB::table('fotostickest')->where('idfotostickest', $id)->first();
+
+    if ($imagen) {
+        // Eliminar la imagen
+        DB::table('fotostickest')->where('idfotostickest', $id)->delete();
+        return response()->json(['success' => true]);
+    } else {
+        return response()->json(['success' => false, 'error' => 'La imagen no existe.']);
     }
+}
+
+
+
+
+
+
 
     public function verificarFechaExistente($idVisita)
     {
@@ -1478,6 +1586,87 @@ public function verificarFechaLlegada($idVisitas)
         'fecha_llegada' => null
     ]);
 }
+
+public function obtenerFirmaCliente($id)
+{
+    // Obtener el idVisitas relacionado con el idTickets desde la tabla seleccionarvisita
+    $idVisitas = DB::table('seleccionarvisita')
+        ->where('idTickets', $id) // Relacionamos el idTickets que hemos recibido
+        ->value('idVisitas'); // Obtenemos el idVisitas correspondiente
+
+    // Verificar si se encontró el idVisitas
+    if (!$idVisitas) {
+        return response()->json(['error' => 'No se encontró la visita relacionada con este ticket'], 404);
+    }
+
+    // Obtener la firma del cliente utilizando el idTickets y el idVisitas desde la tabla firmas
+    $firma = DB::table('firmas')
+        ->where('idTickets', $id)
+        ->where('idVisitas', $idVisitas) // Usamos idVisitas para obtener la firma correcta
+        ->value('firma_cliente');
+
+    // Log para verificar si la firma existe
+    Log::info("Firma del cliente para el ticket $id y la visita $idVisitas: " . ($firma ? 'Encontrada' : 'No encontrada'));
+
+    // Verificar el contenido de la firma antes de codificar
+    Log::info("Contenido de la firma: " . ($firma ? 'Firma encontrada' : 'No hay firma'));
+
+    if ($firma) {
+        // Convertir la firma a base64
+        $firmaBase64 = base64_encode($firma);
+
+        // Log para verificar el valor de la firma base64
+        Log::info("Firma en Base64: " . $firmaBase64);
+
+        return response()->json(['firma' => $firmaBase64]);
+    }
+
+    return response()->json(['firma' => null], 404);
+}
+
+
+
+
+
+
+
+public function seleccionarVisita(Request $request)
+{
+    // Validar los datos que vienen del frontend
+    $validated = $request->validate([
+        'idTickets' => 'required|integer',
+        'idVisitas' => 'required|integer',
+        'vistaseleccionada' => 'required|string|max:255',
+    ]);
+
+    // Buscar si ya existe un registro con el mismo idTickets
+    $seleccionarVisita = SeleccionarVisita::where('idTickets', $validated['idTickets'])->first();
+
+    // Si el registro ya existe, actualizamos los campos
+    if ($seleccionarVisita) {
+        $seleccionarVisita->idVisitas = $validated['idVisitas'];
+        $seleccionarVisita->vistaseleccionada = $validated['vistaseleccionada'];
+        $seleccionarVisita->save();
+
+        return response()->json(['success' => true, 'message' => 'Visita actualizada correctamente.']);
+    }
+
+    // Si no existe, creamos un nuevo registro
+    $seleccionarVisita = new SeleccionarVisita();
+    $seleccionarVisita->idTickets = $validated['idTickets'];
+    $seleccionarVisita->idVisitas = $validated['idVisitas'];
+    $seleccionarVisita->vistaseleccionada = $validated['vistaseleccionada'];
+    
+    // Guardar en la base de datos
+    if ($seleccionarVisita->save()) {
+        return response()->json(['success' => true, 'message' => 'Visita seleccionada guardada correctamente.']);
+    } else {
+        return response()->json(['success' => false, 'message' => 'Hubo un error al guardar la visita seleccionada.']);
+    }
+}
+
+
+
 
 
 }
