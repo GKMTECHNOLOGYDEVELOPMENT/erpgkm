@@ -322,7 +322,7 @@ class OrdenesTrabajoController extends Controller
 public function generarEnlace($id, $idVisitas)
 {
     // El enlace expirará en 30 minutos desde el momento en que se genere
-    $expiresAt = Carbon::now()->addMinutes(4); // 30 minutos de expiración
+    $expiresAt = Carbon::now()->addMinutes(30); // 30 minutos de expiración
     $expiresAtTimestamp = $expiresAt->timestamp; // Convertir a timestamp
     
     // Generar la URL con el parámetro expires_at
@@ -338,46 +338,40 @@ public function generarEnlace($id, $idVisitas)
 
 
 
-public function firmacliente($id, $idVisitas, $expires_at)
-{
-    // Verificar si el enlace ha expirado (30 minutos desde el timestamp)
-    if (Carbon::now()->timestamp > $expires_at) {
-        // Si ha expirado, redirigir a una página de error o mostrar un mensaje
-        return view("pages.error404"); // O redirigir a una página de error
-    }
-
-    // Obtener el ticket
-    $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
-    $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);        
-
-    // Obtener los estados de OTS
-    $estadosOTS = DB::table('estado_ots')->get();
-    $ticketId = $ticket->idTickets;   
-
-    // Obtener la visita usando idVisitas
+    public function firmacliente($id, $idVisitas)
+    {
+        // $usuario = Auth::user();
+        // $rol = $usuario->rol->nombre ?? 'Sin Rol';
+        // Obtener el ticket
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);        
+        // Obtener los estados de OTS
+        $estadosOTS = DB::table('estado_ots')->get();
+        $ticketId = $ticket->idTickets;   
+        // Obtener la visita usando idVisitas
+      // Verificar que la visita corresponda al ticket
     $visita = DB::table('visitas')
-        ->where('idVisitas', $idVisitas)
-        ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
-        ->first();
-
-    // Verificamos que la visita exista, si no, devolver algún mensaje de error
-    if (!$visita) {
-        return view("pages.error404");
+    ->where('idVisitas', $idVisitas)
+    ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
+    ->first();
+        
+        // Verificamos que la visita exista, si no, devolver algún mensaje de error
+        if (!$visita) {
+            return view("pages.error404");
+        }
+        // Pasamos todos los datos a la vista
+        return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
+            'ticket',
+            'orden',         
+          
+            'estadosOTS',       
+            'ticketId',
+            'idVisitas', // Asegúrate de pasar idVisitas aquí
+            'visita', // El objeto visita completo
+            'id',
+            'idVisitas' // Pasamos también el id del ticket
+        ));
     }
-
-    // Pasar todos los datos a la vista
-    return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
-        'ticket',
-        'orden',         
-        'estadosOTS',       
-        'ticketId',
-        'idVisitas', // Asegúrate de pasar idVisitas aquí
-        'visita', // El objeto visita completo
-        'id',
-        'idVisitas' // Pasamos también el id del ticket
-    ));
-}
-
     
     
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
