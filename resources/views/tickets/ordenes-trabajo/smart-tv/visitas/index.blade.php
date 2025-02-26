@@ -72,7 +72,6 @@
     </div>
 </div>
 
-
 <div x-data="{
     openCondiciones: false,
     condiciones: {
@@ -82,30 +81,26 @@
         motivoNoAtiende: ''
     },
     guardarCondiciones(condiciones, ticketId, visitaId) {
-if (!condiciones.esTitular) {
-if (!condiciones.titularNoEsTitular.nombre.trim()) {
-            toastr.error('El campo Nombre no puede estar vacío.');
-            return;
+        if (!condiciones.esTitular) {
+            if (!condiciones.titularNoEsTitular.nombre.trim()) {
+                toastr.error('El campo Nombre no puede estar vacío.');
+                return;
+            }
+            if (!condiciones.titularNoEsTitular.dni.trim()) {
+                toastr.error('El campo DNI no puede estar vacío.');
+                return;
+            }
+            if (!condiciones.titularNoEsTitular.telefono.trim()) {
+                toastr.error('El campo Teléfono no puede estar vacío.');
+                return;
+            }
+        }
 
-             }
-        if (!condiciones.titularNoEsTitular.dni.trim()) {
-            toastr.error('El campo DNI no puede estar vacío.');
+        // Validar campo de motivo si no se atiende el servicio
+        if (condiciones.noAtiende && !condiciones.motivoNoAtiende.trim()) {
+            toastr.error('El campo Motivo no puede estar vacío.');
             return;
         }
-        if (!condiciones.titularNoEsTitular.telefono.trim()) {
-            toastr.error('El campo Teléfono no puede estar vacío.');
-            return;
-        }
-    }
-
-    // Validar campo de motivo si no se atiende el servicio
-    if (condiciones.noAtiende && !condiciones.motivoNoAtiende.trim()) {
-        toastr.error('El campo Motivo no puede estar vacío.');
-        return;
-    }
-
-
-
 
         // Preparar los datos para enviar
         const datos = {
@@ -146,8 +141,14 @@ if (!condiciones.titularNoEsTitular.nombre.trim()) {
 }" class="mb-5" @toggle-modal-condiciones.window="openCondiciones = !openCondiciones">
     <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
-            <div x-show="openCondiciones" x-transition.duration.300
+            <div x-show="openCondiciones" x-transition:enter="transition ease-out duration-300 transform"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200 transform"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
                 class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8">
+                
                 <!-- Header -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                     <h5 class="font-bold text-lg">Condiciones de Inicio de Servicio</h5>
@@ -506,7 +507,7 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         error: function(xhr, status, error) {
             console.error("Error al guardar visita:", error);
-            toastr.error("Hubo un error al guardar la visita. Intenta nuevamente.");
+            toastr.error("El tecnico ya esta asigando a una hora.");
         }
     });
 });

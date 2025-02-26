@@ -12,8 +12,7 @@
             <button type="button" onclick="clearSignature('signatureCanvasTecnico')" class="btn btn-danger">
                 Limpiar
             </button>
-            <button type="button" onclick="saveSignature('signatureCanvasTecnico', 'FirmaTecnico')"
-                class="btn btn-success">
+            <button type="button" onclick="saveSignature('signatureCanvasTecnico', 'FirmaTecnico')" class="btn btn-success">
                 Guardar
             </button>
         </div>
@@ -22,28 +21,21 @@
     <!-- Firma del Cliente -->
     <div class="w-full md:w-[500px] flex flex-col items-center">
         <p class="mb-2 text-lg font-medium text-center">Firma del Cliente</p>
+        <!-- Aquí reemplazamos el canvas por una imagen -->
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
-            <canvas id="signatureCanvasCliente" class="w-full h-full"></canvas>
-        </div>
-        <div class="flex space-x-3 mt-4">
-            <button type="button" onclick="clearSignature('signatureCanvasCliente')" class="btn btn-danger">
-                Limpiar
-            </button>
-            <button type="button" onclick="saveSignature('signatureCanvasCliente', 'FirmaCliente')"
-                class="btn btn-success">
-                Guardar
-            </button>
+            <img id="firmaClienteImg" class="w-full h-full object-contain" src="" alt="Firma del Cliente">
         </div>
     </div>
 </div>
+
+<input type="hidden" id="ticketId" value="{{ $id }}">
 
 <!-- Botones adicionales -->
 <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <button type="button" class="btn btn-primary w-full" onclick="finalizarServicio()">✅ Finalizar Servicio</button>
     <button type="button" class="btn btn-secondary w-full" onclick="coordinarRecojo()">📅 Coordinar Recojo</button>
     <button type="button" class="btn btn-warning w-full" onclick="fueraDeGarantia()">⚠️ Fuera de Garantía</button>
-    <button type="button" class="btn btn-info w-full" onclick="pendienteRepuestos()">⏳ Pendiente por Coordinar
-        Repuestos</button>
+    <button type="button" class="btn btn-info w-full" onclick="pendienteRepuestos()">⏳ Pendiente por Coordinar Repuestos</button>
 </div>
 
 <!-- Incluir SignaturePad.js -->
@@ -52,12 +44,11 @@
 <script>
     // Objeto para almacenar las instancias de SignaturePad
     let signaturePads = {
-        signatureCanvasTecnico: null,
-        signatureCanvasCliente: null
+        signatureCanvasTecnico: null
     };
 
     // Inicializar SignaturePad en un canvas
-    function initializeSignature(canvasId) {
+    function initializeSignature(canvasId, callback) {
         const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext("2d");
 
@@ -90,6 +81,9 @@
         // Ajustar el canvas inicialmente y en cada resize
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
+
+        // Ejecutar el callback si está definido
+        if (callback) callback();
     }
 
     // Limpiar la firma en un canvas específico
@@ -112,6 +106,40 @@
         }
     }
 
+    // Función para cargar la firma del cliente
+    function cargarFirmaCliente() {
+        const ticketId = document.getElementById('ticketId').value; // Obtener el id del ticket
+        console.log("Obteniendo firma para el ticket ID:", ticketId); // Log para verificar el ticketId
+
+        // Obtener la firma del cliente desde el servidor
+        fetch(`/ordenes/smart/${ticketId}/obtener-firma-cliente`)
+            .then(response => {
+                console.log("Respuesta recibida:", response); // Log para verificar la respuesta
+                return response.json();
+            })
+            .then(data => {
+                console.log("Firma recibida:", data); // Verificar la respuesta completa
+                if (data.firma) {
+                    const base64Data = data.firma.replace(/^data:image\/\w+;base64,/, '');
+                    console.log("Firma en base64 sin prefijo:", base64Data); // Verificar la cadena base64 sin el prefijo
+
+                    // Verificar si la firma base64 es válida (longitud)
+                    if (base64Data.length > 100) {
+                        const imgElement = document.getElementById('firmaClienteImg');
+                        imgElement.src = `data:image/png;base64,${base64Data}`;
+                        console.log("Firma cargada en la imagen.");
+                    } else {
+                        console.log("La firma Base64 está vacía o es inválida.");
+                    }
+                } else {
+                    console.log("No se encontró la firma.");
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar la firma:', error);
+            });
+    }
+
     // Funciones para los botones
     function finalizarServicio() {
         alert("Servicio finalizado correctamente.");
@@ -132,6 +160,9 @@
     // Inicializar los canvas cuando el DOM esté listo
     document.addEventListener("DOMContentLoaded", () => {
         initializeSignature("signatureCanvasTecnico");
-        initializeSignature("signatureCanvasCliente");
+        cargarFirmaCliente(); // Cargar la firma del cliente después de inicializar
+
+         // Recargar la firma del cliente cada 5 segundos
+         setInterval(cargarFirmaCliente, 5000);
     });
 </script>

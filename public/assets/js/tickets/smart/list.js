@@ -74,9 +74,10 @@ document.addEventListener('alpine:init', () => {
                             info: '',
                         },
                         initComplete: () => {
-                            // Aplicar el estilo de fondo a todas las celdas de cada fila
+
                             this.ordenesData.forEach((orden, index) => {
-                                const estadoColor = orden.estadoflujo?.color;
+                                const estadoColor = orden.ticketflujo?.estadoflujo?.color;  // Asegúrate de acceder al color correcto
+                                console.log('Procesando orden en índice', index, 'con color:', estadoColor);  // Aquí está el console.log
                                 if (estadoColor) {
                                     const row = $('#myTable1 tbody tr').eq(index);
                                     if (row) {
@@ -84,6 +85,8 @@ document.addEventListener('alpine:init', () => {
                                     }
                                 }
                             });
+                            
+                            
                             // Asegurar que el color del texto sea siempre negro
                             $('#myTable1 tbody td').css('color', 'black');
 
@@ -246,7 +249,8 @@ document.addEventListener('alpine:init', () => {
                 if (record) {
                     let newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
                     // Aplicar el mismo color de fondo que la fila padre y asegurar texto negro
-                    newRow.find('td').css('background-color', record.estadoflujo?.color || '');
+                    const estadoColor = record.ticketflujo?.estadoflujo?.color;  // Asegúrate de acceder correctamente a la relación
+                    newRow.find('td').css('background-color', estadoColor || '');  // Asigna el color, si existe
                     newRow.find('td').html(`
                         <div class="p-2 text-sm" style="color: black;">
                             <ul>
@@ -260,6 +264,11 @@ document.addEventListener('alpine:init', () => {
                 }
             }
         }
+        
+
+
+
+
         
     }));
 });
