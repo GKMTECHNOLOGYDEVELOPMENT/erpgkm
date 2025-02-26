@@ -312,7 +312,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
         ->name('checkUpdates');
 
-        Route::get('smart/{id}/firmas/{idVisitas}/{expires_at}', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
+        Route::get('smart/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
 
 
 
