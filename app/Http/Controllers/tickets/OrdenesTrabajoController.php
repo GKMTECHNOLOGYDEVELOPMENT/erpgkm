@@ -31,6 +31,7 @@ use App\Models\Fotostickest;
 use App\Models\SeleccionarVisita;
 use App\Models\TicketFlujo;
 use App\Models\TransicionStatusTicket;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 use Illuminate\Support\Facades\Validator;
@@ -316,46 +317,67 @@ class OrdenesTrabajoController extends Controller
         ));
     }
 
-    public function firmacliente($id, $idVisitas)
-    {
-        // $usuario = Auth::user();
-        // $rol = $usuario->rol->nombre ?? 'Sin Rol';
-        
-        // Obtener el ticket
-        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
-        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-        
-        // Obtener los estados de OTS
-        $estadosOTS = DB::table('estado_ots')->get();
-        $ticketId = $ticket->idTickets;
+
+    // Generar el enlace con expiración en el controlador
+public function generarEnlace($id, $idVisitas)
+{
+    // El enlace expirará en 30 minutos desde el momento en que se genere
+    $expiresAt = Carbon::now()->addMinutes(4); // 30 minutos de expiración
+    $expiresAtTimestamp = $expiresAt->timestamp; // Convertir a timestamp
     
-        // Obtener la visita usando idVisitas
-      // Verificar que la visita corresponda al ticket
-    $visita = DB::table('visitas')
-    ->where('idVisitas', $idVisitas)
-    ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
-    ->first();
-        
-        // Verificamos que la visita exista, si no, devolver algún mensaje de error
-        if (!$visita) {
-            return view("pages.error404");
-        }
-        
-        
-    
-        // Pasamos todos los datos a la vista
-        return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
-            'ticket',
-            'orden',         
-          
-            'estadosOTS',       
-            'ticketId',
-            'idVisitas', // Asegúrate de pasar idVisitas aquí
-            'visita', // El objeto visita completo
-            'id',
-            'idVisitas' // Pasamos también el id del ticket
-        ));
+    // Generar la URL con el parámetro expires_at
+    $url = route('firmacliente', [
+        'id' => $id,
+        'idVisitas' => $idVisitas,
+        'expires_at' => $expiresAtTimestamp
+    ]);
+
+    // Retornar la URL generada
+    return response()->json(['url' => $url]);
+}
+
+
+
+public function firmacliente($id, $idVisitas, $expires_at)
+{
+    // Verificar si el enlace ha expirado (30 minutos desde el timestamp)
+    if (Carbon::now()->timestamp > $expires_at) {
+        // Si ha expirado, redirigir a una página de error o mostrar un mensaje
+        return view("pages.error404"); // O redirigir a una página de error
     }
+
+    // Obtener el ticket
+    $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
+    $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);        
+
+    // Obtener los estados de OTS
+    $estadosOTS = DB::table('estado_ots')->get();
+    $ticketId = $ticket->idTickets;   
+
+    // Obtener la visita usando idVisitas
+    $visita = DB::table('visitas')
+        ->where('idVisitas', $idVisitas)
+        ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
+        ->first();
+
+    // Verificamos que la visita exista, si no, devolver algún mensaje de error
+    if (!$visita) {
+        return view("pages.error404");
+    }
+
+    // Pasar todos los datos a la vista
+    return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
+        'ticket',
+        'orden',         
+        'estadosOTS',       
+        'ticketId',
+        'idVisitas', // Asegúrate de pasar idVisitas aquí
+        'visita', // El objeto visita completo
+        'id',
+        'idVisitas' // Pasamos también el id del ticket
+    ));
+}
+
     
     
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
