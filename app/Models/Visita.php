@@ -58,8 +58,8 @@ class Visita extends Model
 		'estado',
 		'idTickets',
 		'fecha_inicio_hora',   // Añadimos fecha_inicio_hora
-        'fecha_final_hora',
-		'necesita_apoyo',    
+		'fecha_final_hora',
+		'necesita_apoyo',
 		'idTecnico', // Añadimos fecha_final_hora
 	];
 
@@ -73,16 +73,24 @@ class Visita extends Model
 		return $this->hasMany(AccionesVisita::class, 'idVisitas');
 	}
 
-	public function anexos_visita()
+	// Relación con la tabla anexos_visitas (Trae todas las imágenes de anexos de una visita)
+	public function anexos_visitas()
 	{
-		return $this->hasOne(AnexosVisita::class, 'idVisitas');
+		return $this->hasMany(AnexosVisita::class, 'idVisitas', 'idVisitas');
 	}
+
 	// // Relación con TicketApoyo
-    // public function ticketApoyo()
-    // {
-    //     return $this->hasOne(TicketApoyo::class, 'idVisita', 'idVisitas');
-    // }
+	// public function ticketApoyo()
+	// {
+	//     return $this->hasOne(TicketApoyo::class, 'idVisita', 'idVisitas');
+	// }
 	// En el modelo de Visita (Visita.php)
+	// Relación con la tabla fotostickest (Trae todas las imágenes de fotos del ticket en la visita)
+	public function fotostickest()
+	{
+		return $this->hasMany(Fotostickest::class, 'idVisitas', 'idVisitas');
+	}
+
 	public function ticketApoyos()
 	{
 		return $this->hasMany(TicketApoyo::class, 'idVisita');
@@ -95,17 +103,15 @@ class Visita extends Model
 	}
 
 	// Relación con Usuario (Técnico)
-    public function tecnico()
-    {
-        return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
-    }
+	public function tecnico()
+	{
+		return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
+	}
 
 
-	 // Relación con el modelo CondicionesTicket
-	 public function condicionesTickets()
-	 {
-		 return $this->hasMany(CondicionesTicket::class, 'idVisitas', 'idVisitas');
-	 }
-
-	
+	// Relación con el modelo CondicionesTicket
+	public function condicionesTickets()
+	{
+		return $this->hasMany(CondicionesTicket::class, 'idVisitas', 'idVisitas');
+	}
 }

@@ -43,10 +43,11 @@ class AnexosVisita extends Model
 		'idVisitas'
 	];
 
-	public function tipo_visitum()
+	public function tipo_visita()
 	{
-		return $this->belongsTo(TipoVisitum::class, 'idTipovisita');
+		return $this->belongsTo(TipoVisitum::class, 'idTipovisita', 'idTipovisita');
 	}
+	
 
 	public function visita()
 	{

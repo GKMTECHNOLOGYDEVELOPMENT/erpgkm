@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Fotostickest extends Model
 {
     protected $table = 'fotostickest';
+    protected $primaryKey = 'idfotostickest';
+    public $timestamps = false;
 
     protected $fillable = [
         'idTickets',
@@ -15,5 +17,8 @@ class Fotostickest extends Model
         'descripcion'
     ];
 
-    public $timestamps = false; // Si no tienes campos created_at y updated_at en tu tabla
+    public function visita()
+    {
+        return $this->belongsTo(Visita::class, 'idVisitas', 'idVisitas');
+    }
 }
