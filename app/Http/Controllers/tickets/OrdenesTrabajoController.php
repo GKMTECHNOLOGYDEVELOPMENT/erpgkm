@@ -35,6 +35,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
+use Spatie\Browsershot\Browsershot;
 
 // use Barryvdh\DomPDF\Facade as PDF;
 
@@ -1680,6 +1682,125 @@ public function seleccionarVisita(Request $request)
         return response()->json(['success' => false, 'message' => 'Hubo un error al guardar la visita seleccionada.']);
     }
 }
+
+
+
+public function generateInformePdf($idOt)
+    {
+        $orden = Ticket::with([
+            'cliente',
+            'clienteGeneral',
+            'tienda',
+            'tecnico',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot',
+            'visitas.tecnico',
+            'visitas.anexos_visitas',
+            'visitas.fotostickest'
+        ])->findOrFail($idOt);
+    
+        // Obtener transiciones de estado con justificación válida
+        $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
+            ->whereNotNull('justificacion')
+            ->where('justificacion', '!=', '')
+            ->with('estado_ot')
+            ->get();
+    
+        // 🔹 OBTENER DATOS DEL PRODUCTO
+        $producto = [
+            'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
+            'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
+            'modelo' => $orden->modelo->nombre ?? 'No especificado',
+            'serie' => $orden->serie ?? 'No especificado'
+        ];
+    
+        // 🔹 FORMATEAR VISITAS PARA LA VISTA
+        $visitas = collect();
+        if ($orden->visitas) {
+            $visitas = $orden->visitas->map(function ($visita) {
+                return [
+                    'nombre' => $visita->nombre ?? 'N/A',
+                    'fecha_programada' => $visita->fecha_programada ? date('d/m/Y', strtotime($visita->fecha_programada)) : 'N/A',
+                    'hora_inicio' => $visita->fecha_inicio ? date('H:i', strtotime($visita->fecha_inicio)) : 'N/A',
+                    'hora_final' => $visita->fecha_final ? date('H:i', strtotime($visita->fecha_final)) : 'N/A',
+                    'fecha_llegada' => $visita->fecha_llegada ? date('d/m/Y H:i', strtotime($visita->fecha_llegada)) : 'N/A',
+                    'tecnico' => ($visita->tecnico->Nombre ?? 'N/A') . ' ' . ($visita->tecnico->apellidoPaterno ?? ''),
+                    'correo' => ($visita->tecnico->correo ?? 'No disponible'),
+                    'telefono' => ($visita->tecnico->telefono ?? 'No registrado')
+                ];
+            });
+        }
+    
+        // 🔹 OBTENER FIRMAS
+        $firma = DB::table('firmas')->where('idTickets', $idOt)->first();
+    
+        $firmaTecnico = $firma && !empty($firma->firma_tecnico) ? 'data:image/png;base64,' . base64_encode($firma->firma_tecnico) : null;
+        $firmaCliente = $firma && !empty($firma->firma_cliente) ? 'data:image/png;base64,' . base64_encode($firma->firma_cliente) : null;
+    
+        // Obtener imágenes en base64
+        $imagenesAnexos = $orden->visitas->flatMap(function ($visita) {
+            return $visita->anexos_visitas->map(function ($anexo) {
+                return [
+                    'foto_base64' => !empty($anexo->foto) ? 'data:image/jpeg;base64,' . base64_encode($anexo->foto) : null,
+                    'descripcion' => $anexo->descripcion
+                ];
+            });
+        });
+    
+        $imagenesFotosTickets = $orden->visitas->flatMap(function ($visita) {
+            return $visita->fotostickest->map(function ($foto) {
+                return [
+                    'foto_base64' => !empty($foto->foto) ? 'data:image/jpeg;base64,' . base64_encode($foto->foto) : null,
+                    'descripcion' => $foto->descripcion
+                ];
+            });
+        });
+    
+        // 🔹 PASAR $producto, $visitas, y FIRMAS A LA VISTA
+        $html = View('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', [
+            'orden' => $orden,
+            'producto' => $producto, // Pasamos los datos del producto a la vista
+            'transicionesStatusOt' => $transicionesStatusOt,
+            'visitas' => $visitas,
+            'firmaTecnico' => $firmaTecnico,
+            'firmaCliente' => $firmaCliente,
+            'imagenesAnexos' => $imagenesAnexos,
+            'imagenesFotosTickets' => $imagenesFotosTickets
+        ])->render();
+    
+        // Generar PDF en memoria con Browsershot (sin guardarlo en storage)
+        $pdfContent = Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000) // ⏳ Espera 2 segundos antes de capturar
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->pdf();
+    
+        // Retornar PDF sin guardarlo en storage
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="informe_'.$idOt.'.pdf"');
+    }
+    
+    
+    
+    
+    
+
+    public function checkUpdates($idOt)
+    {
+        $ultimaActualizacion = TransicionStatusTicket::where('idTickets', $idOt)
+            ->latest('fechaRegistro')
+            ->value('fechaRegistro');
+
+        return response()->json([
+            'ultimaActualizacion' => $ultimaActualizacion
+        ]);
+    }
 
 
 

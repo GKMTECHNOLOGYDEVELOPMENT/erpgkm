@@ -15,5 +15,8 @@
         "prettier": "^3.3.3",
         "tailwindcss": "^3.4.1",
         "vite": "^6.0.8"
+    },
+    "dependencies": {
+        "puppeteer": "^24.3.0"
     }
 }

@@ -314,6 +314,11 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
         Route::get('smart/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
 
+        Route::get('/smart/informe/{idOt}/pdf', [OrdenesTrabajoController::class, 'generateInformePdf'])
+        ->name('generateInformePdf');
+        // ✅ Ruta corregida para verificar actualizaciones
+        Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
+        ->name('checkUpdates');
 
 
 
@@ -423,6 +428,9 @@ Route::post('/validar/nombreproveedores', [ProveedoresController::class, 'valida
 
 Route::get('/ticket/{id}/estados', [OrdenesTrabajoController::class, 'loadEstados'])->name('ticket.loadEstados');
 Route::get('/visita/{ticketId}', [OrdenesTrabajoController::class, 'mostrarDetalles'])->name('visita.detalles');
+
+
+
 
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');
