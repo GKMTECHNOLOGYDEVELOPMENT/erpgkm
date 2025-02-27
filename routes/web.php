@@ -355,8 +355,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
 
 Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])
-    ->name('guardar.firma.cliente')
-    ->middleware('auth');
+    ->name('guardar.firma.cliente');
 
     Route::get('ordenes/smart/{id}/obtener-firma-cliente', [OrdenesTrabajoController::class, 'obtenerFirmaCliente'])
     ->name('obtener.firma.cliente')
