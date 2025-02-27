@@ -10,7 +10,6 @@
             /* Asegura que el modal no restrinja contenido */
         }
 
-
         .alert {
             padding: 10px;
             border-radius: 5px;
@@ -28,10 +27,8 @@
         }
     </style>
 
-
-
     @if (session('success'))
-        <div class="alert alert-success">S
+        <div class="alert alert-success">
             {{ session('success') }}
         </div>
     @endif
@@ -42,10 +39,28 @@
         </div>
     @endif
 
-    <div class="mb-5" x-data="{ tab: 'detalle' }">
+    <div class="mb-5" x-data="{
+        tab: 'detalle', 
+        loading: false, 
+        cargarPdf() {
+            const iframe = document.getElementById('informePdfFrame');
+
+             const loadingSpinner = document.getElementById('loadingSpinner');
+
+            // Mostrar el spinner
+            loadingSpinner.classList.remove('hidden');
+
+            iframe.src = '{{ route('ordenes.generateInformePdf', ['idOt' => $orden->idTickets]) }}' + '?' + new Date().getTime();
+
+            // Ocultar el spinner cuando el PDF se cargue
+            iframe.onload = function() {
+                loadingSpinner.classList.add('hidden');
+            };
+
+        }
+    }">
         <!-- Tabs -->
-        <ul
-            class="grid grid-cols-4 gap-2 sm:flex sm:flex-wrap sm:justify-center mt-3 mb-5 sm:space-x-3 rtl:space-x-reverse">
+        <ul class="grid grid-cols-4 gap-2 sm:flex sm:flex-wrap sm:justify-center mt-3 mb-5 sm:space-x-3 rtl:space-x-reverse">
             <li>
                 <a href="javascript:;"
                     class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-[0_5px_15px_0_rgba(0,0,0,0.30)]"
@@ -96,10 +111,12 @@
                     Firmas
                 </a>
             </li>
+
+            <!-- Tab para Informe -->
             <li>
                 <a href="javascript:;"
                     class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-[0_5px_15px_0_rgba(0,0,0,0.30)]"
-                    :class="{ '!bg-success text-white': tab === 'informe' }" @click="tab = 'informe'">
+                    :class="{ '!bg-success text-white': tab === 'informe' }" @click="tab = 'informe'; $nextTick(() => cargarPdf())">
                     <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v16H4V4zM8 10h8M8 14h4" />
@@ -109,7 +126,6 @@
                 </a>
             </li>
         </ul>
-
 
         <!-- Contenido de los Tabs -->
         <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
@@ -129,11 +145,18 @@
                 @include('tickets.ordenes-trabajo.smart-tv.firmas.index')
             </div>
             <div x-show="tab === 'informe'">
+
                 @include('tickets.ordenes-trabajo.smart-tv.informe.index')
+
+                <div id="loadingSpinner" class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full" role="status">
+                        <span class="w-5 h-5 m-auto mb-10"><span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span></span>
+                        </div>
+                    </div>
+
+            </div>
         </div>
     </div>
-
-
 
 
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
