@@ -37,12 +37,6 @@
             ajustarAltura();
             cargarPdf();
             window.addEventListener('resize', ajustarAltura);
-
-            // Verificar cambios en la base de datos cada 15 segundos
-            setInterval(verificarCambios, 15000);
-
-            // Recargar PDF automáticamente cada 15 segundos
-            setInterval(cargarPdf, 15000);
         });
     </script>
 @endif
