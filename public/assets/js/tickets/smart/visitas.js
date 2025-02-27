@@ -21,128 +21,141 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const fechaInicio = formatDate(visita.fecha_inicio_hora);
         const fechaFinal = formatDate(visita.fecha_final_hora);
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
-        
-      
+
+        // CARD PRINCIPAL QUE ENVUELVE TODO
+        const cardContainer = document.createElement('div');
+        cardContainer.className = 'rounded-lg shadow-xl p-6 w-full sm:max-w-4xl mx-auto mt-6 border border-gray-200';
+
+        // Header de la Card (Nombre de la Visita + Botón Seleccionar)
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'flex justify-between items-center mb-4 border-b pb-2';
+
+        const visitaTitle = document.createElement('h2');
+        visitaTitle.className = 'text-lg font-bold text-primary';
+        visitaTitle.textContent = `${visita.nombre}`;
+
+        const selectButton = document.createElement('button');
+        selectButton.className = 'btn btn-outline-danger seleccionarVisitaButton';
+        selectButton.setAttribute('data-id-ticket', visita.idTickets);
+        selectButton.setAttribute('data-id-visita', visita.idVisita);
+        selectButton.setAttribute('data-nombre-visita', visita.nombre_visita);
+        selectButton.textContent = 'Seleccionar Visita';
+
+        // Agregar título y botón al header
+        cardHeader.appendChild(visitaTitle);
+        cardHeader.appendChild(selectButton);
+        cardContainer.appendChild(cardHeader);
+
+        // Contenedor de fila (Fecha de Programación + Técnico en Desplazamiento)
+        const rowContainer = document.createElement('div');
+        rowContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 w-full';
 
         const visitaCard = document.createElement('div');
-        visitaCard.className = 'rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105';
-        visitaCard.style.backgroundColor = "#e3e7fc"; // Color azul claro
+        visitaCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#e3e7fc]';
         visitaCard.innerHTML = `
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-3">
-
-<button type="button" 
-        class="btn btn-outline-danger seleccionarVisitaButton" 
-        data-id-ticket="${visita.idTickets}" 
-        data-id-visita="${visita.idVisita}" 
-        data-nombre-visita="${visita.nombre_visita}">
-    Seleccionar Visita 
-</button>
-
-
-
-
-
-        <span class="text-lg font-semibold mb-4 badge bg-primary">${visita.nombre} </span>
-        <button type="button" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-red-700 active:bg-red-800 transition-all w-full sm:w-auto mt-2 sm:mt-0 flex items-center justify-center gap-2 shadow-md relative after:content-[''] after:absolute after:bg-white/30 after:w-full after:h-full after:rounded-lg after:scale-150 after:opacity-0 after:transition-all hover:after:opacity-100 active:scale-95" id="detallesVisitaButton-${visita.idVisitas}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5a6 6 0 000 12 6 6 0 100-12zM21 21l-4.35-4.35" />
-        </svg>
-        <span>Detalles</span>
-    </button>
-    
-    </div>
-    <div class="text-center px-4 py-2 rounded font-semibold mb-2">
-    <span class="text-primary text-sm sm:text-base">Fecha de Programación</span><br>
-    <span class="font-bold" style="color:black">${fechaInicio} - ${fechaFinal}</span>
-</div>
-`;
+          <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+            <!-- Encabezados -->
+            <div class="grid grid-cols-2 text-center gap-2">
+              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
+              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
+            </div>
+        
+            <!-- Contenido -->
+            <div class="grid grid-cols-2 text-center gap-2 p-2">
+              <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha de Programación</span>
+              <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md">${fechaInicio} - ${fechaFinal}</span>
+            </div>
+          </div>
+        `;
 
 
-   
 
 
-        visitasList.appendChild(visitaCard);
 
-    
+
 
         document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
           button.addEventListener('click', function () {
-              const idTicket = this.getAttribute('data-id-ticket'); // ID del ticket
-              const idVisita = this.getAttribute('data-id-visita'); // ID de la visita
-              const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
-        
-              // Llamada al backend para guardar la visita seleccionada
-              fetch('/api/seleccionar-visita', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF Token si estás usando Blade en Laravel
-                  },
-                  body: JSON.stringify({
-                      idTickets: idTicket,
-                      idVisitas: idVisita,
-                      vistaseleccionada: nombreVisita
-                  })
+            const idTicket = this.getAttribute('data-id-ticket'); // ID del ticket
+            const idVisita = this.getAttribute('data-id-visita'); // ID de la visita
+            const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
+
+            // Llamada al backend para guardar la visita seleccionada
+            fetch('/api/seleccionar-visita', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF Token si estás usando Blade en Laravel
+              },
+              body: JSON.stringify({
+                idTickets: idTicket,
+                idVisitas: idVisita,
+                vistaseleccionada: nombreVisita
               })
+            })
               .then(response => response.json())
               .then(data => {
-                  if (data.success) {
-                      // toastr.success(data.message);  // Muestra el mensaje de éxito
-                  } else {
-                      toastr.error(data.message);  // Muestra el mensaje de error
-                  }
+                if (data.success) {
+                  // toastr.success(data.message);  // Muestra el mensaje de éxito
+                } else {
+                  toastr.error(data.message);  // Muestra el mensaje de error
+                }
               })
               .catch(error => {
-                  console.error('Error al seleccionar la visita:', error);
-                  toastr.error('Hubo un error al seleccionar la visita.');
+                console.error('Error al seleccionar la visita:', error);
+                toastr.error('Hubo un error al seleccionar la visita.');
               });
           });
         });
-       
-        
 
-        // Agregar el evento de clic al botón "Detalles de Visita"
-        const detallesVisitaButton = document.getElementById(`detallesVisitaButton-${visita.idVisitas}`);
-        detallesVisitaButton.addEventListener('click', () => {
-          // Llenar el modal con los detalles de la visita
-          document.getElementById('detalleNombre').textContent = visita.nombre;
-          document.getElementById('detalleFechaProgramada').textContent = formatDate(visita.fecha_programada);
-          document.getElementById('detalleFechaAsignada').textContent = formatDate(visita.fecha_asignada);
-          document.getElementById('detalleFechaDesplazamiento').textContent = formatDate(visita.fechas_desplazamiento);
-          document.getElementById('detalleFechaLlegada').textContent = formatDate(visita.fecha_llegada);
-          document.getElementById('detalleFechaInicio').textContent = formatDate(visita.fecha_inicio);
-          document.getElementById('detalleFechaFinal').textContent = formatDate(visita.fecha_final);
-          document.getElementById('detalleEstado').textContent = visita.estado ? 'Activo' : 'Inactivo';
-
-          // Mostrar el modal
-          const event = new CustomEvent('toggle-modal-detalles-visita');
-          window.dispatchEvent(event);
-        });
 
         // Tarjeta de Técnico en Desplazamiento con el botón de "like"
         const tecnicoCard = document.createElement('div');
-        tecnicoCard.className = 'rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
-        tecnicoCard.style.backgroundColor = "#deeffd"; // Color celeste claro
+        tecnicoCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#deeffd]';
         tecnicoCard.innerHTML = `
-        <div class="relative px-6 py-4 rounded-lg font-semibold text-center mb-2">
-        <span class="text-primary text-sm sm:text-base">Técnico en Desplazamiento</span>
-        <span class="font-bold text-black text-base sm:text-lg block mt-1">${nombreTecnico}</span>
-        <span id="fechaDesplazamiento-${visita.idVisitas}" class="text-gray-600 text-sm sm:text-base block mt-1">
-            ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
-        </span>
-        <button class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 ease-in-out active:bg-green-500 active:text-white active:border-green-600 focus:ring-2 focus:ring-green-300 p-2 rounded-full shadow-md hover:shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center" id="likeButton-${visita.idVisitas}">
-        <i class="fa-solid fa-forward text-lg"></i> <!-- Ícono de Siguiente -->
-    </button>
-    
-    
-    </div>
-`;
-        visitasList.appendChild(tecnicoCard);
-
-
+          <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+            <!-- Encabezados -->
+            <div class="grid grid-cols-3 text-center gap-2">
+              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
+              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Técnico</span>
+              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
+            </div>
         
+            <!-- Contenido -->
+            <div class="grid grid-cols-3 text-center gap-2 p-2">
+              <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">En Desplazamiento</span>
+              <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">${nombreTecnico}</span>
+              <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha'}
+              </span>
+            </div>
+        
+            <!-- Botón de acción mejorado -->
+            <div class="flex justify-center mt-2">
+              <button class="badge bg-info text-white px-4 py-2 rounded-full shadow-md
+                             transition-all duration-200 flex items-center gap-2 !bg-blue-600 !text-white"
+                             id="likeButton-${visita.idVisitas}">
+                <i class="fa-solid fa-route text-lg"></i> Iniciar Desplazamiento
+              </button>
+            </div>
+          </div>
+        `;
 
-       
+
+        // Agregar ambas tarjetas dentro del contenedor en la misma fila
+        rowContainer.appendChild(visitaCard);
+        rowContainer.appendChild(tecnicoCard);
+
+        // Agregar la fila completa al contenedor de visitas
+        // Agregar la fila completa dentro del contenedor principal
+        cardContainer.appendChild(rowContainer);
+
+        // Finalmente, agregar toda la card de la visita a la lista
+        visitasList.appendChild(cardContainer);
+
+
+
+
 
 
 
@@ -153,24 +166,47 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             if (anexoData && anexoData.idVisitas) {
               // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
               const inicioServicioCard = document.createElement('div');
-              inicioServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
-              inicioServicioCard.style.backgroundColor = "#d9f2e6"; // Color verde claro
+              inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
               inicioServicioCard.innerHTML = `
-      <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
-        <h3 class="text-primary text-sm sm:text-base">Llegada al Servicio</h3>
-        <p class="font-bold">El servicio ha comenzado.</p>
-      </div>
+                <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+                  <!-- Encabezados -->
+                  <div class="grid grid-cols-3 text-center gap-2">
+                    <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
+                    <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
+                    <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
+                  </div>
+              
+                  <!-- Contenido -->
+                  <div class="grid grid-cols-3 text-center gap-2 p-2">
+                    <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">Llegada al Servicio</span>
+                    <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                      ${visita.ubicacion || 'Ubicación no disponible'}
+                    </span>
+                    <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                      ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
+                    </span>
+                  </div>
+              
+                  <!-- Botones de acción -->
+                  <div class="flex justify-center gap-3 mt-4">
+                    <button class="bg-success hover:bg-green-700 text-white px-4 py-2 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-2 !bg-success !text-white"
+                                   id="uploadPhotoButton-${visita.idVisitas}">
+                      <i class="fa-solid fa-camera text-lg"></i> Subir Foto
+                    </button>
+              
+                    <button class="bg-success text-white px-4 py-2 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-2 !bg-red-600 !text-white"
+                                   id="siguiente-${visita.idVisitas}">
+                      <i class="fa-solid fa-arrow-right text-lg"></i> Siguiente
+                    </button>
+                  </div>
+              
+                  <!-- Input oculto para subir foto -->
+                  <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">
+                </div>
+              `;
 
-      <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
-        Subir Foto
-      </button>
-
-      <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}">
-        Siguiente
-      </button>
-
-      <input type="file" id="fileInput-${visita.idVisitas}" class="w-full mt-4 p-2 border border-gray-300 rounded-lg" accept="image/*" style="display: none;">
-    `;
               // visitasList.appendChild(inicioServicioCard);
               tecnicoCard.insertAdjacentElement('afterend', inicioServicioCard);
 
@@ -186,20 +222,41 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                       siguienteButton.classList.add('disabled'); // Opcional: agregar una clase CSS para estilos
                       // toastr.error('Ya existe una fecha de llegada para esta visita.');
                     }
-
+                    
                     // Mostrar la tarjeta de "Final de Servicio" automáticamente
                     const finalServicioCard = document.createElement('div');
-                    finalServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
-                    finalServicioCard.style.backgroundColor = "#f8d7da"; // Color rojo claro para indicar finalización
+                    finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
                     finalServicioCard.innerHTML = `
-            <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
-              <h3 class="text-primary text-sm sm:text-base">Final de Servicio</h3>
-              <p class="font-bold">El servicio ha finalizado.</p>
-            </div>
-            <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}">
-              Continuar
-            </button>
-          `;
+  <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+    <!-- Encabezados -->
+    <div class="grid grid-cols-3 text-center gap-2">
+      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
+      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
+      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
+    </div>
+
+    <!-- Contenido -->
+    <div class="grid grid-cols-3 text-center gap-2 p-2">
+      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">Inicio de Servicio</span>
+      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
+        ${visita.ubicacion || 'Ubicación no disponible'}
+      </span>
+      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
+        ${visita.fecha_inicio ? formatDate(visita.fecha_inicio) : 'Sin fecha'}
+      </span>
+    </div>
+
+    <!-- Botón de continuar -->
+    <div class="flex justify-center mt-4">
+      <button class="badge bg-danger text-white px-5 py-2 rounded-full shadow-md
+                     transition-all duration-200 flex items-center gap-2 !badge bg-danger !text-white"
+                     id="continueButton-${visita.idVisitas}">
+        <i class="fa-solid fa-check-circle text-lg"></i> Continuar
+      </button>
+    </div>
+  </div>
+`;
+
 
                     // Insertar la tarjeta de "Final de Servicio" debajo de la tarjeta de "Inicio de Servicio"
                     inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
@@ -426,7 +483,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
 
 
-         
+
 
 
 
