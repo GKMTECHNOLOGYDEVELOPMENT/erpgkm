@@ -163,6 +163,6 @@
         cargarFirmaCliente(); // Cargar la firma del cliente después de inicializar
 
          // Recargar la firma del cliente cada 5 segundos
-         setInterval(cargarFirmaCliente, 5000);
+         setInterval(cargarFirmaCliente, 55000);
     });
 </script>
