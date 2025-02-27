@@ -238,6 +238,7 @@
                             @endif
                         </div>
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
+                        <p class="text-xs"><span class="font-bold"></span> {{ $visita['tecnico'] }}
                     </div>
 
                     <div class="w-1/2 text-center">
