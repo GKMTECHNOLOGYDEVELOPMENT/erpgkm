@@ -72,13 +72,15 @@
     </div>
 </div>
 
+
 <div x-data="{
     openCondiciones: false,
     condiciones: {
         esTitular: true,
         noAtiende: false,
         titularNoEsTitular: { nombre: '', dni: '', telefono: '' },
-        motivoNoAtiende: ''
+        motivoNoAtiende: '',
+        imagen: null  // Aquí se almacena la imagen
     },
     guardarCondiciones(condiciones, ticketId, visitaId) {
         if (!condiciones.esTitular) {
@@ -102,27 +104,36 @@
             return;
         }
 
+        // Validar si el servicio está siendo atendido y si se cargó la imagen
+        if (!condiciones.noAtiende && !condiciones.imagen) {
+            toastr.error('Debe cargar una imagen cuando el servicio es atendido.');
+            return;
+        }
+
         // Preparar los datos para enviar
-        const datos = {
-            idTickets: ticketId,
-            idVisitas: visitaId,
-            titular: condiciones.esTitular ? 1 : 0,
-            nombre: condiciones.esTitular ? null : condiciones.titularNoEsTitular.nombre,
-            dni: condiciones.esTitular ? null : condiciones.titularNoEsTitular.dni,
-            telefono: condiciones.esTitular ? null : condiciones.titularNoEsTitular.telefono,
-            servicio: condiciones.noAtiende ? 1 : 0,
-            motivo: condiciones.noAtiende ? condiciones.motivoNoAtiende : null,
-            fecha_condicion: new Date().toISOString().slice(0, 19).replace('T', ' ')
-        };
+        const datos = new FormData();
+        datos.append('idTickets', ticketId);
+        datos.append('idVisitas', visitaId);
+        datos.append('titular', condiciones.esTitular ? 1 : 0);
+        datos.append('nombre', condiciones.esTitular ? null : condiciones.titularNoEsTitular.nombre);
+        datos.append('dni', condiciones.esTitular ? null : condiciones.titularNoEsTitular.dni);
+        datos.append('telefono', condiciones.esTitular ? null : condiciones.titularNoEsTitular.telefono);
+        datos.append('servicio', condiciones.noAtiende ? 1 : 0);
+        datos.append('motivo', condiciones.noAtiende ? condiciones.motivoNoAtiende : null);
+        datos.append('fecha_condicion', new Date().toISOString().slice(0, 19).replace('T', ' '));
+
+        // Si la imagen está presente, agregarla al FormData
+        if (condiciones.imagen) {
+            datos.append('imagen', condiciones.imagen);
+        }
 
         // Enviar los datos al servidor
         fetch('/api/guardarCondiciones', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}' // Agrega el token CSRF
             },
-            body: JSON.stringify(datos)
+            body: datos
         })
         .then(response => response.json())
         .then(data => {
@@ -217,12 +228,21 @@
                                     peer-checked:border-primary peer-checked:before:bg-primary before:transition-all before:duration-300"></span>
                             </label>
                         </div>
+
                         <!-- Campo de motivo cuando "No se atiende" está activado -->
                         <div x-show="condiciones.noAtiende" class="space-y-3 mt-2">
                             <div>
                                 <label class="block text-sm font-medium">Motivo</label>
                                 <textarea x-model="condiciones.motivoNoAtiende" class="form-textarea w-full" rows="3"></textarea>
                             </div>
+
+                            <!-- Campo para cargar la imagen -->
+                            <div class="space-y-4 mt-4">
+    <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
+    <input type="file" x-ref="imagen" @change="condiciones.imagen = $refs.imagen.files[0]" 
+    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
+</div>
+
                         </div>
 
                         <!-- Botones -->
@@ -241,6 +261,7 @@
         </div>
     </div>
 </div>
+
 
 
 

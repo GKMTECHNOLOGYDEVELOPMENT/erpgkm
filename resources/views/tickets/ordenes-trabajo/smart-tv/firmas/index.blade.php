@@ -31,10 +31,10 @@
 
 <!-- Botones adicionales -->
 <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <button type="button" class="btn btn-primary w-full" onclick="finalizarServicio()">✅ Finalizar Servicio</button>
-    <button type="button" class="btn btn-secondary w-full" onclick="coordinarRecojo()">📅 Coordinar Recojo</button>
-    <button type="button" class="btn btn-warning w-full" onclick="fueraDeGarantia()">⚠️ Fuera de Garantía</button>
-    <button type="button" class="btn btn-info w-full" onclick="pendienteRepuestos()">⏳ Pendiente por Coordinar Repuestos</button>
+    <button type="button" class="btn btn-primary w-full" value="10" onclick="finalizarServicio()">✅ Visita finaliza correctamente</button>
+    <button type="button" class="btn btn-secondary w-full" value="11" onclick="coordinarRecojo()">📅 Pendiente recojo</button>
+    <button type="button" class="btn btn-warning w-full" value="12" onclick="fueraDeGarantia()">⚠️ Fuera de Garantía</button>
+    <button type="button" class="btn btn-info w-full" value="13" onclick="pendienteRepuestos()">⏳ Pendiente de solicitud de repuesto</button>
 </div>
 
 <script>
@@ -86,22 +86,51 @@
         noFirmaCliente.classList.remove('hidden'); // Mostrar mensaje de "No hay firma"
     }
 
-    // Funciones para los botones
-    function finalizarServicio() {
-        alert("Servicio finalizado correctamente.");
-    }
+// Función para actualizar el estado
+function actualizarEstado(estado) {
+    const ticketId = document.getElementById('ticketId').value; // Obtener el ID del ticket
+    console.log("Actualizando estado para el ticket ID:", ticketId, "Estado:", estado);
 
-    function coordinarRecojo() {
-        alert("Recojo coordinado correctamente.");
-    }
+    fetch(`/tickets/${ticketId}/actualizar-estado`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            estado: estado  // Enviar el estado a actualizar
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            toastr.success(data.message); // Mostrar mensaje de éxito
+        } else {
+            toastr.error(data.message); // Mostrar mensaje de error
+        }
+    })
+    .catch(error => {
+        console.error('Error al actualizar estado:', error);
+        toastr.error('Hubo un error al actualizar el estado.');
+    });
+}
 
-    function fueraDeGarantia() {
-        alert("El servicio está fuera de garantía.");
-    }
+// Funciones para los botones
+function finalizarServicio() {
+    actualizarEstado(10); // Estado "10" para finalizar servicio
+}
 
-    function pendienteRepuestos() {
-        alert("Pendiente por coordinar repuestos.");
-    }
+function coordinarRecojo() {
+    actualizarEstado(11); // Estado "11" para coordinar recojo
+}
+
+function fueraDeGarantia() {
+    actualizarEstado(12); // Estado "12" para fuera de garantía
+}
+
+function pendienteRepuestos() {
+    actualizarEstado(13); // Estado "13" para pendiente de repuestos
+}
 
     // Inicializar las firmas cuando el DOM esté listo
     document.addEventListener("DOMContentLoaded", () => {

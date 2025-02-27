@@ -33,7 +33,8 @@ class CondicionesTicket extends Model
         'telefono', 
         'servicio', 
         'motivo', 
-        'fecha_condicion'
+        'fecha_condicion',
+        'imagen'
     ];
 
     // Relación con el modelo Ticket

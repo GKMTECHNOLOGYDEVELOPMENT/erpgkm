@@ -428,6 +428,7 @@ Route::post('/validar/nombreproveedores', [ProveedoresController::class, 'valida
 Route::get('/ticket/{id}/estados', [OrdenesTrabajoController::class, 'loadEstados'])->name('ticket.loadEstados');
 Route::get('/visita/{ticketId}', [OrdenesTrabajoController::class, 'mostrarDetalles'])->name('visita.detalles');
 
+Route::post('/tickets/{idTicket}/actualizar-estado', [OrdenesTrabajoController::class, 'actualizarEstado']);
 
 
 
