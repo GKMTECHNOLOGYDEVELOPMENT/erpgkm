@@ -1605,42 +1605,39 @@ public function verificarFechaLlegada($idVisitas)
     ]);
 }
 
+
 public function obtenerFirmaCliente($id)
 {
-    // Obtener el idVisitas relacionado con el idTickets desde la tabla seleccionarvisita
+    // Obtener el idVisitas directamente con una consulta más eficiente
     $idVisitas = DB::table('seleccionarvisita')
         ->where('idTickets', $id) // Relacionamos el idTickets que hemos recibido
         ->value('idVisitas'); // Obtenemos el idVisitas correspondiente
 
-    // Verificar si se encontró el idVisitas
     if (!$idVisitas) {
         return response()->json(['error' => 'No se encontró la visita relacionada con este ticket'], 404);
     }
 
-    // Obtener la firma del cliente utilizando el idTickets y el idVisitas desde la tabla firmas
+    // Obtener la firma del cliente usando un JOIN directo con la tabla 'firmas'
     $firma = DB::table('firmas')
         ->where('idTickets', $id)
-        ->where('idVisitas', $idVisitas) // Usamos idVisitas para obtener la firma correcta
+        ->where('idVisitas', $idVisitas)
         ->value('firma_cliente');
 
-    // Log para verificar si la firma existe
-    Log::info("Firma del cliente para el ticket $id y la visita $idVisitas: " . ($firma ? 'Encontrada' : 'No encontrada'));
-
-    // Verificar el contenido de la firma antes de codificar
-    Log::info("Contenido de la firma: " . ($firma ? 'Firma encontrada' : 'No hay firma'));
-
+    // Verificar si la firma existe
     if ($firma) {
-        // Convertir la firma a base64
+        // Si la firma ya es un string base64, puedes usarla directamente
+        if (strpos($firma, 'data:image/') !== false) {
+            return response()->json(['firma' => $firma]);
+        }
+
+        // Si no es base64, convertirla a base64
         $firmaBase64 = base64_encode($firma);
-
-        // Log para verificar el valor de la firma base64
-        Log::info("Firma en Base64: " . $firmaBase64);
-
-        return response()->json(['firma' => $firmaBase64]);
+        return response()->json(['firma' => "data:image/png;base64,$firmaBase64"]);
     }
 
     return response()->json(['firma' => null], 404);
 }
+
 
 
 

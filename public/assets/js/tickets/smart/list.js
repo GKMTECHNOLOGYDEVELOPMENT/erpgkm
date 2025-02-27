@@ -9,6 +9,7 @@ document.addEventListener('alpine:init', () => {
         currentPage: 1,
         lastPage: 1,
         isLoading: false,
+       
 
         init() {
             this.fetchMarcas();
