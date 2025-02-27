@@ -1787,23 +1787,6 @@ public function generateInformePdf($idOt)
     }
     
     
-    
-    
-    
-
-    public function checkUpdates($idOt)
-    {
-        $ultimaActualizacion = TransicionStatusTicket::where('idTickets', $idOt)
-            ->latest('fechaRegistro')
-            ->value('fechaRegistro');
-
-        return response()->json([
-            'ultimaActualizacion' => $ultimaActualizacion
-        ]);
-    }
-
-
-
 
 
 }
