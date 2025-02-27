@@ -18,8 +18,8 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
     visitasList.innerHTML = '';
     if (data && data.length > 0) {
       data.forEach(visita => {
-        const fechaInicio = formatDate(visita.fecha_inicio);
-        const fechaFinal = formatDate(visita.fecha_final);
+        const fechaInicio = formatDate(visita.fecha_inicio_hora);
+        const fechaFinal = formatDate(visita.fecha_final_hora);
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
         
       

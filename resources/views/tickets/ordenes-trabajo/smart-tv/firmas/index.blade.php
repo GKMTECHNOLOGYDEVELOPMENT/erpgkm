@@ -14,13 +14,15 @@
     </div>
 
    <!-- Firma del Cliente -->
-<div class="w-full md:w-[500px] flex flex-col items-center">
-    <p class="mb-2 text-lg font-medium text-center">Firma del Cliente</p>
-    <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
-        <img id="firmaClienteImg" class="w-full h-full object-contain" src="" alt="Firma del Cliente">
-    </div>
-    <!-- Botón de refrescar -->
-    <button type="button" class="btn btn-info mt-4" onclick="cargarFirmaCliente(); otraFuncion();">🔄 Refrescar Firma</button>
+    <div class="w-full md:w-[500px] flex flex-col items-center">
+        <p class="mb-2 text-lg font-medium text-center">Firma del Cliente</p>
+        <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
+            <img id="firmaClienteImg" class="w-full h-full object-contain" src="" alt="Firma del Cliente">
+        </div>
+        <!-- Mensaje si no hay firma -->
+        <p id="noFirmaCliente" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita o cliente.</p>
+        <!-- Botón de refrescar -->
+        <button type="button" class="btn btn-info mt-4" onclick="cargarFirmaCliente();">🔄 Refrescar Firma</button>
     </div>
 
 </div>
@@ -49,25 +51,39 @@
             })
             .then(data => {
                 console.log("Firma recibida:", data); // Verificar la respuesta completa
+                const noFirmaCliente = document.getElementById('noFirmaCliente'); // Elemento para el mensaje
+                const firmaClienteImg = document.getElementById('firmaClienteImg'); // Imagen de la firma
+
+                // Verificar si la firma existe
                 if (data.firma) {
-                    const base64Data = data.firma.replace(/^data:image\/\w+;base64,/, '');
-                    console.log("Firma en base64 sin prefijo:", base64Data); // Verificar la cadena base64 sin el prefijo
+                    const base64Data = data.firma.replace(/^data:image\/\w+;base64,/, ''); // Extraer base64
 
                     // Verificar si la firma base64 es válida (longitud)
                     if (base64Data.length > 100) {
-                        const imgElement = document.getElementById('firmaClienteImg');
-                        imgElement.src = `data:image/png;base64,${base64Data}`;
+                        firmaClienteImg.src = `data:image/png;base64,${base64Data}`; // Mostrar firma
+                        noFirmaCliente.classList.add('hidden'); // Ocultar mensaje de "No hay firma"
                         console.log("Firma cargada en la imagen.");
                     } else {
                         console.log("La firma Base64 está vacía o es inválida.");
+                        mostrarMensajeSinFirma();
                     }
                 } else {
                     console.log("No se encontró la firma.");
+                    mostrarMensajeSinFirma();
                 }
             })
             .catch(error => {
                 console.error('Error al cargar la firma:', error);
+                mostrarMensajeSinFirma();
             });
+    }
+
+    // Mostrar mensaje si no hay firma
+    function mostrarMensajeSinFirma() {
+        const noFirmaCliente = document.getElementById('noFirmaCliente');
+        const firmaClienteImg = document.getElementById('firmaClienteImg');
+        firmaClienteImg.src = ''; // Limpiar imagen de firma
+        noFirmaCliente.classList.remove('hidden'); // Mostrar mensaje de "No hay firma"
     }
 
     // Funciones para los botones
@@ -93,7 +109,3 @@
         // Si necesitas cargar una firma del técnico, puedes llamar a cargarFirmaTecnico(firmaBase64);
     });
 </script>
-
-
-
-

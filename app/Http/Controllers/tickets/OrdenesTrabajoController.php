@@ -970,11 +970,11 @@ public function generarEnlace($id, $idVisitas)
         $visitasConflicto = DB::table('visitas')
             ->where('idUsuario', $request->encargado)
             ->where(function ($query) use ($fechaInicio, $fechaFinal) {
-                $query->whereBetween('fecha_inicio', [$fechaInicio, $fechaFinal])
-                    ->orWhereBetween('fecha_final', [$fechaInicio, $fechaFinal])
+                $query->whereBetween('fecha_inicio_hora', [$fechaInicio, $fechaFinal])
+                    ->orWhereBetween('fecha_final_hora', [$fechaInicio, $fechaFinal])
                     ->orWhere(function ($query) use ($fechaInicio, $fechaFinal) {
-                        $query->where('fecha_inicio', '<=', $fechaFinal)
-                            ->where('fecha_final', '>=', $fechaInicio);
+                        $query->where('fecha_inicio_hora', '<=', $fechaFinal)
+                            ->where('fecha_final_hora', '>=', $fechaInicio);
                     });
             })
             ->exists(); // Retorna true si existe un conflicto de horario
@@ -987,8 +987,8 @@ public function generarEnlace($id, $idVisitas)
         $visita = new Visita();
         $visita->nombre = $request->nombre;
         $visita->fecha_programada = $request->fecha_visita;
-        $visita->fecha_inicio = $fechaInicio;  // Concatenar fecha y hora
-        $visita->fecha_final = $fechaFinal; // Concatenar fecha y hora
+        $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
+        $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
         $visita->idUsuario = $request->encargado;
     
         // Asignar 0 o 1 a "necesita_apoyo"
@@ -1059,8 +1059,8 @@ public function generarEnlace($id, $idVisitas)
     
         // Convertir las fechas a formato ISO 8601
         $visitas->each(function ($visita) {
-            $visita->fecha_inicio = $visita->fecha_inicio->toIso8601String();
-            $visita->fecha_final = $visita->fecha_final->toIso8601String();
+            $visita->fecha_inicio_hora = $visita->fecha_inicio_hora->toIso8601String();
+            $visita->fecha_final_hora = $visita->fecha_final_hora->toIso8601String();
             // Incluir el nombre del técnico
             $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;  // Aquí asumimos que el campo 'nombre' está en el modelo Usuario
             $visita->idTicket = $visita->idTickets;  // Este es el ID del ticket asociado a la visita
@@ -1679,6 +1679,9 @@ public function seleccionarVisita(Request $request)
         return response()->json(['success' => false, 'message' => 'Hubo un error al guardar la visita seleccionada.']);
     }
 }
+
+
+
 
 
 

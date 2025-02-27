@@ -43,6 +43,8 @@ class Visita extends Model
 		'fecha_llegada' => 'datetime',
 		'fecha_inicio' => 'datetime',
 		'fecha_final' => 'datetime',
+		'fecha_inicio_hora' => 'datetime',
+		'fecha_final_hora' => 'datetime',
 		'estado' => 'bool',
 		'idTickets' => 'int'
 	];
