@@ -125,9 +125,10 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             <div class="grid grid-cols-3 text-center gap-2 p-2">
               <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">En Desplazamiento</span>
               <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">${nombreTecnico}</span>
-              <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha'}
-              </span>
+              <span id="fechaDesplazamiento-${visita.idVisitas}" class="text-gray-600 text-sm sm:text-base block mt-1">
+            ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
+        </span>
+
             </div>
         
             <!-- Botón de acción mejorado -->
@@ -544,7 +545,12 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                         .then(updatedVisita => {
                           if (updatedVisita) {
                             const fechaDesplazamientoElement = document.getElementById(`fechaDesplazamiento-${visita.idVisitas}`);
-                            fechaDesplazamientoElement.textContent = formatDate(updatedVisita.fechas_desplazamiento);
+                            if (fechaDesplazamientoElement) {
+                                fechaDesplazamientoElement.textContent = formatDate(updatedVisita.fechas_desplazamiento);
+                            } else {
+                                console.warn(`No se encontró el elemento con el id fechaDesplazamiento-${visita.idVisitas}`);
+                            }
+                            
 
                             fetch('/api/guardarAnexoVisita', {
                               method: 'POST',

@@ -1221,24 +1221,55 @@ class OrdenesTrabajoController extends Controller
 
 
 
-    public function verificarRegistroAnexo($idVisitas)
-    {
-        // Verificar si existe un registro en la tabla anexos_visitas con el idVisitas y los campos requeridos
-        $registro = AnexosVisita::where('idVisitas', $idVisitas)
-            ->whereNotNull('lat')
-            ->whereNotNull('lng')
-            ->whereNotNull('ubicacion')
-            ->where('idTipovisita', 2) // Asumiendo que el tipo de visita 2 es "Inicio de Servicio"
-            ->first();
+    // public function verificarRegistroAnexo($idVisitas)
+    // {
+    //     // Verificar si existe un registro en la tabla anexos_visitas con el idVisitas y los campos requeridos
+    //     $registro = AnexosVisita::where('idVisitas', $idVisitas)
+    //         ->whereNotNull('lat')
+    //         ->whereNotNull('lng')
+    //         ->whereNotNull('ubicacion')
+    //         ->where('idTipovisita', 2) // Asumiendo que el tipo de visita 2 es "Inicio de Servicio"
+    //         ->first();
 
-        if ($registro) {
-            // Si ya existe el registro, devolverlo
-            return response()->json($registro);
-        } else {
-            // Si no existe el registro, devolver una respuesta vacía o un estado 404
-            return response()->json([], 404);  // O simplemente return response()->json(null);
-        }
+    //     if ($registro) {
+    //         // Si ya existe el registro, devolverlo
+    //         return response()->json($registro);
+    //     } else {
+    //         // Si no existe el registro, devolver una respuesta vacía o un estado 404
+    //         return response()->json([], 404);  // O simplemente return response()->json(null);
+    //     }
+    // }
+
+
+    // use Illuminate\Support\Facades\Log; // Asegúrate de importar Log si no lo has hecho
+
+public function verificarRegistroAnexo($idVisitas)
+{
+    // Log para verificar el valor recibido de idVisitas
+    Log::info('Verificando registro de anexo para la visita ID: ' . $idVisitas);
+
+    // Verificar si existe un registro en la tabla anexos_visitas con el idVisitas y los campos requeridos
+    $registro = AnexosVisita::where('idVisitas', $idVisitas)
+        ->whereNotNull('lat')
+        ->whereNotNull('lng')
+        ->whereNotNull('ubicacion')
+        ->where('idTipovisita', 2) // Asumiendo que el tipo de visita 2 es "Inicio de Servicio"
+        ->first();
+
+    // Log para verificar si se encontró el registro
+    if ($registro) {
+        Log::info('Registro encontrado para la visita ID: ' . $idVisitas);
+        Log::info('Datos del registro: ', (array) $registro); // Loguea los datos del registro como array
+        // Si ya existe el registro, devolverlo
+        return response()->json($registro);
+    } else {
+        // Log si no se encontró ningún registro
+        Log::warning('No se encontró un registro para la visita ID: ' . $idVisitas);
+        // Si no existe el registro, devolver una respuesta vacía o un estado 404
+        return response()->json([], 404);  // O simplemente return response()->json(null);
     }
+}
+
 
 
 
