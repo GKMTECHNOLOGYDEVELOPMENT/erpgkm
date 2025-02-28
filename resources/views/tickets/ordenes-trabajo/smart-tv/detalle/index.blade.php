@@ -112,7 +112,7 @@
     <!-- Falla Reportada -->
     <div>
         <label for="fallaReportada" class="block text-sm font-medium">Falla Reportada</label>
-        <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full bg-gray-100">{{ $orden->fallaReportada }}</textarea>
+        <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
     </div>
 
     <!-- Botón de GUARDAR -->
