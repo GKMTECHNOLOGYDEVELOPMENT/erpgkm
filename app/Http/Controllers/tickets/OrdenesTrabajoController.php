@@ -357,12 +357,17 @@ if ($ticket) {
             $estadosFlujo = DB::table('estado_flujo')
                 ->whereIn('idEstadflujo', [3])  // Solo obtener el estado con idEstadflujo 3
                 ->get();
+        } elseif ($idEstadflujo == 9) {
+            // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+            $estadosFlujo = DB::table('estado_flujo')
+                ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                ->get();
         } else {
-            // Si no tiene idEstadflujo = 1 o 3, verificar si es 10 o 12
-            if (in_array($idEstadflujo, [10, 12])) {
-                // Si tiene idEstadflujo 10 o 12, solo traer los estados con idEstadflujo 16
+            // Si no tiene idEstadflujo = 1, 3 o 9, verificar si es 6 o 7
+            if (in_array($idEstadflujo, [6, 7])) {
+                // Si tiene idEstadflujo 6 o 7, solo traer los estados con idEstadflujo 4
                 $estadosFlujo = DB::table('estado_flujo')
-                    ->where('idEstadflujo', 16)  // Solo obtener el estado 16
+                    ->where('idEstadflujo', 4)  // Solo obtener el estado 4
                     ->get();
             } else {
                 // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
@@ -371,7 +376,6 @@ if ($ticket) {
         }
     }
 }
-
 
 
 
