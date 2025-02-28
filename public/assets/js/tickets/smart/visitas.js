@@ -45,21 +45,21 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
         // Header de la Card (Nombre de la Visita + Botón Seleccionar)
         const cardHeader = document.createElement('div');
-        cardHeader.className = 'flex justify-between items-center mb-4 border-b pb-2';
+        cardHeader.className = 'flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-2 space-y-2 sm:space-y-0';
 
         const visitaTitle = document.createElement('h2');
         visitaTitle.className = 'text-lg font-bold text-primary';
         // Nombre de la Visita con el Técnico al costado (Aplicando badge-outline-primary a todo)
         visitaTitle.innerHTML = `
-  <span class="badge badge-outline-primary text-lg font-semibold px-3 py-1 rounded-lg shadow-md">
-    ${visita.nombre} - Técnico responsable: ${nombreTecnico}
-  </span>
+        <span class="badge badge-outline-primary text-lg font-semibold px-3 py-1 rounded-lg shadow-md block text-center sm:text-left break-words w-full">
+        ${visita.nombre} <br class="hidden sm:block"> Técnico responsable: ${nombreTecnico}
+    </span>
 `;
 
 
 
         const selectButton = document.createElement('button');
-        selectButton.className = 'btn btn-warning seleccionarVisitaButton';
+        selectButton.className = 'btn btn-warning w-full sm:w-auto seleccionarVisitaButton';
         selectButton.setAttribute('data-id-ticket', visita.idTickets);
         selectButton.setAttribute('data-id-visita', visita.idVisita);
         selectButton.setAttribute('data-nombre-visita', visita.nombre_visita);
@@ -80,17 +80,18 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
           <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
             <!-- Encabezados -->
             <div class="grid grid-cols-1 sm:grid-cols-2 text-center gap-2">
-              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
-              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
-            </div>
-        
-            <!-- Contenido -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 text-center gap-2 p-2">
-              <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha de Programación</span>
-              <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md">${fechaInicio} - ${fechaFinal}</span>
+              <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha de Programación</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+                <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">${fechaInicio} - ${fechaFinal}</span>
+              </div>
             </div>
           </div>
         `;
+
 
 
 
@@ -139,35 +140,37 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         tecnicoCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#deeffd]';
         tecnicoCard.innerHTML = `
           <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-            <!-- Encabezados -->
-            <div class="grid grid-cols-3 text-center gap-2">
-              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
-              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
-              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
+            <!-- Encabezados y Contenido Responsivo -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+              <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">En Desplazamiento</span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                  ${visita.ubicacion || 'Ubicación no disponible'}
+                </span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+                <span id="fechaDesplazamiento-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                  ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
+                </span>
+              </div>
             </div>
         
-            <!-- Contenido -->
-            <div class="grid grid-cols-3 text-center gap-2 p-2">
-              <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">En Desplazamiento</span>
-              <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">
-              ${visita.ubicacion || 'Ubicación no disponible'}
-            </span>
-              <span id="fechaDesplazamiento-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">
-            ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
-        </span>
-
-            </div>
-        
-            <!-- Botón de acción mejorado -->
+            <!-- Botón de acción -->
             <div class="flex justify-center mt-2">
-              <button class="badge bg-info text-white px-4 py-2 rounded-full shadow-md
-                             transition-all duration-200 flex items-center gap-2 !bg-blue-600 !text-white"
-                             id="likeButton-${visita.idVisitas}">
-                <i class="fa-solid fa-route text-lg"></i> Iniciar Desplazamiento
+              <button class="badge bg-info text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                      id="likeButton-${visita.idVisitas}">
+                <i class="fa-solid fa-route text-sm sm:text-base"></i> 
+                <span class="text-xs sm:text-sm">Iniciar Desplazamiento</span>
               </button>
-            </div>
+            </div>                   
           </div>
         `;
+
 
 
         // Agregar ambas tarjetas dentro del contenedor en la misma fila
@@ -231,43 +234,50 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
               inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
               inicioServicioCard.innerHTML = `
                 <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-                  <!-- Encabezados -->
-                  <div class="grid grid-cols-3 text-center gap-2">
-                    <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
-                    <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
-                    <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
-                  </div>
-              
-                  <!-- Contenido -->
-                  <div class="grid grid-cols-3 text-center gap-2 p-2">
-                    <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">Llegada al Servicio</span>
-                    <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                      ${visita.ubicacion || 'Ubicación no disponible'}
-                    </span>
-                    <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                      ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
-                    </span>
+                  <!-- Encabezados y Contenido Responsivo -->
+                  <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+                    <div class="flex flex-col items-center">
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                      <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Llegada al Servicio</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+                      <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                        ${visita.ubicacion || 'Ubicación no disponible'}
+                      </span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+                      <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                        ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
+                      </span>
+                    </div>
                   </div>
               
                   <!-- Botones de acción -->
-                  <div class="flex justify-center gap-3 mt-4">
-                    <button class="bg-success hover:bg-green-700 text-white px-4 py-2 rounded-full shadow-md
-                                   transition-all duration-200 flex items-center gap-2 !bg-success !text-white"
-                                   id="uploadPhotoButton-${visita.idVisitas}">
-                      <i class="fa-solid fa-camera text-lg"></i> Subir Foto
+                  <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
+                    <button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-success !text-white text-xs sm:text-sm"
+                            id="uploadPhotoButton-${visita.idVisitas}">
+                      <i class="fa-solid fa-camera text-sm sm:text-base"></i> 
+                      <span class="text-xs sm:text-sm">Subir Foto</span>
                     </button>
-              
-                    <button class="bg-success text-white px-4 py-2 rounded-full shadow-md
-                                   transition-all duration-200 flex items-center gap-2 !bg-red-600 !text-white"
-                                   id="siguiente-${visita.idVisitas}">
-                      <i class="fa-solid fa-arrow-right text-lg"></i> Siguiente
+                  
+                    <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+                            id="siguiente-${visita.idVisitas}">
+                      <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
+                      <span class="text-xs sm:text-sm">Siguiente</span>
                     </button>
                   </div>
-              
+                  
                   <!-- Input oculto para subir foto -->
                   <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">
+                  
+                  
                 </div>
               `;
+
 
               // visitasList.appendChild(inicioServicioCard);
               tecnicoCard.insertAdjacentElement('afterend', inicioServicioCard);
@@ -289,35 +299,38 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                     const finalServicioCard = document.createElement('div');
                     finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
                     finalServicioCard.innerHTML = `
-  <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-    <!-- Encabezados -->
-    <div class="grid grid-cols-3 text-center gap-2">
-      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
-      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
-      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
-    </div>
-
-    <!-- Contenido -->
-    <div class="grid grid-cols-3 text-center gap-2 p-2">
-      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">Inicio de Servicio</span>
-      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
-        ${visita.ubicacion || 'Ubicación no disponible'}
-      </span>
-      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
-        ${visita.fecha_inicio ? formatDate(visita.fecha_inicio) : 'Sin fecha'}
-      </span>
-    </div>
-
-    <!-- Botón de continuar -->
-    <div class="flex justify-center mt-4">
-      <button class="badge bg-danger text-white px-5 py-2 rounded-full shadow-md
-                     transition-all duration-200 flex items-center gap-2 !badge bg-danger !text-white"
-                     id="continueButton-${visita.idVisitas}">
-        <i class="fa-solid fa-check-circle text-lg"></i> Continuar
-      </button>
-    </div>
-  </div>
-`;
+                      <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+                        <!-- Encabezados y Contenido Responsivo -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+                          <div class="flex flex-col items-center">
+                            <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                            <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Inicio de Servicio</span>
+                          </div>
+                          <div class="flex flex-col items-center">
+                            <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+                            <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                              ${visita.ubicacion || 'Ubicación no disponible'}
+                            </span>
+                          </div>
+                          <div class="flex flex-col items-center">
+                            <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+                            <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                              ${visita.fecha_inicio ? formatDate(visita.fecha_inicio) : 'Sin fecha'}
+                            </span>
+                          </div>
+                        </div>
+                    
+                        <div class="flex justify-center mt-4">
+                        <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                       transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+                                id="continueButton-${visita.idVisitas}">
+                          <i class="fa-solid fa-check-circle text-xs sm:text-base"></i> 
+                          <span class="text-xs sm:text-sm">Continuar</span>
+                        </button>
+                      </div>
+                                                              
+                      </div>
+                    `;
 
 
                     // Insertar la tarjeta de "Final de Servicio" debajo de la tarjeta de "Inicio de Servicio"
@@ -350,42 +363,42 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
               siguienteButton.addEventListener('click', () => {
                 // Crear la card de "Final de Servicio"
                 const finalServicioCard = document.createElement('div');
-                finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6] border border-gray-300';
+                finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
                 finalServicioCard.innerHTML = `
                   <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-                    <!-- Encabezados -->
-                    <div class="grid grid-cols-3 text-center gap-2">
-                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
-                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
-                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
-                    </div>
-                
-                    <!-- Contenido -->
-                    <div class="grid grid-cols-3 text-center gap-2 p-2">
-                      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">Final de Servicio</span>
-                      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                        ${visita.ubicacion || 'Ubicación no disponible'}
-                      </span>
-                      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                        ${visita.fecha_final ? formatDate(visita.fecha_final) : 'Sin fecha'}
-                      </span>
-                    </div>
-                
-                    <!-- Mensaje de finalización -->
-                    <div class="text-center">
-                      <p class="text-gray-800 font-semibold">El servicio ha finalizado.</p>
+                    <!-- Encabezados y Contenido Responsivo -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+                      <div class="flex flex-col items-center">
+                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Final de Servicio</span>
+                      </div>
+                      <div class="flex flex-col items-center">
+                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+                        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                          ${visita.ubicacion || 'Ubicación no disponible'}
+                        </span>
+                      </div>
+                      <div class="flex flex-col items-center">
+                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+                        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                          ${visita.fecha_final ? formatDate(visita.fecha_final) : 'Sin fecha'}
+                        </span>
+                      </div>
                     </div>
                 
                     <!-- Botón de continuar -->
                     <div class="flex justify-center mt-4">
-                      <button class="bg-danger hover:bg-red-700 text-white px-5 py-2 rounded-full shadow-md
-                                     transition-all duration-200 flex items-center gap-2"
-                                     id="continueButton-${visita.idVisitas}">
-                        <i class="fa-solid fa-check-circle text-lg"></i> Continuar
+                      <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                     transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+                              id="continueButton-${visita.idVisitas}">
+                        <i class="fa-solid fa-check-circle text-sm sm:text-base"></i> 
+                        <span class="text-xs sm:text-sm">Continuar</span>
                       </button>
-                    </div>
+                    </div>  
+                                    
                   </div>
                 `;
+
 
 
                 // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
@@ -663,51 +676,51 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                   toastr.success("Tecnico en desplazamiento.");
 
                                   const inicioServicioCard = document.createElement('div');
-                                  inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6] border border-gray-300';
+                                  inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
                                   inicioServicioCard.innerHTML = `
                                     <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-                                      <!-- Encabezados -->
-                                      <div class="grid grid-cols-3 text-center gap-2">
-                                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
-                                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
-                                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
-                                      </div>
-                                  
-                                      <!-- Contenido -->
-                                      <div class="grid grid-cols-3 text-center gap-2 p-2">
-                                        <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">Llegada al Servicio</span>
-                                        <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                                          ${visita.ubicacion || 'Ubicación no disponible'}
-                                        </span>
-                                        <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                                          ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
-                                        </span>
-                                      </div>
-                                  
-                                      <!-- Mensaje -->
-                                      <div class="text-center">
-                                       
+                                      <!-- Encabezados y Contenido Responsivo -->
+                                      <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+                                        <div class="flex flex-col items-center">
+                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                                          <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Llegada al Servicio</span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+                                          <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                                            ${visita.ubicacion || 'Ubicación no disponible'}
+                                          </span>
+                                        </div>
+                                        <div class="flex flex-col items-center">
+                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+                                          <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                                            ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
+                                          </span>
+                                        </div>
                                       </div>
                                   
                                       <!-- Botones de acción -->
-                                      <div class="flex justify-center gap-3 mt-4">
-                                        <button class="badge bg-success hover:bg-green-700 text-white px-4 py-2 rounded-full shadow-md
-                                                       transition-all duration-200 flex items-center gap-2"
-                                                       id="uploadPhotoButton-${visita.idVisitas}">
-                                          <i class="fa-solid fa-camera text-lg"></i> Subir Foto
+                                      <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
+                                        <button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                                       transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-success !text-white text-xs sm:text-sm"
+                                                id="uploadPhotoButton-${visita.idVisitas}">
+                                          <i class="fa-solid fa-camera text-sm sm:text-base"></i> 
+                                          <span class="text-xs sm:text-sm">Subir Foto</span>
                                         </button>
-                                  
-                                        <button class="badge bg-success hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-md
-                                                       transition-all duration-200 flex items-center gap-2"
-                                                       id="siguiente-${visita.idVisitas}">
-                                          <i class="fa-solid fa-arrow-right text-lg"></i> Siguiente
+                                      
+                                        <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                                       transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+                                                id="siguiente-${visita.idVisitas}">
+                                          <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
+                                          <span class="text-xs sm:text-sm">Siguiente</span>
                                         </button>
                                       </div>
-                                  
+                                      
                                       <!-- Input oculto para subir foto -->
-                                      <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">
+                                      <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">                                  
                                     </div>
                                   `;
+
 
                                   visitasList.appendChild(inicioServicioCard);
 
@@ -721,42 +734,42 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                   siguienteButton.addEventListener('click', () => {
                                     // Crear la card de "Final de Servicio"
                                     const finalServicioCard = document.createElement('div');
-                                    finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6] border border-gray-300';
+                                    finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
                                     finalServicioCard.innerHTML = `
-                                      <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-                                        <!-- Encabezados -->
-                                        <div class="grid grid-cols-3 text-center gap-2">
-                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
-                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
-                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
-                                        </div>
-                                    
-                                        <!-- Contenido -->
-                                        <div class="grid grid-cols-3 text-center gap-2 p-2">
-                                          <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">Inicio de Servicio</span>
-                                          <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                                            ${visita.ubicacion || 'Ubicación no disponible'}
-                                          </span>
-                                          <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
-                                            ${visita.fecha_inicio ? formatDate(visita.fecha_inicio) : 'Sin fecha'}
-                                          </span>
-                                        </div>
-                                    
-                                        <!-- Mensaje de inicio -->
-                                        <div class="text-center">
-                                          <p class="text-gray-800 font-semibold">Inicio de servicio.</p>
-                                        </div>
-                                    
-                                        <!-- Botón de continuar -->
-                                        <div class="flex justify-center mt-4">
-                                          <button class="bg-danger hover:bg-red-700 text-white px-5 py-2 rounded-full shadow-md
-                                                         transition-all duration-200 flex items-center gap-2"
-                                                         id="continueButton-${visita.idVisitas}">
-                                            <i class="fa-solid fa-arrow-right text-lg"></i> Continuar
-                                          </button>
-                                        </div>
-                                      </div>
-                                    `;
+  <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+    <!-- Encabezados y Contenido Responsivo -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+      <div class="flex flex-col items-center">
+        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Inicio de Servicio</span>
+      </div>
+      <div class="flex flex-col items-center">
+        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+          ${visita.ubicacion || 'Ubicación no disponible'}
+        </span>
+      </div>
+      <div class="flex flex-col items-center">
+        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+          ${visita.fecha_inicio ? formatDate(visita.fecha_inicio) : 'Sin fecha'}
+        </span>
+      </div>
+    </div>
+
+    <div class="flex justify-center mt-4">
+    <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+            id="continueButton-${visita.idVisitas}">
+      <i class="fa-solid fa-check-circle text-xs sm:text-base"></i> 
+      <span class="text-xs sm:text-sm">Continuar</span>
+    </button>
+  </div>
+  
+    
+  </div>
+`;
+
 
 
                                     // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
