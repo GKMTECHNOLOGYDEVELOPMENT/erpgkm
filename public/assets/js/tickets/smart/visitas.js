@@ -32,10 +32,18 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
         const visitaTitle = document.createElement('h2');
         visitaTitle.className = 'text-lg font-bold text-primary';
-        visitaTitle.textContent = `${visita.nombre}`;
+        // Nombre de la Visita con el Técnico al costado
+        // Nombre de la Visita con el Técnico al costado (Aplicando badge-outline-primary a todo)
+        visitaTitle.innerHTML = `
+  <span class="badge badge-outline-primary text-lg font-semibold px-3 py-1 rounded-lg shadow-md">
+    ${visita.nombre} - Técnico responsable: ${nombreTecnico}
+  </span>
+`;
+
+
 
         const selectButton = document.createElement('button');
-        selectButton.className = 'btn btn-outline-danger seleccionarVisitaButton';
+        selectButton.className = 'btn btn-warning seleccionarVisitaButton';
         selectButton.setAttribute('data-id-ticket', visita.idTickets);
         selectButton.setAttribute('data-id-visita', visita.idVisita);
         selectButton.setAttribute('data-nombre-visita', visita.nombre_visita);
@@ -55,18 +63,19 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         visitaCard.innerHTML = `
           <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
             <!-- Encabezados -->
-            <div class="grid grid-cols-2 text-center gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 text-center gap-2">
               <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
               <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
             </div>
         
             <!-- Contenido -->
-            <div class="grid grid-cols-2 text-center gap-2 p-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 text-center gap-2 p-2">
               <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha de Programación</span>
               <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md">${fechaInicio} - ${fechaFinal}</span>
             </div>
           </div>
         `;
+        
 
 
 
@@ -117,15 +126,17 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             <!-- Encabezados -->
             <div class="grid grid-cols-3 text-center gap-2">
               <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
-              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Técnico</span>
+              <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
               <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
             </div>
         
             <!-- Contenido -->
             <div class="grid grid-cols-3 text-center gap-2 p-2">
               <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">En Desplazamiento</span>
-              <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">${nombreTecnico}</span>
-              <span id="fechaDesplazamiento-${visita.idVisitas}" class="text-gray-600 text-sm sm:text-base block mt-1">
+              <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">
+              ${visita.ubicacion || 'Ubicación no disponible'}
+            </span>
+              <span id="fechaDesplazamiento-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md">
             ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
         </span>
 
@@ -223,7 +234,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                       siguienteButton.classList.add('disabled'); // Opcional: agregar una clase CSS para estilos
                       // toastr.error('Ya existe una fecha de llegada para esta visita.');
                     }
-                    
+
                     // Mostrar la tarjeta de "Final de Servicio" automáticamente
                     const finalServicioCard = document.createElement('div');
                     finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
@@ -289,17 +300,43 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
               siguienteButton.addEventListener('click', () => {
                 // Crear la card de "Final de Servicio"
                 const finalServicioCard = document.createElement('div');
-                finalServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
-                finalServicioCard.style.backgroundColor = "#f8d7da"; // Color rojo claro para indicar finalización
+                finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6] border border-gray-300';
                 finalServicioCard.innerHTML = `
-    <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
-      <h3 class="text-primary text-sm sm:text-base">Inicio de Servicio</h3>
-      <p class="font-bold">El servicio ha finalizado.</p>
-    </div>
-       <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" >
-                  Continuar
-                </button>
-  `;
+                  <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+                    <!-- Encabezados -->
+                    <div class="grid grid-cols-3 text-center gap-2">
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
+                    </div>
+                
+                    <!-- Contenido -->
+                    <div class="grid grid-cols-3 text-center gap-2 p-2">
+                      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">Final de Servicio</span>
+                      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                        ${visita.ubicacion || 'Ubicación no disponible'}
+                      </span>
+                      <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                        ${visita.fecha_final ? formatDate(visita.fecha_final) : 'Sin fecha'}
+                      </span>
+                    </div>
+                
+                    <!-- Mensaje de finalización -->
+                    <div class="text-center">
+                      <p class="text-gray-800 font-semibold">El servicio ha finalizado.</p>
+                    </div>
+                
+                    <!-- Botón de continuar -->
+                    <div class="flex justify-center mt-4">
+                      <button class="bg-danger hover:bg-red-700 text-white px-5 py-2 rounded-full shadow-md
+                                     transition-all duration-200 flex items-center gap-2"
+                                     id="continueButton-${visita.idVisitas}">
+                        <i class="fa-solid fa-check-circle text-lg"></i> Continuar
+                      </button>
+                    </div>
+                  </div>
+                `;
+
 
                 // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
                 inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
@@ -546,11 +583,11 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                           if (updatedVisita) {
                             const fechaDesplazamientoElement = document.getElementById(`fechaDesplazamiento-${visita.idVisitas}`);
                             if (fechaDesplazamientoElement) {
-                                fechaDesplazamientoElement.textContent = formatDate(updatedVisita.fechas_desplazamiento);
+                              fechaDesplazamientoElement.textContent = formatDate(updatedVisita.fechas_desplazamiento);
                             } else {
-                                console.warn(`No se encontró el elemento con el id fechaDesplazamiento-${visita.idVisitas}`);
+                              console.warn(`No se encontró el elemento con el id fechaDesplazamiento-${visita.idVisitas}`);
                             }
-                            
+
 
                             fetch('/api/guardarAnexoVisita', {
                               method: 'POST',
@@ -576,26 +613,52 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                   toastr.success("Tecnico en desplazamiento.");
 
                                   const inicioServicioCard = document.createElement('div');
-                                  inicioServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
+                                  inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6] border border-gray-300';
                                   inicioServicioCard.innerHTML = `
-                                    <div class="text-center text-gray-600">
-                                      <h3 class="text-lg font-semibold text-gray-800">Llegada al Servici</h3>
-                                      <p class="text-gray-800 mt-2">El servicio ha comenzado.</p>
+                                    <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+                                      <!-- Encabezados -->
+                                      <div class="grid grid-cols-3 text-center gap-2">
+                                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
+                                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
+                                        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
+                                      </div>
+                                  
+                                      <!-- Contenido -->
+                                      <div class="grid grid-cols-3 text-center gap-2 p-2">
+                                        <span class="badge bg-green-600 text-white text-xs px-3 py-1 rounded-lg shadow-md">Llegada al Servicio</span>
+                                        <span class="badge bg-green-600 text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                                          ${visita.ubicacion || 'Ubicación no disponible'}
+                                        </span>
+                                        <span class="badge bg-green-600 text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                                          ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
+                                        </span>
+                                      </div>
+                                  
+                                      <!-- Mensaje -->
+                                      <div class="text-center">
+                                        <p class="text-gray-800 font-semibold">El servicio ha comenzado.</p>
+                                      </div>
+                                  
+                                      <!-- Botones de acción -->
+                                      <div class="flex justify-center gap-3 mt-4">
+                                        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full shadow-md
+                                                       transition-all duration-200 flex items-center gap-2"
+                                                       id="uploadPhotoButton-${visita.idVisitas}">
+                                          <i class="fa-solid fa-camera text-lg"></i> Subir Foto
+                                        </button>
+                                  
+                                        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-md
+                                                       transition-all duration-200 flex items-center gap-2"
+                                                       id="siguiente-${visita.idVisitas}">
+                                          <i class="fa-solid fa-arrow-right text-lg"></i> Siguiente
+                                        </button>
+                                      </div>
+                                  
+                                      <!-- Input oculto para subir foto -->
+                                      <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">
                                     </div>
-
-
-                                    <button type="button" class="btn btn-success" id="uploadPhotoButton-${visita.idVisitas}">
-                                          Subir Foto
-                                      </button>
-
-                                  <button type="button" class="btn btn-outline-danger" id="siguiente-${visita.idVisitas}" style="display: none;">
-                                    Siguiente
-                                  </button>
-                                      
-
-
-                                    <input type="file" id="fileInput-${visita.idVisitas}" class="w-full mt-4 p-2 border border-gray-300 rounded-lg" accept="image/*" style="display: none;">
                                   `;
+
                                   visitasList.appendChild(inicioServicioCard);
 
 
@@ -608,18 +671,43 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                   siguienteButton.addEventListener('click', () => {
                                     // Crear la card de "Final de Servicio"
                                     const finalServicioCard = document.createElement('div');
-                                    finalServicioCard.className = 'border border-gray-200 rounded-lg shadow-2xl p-5 w-full sm:max-w-md mx-auto transform transition-transform hover:scale-105 mt-4';
-                                    finalServicioCard.style.backgroundColor = "#f8d7da"; // Color rojo claro para indicar finalización
+                                    finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6] border border-gray-300';
                                     finalServicioCard.innerHTML = `
-    <div class="text-center px-4 py-2 rounded font-semibold mb-2 bg-gray-300">
-      <h3 class="text-primary text-sm sm:text-base">Inicio de Servicio</h3>
-      <p class="font-bold">Inicio de servicio .</p>
-    </div>
+                                      <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+                                        <!-- Encabezados -->
+                                        <div class="grid grid-cols-3 text-center gap-2">
+                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Estado</span>
+                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Ubicación</span>
+                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md">Fecha</span>
+                                        </div>
+                                    
+                                        <!-- Contenido -->
+                                        <div class="grid grid-cols-3 text-center gap-2 p-2">
+                                          <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">Inicio de Servicio</span>
+                                          <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                                            ${visita.ubicacion || 'Ubicación no disponible'}
+                                          </span>
+                                          <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                                            ${visita.fecha_inicio ? formatDate(visita.fecha_inicio) : 'Sin fecha'}
+                                          </span>
+                                        </div>
+                                    
+                                        <!-- Mensaje de inicio -->
+                                        <div class="text-center">
+                                          <p class="text-gray-800 font-semibold">Inicio de servicio.</p>
+                                        </div>
+                                    
+                                        <!-- Botón de continuar -->
+                                        <div class="flex justify-center mt-4">
+                                          <button class="bg-danger hover:bg-red-700 text-white px-5 py-2 rounded-full shadow-md
+                                                         transition-all duration-200 flex items-center gap-2"
+                                                         id="continueButton-${visita.idVisitas}">
+                                            <i class="fa-solid fa-arrow-right text-lg"></i> Continuar
+                                          </button>
+                                        </div>
+                                      </div>
+                                    `;
 
-     <button type="button" class="btn btn-outline-primary" id="continueButton-${visita.idVisitas}" >
-                  Continuar
-                </button>
-  `;
 
                                     // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
                                     inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
