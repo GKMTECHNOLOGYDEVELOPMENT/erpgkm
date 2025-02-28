@@ -139,7 +139,7 @@
                     <th class="px-4 py-2 text-center">Estado</th>
                     <th class="px-4 py-2 text-center">Usuario</th>
                     <th class="px-4 py-2 text-center">Fecha</th>
-                    <th class="px-4 py-2 text-center">Acciones</th>
+                    <th class="px-4 py-2 text-center">Más</th>
                 </tr>
             </thead>
             <tbody id="estadosTableBody">
@@ -168,78 +168,187 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
+document.addEventListener("DOMContentLoaded", function () {
+    const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
+    const rowsPerPage = 10; // Número de filas por página
+    let currentPage = 1; // Página actual
 
-        function cargarEstados() {
-            // Llamada AJAX para obtener los estados de flujo
-            fetch(`/ticket/${ticketId}/estados`)
+    function cargarEstados() {
+        fetch(`/ticket/${ticketId}/estados`)
+            .then(response => response.json())
+            .then(data => {
+                const estadosTableBody = document.getElementById("estadosTableBody");
+                estadosTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar los nuevos estados
+
+                if (Array.isArray(data.estadosFlujo)) {
+                    const estados = data.estadosFlujo;
+                    renderTable(estados, currentPage);
+                    setupPagination(estados.length);
+                } else {
+                    console.error('La respuesta no contiene un array de estados de flujo:', data.estadosFlujo);
+                }
+            })
+            .catch(error => {
+                console.error('Error cargando los estados:', error);
+            });
+    }
+
+    function renderTable(estados, page) {
+        const estadosTableBody = document.getElementById("estadosTableBody");
+        estadosTableBody.innerHTML = "";
+
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const estadosPaginados = estados.slice(start, end);
+
+        estadosPaginados.forEach(ticketFlujo => {
+            const estado = ticketFlujo.estado_flujo;
+            const usuario = ticketFlujo.usuario;
+
+            // Fila principal
+            const row = document.createElement("tr");
+
+            const estadoCell = document.createElement("td");
+            estadoCell.classList.add("px-4", "py-2", "text-center", "text-black");
+            estadoCell.style.backgroundColor = estado.color;
+            estadoCell.textContent = estado.descripcion;
+
+            const usuarioCell = document.createElement("td");
+            usuarioCell.classList.add("px-4", "py-2", "text-center", "text-black");
+            usuarioCell.textContent = usuario ? usuario.Nombre : 'Sin Nombre';
+            usuarioCell.style.backgroundColor = estado.color;
+
+            const fechaCell = document.createElement("td");
+            fechaCell.classList.add("px-4", "py-2", "text-center", "text-black");
+            fechaCell.textContent = ticketFlujo.fecha_creacion;
+            fechaCell.style.backgroundColor = estado.color;
+
+            // Botón "Más" y "Guardar" en la misma celda
+            const masCell = document.createElement("td");
+            masCell.classList.add("px-4", "py-2", "text-center", "flex", "items-center", "justify-center", "space-x-2");
+            masCell.style.backgroundColor = estado.color; // Aplica el color del estado
+
+            // Botón "Más" (⋮)
+            const masBtn = document.createElement("button");
+            masBtn.classList.add("toggle-comment", "px-3", "py-1", "rounded", "bg-gray-300");
+            masBtn.textContent = "⋮";
+            masBtn.dataset.flujoId = ticketFlujo.id;
+
+            // Botón "Guardar" como icono de check ✅ verde
+            const saveIconBtn = document.createElement("button");
+            saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success", "text-white");
+            saveIconBtn.dataset.flujoId = ticketFlujo.id;
+            saveIconBtn.innerHTML = "✔"; // Ícono de check verde
+
+            // Agregar botones a la celda
+            masCell.appendChild(masBtn);
+            masCell.appendChild(saveIconBtn);
+
+            row.appendChild(estadoCell);
+            row.appendChild(usuarioCell);
+            row.appendChild(fechaCell);
+            row.appendChild(masCell);
+            estadosTableBody.appendChild(row);
+
+            // Fila oculta para comentario
+            const commentRow = document.createElement("tr");
+            commentRow.classList.add("hidden");
+            const commentCell = document.createElement("td");
+            commentCell.setAttribute("colspan", "4"); // Ajustado el colspan a la cantidad de columnas
+            commentCell.classList.add("p-4");
+            commentCell.style.backgroundColor = estado.color; // Aplica el color del estado
+
+            const textArea = document.createElement("textarea");
+            textArea.classList.add("w-full", "p-2", "rounded");
+            textArea.placeholder = "Escribe un comentario...";
+            textArea.style.backgroundColor = estado.color; // 🔥 Color de fondo del estado
+
+            commentCell.appendChild(textArea);
+            commentRow.appendChild(commentCell);
+
+            estadosTableBody.appendChild(commentRow);
+        });
+
+        agregarEventosComentarios();
+    }
+
+    function setupPagination(totalRows) {
+        const paginationContainer = document.getElementById("paginationControls");
+        paginationContainer.innerHTML = ""; // Limpiar paginación previa
+
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        if (totalPages > 1) {
+            const prevBtn = document.createElement("button");
+            prevBtn.textContent = "Anterior";
+            prevBtn.classList.add("px-4", "py-2", "bg-gray-300", "rounded", "mx-1");
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.addEventListener("click", () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    cargarEstados();
+                }
+            });
+
+            const nextBtn = document.createElement("button");
+            nextBtn.textContent = "Siguiente";
+            nextBtn.classList.add("px-4", "py-2", "bg-gray-300", "rounded", "mx-1");
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.addEventListener("click", () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    cargarEstados();
+                }
+            });
+
+            paginationContainer.appendChild(prevBtn);
+            paginationContainer.appendChild(nextBtn);
+        }
+    }
+
+    function agregarEventosComentarios() {
+        document.querySelectorAll('.toggle-comment').forEach(button => {
+            button.addEventListener('click', function () {
+                let parentCell = this.closest('td'); // Celda donde están los elementos
+                let row = this.closest('tr').nextElementSibling;
+                row.classList.toggle('hidden'); // Mostrar/ocultar la fila de comentario
+            });
+        });
+
+        document.querySelectorAll('.save-comment').forEach(button => {
+            button.addEventListener('click', function () {
+                let flujoId = this.dataset.flujoId;
+                let row = this.closest('tr').nextElementSibling;
+                let textArea = row.querySelector("textarea");
+                let comentario = textArea.value;
+
+                fetch(`/ticket/${ticketId}/estados/${flujoId}/comentario`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content") // Si usas Laravel
+                    },
+                    body: JSON.stringify({ comentario })
+                })
                 .then(response => response.json())
-                .then(data => {
-                    // console.log('Datos recibidos:', data); // Ver los datos
-
-                    const estadosTableBody = document.getElementById("estadosTableBody");
-                    estadosTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar los nuevos estados
-
-                    // Verifica si data.estadosFlujo es un array
-                    if (Array.isArray(data.estadosFlujo)) {
-                        // Iterar sobre todos los estados de flujo
-                        data.estadosFlujo.forEach(ticketFlujo => {
-                            const estado = ticketFlujo.estado_flujo;  // Cada flujo de estado tiene una relación con estado_flujo
-                            const usuario = ticketFlujo.usuario; // Obtener la relación usuario
-
-                            const row = document.createElement("tr");
-
-                            // Crear las celdas de la fila
-                            const estadoCell = document.createElement("td");
-                            estadoCell.classList.add("px-4", "py-2", "text-center");
-                            estadoCell.style.backgroundColor = estado.color; // Color del estado
-                            // estadoCell.style.color = "white"; // Cambia el color del texto a blanco
-                            estadoCell.textContent = estado.descripcion;
-
-                            const usuarioCell = document.createElement("td");
-                            usuarioCell.classList.add("px-4", "py-2", "text-center");
-                            usuarioCell.textContent = usuario ? usuario.Nombre : 'Sin Nombre';
-                            usuarioCell.style.backgroundColor = estado.color; // Color del usuario
-
-
-                            const fechaCell = document.createElement("td");
-                            fechaCell.classList.add("px-4", "py-2", "text-center");
-                            fechaCell.textContent = ticketFlujo.fecha_creacion;
-                            fechaCell.style.backgroundColor = estado.color; // Color de la fecha
-                            fechaCell.style.backgroundColor = estado.color; // Color del usuario
-
-
-                            const accionesCell = document.createElement("td");
-                            accionesCell.classList.add("px-4", "py-2", "text-center");
-                            accionesCell.innerHTML = `<span class="text-gray-500">-</span>`;
-                            accionesCell.style.backgroundColor = estado.color; // Color del usuario
-                            // Agregar las celdas a la fila
-                            row.appendChild(estadoCell);
-                            row.appendChild(usuarioCell);
-                            row.appendChild(fechaCell);
-                            row.appendChild(accionesCell);
-
-                            // Agregar la fila a la tabla
-                            estadosTableBody.appendChild(row);
-                        });
+                .then(result => {
+                    if (result.success) {
+                        alert("Comentario guardado correctamente.");
                     } else {
-                        console.error('La respuesta no contiene un array de estados de flujo:', data.estadosFlujo);
+                        alert("Error al guardar el comentario.");
                     }
                 })
-                .catch(error => {
-                    console.error('Error cargando los estados:', error);
-                });
-        }
+                .catch(error => console.error("Error al guardar el comentario:", error));
+            });
+        });
+    }
 
-        // Cargar los estados al iniciar
-        cargarEstados();
+    // Cargar estados al iniciar
+    cargarEstados();
 
-
-        // Actualizar los estados cada 5 segundo (3000 ms )
-
-        setInterval(cargarEstados, 30000)
-    });
+    // Actualizar cada 30 segundos
+    setInterval(cargarEstados, 30000);
+});
 </script>
 
 
@@ -389,9 +498,6 @@
         <td class="px-4 py-2 text-center">${state}</td>
         <td class="px-4 py-2 text-center">${usuario}</td>
         <td class="px-4 py-2 text-center">${fecha}</td>
-        <td class="px-4 py-2 text-center flex justify-center items-center">
-          <button class="delete-state btn btn-danger btn-sm">X</button>
-        </td>
       `;
                 dropZone.appendChild(newRow);
                 // Actualizar log de modificación por cambio de estado
