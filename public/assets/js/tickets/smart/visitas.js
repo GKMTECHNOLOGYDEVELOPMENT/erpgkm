@@ -24,7 +24,24 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
         // CARD PRINCIPAL QUE ENVUELVE TODO
         const cardContainer = document.createElement('div');
-        cardContainer.className = 'rounded-lg shadow-xl p-6 w-full sm:max-w-4xl mx-auto mt-6 border border-gray-200';
+        cardContainer.className = 'rounded-lg shadow-xl p-6 w-full sm:max-w-4xl mx-auto mt-6';
+        // 📌 Botón para ocultar/mostrar la card
+        const toggleCardButton = document.createElement('button');
+        toggleCardButton.className = 'px-4 py-2 mb-2 bg-gray-300 text-gray-800 rounded-lg shadow hover:bg-gray-400 transition font-semibold w-full flex justify-between items-center';
+        toggleCardButton.innerHTML = `<span>Ocultar ${visita.nombre}</span> <i class="fa-solid fa-chevron-up"></i>`;
+
+        // 📌 Evento para ocultar/mostrar la card
+        toggleCardButton.addEventListener('click', function () {
+          cardContainer.classList.toggle('hidden');
+
+          if (cardContainer.classList.contains('hidden')) {
+            toggleCardButton.innerHTML = `<span>Mostrar ${visita.nombre}</span> <i class="fa-solid fa-chevron-down"></i>`;
+          } else {
+            toggleCardButton.innerHTML = `<span>Ocultar ${visita.nombre}</span> <i class="fa-solid fa-chevron-up"></i>`;
+          }
+        });
+        // Agregar el botón ANTES de `cardContainer` para que quede fuera del bloque
+        visitasList.appendChild(toggleCardButton);
 
         // Header de la Card (Nombre de la Visita + Botón Seleccionar)
         const cardHeader = document.createElement('div');
@@ -32,7 +49,6 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
         const visitaTitle = document.createElement('h2');
         visitaTitle.className = 'text-lg font-bold text-primary';
-        // Nombre de la Visita con el Técnico al costado
         // Nombre de la Visita con el Técnico al costado (Aplicando badge-outline-primary a todo)
         visitaTitle.innerHTML = `
   <span class="badge badge-outline-primary text-lg font-semibold px-3 py-1 rounded-lg shadow-md">
@@ -75,7 +91,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             </div>
           </div>
         `;
-        
+
 
 
 
