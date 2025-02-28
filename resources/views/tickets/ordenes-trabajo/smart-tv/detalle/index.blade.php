@@ -543,7 +543,7 @@ dropZone.addEventListener("drop", function(e) {
             idTicket: ticketId,
             idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
             idUsuario: usuario,
-            comentarioflujo: 'Estado cambiado por drag & drop', // Comentario opcional
+            comentarioflujo: 'Ingresar comentario para el flujo', // Comentario opcional
         })
         .then(response => {
             // Si la respuesta es exitosa
