@@ -1,13 +1,17 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <!-- Botón para abrir el modal de crear visita -->
-<span class="text-lg font-semibold mb-4 badge bg-success">Coordinación</span>
-<div class="flex gap-2 justify-center">
-    <button id="crearCordinacionBtn" class="px-4 py-2 btn btn-success text-white rounded-lg shadow-md flex items-center">
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">
+    Coordinación
+</span>
+
+<div class="flex gap-1 sm:gap-2 justify-center mt-2">
+    <button id="crearCordinacionBtn" 
+        class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
         Coordinación
     </button>
-
-
 </div>
+
+
 <div id="visitasContainer" class="mt-4">
     <div id="visitasList" class="space-y-4"></div>
 </div>
