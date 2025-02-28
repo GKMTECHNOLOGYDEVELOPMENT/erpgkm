@@ -4,7 +4,7 @@
 <div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">
     <!-- Firma del Técnico -->
     <div class="w-full md:w-[500px] flex flex-col items-center">
-        <p class="mb-2 text-lg font-medium text-center">Firma del Técnico</p>
+        <p class="mb-2 text-lg font-bold text-center">FIRMA DEL TÉCNICO</p>
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
             <img id="firmaTecnicoImg" class="w-full h-full object-contain" src="" alt="Firma del Técnico">
         </div>
@@ -15,12 +15,12 @@
 
     <!-- Firma del Cliente -->
     <div class="w-full md:w-[500px] flex flex-col items-center">
-        <p class="mb-2 text-lg font-medium text-center">Firma del Cliente</p>
+        <p class="mb-2 text-lg font-bold text-center">FIRMA DEL CLIENTE</p>
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
             <img id="firmaClienteImg" class="w-full h-full object-contain" src="" alt="Firma del Cliente">
         </div>
         <!-- Mensaje si no hay firma -->
-        <p id="noFirmaCliente" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita o cliente.</p>
+        {{-- <p id="noFirmaCliente" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita o cliente.</p> --}}
         <!-- Botón de refrescar -->
         <button type="button" class="btn btn-info mt-4" onclick="cargarFirmaCliente();">🔄 Refrescar Firma</button>
     </div>
