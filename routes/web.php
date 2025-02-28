@@ -293,6 +293,9 @@ Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
 Route::get('/api/obtenerVisitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 
 
+Route::post('/ticket/{ticketId}/ticketflujo/{flujoId}/update', 'TicketFlujoController@update')->name('ticketflujo.update');
+
+
 //INICIO TICKETS///
 
 /// INICIO ÓRDENES DE TRABAJO ///
@@ -368,6 +371,7 @@ Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoContr
 // Agrega esta ruta en tu archivo de rutas web.php
 
 Route::get('validar-ticket/{nroTicket}', [OrdenesTrabajoController::class, 'validarTicket'])->name('validarTicket');
+Route::post('/ticket/{ticketId}/ticketflujo/{flujoId}/update', [OrdenesTrabajoController::class, 'actualizarComentario'])->name('ticketflujo.update');
 
 
 Route::get('/clientes/generales/asociados/{idCliente}', [ClientesController::class, 'clientesGeneralesAsociados']);

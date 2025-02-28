@@ -1,4 +1,4 @@
-<span class="text-lg font-semibold mb-4 badge bg-success">Firmas</span>
+<span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">Firmas</span>
 
 <!-- Contenedor general -->
 <div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">

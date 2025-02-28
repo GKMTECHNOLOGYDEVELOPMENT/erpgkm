@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <!-- Botón para abrir el modal de crear visita -->
-<span class="text-lg font-semibold mb-4 badge bg-success">Coordinación</span>
+<span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">Coordinación</span>
 <div class="flex gap-2 justify-center">
     <button id="crearCordinacionBtn" class="px-4 py-2 btn btn-success text-white rounded-lg shadow-md flex items-center">
         Coordinación

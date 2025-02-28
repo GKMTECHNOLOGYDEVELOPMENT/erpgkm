@@ -7,8 +7,10 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 
-<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo N°
-    {{ $orden->idTickets }}</span>
+<span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">
+    Detalles de la Orden de Trabajo N° {{ $orden->idTickets }}
+</span>
+
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 
@@ -130,7 +132,7 @@
 
 <!-- Nueva Card: Historial de Estados -->
 <div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">
-    <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
+    <span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">Historial de Estados</span>
     <!-- Tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">
         <table class="min-w-[600px] border-collapse">
@@ -151,21 +153,22 @@
     <div class="mt-4">
         Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
     </div>
-    <!-- Estados disponibles (draggables) -->
-    <div class="mt-3 overflow-x-auto">
-        <div id="draggableContainer" class="flex space-x-2">
-            <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Recojo">
-                Recojo
+<!-- Estados disponibles (draggables) -->
+<div class="mt-3 overflow-x-auto">
+    <div id="draggableContainer" class="flex space-x-2">
+        @foreach($estadosFlujo as $estado)
+            <div class="draggable-state px-3 py-1 rounded cursor-move" style="background-color: {{ $estado->color }};" draggable="true" data-state="{{ $estado->descripcion }}">
+                {{ $estado->descripcion }}
             </div>
-            <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Coordinado">
-                Coordinado
-            </div>
-            <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Operativo">
-                Operativo
-            </div>
-        </div>
+        @endforeach
     </div>
 </div>
+
+</div>
+
+
+
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -232,12 +235,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const masBtn = document.createElement("button");
             masBtn.classList.add("toggle-comment", "px-3", "py-1", "rounded", "bg-gray-300");
             masBtn.textContent = "⋮";
-            masBtn.dataset.flujoId = ticketFlujo.id;
+            masBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
 
             // Botón "Guardar" como icono de check ✅ verde
             const saveIconBtn = document.createElement("button");
             saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success", "text-white");
-            saveIconBtn.dataset.flujoId = ticketFlujo.id;
+            saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
             saveIconBtn.innerHTML = "✔"; // Ícono de check verde
 
             // Agregar botones a la celda
@@ -260,6 +263,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const textArea = document.createElement("textarea");
             textArea.classList.add("w-full", "p-2", "rounded");
+            textArea.textContent = ticketFlujo.comentarioflujo;
             textArea.placeholder = "Escribe un comentario...";
             textArea.style.backgroundColor = estado.color; // 🔥 Color de fondo del estado
 
@@ -315,41 +319,42 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
+
         document.querySelectorAll('.save-comment').forEach(button => {
             button.addEventListener('click', function () {
-                let flujoId = this.dataset.flujoId;
+                let flujoId = this.dataset.flujoId; // Obtener idTicketFlujo
                 let row = this.closest('tr').nextElementSibling;
                 let textArea = row.querySelector("textarea");
                 let comentario = textArea.value;
 
-                fetch(`/ticket/${ticketId}/estados/${flujoId}/comentario`, {
+                // Ruta actualizada para hacer la actualización sin el "comentario" como campo
+                fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content") // Si usas Laravel
                     },
-                    body: JSON.stringify({ comentario })
+                    body: JSON.stringify({ comentario }) // Enviar solo comentario o los campos necesarios
                 })
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
-                        alert("Comentario guardado correctamente.");
+                        toastr.success("Estado actualizado correctamente.");
                     } else {
-                        alert("Error al guardar el comentario.");
+                        toastr.error("Error al actualizar el estado.");
                     }
                 })
-                .catch(error => console.error("Error al guardar el comentario:", error));
+                .catch(error => console.error("Error al actualizar el estado:", error));
             });
         });
     }
 
     // Cargar estados al iniciar
     cargarEstados();
-
-    // Actualizar cada 30 segundos
     setInterval(cargarEstados, 30000);
 });
 </script>
+
 
 
 
