@@ -140,6 +140,7 @@
             if (data.success) {
                 toastr.success('Condiciones guardadas correctamente.');
                 this.openCondiciones = false; // Cerrar el modal
+                   location.reload();
             } else {
                 toastr.error('Error al guardar las condiciones.');
             }
@@ -521,6 +522,8 @@ document.addEventListener("DOMContentLoaded", function() {
             if (response.success) {
                 toastr.success(response.message); // Muestra un mensaje de éxito
                 window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
+                 // Recargar la página
+            location.reload();
             } else {
                 // Si no fue exitoso, muestra el mensaje de error
                 toastr.error(response.message);  // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"

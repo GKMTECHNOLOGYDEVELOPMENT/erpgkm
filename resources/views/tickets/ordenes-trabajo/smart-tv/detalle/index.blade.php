@@ -7,8 +7,10 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 
-<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo N°
-    {{ $orden->idTickets }}</span>
+<span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">
+    Detalles de la Orden de Trabajo N° {{ $orden->idTickets }}
+</span>
+
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 
@@ -130,7 +132,7 @@
 
 <!-- Nueva Card: Historial de Estados -->
 <div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">
-    <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
+    <span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">Historial de Estados</span>
     <!-- Tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">
         <table class="min-w-[600px] border-collapse">
@@ -147,25 +149,41 @@
             </tbody>
         </table>
     </div>
+
+
+
+
+<!-- Estados disponibles (draggables) -->
+<div class="mt-3 overflow-x-auto">
+    <div id="draggableContainer" class="flex space-x-2">
+        @foreach($estadosFlujo as $estado)
+            <div class="draggable-state px-3 py-1 rounded cursor-move" style="background-color: {{ $estado->color }};" draggable="true" data-state="{{ $estado->descripcion }}">
+                {{ $estado->descripcion }}
+            </div>
+        @endforeach
+    </div>
+</div>
+
+
+
+
+
+
+
     <!-- Div para mostrar la última modificación -->
     <div class="mt-4">
         Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
     </div>
-    <!-- Estados disponibles (draggables) -->
-    <div class="mt-3 overflow-x-auto">
-        <div id="draggableContainer" class="flex space-x-2">
-            <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Recojo">
-                Recojo
-            </div>
-            <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Coordinado">
-                Coordinado
-            </div>
-            <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true" data-state="Operativo">
-                Operativo
-            </div>
-        </div>
-    </div>
+
+
+
+
+
 </div>
+
+
+
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -232,12 +250,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const masBtn = document.createElement("button");
             masBtn.classList.add("toggle-comment", "px-3", "py-1", "rounded", "bg-gray-300");
             masBtn.textContent = "⋮";
-            masBtn.dataset.flujoId = ticketFlujo.id;
+            masBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
 
             // Botón "Guardar" como icono de check ✅ verde
             const saveIconBtn = document.createElement("button");
             saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success", "text-white");
-            saveIconBtn.dataset.flujoId = ticketFlujo.id;
+            saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
             saveIconBtn.innerHTML = "✔"; // Ícono de check verde
 
             // Agregar botones a la celda
@@ -260,6 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const textArea = document.createElement("textarea");
             textArea.classList.add("w-full", "p-2", "rounded");
+            textArea.textContent = ticketFlujo.comentarioflujo;
             textArea.placeholder = "Escribe un comentario...";
             textArea.style.backgroundColor = estado.color; // 🔥 Color de fondo del estado
 
@@ -315,38 +334,38 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
+
         document.querySelectorAll('.save-comment').forEach(button => {
             button.addEventListener('click', function () {
-                let flujoId = this.dataset.flujoId;
+                let flujoId = this.dataset.flujoId; // Obtener idTicketFlujo
                 let row = this.closest('tr').nextElementSibling;
                 let textArea = row.querySelector("textarea");
                 let comentario = textArea.value;
 
-                fetch(`/ticket/${ticketId}/estados/${flujoId}/comentario`, {
+                // Ruta actualizada para hacer la actualización sin el "comentario" como campo
+                fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content") // Si usas Laravel
                     },
-                    body: JSON.stringify({ comentario })
+                    body: JSON.stringify({ comentario }) // Enviar solo comentario o los campos necesarios
                 })
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
-                        alert("Comentario guardado correctamente.");
+                        toastr.success("Estado actualizado correctamente.");
                     } else {
-                        alert("Error al guardar el comentario.");
+                        toastr.error("Error al actualizar el estado.");
                     }
                 })
-                .catch(error => console.error("Error al guardar el comentario:", error));
+                .catch(error => console.error("Error al actualizar el estado:", error));
             });
         });
     }
 
     // Cargar estados al iniciar
     cargarEstados();
-
-    // Actualizar cada 30 segundos
     setInterval(cargarEstados, 30000);
 });
 </script>
@@ -355,6 +374,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+
+<!-- Agregar Axios desde un CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -459,52 +481,86 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-        /* ================================
-           Registro de cambios en drag & drop
-        ================================ */
-        const draggables = document.querySelectorAll(".draggable-state");
-        draggables.forEach(function(draggable) {
-            draggable.addEventListener("dragstart", function(e) {
-                e.dataTransfer.setData("text/plain", this.dataset.state);
-            });
-        });
+     // Pasa los estados de flujo desde Blade a JavaScript
+    const estadosFlujo = @json($estadosFlujo);
 
-        const dropZone = document.getElementById("estadosTableBody");
-        dropZone.addEventListener("dragover", function(e) {
-            e.preventDefault();
+// Función para obtener el ID del estado a partir de la descripción
+function getStateId(stateDescription) {
+    const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
+    return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
+}
+
+// Código drag & drop
+const draggables = document.querySelectorAll(".draggable-state");
+draggables.forEach(function(draggable) {
+    draggable.addEventListener("dragstart", function(e) {
+        e.dataTransfer.setData("text/plain", this.dataset.state);  // Obtén la descripción del estado
+    });
+});
+
+const dropZone = document.getElementById("estadosTableBody");
+dropZone.addEventListener("dragover", function(e) {
+    e.preventDefault();
+});
+
+dropZone.addEventListener("drop", function(e) {
+    e.preventDefault();
+    const stateDescription = e.dataTransfer.getData("text/plain");
+    if (stateDescription) {
+        const draggableEl = document.querySelector(
+            "#draggableContainer .draggable-state[data-state='" + stateDescription + "']");
+        if (draggableEl) {
+            draggableEl.remove();
+        }
+
+        const usuario = "{{ auth()->user()->id }}";  // Utiliza el ID del usuario autenticado
+        const fecha = formatDate(new Date());
+        const ticketId = "{{ $ticket->idTickets }}";  // Obtén el ID del ticket
+
+        // Obtener el ID del estado basado en la descripción
+        const estadoId = getStateId(stateDescription);
+
+        let rowClasses = "";
+        if (estadoId === 1) {
+            rowClasses = "bg-primary/20 border-primary/20";
+        } else if (estadoId === 2) {
+            rowClasses = "bg-secondary/20 border-secondary/20";
+        } else if (estadoId === 3) {
+            rowClasses = "bg-success/20 border-success/20";
+        }
+
+        const newRow = document.createElement("tr");
+        newRow.className = rowClasses;
+        newRow.innerHTML = `
+            <td class="px-4 py-2 text-center">${stateDescription}</td>
+            <td class="px-4 py-2 text-center">${usuario}</td>
+            <td class="px-4 py-2 text-center">${fecha}</td>
+        `;
+        dropZone.appendChild(newRow);
+
+        // Enviar la solicitud AJAX para guardar el estado
+        axios.post("{{ route('guardarEstado') }}", {
+            idTicket: ticketId,
+            idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+            idUsuario: usuario,
+            comentarioflujo: 'Estado cambiado por drag & drop', // Comentario opcional
+        })
+        .then(response => {
+            // Si la respuesta es exitosa
+            console.log("Estado guardado exitosamente");
+            location.reload();
+            // Actualizar log de modificación
+            document.getElementById('ultimaModificacion').textContent = `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
+        })
+        .catch(error => {
+            // Manejar el error si ocurre
+            console.error("Error al guardar el estado", error);
         });
-        dropZone.addEventListener("drop", function(e) {
-            e.preventDefault();
-            const state = e.dataTransfer.getData("text/plain");
-            if (state) {
-                const draggableEl = document.querySelector(
-                    "#draggableContainer .draggable-state[data-state='" + state + "']");
-                if (draggableEl) {
-                    draggableEl.remove();
-                }
-                const usuario = "{{ auth()->user()->name }}";
-                const fecha = formatDate(new Date());
-                const newRow = document.createElement("tr");
-                let rowClasses = "";
-                if (state === "Recojo") {
-                    rowClasses = "bg-primary/20 border-primary/20";
-                } else if (state === "Coordinado") {
-                    rowClasses = "bg-secondary/20 border-secondary/20";
-                } else if (state === "Operativo") {
-                    rowClasses = "bg-success/20 border-success/20";
-                }
-                newRow.className = rowClasses;
-                newRow.innerHTML = `
-        <td class="px-4 py-2 text-center">${state}</td>
-        <td class="px-4 py-2 text-center">${usuario}</td>
-        <td class="px-4 py-2 text-center">${fecha}</td>
-      `;
-                dropZone.appendChild(newRow);
-                // Actualizar log de modificación por cambio de estado
-                document.getElementById('ultimaModificacion').textContent =
-                    `${fecha} por ${usuario}: Se modificó Estado a "${state}"`;
-            }
-        });
+    }
+});
+
+
+
 
         function reinitializeDraggable(element) {
             element.setAttribute("draggable", "true");

@@ -11,6 +11,8 @@ class TicketFlujo extends Model
 
     // Nombre de la tabla, ya que Laravel por convención espera el plural de la clase (ticketflujos)
     protected $table = 'ticketflujo';
+    protected $primaryKey = 'idTicketFlujo'; // Esto indica a Laravel que la clave primaria es 'idTicketFlujo'
+
 	public $timestamps = false;
 
     // Definir los campos que son asignables en masa

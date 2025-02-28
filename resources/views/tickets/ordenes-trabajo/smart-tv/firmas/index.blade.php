@@ -1,4 +1,4 @@
-<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">Firmas</span>
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Firmas</span>
 
 <!-- Contenedor general -->
 <div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">
@@ -32,22 +32,22 @@
 <!-- Botones adicionales -->
 <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-        style="background-color: #BDB762; border: none; box-shadow: none;" value="10" onclick="finalizarServicio()">
+        style="background-color: #BDB762; border: none; box-shadow: none;" value="7" onclick="finalizarServicio()">
         ✅ Visita finaliza correctamente
     </button>
 
 
     <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-        style="background-color: #B5FA37; border: none; box-shadow: none;"  value="11" onclick="coordinarRecojo()">
+        style="background-color: #B5FA37; border: none; box-shadow: none;"  value="8" onclick="coordinarRecojo()">
         📅 Pendiente recojo
     </button>
 
     <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-        style="background-color: #ADADAD; border: none; box-shadow: none;" value="12" onclick="fueraDeGarantia()">
+        style="background-color: #ADADAD; border: none; box-shadow: none;" value="6" onclick="fueraDeGarantia()">
         ⚠️ Fuera de Garantía
     </button>
     <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-        style="background-color: #FFFF00; border: none; box-shadow: none;" value="13" onclick="pendienteRepuestos()">
+        style="background-color: #FFFF00; border: none; box-shadow: none;" value="5" onclick="pendienteRepuestos()">
         ⏳ Pendiente de solicitud de repuesto
     </button>
 
@@ -107,46 +107,47 @@
         const ticketId = document.getElementById('ticketId').value; // Obtener el ID del ticket
         console.log("Actualizando estado para el ticket ID:", ticketId, "Estado:", estado);
 
-        fetch(`/tickets/${ticketId}/actualizar-estado`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    estado: estado // Enviar el estado a actualizar
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    toastr.success(data.message); // Mostrar mensaje de éxito
-                } else {
-                    toastr.error(data.message); // Mostrar mensaje de error
-                }
-            })
-            .catch(error => {
-                console.error('Error al actualizar estado:', error);
-                toastr.error('Hubo un error al actualizar el estado.');
-            });
-    }
+    fetch(`/tickets/${ticketId}/actualizar-estado`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            estado: estado  // Enviar el estado a actualizar
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            toastr.success(data.message); // Mostrar mensaje de éxito
+            location.reload();
+        } else {
+            toastr.error(data.message); // Mostrar mensaje de error
+        }
+    })
+    .catch(error => {
+        console.error('Error al actualizar estado:', error);
+        toastr.error('Hubo un error al actualizar el estado.');
+    });
+}
 
-    // Funciones para los botones
-    function finalizarServicio() {
-        actualizarEstado(10); // Estado "10" para finalizar servicio
-    }
+// Funciones para los botones
+function finalizarServicio() {
+    actualizarEstado(7); // Estado "10" para finalizar servicio
+}
 
-    function coordinarRecojo() {
-        actualizarEstado(11); // Estado "11" para coordinar recojo
-    }
+function coordinarRecojo() {
+    actualizarEstado(8); // Estado "11" para coordinar recojo
+}
 
-    function fueraDeGarantia() {
-        actualizarEstado(12); // Estado "12" para fuera de garantía
-    }
+function fueraDeGarantia() {
+    actualizarEstado(6); // Estado "12" para fuera de garantía
+}
 
-    function pendienteRepuestos() {
-        actualizarEstado(13); // Estado "13" para pendiente de repuestos
-    }
+function pendienteRepuestos() {
+    actualizarEstado(5); // Estado "13" para pendiente de repuestos
+}
 
     // Inicializar las firmas cuando el DOM esté listo
     document.addEventListener("DOMContentLoaded", () => {
