@@ -64,7 +64,6 @@
             <li>
                 <a href="javascript:;"
                     class="p-7 py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-[0_5px_15px_0_rgba(0,0,0,0.30)]"
-                     style="background-color: {{ $colorEstado }};"
                     :class="{ '!bg-success text-white': tab === 'detalle' }" @click="tab = 'detalle'">
                     <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
                         xmlns="http://www.w3.org/2000/svg">

@@ -31,10 +31,10 @@
 
 <!-- Botones adicionales -->
 <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <button type="button" class="btn btn-primary w-full" value="10" onclick="finalizarServicio()">✅ Visita finaliza correctamente</button>
-    <button type="button" class="btn btn-secondary w-full" value="11" onclick="coordinarRecojo()">📅 Pendiente recojo</button>
-    <button type="button" class="btn btn-warning w-full" value="12" onclick="fueraDeGarantia()">⚠️ Fuera de Garantía</button>
-    <button type="button" class="btn btn-info w-full" value="13" onclick="pendienteRepuestos()">⏳ Pendiente de solicitud de repuesto</button>
+    <button type="button" class="btn btn-primary w-full" value="7" onclick="finalizarServicio()">✅ Visita finaliza correctamente</button>
+    <button type="button" class="btn btn-secondary w-full" value="8" onclick="coordinarRecojo()">📅 Pendiente recojo</button>
+    <button type="button" class="btn btn-warning w-full" value="6" onclick="fueraDeGarantia()">⚠️ Fuera de Garantía</button>
+    <button type="button" class="btn btn-info w-full" value="5" onclick="pendienteRepuestos()">⏳ Pendiente de solicitud de repuesto</button>
 </div>
 
 <script>
@@ -105,6 +105,7 @@ function actualizarEstado(estado) {
     .then(data => {
         if (data.success) {
             toastr.success(data.message); // Mostrar mensaje de éxito
+            location.reload();
         } else {
             toastr.error(data.message); // Mostrar mensaje de error
         }
@@ -117,19 +118,19 @@ function actualizarEstado(estado) {
 
 // Funciones para los botones
 function finalizarServicio() {
-    actualizarEstado(10); // Estado "10" para finalizar servicio
+    actualizarEstado(7); // Estado "10" para finalizar servicio
 }
 
 function coordinarRecojo() {
-    actualizarEstado(11); // Estado "11" para coordinar recojo
+    actualizarEstado(8); // Estado "11" para coordinar recojo
 }
 
 function fueraDeGarantia() {
-    actualizarEstado(12); // Estado "12" para fuera de garantía
+    actualizarEstado(6); // Estado "12" para fuera de garantía
 }
 
 function pendienteRepuestos() {
-    actualizarEstado(13); // Estado "13" para pendiente de repuestos
+    actualizarEstado(5); // Estado "13" para pendiente de repuestos
 }
 
     // Inicializar las firmas cuando el DOM esté listo

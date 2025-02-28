@@ -300,32 +300,44 @@ class OrdenesTrabajoController extends Controller
         $marcas = Marca::all();
 
 
-   
-    // Buscar en ticketflujo el idTicketFlujo correspondiente al ticket y verificar el idEstadflujo
+
+
+
+
+// Buscar en ticketflujo el idTicketFlujo correspondiente al ticket y verificar el idEstadflujo
 $ticketFlujo = DB::table('ticketflujo')->where('idTicket', $id)->where('idEstadflujo', 1)->first();
 
-// Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 1 y 2
-if ($ticketFlujo) {
-    // Obtener los estados con idEstadflujo 1 y 2
+// Agregar condición para verificar si idEstadflujo es 3
+if ($ticketFlujo && $ticketFlujo->idEstadflujo == 4) {
+    // Si el ticket tiene un idEstadflujo = 3, solo mostrar los estados con idEstadflujo 4
     $estadosFlujo = DB::table('estado_flujo')
-        ->whereIn('idEstadflujo', [3])  // Solo obtener los estados 15 y 16
+        ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 4
         ->get();
 } else {
-    // Si no tiene idEstadflujo = 1, verificar si es 10 o 12
-    $ticketFlujoOtro = DB::table('ticketflujo')->where('idTicket', $id)
-                                                ->whereIn('idEstadflujo', [10, 12]) // Verificamos si es 10 o 12
-                                                ->first();
-
-    if ($ticketFlujoOtro) {
-        // Si tiene idEstadflujo 10 o 12, solo traer los estados con idEstadflujo 16
+    // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 1 y 2
+    if ($ticketFlujo) {
+        // Obtener los estados con idEstadflujo 1 y 2
         $estadosFlujo = DB::table('estado_flujo')
-            ->where('idEstadflujo', 16)  // Solo obtener el estado 16
+            ->whereIn('idEstadflujo', [3])  // Solo obtener los estados 15 y 16
             ->get();
     } else {
-        // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
-        $estadosFlujo = DB::table('estado_flujo')->get();
+        // Si no tiene idEstadflujo = 1, verificar si es 10 o 12
+        $ticketFlujoOtro = DB::table('ticketflujo')->where('idTicket', $id)
+                                                    ->whereIn('idEstadflujo', [10, 12]) // Verificamos si es 10 o 12
+                                                    ->first();
+
+        if ($ticketFlujoOtro) {
+            // Si tiene idEstadflujo 10 o 12, solo traer los estados con idEstadflujo 16
+            $estadosFlujo = DB::table('estado_flujo')
+                ->where('idEstadflujo', 16)  // Solo obtener el estado 16
+                ->get();
+        } else {
+            // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
+            $estadosFlujo = DB::table('estado_flujo')->get();
+        }
     }
 }
+
 
 
 
@@ -336,7 +348,6 @@ if ($ticketFlujo) {
             'orden',
             'modelos',
             'usuario',
-            'estadosFlujo',
             'clientes',
             'clientesGenerales',
             'tiendas',
@@ -1382,7 +1393,7 @@ public function guardar(Request $request)
         // Insertar en la tabla ticketflujo con idEstadflujo 14
         $ticketflujo = DB::table('ticketflujo')->insertGetId([
             'idTicket' => $request->idTickets,  // Usamos el idTickets de la solicitud
-            'idEstadflujo' => 14,               // Siempre 14 como estado
+            'idEstadflujo' => 9,               // Siempre 14 como estado
             'idUsuario' => auth()->id(),        // ID del usuario autenticado
             'fecha_creacion' => now(),          // Fecha actual
         ]);
@@ -1980,7 +1991,7 @@ public function actualizarEstado(Request $request, $idTicket)
     Log::info("Estado recibido: " . $validated['estado']);
 
     // Verificamos si el estado es uno de los valores válidos
-    $estadosValidos = [10, 11, 12, 13]; // Estos son los estados válidos: finalizar, coordinar recojo, fuera de garantía, pendiente repuestos
+    $estadosValidos = [7, 8, 6, 5]; // Estos son los estados válidos: finalizar, coordinar recojo, fuera de garantía, pendiente repuestos
 
     if (!in_array($validated['estado'], $estadosValidos)) {
         Log::error("Estado inválido recibido: " . $validated['estado']);
@@ -2026,6 +2037,43 @@ public function actualizarEstado(Request $request, $idTicket)
         return response()->json(['success' => false, 'message' => 'Hubo un error al actualizar el ticket'], 500);
     }
 }
+
+
+
+public function guardarEstadoflujo(Request $request)
+{
+    // Validar los datos
+    $request->validate([
+        'idTicket' => 'required|integer|exists:tickets,idTickets',
+        'idEstadflujo' => 'required|integer|exists:estado_flujo,idEstadflujo',
+        // No necesitas validar el idUsuario aquí, ya que lo vamos a obtener del usuario autenticado
+    ]);
+
+    // Obtener el ID del usuario autenticado
+    $idUsuario = auth()->user()->idUsuario;  // Asegúrate de usar auth()->user()->id
+
+    // Insertar el registro en la tabla ticketflujo
+    DB::table('ticketflujo')->insert([
+        'idTicket' => $request->idTicket,
+        'idEstadflujo' => $request->idEstadflujo,
+        'idUsuario' => $idUsuario,  // Usamos el ID del usuario autenticado
+        'fecha_creacion' => now(),
+        'comentarioflujo' => $request->comentarioflujo ?? '',
+    ]);
+
+    // Obtener el último idTicketFlujo insertado
+    $idTicketFlujo = DB::getPdo()->lastInsertId();
+
+    // Actualizar la tabla tickets con el idTicketFlujo recién creado
+    DB::table('tickets')
+        ->where('idTickets', $request->idTicket)
+        ->update([
+            'idTicketFlujo' => $idTicketFlujo,  // Asignamos el idTicketFlujo al ticket
+        ]);
+
+    return response()->json(['success' => true]);
+}
+
 
 
     

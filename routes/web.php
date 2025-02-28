@@ -433,6 +433,7 @@ Route::get('/visita/{ticketId}', [OrdenesTrabajoController::class, 'mostrarDetal
 
 Route::post('/tickets/{idTicket}/actualizar-estado', [OrdenesTrabajoController::class, 'actualizarEstado']);
 
+Route::post('/guardar-estado', [OrdenesTrabajoController::class, 'guardarEstadoflujo'])->name('guardarEstado');
 
 
 

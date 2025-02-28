@@ -149,10 +149,10 @@
             </tbody>
         </table>
     </div>
-    <!-- Div para mostrar la última modificación -->
-    <div class="mt-4">
-        Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
-    </div>
+
+
+
+
 <!-- Estados disponibles (draggables) -->
 <div class="mt-3 overflow-x-auto">
     <div id="draggableContainer" class="flex space-x-2">
@@ -163,6 +163,21 @@
         @endforeach
     </div>
 </div>
+
+
+
+
+
+
+
+    <!-- Div para mostrar la última modificación -->
+    <div class="mt-4">
+        Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
+    </div>
+
+
+
+
 
 </div>
 
@@ -360,6 +375,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+<!-- Agregar Axios desde un CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -464,52 +481,86 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-        /* ================================
-           Registro de cambios en drag & drop
-        ================================ */
-        const draggables = document.querySelectorAll(".draggable-state");
-        draggables.forEach(function(draggable) {
-            draggable.addEventListener("dragstart", function(e) {
-                e.dataTransfer.setData("text/plain", this.dataset.state);
-            });
-        });
+     // Pasa los estados de flujo desde Blade a JavaScript
+    const estadosFlujo = @json($estadosFlujo);
 
-        const dropZone = document.getElementById("estadosTableBody");
-        dropZone.addEventListener("dragover", function(e) {
-            e.preventDefault();
+// Función para obtener el ID del estado a partir de la descripción
+function getStateId(stateDescription) {
+    const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
+    return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
+}
+
+// Código drag & drop
+const draggables = document.querySelectorAll(".draggable-state");
+draggables.forEach(function(draggable) {
+    draggable.addEventListener("dragstart", function(e) {
+        e.dataTransfer.setData("text/plain", this.dataset.state);  // Obtén la descripción del estado
+    });
+});
+
+const dropZone = document.getElementById("estadosTableBody");
+dropZone.addEventListener("dragover", function(e) {
+    e.preventDefault();
+});
+
+dropZone.addEventListener("drop", function(e) {
+    e.preventDefault();
+    const stateDescription = e.dataTransfer.getData("text/plain");
+    if (stateDescription) {
+        const draggableEl = document.querySelector(
+            "#draggableContainer .draggable-state[data-state='" + stateDescription + "']");
+        if (draggableEl) {
+            draggableEl.remove();
+        }
+
+        const usuario = "{{ auth()->user()->id }}";  // Utiliza el ID del usuario autenticado
+        const fecha = formatDate(new Date());
+        const ticketId = "{{ $ticket->idTickets }}";  // Obtén el ID del ticket
+
+        // Obtener el ID del estado basado en la descripción
+        const estadoId = getStateId(stateDescription);
+
+        let rowClasses = "";
+        if (estadoId === 1) {
+            rowClasses = "bg-primary/20 border-primary/20";
+        } else if (estadoId === 2) {
+            rowClasses = "bg-secondary/20 border-secondary/20";
+        } else if (estadoId === 3) {
+            rowClasses = "bg-success/20 border-success/20";
+        }
+
+        const newRow = document.createElement("tr");
+        newRow.className = rowClasses;
+        newRow.innerHTML = `
+            <td class="px-4 py-2 text-center">${stateDescription}</td>
+            <td class="px-4 py-2 text-center">${usuario}</td>
+            <td class="px-4 py-2 text-center">${fecha}</td>
+        `;
+        dropZone.appendChild(newRow);
+
+        // Enviar la solicitud AJAX para guardar el estado
+        axios.post("{{ route('guardarEstado') }}", {
+            idTicket: ticketId,
+            idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+            idUsuario: usuario,
+            comentarioflujo: 'Estado cambiado por drag & drop', // Comentario opcional
+        })
+        .then(response => {
+            // Si la respuesta es exitosa
+            console.log("Estado guardado exitosamente");
+            location.reload();
+            // Actualizar log de modificación
+            document.getElementById('ultimaModificacion').textContent = `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
+        })
+        .catch(error => {
+            // Manejar el error si ocurre
+            console.error("Error al guardar el estado", error);
         });
-        dropZone.addEventListener("drop", function(e) {
-            e.preventDefault();
-            const state = e.dataTransfer.getData("text/plain");
-            if (state) {
-                const draggableEl = document.querySelector(
-                    "#draggableContainer .draggable-state[data-state='" + state + "']");
-                if (draggableEl) {
-                    draggableEl.remove();
-                }
-                const usuario = "{{ auth()->user()->name }}";
-                const fecha = formatDate(new Date());
-                const newRow = document.createElement("tr");
-                let rowClasses = "";
-                if (state === "Recojo") {
-                    rowClasses = "bg-primary/20 border-primary/20";
-                } else if (state === "Coordinado") {
-                    rowClasses = "bg-secondary/20 border-secondary/20";
-                } else if (state === "Operativo") {
-                    rowClasses = "bg-success/20 border-success/20";
-                }
-                newRow.className = rowClasses;
-                newRow.innerHTML = `
-        <td class="px-4 py-2 text-center">${state}</td>
-        <td class="px-4 py-2 text-center">${usuario}</td>
-        <td class="px-4 py-2 text-center">${fecha}</td>
-      `;
-                dropZone.appendChild(newRow);
-                // Actualizar log de modificación por cambio de estado
-                document.getElementById('ultimaModificacion').textContent =
-                    `${fecha} por ${usuario}: Se modificó Estado a "${state}"`;
-            }
-        });
+    }
+});
+
+
+
 
         function reinitializeDraggable(element) {
             element.setAttribute("draggable", "true");
