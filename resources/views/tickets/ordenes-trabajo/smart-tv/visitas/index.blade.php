@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <!-- Botón para abrir el modal de crear visita -->
-<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">
     Coordinación
 </span>
 
