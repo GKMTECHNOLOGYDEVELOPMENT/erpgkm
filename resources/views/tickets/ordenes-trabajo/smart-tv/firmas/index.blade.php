@@ -1,26 +1,26 @@
-<span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">Firmas</span>
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Firmas</span>
 
 <!-- Contenedor general -->
 <div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">
     <!-- Firma del Técnico -->
     <div class="w-full md:w-[500px] flex flex-col items-center">
-        <p class="mb-2 text-lg font-medium text-center">Firma del Técnico</p>
+        <p class="mb-2 text-lg font-bold text-center">FIRMA DEL TÉCNICO</p>
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
             <img id="firmaTecnicoImg" class="w-full h-full object-contain" src="" alt="Firma del Técnico">
         </div>
         <div class="flex space-x-3 mt-4">
-           
+
         </div>
     </div>
 
-   <!-- Firma del Cliente -->
+    <!-- Firma del Cliente -->
     <div class="w-full md:w-[500px] flex flex-col items-center">
-        <p class="mb-2 text-lg font-medium text-center">Firma del Cliente</p>
+        <p class="mb-2 text-lg font-bold text-center">FIRMA DEL CLIENTE</p>
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
             <img id="firmaClienteImg" class="w-full h-full object-contain" src="" alt="Firma del Cliente">
         </div>
         <!-- Mensaje si no hay firma -->
-        <p id="noFirmaCliente" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita o cliente.</p>
+        {{-- <p id="noFirmaCliente" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita o cliente.</p> --}}
         <!-- Botón de refrescar -->
         <button type="button" class="btn btn-info mt-4" onclick="cargarFirmaCliente();">🔄 Refrescar Firma</button>
     </div>
@@ -31,10 +31,26 @@
 
 <!-- Botones adicionales -->
 <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <button type="button" class="btn btn-primary w-full" value="7" onclick="finalizarServicio()">✅ Visita finaliza correctamente</button>
-    <button type="button" class="btn btn-secondary w-full" value="8" onclick="coordinarRecojo()">📅 Pendiente recojo</button>
-    <button type="button" class="btn btn-warning w-full" value="6" onclick="fueraDeGarantia()">⚠️ Fuera de Garantía</button>
-    <button type="button" class="btn btn-info w-full" value="5" onclick="pendienteRepuestos()">⏳ Pendiente de solicitud de repuesto</button>
+    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+        style="background-color: #BDB762; border: none; box-shadow: none;" value="7" onclick="finalizarServicio()">
+        ✅ Visita finaliza correctamente
+    </button>
+
+
+    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+        style="background-color: #B5FA37; border: none; box-shadow: none;"  value="8" onclick="coordinarRecojo()">
+        📅 Pendiente recojo
+    </button>
+
+    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+        style="background-color: #ADADAD; border: none; box-shadow: none;" value="6" onclick="fueraDeGarantia()">
+        ⚠️ Fuera de Garantía
+    </button>
+    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+        style="background-color: #FFFF00; border: none; box-shadow: none;" value="5" onclick="pendienteRepuestos()">
+        ⏳ Pendiente de solicitud de repuesto
+    </button>
+
 </div>
 
 <script>
@@ -86,10 +102,10 @@
         noFirmaCliente.classList.remove('hidden'); // Mostrar mensaje de "No hay firma"
     }
 
-// Función para actualizar el estado
-function actualizarEstado(estado) {
-    const ticketId = document.getElementById('ticketId').value; // Obtener el ID del ticket
-    console.log("Actualizando estado para el ticket ID:", ticketId, "Estado:", estado);
+    // Función para actualizar el estado
+    function actualizarEstado(estado) {
+        const ticketId = document.getElementById('ticketId').value; // Obtener el ID del ticket
+        console.log("Actualizando estado para el ticket ID:", ticketId, "Estado:", estado);
 
     fetch(`/tickets/${ticketId}/actualizar-estado`, {
         method: 'POST',

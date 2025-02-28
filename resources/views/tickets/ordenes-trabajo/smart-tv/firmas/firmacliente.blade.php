@@ -7,7 +7,7 @@
 <div class="flex justify-center items-center min-h-screen">
     <!-- Contenedor de la firma del cliente -->
     <div class="w-full max-w-[300px] flex flex-col items-center">
-        <span class="text-lg font-semibold mb-4 badge bg-success">Firma del Cliente</span>
+        <span class="text-lg font-semibold mb-4 badge bg-success">FIRMA DEL CLIENTE</span>
         <div class="w-full h-[300px] border-2 border-gray-300 rounded-lg relative">
             <canvas id="signatureCanvasCliente" class="w-full h-full"></canvas>
         </div>
