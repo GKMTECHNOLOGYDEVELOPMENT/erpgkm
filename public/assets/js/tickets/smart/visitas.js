@@ -170,6 +170,40 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
 
 
+        document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
+          button.addEventListener('click', function () {
+            const idTicket = this.getAttribute('data-id-ticket'); // ID del ticket
+            const idVisita = this.getAttribute('data-id-visita'); // ID de la visita
+            const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
+
+            // Llamada al backend para guardar la visita seleccionada
+            fetch('/api/seleccionar-visita', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF Token si estás usando Blade en Laravel
+              },
+              body: JSON.stringify({
+                idTickets: idTicket,
+                idVisitas: idVisita,
+                vistaseleccionada: nombreVisita
+              })
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // toastr.success(data.message);  // Muestra el mensaje de éxito
+                } else {
+                  toastr.error(data.message);  // Muestra el mensaje de error
+                }
+              })
+              .catch(error => {
+                console.error('Error al seleccionar la visita:', error);
+                toastr.error('Hubo un error al seleccionar la visita.');
+              });
+          });
+        });
+
 
         // Verificar si ya existe un registro de "Inicio de Servicio"
         fetch(`/api/verificarRegistroAnexo/${visita.idVisitas}`)
@@ -625,29 +659,29 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                   
                                       <!-- Contenido -->
                                       <div class="grid grid-cols-3 text-center gap-2 p-2">
-                                        <span class="badge bg-green-600 text-white text-xs px-3 py-1 rounded-lg shadow-md">Llegada al Servicio</span>
-                                        <span class="badge bg-green-600 text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                                        <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">Llegada al Servicio</span>
+                                        <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">
                                           ${visita.ubicacion || 'Ubicación no disponible'}
                                         </span>
-                                        <span class="badge bg-green-600 text-white text-xs px-3 py-1 rounded-lg shadow-md">
+                                        <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md">
                                           ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
                                         </span>
                                       </div>
                                   
                                       <!-- Mensaje -->
                                       <div class="text-center">
-                                        <p class="text-gray-800 font-semibold">El servicio ha comenzado.</p>
+                                       
                                       </div>
                                   
                                       <!-- Botones de acción -->
                                       <div class="flex justify-center gap-3 mt-4">
-                                        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full shadow-md
+                                        <button class="badge bg-success hover:bg-green-700 text-white px-4 py-2 rounded-full shadow-md
                                                        transition-all duration-200 flex items-center gap-2"
                                                        id="uploadPhotoButton-${visita.idVisitas}">
                                           <i class="fa-solid fa-camera text-lg"></i> Subir Foto
                                         </button>
                                   
-                                        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-md
+                                        <button class="badge bg-success hover:bg-red-700 text-white px-4 py-2 rounded-full shadow-md
                                                        transition-all duration-200 flex items-center gap-2"
                                                        id="siguiente-${visita.idVisitas}">
                                           <i class="fa-solid fa-arrow-right text-lg"></i> Siguiente

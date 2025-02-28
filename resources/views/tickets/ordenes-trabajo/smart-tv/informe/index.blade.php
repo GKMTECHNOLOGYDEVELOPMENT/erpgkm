@@ -35,7 +35,7 @@
 
                 // Cargar PDF al inicio
                 ajustarAltura();
-         
+  
                 window.addEventListener('resize', ajustarAltura);
             });
         </script>

@@ -104,11 +104,7 @@
             return;
         }
 
-        // Validar si el servicio está siendo atendido y si se cargó la imagen
-        if (!condiciones.noAtiende && !condiciones.imagen) {
-            toastr.error('Debe cargar una imagen cuando el servicio es atendido.');
-            return;
-        }
+       
 
         // Preparar los datos para enviar
         const datos = new FormData();

@@ -45,7 +45,7 @@
         cargarPdf() {
             const iframe = document.getElementById('informePdfFrame');
 
-             const loadingSpinner = document.getElementById('loadingSpinner');
+             const loadingSpinner = document.getElementById('loadingSpinner'); 
 
             // Mostrar el spinner
             loadingSpinner.classList.remove('hidden');
