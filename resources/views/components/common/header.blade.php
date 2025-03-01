@@ -387,14 +387,15 @@
                                 </div>
                                 <div class="ltr:pl-4 rtl:pr-4 truncate">
                                     <h4 class="text-base">
-                                        {{ isset($usuario) ? $usuario->Nombre . ' ' . $usuario->apellidoPaterno . ' ' . $usuario->apellidoMaterno : 'Nombre desconocido' }}
-                                        <span class="text-xs bg-success-light rounded text-success px-1 ltr:ml-2 rtl:ml-2">
-                                            {{ isset($usuario) ? $usuario->rol->nombre : 'Rol desconocido' }}
+                                    {{ auth()->user()->Nombre }} 
+                                    <span class="text-xs bg-success-light rounded text-success px-1 ltr:ml-2 rtl:ml-2">
+                                    {{ auth()->user()->rol->nombre ?? 'Rol no definido' }} Si tienes una relación de rol
+
                                         </span>
                                     </h4>
                                     <a class="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
                                     href="javascript:;">
-                                        {{ isset($usuario) ? $usuario->correo : 'Correo no disponible' }}
+                                    {{ auth()->user()->correo }}
                                     </a>
                                 </div>
                             </div>

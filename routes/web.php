@@ -400,7 +400,12 @@ Route::get('/usuario', [UsuarioController::class, 'index'])->name('usuario');
 Route::get('/create/usuario', [UsuarioController::class, 'create'])->name('usuario.create');
 Route::get('/usuario/{usuario}/edit', [UsuarioController::class, 'edit'])->name('usuario.edit');
 Route::post('/usuario/store', [UsuarioController::class, 'store'])->name('usuarios.store');
+
+
 Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
+
+
+
 Route::put('config/{id}', [UsuarioController::class, 'config'])->name('usuario.config');
 Route::put('direccion/{id}', [UsuarioController::class, 'direccion'])->name('usuario.direccion');
 Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'actualizarFirma'])->name('usuario.firma');

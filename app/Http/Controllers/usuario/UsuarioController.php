@@ -12,6 +12,7 @@ use App\Models\Tipousuario;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class UsuarioController extends Controller
@@ -87,6 +88,11 @@ class UsuarioController extends Controller
         ->with('success', 'Usuario creado correctamente');
     }
 
+
+
+
+
+
     public function edit($id)
 {
     $usuario = Usuario::findOrFail($id); // Buscar al usuario por id
@@ -139,6 +145,11 @@ class UsuarioController extends Controller
 }
 
 
+
+
+
+
+
 public function update(Request $request, $id)
 {
     // Validar los datos del formulario
@@ -147,18 +158,27 @@ public function update(Request $request, $id)
         'apellidoPaterno' => 'required|string|max:255',
         'apellidoMaterno' => 'required|string|max:255',
         'idTipoDocumento' => 'required|integer',
-        'documento' => 'required|string|max:255',
-        'telefono' => 'required|string|max:255',
-        'correo' => 'required|email|max:255',
+        'documento' => 'required|string|max:255|unique:usuarios,documento,' . $id . ',idUsuario', // Asegúrate de que no se repita el documento
+        'telefono' => 'required|string|max:255|unique:usuarios,telefono,' . $id . ',idUsuario', // Asegúrate de que no se repita el teléfono
+        'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id . ',idUsuario', // Asegúrate de que no se repita el correo
         'profile-image' => 'nullable|image|max:1024',
     ]);
+
+    Log::info('Inicio de la actualización de usuario', ['user_id' => $id]);
 
     // Buscar al usuario y actualizar sus datos
     $usuario = Usuario::findOrFail($id);
 
+    Log::info('Usuario encontrado', ['usuario' => $usuario]);
+
+    // Si se ha subido una imagen de perfil, actualizarla
     if ($request->hasFile('profile-image')) {
         $image = $request->file('profile-image');
-        $imageData = file_get_contents($image); // Obtener el contenido binario de la imagen
+        // Asegurarse de que la imagen esté correctamente codificada en base64
+        $imageData = base64_encode(file_get_contents($image)); // Convertir la imagen a base64
+
+        Log::info('Imagen de perfil cargada', ['image_name' => $image->getClientOriginalName(), 'image_size' => $image->getSize()]);
+
         $usuario->avatar = $imageData;
     }
 
@@ -170,22 +190,47 @@ public function update(Request $request, $id)
     $usuario->documento = $request->documento;
     $usuario->telefono = $request->telefono;
     $usuario->correo = $request->correo;
+
+    Log::info('Datos de usuario actualizados', [
+        'Nombre' => $usuario->Nombre,
+        'apellidoPaterno' => $usuario->apellidoPaterno,
+        'apellidoMaterno' => $usuario->apellidoMaterno,
+        'telefono' => $usuario->telefono,
+        'correo' => $usuario->correo,
+    ]);
+
     $usuario->save();
 
-    return redirect()->route('usuario.edit', ['usuario' => $usuario->idUsuario])
-        ->with('success', 'Usuario actualizado correctamente');
+    Log::info('Usuario guardado exitosamente', ['usuario_id' => $usuario->idUsuario]);
+
+    // Devolver la respuesta JSON con los datos actualizados
+    return response()->json([
+        'success' => true,
+        'message' => 'Usuario actualizado correctamente',
+        'usuario' => $usuario,
+        'avatar' => $usuario->avatar // Si deseas enviar el avatar actualizado
+    ], 200); // Asegúrate de enviar el código de estado 200 (OK)
 }
+
+
+
+
+
+
+
+
+
 
 public function config(Request $request, $id)
 {
-    // Validación
+    // Validación de los campos, asegurando que no se repitan en la base de datos
     $request->validate([
         'sueldoPorHora' => 'required|numeric',
-        'idSucursal' => 'required|integer',
-        'idTipoUsuario' => 'required|integer',
-        'idSexo' => 'required|integer',
-        'idRol' => 'required|integer',
-        'idTipoArea' => 'required|integer',
+        'idSucursal' => 'required|integer|exists:sucursal,idSucursal',  // Verifica si la sucursal existe
+        'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',  // Verifica si el tipo de usuario existe
+        'idSexo' => 'required|integer|exists:sexo,idSexo',  // Verifica si el sexo existe
+        'idRol' => 'required|integer|exists:rol,idRol',  // Verifica si el rol existe
+        'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',  // Verifica si el tipo de área existe
     ]);
 
     // Obtener el usuario
@@ -202,9 +247,20 @@ public function config(Request $request, $id)
     // Guardar los cambios
     $usuario->save();
 
-    return redirect()->route('usuario.edit', ['usuario' => $usuario->idUsuario])
-    ->with('success', 'Usuario actualizado correctamente');
+    // Respuesta exitosa en formato JSON
+    return response()->json([
+        'success' => true,
+        'message' => 'Usuario actualizado correctamente',
+        'usuario' => $usuario
+    ], 200);
 }
+
+
+
+
+
+
+
 
 public function direccion(Request $request, $id)
 {

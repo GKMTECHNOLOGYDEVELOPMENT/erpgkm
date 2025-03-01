@@ -1,4 +1,6 @@
 <x-layout.default>
+    <!-- Incluye la biblioteca Signature Pad -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <!-- Cargar jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Incluir el archivo CSS de Nice Select -->
@@ -89,267 +91,345 @@
                         </a>
                     </li>
                 </ul>
+                
                 <template x-if="tab === 'home'">
                     <div>
-                        <form action="{{ route('usuarios.update', $usuario->idUsuario) }}" method="POST" enctype="multipart/form-data" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
-                            @csrf
-                            @method('PUT')
-                            <h6 class="text-lg font-bold mb-5">Información General</h6>
-                            <div class="flex flex-col sm:flex-row">
-                                <!-- Imagen de perfil -->
-                                <div class="ltr:sm:mr-4 rtl:sm:ml-4 w-full sm:w-2/12 mb-5">
-                                    <label for="profile-image">
-                                        <img id="profile-img" src="{{ $usuario->avatar ? 'data:image/jpeg;base64,'.base64_encode($usuario->avatar) : '/assets/images/profile-34.jpeg' }}" alt="image"
-                                            class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto cursor-pointer" />
-                                    </label>
-                                    <input type="file" id="profile-image" name="profile-image" style="display:none;" accept="image/*" onchange="previewImage(event)" />
-                                </div>
-
-                                <!-- Formulario de campos -->
-                                <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <!-- Nombre Completo -->
-                                    <div>
-                                        <label for="Nombre">Nombre Completo</label>
-                                        <input id="Nombre" name="Nombre" type="text" value="{{ $usuario->Nombre }}" class="form-input" />
-                                    </div>
-
-                                    <!-- Apellido Paterno -->
-                                    <div>
-                                        <label for="apellidoPaterno">Apellido Paterno</label>
-                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text" value="{{ $usuario->apellidoPaterno }}" class="form-input" />
-                                    </div>
-
-                                    <!-- Apellido Materno -->
-                                    <div>
-                                        <label for="apellidoMaterno">Apellido Materno</label>
-                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text" value="{{ $usuario->apellidoMaterno }}" class="form-input" />
-                                    </div>
-
-                                    <!-- Tipo Documento -->
-                                    <div>
-                                        <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
-                                        <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
-                                            <option value="" disabled>Seleccionar Tipo Documento</option>
-                                            @foreach ($tiposDocumento as $tipoDocumento)
-                                            <option value="{{ $tipoDocumento->idTipoDocumento }}" {{ $tipoDocumento->idTipoDocumento == $usuario->idTipoDocumento ? 'selected' : '' }}>
-                                                {{ $tipoDocumento->nombre }}
-                                            </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <!-- Documento -->
-                                    <div>
-                                        <label for="documento">Documento</label>
-                                        <input id="documento" name="documento" type="text" value="{{ $usuario->documento }}" class="form-input" />
-                                    </div>
-
-                                    <!-- Teléfono -->
-                                    <div>
-                                        <label for="telefono">Teléfono</label>
-                                        <input id="telefono" type="text" name="telefono" value="{{ $usuario->telefono }}" class="form-input" />
-                                    </div>
-
-                                    <!-- Email -->
-                                    <div>
-                                        <label for="correo">Email</label>
-                                        <input id="correo" name="correo" type="email" value="{{ $usuario->correo }}" class="form-input" />
-                                    </div>
-
-                                    <!-- Sexo -->
-                                    <div>
-                                        <label for="sexo" class="block text-sm font-medium">Sexo</label>
-                                        <select id="sexo" name="sexo" class="select2 w-full" style="display:none">
-                                            <option value="" disabled>Seleccionar Sexo</option>
-                                            <option value="M" {{ $usuario->sexo == 'M' ? 'selected' : '' }}>Masculino</option>
-                                            <option value="F" {{ $usuario->sexo == 'F' ? 'selected' : '' }}>Femenino</option>
-                                            <option value="O" {{ $usuario->sexo == 'O' ? 'selected' : '' }}>Otro</option>
-                                        </select>
-                                    </div>
+                      
+                    
 
 
-                                    <!-- Botones -->
-                                    <div class="sm:col-span-2 mt-3">
-                                        <button type="submit" class="btn btn-primary mr-2">Actualizar</button>
-                                        <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+                    
+                    
+                    <form id="update-form" method="POST" enctype="multipart/form-data" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
+    @csrf
+    @method('PUT')
+    <h6 class="text-lg font-bold mb-5">Información General</h6>
+    <div class="flex flex-col sm:flex-row">
+        <!-- Imagen de perfil -->
+        <div class="ltr:sm:mr-4 rtl:sm:ml-4 w-full sm:w-2/12 mb-5">
+            <label for="profile-image">
+                <img id="profile-img" src="{{ $usuario->avatar ? 'data:image/jpeg;base64,'.base64_encode($usuario->avatar) : '/assets/images/profile-34.jpeg' }}" alt="image"
+                    class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto cursor-pointer" />
+            </label>
+            <input type="file" id="profile-image" name="profile-image" style="display:none;" accept="image/*" onchange="previewImage(event)" />
+        </div>
+
+        <!-- Formulario de campos -->
+        <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <!-- Nombre Completo -->
+            <div>
+                <label for="Nombre">Nombre Completo</label>
+                <input id="Nombre" name="Nombre" type="text" value="{{ $usuario->Nombre }}" class="form-input" />
+            </div>
+
+            <!-- Apellido Paterno -->
+            <div>
+                <label for="apellidoPaterno">Apellido Paterno</label>
+                <input id="apellidoPaterno" name="apellidoPaterno" type="text" value="{{ $usuario->apellidoPaterno }}" class="form-input" />
+            </div>
+
+            <!-- Apellido Materno -->
+            <div>
+                <label for="apellidoMaterno">Apellido Materno</label>
+                <input id="apellidoMaterno" name="apellidoMaterno" type="text" value="{{ $usuario->apellidoMaterno }}" class="form-input" />
+            </div>
+
+            <!-- Tipo Documento -->
+            <div>
+                <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
+                <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
+                    <option value="" disabled>Seleccionar Tipo Documento</option>
+                    @foreach ($tiposDocumento as $tipoDocumento)
+                    <option value="{{ $tipoDocumento->idTipoDocumento }}" {{ $tipoDocumento->idTipoDocumento == $usuario->idTipoDocumento ? 'selected' : '' }}>
+                        {{ $tipoDocumento->nombre }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Documento -->
+            <div>
+                <label for="documento">Documento</label>
+                <input id="documento" name="documento" type="text" value="{{ $usuario->documento }}" class="form-input" />
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+                <label for="telefono">Teléfono</label>
+                <input id="telefono" type="text" name="telefono" value="{{ $usuario->telefono }}" class="form-input" />
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="correo">Email</label>
+                <input id="correo" name="correo" type="email" value="{{ $usuario->correo }}" class="form-input" />
+            </div>
+
+            <!-- Botones -->
+            <div class="sm:col-span-2 mt-3">
+                <button type="submit" class="btn btn-primary mr-2">Actualizar</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- jQuery (si no lo has incluido antes) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+
+<!-- Toastr CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+
+<script>
+$(document).ready(function() {
+    $('#update-form').on('submit', function(event) {
+        event.preventDefault();  // Prevenir la recarga de la página
+        
+        var formData = new FormData(this);
+        
+        $.ajax({
+            url: '{{ route("usuarios.update", $usuario->idUsuario) }}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    // Aquí puedes actualizar el contenido de la página con los nuevos datos
+                    $('#profile-img').attr('src', 'data:image/jpeg;base64,' + btoa(String.fromCharCode.apply(null, new Uint8Array(response.usuario.avatar)))); 
+                    $('#Nombre').val(response.usuario.Nombre);
+                    $('#apellidoPaterno').val(response.usuario.apellidoPaterno);
+                    $('#apellidoMaterno').val(response.usuario.apellidoMaterno);
+                    $('#documento').val(response.usuario.documento);
+                    $('#telefono').val(response.usuario.telefono);
+                    $('#correo').val(response.usuario.correo);
+                } else {
+                    toastr.error('Hubo un problema al actualizar');
+                }
+            },
+            error: function(xhr, status, error) {
+                // Verificar si el error proviene de un problema de validación
+                if (xhr.status === 422) {
+                    var errors = xhr.responseJSON.errors;
+                    // Mostrar todos los errores usando toastr
+                    for (var field in errors) {
+                        if (errors.hasOwnProperty(field)) {
+                            toastr.error(errors[field].join(', ')); // Unir los mensajes de error si hay más de uno
+                        }
+                    }
+                } else {
+                    toastr.error('Hubo un error al intentar actualizar los datos');
+                }
+            }
+        });
+    });
+});
+</script>
 
 
 
-                        <form action="{{ route('usuario.config', $usuario->idUsuario) }}" method="POST" enctype="multipart/form-data" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
-                            @csrf
-                            @method('PUT')
-                            <h6 class="text-lg font-bold mb-5">Información Importante</h6>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
-                                <!-- Sueldo por Hora -->
-                                <div>
-                                    <label for="sueldoPorHora">Sueldo por Hora</label>
-                                    <input type="number" name="sueldoPorHora" id="sueldoPorHora" placeholder="Ejemplo: 20.5" class="form-input" step="0.01" value="{{ $usuario->sueldoPorHora }}" />
-                                </div>
 
-                                <!-- Sucursal -->
-                                <div>
-                                    <label for="idSucursal">Sucursal</label>
-                                    <select name="idSucursal" id="idSucursal" class="form-input">
-                                        <option value="" disabled>Selecciona una Sucursal</option>
-                                        @foreach ($sucursales as $sucursal)
-                                        <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
 
-                                <!-- Tipo de Usuario -->
-                                <div>
-                                    <label for="idTipoUsuario">Tipo de Usuario</label>
-                                    <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
-                                        <option value="" disabled>Selecciona un Tipo de Usuario</option>
-                                        @foreach ($tiposUsuario as $tipoUsuario)
-                                        <option value="{{ $tipoUsuario->idTipoUsuario }}">{{ $tipoUsuario->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
 
-                                <!-- Sexo -->
-                                <div>
-                                    <label for="idSexo">Sexo</label>
-                                    <select name="idSexo" id="idSexo" class="form-input">
-                                        <option value="" disabled>Selecciona un Sexo</option>
-                                        @foreach ($sexos as $sexo)
-                                        <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
 
-                                <!-- Rol -->
-                                <div>
-                                    <label for="idRol">Rol</label>
-                                    <select name="idRol" id="idRol" class="form-input">
-                                        <option value="" disabled>Selecciona un Rol</option>
-                                        @foreach ($roles as $rol)
-                                        <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
 
-                                <!-- Tipo de Área -->
-                                <div>
-                                    <label for="idTipoArea">Tipo de Área</label>
-                                    <select name="idTipoArea" id="idTipoArea" class="form-input">
-                                        <option value="" disabled>Selecciona un Tipo de Área</option>
-                                        @foreach ($tiposArea as $tipoArea)
-                                        <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
 
-                                <!-- Botones -->
-                                <div class="sm:col-span-2 mt-3">
-                                    <button type="submit" class="btn btn-primary mr-2">Actualizar</button>
-                                    <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
-                                </div>
-                            </div>
-                        </form>
+
+
+
+
+<form id="config-form" method="POST" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
+    @csrf
+    @method('PUT')
+    <h6 class="text-lg font-bold mb-5">Información Importante</h6>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        
+        <!-- Sueldo por Hora -->
+        <div>
+            <label for="sueldoPorHora">Sueldo por Hora</label>
+            <input type="number" name="sueldoPorHora" id="sueldoPorHora" placeholder="Ejemplo: 20.5" class="form-input" step="0.01" value="{{ $usuario->sueldoPorHora }}" />
+        </div>
+
+        <!-- Sucursal -->
+        <div>
+            <label for="idSucursal">Sucursal</label>
+            <select name="idSucursal" id="idSucursal" class="form-input">
+                <option value="" disabled>Selecciona una Sucursal</option>
+                @foreach ($sucursales as $sucursal)
+                    <option value="{{ $sucursal->idSucursal }}" {{ $usuario->idSucursal == $sucursal->idSucursal ? 'selected' : '' }}>{{ $sucursal->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Tipo de Usuario -->
+        <div>
+            <label for="idTipoUsuario">Tipo de Usuario</label>
+            <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
+                <option value="" disabled>Selecciona un Tipo de Usuario</option>
+                @foreach ($tiposUsuario as $tipoUsuario)
+                    <option value="{{ $tipoUsuario->idTipoUsuario }}" {{ $usuario->idTipoUsuario == $tipoUsuario->idTipoUsuario ? 'selected' : '' }}>{{ $tipoUsuario->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Sexo -->
+        <div>
+            <label for="idSexo">Sexo</label>
+            <select name="idSexo" id="idSexo" class="form-input">
+                <option value="" disabled>Selecciona un Sexo</option>
+                @foreach ($sexos as $sexo)
+                    <option value="{{ $sexo->idSexo }}" {{ $usuario->idSexo == $sexo->idSexo ? 'selected' : '' }}>{{ $sexo->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Rol -->
+        <div>
+            <label for="idRol">Rol</label>
+            <select name="idRol" id="idRol" class="form-input">
+                <option value="" disabled>Selecciona un Rol</option>
+                @foreach ($roles as $rol)
+                    <option value="{{ $rol->idRol }}" {{ $usuario->idRol == $rol->idRol ? 'selected' : '' }}>{{ $rol->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Tipo de Área -->
+        <div>
+            <label for="idTipoArea">Tipo de Área</label>
+            <select name="idTipoArea" id="idTipoArea" class="form-input">
+                <option value="" disabled>Selecciona un Tipo de Área</option>
+                @foreach ($tiposArea as $tipoArea)
+                    <option value="{{ $tipoArea->idTipoArea }}" {{ $usuario->idTipoArea == $tipoArea->idTipoArea ? 'selected' : '' }}>{{ $tipoArea->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Botones -->
+        <div class="sm:col-span-2 mt-3">
+            <button type="submit" class="btn btn-primary mr-2">Actualizar Información</button>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function() {
+        $('#config-form').on('submit', function(event) {
+            event.preventDefault();  // Prevenir la recarga de la página
+
+            var formData = $(this).serialize();  // Usamos serialize para enviar los datos como JSON
+            
+            $.ajax({
+                url: '{{ route('usuario.config', $usuario->idUsuario) }}',
+                type: 'PUT',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        // Aquí puedes actualizar los datos en el DOM si lo deseas
+                        // Ejemplo: actualizar los valores en los campos de entrada
+                        $('#sueldoPorHora').val(response.usuario.sueldoPorHora);
+                        $('#idSucursal').val(response.usuario.idSucursal);
+                        $('#idTipoUsuario').val(response.usuario.idTipoUsuario);
+                        $('#idSexo').val(response.usuario.idSexo);
+                        $('#idRol').val(response.usuario.idRol);
+                        $('#idTipoArea').val(response.usuario.idTipoArea);
+                    }
+                },
+                error: function(xhr) {
+                    // Si hay errores, manejamos la respuesta de error
+                    var errors = xhr.responseJSON.errors;
+                    if (errors) {
+                        // Mostrar los errores en el frontend
+                        for (var field in errors) {
+                            toastr.error(errors[field].join(", "));
+                        }
+                    } else {
+                        toastr.error('Hubo un error al intentar actualizar los datos');
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+
+
+
+
+
+
 
                     </div>
                 </template>
+
+
+
+
                 <template x-if="tab === 'payment-details'">
-                    <div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-                        <div class="panel">
+
+
+
+    <div>
+
+
+
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+      
+    
+    <div class="panel">
     <div class="mb-5">
         <h5 class="font-semibold text-lg mb-4">Firma Digital</h5>
         <p>Por favor, firme en el área de abajo para completar el proceso de validación.</p>
+        
+        <!-- Lienzo para la firma -->
+        <canvas id="signature-pad" width="700" height="300" style="border: 1px solid #000;"></canvas>
+        
+        <!-- Botones para limpiar y guardar la firma -->
+        <div class="mt-3">
+            <button id="clear-btn" class="bg-gray-500 text-white px-4 py-2 rounded">Limpiar</button>
+            <button id="save-btn" class="bg-blue-500 text-white px-4 py-2 rounded">Guardar Firma</button>
+        </div>
     </div>
+</div>
 
-    <!-- Canvas para la firma digital -->
-    <div class="mb-5">
-        <canvas id="signatureCanvas" class="border border-[#ebedf2] dark:border-[#1b2e4b] w-full" width="500" height="150"></canvas>
-    </div>
 
-    <!-- Botones para limpiar la firma y enviar el formulario -->
-    <div class="flex justify-between items-center mb-5">
-        <button type="button" id="clearSignature" class="btn btn-dark">Limpiar Firma</button>
-        <button type="button" id="saveSignature" class="btn btn-primary">Guardar Firma</button>
-    </div>
+<script>
+    // Obtén el lienzo y configura Signature Pad
+    const canvas = document.getElementById('signature-pad');
+    const signaturePad = new SignaturePad(canvas);
 
-    <!-- Formulario oculto con la firma en base64 -->
-    <form action="{{ route('usuario.firma' , $usuario->idUsuario) }}" method="POST" id="signatureForm">
-        @csrf
-        @method('PUT')
-        <input type="hidden" name="signature" id="signatureInput">
-        <button type="submit" class="btn btn-primary">Enviar Firma</button>
-    </form>
+    // Botón para limpiar la firma
+    document.getElementById('clear-btn').addEventListener('click', () => {
+        signaturePad.clear();
+    });
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const canvas = document.getElementById("signatureCanvas");
+    // Botón para guardar la firma
+    document.getElementById('save-btn').addEventListener('click', () => {
+        if (signaturePad.isEmpty()) {
+            alert("Por favor, proporciona tu firma primero.");
+        } else {
+            // Convierte la firma a una imagen en formato PNG
+            const dataURL = signaturePad.toDataURL();
             
-            if (canvas) {
-                console.log("Canvas encontrado correctamente");
-                
-                const ctx = canvas.getContext("2d");
-                
-                if (!ctx) {
-                    console.error("No se pudo obtener el contexto 2D del canvas");
-                    return;
-                }
-                
-                console.log("Contexto de dibujo 2D obtenido correctamente");
-
-                // Asegura que el canvas sea visible y tenga un tamaño adecuado
-                canvas.width = 500;
-                canvas.height = 150;
-                
-                let isDrawing = false;
-                const rect = canvas.getBoundingClientRect(); // Obtener la posición del canvas en la pantalla
-
-                // Función para iniciar el dibujo
-                canvas.addEventListener("mousedown", (event) => {
-                    isDrawing = true;
-                    ctx.beginPath();
-                    ctx.moveTo(event.clientX - rect.left, event.clientY - rect.top);
-                    console.log("Iniciando dibujo en", event.clientX - rect.left, event.clientY - rect.top);
-                });
-
-                // Función para dibujar mientras se mueve el ratón
-                canvas.addEventListener("mousemove", (event) => {
-                    if (isDrawing) {
-                        ctx.lineTo(event.clientX - rect.left, event.clientY - rect.top);
-                        ctx.stroke();
-                        console.log("Dibujando en", event.clientX - rect.left, event.clientY - rect.top);
-                    }
-                });
-
-                // Terminar el dibujo cuando se suelta el ratón
-                canvas.addEventListener("mouseup", () => {
-                    isDrawing = false;
-                    console.log("Dibujo terminado");
-                });
-
-                // Limpiar el lienzo
-                document.getElementById("clearSignature").addEventListener("click", () => {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    console.log("Lienzo limpiado");
-                });
-
-                // Guardar la firma y convertirla en base64
-                document.getElementById("saveSignature").addEventListener("click", () => {
-                    const signatureData = canvas.toDataURL(); // Convierte la firma a base64
-                    document.getElementById("signatureInput").value = signatureData; // Pone la firma en el campo oculto
-                    console.log("Firma guardada en base64: ", signatureData);
-                });
-            } else {
-                console.error("No se encontró el canvas con id 'signatureCanvas'");
-            }
-        });
-    </script>
+            // Aquí puedes enviar la firma al servidor o guardarla localmente
+            console.log("Firma guardada:", dataURL);
+            alert("Firma guardada correctamente.");
+        }
+    });
+</script>
 
 
-                            </div>
+
+
+
+
+
 
 
                             <div class="panel">
