@@ -364,6 +364,8 @@ Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoContr
     ->middleware('auth');
 
 
+
+
     
 
 
@@ -407,8 +409,12 @@ Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('u
 
 
 Route::put('config/{id}', [UsuarioController::class, 'config'])->name('usuario.config');
-Route::put('direccion/{id}', [UsuarioController::class, 'direccion'])->name('usuario.direccion');
-Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'actualizarFirma'])->name('usuario.firma');
+
+
+
+
+Route::put('/usuario/direccion/{id}', [UsuarioController::class, 'direccion'])->name('usuario.direccion');
+// Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'actualizarFirma'])->name('usuario.firma');
 
 
 // Route::get('/informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'generarInformePdf'])->name('informe.pdf');
@@ -439,6 +445,14 @@ Route::get('/visita/{ticketId}', [OrdenesTrabajoController::class, 'mostrarDetal
 Route::post('/tickets/{idTicket}/actualizar-estado', [OrdenesTrabajoController::class, 'actualizarEstado']);
 
 Route::post('/guardar-estado', [OrdenesTrabajoController::class, 'guardarEstadoflujo'])->name('guardarEstado');
+
+
+
+// web.php (Rutas)
+Route::get('/usuario/firma/{idUsuario}', [UsuarioController::class, 'obtenerFirma']);
+
+
+Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'guardarFirma']);
 
 
 

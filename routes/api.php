@@ -11,6 +11,7 @@ use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
+use App\Http\Controllers\usuario\UsuarioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

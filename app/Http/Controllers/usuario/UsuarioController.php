@@ -260,66 +260,124 @@ public function config(Request $request, $id)
 
 
 
-
+// use Illuminate\Support\Facades\Log;
 
 public function direccion(Request $request, $id)
 {
     // Validar los datos del formulario
-    $request->validate([
-        'nacionalidad' => 'required|string|max:255',
-        'departamento' => 'required|integer',
-        'provincia' => 'required|integer',
-        'distrito' => 'required|integer',
-        'direccion' => 'required|string|max:255',
-    ]);
+    Log::info("Validación de los datos de actualización para el usuario con ID: {$id}", $request->all());
 
-    // Obtener el usuario con el ID proporcionado
-    $usuario = Usuario::findOrFail($id);
+    try {
+        $request->validate([
+            'nacionalidad' => 'required|string|max:255',
+            'departamento' => 'required|integer',
+            'provincia' => 'integer',
+            'distrito' => 'integer',
+            'direccion' => 'required|string|max:255',
+        ]);
+        Log::info("Datos validados correctamente para el usuario con ID: {$id}");
 
-    // Actualizar los datos del usuario
-    $usuario->nacionalidad = $request->nacionalidad;
-    $usuario->departamento = $request->departamento;
-    $usuario->provincia = $request->provincia;
-    $usuario->distrito = $request->distrito;
-    $usuario->direccion = $request->direccion;
+        // Obtener el usuario con el ID proporcionado
+        $usuario = Usuario::findOrFail($id);
+        Log::info("Usuario encontrado para el ID: {$id}", ['usuario' => $usuario]);
 
-    // Guardar los cambios en la base de datos
-    $usuario->save();
+        // Actualizar los datos del usuario
+        $usuario->nacionalidad = $request->nacionalidad;
+        $usuario->departamento = $request->departamento;
+        $usuario->provincia = $request->provincia;
+        $usuario->distrito = $request->distrito;
+        $usuario->direccion = $request->direccion;
 
-    // Redirigir al usuario con un mensaje de éxito
-    return redirect()->route('usuario.index')->with('success', 'Usuario actualizado correctamente');
+        // Guardar los cambios en la base de datos
+        $usuario->save();
+        Log::info("Usuario con ID {$id} actualizado correctamente.", ['usuario' => $usuario]);
+
+        // Respuesta JSON
+        return response()->json(['success' => true, 'message' => 'Usuario actualizado correctamente']);
+
+    } catch (\Exception $e) {
+        Log::error("Error al intentar actualizar el usuario con ID {$id}: " . $e->getMessage(), [
+            'error' => $e->getTraceAsString(),
+            'request_data' => $request->all()
+        ]);
+        
+        return response()->json(['success' => false, 'message' => 'Ocurrió un error al actualizar el usuario'], 500);
+    }
 }
 
 
- // Método para actualizar la firma
- public function actualizarFirma(Request $request, $idUsuario)
- {
-     // Validar la firma
-     $request->validate([
-         'signature' => 'required|string', // Asegurarse de que la firma no esté vacía
-     ]);
 
-     // Obtener la firma base64 del formulario
-     $signatureBase64 = $request->input('signature');
 
-     // Convertir la firma base64 a binario
-     $signatureBinaria = base64_decode($signatureBase64);
 
-     // Aquí puedes elegir si guardar la firma en una base de datos como un archivo binario
-     // o guardarla como un archivo en el sistema de almacenamiento de Laravel.
 
-     // Si decides guardar la firma como un archivo en el sistema de archivos:
-     $path = Storage::put('public/firmas/' . $idUsuario . '.png', $signatureBinaria);
+public function guardarFirma(Request $request, $idUsuario)
+{
+    // Validar la firma
+    $request->validate([
+        'firma' => 'required|string',
+    ]);
 
-     // Si decides guardarla en la base de datos (como un campo tipo blob o binario):
-     // Suponiendo que tienes un campo 'firma' en tu modelo Usuario que almacena los datos binarios
-     $usuario = Usuario::findOrFail($idUsuario);
-     $usuario->firma = $signatureBinaria;
-     $usuario->save();
+    // Obtener la firma del request
+    $firmaBase64 = $request->input('firma');
 
-     // Retornar una respuesta, por ejemplo:
-     return redirect()->back()->with('success', 'Firma actualizada correctamente');
- }
+    // Log para verificar que se recibió la firma
+    Log::info("Firma recibida del usuario {$idUsuario}: " . substr($firmaBase64, 0, 50) . '...'); // Solo muestra los primeros 50 caracteres para evitar logs largos
+
+    // Eliminar el encabezado de la cadena base64 (por ejemplo: data:image/png;base64,)
+    $firmaBase64 = preg_replace('/^data:image\/\w+;base64,/', '', $firmaBase64);
+    
+    // Decodificar la cadena base64 a binario
+    $firmaBinaria = base64_decode($firmaBase64);
+
+    // Log para verificar que la firma fue decodificada correctamente
+    if ($firmaBinaria === false) {
+        Log::error("Error al decodificar la firma base64.");
+    } else {
+        Log::info("Firma decodificada correctamente.");
+    }
+
+    // Obtener el usuario y actualizar su firma
+    $usuario = Usuario::find($idUsuario);
+
+    // Log para verificar si se encontró al usuario
+    if ($usuario) {
+        Log::info("Usuario encontrado con ID {$idUsuario}. Actualizando firma.");
+        $usuario->firma = $firmaBinaria;
+        $usuario->save();
+
+        Log::info("Firma guardada para el usuario {$idUsuario}.");
+
+        return response()->json(['message' => 'Firma guardada correctamente.'], 200);
+    } else {
+        Log::warning("Usuario con ID {$idUsuario} no encontrado.");
+        return response()->json(['message' => 'Usuario no encontrado.'], 404);
+    }
+}
+
+
+
+
+
+
+
+public function obtenerFirma($idUsuario)
+{
+    $usuario = Usuario::find($idUsuario);
+    
+    if ($usuario && $usuario->firma) {
+        // Si la firma está en binario, la convertimos a base64
+        $firmaBase64 = base64_encode($usuario->firma);
+        
+        return response()->json(['firma' => 'data:image/png;base64,' . $firmaBase64], 200);
+    }
+
+    return response()->json(['message' => 'Firma no encontrada.'], 404);
+}
+
+
+
+
+
 
 
 
