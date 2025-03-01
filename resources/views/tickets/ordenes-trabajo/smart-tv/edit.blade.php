@@ -39,6 +39,9 @@
         </div>
     @endif
 
+
+    
+
     <div class="mb-5" x-data="{
         tab: 'detalle',
         loading: false,
@@ -74,7 +77,7 @@
                         Ticket
                     </a>
                 </li>
-                <li>
+                <li >
                     <a href="javascript:;"
                         class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
                         :class="{ '!bg-success text-white': tab === 'visitas' }" @click="tab = 'visitas'">
@@ -86,6 +89,9 @@
                         Coordinación
                     </a>
                 </li>
+
+                @if($visitaExistente)
+
                 <li>
                     <a href="javascript:;"
                         class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
@@ -99,6 +105,9 @@
                         Desarrollo
                     </a>
                 </li>
+
+               
+
                 <li>
                     <a href="javascript:;"
                         class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
@@ -123,6 +132,8 @@
                         Informe
                     </a>
                 </li>
+
+                @endif
             </ul>
         </div>
         <!-- Contenido de los Tabs -->
