@@ -9,20 +9,22 @@
 
 <!-- Contenedor Alpine.js para el botón y el modal -->
 <div x-data="{ openModal: false }">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
         <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
             style="background-color: {{ $colorEstado }};">
             Orden de Trabajo N° {{ $orden->idTickets }}
         </span>
 
-        <!-- Botón flotante -->
+        <!-- Botón flotante responsive -->
         <button id="botonFlotante"
-            class="badge bg-dark text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 text-sm sm:text-base mt-2 sm:mt-0 flex items-center gap-2"
+            class="bg-dark text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all duration-200
+            text-xs sm:text-sm md:text-base flex items-center justify-center gap-1 sm:gap-2 w-full sm:w-auto"
             @click="openModal = true">
-            <i class="fa-solid fa-clock-rotate-left text-base sm:text-lg"></i>
-            <span class="hidden sm:inline">Historial de Cambios</span>
+            <i class="fa-solid fa-clock-rotate-left text-sm sm:text-base md:text-lg"></i>
+            <span class="sm:inline"></span>
         </button>
     </div>
+
 
     <!-- Fondo oscuro cuando el modal está abierto -->
     <div x-show="openModal" class="fixed inset-0 bg-[black]/60 z-40 transition-opacity duration-300"
@@ -50,9 +52,12 @@
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Usuario</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Fecha de Modificación</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Última Modificación</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Nueva Modificación</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Fecha de
+                            Modificación</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Última
+                            Modificación</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Nueva
+                            Modificación</th>
                     </tr>
                 </thead>
                 <tbody id="historialModificaciones">
@@ -60,9 +65,9 @@
                 </tbody>
             </table>
         </div>
-
     </div>
 </div>
+
 
 
 
@@ -208,13 +213,12 @@
 
 
 
-
-    <!-- Estados disponibles (draggables) -->
+    <!-- Contenedor de Estados -->
     <div class="mt-3 overflow-x-auto">
-        <div id="draggableContainer" class="flex space-x-2">
+        <div id="draggableContainer" class="flex space-x-2 w-max">
             @foreach ($estadosFlujo as $estado)
-                <div class="draggable-state px-3 py-1 rounded cursor-move"
-                    style="background-color: {{ $estado->color }};" draggable="true"
+                <div class="draggable-state min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-move text-white text-center shadow-md"
+                    style="background-color: {{ $estado->color }}; color: black;" draggable="true"
                     data-state="{{ $estado->descripcion }}">
                     {{ $estado->descripcion }}
                 </div>
@@ -223,19 +227,16 @@
     </div>
 
 
-
-
-
-
-
-    <!-- Div para mostrar la última modificación -->
-    <div class="mt-4">
-        Última modificación: <span
-            class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2"
-            id="ultimaModificacion"></span>
+    <!-- Div para mostrar la última modificación (Responsive) -->
+    <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
+        <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
+            Última modificación:
+        </span>
+        <span id="ultimaModificacion"
+            class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600 
+               rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
+        </span>
     </div>
-
-
 
 
 
@@ -342,10 +343,12 @@
                 commentCell.style.backgroundColor = estado.color; // Aplica el color del estado
 
                 const textArea = document.createElement("textarea");
-                textArea.classList.add("w-full", "p-2", "rounded");
+                textArea.classList.add("w-full", "p-2", "rounded", "border",
+                    "border-black"); // 🔥 Borde negro
                 textArea.textContent = ticketFlujo.comentarioflujo;
                 textArea.placeholder = "Escribe un comentario...";
                 textArea.style.backgroundColor = estado.color; // 🔥 Color de fondo del estado
+
 
                 commentCell.appendChild(textArea);
                 commentRow.appendChild(commentCell);
