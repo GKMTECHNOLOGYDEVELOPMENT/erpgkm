@@ -1,127 +1,182 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+<!-- Contenedor Alpine.js para el botón y el modal -->
+<div x-data="{ openModal: false }">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+            style="background-color: {{ $colorEstado }};">
+            Orden de Trabajo N° {{ $orden->idTickets }}
+        </span>
 
-<span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">
-    Detalles de la Orden de Trabajo N° {{ $orden->idTickets }}
-</span>
-
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-
-    <div>
-        <form action="formActualizarOrden" enctype="multipart/form-data" method="POST">
-            @CSRF
-            <label class="block text-sm font-medium">Ticket</label>
-            <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}" readonly>
+        <!-- Botón flotante -->
+        <button id="botonFlotante"
+            class="badge bg-dark text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200 text-sm sm:text-base mt-2 sm:mt-0 flex items-center gap-2"
+            @click="openModal = true">
+            <i class="fa-solid fa-clock-rotate-left text-base sm:text-lg"></i>
+            <span class="hidden sm:inline">Historial de Cambios</span>
+        </button>
     </div>
 
-
-
-    <!-- Cliente -->
-    <div>
-        <label class="block text-sm font-medium">Cliente</label>
-        <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display:none">
-            <option value="" disabled>Seleccionar Cliente</option>
-            @foreach ($clientes as $cliente)
-                <option value="{{ $cliente->idCliente }}"
-                    {{ $cliente->idCliente == $orden->cliente->idCliente ? 'selected' : '' }}>
-                    {{ $cliente->nombre }} - {{ $cliente->documento }}
-                </option>
-            @endforeach
-        </select>
+    <!-- Fondo oscuro cuando el modal está abierto -->
+    <div x-show="openModal" class="fixed inset-0 bg-[black]/60 z-40 transition-opacity duration-300"
+        @click="openModal = false">
     </div>
 
-    <!-- Cliente General -->
-    <div>
-        <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-        <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
-            <option value="" selected>Seleccionar Cliente General</option>
-            <!-- Aquí cargaremos el cliente general por defecto usando Blade -->
-            <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
-                {{ $orden->clienteGeneral->descripcion }}
-            </option>
-        </select>
+    <!-- Modal deslizable desde la derecha -->
+    <div x-show="openModal" x-transition:enter="transition ease-in-out duration-300 transform"
+        x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
+        x-transition:leave="transition ease-in-out duration-300 transform"
+        x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
+        class="fixed top-0 right-0 w-80 sm:w-[600px] md:w-[700px] lg:w-[800px] h-full bg-white shadow-lg z-50 p-6 flex flex-col rounded-l-lg">
+
+        <!-- Encabezado del modal -->
+        <div class="flex justify-between items-center border-b pb-3">
+            <h2 class="text-lg font-semibold text-gray-800">Historial de Cambios</h2>
+            <button @click="openModal = false" class="text-gray-500 hover:text-gray-700">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Contenido del modal con tabla -->
+        <div class="mt-4 overflow-y-auto flex-grow">
+            <table class="w-full border-collapse border border-gray-300">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Usuario</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Fecha de Modificación</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Última Modificación</th>
+                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Nueva Modificación</th>
+                    </tr>
+                </thead>
+                <tbody id="historialModificaciones">
+                    <!-- Aquí se llenará dinámicamente con AJAX -->
+                </tbody>
+            </table>
+        </div>
+
     </div>
+</div>
 
 
 
 
-    <!-- Tienda -->
-    <div>
-        <label class="block text-sm font-medium">Tienda</label>
-        <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
-            <option value="" disabled>Seleccionar Tienda</option>
-            @foreach ($tiendas as $tienda)
-                <option value="{{ $tienda->idTienda }}" {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
-                    {{ $tienda->nombre }}
-                </option>
-            @endforeach
-        </select>
-    </div>
 
 
-    <!-- Dirección -->
-    <div>
-        <label class="block text-sm font-medium">Dirección</label>
-        <input id="direccion" name="direccion" type="text" class="form-input w-full "
-            value="{{ $orden->direccion }}">
-    </div>
-    <!-- Marca -->
-    <div>
-        <label class="block text-sm font-medium">Marca</label>
-        <select name="idMarca" id="idMarca" class="select2 w-full bg-gray-100" style="display: none;">
-            <option value="" disabled>Seleccionar Marca</option>
-            @foreach ($marcas as $marca)
-                <option value="{{ $marca->idMarca }}" {{ $marca->idMarca == $orden->idMarca ? 'selected' : '' }}>
-                    {{ $marca->nombre }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+<div class="p-6 mt-4">
+    <form action="formActualizarOrden" enctype="multipart/form-data" method="POST">
+        @CSRF
 
-    <!-- Modelo -->
-    <div>
-        <label for="idModelo" class="block text-sm font-medium">Modelo</label>
-        <select id="idModelo" name="idModelo" class="form-input w-full">
-            <option value="" selected>Seleccionar Modelo</option>
-            <!-- Aquí cargaremos el modelo por defecto usando Blade -->
-            <option value="{{ $orden->idModelo ?? '' }}" selected>
-                {{ $orden->modelo->nombre ?? 'Sin Modelo' }}
-            </option>
-        </select>
-    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Ticket -->
+            <div>
+                <label class="text-sm font-medium">Ticket</label>
+                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}"
+                    readonly>
+            </div>
 
+            <!-- Cliente -->
+            <div>
+                <label class="text-sm font-medium">Cliente</label>
+                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
+                    <option value="" disabled>Seleccionar Cliente</option>
+                    @foreach ($clientes as $cliente)
+                        <option value="{{ $cliente->idCliente }}"
+                            {{ $cliente->idCliente == $orden->cliente->idCliente ? 'selected' : '' }}>
+                            {{ $cliente->nombre }} - {{ $cliente->documento }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-    <!-- Serie (Editable) -->
-    <div>
-        <label for="serie" class="block text-sm font-medium">N. Serie</label>
-        <input id="serie" name="serie" type="text" class="form-input w-full" value="{{ $orden->serie }}">
-    </div>
+            <!-- Cliente General -->
+            <div>
+                <label class="text-sm font-medium">Cliente General</label>
+                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+                    <option value="" selected>Seleccionar Cliente General</option>
+                    <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+                        {{ $orden->clienteGeneral->descripcion }}
+                    </option>
+                </select>
+            </div>
 
-    <!-- Fecha de Compra (Editable) -->
-    <div>
-        <label for="fechaCompra" class="block text-sm font-medium">Fecha de Compra</label>
-        <input id="fechaCompra" name="fechaCompra" type="text" class="form-input w-full"
-            value="{{ \Carbon\Carbon::parse($orden->fechaCompra)->format('Y-m-d') }}">
-    </div>
+            <!-- Tienda -->
+            <div>
+                <label class="text-sm font-medium">Tienda</label>
+                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none">
+                    <option value="" disabled>Seleccionar Tienda</option>
+                    @foreach ($tiendas as $tienda)
+                        <option value="{{ $tienda->idTienda }}"
+                            {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
+                            {{ $tienda->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-    <!-- Falla Reportada -->
-    <div>
-        <label for="fallaReportada" class="block text-sm font-medium">Falla Reportada</label>
-        <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
-    </div>
+            <!-- Dirección -->
+            <div>
+                <label class="text-sm font-medium">Dirección</label>
+                <input id="direccion" name="direccion" type="text" class="form-input w-full"
+                    value="{{ $orden->direccion }}">
+            </div>
 
-    <!-- Botón de GUARDAR -->
-    <div class="md:col-span-2 flex justify-end">
-        <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
-    </div>
+            <!-- Marca -->
+            <div>
+                <label class="text-sm font-medium">Marca</label>
+                <select name="idMarca" id="idMarca" class="select2 w-full bg-gray-100" style="display: none">
+                    <option value="" disabled>Seleccionar Marca</option>
+                    @foreach ($marcas as $marca)
+                        <option value="{{ $marca->idMarca }}"
+                            {{ $marca->idMarca == $orden->idMarca ? 'selected' : '' }}>
+                            {{ $marca->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
+            <!-- Modelo -->
+            <div>
+                <label class="text-sm font-medium">Modelo</label>
+                <select id="idModelo" name="idModelo" class="form-input w-full">
+                    <option value="" selected>Seleccionar Modelo</option>
+                    <option value="{{ $orden->idModelo ?? '' }}" selected>
+                        {{ $orden->modelo->nombre ?? 'Sin Modelo' }}
+                    </option>
+                </select>
+            </div>
+
+            <!-- Serie -->
+            <div>
+                <label class="text-sm font-medium">N. Serie</label>
+                <input id="serie" name="serie" type="text" class="form-input w-full"
+                    value="{{ $orden->serie }}">
+            </div>
+
+            <!-- Fecha de Compra -->
+            <div>
+                <label class="text-sm font-medium">Fecha de Compra</label>
+                <input id="fechaCompra" name="fechaCompra" type="text" class="form-input w-full"
+                    value="{{ \Carbon\Carbon::parse($orden->fechaCompra)->format('Y-m-d') }}">
+            </div>
+
+            <!-- Falla Reportada -->
+            <div class="md:col-span-2">
+                <label class="text-sm font-medium">Falla Reportada</label>
+                <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
+            </div>
+
+            <!-- Botón de Guardar -->
+            <div class="md:col-span-2 flex justify-end">
+                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
+            </div>
+        </div>
     </form>
 </div>
 
@@ -131,8 +186,9 @@
 
 
 <!-- Nueva Card: Historial de Estados -->
-<div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">
-    <span class="text-lg font-semibold mb-4 badge" style="background-color: {{ $colorEstado }};">Historial de Estados</span>
+<div id="estadosCard" class="mt-4 p-4">
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+        style="background-color: {{ $colorEstado }};">Historial de Estados</span>
     <!-- Tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">
         <table class="min-w-[600px] border-collapse">
@@ -153,16 +209,18 @@
 
 
 
-<!-- Estados disponibles (draggables) -->
-<div class="mt-3 overflow-x-auto">
-    <div id="draggableContainer" class="flex space-x-2">
-        @foreach($estadosFlujo as $estado)
-            <div class="draggable-state px-3 py-1 rounded cursor-move" style="background-color: {{ $estado->color }};" draggable="true" data-state="{{ $estado->descripcion }}">
-                {{ $estado->descripcion }}
-            </div>
-        @endforeach
+    <!-- Estados disponibles (draggables) -->
+    <div class="mt-3 overflow-x-auto">
+        <div id="draggableContainer" class="flex space-x-2">
+            @foreach ($estadosFlujo as $estado)
+                <div class="draggable-state px-3 py-1 rounded cursor-move"
+                    style="background-color: {{ $estado->color }};" draggable="true"
+                    data-state="{{ $estado->descripcion }}">
+                    {{ $estado->descripcion }}
+                </div>
+            @endforeach
+        </div>
     </div>
-</div>
 
 
 
@@ -172,7 +230,9 @@
 
     <!-- Div para mostrar la última modificación -->
     <div class="mt-4">
-        Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
+        Última modificación: <span
+            class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2"
+            id="ultimaModificacion"></span>
     </div>
 
 
@@ -185,189 +245,198 @@
 
 
 
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
-    const rowsPerPage = 10; // Número de filas por página
-    let currentPage = 1; // Página actual
+    document.addEventListener("DOMContentLoaded", function() {
+        const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
+        const rowsPerPage = 10; // Número de filas por página
+        let currentPage = 1; // Página actual
 
-    function cargarEstados() {
-        fetch(`/ticket/${ticketId}/estados`)
-            .then(response => response.json())
-            .then(data => {
-                const estadosTableBody = document.getElementById("estadosTableBody");
-                estadosTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar los nuevos estados
-
-                if (Array.isArray(data.estadosFlujo)) {
-                    const estados = data.estadosFlujo;
-                    renderTable(estados, currentPage);
-                    setupPagination(estados.length);
-                } else {
-                    console.error('La respuesta no contiene un array de estados de flujo:', data.estadosFlujo);
-                }
-            })
-            .catch(error => {
-                console.error('Error cargando los estados:', error);
-            });
-    }
-
-    function renderTable(estados, page) {
-        const estadosTableBody = document.getElementById("estadosTableBody");
-        estadosTableBody.innerHTML = "";
-
-        const start = (page - 1) * rowsPerPage;
-        const end = start + rowsPerPage;
-        const estadosPaginados = estados.slice(start, end);
-
-        estadosPaginados.forEach(ticketFlujo => {
-            const estado = ticketFlujo.estado_flujo;
-            const usuario = ticketFlujo.usuario;
-
-            // Fila principal
-            const row = document.createElement("tr");
-
-            const estadoCell = document.createElement("td");
-            estadoCell.classList.add("px-4", "py-2", "text-center", "text-black");
-            estadoCell.style.backgroundColor = estado.color;
-            estadoCell.textContent = estado.descripcion;
-
-            const usuarioCell = document.createElement("td");
-            usuarioCell.classList.add("px-4", "py-2", "text-center", "text-black");
-            usuarioCell.textContent = usuario ? usuario.Nombre : 'Sin Nombre';
-            usuarioCell.style.backgroundColor = estado.color;
-
-            const fechaCell = document.createElement("td");
-            fechaCell.classList.add("px-4", "py-2", "text-center", "text-black");
-            fechaCell.textContent = ticketFlujo.fecha_creacion;
-            fechaCell.style.backgroundColor = estado.color;
-
-            // Botón "Más" y "Guardar" en la misma celda
-            const masCell = document.createElement("td");
-            masCell.classList.add("px-4", "py-2", "text-center", "flex", "items-center", "justify-center", "space-x-2");
-            masCell.style.backgroundColor = estado.color; // Aplica el color del estado
-
-            // Botón "Más" (⋮)
-            const masBtn = document.createElement("button");
-            masBtn.classList.add("toggle-comment", "px-3", "py-1", "rounded", "bg-gray-300");
-            masBtn.textContent = "⋮";
-            masBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
-
-            // Botón "Guardar" como icono de check ✅ verde
-            const saveIconBtn = document.createElement("button");
-            saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success", "text-white");
-            saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
-            saveIconBtn.innerHTML = "✔"; // Ícono de check verde
-
-            // Agregar botones a la celda
-            masCell.appendChild(masBtn);
-            masCell.appendChild(saveIconBtn);
-
-            row.appendChild(estadoCell);
-            row.appendChild(usuarioCell);
-            row.appendChild(fechaCell);
-            row.appendChild(masCell);
-            estadosTableBody.appendChild(row);
-
-            // Fila oculta para comentario
-            const commentRow = document.createElement("tr");
-            commentRow.classList.add("hidden");
-            const commentCell = document.createElement("td");
-            commentCell.setAttribute("colspan", "4"); // Ajustado el colspan a la cantidad de columnas
-            commentCell.classList.add("p-4");
-            commentCell.style.backgroundColor = estado.color; // Aplica el color del estado
-
-            const textArea = document.createElement("textarea");
-            textArea.classList.add("w-full", "p-2", "rounded");
-            textArea.textContent = ticketFlujo.comentarioflujo;
-            textArea.placeholder = "Escribe un comentario...";
-            textArea.style.backgroundColor = estado.color; // 🔥 Color de fondo del estado
-
-            commentCell.appendChild(textArea);
-            commentRow.appendChild(commentCell);
-
-            estadosTableBody.appendChild(commentRow);
-        });
-
-        agregarEventosComentarios();
-    }
-
-    function setupPagination(totalRows) {
-        const paginationContainer = document.getElementById("paginationControls");
-        paginationContainer.innerHTML = ""; // Limpiar paginación previa
-
-        const totalPages = Math.ceil(totalRows / rowsPerPage);
-
-        if (totalPages > 1) {
-            const prevBtn = document.createElement("button");
-            prevBtn.textContent = "Anterior";
-            prevBtn.classList.add("px-4", "py-2", "bg-gray-300", "rounded", "mx-1");
-            prevBtn.disabled = currentPage === 1;
-            prevBtn.addEventListener("click", () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    cargarEstados();
-                }
-            });
-
-            const nextBtn = document.createElement("button");
-            nextBtn.textContent = "Siguiente";
-            nextBtn.classList.add("px-4", "py-2", "bg-gray-300", "rounded", "mx-1");
-            nextBtn.disabled = currentPage === totalPages;
-            nextBtn.addEventListener("click", () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    cargarEstados();
-                }
-            });
-
-            paginationContainer.appendChild(prevBtn);
-            paginationContainer.appendChild(nextBtn);
-        }
-    }
-
-    function agregarEventosComentarios() {
-        document.querySelectorAll('.toggle-comment').forEach(button => {
-            button.addEventListener('click', function () {
-                let parentCell = this.closest('td'); // Celda donde están los elementos
-                let row = this.closest('tr').nextElementSibling;
-                row.classList.toggle('hidden'); // Mostrar/ocultar la fila de comentario
-            });
-        });
-
-
-        document.querySelectorAll('.save-comment').forEach(button => {
-            button.addEventListener('click', function () {
-                let flujoId = this.dataset.flujoId; // Obtener idTicketFlujo
-                let row = this.closest('tr').nextElementSibling;
-                let textArea = row.querySelector("textarea");
-                let comentario = textArea.value;
-
-                // Ruta actualizada para hacer la actualización sin el "comentario" como campo
-                fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content") // Si usas Laravel
-                    },
-                    body: JSON.stringify({ comentario }) // Enviar solo comentario o los campos necesarios
-                })
+        function cargarEstados() {
+            fetch(`/ticket/${ticketId}/estados`)
                 .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        toastr.success("Estado actualizado correctamente.");
+                .then(data => {
+                    const estadosTableBody = document.getElementById("estadosTableBody");
+                    estadosTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar los nuevos estados
+
+                    if (Array.isArray(data.estadosFlujo)) {
+                        const estados = data.estadosFlujo;
+                        renderTable(estados, currentPage);
+                        setupPagination(estados.length);
                     } else {
-                        toastr.error("Error al actualizar el estado.");
+                        console.error('La respuesta no contiene un array de estados de flujo:', data
+                            .estadosFlujo);
                     }
                 })
-                .catch(error => console.error("Error al actualizar el estado:", error));
-            });
-        });
-    }
+                .catch(error => {
+                    console.error('Error cargando los estados:', error);
+                });
+        }
 
-    // Cargar estados al iniciar
-    cargarEstados();
-    setInterval(cargarEstados, 30000);
-});
+        function renderTable(estados, page) {
+            const estadosTableBody = document.getElementById("estadosTableBody");
+            estadosTableBody.innerHTML = "";
+
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const estadosPaginados = estados.slice(start, end);
+
+            estadosPaginados.forEach(ticketFlujo => {
+                const estado = ticketFlujo.estado_flujo;
+                const usuario = ticketFlujo.usuario;
+
+                // Fila principal
+                const row = document.createElement("tr");
+
+                const estadoCell = document.createElement("td");
+                estadoCell.classList.add("px-4", "py-2", "text-center", "text-black");
+                estadoCell.style.backgroundColor = estado.color;
+                estadoCell.textContent = estado.descripcion;
+
+                const usuarioCell = document.createElement("td");
+                usuarioCell.classList.add("px-4", "py-2", "text-center", "text-black");
+                usuarioCell.textContent = usuario ? usuario.Nombre : 'Sin Nombre';
+                usuarioCell.style.backgroundColor = estado.color;
+
+                const fechaCell = document.createElement("td");
+                fechaCell.classList.add("px-4", "py-2", "text-center", "text-black");
+                fechaCell.textContent = ticketFlujo.fecha_creacion;
+                fechaCell.style.backgroundColor = estado.color;
+
+                // Botón "Más" y "Guardar" en la misma celda
+                const masCell = document.createElement("td");
+                masCell.classList.add("px-4", "py-2", "text-center", "flex", "items-center",
+                    "justify-center", "space-x-2");
+                masCell.style.backgroundColor = estado.color; // Aplica el color del estado
+
+                // Botón "Más" (⋮)
+                const masBtn = document.createElement("button");
+                masBtn.classList.add("toggle-comment", "px-3", "py-1", "rounded", "bg-gray-300");
+                masBtn.textContent = "⋮";
+                masBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
+
+                // Botón "Guardar" como icono de check ✅ verde
+                const saveIconBtn = document.createElement("button");
+                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success",
+                    "text-white");
+                saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
+                saveIconBtn.innerHTML = "✔"; // Ícono de check verde
+
+                // Agregar botones a la celda
+                masCell.appendChild(masBtn);
+                masCell.appendChild(saveIconBtn);
+
+                row.appendChild(estadoCell);
+                row.appendChild(usuarioCell);
+                row.appendChild(fechaCell);
+                row.appendChild(masCell);
+                estadosTableBody.appendChild(row);
+
+                // Fila oculta para comentario
+                const commentRow = document.createElement("tr");
+                commentRow.classList.add("hidden");
+                const commentCell = document.createElement("td");
+                commentCell.setAttribute("colspan",
+                    "4"); // Ajustado el colspan a la cantidad de columnas
+                commentCell.classList.add("p-4");
+                commentCell.style.backgroundColor = estado.color; // Aplica el color del estado
+
+                const textArea = document.createElement("textarea");
+                textArea.classList.add("w-full", "p-2", "rounded");
+                textArea.textContent = ticketFlujo.comentarioflujo;
+                textArea.placeholder = "Escribe un comentario...";
+                textArea.style.backgroundColor = estado.color; // 🔥 Color de fondo del estado
+
+                commentCell.appendChild(textArea);
+                commentRow.appendChild(commentCell);
+
+                estadosTableBody.appendChild(commentRow);
+            });
+
+            agregarEventosComentarios();
+        }
+
+        function setupPagination(totalRows) {
+            const paginationContainer = document.getElementById("paginationControls");
+            paginationContainer.innerHTML = ""; // Limpiar paginación previa
+
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            if (totalPages > 1) {
+                const prevBtn = document.createElement("button");
+                prevBtn.textContent = "Anterior";
+                prevBtn.classList.add("px-4", "py-2", "bg-gray-300", "rounded", "mx-1");
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.addEventListener("click", () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        cargarEstados();
+                    }
+                });
+
+                const nextBtn = document.createElement("button");
+                nextBtn.textContent = "Siguiente";
+                nextBtn.classList.add("px-4", "py-2", "bg-gray-300", "rounded", "mx-1");
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.addEventListener("click", () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        cargarEstados();
+                    }
+                });
+
+                paginationContainer.appendChild(prevBtn);
+                paginationContainer.appendChild(nextBtn);
+            }
+        }
+
+        function agregarEventosComentarios() {
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+                button.addEventListener('click', function() {
+                    let parentCell = this.closest('td'); // Celda donde están los elementos
+                    let row = this.closest('tr').nextElementSibling;
+                    row.classList.toggle('hidden'); // Mostrar/ocultar la fila de comentario
+                });
+            });
+
+
+            document.querySelectorAll('.save-comment').forEach(button => {
+                button.addEventListener('click', function() {
+                    let flujoId = this.dataset.flujoId; // Obtener idTicketFlujo
+                    let row = this.closest('tr').nextElementSibling;
+                    let textArea = row.querySelector("textarea");
+                    let comentario = textArea.value;
+
+                    // Ruta actualizada para hacer la actualización sin el "comentario" como campo
+                    fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute(
+                                    "content") // Si usas Laravel
+                            },
+                            body: JSON.stringify({
+                                comentario
+                            }) // Enviar solo comentario o los campos necesarios
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                toastr.success("Estado actualizado correctamente.");
+                            } else {
+                                toastr.error("Error al actualizar el estado.");
+                            }
+                        })
+                        .catch(error => console.error("Error al actualizar el estado:", error));
+                });
+            });
+        }
+
+        // Cargar estados al iniciar
+        cargarEstados();
+        setInterval(cargarEstados, 30000);
+    });
 </script>
 
 
@@ -415,7 +484,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Llamar al backend para obtener la última modificación
             $.ajax({
                 url: '/ultima-modificacion/' +
-                idTickets, // Obtener la última modificación del ticket
+                    idTickets, // Obtener la última modificación del ticket
                 method: 'GET',
                 success: function(response) {
                     if (response.success) {
@@ -448,7 +517,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const usuario = "{{ auth()->user()->Nombre }}"; // Usuario logueado
             const fecha = formatDate(new Date());
             const idTickets =
-            "{{ $orden->idTickets }}"; // Aquí asumo que el id de la orden está disponible en el Blade
+                "{{ $orden->idTickets }}"; // Aquí asumo que el id de la orden está disponible en el Blade
 
             // Actualizar el log de modificación con la nueva modificación
             document.getElementById('ultimaModificacion').textContent =
@@ -481,83 +550,85 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-     // Pasa los estados de flujo desde Blade a JavaScript
-    const estadosFlujo = @json($estadosFlujo);
+        // Pasa los estados de flujo desde Blade a JavaScript
+        const estadosFlujo = @json($estadosFlujo);
 
-// Función para obtener el ID del estado a partir de la descripción
-function getStateId(stateDescription) {
-    const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
-    return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
-}
-
-// Código drag & drop
-const draggables = document.querySelectorAll(".draggable-state");
-draggables.forEach(function(draggable) {
-    draggable.addEventListener("dragstart", function(e) {
-        e.dataTransfer.setData("text/plain", this.dataset.state);  // Obtén la descripción del estado
-    });
-});
-
-const dropZone = document.getElementById("estadosTableBody");
-dropZone.addEventListener("dragover", function(e) {
-    e.preventDefault();
-});
-
-dropZone.addEventListener("drop", function(e) {
-    e.preventDefault();
-    const stateDescription = e.dataTransfer.getData("text/plain");
-    if (stateDescription) {
-        const draggableEl = document.querySelector(
-            "#draggableContainer .draggable-state[data-state='" + stateDescription + "']");
-        if (draggableEl) {
-            draggableEl.remove();
+        // Función para obtener el ID del estado a partir de la descripción
+        function getStateId(stateDescription) {
+            const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
+            return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
         }
 
-        const usuario = "{{ auth()->user()->id }}";  // Utiliza el ID del usuario autenticado
-        const fecha = formatDate(new Date());
-        const ticketId = "{{ $ticket->idTickets }}";  // Obtén el ID del ticket
+        // Código drag & drop
+        const draggables = document.querySelectorAll(".draggable-state");
+        draggables.forEach(function(draggable) {
+            draggable.addEventListener("dragstart", function(e) {
+                e.dataTransfer.setData("text/plain", this.dataset
+                    .state); // Obtén la descripción del estado
+            });
+        });
 
-        // Obtener el ID del estado basado en la descripción
-        const estadoId = getStateId(stateDescription);
+        const dropZone = document.getElementById("estadosTableBody");
+        dropZone.addEventListener("dragover", function(e) {
+            e.preventDefault();
+        });
 
-        let rowClasses = "";
-        if (estadoId === 1) {
-            rowClasses = "bg-primary/20 border-primary/20";
-        } else if (estadoId === 2) {
-            rowClasses = "bg-secondary/20 border-secondary/20";
-        } else if (estadoId === 3) {
-            rowClasses = "bg-success/20 border-success/20";
-        }
+        dropZone.addEventListener("drop", function(e) {
+            e.preventDefault();
+            const stateDescription = e.dataTransfer.getData("text/plain");
+            if (stateDescription) {
+                const draggableEl = document.querySelector(
+                    "#draggableContainer .draggable-state[data-state='" + stateDescription + "']");
+                if (draggableEl) {
+                    draggableEl.remove();
+                }
 
-        const newRow = document.createElement("tr");
-        newRow.className = rowClasses;
-        newRow.innerHTML = `
+                const usuario = "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
+                const fecha = formatDate(new Date());
+                const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
+
+                // Obtener el ID del estado basado en la descripción
+                const estadoId = getStateId(stateDescription);
+
+                let rowClasses = "";
+                if (estadoId === 1) {
+                    rowClasses = "bg-primary/20 border-primary/20";
+                } else if (estadoId === 2) {
+                    rowClasses = "bg-secondary/20 border-secondary/20";
+                } else if (estadoId === 3) {
+                    rowClasses = "bg-success/20 border-success/20";
+                }
+
+                const newRow = document.createElement("tr");
+                newRow.className = rowClasses;
+                newRow.innerHTML = `
             <td class="px-4 py-2 text-center">${stateDescription}</td>
             <td class="px-4 py-2 text-center">${usuario}</td>
             <td class="px-4 py-2 text-center">${fecha}</td>
         `;
-        dropZone.appendChild(newRow);
+                dropZone.appendChild(newRow);
 
-        // Enviar la solicitud AJAX para guardar el estado
-        axios.post("{{ route('guardarEstado') }}", {
-            idTicket: ticketId,
-            idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
-            idUsuario: usuario,
-            comentarioflujo: 'Ingresar comentario para el flujo', // Comentario opcional
-        })
-        .then(response => {
-            // Si la respuesta es exitosa
-            console.log("Estado guardado exitosamente");
-            location.reload();
-            // Actualizar log de modificación
-            document.getElementById('ultimaModificacion').textContent = `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
-        })
-        .catch(error => {
-            // Manejar el error si ocurre
-            console.error("Error al guardar el estado", error);
+                // Enviar la solicitud AJAX para guardar el estado
+                axios.post("{{ route('guardarEstado') }}", {
+                        idTicket: ticketId,
+                        idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+                        idUsuario: usuario,
+                        comentarioflujo: 'Ingresar comentario para el flujo', // Comentario opcional
+                    })
+                    .then(response => {
+                        // Si la respuesta es exitosa
+                        console.log("Estado guardado exitosamente");
+                        location.reload();
+                        // Actualizar log de modificación
+                        document.getElementById('ultimaModificacion').textContent =
+                            `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
+                    })
+                    .catch(error => {
+                        // Manejar el error si ocurre
+                        console.error("Error al guardar el estado", error);
+                    });
+            }
         });
-    }
-});
 
 
 
@@ -791,7 +862,7 @@ dropZone.addEventListener("drop", function(e) {
             // Validar el campo "serie" (permitir letras y números, pero no el signo -)
             var serie = formData.serie;
             var serieRegex =
-            /^[a-zA-Z0-9]+$/; // Expresión regular que permite solo letras y números, pero no el signo -
+                /^[a-zA-Z0-9]+$/; // Expresión regular que permite solo letras y números, pero no el signo -
 
             if (!serie || !serieRegex.test(serie)) {
                 toastr.error(
@@ -802,7 +873,7 @@ dropZone.addEventListener("drop", function(e) {
             // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             console.log("Token CSRF obtenido:",
-            csrfToken); // Asegúrate de que el token se obtiene correctamente
+                csrfToken); // Asegúrate de que el token se obtiene correctamente
 
             // Verificar si el token CSRF es válido
             if (!csrfToken) {
