@@ -54,34 +54,34 @@ document.addEventListener("DOMContentLoaded", function() {
 
     let marker;
 
-    function buscarDireccion() {
-        const direccion = document.getElementById("direccion").value.trim();
-        if (direccion) {
-            const url =
-                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
-            $.get(url, function(data) {
-                if (data && data.length > 0) {
-                    const lat = data[0].lat;
-                    const lon = data[0].lon;
-                    map.setView([lat, lon], 13);
-                    if (marker) {
-                        marker.setLatLng([lat, lon]);
-                    } else {
-                        marker = L.marker([lat, lon]).addTo(map);
-                    }
-                    document.getElementById('latitud').value = lat;
-                    document.getElementById('longitud').value = lon;
-                } else {
-                    alert("No se encontraron resultados para esa dirección.");
-                }
-            });
-        }
-    }
-    document.getElementById("direccion").addEventListener("input", function() {
-        if (this.value.trim() !== "") {
-            buscarDireccion();
-        }
-    });
+    // function buscarDireccion() {
+    //     const direccion = document.getElementById("direccion").value.trim();
+    //     if (direccion) {
+    //         const url =
+    //             `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
+    //         $.get(url, function(data) {
+    //             if (data && data.length > 0) {
+    //                 const lat = data[0].lat;
+    //                 const lon = data[0].lon;
+    //                 map.setView([lat, lon], 13);
+    //                 if (marker) {
+    //                     marker.setLatLng([lat, lon]);
+    //                 } else {
+    //                     marker = L.marker([lat, lon]).addTo(map);
+    //                 }
+    //                 document.getElementById('latitud').value = lat;
+    //                 document.getElementById('longitud').value = lon;
+    //             } else {
+    //                 alert("No se encontraron resultados para esa dirección.");
+    //             }
+    //         });
+    //     }
+    // }
+    // document.getElementById("direccion").addEventListener("input", function() {
+    //     if (this.value.trim() !== "") {
+    //         buscarDireccion();
+    //     }
+    // });
     map.on('click', function(e) {
         document.getElementById('latitud').value = e.latlng.lat;
         document.getElementById('longitud').value = e.latlng.lng;
