@@ -108,7 +108,6 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
 
 
-
         document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
           button.addEventListener('click', function () {
             const idTicket = this.getAttribute('data-id-ticket'); // ID del ticket
@@ -153,14 +152,16 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
               <div class="flex flex-col items-center">
                 <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
-                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">En Desplazamiento</span>
+                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">En Desplaz</span>
               </div>
-              <div class="flex flex-col items-center">
-                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
-                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-                  ${visita.ubicacion || 'Ubicación no disponible'}
-                </span>
-              </div>
+             <div class="flex flex-col items-center">
+        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+        <!-- Mostrar la ubicación -->
+        <span id="ubicacion-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+          <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
+          ${visita.anexos_visitas.length > 0 && visita.anexos_visitas[0].ubicacion ? visita.anexos_visitas[0].ubicacion : 'Ubicación no disponible'}
+        </span>
+      </div>
               <div class="flex flex-col items-center">
                 <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
                 <span id="fechaDesplazamiento-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
@@ -324,7 +325,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                           <div class="flex flex-col items-center">
                             <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
                             <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-                              ${visita.ubicacion || 'Ubicación no disponible'}
+                              ${visita.anexos_visitas.ubicacion || 'Ubicación no disponible'}
                             </span>
                           </div>
                           <div class="flex flex-col items-center">
@@ -587,7 +588,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
                         });
                       } else {
-                        toastr.error("Hubo un error al subir la foto.");
+                        // toastr.error("Hubo un error al subir la foto.");
                       }
                     })
                     .catch(error => {
@@ -650,11 +651,11 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                   const lat = position.coords.latitude;
                   const lng = position.coords.longitude;
 
-                  const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=YOUR_GOOGLE_MAPS_API_KEY`;
+                  const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
                   fetch(geocodeUrl)
                     .then(response => response.json())
                     .then(data => {
-                      const ubicacion = data.results[0]?.formatted_address || "Ubicación desconocida";
+                      const ubicacion = data.address ? `${data.address.road || ''}, ${data.address.city || ''}, ${data.address.country || ''}` : "Ubicación desconocida";
 
                       fetch(`/api/actualizarVisita/${visita.idVisitas}`, {
                         method: 'PATCH',
@@ -663,17 +664,24 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                         },
                         body: JSON.stringify({
                           fechas_desplazamiento: nuevaFechaDesplazamiento,
+                          // ubicacion: nuevaUbicacion,  // El nuevo valor de la ubicación
+
                         }),
                       })
                         .then(response => response.json())
                         .then(updatedVisita => {
                           if (updatedVisita) {
                             const fechaDesplazamientoElement = document.getElementById(`fechaDesplazamiento-${visita.idVisitas}`);
+                           
+                           
+                           
                             if (fechaDesplazamientoElement) {
                               fechaDesplazamientoElement.textContent = formatDate(updatedVisita.fechas_desplazamiento);
                             } else {
                               console.warn(`No se encontró el elemento con el id fechaDesplazamiento-${visita.idVisitas}`);
                             }
+
+                            
 
 
                             fetch('/api/guardarAnexoVisita', {
@@ -699,54 +707,63 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                 if (data.success) {
                                   toastr.success("Tecnico en desplazamiento.");
 
-                                  const inicioServicioCard = document.createElement('div');
-                                  inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
-                                  inicioServicioCard.innerHTML = `
-                                    <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-                                      <!-- Encabezados y Contenido Responsivo -->
-                                      <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
-                                        <div class="flex flex-col items-center">
-                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
-                                          <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Llegada al Servicio</span>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
-                                          <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-                                            ${visita.ubicacion || 'Ubicación no disponible'}
-                                          </span>
-                                        </div>
-                                        <div class="flex flex-col items-center">
-                                          <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
-                                          <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-                                            ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
-                                          </span>
-                                        </div>
-                                      </div>
-                                  
-                                      <!-- Botones de acción -->
-                                      <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
-                                        <button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                                       transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-success !text-white text-xs sm:text-sm"
-                                                id="uploadPhotoButton-${visita.idVisitas}">
-                                          <i class="fa-solid fa-camera text-sm sm:text-base"></i> 
-                                          <span class="text-xs sm:text-sm">Subir Foto</span>
-                                        </button>
-                                      
-                                        <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                                       transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-                                                id="siguiente-${visita.idVisitas}">
-                                          <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
-                                          <span class="text-xs sm:text-sm">Siguiente</span>
-                                        </button>
-                                      </div>
-                                      
-                                      <!-- Input oculto para subir foto -->
-                                      <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">                                  
-                                    </div>
-                                  `;
+                                   // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
+              const inicioServicioCard = document.createElement('div');
+              inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
+              inicioServicioCard.innerHTML = `
+                <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+                  <!-- Encabezados y Contenido Responsivo -->
+                  <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+                    <div class="flex flex-col items-center">
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                      <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Llegada al Servicio</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+                      <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                        ${visita.ubicacion || 'Ubicación no disponible'}
+                      </span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                      <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+                      <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                        ${visita.fecha_llegada ? formatDate(visita.fecha_llegada) : 'Sin fecha'}
+                      </span>
+                    </div>
+                  </div>
+        
+                  <!-- Botones de acción -->
+                  <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
+                    <button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-success !text-white text-xs sm:text-sm"
+                            id="uploadPhotoButton-${visita.idVisitas}">
+                      <i class="fa-solid fa-camera text-sm sm:text-base"></i> 
+                      <span class="text-xs sm:text-sm">Subir Foto</span>
+                    </button>
+                  
+                    <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+                            id="siguiente-${visita.idVisitas}">
+                      <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
+                      <span class="text-xs sm:text-sm">Siguiente</span>
+                    </button>
+                    
+                    <!-- Botón para ver imagen -->
+                    <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                            id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
+                      <i class="fa-solid fa-image text-sm sm:text-base"></i> 
+                    </button>
+                  </div>
+                
+                  <!-- Input oculto para subir foto -->
+                  <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">
+                </div>
+              `;
 
+              tecnicoCard.insertAdjacentElement('afterend', inicioServicioCard);
 
-                                  visitasList.appendChild(inicioServicioCard);
+                                  // visitasList.appendChild(inicioServicioCard);
 
 
 
@@ -911,12 +928,12 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                               modal.toggle();
                                             });
                                           } else {
-                                            toastr.error("Hubo un error al subir la foto.");
+                                            // toastr.error("Hubo un error al subir la foto.");
                                           }
                                         })
                                         .catch(error => {
                                           console.error('Error al subir la foto:', error);
-                                          toastr.error("Hubo un error al subir la foto.");
+                                          // toastr.error("Hubo un error al subir la foto.");
                                         });
                                     } else {
                                       toastr.error("Por favor selecciona una foto.");
