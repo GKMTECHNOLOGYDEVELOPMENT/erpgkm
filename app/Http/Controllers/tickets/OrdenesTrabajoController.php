@@ -1192,6 +1192,18 @@ if ($ticket) {
     
         return response()->json($visitas);
     }
+
+
+
+    public function obtenerHistorialModificaciones($ticketId)
+{
+    // Obtener todas las modificaciones relacionadas con el ticket
+    $modificaciones = Modificacion::where('idTickets', $ticketId)
+        ->orderBy('fecha_modificacion', 'desc')  // Ordenar por la fecha de modificación
+        ->get();
+
+    return response()->json($modificaciones);
+}
     
 
 
