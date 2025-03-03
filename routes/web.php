@@ -316,6 +316,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
         ->name('checkUpdates');
 
         Route::get('smart/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
+        Route::get('smart/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
 
     
         // ✅ Ruta corregida para verificar actualizaciones
