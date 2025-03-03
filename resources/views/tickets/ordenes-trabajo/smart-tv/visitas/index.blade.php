@@ -5,7 +5,7 @@
 </span>
 
 <div class="flex gap-1 sm:gap-2 justify-center mt-2">
-    <button id="crearCordinacionBtn" 
+    <button id="crearCordinacionBtn"
         class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
         Coordinación
     </button>
@@ -22,7 +22,8 @@
 
 
 <!-- Modal de Detalles de Visita -->
-<div x-data="{ openDetallesVisita: false }" class="mb-5" @toggle-modal-detalles-visita.window="openDetallesVisita = !openDetallesVisita">
+<div x-data="{ openDetallesVisita: false }" class="mb-5"
+    @toggle-modal-detalles-visita.window="openDetallesVisita = !openDetallesVisita">
     <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openDetallesVisita && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="openDetallesVisita = false">
             <div x-show="openDetallesVisita" x-transition.duration.300
@@ -84,7 +85,7 @@
         noAtiende: false,
         titularNoEsTitular: { nombre: '', dni: '', telefono: '' },
         motivoNoAtiende: '',
-        imagen: null  // Aquí se almacena la imagen
+        imagen: null // Aquí se almacena la imagen
     },
     guardarCondiciones(condiciones, ticketId, visitaId) {
         if (!condiciones.esTitular) {
@@ -108,7 +109,7 @@
             return;
         }
 
-       
+
 
         // Preparar los datos para enviar
         const datos = new FormData();
@@ -129,38 +130,36 @@
 
         // Enviar los datos al servidor
         fetch('/api/guardarCondiciones', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}' // Agrega el token CSRF
-            },
-            body: datos
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                toastr.success('Condiciones guardadas correctamente.');
-                this.openCondiciones = false; // Cerrar el modal
-                   location.reload();
-            } else {
-                toastr.error('Error al guardar las condiciones.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            toastr.error('Hubo un error al guardar las condiciones.');
-        });
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // Agrega el token CSRF
+                },
+                body: datos
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success('Condiciones guardadas correctamente.');
+                    this.openCondiciones = false; // Cerrar el modal
+                    location.reload();
+                } else {
+                    toastr.error('Error al guardar las condiciones.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Hubo un error al guardar las condiciones.');
+            });
     }
 }" class="mb-5" @toggle-modal-condiciones.window="openCondiciones = !openCondiciones">
     <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
             <div x-show="openCondiciones" x-transition:enter="transition ease-out duration-300 transform"
-                x-transition:enter-start="opacity-0 scale-95"
-                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                 x-transition:leave="transition ease-in duration-200 transform"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-95"
+                x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                 class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8">
-                
+
                 <!-- Header -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                     <h5 class="font-bold text-lg">Condiciones de Inicio de Servicio</h5>
@@ -239,10 +238,11 @@
 
                             <!-- Campo para cargar la imagen -->
                             <div class="space-y-4 mt-4">
-    <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
-    <input type="file" x-ref="imagen" @change="condiciones.imagen = $refs.imagen.files[0]" 
-    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
-</div>
+                                <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
+                                <input type="file" x-ref="imagen"
+                                    @change="condiciones.imagen = $refs.imagen.files[0]"
+                                    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
+                            </div>
 
                         </div>
 
@@ -252,9 +252,9 @@
                                 Cancelar
                             </button>
                             <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                            @click="guardarCondiciones(condiciones, {{ $ticketId }}, {{ $visitaId }})">
-                            Guardar
-                        </button>
+                                @click="guardarCondiciones(condiciones, {{ $ticketId }}, {{ $visitaId }})">
+                                Guardar
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -330,13 +330,15 @@
                         <!-- Encargado -->
                         <div>
                             <label for="encargado" class="block text-sm font-medium">Encargado</label>
-                            <select id="encargado" name="encargado" class="select2 w-full" style="display: none" @change="encargadoTipo = $event.target.options[$event.target.selectedIndex].dataset.tipo">
+                            <select id="encargado" name="encargado" class="select2 w-full" style="display: none"
+                                @change="encargadoTipo = $event.target.options[$event.target.selectedIndex].dataset.tipo">
                                 <option value="" disabled selected>Seleccionar Encargado</option>
                                 <!-- Aquí se itera sobre los usuarios -->
                                 @foreach ($encargado as $encargados)
-                                    <option value="{{ $encargados->idUsuario }}" data-tipo="{{ $encargados->idTipoUsuario }}">
-                                        {{ $encargados->Nombre }} - 
-                                        @if($encargados->idTipoUsuario == 3)
+                                    <option value="{{ $encargados->idUsuario }}"
+                                        data-tipo="{{ $encargados->idTipoUsuario }}">
+                                        {{ $encargados->Nombre }} -
+                                        @if ($encargados->idTipoUsuario == 4)
                                             Técnico
                                         @elseif($encargados->idTipoUsuario == 5)
                                             Chofer
@@ -348,16 +350,19 @@
 
                         <!-- Mostrar checkbox "¿Necesita Apoyo?" solo si el encargado es Técnico -->
                         <div x-show="encargadoTipo == 3" class="mt-4">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" id="necesitaApoyo" name="necesita_apoyo" class="form-checkbox" x-model="necesitaApoyo">
-                            <span class="ml-2 text-sm font-medium">¿Necesita Apoyo?</span>
-                        </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="necesitaApoyo" name="necesita_apoyo"
+                                    class="form-checkbox" x-model="necesitaApoyo">
+                                <span class="ml-2 text-sm font-medium">¿Necesita Apoyo?</span>
+                            </label>
                         </div>
 
                         <!-- Mostrar select de técnicos de apoyo solo si el checkbox está marcado -->
                         <div x-show="necesitaApoyo" class="mt-3">
-                            <label for="idTecnicoApoyo" class="block text-sm font-medium">Seleccione Técnicos de Apoyo</label>
-                            <select id="idTecnicoApoyo" name="idTecnicoApoyo[]" multiple class="select2" style="display: none;" placeholder="Seleccionar Técnicos de Apoyo">
+                            <label for="idTecnicoApoyo" class="block text-sm font-medium">Seleccione Técnicos de
+                                Apoyo</label>
+                            <select id="idTecnicoApoyo" name="idTecnicoApoyo[]" multiple class="select2"
+                                style="display: none;" placeholder="Seleccionar Técnicos de Apoyo">
                                 <!-- Aquí iteramos sobre los técnicos -->
                                 @foreach ($tecnicos_apoyo as $tecnico)
                                     <option value="{{ $tecnico->idUsuario }}">{{ $tecnico->Nombre }}</option>
@@ -374,13 +379,17 @@
                         <!-- Sección para la carga de la imagen -->
                         <div class="mt-4">
                             <label class="block text-sm font-medium" for="imageUpload">Subir Imagen</label>
-                            <input type="file" id="imageUpload" name="image" accept="image/*" class="form-input w-full" @change="imagePreview = URL.createObjectURL($event.target.files[0])">
-                            
+                            <input type="file" id="imageUpload" name="image" accept="image/*"
+                                class="form-input w-full"
+                                @change="imagePreview = URL.createObjectURL($event.target.files[0])">
+
                             <!-- Contenedor para la previsualización de la imagen -->
                             <div class="mt-2" x-show="imagePreview" x-transition>
-                                <div class="w-[300px] h-[300px] bg-gray-200 border-2 border-gray-300 flex items-center justify-center rounded-md overflow-hidden">
+                                <div
+                                    class="w-[300px] h-[300px] bg-gray-200 border-2 border-gray-300 flex items-center justify-center rounded-md overflow-hidden">
                                     <!-- Imagen con tamaño fijo dentro de un contenedor -->
-                                    <img :src="imagePreview" alt="Previsualización de la imagen" class="object-cover w-full h-full">
+                                    <img :src="imagePreview" alt="Previsualización de la imagen"
+                                        class="object-cover w-full h-full">
                                 </div>
                             </div>
                         </div>
@@ -389,9 +398,9 @@
                         <div class="flex justify-end items-center mt-4">
                             <button type="button" class="btn btn-outline-danger"
                                 @click="open = false">Cancelar</button>
-                                <button type="button" id="guardarBtn"  class="btn btn-primary ltr:ml-4 rtl:mr-4">
-                                    Guardar
-                                </button>
+                            <button type="button" id="guardarBtn" class="btn btn-primary ltr:ml-4 rtl:mr-4">
+                                Guardar
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -411,207 +420,195 @@
 
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // INICIALIZAR FLATPICKR PARA VISITA
-    flatpickr("#fechaVisitaInput", {
-        locale: "es",
-        dateFormat: "Y-m-d"
+    document.addEventListener("DOMContentLoaded", function() {
+        // INICIALIZAR FLATPICKR PARA VISITA
+        flatpickr("#fechaVisitaInput", {
+            locale: "es",
+            dateFormat: "Y-m-d"
+        });
+        flatpickr("#horaInicioInput", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            locale: "es"
+        });
+        flatpickr("#horaFinInput", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            locale: "es"
+        });
+
+
+        // ABRIR MODAL AL CREAR VISITA
+        const crearCordinacionBtn = document.getElementById('crearCordinacionBtn');
+
+        crearCordinacionBtn.addEventListener("click", function(event) {
+
+            // Si la validación es correcta, proceder con la llamada AJAX
+            const ticketId =
+            '{{ $ticket->idTickets }}'; // El ID del ticket, que lo obtienes desde el backend
+
+            console.log("ID del ticket:", ticketId);
+
+            // Realizar consulta AJAX para obtener el número de visitas existentes para ese ticket
+            $.ajax({
+                url: `/obtener-numero-visitas/${ticketId}`, // Endpoint que te dará el número de visitas actuales para ese ticket
+                type: 'GET',
+                success: function(response) {
+                    // Supongamos que la respuesta es el número de visitas asociadas al ticket
+                    let numeroVisitas = response
+                    .numeroVisitas; // Esto lo deberías ajustar según lo que devuelvas desde el backend
+
+                    // El siguiente ID de visita sería el número de visitas + 1
+                    let siguienteIdVisita = numeroVisitas + 1;
+
+                    // Usamos el siguiente ID de visita para el nombre de la visita
+                    nombreVisitaInput.value = `Visita ${siguienteIdVisita}`;
+
+                    // Limpiar los campos de fecha y hora
+                    fechaVisitaInput.value = "";
+                    horaInicioInput.value = "";
+                    horaFinInput.value = "";
+
+                    // Abrir el modal
+                    window.dispatchEvent(new Event('toggle-modal'));
+
+                    console.log("Siguiente ID de visita:", siguienteIdVisita);
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error al obtener el número de visitas para el ticket:",
+                        error);
+                }
+            });
+        });
+        guardarBtn.addEventListener("click", function(event) {
+            // Obtener los valores del formulario
+            const nombreVisita = document.getElementById('nombreVisitaInput').value;
+            const fechaVisita = document.getElementById('fechaVisitaInput').value;
+            const horaInicio = document.getElementById('horaInicioInput').value;
+            const horaFin = document.getElementById('horaFinInput').value;
+            const encargado = document.getElementById('encargado').value;
+
+            // Enviar 1 si el checkbox está marcado, 0 si no
+            const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
+
+            const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions)
+                .map(option => option.value);
+            const ticketId = '{{ $ticket->idTickets }}'; // El ID del ticket
+
+            // Verificar si los campos obligatorios están vacíos
+            if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
+                toastr.error("Por favor, complete todos los campos obligatorios.");
+                return; // Detener la ejecución si falta algún campo
+            }
+
+            // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
+            if (necesitaApoyo && tecnicosApoyo.length === 0) {
+                toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
+                return; // Detener la ejecución si no se seleccionaron técnicos
+            }
+
+            // Convertir las horas de inicio y fin a formato Date
+            const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
+            const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
+
+            // Crear objetos Date para la hora de inicio y hora de fin
+            const inicioDate = new Date();
+            inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
+
+            const finDate = new Date();
+            finDate.setHours(horaFinHoras, horaFinMinutos, 0);
+
+            // Validar si la hora de fin es menor o igual a la hora de inicio
+            if (finDate <= inicioDate) {
+                toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
+                return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
+            }
+
+            // Si la validación es correcta, realizar la llamada AJAX para guardar la visita
+            $.ajax({
+                url: `/guardar-visita`,
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}', // Token CSRF
+                    nombre: nombreVisita,
+                    fecha_visita: fechaVisita,
+                    hora_inicio: horaInicio,
+                    hora_fin: horaFin,
+                    encargado: encargado,
+                    necesita_apoyo: necesitaApoyo, // Enviar 1 o 0
+                    tecnicos_apoyo: tecnicosApoyo,
+                    idTickets: ticketId // El id del ticket
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message); // Muestra un mensaje de éxito
+                        window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
+                        // Recargar la página
+                        location.reload();
+                    } else {
+                        // Si no fue exitoso, muestra el mensaje de error
+                        toastr.error(response
+                        .message); // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al guardar visita:", error);
+                    toastr.error("El tecnico ya esta asigando a una hora.");
+                }
+            });
+        });
     });
-    flatpickr("#horaInicioInput", {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        locale: "es"
-    });
-    flatpickr("#horaFinInput", {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        locale: "es"
-    });
+</script>
 
 
-    // ABRIR MODAL AL CREAR VISITA
-    const crearCordinacionBtn = document.getElementById('crearCordinacionBtn');
 
-    crearCordinacionBtn.addEventListener("click", function(event) {
 
-        // Si la validación es correcta, proceder con la llamada AJAX
-        const ticketId = '{{ $ticket->idTickets }}';  // El ID del ticket, que lo obtienes desde el backend
 
-        console.log("ID del ticket:", ticketId);
 
-        // Realizar consulta AJAX para obtener el número de visitas existentes para ese ticket
-        $.ajax({
-            url: `/obtener-numero-visitas/${ticketId}`,  // Endpoint que te dará el número de visitas actuales para ese ticket
-            type: 'GET',
-            success: function(response) {
-                // Supongamos que la respuesta es el número de visitas asociadas al ticket
-                let numeroVisitas = response.numeroVisitas; // Esto lo deberías ajustar según lo que devuelvas desde el backend
 
-                // El siguiente ID de visita sería el número de visitas + 1
-                let siguienteIdVisita = numeroVisitas + 1;
 
-                // Usamos el siguiente ID de visita para el nombre de la visita
-                nombreVisitaInput.value = `Visita ${siguienteIdVisita}`;
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Inicializar Select2 para el select de técnicos de apoyo
+        $('.select2').select2({
+            placeholder: "Seleccionar Técnicos de Apoyo", // Puedes personalizar el texto del placeholder
+            allowClear: true // Permite limpiar la selección
+        });
 
-                // Limpiar los campos de fecha y hora
-                fechaVisitaInput.value = "";
-                horaInicioInput.value = "";
-                horaFinInput.value = "";
+        // Mostrar/ocultar el contenedor y agregar/remover badges cuando los técnicos son seleccionados
+        $('#idTecnicoApoyo').on('change', function() {
+            const selectedTechnicians = $(this).val(); // Obtener los técnicos seleccionados
+            const container = $('#selected-items-container');
+            const listContainer = $('#selected-items-list');
 
-                // Abrir el modal
-                window.dispatchEvent(new Event('toggle-modal'));
+            // Limpiar el contenedor antes de añadir nuevos badges
+            listContainer.empty();
 
-                console.log("Siguiente ID de visita:", siguienteIdVisita);
-            },
-            error: function(xhr, status, error) {
-                console.log("Error al obtener el número de visitas para el ticket:", error);
+            // Si hay técnicos seleccionados, mostrar el contenedor
+            if (selectedTechnicians && selectedTechnicians.length > 0) {
+                container.removeClass('hidden'); // Mostrar el contenedor
+                selectedTechnicians.forEach(function(technicianId) {
+                    // Aquí se asume que cada técnico tiene un nombre
+                    const technicianName = $('#idTecnicoApoyo option[value="' + technicianId +
+                        '"]').text(); // Obtener nombre del técnico
+                    const badge =
+                        `<span class="bg-blue-500 text-white px-3 py-1 rounded-full">${technicianName}</span>`;
+                    listContainer.append(badge);
+                });
+            } else {
+                // Si no hay técnicos seleccionados, ocultar el contenedor
+                container.addClass('hidden');
             }
         });
     });
-    guardarBtn.addEventListener("click", function(event) {
-    // Obtener los valores del formulario
-    const nombreVisita = document.getElementById('nombreVisitaInput').value;
-    const fechaVisita = document.getElementById('fechaVisitaInput').value;
-    const horaInicio = document.getElementById('horaInicioInput').value;
-    const horaFin = document.getElementById('horaFinInput').value;
-    const encargado = document.getElementById('encargado').value;
-
-    // Enviar 1 si el checkbox está marcado, 0 si no
-    const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
-
-    const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions).map(option => option.value);
-    const ticketId = '{{ $ticket->idTickets }}';  // El ID del ticket
-
-    // Verificar si los campos obligatorios están vacíos
-    if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
-        toastr.error("Por favor, complete todos los campos obligatorios.");
-        return; // Detener la ejecución si falta algún campo
-    }
-
-    // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
-    if (necesitaApoyo && tecnicosApoyo.length === 0) {
-        toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
-        return; // Detener la ejecución si no se seleccionaron técnicos
-    }
-
-    // Convertir las horas de inicio y fin a formato Date
-    const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
-    const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
-
-    // Crear objetos Date para la hora de inicio y hora de fin
-    const inicioDate = new Date();
-    inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
-
-    const finDate = new Date();
-    finDate.setHours(horaFinHoras, horaFinMinutos, 0);
-
-    // Validar si la hora de fin es menor o igual a la hora de inicio
-    if (finDate <= inicioDate) {
-        toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
-        return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
-    }
-
-    // Si la validación es correcta, realizar la llamada AJAX para guardar la visita
-    $.ajax({
-        url: `/guardar-visita`,
-        method: 'POST',
-        data: {
-            _token: '{{ csrf_token() }}',  // Token CSRF
-            nombre: nombreVisita,
-            fecha_visita: fechaVisita,
-            hora_inicio: horaInicio,
-            hora_fin: horaFin,
-            encargado: encargado,
-            necesita_apoyo: necesitaApoyo,  // Enviar 1 o 0
-            tecnicos_apoyo: tecnicosApoyo,
-            idTickets: ticketId  // El id del ticket
-        },
-        success: function(response) {
-            if (response.success) {
-                toastr.success(response.message); // Muestra un mensaje de éxito
-                window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
-                 // Recargar la página
-            location.reload();
-            } else {
-                // Si no fue exitoso, muestra el mensaje de error
-                toastr.error(response.message);  // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error al guardar visita:", error);
-            toastr.error("El tecnico ya esta asigando a una hora.");
-        }
-    });
-});
-});
-
-</script>
-
-
-
-
-
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Inicializar Select2 para el select de técnicos de apoyo
-    $('.select2').select2({
-        placeholder: "Seleccionar Técnicos de Apoyo", // Puedes personalizar el texto del placeholder
-        allowClear: true // Permite limpiar la selección
-    });
-
-    // Mostrar/ocultar el contenedor y agregar/remover badges cuando los técnicos son seleccionados
-    $('#idTecnicoApoyo').on('change', function() {
-        const selectedTechnicians = $(this).val(); // Obtener los técnicos seleccionados
-        const container = $('#selected-items-container');
-        const listContainer = $('#selected-items-list');
-
-        // Limpiar el contenedor antes de añadir nuevos badges
-        listContainer.empty();
-
-        // Si hay técnicos seleccionados, mostrar el contenedor
-        if (selectedTechnicians && selectedTechnicians.length > 0) {
-            container.removeClass('hidden'); // Mostrar el contenedor
-            selectedTechnicians.forEach(function(technicianId) {
-                // Aquí se asume que cada técnico tiene un nombre
-                const technicianName = $('#idTecnicoApoyo option[value="' + technicianId + '"]').text(); // Obtener nombre del técnico
-                const badge = `<span class="bg-blue-500 text-white px-3 py-1 rounded-full">${technicianName}</span>`;
-                listContainer.append(badge);
-            });
-        } else {
-            // Si no hay técnicos seleccionados, ocultar el contenedor
-            container.addClass('hidden');
-        }
-    });
-});
 </script>
 
 <script>
-  
-  var ticketId = {{ $ticketId }};
+    var ticketId = {{ $ticketId }};
 </script>
 
 <script src="{{ asset('assets/js/tickets/smart/visitas.js') }}"></script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
