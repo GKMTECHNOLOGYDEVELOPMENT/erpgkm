@@ -238,7 +238,8 @@
                             </div>
 
                             <!-- Campo para cargar la imagen -->
-                            <div class="space-y-4 mt-4">
+                                        <!-- Campo para cargar la imagen -->
+                                        <div class="space-y-4 mt-4">
     <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
     <input type="file" x-ref="imagen" @change="condiciones.imagen = $refs.imagen.files[0]" 
     class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
@@ -371,18 +372,11 @@
                             <div id="selected-items-list" class="flex flex-wrap gap-2"></div>
                         </div>
 
-                        <!-- Sección para la carga de la imagen -->
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium" for="imageUpload">Subir Imagen</label>
-                            <input type="file" id="imageUpload" name="image" accept="image/*" class="form-input w-full" @change="imagePreview = URL.createObjectURL($event.target.files[0])">
-                            
-                            <!-- Contenedor para la previsualización de la imagen -->
-                            <div class="mt-2" x-show="imagePreview" x-transition>
-                                <div class="w-[300px] h-[300px] bg-gray-200 border-2 border-gray-300 flex items-center justify-center rounded-md overflow-hidden">
-                                    <!-- Imagen con tamaño fijo dentro de un contenedor -->
-                                    <img :src="imagePreview" alt="Previsualización de la imagen" class="object-cover w-full h-full">
-                                </div>
-                            </div>
+                        <!-- Campo para cargar la imagen -->
+                        <div class="space-y-4 mt-4">
+                            <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
+                            <input type="file" x-ref="imagen" @change="condiciones.imagen = $refs.imagen.files[0]" 
+                            class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
                         </div>
 
                         <!-- Botones -->
@@ -550,12 +544,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 </script>
-
-
-
-
-
-
 
 
 <script>

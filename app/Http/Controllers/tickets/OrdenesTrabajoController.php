@@ -1052,6 +1052,7 @@ if ($ticket) {
             'encargado' => 'required|integer|exists:usuarios,idUsuario', // Validar que el encargado existe
             'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
             'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
+            'imagen' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         $fechaInicio = $request->fecha_visita . ' ' . $request->hora_inicio;
@@ -1090,6 +1091,20 @@ if ($ticket) {
 
         // Guardar la visita
         $visita->save();
+
+
+
+    // Manejar la imagen (si se subió)
+    if ($request->hasFile('imagen')) {
+        $imagen = file_get_contents($request->file('imagen')->getRealPath());  // Leer archivo como binario
+
+        // Guardar la imagen en la tabla 'imagenapoyosmart'
+        DB::table('imagenapoyosmart')->insert([
+            'imagen' => $imagen,
+            'idVisitas' => $visita->idVisitas,
+            'descripcion' => 'Imagen de apoyo',  // Puedes agregar una descripción si es necesario
+        ]);
+    }
 
         // Guardar en la tabla anexos_visitas
         DB::table('anexos_visitas')->insert([
@@ -1145,22 +1160,39 @@ if ($ticket) {
 
     public function obtenerVisitas($ticketId)
     {
-        // Obtener todas las visitas del ticket, incluyendo el técnico
-        $visitas = Visita::with('tecnico')->where('idTickets', $ticketId)->get();
-
+        // Obtener todas las visitas del ticket, incluyendo el técnico y los anexos
+        $visitas = Visita::with(['tecnico', 'anexos_visitas'])->where('idTickets', $ticketId)->get();
+    
         // Convertir las fechas a formato ISO 8601
         $visitas->each(function ($visita) {
             $visita->fecha_inicio_hora = $visita->fecha_inicio_hora->toIso8601String();
             $visita->fecha_final_hora = $visita->fecha_final_hora->toIso8601String();
+            
             // Incluir el nombre del técnico
             $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;  // Aquí asumimos que el campo 'nombre' está en el modelo Usuario
             $visita->idTicket = $visita->idTickets;  // Este es el ID del ticket asociado a la visita
             $visita->idVisita = $visita->idVisitas;  // Este es el ID de la visita
             $visita->nombre_visita = $visita->nombre; // Este es el nombre de la visita
+    
+            // Iterar sobre los anexos y obtener todos los datos
+            $visita->anexos_visitas->each(function ($anexovisita) {
+                // Asegurarse de obtener todos los datos de los anexos
+                // Convertir la foto a base64 si existe
+                if ($anexovisita->foto) {
+                    $anexovisita->foto = base64_encode($anexovisita->foto);
+                }
+                // Si quieres incluir la descripción, lat, lng y ubicación
+                $anexovisita->descripcion = $anexovisita->descripcion;
+                $anexovisita->idTipovisita = $anexovisita->idTipovisita;
+                $anexovisita->lat = $anexovisita->lat;
+                $anexovisita->lng = $anexovisita->lng;
+                $anexovisita->ubicacion = $anexovisita->ubicacion;
+            });
         });
-
+    
         return response()->json($visitas);
     }
+    
 
 
 
@@ -1190,10 +1222,17 @@ if ($ticket) {
     }
 
 
+
+
+    
+    // use Illuminate\Support\Facades\Log; // Asegúrate de importar la clase Log al inicio del archivo
+
     public function guardarAnexoVisita(Request $request)
     {
         try {
             // Validación de los datos
+            Log::info('Iniciando validación de datos', ['request' => $request->all()]);
+    
             $validated = $request->validate([
                 'idVisitas' => 'required|integer|exists:visitas,idVisitas',
                 'idTipovisita' => 'required|integer',
@@ -1201,18 +1240,38 @@ if ($ticket) {
                 'lng' => 'required|numeric',
                 'ubicacion' => 'required|string|max:255',
             ]);
-
+    
+            Log::info('Datos validados correctamente', ['validated_data' => $validated]);
+    
             // Verificar si ya existe un anexo para la visita y tipo de visita (sin importar lat y lng)
+            Log::info('Verificando existencia de anexo para visita y tipo de visita', [
+                'idVisitas' => $validated['idVisitas'],
+                'idTipovisita' => $validated['idTipovisita']
+            ]);
+    
             $existingAnexo = DB::table('anexos_visitas')
                 ->where('idVisitas', $validated['idVisitas'])
                 ->where('idTipovisita', $validated['idTipovisita'])
                 ->first();
-
+    
             if ($existingAnexo) {
+                Log::warning('Anexo ya existe para la visita y tipo de visita', [
+                    'idVisitas' => $validated['idVisitas'],
+                    'idTipovisita' => $validated['idTipovisita'],
+                    'existing_anexo' => $existingAnexo
+                ]);
                 return response()->json(['error' => 'El técnico ya se encuentra en desplazamiento para esta visita.'], 400);
             }
-
+    
             // Insertar los datos en la tabla anexos_visitas si no existe
+            Log::info('Insertando nuevo anexo en la base de datos', [
+                'idVisitas' => $validated['idVisitas'],
+                'idTipovisita' => $validated['idTipovisita'],
+                'lat' => $validated['lat'],
+                'lng' => $validated['lng'],
+                'ubicacion' => $validated['ubicacion'],
+            ]);
+    
             DB::table('anexos_visitas')->insert([
                 'idVisitas' => $validated['idVisitas'],
                 'idTipovisita' => $validated['idTipovisita'],
@@ -1220,13 +1279,25 @@ if ($ticket) {
                 'lng' => $validated['lng'],
                 'ubicacion' => $validated['ubicacion'],
             ]);
-
+    
+            Log::info('Anexo guardado correctamente', [
+                'idVisitas' => $validated['idVisitas'],
+                'idTipovisita' => $validated['idTipovisita']
+            ]);
+    
             return response()->json(['success' => true, 'message' => 'Anexo guardado correctamente.'], 200);
         } catch (\Exception $e) {
             // Manejo de errores
+            Log::error('Error al guardar el anexo', [
+                'exception' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
             return response()->json(['error' => 'Error al guardar el anexo', 'message' => $e->getMessage()], 500);
         }
     }
+    
+
+
 
 
 
