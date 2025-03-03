@@ -89,8 +89,17 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                 <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">${fechaInicio} - ${fechaFinal}</span>
               </div>
             </div>
+            
+            <!-- Botón para ver imagen -->
+            <div class="flex justify-center mt-2">
+              <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                      id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
+                <i class="fa-solid fa-image text-sm sm:text-base"></i> 
+              </button>
+            </div>                   
           </div>
         `;
+        
 
 
 
@@ -253,7 +262,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                       </span>
                     </div>
                   </div>
-              
+        
                   <!-- Botones de acción -->
                   <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
                     <button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
@@ -269,14 +278,20 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                       <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
                       <span class="text-xs sm:text-sm">Siguiente</span>
                     </button>
+                    
+                    <!-- Botón para ver imagen -->
+                    <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                            id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
+                      <i class="fa-solid fa-image text-sm sm:text-base"></i> 
+                    </button>
                   </div>
-                  
+                
                   <!-- Input oculto para subir foto -->
                   <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">
-                  
-                  
                 </div>
               `;
+              
 
 
               // visitasList.appendChild(inicioServicioCard);
@@ -320,17 +335,26 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                           </div>
                         </div>
                     
-                        <div class="flex justify-center mt-4">
-                        <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                       transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-                                id="continueButton-${visita.idVisitas}">
-                          <i class="fa-solid fa-check-circle text-xs sm:text-base"></i> 
-                          <span class="text-xs sm:text-sm">Continuar</span>
-                        </button>
-                      </div>
-                                                              
+                        <!-- Botones de acción -->
+                        <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
+                          <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                         transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+                                  id="continueButton-${visita.idVisitas}">
+                            <i class="fa-solid fa-check-circle text-xs sm:text-base"></i> 
+                            <span class="text-xs sm:text-sm">Continuar</span>
+                          </button>
+                          
+                          <!-- Botón para ver imagen -->
+                          <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                         transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                                  id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
+                            <i class="fa-solid fa-image text-xs sm:text-base"></i> 
+                          </button>
+                        </div>
+                        
                       </div>
                     `;
+                    
 
 
                     // Insertar la tarjeta de "Final de Servicio" debajo de la tarjeta de "Inicio de Servicio"

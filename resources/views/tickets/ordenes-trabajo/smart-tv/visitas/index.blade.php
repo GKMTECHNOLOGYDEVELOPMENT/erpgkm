@@ -281,7 +281,7 @@
 <div id="cordinacionContainer" class="mt-5 flex flex-col space-y-4"></div>
 
 <!-- MODAL PARA CREAR VISITA USANDO ALPINE.JS -->
-<div x-data="{ open: false, encargadoTipo: '', necesitaApoyo: false }" class="mb-5" @toggle-modal.window="open = !open">
+<div x-data="{ open: false, encargadoTipo: '', necesitaApoyo: false, imagePreview: null }" class="mb-5" @toggle-modal.window="open = !open">
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
             <div x-show="open" x-transition.duration.300
@@ -352,10 +352,9 @@
                             <input type="checkbox" id="necesitaApoyo" name="necesita_apoyo" class="form-checkbox" x-model="necesitaApoyo">
                             <span class="ml-2 text-sm font-medium">¿Necesita Apoyo?</span>
                         </label>
-
                         </div>
 
-                      <!-- Mostrar select de técnicos de apoyo solo si el checkbox está marcado -->
+                        <!-- Mostrar select de técnicos de apoyo solo si el checkbox está marcado -->
                         <div x-show="necesitaApoyo" class="mt-3">
                             <label for="idTecnicoApoyo" class="block text-sm font-medium">Seleccione Técnicos de Apoyo</label>
                             <select id="idTecnicoApoyo" name="idTecnicoApoyo[]" multiple class="select2" style="display: none;" placeholder="Seleccionar Técnicos de Apoyo">
@@ -372,6 +371,19 @@
                             <div id="selected-items-list" class="flex flex-wrap gap-2"></div>
                         </div>
 
+                        <!-- Sección para la carga de la imagen -->
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium" for="imageUpload">Subir Imagen</label>
+                            <input type="file" id="imageUpload" name="image" accept="image/*" class="form-input w-full" @change="imagePreview = URL.createObjectURL($event.target.files[0])">
+                            
+                            <!-- Contenedor para la previsualización de la imagen -->
+                            <div class="mt-2" x-show="imagePreview" x-transition>
+                                <div class="w-[300px] h-[300px] bg-gray-200 border-2 border-gray-300 flex items-center justify-center rounded-md overflow-hidden">
+                                    <!-- Imagen con tamaño fijo dentro de un contenedor -->
+                                    <img :src="imagePreview" alt="Previsualización de la imagen" class="object-cover w-full h-full">
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
@@ -380,7 +392,6 @@
                                 <button type="button" id="guardarBtn"  class="btn btn-primary ltr:ml-4 rtl:mr-4">
                                     Guardar
                                 </button>
-
                         </div>
                     </form>
                 </div>
@@ -388,6 +399,7 @@
         </div>
     </div>
 </div>
+
 
 
 
@@ -578,8 +590,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
-
-
 </script>
 
 <script>
