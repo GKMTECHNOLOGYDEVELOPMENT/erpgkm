@@ -46,29 +46,67 @@
             </button>
         </div>
 
-        <!-- Contenido del modal con tabla -->
-        <div class="mt-4 overflow-y-auto flex-grow">
-            <table class="w-full border-collapse border border-gray-300">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Usuario</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Fecha de
-                            Modificación</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Última
-                            Modificación</th>
-                        <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Nueva
-                            Modificación</th>
-                    </tr>
-                </thead>
-                <tbody id="historialModificaciones">
-                    <!-- Aquí se llenará dinámicamente con AJAX -->
-                </tbody>
-            </table>
-        </div>
+       <!-- Contenido del modal con tabla -->
+<div class="mt-4 overflow-y-auto flex-grow">
+    <table class="w-full border-collapse border border-gray-300">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Campo</th>
+                <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Valor Antiguo</th>
+                <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Valor Nuevo</th>
+                <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Fecha de Modificación</th>
+                <th class="border border-gray-300 px-4 py-2 text-center text-sm font-semibold">Usuario</th>
+            </tr>
+        </thead>
+        <tbody id="historialModificaciones">
+            <!-- Aquí se llenará dinámicamente con AJAX -->
+        </tbody>
+    </table>
+</div>
     </div>
 </div>
 
 
+
+<script>
+    // Suponiendo que tienes un ID de ticket disponible en tu página
+    const ticketId = '{{ $id }}';  // Error aquí, ya que ticketId ya fue declarado en PHP
+
+    // Cargar las modificaciones con AJAX cuando se abra el modal
+    window.addEventListener('toggle-modal', function() {
+        cargarHistorialModificaciones(ticketId);
+    });
+
+    function cargarHistorialModificaciones(ticketId) {
+        // Hacer una solicitud AJAX para obtener el historial de modificaciones
+        $.ajax({
+            url: `/ticket/${ticketId}/historial-modificaciones`,
+            method: 'GET',
+            success: function(response) {
+                const tbody = document.getElementById('historialModificaciones');
+                tbody.innerHTML = '';  // Limpiar la tabla antes de agregar nuevas filas
+
+                // Iterar sobre las modificaciones y agregar las filas a la tabla
+                response.forEach(modificacion => {
+                    const tr = document.createElement('tr');
+                    
+                    tr.innerHTML = `
+                        <td class="border border-gray-300 px-4 py-2 text-center text-sm">${modificacion.campo}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center text-sm">${modificacion.valor_antiguo}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center text-sm">${modificacion.valor_nuevo}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center text-sm">${modificacion.fecha_modificacion}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center text-sm">${modificacion.usuario}</td>
+                    `;
+
+                    tbody.appendChild(tr);
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error("Error al cargar el historial de modificaciones", error);
+            }
+        });
+    }
+</script>
 
 
 
