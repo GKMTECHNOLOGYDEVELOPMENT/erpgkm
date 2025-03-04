@@ -237,12 +237,13 @@
                             </div>
 
                             <!-- Campo para cargar la imagen -->
-                                        <!-- Campo para cargar la imagen -->
-                                        <div class="space-y-4 mt-4">
-    <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
-    <input type="file" x-ref="imagen" @change="condiciones.imagen = $refs.imagen.files[0]" 
-    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
-</div>
+                            <!-- Campo para cargar la imagen -->
+                            <div class="space-y-4 mt-4">
+                                <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
+                                <input type="file" x-ref="imagen"
+                                    @change="condiciones.imagen = $refs.imagen.files[0]"
+                                    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
+                            </div>
 
                         </div>
 
@@ -264,6 +265,26 @@
 </div>
 
 
+<!-- Modal para visualizar la imagen -->
+<div id="imageModal"
+    class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto flex items-center justify-center">
+    <div class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg bg-white dark:bg-[#121c2c] shadow-lg">
+        <!-- Encabezado -->
+        <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+            <div class="font-bold text-lg">
+                <span id="modalTitle"></span>
+            </div>
+            <button type="button" class="text-white-dark hover:text-dark" id="closeModal">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <!-- Imagen -->
+        <div class="p-5 flex justify-center">
+            <img id="modalImage" src="" alt="Imagen de la visita" class="max-w-full rounded-lg shadow-md" />
+        </div>
+    </div>
+</div>
+
 
 
 
@@ -281,14 +302,31 @@
 <div id="cordinacionContainer" class="mt-5 flex flex-col space-y-4"></div>
 
 <!-- MODAL PARA CREAR VISITA USANDO ALPINE.JS -->
-<div x-data="{ open: false, encargadoTipo: '', necesitaApoyo: false, imagePreview: null }" class="mb-5" @toggle-modal.window="open = !open">
+<div x-data="{
+    open: false, 
+    encargadoTipo: '', 
+    necesitaApoyo: false, 
+    imagePreview: null,
+
+    // Función para previsualizar la imagen antes de subirla
+    previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => this.imagePreview = reader.result;
+            reader.readAsDataURL(file);
+        }
+    }
+}" 
+class="mb-5" @toggle-modal.window="open = !open">
+
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
             <div x-show="open" x-transition.duration.300
                 class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
                 <!-- Header del Modal -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg"> Nueva Cordinacion</h5>
+                    <h5 class="font-bold text-lg"> Nueva Coordinación</h5>
                     <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -377,11 +415,19 @@
                         </div>
 
                         <!-- Campo para cargar la imagen -->
-                        <div class="space-y-4 mt-4">
-                            <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
-                            <input type="file" x-ref="imagen" @change="condiciones.imagen = $refs.imagen.files[0]" 
-                            class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
+                        <div class="space-y-4 mt-2">
+                            <label class="block text-sm font-medium">Subir Imagen</label>
+                            <input type="file" x-ref="imagen" @change="previewImage"
+                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 
+        file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
+
+                            <!-- PREVISUALIZACIÓN DE LA IMAGEN -->
+                            <div x-show="imagePreview" class="mt-4 flex justify-center">
+                                <img :src="imagePreview" alt="Previsualización"
+                                    class="max-w-full h-40 rounded-lg shadow-md">
+                            </div>
                         </div>
+
 
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
@@ -409,6 +455,73 @@
 
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalTitle'); // ✅ Nuevo elemento para el título
+        const closeModal = document.getElementById('closeModal');
+
+        // ✅ Delegación de eventos para los botones "Ver Imagen"
+        document.body.addEventListener('click', function(event) {
+            const button = event.target.closest('button[id^="viewImageButton-"]');
+            if (button) {
+                const visitaId = button.dataset.id; // Extraer ID de la visita
+                const imageType = button.dataset.imageType; // Tipo de imagen
+
+                // ✅ Obtener la URL correcta según el tipo de imagen
+                modalImage.src = obtenerUrlImagen(visitaId, imageType);
+
+                // ✅ Cambiar el título del modal según el tipo de imagen
+                modalTitle.textContent = obtenerTituloFase(imageType);
+
+                // ✅ Mostrar el modal
+                modal.classList.remove('hidden');
+            }
+        });
+
+        // ❌ Cerrar modal al hacer clic en el botón de cerrar
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        // ❌ Cerrar modal si se hace clic fuera de la imagen/modal
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    });
+
+    // 🔄 Función para obtener la URL correcta según el tipo de tarjeta
+    function obtenerUrlImagen(visitaId, imageType) {
+        switch (imageType) {
+            case "visita":
+                return `https://via.placeholder.com/600x400?text=Visita+${visitaId}`;
+            case "inicioServicio":
+                return `https://via.placeholder.com/600x400?text=Inicio+Servicio+${visitaId}`;
+            case "finalServicio":
+                return `https://via.placeholder.com/600x400?text=Final+Servicio+${visitaId}`;
+            default:
+                return `https://via.placeholder.com/600x400?text=Imagen+${visitaId}`;
+        }
+    }
+
+    // 🔄 Función para obtener el título del modal según la fase
+    function obtenerTituloFase(imageType) {
+        switch (imageType) {
+            case "visita":
+                return "Imagen - Programación";
+            case "inicioServicio":
+                return "Imagen - Llegada al Servicio";
+            case "finalServicio":
+                return "Imagen - Inicio de Servicio";
+            default:
+                return "Imagen de la Visita";
+        }
+    }
+
+
+
     document.addEventListener("DOMContentLoaded", function() {
         // INICIALIZAR FLATPICKR PARA VISITA
         flatpickr("#fechaVisitaInput", {
@@ -438,7 +551,7 @@
 
             // Si la validación es correcta, proceder con la llamada AJAX
             const ticketId =
-            '{{ $ticket->idTickets }}'; // El ID del ticket, que lo obtienes desde el backend
+                '{{ $ticket->idTickets }}'; // El ID del ticket, que lo obtienes desde el backend
 
             console.log("ID del ticket:", ticketId);
 
@@ -449,7 +562,7 @@
                 success: function(response) {
                     // Supongamos que la respuesta es el número de visitas asociadas al ticket
                     let numeroVisitas = response
-                    .numeroVisitas; // Esto lo deberías ajustar según lo que devuelvas desde el backend
+                        .numeroVisitas; // Esto lo deberías ajustar según lo que devuelvas desde el backend
 
                     // El siguiente ID de visita sería el número de visitas + 1
                     let siguienteIdVisita = numeroVisitas + 1;
@@ -541,7 +654,8 @@
                     } else {
                         // Si no fue exitoso, muestra el mensaje de error
                         toastr.error(response
-                        .message); // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"
+                            .message
+                        ); // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"
                     }
                 },
                 error: function(xhr, status, error) {
@@ -558,6 +672,119 @@
 
 
 
+
+
+<script>
+//     document.addEventListener("DOMContentLoaded", function() {
+//         // Inicializar Select2 para el select de técnicos de apoyo
+//         $('.select2').select2({
+//             placeholder: "Seleccionar Técnicos de Apoyo", // Puedes personalizar el texto del placeholder
+//             allowClear: true // Permite limpiar la selección
+//         });
+
+//         // Mostrar/ocultar el contenedor y agregar/remover badges cuando los técnicos son seleccionados
+//         $('#idTecnicoApoyo').on('change', function() {
+//             const selectedTechnicians = $(this).val(); // Obtener los técnicos seleccionados
+//             const container = $('#selected-items-container');
+//             const listContainer = $('#selected-items-list');
+
+//             // Limpiar el contenedor antes de añadir nuevos badges
+//             listContainer.empty();
+
+//             // Si hay técnicos seleccionados, mostrar el contenedor
+//             if (selectedTechnicians && selectedTechnicians.length > 0) {
+//                 container.removeClass('hidden'); // Mostrar el contenedor
+//                 selectedTechnicians.forEach(function(technicianId) {
+//                     // Aquí se asume que cada técnico tiene un nombre
+//                     const technicianName = $('#idTecnicoApoyo option[value="' + technicianId +
+//                         '"]').text(); // Obtener nombre del técnico
+//                     const badge =
+//                         `<span class="bg-blue-500 text-white px-3 py-1 rounded-full">${technicianName}</span>`;
+//                     listContainer.append(badge);
+//                 });
+//             } else {
+//                 // Si no hay técnicos seleccionados, ocultar el contenedor
+//                 container.addClass('hidden');
+//             }
+//         });
+//     });
+//     guardarBtn.addEventListener("click", function(event) {
+//     // Obtener los valores del formulario
+//     const nombreVisita = document.getElementById('nombreVisitaInput').value;
+//     const fechaVisita = document.getElementById('fechaVisitaInput').value;
+//     const horaInicio = document.getElementById('horaInicioInput').value;
+//     const horaFin = document.getElementById('horaFinInput').value;
+//     const encargado = document.getElementById('encargado').value;
+
+//     // Enviar 1 si el checkbox está marcado, 0 si no
+//     const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
+
+//     const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions).map(option => option.value);
+//     const ticketId = '{{ $ticket->idTickets }}';  // El ID del ticket
+
+//     // Verificar si los campos obligatorios están vacíos
+//     if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
+//         toastr.error("Por favor, complete todos los campos obligatorios.");
+//         return; // Detener la ejecución si falta algún campo
+//     }
+
+//     // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
+//     if (necesitaApoyo && tecnicosApoyo.length === 0) {
+//         toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
+//         return; // Detener la ejecución si no se seleccionaron técnicos
+//     }
+
+//     // Convertir las horas de inicio y fin a formato Date
+//     const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
+//     const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
+
+//     // Crear objetos Date para la hora de inicio y hora de fin
+//     const inicioDate = new Date();
+//     inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
+
+//     const finDate = new Date();
+//     finDate.setHours(horaFinHoras, horaFinMinutos, 0);
+
+//     // Validar si la hora de fin es menor o igual a la hora de inicio
+//     if (finDate <= inicioDate) {
+//         toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
+//         return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
+//     }
+
+//     // Si la validación es correcta, realizar la llamada AJAX para guardar la visita
+//     $.ajax({
+//         url: `/guardar-visita`,
+//         method: 'POST',
+//         data: {
+//             _token: '{{ csrf_token() }}',  // Token CSRF
+//             nombre: nombreVisita,
+//             fecha_visita: fechaVisita,
+//             hora_inicio: horaInicio,
+//             hora_fin: horaFin,
+//             encargado: encargado,
+//             necesita_apoyo: necesitaApoyo,  // Enviar 1 o 0
+//             tecnicos_apoyo: tecnicosApoyo,
+//             idTickets: ticketId  // El id del ticket
+//         },
+//         success: function(response) {
+//             if (response.success) {
+//                 toastr.success(response.message); // Muestra un mensaje de éxito
+//                 window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
+//                  // Recargar la página
+//             location.reload();
+//             } else {
+//                 // Si no fue exitoso, muestra el mensaje de error
+//                 toastr.error(response.message);  // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"
+//             }
+//         },
+//         error: function(xhr, status, error) {
+//             console.error("Error al guardar visita:", error);
+//             toastr.error("El tecnico ya esta asigando a una hora.");
+//         }
+//     });
+// });
+
+</script>
 
 
 <script>
@@ -594,122 +821,10 @@
             }
         });
     });
-    guardarBtn.addEventListener("click", function(event) {
-    // Obtener los valores del formulario
-    const nombreVisita = document.getElementById('nombreVisitaInput').value;
-    const fechaVisita = document.getElementById('fechaVisitaInput').value;
-    const horaInicio = document.getElementById('horaInicioInput').value;
-    const horaFin = document.getElementById('horaFinInput').value;
-    const encargado = document.getElementById('encargado').value;
-
-    // Enviar 1 si el checkbox está marcado, 0 si no
-    const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
-
-    const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions).map(option => option.value);
-    const ticketId = '{{ $ticket->idTickets }}';  // El ID del ticket
-
-    // Verificar si los campos obligatorios están vacíos
-    if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
-        toastr.error("Por favor, complete todos los campos obligatorios.");
-        return; // Detener la ejecución si falta algún campo
-    }
-
-    // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
-    if (necesitaApoyo && tecnicosApoyo.length === 0) {
-        toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
-        return; // Detener la ejecución si no se seleccionaron técnicos
-    }
-
-    // Convertir las horas de inicio y fin a formato Date
-    const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
-    const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
-
-    // Crear objetos Date para la hora de inicio y hora de fin
-    const inicioDate = new Date();
-    inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
-
-    const finDate = new Date();
-    finDate.setHours(horaFinHoras, horaFinMinutos, 0);
-
-    // Validar si la hora de fin es menor o igual a la hora de inicio
-    if (finDate <= inicioDate) {
-        toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
-        return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
-    }
-
-    // Si la validación es correcta, realizar la llamada AJAX para guardar la visita
-    $.ajax({
-        url: `/guardar-visita`,
-        method: 'POST',
-        data: {
-            _token: '{{ csrf_token() }}',  // Token CSRF
-            nombre: nombreVisita,
-            fecha_visita: fechaVisita,
-            hora_inicio: horaInicio,
-            hora_fin: horaFin,
-            encargado: encargado,
-            necesita_apoyo: necesitaApoyo,  // Enviar 1 o 0
-            tecnicos_apoyo: tecnicosApoyo,
-            idTickets: ticketId  // El id del ticket
-        },
-        success: function(response) {
-            if (response.success) {
-                toastr.success(response.message); // Muestra un mensaje de éxito
-                window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
-                 // Recargar la página
-            location.reload();
-            } else {
-                // Si no fue exitoso, muestra el mensaje de error
-                toastr.error(response.message);  // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error al guardar visita:", error);
-            toastr.error("El tecnico ya esta asigando a una hora.");
-        }
-    });
-});
-});
-
 </script>
 
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Inicializar Select2 para el select de técnicos de apoyo
-    $('.select2').select2({
-        placeholder: "Seleccionar Técnicos de Apoyo", // Puedes personalizar el texto del placeholder
-        allowClear: true // Permite limpiar la selección
-    });
-
-    // Mostrar/ocultar el contenedor y agregar/remover badges cuando los técnicos son seleccionados
-    $('#idTecnicoApoyo').on('change', function() {
-        const selectedTechnicians = $(this).val(); // Obtener los técnicos seleccionados
-        const container = $('#selected-items-container');
-        const listContainer = $('#selected-items-list');
-
-        // Limpiar el contenedor antes de añadir nuevos badges
-        listContainer.empty();
-
-        // Si hay técnicos seleccionados, mostrar el contenedor
-        if (selectedTechnicians && selectedTechnicians.length > 0) {
-            container.removeClass('hidden'); // Mostrar el contenedor
-            selectedTechnicians.forEach(function(technicianId) {
-                // Aquí se asume que cada técnico tiene un nombre
-                const technicianName = $('#idTecnicoApoyo option[value="' + technicianId + '"]').text(); // Obtener nombre del técnico
-                const badge = `<span class="bg-blue-500 text-white px-3 py-1 rounded-full">${technicianName}</span>`;
-                listContainer.append(badge);
-            });
-        } else {
-            // Si no hay técnicos seleccionados, ocultar el contenedor
-            container.addClass('hidden');
-        }
-    });
-});
-</script>
-
-<script>
+<!-- <script>
     var ticketId = {{ $ticketId }};
-</script>
+</script> -->
 
 <script src="{{ asset('assets/js/tickets/smart/visitas.js') }}"></script>

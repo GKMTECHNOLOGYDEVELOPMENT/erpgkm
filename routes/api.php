@@ -71,6 +71,7 @@ Route::get('/verificarFoto/{idVisitas}', [OrdenesTrabajoController::class, 'veri
 Route::get('/verificarRegistroAnexo/{idVisitas}', [OrdenesTrabajoController::class, 'verificarRegistroAnexo']);
 Route::post('/guardarCondiciones', [OrdenesTrabajoController::class, 'guardar']);
 
+// Route::get('/ticket/{ticketId}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
 
 
 Route::post('/guardarEstado', [OrdenesTrabajoController::class, 'guardarEstado']);
