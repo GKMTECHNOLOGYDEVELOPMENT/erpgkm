@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Categorium
+ * Class Categoria
  * 
  * @property int $idCategoria
  * @property string|null $nombre

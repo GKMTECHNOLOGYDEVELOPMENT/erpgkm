@@ -19,7 +19,7 @@ class ArticulosController extends Controller
     {   
         $unidades= Unidad::all();
         $tiposArticulo= Tipoarticulo::all();
-        $modelos = Modelo::with(['marca','categorium'])
+        $modelos = Modelo::with(['marca','categoria'])
         -> where('estado', 1)
         ->get();
         

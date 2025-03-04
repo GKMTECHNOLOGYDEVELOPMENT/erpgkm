@@ -27,7 +27,7 @@ document.addEventListener("alpine:init", () => {
                     // Inicializar DataTable con las nuevas cabeceras
                     this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
                         data: {
-                            headings: ["Ruc", "Nombre", "Celular", "Email", "Dirección", "Referencia", "Acción"], // Nuevas cabeceras
+                            headings: ["RUC", "Nombre", "Celular", "Email", "Dirección", "Referencia", "Acción"], // Nuevas cabeceras
                             data: this.formatDataForTable(data),
                         },
                         searchable: true,
