@@ -8,6 +8,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Categoria;
+
 
 /**
  * Class Modelo
@@ -18,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $idCategoria
  * 
  * @property Marca $marca
- * @property Categorium $categorium
+ * @property Categoria $categoria
  * @property Collection|Articulo[] $articulos
  *
  * @package App\Models

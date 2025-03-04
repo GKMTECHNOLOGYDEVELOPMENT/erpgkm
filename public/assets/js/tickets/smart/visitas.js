@@ -65,6 +65,25 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         selectButton.setAttribute('data-nombre-visita', visita.nombre_visita);
         selectButton.textContent = 'Seleccionar Visita';
 
+
+        // Obtener el ID de la visita
+const idVisita = visita.idVisita;
+
+// Realizar la consulta al backend para verificar si la visita ha sido seleccionada
+fetch(`/api/visita-seleccionada/${idVisita}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.seleccionada) {
+            // Si la visita está seleccionada, cambiar el color del botón y el texto
+            selectButton.classList.remove('btn-warning');
+            selectButton.classList.add('btn-danger');
+            selectButton.textContent = 'Visita Seleccionada';
+        }
+    })
+    .catch(error => {
+        console.error('Error al verificar si la visita está seleccionada:', error);
+    });
+
         // Agregar título y botón al header
         cardHeader.appendChild(visitaTitle);
         cardHeader.appendChild(selectButton);
@@ -126,6 +145,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
               .then(response => response.json())
               .then(data => {
                 if (data.success) {
+                  location.reload()
                   // toastr.success(data.message);  // Muestra el mensaje de éxito
                 } else {
                   toastr.error(data.message);  // Muestra el mensaje de error
@@ -155,7 +175,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         <!-- Mostrar la ubicación -->
         <span id="ubicacion-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
           <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
-          ${visita.anexos_visitas.length > 0 && visita.anexos_visitas[0].ubicacion ? visita.anexos_visitas[0].ubicacion : 'Ubicación no disponible'}
+${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2) ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2).ubicacion : 'Ubicación no disponible'}
         </span>
       </div>
               <div class="flex flex-col items-center">
@@ -217,6 +237,9 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
               .then(response => response.json())
               .then(data => {
                 if (data.success) {
+
+                  location.reload();
+
                   // toastr.success(data.message);  // Muestra el mensaje de éxito
                 } else {
                   toastr.error(data.message);  // Muestra el mensaje de error
@@ -248,9 +271,11 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                     </div>
                     <div class="flex flex-col items-center">
                       <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
-                      <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-                        ${visita.ubicacion || 'Ubicación no disponible'}
-                      </span>
+                   <span id="ubicacion-${visita.idVisitas}" class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+          <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
+
+${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 3) ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 3).ubicacion : 'Ubicación no disponible'}
+        </span>
                     </div>
                     <div class="flex flex-col items-center">
                       <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
@@ -322,9 +347,11 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                           </div>
                           <div class="flex flex-col items-center">
                             <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
-                            <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-                              ${visita.anexos_visitas.ubicacion || 'Ubicación no disponible'}
-                            </span>
+                           <span id="ubicacion-${visita.idVisitas}" class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+          <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
+
+${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 4) ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 4).ubicacion : 'Ubicación no disponible'}
+        </span>
                           </div>
                           <div class="flex flex-col items-center">
                             <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
@@ -336,12 +363,24 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                     
                         <!-- Botones de acción -->
                         <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
-                          <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                         transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-                                  id="continueButton-${visita.idVisitas}">
-                            <i class="fa-solid fa-check-circle text-xs sm:text-base"></i> 
-                            <span class="text-xs sm:text-sm">Continuar</span>
-                          </button>
+        <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+id="continueButton-${visita.idVisitas}"
+data-visita-id="${visita.idVisitas}"
+@click="
+    console.log('Button clicked');
+    visitaId = $event.currentTarget.getAttribute('data-visita-id');  <!-- Usamos currentTarget -->
+    console.log('Visita ID:', visitaId);
+    $dispatch('set-visita-id', visitaId);  <!-- Esto pasa el ID al modal -->
+    openCondiciones = true;
+">
+    <i class="fa-solid fa-check-circle text-xs sm:text-base"></i>
+    <span class="text-xs sm:text-sm">Continuar boton</span>
+</button>
+
+
+
+
                           
                           <!-- Botón para ver imagen -->
                           <button class="badge bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
@@ -413,12 +452,20 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                 
                     <!-- Botón de continuar -->
                     <div class="flex justify-center mt-4">
-                      <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                     transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-                              id="continueButton-${visita.idVisitas}">
-                        <i class="fa-solid fa-check-circle text-sm sm:text-base"></i> 
-                        <span class="text-xs sm:text-sm">Continuar</span>
-                      </button>
+          <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+id="continueButton-${visita.idVisitas}"
+data-visita-id="${visita.idVisitas}"
+@click="
+    console.log('Button clicked');
+    visitaId = $event.currentTarget.getAttribute('data-visita-id');  <!-- Usamos currentTarget -->
+    console.log('Visita ID:', visitaId);
+    $dispatch('set-visita-id', visitaId);  <!-- Esto pasa el ID al modal -->
+    openCondiciones = true;
+">
+    <i class="fa-solid fa-check-circle text-xs sm:text-base"></i>
+    <span class="text-xs sm:text-sm">Continuar boton</span>
+</button>
                     </div>  
                                     
                   </div>
@@ -558,47 +605,78 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                 fileInput.click(); // Simula el clic en el input de archivo
               });
 
-              // Manejar la selección de archivo
-              fileInput.addEventListener('change', () => {
-                const file = fileInput.files[0];
-                if (file) {
-                  const formData = new FormData();
-                  formData.append('photo', file);
-                  formData.append('visitaId', visita.idVisitas);
+          // Manejar la selección de archivo
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (file) {
+    const formData = new FormData();
+    formData.append('photo', file);
+    formData.append('visitaId', visita.idVisitas);
 
-                  // Hacer la solicitud para subir la foto
-                  fetch('/api/subirFoto', {
-                    method: 'POST',
-                    body: formData,
-                  })
-                    .then(response => response.json())
-                    .then(data => {
-                      if (data.success) {
-                        toastr.success("Foto subida con éxito.");
-                        const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
-                        const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
-                        uploadPhotoButton.style.display = 'none';
-                        siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
-                        // Agregar el evento de clic al botón "Continuar" después de subir la foto
-                        continueButton.addEventListener('click', () => {
-                          // Mostrar el modal
-                          const event = new CustomEvent('toggle-modal-condiciones');
+    // Obtener la ubicación (latitud y longitud)
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
 
-                          window.dispatchEvent(event);
+          // Hacer la solicitud a Nominatim para obtener la ubicación
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(response => response.json())
+            .then(data => {
+              const location = data.display_name; // La dirección obtenida
 
-                        });
-                      } else {
-                        // toastr.error("Hubo un error al subir la foto.");
-                      }
-                    })
-                    .catch(error => {
-                      console.error('Error al subir la foto:', error);
-                      // toastr.error("Hubo un error al subir la foto.");
-                    });
+              // Agregar la latitud, longitud y la ubicación al FormData
+              formData.append('lat', lat);
+              formData.append('lng', lng);
+              formData.append('ubicacion', location); // Ubicación (dirección)
+
+              // Hacer la solicitud para subir la foto con la ubicación
+              fetch('/api/subirFoto', {
+                method: 'POST',
+                body: formData,
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  toastr.success("Foto subida con éxito.");
+                  const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
+                  const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
+                  uploadPhotoButton.style.display = 'none';
+                  siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
+                  // Agregar el evento de clic al botón "Continuar" después de subir la foto
+                  continueButton.addEventListener('click', () => {
+                    // Mostrar el modal
+                    const event = new CustomEvent('toggle-modal-condiciones');
+                    window.dispatchEvent(event);
+                  });
                 } else {
-                  toastr.error("Por favor selecciona una foto.");
+                  // toastr.error("Hubo un error al subir la foto.");
                 }
+              })
+              .catch(error => {
+                console.error('Error al subir la foto:', error);
+                // toastr.error("Hubo un error al subir la foto.");
               });
+            })
+            .catch(error => {
+              console.error('Error al obtener la ubicación:', error);
+              // toastr.error("Hubo un error al obtener la ubicación.");
+            });
+        },
+        (error) => {
+          console.error('Error al obtener la ubicación:', error);
+          toastr.error("No se pudo obtener la ubicación.");
+        }
+      );
+    } else {
+      toastr.error("La geolocalización no está disponible en tu navegador.");
+    }
+  } else {
+    toastr.error("Por favor selecciona una foto.");
+  }
+});
+
             }
           })
           .catch(error => {
@@ -608,6 +686,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
 
 
 
+        
 
 
 
@@ -720,9 +799,11 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                     </div>
                     <div class="flex flex-col items-center">
                       <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
-                      <span class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-                        ${visita.ubicacion || 'Ubicación no disponible'}
-                      </span>
+                      <span id="ubicacion-${visita.idVisitas}" class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+          <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
+
+${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 3) ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 3).ubicacion : 'Ubicación no disponible'}
+        </span>
                     </div>
                     <div class="flex flex-col items-center">
                       <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
@@ -786,8 +867,10 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
       </div>
       <div class="flex flex-col items-center">
         <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
-        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-          ${visita.ubicacion || 'Ubicación no disponible'}
+          <span id="ubicacion-${visita.idVisitas}" class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+          <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
+
+${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 4) ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 4).ubicacion : 'Ubicación no disponible'}
         </span>
       </div>
       <div class="flex flex-col items-center">
@@ -805,7 +888,15 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
       <i class="fa-solid fa-check-circle text-xs sm:text-base"></i> 
       <span class="text-xs sm:text-sm">Continuar</span>
     </button>
+
+     <button class="badge bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                          id="viewImageButton-${visita.idVisitas}" 
+                          data-image-type="finalServicio"
+                          data-id="${visita.idVisitas}"
+                          title="Ver imagen">
   </div>
+
+  
   
     
   </div>
@@ -971,5 +1062,9 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
     console.error('Error al obtener las visitas:', error);
     alert('Ocurrió un error al obtener las visitas.');
   });
+
+
+
+
 
 

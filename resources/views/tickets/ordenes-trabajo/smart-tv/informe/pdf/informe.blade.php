@@ -46,7 +46,7 @@
             width: 100%;
             text-align: center;
             page-break-inside: avoid !important;
-            /* Evita que se corten entre páginas */
+            /* Evita cortes entre páginas */
             break-inside: avoid !important;
             display: flex;
             justify-content: center;
@@ -54,20 +54,27 @@
         }
 
         .img-container img {
-            width: auto !important;
-            /* Mantiene la proporción */
             max-width: 100% !important;
-            /* Permite expandirse según el contenedor */
-            max-height: 200px !important;
-            /* Ajusta la altura máxima */
+            /* La imagen nunca será más ancha que su contenedor */
+            width: auto !important;
+            /* Permite que la imagen mantenga su proporción */
+
+            max-height: 300px !important;
+            /* 🔹 Fija una altura máxima */
+            min-height: 100px !important;
+            /* 🔹 Fija una altura mínima */
+
             object-fit: contain !important;
-            /* Evita deformaciones */
+            /* Evita que la imagen se deforme */
             display: block;
             margin: 0 auto;
             page-break-inside: avoid !important;
-            /* Evita cortes en PDF */
+            /* Evita que la imagen se corte entre páginas */
+            /* Evita cortes en la imagen */
             break-inside: avoid !important;
+
         }
+
 
         .footer {
             position: absolute;
@@ -126,7 +133,8 @@
                         <li><span class="font-bold">CLIENTE:</span> {{ $orden->cliente->nombre ?? 'No asignado' }}</li>
                         <li><span class="font-bold">DNI/RUC:</span> {{ $orden->cliente->documento ?? 'No disponible' }}
                         </li>
-                        <li><span class="font-bold">TIENDA DE COMPRA:</span> {{ $orden->tienda->nombre ?? 'No registrada' }}</li>
+                        <li><span class="font-bold">TIENDA DE COMPRA:</span>
+                            {{ $orden->tienda->nombre ?? 'No registrada' }}</li>
                         <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}</li>
                     </ul>
                 </div>
@@ -151,6 +159,14 @@
                     <div class="mt-2">
                         <p><span class="font-bold">SERIE:</span> {{ $producto['serie'] }}</p>
                     </div>
+                </div>
+            @endif
+
+            @if (!empty($producto['fallaReportada']))
+                <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
+                <div class="red-bg mt-4 text-left">Falla Reportada</div>
+                <div class="w-full text-xs mt-3">
+                    <p>{{ $producto['fallaReportada'] }}</p>
                 </div>
             @endif
 
@@ -279,8 +295,9 @@
                                 <div class="bg-white border border-gray-300 rounded-lg shadow-lg p-4 flex flex-col items-center"
                                     style="page-break-inside: avoid;">
                                     <!-- Imagen más grande y centrada -->
-                                    <img src="{{ $anexo['foto_base64'] }}"
-                                        class="w-full max-w-[500px] max-h-[500px] rounded-lg border border-gray-200 object-contain shadow-md">
+                                    <div class="img-container">
+                                        <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
+                                    </div>
 
                                     <!-- Descripción centrada -->
                                     <p class="text-sm text-center text-gray-700 font-semibold mt-2">
@@ -298,8 +315,9 @@
                                 <div class="bg-white border border-gray-300 rounded-lg shadow-lg p-4 flex flex-col items-center"
                                     style="page-break-inside: avoid;">
                                     <!-- Imagen más grande y centrada -->
-                                    <img src="{{ $fotoTicket['foto_base64'] }}"
-                                        class="w-full max-w-[500px] max-h-[500px] rounded-lg border border-gray-200 object-contain shadow-md">
+                                    <div class="img-container">
+                                        <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
+                                    </div>
 
                                     <!-- Descripción centrada -->
                                     <p class="text-sm text-center text-gray-700 font-semibold mt-2">

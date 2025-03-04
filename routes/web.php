@@ -291,6 +291,9 @@ Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
 
 Route::get('/ticket/{id}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
 
+Route::get('/imagen-apoyo/{idVisita}', [OrdenesTrabajoController::class, 'getImagen'])->name('imagen-apoyo.get');
+Route::get('/inicio-servicio-imagen/{idVisita}', [OrdenesTrabajoController::class, 'getImagenInicioServicio'])->name('inicio-servicio-imagen.get');
+Route::get('/final-servicio-imagen/{idVisita}', [OrdenesTrabajoController::class, 'getImagenFinalServicio'])->name('final-servicio-imagen.get');
 
 
 
