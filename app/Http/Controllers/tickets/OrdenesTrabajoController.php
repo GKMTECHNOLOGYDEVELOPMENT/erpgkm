@@ -2105,8 +2105,8 @@ class OrdenesTrabajoController extends Controller
 
     return response($pdfContent)
         ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', 'inline; filename="informe_' . $idOt . '.pdf"');
-}
+        ->header('Content-Disposition', 'attachment; filename="informe_' . $idOt . '.pdf"');
+    }
 
 
 
