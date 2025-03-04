@@ -21,7 +21,7 @@
             text-xs sm:text-sm md:text-base flex items-center justify-center gap-1 sm:gap-2 w-full sm:w-auto"
             @click="openModal = true">
             <i class="fa-solid fa-clock-rotate-left text-sm sm:text-base md:text-lg"></i>
-            <span class="sm:inline"></span>
+            <span class="sm:inline"></span> 
         </button>
     </div>
 
@@ -59,8 +59,17 @@
             </tr>
         </thead>
         <tbody id="historialModificaciones">
-            <!-- Aquí se llenará dinámicamente con AJAX -->
-        </tbody>
+    <!-- Preload visible mientras se cargan los datos -->
+    <tr id="preload" style="display: none;">
+        <td colspan="5" class="text-center">
+            <span class="w-5 h-5 m-auto mb-10">
+                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+            </span>
+            Cargando datos...
+        </td>
+    </tr>
+</tbody>
+
     </table>
 </div>
     </div>
@@ -77,14 +86,17 @@
         cargarHistorialModificaciones(ticketId);
     });
 
-    function cargarHistorialModificaciones(ticketId) {
+    function cargarHistorialModificaciones(ticketId, tbody, preload) {
         // Hacer una solicitud AJAX para obtener el historial de modificaciones
         $.ajax({
             url: `/ticket/${ticketId}/historial-modificaciones`,
             method: 'GET',
             success: function(response) {
+                console.log(response);
                 const tbody = document.getElementById('historialModificaciones');
                 tbody.innerHTML = '';  // Limpiar la tabla antes de agregar nuevas filas
+
+                preload.style.display = 'none';
 
                 // Iterar sobre las modificaciones y agregar las filas a la tabla
                 response.forEach(modificacion => {
@@ -106,6 +118,17 @@
             }
         });
     }
+
+
+    document.getElementById('botonFlotante').addEventListener('click', function() {
+    // Mostrar el preload cuando se haga clic en el botón
+    const tbody = document.getElementById('historialModificaciones');
+    const preload = document.getElementById('preload');
+    preload.style.display = 'table-row';  // Mostrar el preload
+
+    // Llamar la función que carga las modificaciones
+    cargarHistorialModificaciones(ticketId, tbody, preload);
+});
 </script>
 
 

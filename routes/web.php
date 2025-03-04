@@ -289,13 +289,16 @@ Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
 });
 
 
+Route::get('/ticket/{id}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
+
+
+
 
 Route::get('/api/obtenerVisitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 
 
 Route::post('/ticket/{ticketId}/ticketflujo/{flujoId}/update', 'TicketFlujoController@update')->name('ticketflujo.update');
 
-Route::get('/ticket/{ticketId}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
 
 //INICIO TICKETS///
 

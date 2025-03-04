@@ -561,115 +561,115 @@
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Inicializar Select2 para el select de técnicos de apoyo
-        $('.select2').select2({
-            placeholder: "Seleccionar Técnicos de Apoyo", // Puedes personalizar el texto del placeholder
-            allowClear: true // Permite limpiar la selección
-        });
+//     document.addEventListener("DOMContentLoaded", function() {
+//         // Inicializar Select2 para el select de técnicos de apoyo
+//         $('.select2').select2({
+//             placeholder: "Seleccionar Técnicos de Apoyo", // Puedes personalizar el texto del placeholder
+//             allowClear: true // Permite limpiar la selección
+//         });
 
-        // Mostrar/ocultar el contenedor y agregar/remover badges cuando los técnicos son seleccionados
-        $('#idTecnicoApoyo').on('change', function() {
-            const selectedTechnicians = $(this).val(); // Obtener los técnicos seleccionados
-            const container = $('#selected-items-container');
-            const listContainer = $('#selected-items-list');
+//         // Mostrar/ocultar el contenedor y agregar/remover badges cuando los técnicos son seleccionados
+//         $('#idTecnicoApoyo').on('change', function() {
+//             const selectedTechnicians = $(this).val(); // Obtener los técnicos seleccionados
+//             const container = $('#selected-items-container');
+//             const listContainer = $('#selected-items-list');
 
-            // Limpiar el contenedor antes de añadir nuevos badges
-            listContainer.empty();
+//             // Limpiar el contenedor antes de añadir nuevos badges
+//             listContainer.empty();
 
-            // Si hay técnicos seleccionados, mostrar el contenedor
-            if (selectedTechnicians && selectedTechnicians.length > 0) {
-                container.removeClass('hidden'); // Mostrar el contenedor
-                selectedTechnicians.forEach(function(technicianId) {
-                    // Aquí se asume que cada técnico tiene un nombre
-                    const technicianName = $('#idTecnicoApoyo option[value="' + technicianId +
-                        '"]').text(); // Obtener nombre del técnico
-                    const badge =
-                        `<span class="bg-blue-500 text-white px-3 py-1 rounded-full">${technicianName}</span>`;
-                    listContainer.append(badge);
-                });
-            } else {
-                // Si no hay técnicos seleccionados, ocultar el contenedor
-                container.addClass('hidden');
-            }
-        });
-    });
-    guardarBtn.addEventListener("click", function(event) {
-    // Obtener los valores del formulario
-    const nombreVisita = document.getElementById('nombreVisitaInput').value;
-    const fechaVisita = document.getElementById('fechaVisitaInput').value;
-    const horaInicio = document.getElementById('horaInicioInput').value;
-    const horaFin = document.getElementById('horaFinInput').value;
-    const encargado = document.getElementById('encargado').value;
+//             // Si hay técnicos seleccionados, mostrar el contenedor
+//             if (selectedTechnicians && selectedTechnicians.length > 0) {
+//                 container.removeClass('hidden'); // Mostrar el contenedor
+//                 selectedTechnicians.forEach(function(technicianId) {
+//                     // Aquí se asume que cada técnico tiene un nombre
+//                     const technicianName = $('#idTecnicoApoyo option[value="' + technicianId +
+//                         '"]').text(); // Obtener nombre del técnico
+//                     const badge =
+//                         `<span class="bg-blue-500 text-white px-3 py-1 rounded-full">${technicianName}</span>`;
+//                     listContainer.append(badge);
+//                 });
+//             } else {
+//                 // Si no hay técnicos seleccionados, ocultar el contenedor
+//                 container.addClass('hidden');
+//             }
+//         });
+//     });
+//     guardarBtn.addEventListener("click", function(event) {
+//     // Obtener los valores del formulario
+//     const nombreVisita = document.getElementById('nombreVisitaInput').value;
+//     const fechaVisita = document.getElementById('fechaVisitaInput').value;
+//     const horaInicio = document.getElementById('horaInicioInput').value;
+//     const horaFin = document.getElementById('horaFinInput').value;
+//     const encargado = document.getElementById('encargado').value;
 
-    // Enviar 1 si el checkbox está marcado, 0 si no
-    const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
+//     // Enviar 1 si el checkbox está marcado, 0 si no
+//     const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
 
-    const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions).map(option => option.value);
-    const ticketId = '{{ $ticket->idTickets }}';  // El ID del ticket
+//     const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions).map(option => option.value);
+//     const ticketId = '{{ $ticket->idTickets }}';  // El ID del ticket
 
-    // Verificar si los campos obligatorios están vacíos
-    if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
-        toastr.error("Por favor, complete todos los campos obligatorios.");
-        return; // Detener la ejecución si falta algún campo
-    }
+//     // Verificar si los campos obligatorios están vacíos
+//     if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
+//         toastr.error("Por favor, complete todos los campos obligatorios.");
+//         return; // Detener la ejecución si falta algún campo
+//     }
 
-    // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
-    if (necesitaApoyo && tecnicosApoyo.length === 0) {
-        toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
-        return; // Detener la ejecución si no se seleccionaron técnicos
-    }
+//     // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
+//     if (necesitaApoyo && tecnicosApoyo.length === 0) {
+//         toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
+//         return; // Detener la ejecución si no se seleccionaron técnicos
+//     }
 
-    // Convertir las horas de inicio y fin a formato Date
-    const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
-    const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
+//     // Convertir las horas de inicio y fin a formato Date
+//     const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
+//     const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
 
-    // Crear objetos Date para la hora de inicio y hora de fin
-    const inicioDate = new Date();
-    inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
+//     // Crear objetos Date para la hora de inicio y hora de fin
+//     const inicioDate = new Date();
+//     inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
 
-    const finDate = new Date();
-    finDate.setHours(horaFinHoras, horaFinMinutos, 0);
+//     const finDate = new Date();
+//     finDate.setHours(horaFinHoras, horaFinMinutos, 0);
 
-    // Validar si la hora de fin es menor o igual a la hora de inicio
-    if (finDate <= inicioDate) {
-        toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
-        return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
-    }
+//     // Validar si la hora de fin es menor o igual a la hora de inicio
+//     if (finDate <= inicioDate) {
+//         toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
+//         return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
+//     }
 
-    // Si la validación es correcta, realizar la llamada AJAX para guardar la visita
-    $.ajax({
-        url: `/guardar-visita`,
-        method: 'POST',
-        data: {
-            _token: '{{ csrf_token() }}',  // Token CSRF
-            nombre: nombreVisita,
-            fecha_visita: fechaVisita,
-            hora_inicio: horaInicio,
-            hora_fin: horaFin,
-            encargado: encargado,
-            necesita_apoyo: necesitaApoyo,  // Enviar 1 o 0
-            tecnicos_apoyo: tecnicosApoyo,
-            idTickets: ticketId  // El id del ticket
-        },
-        success: function(response) {
-            if (response.success) {
-                toastr.success(response.message); // Muestra un mensaje de éxito
-                window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
-                 // Recargar la página
-            location.reload();
-            } else {
-                // Si no fue exitoso, muestra el mensaje de error
-                toastr.error(response.message);  // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error al guardar visita:", error);
-            toastr.error("El tecnico ya esta asigando a una hora.");
-        }
-    });
-});
-});
+//     // Si la validación es correcta, realizar la llamada AJAX para guardar la visita
+//     $.ajax({
+//         url: `/guardar-visita`,
+//         method: 'POST',
+//         data: {
+//             _token: '{{ csrf_token() }}',  // Token CSRF
+//             nombre: nombreVisita,
+//             fecha_visita: fechaVisita,
+//             hora_inicio: horaInicio,
+//             hora_fin: horaFin,
+//             encargado: encargado,
+//             necesita_apoyo: necesitaApoyo,  // Enviar 1 o 0
+//             tecnicos_apoyo: tecnicosApoyo,
+//             idTickets: ticketId  // El id del ticket
+//         },
+//         success: function(response) {
+//             if (response.success) {
+//                 toastr.success(response.message); // Muestra un mensaje de éxito
+//                 window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
+//                  // Recargar la página
+//             location.reload();
+//             } else {
+//                 // Si no fue exitoso, muestra el mensaje de error
+//                 toastr.error(response.message);  // Muestra el mensaje de error, por ejemplo "El técnico ya tiene una visita asignada en este horario"
+//             }
+//         },
+//         error: function(xhr, status, error) {
+//             console.error("Error al guardar visita:", error);
+//             toastr.error("El tecnico ya esta asigando a una hora.");
+//         }
+//     });
+// });
+
 
 </script>
 
@@ -708,8 +708,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-<script>
+<!-- <script>
     var ticketId = {{ $ticketId }};
-</script>
+</script> -->
 
 <script src="{{ asset('assets/js/tickets/smart/visitas.js') }}"></script>
