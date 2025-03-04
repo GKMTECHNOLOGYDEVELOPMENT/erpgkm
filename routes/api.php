@@ -93,3 +93,5 @@ Route::get('/verificarFechaExistente/{idVisita}', [OrdenesTrabajoController::cla
 
 
 Route::post('/seleccionar-visita', [OrdenesTrabajoController::class, 'seleccionarVisita'])->name('seleccionarVisita');
+// Ruta para verificar si una visita está seleccionada
+Route::get('/visita-seleccionada/{idVisita}', [OrdenesTrabajoController::class, 'verificarVisitaSeleccionada']);
