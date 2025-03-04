@@ -291,8 +291,8 @@ class OrdenesTrabajoController extends Controller
             ->get();
 
         // Otros datos que ya estás obteniendo
-        $encargado = Usuario::whereIn('idTipoUsuario', [3, 5])->get();
-        $tecnicos_apoyo = Usuario::where('idTipoUsuario', 3)->get();
+        $encargado = Usuario::whereIn('idTipoUsuario', [4, 5])->get();
+        $tecnicos_apoyo = Usuario::where('idTipoUsuario', 4)->get();
         $clientes = Cliente::all();
         $clientesGenerales = ClienteGeneral::all();
         $modelos = Modelo::all();
