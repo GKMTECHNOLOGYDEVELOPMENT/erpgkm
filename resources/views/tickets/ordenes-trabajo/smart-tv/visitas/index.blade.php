@@ -272,7 +272,7 @@
         <!-- Encabezado -->
         <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
             <div class="font-bold text-lg">
-             <span id="modalTitle"></span>
+                <span id="modalTitle"></span>
             </div>
             <button type="button" class="text-white-dark hover:text-dark" id="closeModal">
                 <i class="fa-solid fa-xmark text-lg"></i>
@@ -302,14 +302,31 @@
 <div id="cordinacionContainer" class="mt-5 flex flex-col space-y-4"></div>
 
 <!-- MODAL PARA CREAR VISITA USANDO ALPINE.JS -->
-<div x-data="{ open: false, encargadoTipo: '', necesitaApoyo: false, imagePreview: null }" class="mb-5" @toggle-modal.window="open = !open">
+<div x-data="{
+    open: false, 
+    encargadoTipo: '', 
+    necesitaApoyo: false, 
+    imagePreview: null,
+
+    // Función para previsualizar la imagen antes de subirla
+    previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => this.imagePreview = reader.result;
+            reader.readAsDataURL(file);
+        }
+    }
+}" 
+class="mb-5" @toggle-modal.window="open = !open">
+
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
             <div x-show="open" x-transition.duration.300
                 class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
                 <!-- Header del Modal -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg"> Nueva Cordinacion</h5>
+                    <h5 class="font-bold text-lg"> Nueva Coordinación</h5>
                     <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -398,11 +415,19 @@
                         </div>
 
                         <!-- Campo para cargar la imagen -->
-                        <div class="space-y-4 mt-4">
-                            <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
-                            <input type="file" x-ref="imagen" @change="condiciones.imagen = $refs.imagen.files[0]"
-                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
+                        <div class="space-y-4 mt-2">
+                            <label class="block text-sm font-medium">Subir Imagen</label>
+                            <input type="file" x-ref="imagen" @change="previewImage"
+                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 
+        file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
+
+                            <!-- PREVISUALIZACIÓN DE LA IMAGEN -->
+                            <div x-show="imagePreview" class="mt-4 flex justify-center">
+                                <img :src="imagePreview" alt="Previsualización"
+                                    class="max-w-full h-40 rounded-lg shadow-md">
+                            </div>
                         </div>
+
 
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
