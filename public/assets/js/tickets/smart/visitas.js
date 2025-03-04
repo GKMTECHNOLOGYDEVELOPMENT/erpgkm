@@ -92,20 +92,16 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             
             <!-- Botón para ver imagen -->
             <div class="flex justify-center mt-2">
-              <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                      id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
-                <i class="fa-solid fa-image text-sm sm:text-base"></i> 
-              </button>
+            <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+            id="viewImageButton-${visita.idVisitas}" 
+            data-image-type="visita"
+            data-id="${visita.idVisitas}"
+            title="Ver imagen">
+      <i class="fa-solid fa-image text-sm sm:text-base"></i> 
+    </button>
             </div>                   
           </div>
         `;
-        
-
-
-
-
-
-
 
 
         document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
@@ -152,7 +148,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
               <div class="flex flex-col items-center">
                 <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
-                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">En Desplaz</span>
+                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">En Desplazamiento</span>
               </div>
              <div class="flex flex-col items-center">
         <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
@@ -281,18 +277,20 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                     </button>
                     
                     <!-- Botón para ver imagen -->
-                    <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                            id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
-                      <i class="fa-solid fa-image text-sm sm:text-base"></i> 
-                    </button>
+                    <button class="badge bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                    id="viewImageButton-${visita.idVisitas}" 
+                    data-image-type="inicioServicio"
+                    data-id="${visita.idVisitas}"
+                    title="Ver imagen">
+              <i class="fa-solid fa-image text-sm sm:text-base"></i> 
+            </button>
                   </div>
                 
                   <!-- Input oculto para subir foto -->
                   <input type="file" id="fileInput-${visita.idVisitas}" class="hidden" accept="image/*">
                 </div>
               `;
-              
+
 
 
               // visitasList.appendChild(inicioServicioCard);
@@ -346,16 +344,18 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                           </button>
                           
                           <!-- Botón para ver imagen -->
-                          <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                         transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                                  id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
-                            <i class="fa-solid fa-image text-xs sm:text-base"></i> 
-                          </button>
+                          <button class="badge bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                          id="viewImageButton-${visita.idVisitas}" 
+                          data-image-type="finalServicio"
+                          data-id="${visita.idVisitas}"
+                          title="Ver imagen">
+                    <i class="fa-solid fa-image text-xs sm:text-base"></i> 
+                  </button>
                         </div>
                         
                       </div>
                     `;
-                    
+
 
 
                     // Insertar la tarjeta de "Final de Servicio" debajo de la tarjeta de "Inicio de Servicio"
@@ -672,16 +672,16 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                         .then(updatedVisita => {
                           if (updatedVisita) {
                             const fechaDesplazamientoElement = document.getElementById(`fechaDesplazamiento-${visita.idVisitas}`);
-                           
-                           
-                           
+
+
+
                             if (fechaDesplazamientoElement) {
                               fechaDesplazamientoElement.textContent = formatDate(updatedVisita.fechas_desplazamiento);
                             } else {
                               console.warn(`No se encontró el elemento con el id fechaDesplazamiento-${visita.idVisitas}`);
                             }
 
-                            
+
 
 
                             fetch('/api/guardarAnexoVisita', {
@@ -707,10 +707,10 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                                 if (data.success) {
                                   toastr.success("Tecnico en desplazamiento.");
 
-                                   // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
-              const inicioServicioCard = document.createElement('div');
-              inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
-              inicioServicioCard.innerHTML = `
+                                  // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
+                                  const inicioServicioCard = document.createElement('div');
+                                  inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
+                                  inicioServicioCard.innerHTML = `
                 <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
                   <!-- Encabezados y Contenido Responsivo -->
                   <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
@@ -761,7 +761,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                 </div>
               `;
 
-              tecnicoCard.insertAdjacentElement('afterend', inicioServicioCard);
+                                  tecnicoCard.insertAdjacentElement('afterend', inicioServicioCard);
 
                                   // visitasList.appendChild(inicioServicioCard);
 
@@ -971,6 +971,5 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
     console.error('Error al obtener las visitas:', error);
     alert('Ocurrió un error al obtener las visitas.');
   });
-
 
 
