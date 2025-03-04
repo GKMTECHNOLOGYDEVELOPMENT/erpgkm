@@ -1998,7 +1998,7 @@ class OrdenesTrabajoController extends Controller
 }
 
 
-    public function generateInformePdfVisita($idOt, $idVisita)
+public function generateInformePdfVisita($idOt, $idVisita)
 {
     $orden = Ticket::with([
         'cliente',
@@ -2038,7 +2038,8 @@ class OrdenesTrabajoController extends Controller
         'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
         'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
         'modelo' => $orden->modelo->nombre ?? 'No especificado',
-        'serie' => $orden->serie ?? 'No especificado'
+        'serie' => $orden->serie ?? 'No especificado',
+        'fallaReportada' => $orden->fallaReportada ?? 'No especificado' // 🔹 Agregamos la falla reportada
     ];
 
     // 🔹 Formatear visita seleccionada
@@ -2105,8 +2106,8 @@ class OrdenesTrabajoController extends Controller
 
     return response($pdfContent)
         ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', 'attachment; filename="informe_' . $idOt . '.pdf"');
-    }
+        ->header('Content-Disposition', 'inline; filename="informe_' . $idOt . '.pdf"');
+}
 
 
 
@@ -2151,7 +2152,8 @@ class OrdenesTrabajoController extends Controller
             'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
             'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
             'modelo' => $orden->modelo->nombre ?? 'No especificado',
-            'serie' => $orden->serie ?? 'No especificado'
+            'serie' => $orden->serie ?? 'No especificado',
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado' // 🔹 Agregamos la falla reportada
         ];
 
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
@@ -2245,6 +2247,7 @@ class OrdenesTrabajoController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="informe_' . $idOt . '.pdf"');
     }
+
 
 
 
