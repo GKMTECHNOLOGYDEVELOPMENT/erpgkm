@@ -53,26 +53,26 @@
             align-items: center;
         }
 
+        /* 🔹 Evita que la imagen choque con el borde superior cuando está en una nueva página */
         .img-container img {
             max-width: 100% !important;
-            /* La imagen nunca será más ancha que su contenedor */
             width: auto !important;
-            /* Permite que la imagen mantenga su proporción */
-
             max-height: 300px !important;
-            /* 🔹 Fija una altura máxima */
             min-height: 100px !important;
-            /* 🔹 Fija una altura mínima */
-
             object-fit: contain !important;
-            /* Evita que la imagen se deforme */
             display: block;
-            margin: 0 auto;
+            margin: 20px auto 0 auto !important;
+            /* 🔹 Agrega margen superior solo si es necesario */
             page-break-inside: avoid !important;
-            /* Evita que la imagen se corte entre páginas */
-            /* Evita cortes en la imagen */
             break-inside: avoid !important;
+        }
 
+        /* 🔹 Detecta imágenes que están justo después de un salto de página */
+        @media print {
+            .img-container {
+                margin-top: 40px !important;
+                /* 🔹 Mayor margen en impresión para evitar que toquen el borde */
+            }
         }
 
 
@@ -292,8 +292,7 @@
                     @if (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)
                         @foreach ($imagenesAnexos as $anexo)
                             @if (!empty($anexo['foto_base64']))
-                                <div class="flex flex-col items-center"
-                                    style="page-break-inside: avoid;">
+                                <div class="flex flex-col items-center" style="page-break-inside: avoid;">
                                     <!-- Imagen más grande y centrada -->
                                     <div class="img-container">
                                         <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
@@ -312,8 +311,7 @@
                     @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
                         @foreach ($imagenesFotosTickets as $fotoTicket)
                             @if (!empty($fotoTicket['foto_base64']))
-                                <div class="flex flex-col items-center"
-                                    style="page-break-inside: avoid;">
+                                <div class="flex flex-col items-center" style="page-break-inside: avoid;">
                                     <!-- Imagen más grande y centrada -->
                                     <div class="img-container">
                                         <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
