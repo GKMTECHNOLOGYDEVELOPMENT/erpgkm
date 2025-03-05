@@ -245,7 +245,7 @@
 
                 <div class="flex justify-between mt-6 page-break-inside-avoid">
                     <div class="w-1/2 text-center">
-                        <div class="border-b-2 border-gray-300 inline-block mb-2">
+                        <div class="inline-block mb-2">
                             @if ($firmaTecnico)
                                 <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
                                     class="h-20 max-w-[150px] mx-auto object-contain">
@@ -258,7 +258,7 @@
                     </div>
 
                     <div class="w-1/2 text-center">
-                        <div class="border-b-2 border-gray-300 inline-block mb-2">
+                        <div class="inline-block mb-2">
                             @if ($firmaCliente)
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                                     class="h-20 max-w-[150px] mx-auto object-contain">
@@ -292,7 +292,7 @@
                     @if (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)
                         @foreach ($imagenesAnexos as $anexo)
                             @if (!empty($anexo['foto_base64']))
-                                <div class="bg-white border border-gray-300 rounded-lg shadow-lg p-4 flex flex-col items-center"
+                                <div class="flex flex-col items-center"
                                     style="page-break-inside: avoid;">
                                     <!-- Imagen más grande y centrada -->
                                     <div class="img-container">
@@ -312,7 +312,7 @@
                     @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
                         @foreach ($imagenesFotosTickets as $fotoTicket)
                             @if (!empty($fotoTicket['foto_base64']))
-                                <div class="bg-white border border-gray-300 rounded-lg shadow-lg p-4 flex flex-col items-center"
+                                <div class="flex flex-col items-center"
                                     style="page-break-inside: avoid;">
                                     <!-- Imagen más grande y centrada -->
                                     <div class="img-container">
