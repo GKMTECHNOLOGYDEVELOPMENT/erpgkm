@@ -406,7 +406,6 @@
 
 
 
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
@@ -425,8 +424,7 @@
                         renderTable(estados, currentPage);
                         setupPagination(estados.length);
                     } else {
-                        console.error('La respuesta no contiene un array de estados de flujo:', data
-                            .estadosFlujo);
+                        console.error('La respuesta no contiene un array de estados de flujo:', data.estadosFlujo);
                     }
                 })
                 .catch(error => {
@@ -443,32 +441,31 @@
             const estadosPaginados = estados.slice(start, end);
 
             estadosPaginados.forEach(ticketFlujo => {
-                const estado = ticketFlujo.estado_flujo;
-                const usuario = ticketFlujo.usuario;
+                const estado = ticketFlujo.estado_descripcion; // Cambié a 'estado_descripcion'
+                const usuario = ticketFlujo.usuario_nombre; // Cambié a 'usuario_nombre'
 
                 // Fila principal
                 const row = document.createElement("tr");
 
                 const estadoCell = document.createElement("td");
                 estadoCell.classList.add("px-4", "py-2", "text-center", "text-black");
-                estadoCell.style.backgroundColor = estado.color;
-                estadoCell.textContent = estado.descripcion;
+                estadoCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
+                estadoCell.textContent = estado;
 
                 const usuarioCell = document.createElement("td");
                 usuarioCell.classList.add("px-4", "py-2", "text-center", "text-black");
-                usuarioCell.textContent = usuario ? usuario.Nombre : 'Sin Nombre';
-                usuarioCell.style.backgroundColor = estado.color;
+                usuarioCell.textContent = usuario ? usuario : 'Sin Nombre';
+                usuarioCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
 
                 const fechaCell = document.createElement("td");
                 fechaCell.classList.add("px-4", "py-2", "text-center", "text-black");
                 fechaCell.textContent = ticketFlujo.fecha_creacion;
-                fechaCell.style.backgroundColor = estado.color;
+                fechaCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
 
                 // Botón "Más" y "Guardar" en la misma celda
                 const masCell = document.createElement("td");
-                masCell.classList.add("px-4", "py-2", "text-center", "flex", "items-center",
-                    "justify-center", "space-x-2");
-                masCell.style.backgroundColor = estado.color; // Aplica el color del estado
+                masCell.classList.add("px-4", "py-2", "text-center", "flex", "items-center", "justify-center", "space-x-2");
+                masCell.style.backgroundColor = ticketFlujo.estado_color; // Aplica el color del estado
 
                 // Botón "Más" (⋮)
                 const masBtn = document.createElement("button");
@@ -478,8 +475,7 @@
 
                 // Botón "Guardar" como icono de check ✅ verde
                 const saveIconBtn = document.createElement("button");
-                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success",
-                    "text-white");
+                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success", "text-white");
                 saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
                 saveIconBtn.innerHTML = "✔"; // Ícono de check verde
 
@@ -497,18 +493,15 @@
                 const commentRow = document.createElement("tr");
                 commentRow.classList.add("hidden");
                 const commentCell = document.createElement("td");
-                commentCell.setAttribute("colspan",
-                    "4"); // Ajustado el colspan a la cantidad de columnas
+                commentCell.setAttribute("colspan", "4"); // Ajustado el colspan a la cantidad de columnas
                 commentCell.classList.add("p-4");
-                commentCell.style.backgroundColor = estado.color; // Aplica el color del estado
+                commentCell.style.backgroundColor = ticketFlujo.estado_color; // Aplica el color del estado
 
                 const textArea = document.createElement("textarea");
-                textArea.classList.add("w-full", "p-2", "rounded", "border",
-                    "border-black"); // 🔥 Borde negro
+                textArea.classList.add("w-full", "p-2", "rounded", "border", "border-black"); // 🔥 Borde negro
                 textArea.textContent = ticketFlujo.comentarioflujo;
                 textArea.placeholder = "Escribe un comentario...";
-                textArea.style.backgroundColor = estado.color; // 🔥 Color de fondo del estado
-
+                textArea.style.backgroundColor = ticketFlujo.estado_color; // 🔥 Color de fondo del estado
 
                 commentCell.appendChild(textArea);
                 commentRow.appendChild(commentCell);
@@ -562,7 +555,6 @@
                 });
             });
 
-
             document.querySelectorAll('.save-comment').forEach(button => {
                 button.addEventListener('click', function() {
                     let flujoId = this.dataset.flujoId; // Obtener idTicketFlujo
@@ -570,28 +562,25 @@
                     let textArea = row.querySelector("textarea");
                     let comentario = textArea.value;
 
-                    // Ruta actualizada para hacer la actualización sin el "comentario" como campo
                     fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRF-TOKEN": document.querySelector(
-                                    'meta[name="csrf-token"]').getAttribute(
-                                    "content") // Si usas Laravel
-                            },
-                            body: JSON.stringify({
-                                comentario
-                            }) // Enviar solo comentario o los campos necesarios
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                        },
+                        body: JSON.stringify({
+                            comentario
                         })
-                        .then(response => response.json())
-                        .then(result => {
-                            if (result.success) {
-                                toastr.success("Estado actualizado correctamente.");
-                            } else {
-                                toastr.error("Error al actualizar el estado.");
-                            }
-                        })
-                        .catch(error => console.error("Error al actualizar el estado:", error));
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            toastr.success("Estado actualizado correctamente.");
+                        } else {
+                            toastr.error("Error al actualizar el estado.");
+                        }
+                    })
+                    .catch(error => console.error("Error al actualizar el estado:", error));
                 });
             });
         }

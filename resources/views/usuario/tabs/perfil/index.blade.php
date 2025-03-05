@@ -1,10 +1,5 @@
-<template x-if="tab === 'home'">
+<template x-if="tab === 'perfil'">
     <div>
-
-
-
-
-
 
         <form id="update-form" method="POST" enctype="multipart/form-data"
             class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
