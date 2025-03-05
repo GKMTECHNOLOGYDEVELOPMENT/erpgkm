@@ -1998,7 +1998,41 @@ class OrdenesTrabajoController extends Controller
         ]);
     }
 
+    private function optimizeBase64Image($base64String, $quality = 60, $maxWidth = 800)
+    {
+        if (!$base64String) return null;
 
+        // Extraer el tipo de imagen
+        preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches);
+        $imageType = $matches[1] ?? 'jpeg'; // Si no se detecta tipo, usa JPEG
+
+        // Decodificar la imagen base64
+        $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
+        $image = imagecreatefromstring($imageData);
+        if (!$image) return $base64String; // Si la imagen es inválida, devolver la original
+
+        // Obtener dimensiones
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $newWidth = min($width, $maxWidth);
+        $newHeight = ($height / $width) * $newWidth; // Mantener proporción
+
+        // Redimensionar imagen
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+        imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        // Convertir a JPEG con calidad reducida
+        ob_start();
+        imagejpeg($resizedImage, null, $quality);
+        $compressedImage = ob_get_clean();
+
+        // Liberar memoria
+        imagedestroy($image);
+        imagedestroy($resizedImage);
+
+        // Devolver imagen comprimida en base64
+        return 'data:image/jpeg;base64,' . base64_encode($compressedImage);
+    }
     public function generateInformePdfVisita($idOt, $idVisita)
     {
         $orden = Ticket::with([
@@ -2066,21 +2100,19 @@ class OrdenesTrabajoController extends Controller
             }
         }
 
-    
+
         // 🔹 OBTENER FIRMAS FILTRADAS POR idTickets Y idVisitas
         $firma = DB::table('firmas')->where('idTickets', $idOt)
             ->where('idVisitas', $idVisitasSeleccionada)  // Filtrar por la visita seleccionada
             ->first();
 
-        // Aplicar optimización de imágenes a las firmas
         $firmaTecnico = $firma && !empty($firma->firma_tecnico)
-            ? optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
             : null;
 
         $firmaCliente = $firma && !empty($firma->firma_cliente)
-            ? optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
             : null;
-
         // 🔹 OBTENER IMÁGENES EN BASE64 (Filtrar los anexos de la visita seleccionada)
         $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
 
@@ -2090,8 +2122,8 @@ class OrdenesTrabajoController extends Controller
             $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
                 return [
                     'foto_base64' => !empty($anexo->foto)
-                        ? optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
-                        : null,
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                    : null,
                     'descripcion' => $anexo->descripcion
                 ];
             });
@@ -2101,8 +2133,8 @@ class OrdenesTrabajoController extends Controller
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
                 'foto_base64' => !empty($foto->foto)
-                    ? optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
-                    : null,
+                ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                : null,
                 'descripcion' => $foto->descripcion
             ];
         });
@@ -2207,42 +2239,6 @@ class OrdenesTrabajoController extends Controller
             }
         }
 
-        function optimizeBase64Image($base64String, $quality = 60, $maxWidth = 800)
-        {
-            if (!$base64String) return null;
-
-            // Decodificar la imagen base64
-            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
-
-            // Crear una imagen desde los datos decodificados
-            $image = imagecreatefromstring($imageData);
-            if (!$image) return $base64String; // Si falla, devolver la original
-
-            // Obtener dimensiones
-            $width = imagesx($image);
-            $height = imagesy($image);
-            $newWidth = min($width, $maxWidth);
-            $newHeight = ($height / $width) * $newWidth; // Mantener proporción
-
-            // Redimensionar imagen
-            $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
-            imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-
-            // Convertir a JPEG con calidad reducida
-            ob_start();
-            imagejpeg($resizedImage, null, $quality);
-            $compressedImage = ob_get_clean();
-
-            // Liberar memoria
-            imagedestroy($image);
-            imagedestroy($resizedImage);
-
-            // Devolver imagen comprimida en base64
-            return 'data:image/jpeg;base64,' . base64_encode($compressedImage);
-        }
-
-
-
         // 🔹 OBTENER FIRMAS FILTRADAS POR idTickets Y idVisitas
         $firma = DB::table('firmas')->where('idTickets', $idOt)
             ->where('idVisitas', $idVisitasSeleccionada)  // Filtrar por la visita seleccionada
@@ -2250,11 +2246,11 @@ class OrdenesTrabajoController extends Controller
 
         // Aplicar optimización de imágenes a las firmas
         $firmaTecnico = $firma && !empty($firma->firma_tecnico)
-            ? optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
             : null;
 
         $firmaCliente = $firma && !empty($firma->firma_cliente)
-            ? optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
             : null;
 
         // 🔹 OBTENER IMÁGENES EN BASE64 (Filtrar los anexos de la visita seleccionada)
@@ -2266,8 +2262,8 @@ class OrdenesTrabajoController extends Controller
             $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
                 return [
                     'foto_base64' => !empty($anexo->foto)
-                        ? optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
-                        : null,
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                    : null,
                     'descripcion' => $anexo->descripcion
                 ];
             });
@@ -2277,8 +2273,8 @@ class OrdenesTrabajoController extends Controller
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
                 'foto_base64' => !empty($foto->foto)
-                    ? optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
-                    : null,
+                ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                : null,
                 'descripcion' => $foto->descripcion
             ];
         });
