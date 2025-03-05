@@ -2001,38 +2001,54 @@ class OrdenesTrabajoController extends Controller
     private function optimizeBase64Image($base64String, $quality = 60, $maxWidth = 800)
     {
         if (!$base64String) return null;
-
+    
         // Extraer el tipo de imagen
         preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches);
         $imageType = $matches[1] ?? 'jpeg'; // Si no se detecta tipo, usa JPEG
-
+    
         // Decodificar la imagen base64
         $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
         $image = imagecreatefromstring($imageData);
         if (!$image) return $base64String; // Si la imagen es inválida, devolver la original
-
+    
         // Obtener dimensiones
         $width = imagesx($image);
         $height = imagesy($image);
         $newWidth = min($width, $maxWidth);
         $newHeight = ($height / $width) * $newWidth; // Mantener proporción
-
-        // Redimensionar imagen
+    
+        // Crear nueva imagen con transparencia si es PNG
         $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+        if ($imageType === 'png') {
+            imagealphablending($resizedImage, false);
+            imagesavealpha($resizedImage, true);
+            $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+        } else {
+            $background = imagecolorallocate($resizedImage, 255, 255, 255); // Blanco para JPG
+            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $background);
+        }
+    
+        // Redimensionar imagen
         imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-
-        // Convertir a JPEG con calidad reducida
+    
+        // Convertir a WebP con calidad optimizada
         ob_start();
-        imagejpeg($resizedImage, null, $quality);
+        if ($imageType === 'png') {
+            imagepng($resizedImage, null, 9); // Mantener transparencia
+        } else {
+            imagejpeg($resizedImage, null, $quality);
+        }
         $compressedImage = ob_get_clean();
-
+    
         // Liberar memoria
         imagedestroy($image);
         imagedestroy($resizedImage);
-
+    
         // Devolver imagen comprimida en base64
-        return 'data:image/jpeg;base64,' . base64_encode($compressedImage);
+        return 'data:image/webp;base64,' . base64_encode($compressedImage);
     }
+    
     public function generateInformePdfVisita($idOt, $idVisita)
     {
         $orden = Ticket::with([
