@@ -302,13 +302,21 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                     </button>
                     
                     <!-- Botón para ver imagen -->
-                    <button class="badge bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                    <button 
+                    class="flex items-center justify-center gap-2 
+                           px-2 py-1 sm:px-3 sm:py-1.5
+                           text-xs sm:text-sm md:text-base
+                           font-semibold rounded-full shadow-md 
+                           transition-all duration-200
+                           bg-success hover:bg-blue-700 focus:ring focus:ring-blue-300 
+                           text-white"
                     id="viewImageButton-${visita.idVisitas}" 
                     data-image-type="inicioServicio"
                     data-id="${visita.idVisitas}"
                     title="Ver imagen">
-              <i class="fa-solid fa-image text-sm sm:text-base"></i> 
-            </button>
+                    <i class="fa-solid fa-image text-base md:text-lg"></i> 
+                </button>
+                
                   </div>
                 
                   <!-- Input oculto para subir foto -->
@@ -362,35 +370,42 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                         </div>
                     
                         <!-- Botones de acción -->
-                        <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
-        <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-id="continueButton-${visita.idVisitas}"
-data-visita-id="${visita.idVisitas}"
-@click="
-    console.log('Button clicked');
-    visitaId = $event.currentTarget.getAttribute('data-visita-id');  <!-- Usamos currentTarget -->
-    console.log('Visita ID:', visitaId);
-    $dispatch('set-visita-id', visitaId);  <!-- Esto pasa el ID al modal -->
-    openCondiciones = true;
-">
-    <i class="fa-solid fa-check-circle text-xs sm:text-base"></i>
-    <span class="text-xs sm:text-sm">Continuar boton</span>
-</button>
+                        <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4 w-full">
+                        <!-- Botón Continuar -->
+                        <button class="sm:w-auto badge bg-danger text-white px-3 py-2 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full shadow-md transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 !bg-blue-600 !text-white text-sm sm:text-base md:text-lg"
+                            id="continueButton-${visita.idVisitas}"
+                            data-visita-id="${visita.idVisitas}"
+                            @click="
+                                console.log('Button clicked');
+                                visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
+                                console.log('Visita ID:', visitaId);
+                                $dispatch('set-visita-id', visitaId);  
+                                openCondiciones = true;
+                            ">
+                            <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
+                            <span class="text-xs sm:text-sm">Continuar</span>
+                        </button>
+                    
 
 
 
 
                           
                           <!-- Botón para ver imagen -->
-                          <button class="badge bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                          <button class="flex items-center justify-center gap-2 
+                          px-2 py-1 sm:px-3 sm:py-1.5
+                          text-xs sm:text-sm md:text-base
+                          font-semibold rounded-full shadow-md 
+                          transition-all duration-200
+                          bg-danger hover:bg-blue-700 focus:ring focus:ring-blue-300 
+                          text-white"
                           id="viewImageButton-${visita.idVisitas}" 
                           data-image-type="finalServicio"
                           data-id="${visita.idVisitas}"
                           title="Ver imagen">
-                    <i class="fa-solid fa-image text-xs sm:text-base"></i> 
-                  </button>
-                        </div>
+                          <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
+                      </button>
+
                         
                       </div>
                     `;

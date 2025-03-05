@@ -46,28 +46,35 @@
             width: 100%;
             text-align: center;
             page-break-inside: avoid !important;
-            /* Evita que se corten entre páginas */
+            /* Evita cortes entre páginas */
             break-inside: avoid !important;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
+        /* 🔹 Evita que la imagen choque con el borde superior cuando está en una nueva página */
         .img-container img {
-            width: auto !important;
-            /* Mantiene la proporción */
             max-width: 100% !important;
-            /* Permite expandirse según el contenedor */
-            max-height: 200px !important;
-            /* Ajusta la altura máxima */
+            width: auto !important;
+            max-height: 300px !important;
+            min-height: 100px !important;
             object-fit: contain !important;
-            /* Evita deformaciones */
             display: block;
-            margin: 0 auto;
+            margin: 20px auto 0 auto !important;
+            /* 🔹 Agrega margen superior solo si es necesario */
             page-break-inside: avoid !important;
-            /* Evita cortes en PDF */
             break-inside: avoid !important;
         }
+
+        /* 🔹 Detecta imágenes que están justo después de un salto de página */
+        @media print {
+            .img-container {
+                margin-top: 40px !important;
+                /* 🔹 Mayor margen en impresión para evitar que toquen el borde */
+            }
+        }
+
 
         .footer {
             position: absolute;
@@ -126,7 +133,8 @@
                         <li><span class="font-bold">CLIENTE:</span> {{ $orden->cliente->nombre ?? 'No asignado' }}</li>
                         <li><span class="font-bold">DNI/RUC:</span> {{ $orden->cliente->documento ?? 'No disponible' }}
                         </li>
-                        <li><span class="font-bold">TIENDA DE COMPRA:</span> {{ $orden->tienda->nombre ?? 'No registrada' }}</li>
+                        <li><span class="font-bold">TIENDA DE COMPRA:</span>
+                            {{ $orden->tienda->nombre ?? 'No registrada' }}</li>
                         <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}</li>
                     </ul>
                 </div>
@@ -151,6 +159,14 @@
                     <div class="mt-2">
                         <p><span class="font-bold">SERIE:</span> {{ $producto['serie'] }}</p>
                     </div>
+                </div>
+            @endif
+
+            @if (!empty($producto['fallaReportada']))
+                <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
+                <div class="red-bg mt-4 text-left">Falla Reportada</div>
+                <div class="w-full text-xs mt-3">
+                    <p>{{ $producto['fallaReportada'] }}</p>
                 </div>
             @endif
 
@@ -229,7 +245,7 @@
 
                 <div class="flex justify-between mt-6 page-break-inside-avoid">
                     <div class="w-1/2 text-center">
-                        <div class="border-b-2 border-gray-300 inline-block mb-2">
+                        <div class="inline-block mb-2">
                             @if ($firmaTecnico)
                                 <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
                                     class="h-20 max-w-[150px] mx-auto object-contain">
@@ -242,7 +258,7 @@
                     </div>
 
                     <div class="w-1/2 text-center">
-                        <div class="border-b-2 border-gray-300 inline-block mb-2">
+                        <div class="inline-block mb-2">
                             @if ($firmaCliente)
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                                     class="h-20 max-w-[150px] mx-auto object-contain">
@@ -276,11 +292,11 @@
                     @if (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)
                         @foreach ($imagenesAnexos as $anexo)
                             @if (!empty($anexo['foto_base64']))
-                                <div class="bg-white border border-gray-300 rounded-lg shadow-lg p-4 flex flex-col items-center"
-                                    style="page-break-inside: avoid;">
+                                <div class="flex flex-col items-center" style="page-break-inside: avoid;">
                                     <!-- Imagen más grande y centrada -->
-                                    <img src="{{ $anexo['foto_base64'] }}"
-                                        class="w-full max-w-[500px] max-h-[500px] rounded-lg border border-gray-200 object-contain shadow-md">
+                                    <div class="img-container">
+                                        <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
+                                    </div>
 
                                     <!-- Descripción centrada -->
                                     <p class="text-sm text-center text-gray-700 font-semibold mt-2">
@@ -295,11 +311,11 @@
                     @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
                         @foreach ($imagenesFotosTickets as $fotoTicket)
                             @if (!empty($fotoTicket['foto_base64']))
-                                <div class="bg-white border border-gray-300 rounded-lg shadow-lg p-4 flex flex-col items-center"
-                                    style="page-break-inside: avoid;">
+                                <div class="flex flex-col items-center" style="page-break-inside: avoid;">
                                     <!-- Imagen más grande y centrada -->
-                                    <img src="{{ $fotoTicket['foto_base64'] }}"
-                                        class="w-full max-w-[500px] max-h-[500px] rounded-lg border border-gray-200 object-contain shadow-md">
+                                    <div class="img-container">
+                                        <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
+                                    </div>
 
                                     <!-- Descripción centrada -->
                                     <p class="text-sm text-center text-gray-700 font-semibold mt-2">

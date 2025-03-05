@@ -120,7 +120,7 @@ class ModelosController extends Controller
     public function exportAllPDF()
     {
         // Obtener todos los modelos
-        $modelos = Modelo::with(['marca', 'categorium'])->get();
+        $modelos = Modelo::with(['marca', 'categoria'])->get();
         Log::info( 'Modelos obtenidos' .$modelos );
 
         // Generar el PDF
@@ -132,13 +132,13 @@ class ModelosController extends Controller
 
     public function getAll()
     {
-        $modelos = Modelo::with(['marca', 'categorium'])->get();
+        $modelos = Modelo::with(['marca', 'categoria'])->get();
         $modelosData = $modelos->map(function ($modelo) {
             return [
                 'idModelo' => $modelo->idModelo,
                 'nombre' => $modelo->nombre,
                 'marca' => $modelo->marca->nombre ?? 'Sin Marca',
-                'categoria' => $modelo->categorium->nombre ?? 'Sin Categoría',
+                'categoria' => $modelo->categoria->nombre ?? 'Sin Categoría',
                 'estado' => $modelo->estado ? 'Activo' : 'Inactivo',
             ];
         });
