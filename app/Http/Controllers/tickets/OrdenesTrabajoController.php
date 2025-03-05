@@ -978,19 +978,38 @@ class OrdenesTrabajoController extends Controller
     }
 
 
-    public function loadEstados($id)
+    public function loadEstados($ticketId)
     {
-        // Obtener todos los flujos de estados relacionados con el ticket, incluyendo el usuario
-        $ticketFlujos = TicketFlujo::with('estadoFlujo', 'usuario') // Traer la relación con 'usuario'
-            ->where('idTicket', $id) // Filtrar por idTicket
-            ->get(); // Obtener todos los registros
-
-        // Devolver la respuesta con todos los estados de flujo, incluyendo el usuario
+        // Consulta usando DB para obtener los estados de flujo, los usuarios y los estados de flujo
+        $ticketFlujos = DB::table('ticketflujo')
+            ->join('usuarios', 'ticketflujo.idUsuario', '=', 'usuarios.idUsuario')
+            ->join('estado_flujo', 'ticketflujo.idEstadflujo', '=', 'estado_flujo.idEstadflujo')
+            ->select(
+                'ticketflujo.idTicketFlujo',
+                'ticketflujo.idTicket',
+                'ticketflujo.idEstadflujo',
+                'ticketflujo.fecha_creacion',
+                'ticketflujo.comentarioflujo',
+                'usuarios.idUsuario',
+                'usuarios.Nombre as usuario_nombre', // Solo nombre del usuario, sin avatar
+                'estado_flujo.descripcion as estado_descripcion', // Descripción del estado
+                'estado_flujo.color as estado_color' // Color del estado
+            )
+            ->where('ticketflujo.idTicket', $ticketId)
+            ->get(); // Obtiene los resultados de la consulta
+    
+        // Si es necesario, asegúrate de que las cadenas de texto estén correctamente codificadas en UTF-8
+        $ticketFlujos->each(function ($flujo) {
+            $flujo->usuario_nombre = mb_convert_encoding($flujo->usuario_nombre, 'UTF-8', 'auto');
+            $flujo->comentarioflujo = mb_convert_encoding($flujo->comentarioflujo, 'UTF-8', 'auto');
+            $flujo->estado_descripcion = mb_convert_encoding($flujo->estado_descripcion, 'UTF-8', 'auto');
+        });
+    
+        // Devuelve la respuesta en formato JSON con la codificación adecuada
         return response()->json([
-            'estadosFlujo' => $ticketFlujos,
-        ]);
+            'estadosFlujo' => $ticketFlujos
+        ], 200, ['Content-Type' => 'application/json; charset=UTF-8']);
     }
-
 
 
 
