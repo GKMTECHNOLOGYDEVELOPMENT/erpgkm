@@ -131,23 +131,26 @@
                         <li><span class="font-bold">CLIENTE GENERAL:</span>
                             {{ $orden->clienteGeneral->descripcion ?? 'No disponible' }}</li>
                         <li><span class="font-bold">CLIENTE:</span> {{ $orden->cliente->nombre ?? 'No asignado' }}</li>
-                        <li><span class="font-bold">DNI/RUC:</span> {{ $orden->cliente->documento ?? 'No disponible' }}
-                        </li>
+                        <li><span class="font-bold">DNI/RUC:</span> {{ $orden->cliente->documento ?? 'No disponible' }}</li>
                         <li><span class="font-bold">TIENDA DE COMPRA:</span>
                             {{ $orden->tienda->nombre ?? 'No registrada' }}</li>
-                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}</li>
                     </ul>
                 </div>
-
+            
                 <!-- Información del Técnico -->
                 <div class="w-1/2 text-right">
                     <h2 class="text-xs font-bold mb-1 text-gray-700">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
-                        <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ $visita['tecnico'] }}
-                        </p>
+                        <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ $visita['tecnico'] }}</p>
                     @endforeach
                 </div>
             </div>
+            
+            <!-- 🔹 Dirección en toda la fila -->
+            <div class="w-full mt-2">
+                <p class="text-xs"><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}</p>
+            </div>
+            
             @if (!empty($producto))
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
