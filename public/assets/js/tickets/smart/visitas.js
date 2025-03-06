@@ -21,6 +21,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const fechaInicio = formatDate(visita.fecha_inicio_hora);
         const fechaFinal = formatDate(visita.fecha_final_hora);
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
+        const nombre_visita = visita.nombre_visita || 'Nombre de la visita';
 
         // CARD PRINCIPAL QUE ENVUELVE TODO
         const cardContainer = document.createElement('div');
@@ -28,16 +29,16 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         // 📌 Botón para ocultar/mostrar la card
         const toggleCardButton = document.createElement('button');
         toggleCardButton.className = 'px-4 py-2 mb-2 bg-gray-300 text-gray-800 rounded-lg shadow hover:bg-gray-400 transition font-semibold w-full flex justify-between items-center';
-        toggleCardButton.innerHTML = `<span>Ocultar ${visita.nombre}</span> <i class="fa-solid fa-chevron-up"></i>`;
+        toggleCardButton.innerHTML = `<span>Ocultar ${nombre_visita}</span> <i class="fa-solid fa-chevron-up"></i>`;
 
         // 📌 Evento para ocultar/mostrar la card
         toggleCardButton.addEventListener('click', function () {
           cardContainer.classList.toggle('hidden');
 
           if (cardContainer.classList.contains('hidden')) {
-            toggleCardButton.innerHTML = `<span>Mostrar ${visita.nombre}</span> <i class="fa-solid fa-chevron-down"></i>`;
+            toggleCardButton.innerHTML = `<span>Mostrar ${nombre_visita}</span> <i class="fa-solid fa-chevron-down"></i>`;
           } else {
-            toggleCardButton.innerHTML = `<span>Ocultar ${visita.nombre}</span> <i class="fa-solid fa-chevron-up"></i>`;
+            toggleCardButton.innerHTML = `<span>Ocultar ${nombre_visita}</span> <i class="fa-solid fa-chevron-up"></i>`;
           }
         });
         // Agregar el botón ANTES de `cardContainer` para que quede fuera del bloque
@@ -52,7 +53,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         // Nombre de la Visita con el Técnico al costado (Aplicando badge-outline-primary a todo)
         visitaTitle.innerHTML = `
         <span class="badge badge-outline-primary text-lg font-semibold px-3 py-1 rounded-lg shadow-md block text-center sm:text-left break-words w-full">
-        ${visita.nombre} <br class="hidden sm:block"> Técnico responsable: ${nombreTecnico}
+        ${nombre_visita} <br class="hidden sm:block"> Técnico responsable: ${nombreTecnico}
     </span>
 `;
 
@@ -62,12 +63,12 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         selectButton.className = 'btn btn-warning w-full sm:w-auto seleccionarVisitaButton';
         selectButton.setAttribute('data-id-ticket', visita.idTickets);
         selectButton.setAttribute('data-id-visita', visita.idVisita);
-        selectButton.setAttribute('data-nombre-visita', visita.nombre_visita);
+        selectButton.setAttribute('data-nombre-visita', nombre_visita);
         selectButton.textContent = 'Seleccionar Visita';
-
-
         // Obtener el ID de la visita
-const idVisita = visita.idVisita;
+        const idVisita = visita.idVisita;
+
+
 
 // Realizar la consulta al backend para verificar si la visita ha sido seleccionada
 fetch(`/api/visita-seleccionada/${idVisita}`)
@@ -123,40 +124,6 @@ fetch(`/api/visita-seleccionada/${idVisita}`)
         `;
 
 
-        document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
-          button.addEventListener('click', function () {
-            const idTicket = this.getAttribute('data-id-ticket'); // ID del ticket
-            const idVisita = this.getAttribute('data-id-visita'); // ID de la visita
-            const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
-
-            // Llamada al backend para guardar la visita seleccionada
-            fetch('/api/seleccionar-visita', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF Token si estás usando Blade en Laravel
-              },
-              body: JSON.stringify({
-                idTickets: idTicket,
-                idVisitas: idVisita,
-                vistaseleccionada: nombreVisita
-              })
-            })
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  location.reload()
-                  // toastr.success(data.message);  // Muestra el mensaje de éxito
-                } else {
-                  toastr.error(data.message);  // Muestra el mensaje de error
-                }
-              })
-              .catch(error => {
-                console.error('Error al seleccionar la visita:', error);
-                toastr.error('Hubo un error al seleccionar la visita.');
-              });
-          });
-        });
 
 
         // Tarjeta de Técnico en Desplazamiento con el botón de "like"
@@ -198,9 +165,13 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
         `;
 
 
+        
+       
 
         // Agregar ambas tarjetas dentro del contenedor en la misma fila
         rowContainer.appendChild(visitaCard);
+
+
         rowContainer.appendChild(tecnicoCard);
 
         // Agregar la fila completa al contenedor de visitas
@@ -209,9 +180,6 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
 
         // Finalmente, agregar toda la card de la visita a la lista
         visitasList.appendChild(cardContainer);
-
-
-
 
 
 
@@ -238,9 +206,9 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
               .then(data => {
                 if (data.success) {
 
+                // toastr.success("Actualizada correctamente");
                   location.reload();
-
-                  // toastr.success(data.message);  // Muestra el mensaje de éxito
+                  // toastr.success(data.message, 'Esta es la ultima');  // Muestra el mensaje de éxito
                 } else {
                   toastr.error(data.message);  // Muestra el mensaje de error
                 }
@@ -251,6 +219,9 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
               });
           });
         });
+
+
+
 
 
         // Verificar si ya existe un registro de "Inicio de Servicio"
@@ -369,42 +340,78 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                           </div>
                         </div>
                     
-                        <!-- Botones de acción -->
-                        <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4 w-full">
-                        <!-- Botón Continuar -->
-                        <button class="sm:w-auto badge bg-danger text-white px-3 py-2 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full shadow-md transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 !bg-blue-600 !text-white text-sm sm:text-base md:text-lg"
-                            id="continueButton-${visita.idVisitas}"
-                            data-visita-id="${visita.idVisitas}"
-                            @click="
-                                console.log('Button clicked');
-                                visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
-                                console.log('Visita ID:', visitaId);
-                                $dispatch('set-visita-id', visitaId);  
-                                openCondiciones = true;
-                            ">
-                            <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
-                            <span class="text-xs sm:text-sm">Continuar</span>
-                        </button>
-                    
+
+
+                        
+                    <!-- Verificar si el servicio es igual a 1 -->
+    ${visita.titular === 1 ? 
+        // Si el servicio es igual a 1, mostrar el label "Finalizado"
+        `
+        <label class="badge bg-danger text-white text-sm sm:text-base md:text-lg rounded-full shadow-md py-2 w-auto mx-auto">
+           El cliente es titular
+        </label>
+        ` 
+        : 
+
+        `${visita.titular === 0 ?
+        `
+        <label class="badge bg-danger text-white text-sm sm:text-base md:text-lg rounded-full shadow-md py-2 w-auto mx-auto">
+            EL CLIENTE NO ES TITULAR: 
+          NOMBRE: ${visita.nombre} - DNI: ${visita.dni} - TELEFONO: ${visita.telefono}
+        </label>
+        `
+        : 
+         `${visita.servicio === 1 ? 
+            // Si el servicio es igual a 1, mostrar el label "SERVICIO NO FINALIZADO"
+            `
+            <label class="badge bg-danger text-white text-sm sm:text-base md:text-lg rounded-full shadow-md py-2 w-auto mx-auto">
+                Servicio No Finalizado Motivo: ${visita.motivo}
+            </label>
+            `
+            :
+        // Si el servicio no es igual a 1, mostrar el botón "Continuar"
+        `
+        <button class="sm:w-auto badge bg-danger text-white px-3 py-2 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full shadow-md transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 !bg-blue-600 !text-white text-sm sm:text-base md:text-lg"
+            id="continueButton-${visita.idVisitas}"
+            data-visita-id="${visita.idVisitas}"
+            @click="
+                console.log('Button clicked');
+                visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
+                console.log('Visita ID:', visitaId);
+                $dispatch('set-visita-id', visitaId);  
+                openCondiciones = true;
+            ">
+            <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
+            <span class="text-xs sm:text-sm">Continuar Aquí</span>
+        </button>
+        `}  `}`}
 
 
 
 
                           
-                          <!-- Botón para ver imagen -->
-                          <button class="flex items-center justify-center gap-2 
-                          px-2 py-1 sm:px-3 sm:py-1.5
-                          text-xs sm:text-sm md:text-base
-                          font-semibold rounded-full shadow-md 
-                          transition-all duration-200
-                          bg-danger hover:bg-blue-700 focus:ring focus:ring-blue-300 
-                          text-white"
-                          id="viewImageButton-${visita.idVisitas}" 
-                          data-image-type="finalServicio"
-                          data-id="${visita.idVisitas}"
-                          title="Ver imagen">
-                          <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
-                      </button>
+                          <!-- Verificar si el servicio es igual a 1 -->
+${visita.servicio === 1 ? 
+    // Si el servicio es igual a 1, mostrar el botón "Ver imagen"
+    `
+    <button class="flex items-center justify-center gap-2 
+        px-2 py-1 sm:px-3 sm:py-1.5
+        text-xs sm:text-sm md:text-base
+        font-semibold rounded-full shadow-md 
+        transition-all duration-200
+        bg-danger hover:bg-blue-700 focus:ring focus:ring-blue-300 
+        text-white"
+        id="viewImageButton-${visita.idVisitas}" 
+        data-image-type="finalServicio"
+        data-id="${visita.idVisitas}"
+        title="Ver imagen">
+        <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
+    </button>
+    `
+    : 
+    // Si el servicio no es igual a 1, no mostrar el botón
+    ''
+}
 
                         
                       </div>
@@ -465,25 +472,45 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                       </div>
                     </div>
                 
-                    <!-- Botón de continuar -->
-                    <div class="flex justify-center mt-4">
-          <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-id="continueButton-${visita.idVisitas}"
-data-visita-id="${visita.idVisitas}"
-@click="
-    console.log('Button clicked');
-    visitaId = $event.currentTarget.getAttribute('data-visita-id');  <!-- Usamos currentTarget -->
-    console.log('Visita ID:', visitaId);
-    $dispatch('set-visita-id', visitaId);  <!-- Esto pasa el ID al modal -->
-    openCondiciones = true;
-">
-    <i class="fa-solid fa-check-circle text-xs sm:text-base"></i>
-    <span class="text-xs sm:text-sm">Continuar boton</span>
-</button>
-                    </div>  
-                                    
-                  </div>
+                <!-- Botones de acción -->
+                        <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4 w-full">
+                        <!-- Botón Continuar -->
+                        <button class="sm:w-auto badge bg-danger text-white px-3 py-2 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full shadow-md transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 !bg-blue-600 !text-white text-sm sm:text-base md:text-lg"
+                            id="continueButton-${visita.idVisitas}"
+                            data-visita-id="${visita.idVisitas}"
+                            @click="
+                                console.log('Button clicked');
+                                visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
+                                console.log('Visita ID:', visitaId);
+                                $dispatch('set-visita-id', visitaId);  
+                                openCondiciones = true;
+                            ">
+                            <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
+                            <span class="text-xs sm:text-sm">Continuar Aqui si estoy </span>
+                        </button>
+                    
+
+
+
+
+                          
+                          <!-- Botón para ver imagen -->
+                          <button class="flex items-center justify-center gap-2 
+                          px-2 py-1 sm:px-3 sm:py-1.5
+                          text-xs sm:text-sm md:text-base
+                          font-semibold rounded-full shadow-md 
+                          transition-all duration-200
+                          bg-danger hover:bg-blue-700 focus:ring focus:ring-blue-300 
+                          text-white"
+                          id="viewImageButton-${visita.idVisitas}" 
+                          data-image-type="finalServicio"
+                          data-id="${visita.idVisitas}"
+                          title="Ver imagen">
+                          <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
+                      </button>
+
+                        
+                      </div>
                 `;
 
 
@@ -866,56 +893,74 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
 
 
 
-                                  // Agregar el evento de clic al botón "Siguiente"
-                                  const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
-                                  siguienteButton.addEventListener('click', () => {
-                                    // Crear la card de "Final de Servicio"
-                                    const finalServicioCard = document.createElement('div');
-                                    finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
-                                    finalServicioCard.innerHTML = `
-  <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-    <!-- Encabezados y Contenido Responsivo -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
-      <div class="flex flex-col items-center">
-        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
-        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Inicio de Servicio</span>
-      </div>
-      <div class="flex flex-col items-center">
-        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
-          <span id="ubicacion-${visita.idVisitas}" class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-          <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
+                                // Agregar el evento de clic al botón "Siguiente"
+const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
+siguienteButton.addEventListener('click', () => {
+    // Crear la card de "Final de Servicio"
+    const finalServicioCard = document.createElement('div');
+    finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
+    finalServicioCard.innerHTML = `
+    <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+        <!-- Encabezados y Contenido Responsivo -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+            <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Inicio de Servicio</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+                <span id="ubicacion-${visita.idVisitas}" class="badge bg-success text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                    <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
+                    ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 4) ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 4).ubicacion : 'Ubicación no disponible'}
+                </span>
+            </div>
+            <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
+                <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                    ${visita.fecha_inicio ? formatDate(visita.fecha_inicio) : 'Sin fecha'}
+                </span>
+            </div>
+        </div>
 
-${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 4) ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 4).ubicacion : 'Ubicación no disponible'}
-        </span>
-      </div>
-      <div class="flex flex-col items-center">
-        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
-        <span class="badge bg-danger text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-          ${visita.fecha_inicio ? formatDate(visita.fecha_inicio) : 'Sin fecha'}
-        </span>
-      </div>
+        <div class="flex justify-center mt-4">
+            <!-- Verificar si 'servicio' es igual a 1 -->
+          
+                <!-- Mostrar label si el servicio está finalizado -->
+                <label class="text-green-600 font-semibold text-lg">Servicio Finalizado</label>
+          
+                <!-- Botón Continuar -->
+                <button class="sm:w-auto badge bg-danger text-white px-3 py-2 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full shadow-md transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 !bg-blue-600 !text-white text-sm sm:text-base md:text-lg"
+                        id="continueButton-${visita.idVisitas}"
+                        data-visita-id="${visita.idVisitas}"
+                        @click="
+                            console.log('Button clicked');
+                            visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
+                            console.log('Visita ID:', visitaId);
+                            $dispatch('set-visita-id', visitaId);  
+                            openCondiciones = true;
+                        ">
+                    <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
+                    <span class="text-xs sm:text-sm">Continuar Estoy aqui </span>
+                </button>
+     
+            
+            <!-- Botón para ver imagen -->
+            <button class="flex items-center justify-center gap-2 
+                        px-2 py-1 sm:px-3 sm:py-1.5
+                        text-xs sm:text-sm md:text-base
+                        font-semibold rounded-full shadow-md 
+                        transition-all duration-200
+                        bg-danger hover:bg-blue-700 focus:ring focus:ring-blue-300 
+                        text-white"
+                    id="viewImageButton-${visita.idVisitas}" 
+                    data-image-type="finalServicio"
+                    data-id="${visita.idVisitas}"
+                    title="Ver imagen">
+                <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
+            </button>
+        </div>
     </div>
-
-    <div class="flex justify-center mt-4">
-    <button class="bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-            id="continueButton-${visita.idVisitas}">
-      <i class="fa-solid fa-check-circle text-xs sm:text-base"></i> 
-      <span class="text-xs sm:text-sm">Continuar</span>
-    </button>
-
-     <button class="badge bg-danger text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                          id="viewImageButton-${visita.idVisitas}" 
-                          data-image-type="finalServicio"
-                          data-id="${visita.idVisitas}"
-                          title="Ver imagen">
-  </div>
-
-  
-  
-    
-  </div>
-`;
+    `;
 
 
 
@@ -966,6 +1011,44 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                       });
 
                                   });
+
+
+          document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
+          button.addEventListener('click', function () {
+            const idTicket = this.getAttribute('data-id-ticket'); // ID del ticket
+            const idVisita = this.getAttribute('data-id-visita'); // ID de la visita
+            const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
+
+            // Llamada al backend para guardar la visita seleccionada
+            fetch('/api/seleccionar-visita', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF Token si estás usando Blade en Laravel
+              },
+              body: JSON.stringify({
+                idTickets: idTicket,
+                idVisitas: idVisita,
+                vistaseleccionada: nombreVisita
+              })
+            })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+
+                // toastr.success("Actualizada correctamente");
+
+                  toastr.success(data.message, 'Esta es la ultima');  // Muestra el mensaje de éxito
+                } else {
+                  toastr.error(data.message);  // Muestra el mensaje de error
+                }
+              })
+              .catch(error => {
+                console.error('Error al seleccionar la visita:', error);
+                toastr.error('Hubo un error al seleccionar la visita.');
+              });
+          });
+        });
 
 
 

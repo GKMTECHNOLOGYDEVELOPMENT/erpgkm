@@ -156,7 +156,7 @@
         const datos = new FormData();
         datos.append('idTickets', ticketId);
         datos.append('idVisitas', visitaId);
-        datos.append('titular', condiciones.esTitular ? 1 : 0);
+        datos.append('titular', condiciones.noAtiende ? 2 : (condiciones.esTitular ? 1 : 0));
         datos.append('nombre', condiciones.esTitular ? null : condiciones.titularNoEsTitular.nombre);
         datos.append('dni', condiciones.esTitular ? null : condiciones.titularNoEsTitular.dni);
         datos.append('telefono', condiciones.esTitular ? null : condiciones.titularNoEsTitular.telefono);

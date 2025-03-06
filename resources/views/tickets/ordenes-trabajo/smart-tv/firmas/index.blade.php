@@ -20,7 +20,7 @@
             <img id="firmaClienteImg" class="w-full h-full object-contain" src="" alt="Firma del Cliente">
         </div>
         <!-- Mensaje si no hay firma -->
-        {{-- <p id="noFirmaCliente" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita o cliente.</p> --}}
+         <p id="noFirmaCliente" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita o cliente.</p> 
         <!-- Botón de refrescar -->
         <button type="button" class="btn btn-info mt-4" onclick="cargarFirmaCliente();">🔄 Refrescar Firma</button>
     </div>
@@ -52,6 +52,8 @@
     </button>
 
 </div>
+
+
 
 <script>
     // Función para cargar la firma del cliente
