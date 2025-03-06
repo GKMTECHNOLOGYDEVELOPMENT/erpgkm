@@ -464,7 +464,7 @@
 
                 // Botón "Más" y "Guardar" en la misma celda
                 const masCell = document.createElement("td");
-                masCell.classList.add("px-4", "py-2", "text-center", "flex", "items-center", "justify-center", "space-x-2");
+                masCell.classList.add("px-4", "py-2", "text-center","space-x-2");
                 masCell.style.backgroundColor = ticketFlujo.estado_color; // Aplica el color del estado
 
                 // Botón "Más" (⋮)
