@@ -89,6 +89,7 @@ class Ticket extends Model
 		'idUsuario',
 		'idTienda',
 		'fallaReportada',
+		'linkubicacion',
 		'esRecojo',
 		'direccion',
 		'idMarca',

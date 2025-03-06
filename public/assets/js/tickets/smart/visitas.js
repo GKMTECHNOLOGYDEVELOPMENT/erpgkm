@@ -1153,7 +1153,7 @@ siguienteButton.addEventListener('click', () => {
 
       document.getElementById('visitasContainer').style.display = 'block';
     } else {
-      alert("No hay visitas para este ticket.");
+      toastr.warning("No hay visitas para este ticket.");
     }
   })
   .catch(error => {

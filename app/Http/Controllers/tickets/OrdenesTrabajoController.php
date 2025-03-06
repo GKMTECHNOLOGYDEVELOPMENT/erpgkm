@@ -26,6 +26,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TicketExport;
 use App\Exports\HelpdeskTicketExport; // Importa el nuevo exportador
 use App\Models\AnexosVisita;
+use App\Models\Categoria;
 use App\Models\CondicionesTicket;
 use App\Models\Fotostickest;
 use App\Models\SeleccionarVisita;
@@ -129,6 +130,9 @@ class OrdenesTrabajoController extends Controller
         $marcas = Marca::all();
         $modelos = Modelo::all();
         $tiposDocumento = TipoDocumento::all();
+        $categorias = Categoria::all();
+
+
 
 
 
@@ -142,7 +146,8 @@ class OrdenesTrabajoController extends Controller
             'marcas',
             'modelos',
             'tiposDocumento',
-            'departamentos'
+            'departamentos',
+            'categorias'
         ));
     }
 
@@ -167,6 +172,7 @@ class OrdenesTrabajoController extends Controller
                 'serie' => 'required|string|max:255',
                 'fechaCompra' => 'required|date_format:Y-m-d',
                 'fallaReportada' => 'required|string|max:255',
+                'linkubicacion' =>  'required|string|max:255',
                 'lat' => 'nullable|string|max:255',
                 'lng' => 'nullable|string|max:255',
             ]);
@@ -184,6 +190,7 @@ class OrdenesTrabajoController extends Controller
                 'idModelo' => $validatedData['idModelo'],
                 'serie' => $validatedData['serie'],
                 'fechaCompra' => $validatedData['fechaCompra'],
+                'linkubicacion' => $validatedData['linkubicacion'],
                 'fallaReportada' => $validatedData['fallaReportada'],
                 'lat' => $validatedData['lat'],
                 'lng' => $validatedData['lng'],

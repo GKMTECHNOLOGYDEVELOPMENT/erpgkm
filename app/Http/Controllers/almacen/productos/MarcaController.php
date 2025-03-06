@@ -47,6 +47,39 @@ class MarcaController extends Controller
             ], 500);
         }
     }
+
+    public function guardarMarcaSmart(Request $request)
+    {
+        try {
+            // Validar los datos del formulario
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255',
+            ]);
+    
+            // Datos básicos de la marca con estado siempre en 1
+            $dataMarca = [
+                'nombre' => $validatedData['nombre'],
+                'estado' => 1, // Estado siempre será 1
+            ];
+    
+            // Guardar la marca en la base de datos
+            Log::info('Insertando marca:', $dataMarca);
+            Marca::create($dataMarca);
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Marca agregada correctamente',
+                'data' => $dataMarca,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al guardar la marca: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al guardar la marca.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
     
 
     public function edit($id)
@@ -135,5 +168,14 @@ class MarcaController extends Controller
         $exists = Marca::where('nombre', $nombre)->exists();
 
         return response()->json(['unique' => !$exists]);
+    }
+
+
+    public function checkMarcas(Request $request)
+    {
+        // Aquí hacemos una consulta para obtener las marcas activas (o según el estado que necesites)
+        $marcas = Marca::where('estado', 1)->get(); // Filtramos por 'estado' igual a 1 (activas)
+
+        return response()->json($marcas); // Devolvemos los datos en formato JSON
     }
 }

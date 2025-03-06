@@ -114,7 +114,9 @@ Route::get('/exportar-tiendas', function () {
 })->name('tiendas.exportExcel');
 Route::get('/reporte-tiendas', [TiendaController::class, 'exportAllPDF'])->name('reporte.tiendas');
 
+Route::get('/obtenerClientesGenerales', [ClienteGeneralController::class, 'obtenerClientesGenerales']);
 
+Route::get('/check-marcas', [MarcaController::class, 'checkMarcas']);
 
 
 
@@ -222,6 +224,9 @@ Route::prefix('marcas')->name('marcas.')->group(function () {
         return Excel::download(new MarcasExport, 'marcas.xlsx');
     })->name('exportExcel');
 });
+
+
+
 
 /// FIN MARCA ///
 
@@ -373,6 +378,9 @@ Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoContr
 
 
 
+// routes/web.php
+
+Route::get('/get-marcas', [MarcaController::class, 'checkMarcas']);
 
     
 
@@ -382,6 +390,12 @@ Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoContr
 
 Route::get('validar-ticket/{nroTicket}', [OrdenesTrabajoController::class, 'validarTicket'])->name('validarTicket');
 Route::post('/ticket/{ticketId}/ticketflujo/{flujoId}/update', [OrdenesTrabajoController::class, 'actualizarComentario'])->name('ticketflujo.update');
+
+///CLIENTE GENERAL POR CREATE-SMART
+Route::post('/guardar-cliente-general-smart', [ClienteGeneralController::class, 'guardarClienteSmart'])->name('guardar.cliente');
+Route::post('/guardar-marca-smart', [MarcaController::class, 'store'])->name('guardar.cliente');
+Route::post('/guardar-modelo-smart', [ModelosController::class, 'store'])->name('guardar.modelo');
+///RUTAS
 
 
 Route::get('/clientes/generales/asociados/{idCliente}', [ClientesController::class, 'clientesGeneralesAsociados']);

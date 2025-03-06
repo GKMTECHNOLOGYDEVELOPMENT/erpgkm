@@ -257,4 +257,68 @@ class ClienteGeneralController extends Controller
 
         return response()->json(['unique' => !$exists]);
     }
+
+
+
+
+    public function guardarClienteSmart(GeneralRequests $request)
+    {
+        try {
+            // Datos básicos del cliente
+            $dataClientes = [
+                'descripcion' => $request->descripcion,
+                'estado' => 1,
+            ];
+
+            // Guardar el cliente en la base de datos (sin la imagen por ahora)
+            Log::info('Insertando cliente:', $dataClientes);
+            $cliente = Clientegeneral::create($dataClientes);
+
+            // Procesar la imagen si se ha subido
+            if ($request->hasFile('logo')) {
+                // Obtener el contenido binario de la imagen
+                $binaryImage = file_get_contents($request->file('logo')->getRealPath());
+
+                // Actualizar el cliente con la imagen en formato binario
+                DB::table('clientegeneral')
+                    ->where('idClienteGeneral', $cliente->idClienteGeneral)
+                    ->update(['foto' => $binaryImage]);
+
+                Log::info('Imagen guardada como longblob en la base de datos.');
+            }
+
+            // Responder con JSON
+            return response()->json([
+                'success' => true,
+                'message' => 'Cliente agregado correctamente',
+                'data' => $cliente,
+            ]);
+        } catch (\Exception $e) {
+            // Log para capturar el error
+            Log::error('Error al guardar el cliente: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al guardar el cliente.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+ // En tu controlador
+public function obtenerClientesGenerales()
+{
+    // Obtener los clientes generales
+    $clientesGenerales = DB::table('clientegeneral')
+                            ->where('estado', 1) // Asegúrate de filtrar si es necesario
+                            ->get(['idClienteGeneral', 'descripcion']); // Solo seleccionamos los campos que necesitamos
+
+    // Retornar los datos en formato JSON
+    return response()->json($clientesGenerales);
+}
+
+
+
+
+
 }
