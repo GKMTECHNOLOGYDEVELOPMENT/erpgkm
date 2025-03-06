@@ -1207,23 +1207,39 @@ class OrdenesTrabajoController extends Controller
 
     public function obtenerVisitas($ticketId)
     {
-        // Obtener todas las visitas del ticket, incluyendo el técnico y los anexos
+        // Obtener todas las visitas del ticket, incluyendo el técnico, los anexos y las condiciones
         $visitas = Visita::with(['tecnico', 'anexos_visitas' => function ($query) {
             // Filtrar los anexos donde idTipovisita sea 2 o 3
             $query->whereIn('idTipovisita', [2, 3, 4]);
-        }])->where('idTickets', $ticketId)->get();
-
+        }, 'condicionesTickets']) // Aquí usamos el nombre correcto de la relación (condicionesTickets)
+        ->where('idTickets', $ticketId)
+        ->get();
+    
+        Log::info('Visitas obteneidas: ', $visitas->toArray());
+    
         // Convertir las fechas a formato ISO 8601
         $visitas->each(function ($visita) {
             $visita->fecha_inicio_hora = $visita->fecha_inicio_hora->toIso8601String();
             $visita->fecha_final_hora = $visita->fecha_final_hora->toIso8601String();
-
+    
             // Incluir el nombre del técnico
             $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;  // Aquí asumimos que el campo 'nombre' está en el modelo Usuario
             $visita->idTicket = $visita->idTickets;  // Este es el ID del ticket asociado a la visita
             $visita->idVisita = $visita->idVisitas;  // Este es el ID de la visita
             $visita->nombre_visita = $visita->nombre; // Este es el nombre de la visita
-
+           
+    
+    
+    
+    
+            $visita->servicio = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->servicio : null;
+            $visita->motivo = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->motivo : null;
+            $visita->titular = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->titular : null;
+    
+            $visita->nombre = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->nombre : null;
+            $visita->dni = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->dni : null;
+            $visita->telefono = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->telefono : null;
+    
             // Iterar sobre los anexos y obtener los datos (solo los que tienen idTipovisita 2 o 3)
             $visita->anexos_visitas->each(function ($anexovisita) {
                 // Asegurarse de obtener todos los datos de los anexos
@@ -1238,11 +1254,30 @@ class OrdenesTrabajoController extends Controller
                 $anexovisita->lng = $anexovisita->lng;
                 $anexovisita->ubicacion = $anexovisita->ubicacion;
             });
+    
+            // Verificar si existen condiciones para esta visita antes de usar each()
+            if ($visita->condicionesTickets) {
+                // Log de las condiciones
+                Log::info('Condiciones de la visita: ', $visita->condicionesTickets->toArray());
+    
+                // Incluir las condiciones del ticket si existen
+                $visita->condicionesTickets->each(function ($condicion) {
+                    // Log de cada condición
+                    Log::info('Condición individual: ', $condicion->toArray());
+    
+                    // Convertir la imagen de la condición a base64 si existe
+                    if ($condicion->imagen) {
+                        $condicion->imagen = base64_encode($condicion->imagen);
+                    }
+                });
+            } else {
+                // Si no hay condiciones, puedes manejar el caso
+                $visita->condicionesTickets = []; // O simplemente no hacer nada
+            }
         });
-
+    
         return response()->json($visitas);
     }
-
 
 
 
