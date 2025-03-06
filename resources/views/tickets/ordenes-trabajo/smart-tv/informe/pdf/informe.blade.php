@@ -46,28 +46,27 @@
             width: 100%;
             text-align: center;
             page-break-inside: avoid !important;
-            /* Evita cortes entre páginas */
             break-inside: avoid !important;
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
-        /* 🔹 Evita que la imagen choque con el borde superior cuando está en una nueva página */
         .img-container img {
-            max-width: 100% !important;
-            width: auto !important;
-            max-height: 450px !important;
-            /* 🔹 Más grande */
-            min-height: 200px !important;
-            /* 🔹 Evita imágenes muy pequeñas */
-            object-fit: contain !important;
+            width: 90% !important;
+            /* 🔹 Fuerza todas las imágenes a tener el mismo ancho */
+            max-width: 90% !important;
+            height: auto !important;
+            max-height: 400px !important;
+            /* 🔹 Asegura que las imágenes no sean demasiado altas */
+            object-fit: cover !important;
+            /* 🔹 Mantiene el recorte sin deformar */
             display: block;
             margin: 20px auto 0 auto !important;
-            /* 🔹 Agrega margen superior solo si es necesario */
             page-break-inside: avoid !important;
             break-inside: avoid !important;
         }
+
 
         /* 🔹 Detecta imágenes que están justo después de un salto de página */
         @media print {
@@ -283,73 +282,73 @@
 
 
             @if (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0))
-            <!-- Nueva página con el título ANEXOS -->
-            <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
-                <h2>ANEXOS</h2>
-            </div>
-        
-            <div class="mt-4">
-                @php $contador = 0; @endphp
-        
-                <!-- Primero las imágenes de la visita -->
-                @if (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)
-                    @foreach ($imagenesAnexos as $anexo)
-                        @if (!empty($anexo['foto_base64']))
-                            @if ($contador % 2 == 0)
-                                <!-- Primera hoja con el título "ANEXOS" SIN SALTO DE PÁGINA -->
-                                <div class="flex flex-col items-center">
-                            @else
-                                <!-- A partir de la segunda hoja, forzamos un salto de página -->
-                                <div class="flex flex-col items-center" style="page-break-before: always;">
-                            @endif
-        
-                            <!-- Imagen más grande y centrada -->
-                            <div class="img-container">
-                                <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
-                            </div>
-        
-                            <!-- Descripción centrada -->
-                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                IMAGEN DE LA VISITA
-                            </p>
-        
-                            @php $contador++; @endphp
-        
-                            @if ($contador % 2 == 0)
+                <!-- Nueva página con el título ANEXOS -->
+                <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
+                    <h2>ANEXOS</h2>
+                </div>
+
+                <div class="mt-4">
+                    @php $contador = 0; @endphp
+
+                    <!-- Primero las imágenes de la visita -->
+                    @if (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)
+                        @foreach ($imagenesAnexos as $anexo)
+                            @if (!empty($anexo['foto_base64']))
+                                @if ($contador % 2 == 0)
+                                    <!-- Primera hoja con el título "ANEXOS" SIN SALTO DE PÁGINA -->
+                                    <div class="flex flex-col items-center">
+                                    @else
+                                        <!-- A partir de la segunda hoja, forzamos un salto de página -->
+                                        <div class="flex flex-col items-center" style="page-break-before: always;">
+                                @endif
+
+                                <!-- Imagen más grande y centrada -->
+                                <div class="img-container">
+                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                 </div>
-                            @endif
+
+                                <!-- Descripción centrada -->
+                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                    IMAGEN DE LA VISITA
+                                </p>
+
+                                @php $contador++; @endphp
+
+                                @if ($contador % 2 == 0)
+                </div>
+            @endif
+            @endif
+            @endforeach
+            @endif
+
+            <!-- Luego las imágenes de los tickets anexos -->
+            @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
+                @foreach ($imagenesFotosTickets as $fotoTicket)
+                    @if (!empty($fotoTicket['foto_base64']))
+                        @if ($contador % 2 == 0)
+                            <div class="flex flex-col items-center" style="page-break-before: always;">
                         @endif
-                    @endforeach
-                @endif
-        
-                <!-- Luego las imágenes de los tickets anexos -->
-                @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
-                    @foreach ($imagenesFotosTickets as $fotoTicket)
-                        @if (!empty($fotoTicket['foto_base64']))
-                            @if ($contador % 2 == 0)
-                                <div class="flex flex-col items-center" style="page-break-before: always;">
-                            @endif
-        
-                            <!-- Imagen más grande y centrada -->
-                            <div class="img-container">
-                                <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
-                            </div>
-        
-                            <!-- Descripción centrada -->
-                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
-                            </p>
-        
-                            @php $contador++; @endphp
-        
-                            @if ($contador % 2 == 0)
-                                </div>
-                            @endif
-                        @endif
-                    @endforeach
-                @endif
-            </div>
+
+                        <!-- Imagen más grande y centrada -->
+                        <div class="img-container">
+                            <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
+                        </div>
+
+                        <!-- Descripción centrada -->
+                        <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                            {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
+                        </p>
+
+                        @php $contador++; @endphp
+
+                        @if ($contador % 2 == 0)
+        </div>
         @endif
+        @endif
+        @endforeach
+        @endif
+    </div>
+    @endif
 
     </div>
 </body>
