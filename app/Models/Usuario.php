@@ -112,25 +112,28 @@ class Usuario extends Authenticatable
 		return $this->belongsTo(Sucursal::class, 'idSucursal');
 	}
 
-	public function tipodocumento()
+	public function tipoDocumento()
 	{
-		return $this->belongsTo(Tipodocumento::class, 'idTipoDocumento');
+		return $this->belongsTo(TipoDocumento::class, 'idTipoDocumento');
 	}
+	
 
-	public function tipousuario()
+	public function tipoUsuario()
 	{
-		return $this->belongsTo(Tipousuario::class, 'idTipoUsuario');
+		return $this->belongsTo(TipoUsuario::class, 'idTipoUsuario');
 	}
+	
 
 	public function sexo()
 	{
 		return $this->belongsTo(Sexo::class, 'idSexo');
 	}
 
-	public function area()
+	public function tipoArea()
 	{
-		return $this->belongsTo(Area::class, 'idArea');
+		return $this->belongsTo(TipoArea::class, 'idTipoArea');
 	}
+	
 
 	public function rol()
 	{
@@ -208,9 +211,4 @@ class Usuario extends Authenticatable
     {
         return $this->hasMany(TicketApoyo::class, 'idTecnico', 'idUsuario');
     }
-
-	public function usuario()
-	{
-		return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
-	}
 }

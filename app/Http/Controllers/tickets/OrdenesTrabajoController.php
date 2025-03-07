@@ -2549,4 +2549,45 @@ class OrdenesTrabajoController extends Controller
         // Retornar la imagen como base64
         return response()->json(['imagen' => base64_encode($imagen->imagen)]);
     }
+    public function detalle($id)
+    {
+        $orden = Ticket::findOrFail($id);
+        return view('tickets.ordenes-trabajo.smart-tv.detalle.index', compact('orden'))->render();
+    }
+
+    /**
+     * Cargar contenido dinámico del tab "Visitas".
+     */
+    public function visitas($id)
+    {
+        $orden = Ticket::findOrFail($id);
+        return view('tickets.ordenes-trabajo.smart-tv.visitas.index', compact('orden'))->render();
+    }
+
+    /**
+     * Cargar contenido dinámico del tab "Desarrollo".
+     */
+    public function desarrollo($id)
+    {
+        $orden = Ticket::findOrFail($id);
+        return view('tickets.ordenes-trabajo.smart-tv.informacion.index', compact('orden'))->render();
+    }
+
+    /**
+     * Cargar contenido dinámico del tab "Firmas".
+     */
+    public function firmas($id)
+    {
+        $orden = Ticket::findOrFail($id);
+        return view('tickets.ordenes-trabajo.smart-tv.firmas.index', compact('orden'))->render();
+    }
+
+    /**
+     * Cargar contenido dinámico del tab "Informe".
+     */
+    public function informe($id)
+    {
+        $orden = Ticket::findOrFail($id);
+        return view('tickets.ordenes-trabajo.smart-tv.informe.index', compact('orden'))->render();
+    }
 }

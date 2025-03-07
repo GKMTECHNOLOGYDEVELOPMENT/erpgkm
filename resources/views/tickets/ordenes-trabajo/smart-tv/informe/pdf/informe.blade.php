@@ -254,6 +254,7 @@
                                 <p class="text-xs text-gray-500">N/A</p>
                             @endif
                         </div>
+                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1"> 
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
                         <p class="text-xs"><span class="font-bold"></span> {{ $visita['tecnico'] }}
                     </div>
@@ -264,9 +265,10 @@
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                                     class="h-20 max-w-[150px] mx-auto object-contain">
                             @else
-                                <p class="text-xs text-gray-500">N/A</p>
+                            <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
                             @endif
                         </div>
+                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1"> 
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
                     </div>
                 </div>

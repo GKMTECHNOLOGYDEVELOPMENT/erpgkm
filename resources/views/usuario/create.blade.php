@@ -29,7 +29,7 @@
                                 <path d="M12 15L12 18" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" />
                             </svg>
-                            Home
+                            Perfil
                         </a>
                     </li>
                     <li class="inline-block">
@@ -47,7 +47,7 @@
                                     d="M15 9.5C15 8.11929 13.6569 7 12 7C10.3431 7 9 8.11929 9 9.5C9 10.8807 10.3431 12 12 12C13.6569 12 15 13.1193 15 14.5C15 15.8807 13.6569 17 12 17C10.3431 17 9 15.8807 9 14.5"
                                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             </svg>
-                            Payment Details
+                            Detalle de Pago
                         </a>
                     </li>
                     <li class="inline-block">
@@ -63,7 +63,7 @@
                                 <ellipse opacity="0.5" cx="12" cy="17" rx="7" ry="4"
                                     stroke="currentColor" stroke-width="1.5" />
                             </svg>
-                            Preferences
+                            Permisos
                         </a>
                     </li>
                     <li class="inline-block">
@@ -84,7 +84,7 @@
                                     d="M16.1007 13.3589C16.1007 13.3589 15.0181 14.4353 12.0631 11.4971C9.10807 8.55886 10.1907 7.48242 10.1907 7.48242"
                                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             </svg>
-                            Danger Zone
+                            Deshabilitar
                         </a>
                     </li>
                 </ul>
@@ -110,25 +110,25 @@
                                     <!-- Nombre Completo -->
                                     <div>
                                         <label for="Nombre">Nombre Completo</label>
-                                        <input id="Nombre" name="Nombre" type="text" placeholder="Jimmy Turner" class="form-input" />
+                                        <input id="Nombre" name="Nombre" type="text" placeholder="Darlin Josue" class="form-input" />
                                     </div>
 
                                     <!-- Apellido Paterno -->
                                     <div>
                                         <label for="apellidoPaterno">Apellido Paterno</label>
-                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text" placeholder="Turner" class="form-input" />
+                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text" placeholder="Saldarriaga" class="form-input" />
                                     </div>
 
                                     <!-- Apellido Materno -->
                                     <div>
                                         <label for="apellidoMaterno">Apellido Materno</label>
-                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text" placeholder="Lopez" class="form-input" />
+                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text" placeholder="Cruz" class="form-input" />
                                     </div>
 
                                     <!-- Tipo Documento -->
                                     <div>
                                         <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
-                                        <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
+                                        <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display: none">
                                             <option value="" disabled selected>Seleccionar Tipo Documento</option>
 
                                             @foreach ($tiposDocumento as $tipoDocumento)
@@ -148,13 +148,13 @@
                                     <!-- Teléfono -->
                                     <div>
                                         <label for="telefono">Teléfono</label>
-                                        <input id="telefono" type="text" name="telefono" placeholder="+1 (530) 555-12121" class="form-input" />
+                                        <input id="telefono" type="text" name="telefono" placeholder="962 952 239" class="form-input" />
                                     </div>
 
                                     <!-- Email -->
                                     <div>
-                                        <label for="correo">Email</label>
-                                        <input id="correo" name="correo" type="email" placeholder="jimmy@gmail.com" class="form-input" />
+                                        <label for="correo">Correo Electronico</label>
+                                        <input id="correo" name="correo" type="email" placeholder="darlin@gmail.com" class="form-input" />
                                     </div>
 
                                     <!-- Botones -->

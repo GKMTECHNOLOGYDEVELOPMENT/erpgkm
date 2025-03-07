@@ -355,6 +355,11 @@ public function guardarFirma(Request $request, $idUsuario)
 }
 
 
+public function getUsuarios()
+{
+    $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])->get();
+    return response()->json($usuarios);
+}
 
 
 
