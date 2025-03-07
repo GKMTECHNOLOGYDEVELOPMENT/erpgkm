@@ -248,6 +248,8 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+
+
     public function edit($id)
     {
         $usuario = Auth::user();
@@ -283,10 +285,28 @@ $existeFlujo4 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, e
             )
             ->first();
 
+
+
+
         $visitaExistente = $visita ? true : false;
 
 
         $visitaId = $visita ? $visita->idVisitas : null; // Si no hay visita, será null
+
+
+            // Verificar si existe una transición en transicion_status_ticket con idEstadoots = 4
+    $transicionExistente = DB::table('transicion_status_ticket')
+    ->where('idTickets', $ticketId)
+    ->where('idVisitas', $visitaId)
+    ->where('idEstadoots', 4)
+    ->exists(); // Devuelve true si existe, false si no
+
+// Verificar si la visita seleccionada está registrada en la tabla seleccionarvisita
+$visitaSeleccionada = DB::table('seleccionarvisita')
+->where('idTickets', $ticketId)
+->where('idVisitas', $visitaId)
+->exists(); // Devuelve true si la visita está seleccionada, false si no
+
 
         // Acceder al idTicketFlujo desde la relación 'ticketflujo'
         $idTicketFlujo = $orden->ticketflujo ? $orden->ticketflujo->idTicketFlujo : null;
@@ -313,58 +333,6 @@ $existeFlujo4 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, e
         $modelos = Modelo::all();
         $tiendas = Tienda::all();
         $marcas = Marca::all();
-
-
-
-
-
-
-
-
-        // // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
-        // $ticket = DB::table('tickets')->where('idTickets', $id)->first();
-
-        // // Verificar que encontramos el ticket y que tiene un idTicketFlujo
-        // if ($ticket) {
-        //     $idTicketFlujo = $ticket->idTicketFlujo;  // Obtener el idTicketFlujo del ticket
-
-        //     // Buscar en ticketflujo el idEstadflujo correspondiente al idTicketFlujo
-        //     $ticketFlujo = DB::table('ticketflujo')->where('idTicketFlujo', $idTicketFlujo)->first();
-
-        //     // Verifica que existe el ticketFlujo y su idEstadflujo
-        //     if ($ticketFlujo) {
-        //         $idEstadflujo = $ticketFlujo->idEstadflujo;  // Obtener el idEstadflujo del ticketflujo
-
-        //         // Si el idEstadflujo del ticketflujo es 3, solo mostrar los estados con idEstadflujo 4
-        //         if ($idEstadflujo == 3) {
-        //             $estadosFlujo = DB::table('estado_flujo')
-        //                 ->where('idEstadflujo', 4)  // Solo obtener el estado con idEstadflujo 4
-        //                 ->get();
-        //         } elseif ($idEstadflujo == 1) {
-        //             // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
-        //             $estadosFlujo = DB::table('estado_flujo')
-        //                 ->whereIn('idEstadflujo', [3])  // Solo obtener el estado con idEstadflujo 3
-        //                 ->get();
-        //         } elseif ($idEstadflujo == 9) {
-        //             // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-        //             $estadosFlujo = DB::table('estado_flujo')
-        //                 ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
-        //                 ->get();
-        //         } else {
-        //             // Si no tiene idEstadflujo = 1, 3 o 9, verificar si es 6 o 7
-        //             if (in_array($idEstadflujo, [6, 7])) {
-        //                 // Si tiene idEstadflujo 6 o 7, solo traer los estados con idEstadflujo 4
-        //                 $estadosFlujo = DB::table('estado_flujo')
-        //                     ->where('idEstadflujo', 4)  // Solo obtener el estado 4
-        //                     ->get();
-        //             } else {
-        //                 // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
-        //                 $estadosFlujo = DB::table('estado_flujo')->get();
-        //             }
-        //         }
-        //     }
-        // }
-
 
 // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
 $ticket = DB::table('tickets')->where('idTickets', $id)->first();
@@ -423,12 +391,6 @@ if ($ticket) {
     }
 }
 
-
-
-
-
-
-
         // Pasamos los datos a la vista
         return view("tickets.ordenes-trabajo.smart-tv.edit", compact(
             'ticket',
@@ -453,7 +415,9 @@ if ($ticket) {
             'estadosFlujo',
             'colorEstado',
             'visitaExistente',
-            'existeFlujo4'  // Pasamos la variable que indica si existe flujo 4
+            'existeFlujo4',
+            'transicionExistente', // Pasamos la variable que indica si la transición existe
+              'visitaSeleccionada'  // Pasamos la variable que indica si la visita está seleccionada  // Pasamos la variable que indica si existe flujo 4
 
         ));
     }
@@ -1163,6 +1127,8 @@ if ($ticket) {
         }
     }
 
+
+
     public function guardarVisita(Request $request)
     {
         // Validación de los datos
@@ -1296,6 +1262,25 @@ if ($ticket) {
 
             Log::info('Técnicos de apoyo guardados exitosamente');
         }
+
+
+         // Aquí agregamos la parte que guarda la modificación en la tabla 'modificaciones'
+    $usuarioAutenticado = auth()->user()->Nombre; // Obtener el nombre del usuario autenticado
+
+    DB::table('modificaciones')->insert([
+        'idTickets' => $visita->idTickets,
+        'campo' => 'Crear Visita',
+        'valor_antiguo' => 'Visita nueva',
+        'valor_nuevo' => 'Visita nueva creada',
+        'usuario' => $usuarioAutenticado,
+        'fecha_modificacion' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    Log::info('Modificación registrada en la tabla modificaciones');
+
+
 
         return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
     }
