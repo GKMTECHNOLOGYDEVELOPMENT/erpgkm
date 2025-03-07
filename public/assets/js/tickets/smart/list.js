@@ -9,7 +9,7 @@ document.addEventListener('alpine:init', () => {
         currentPage: 1,
         lastPage: 1,
         isLoading: false,
-       
+
 
         init() {
             this.fetchMarcas();
@@ -40,7 +40,8 @@ document.addEventListener('alpine:init', () => {
                     return response.json();
                 })
                 .then(data => {
-                    this.ordenesData = data.data;
+                    // 🔹 ORDENAR POR FECHA DE CREACIÓN DESCENDENTE (últimos tickets primero)
+                    this.ordenesData = data.data.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
                     this.currentPage = data.current_page;
                     this.lastPage = data.last_page;
 
@@ -68,6 +69,7 @@ document.addEventListener('alpine:init', () => {
                         searching: true,
                         paging: false,
                         pageLength: 10,
+                        order: [], // 🔹 Desactivar ordenación automática de DataTables
                         language: {
                             search: 'Buscar...',
                             lengthMenu: '',
@@ -86,8 +88,8 @@ document.addEventListener('alpine:init', () => {
                                     }
                                 }
                             });
-                            
-                            
+
+
                             // Asegurar que el color del texto sea siempre negro
                             $('#myTable1 tbody td').css('color', 'black');
 
@@ -301,11 +303,11 @@ console.log('Justificación: ', justificacion);
                 }
             }
         }
-        
 
 
 
 
-        
+
+
     }));
 });

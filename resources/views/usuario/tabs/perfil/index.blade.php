@@ -25,7 +25,7 @@
                     <div>
                         <label for="Nombre">Nombre Completo</label>
                         <input id="Nombre" name="Nombre" type="text" value="{{ $usuario->Nombre }}"
-                            class="form-input" />
+                            class="form-input"/>
                     </div>
 
                     <!-- Apellido Paterno -->
@@ -73,7 +73,7 @@
 
                     <!-- Email -->
                     <div>
-                        <label for="correo">Email</label>
+                        <label for="correo">Correo Electronico</label>
                         <input id="correo" name="correo" type="email" value="{{ $usuario->correo }}"
                             class="form-input" />
                     </div>
