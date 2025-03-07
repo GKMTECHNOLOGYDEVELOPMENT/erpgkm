@@ -18,4 +18,13 @@ class SeleccionarVisita extends Model
 
 
     protected $fillable = ['idTickets', 'idVisitas', 'vistaseleccionada'];
+
+
+    // Relación con el modelo Visita
+    public function visita()
+    {
+        return $this->belongsTo(Visita::class, 'idVisitas', 'idVisitas');
+    }
+
+    
 }

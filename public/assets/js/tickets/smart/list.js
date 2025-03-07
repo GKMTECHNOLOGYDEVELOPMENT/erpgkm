@@ -251,13 +251,49 @@ document.addEventListener('alpine:init', () => {
                     let newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
                     // Aplicar el mismo color de fondo que la fila padre y asegurar texto negro
                     const estadoColor = record.ticketflujo?.estadoflujo?.color;  // Asegúrate de acceder correctamente a la relación
+                    const estadoDescripcion = record.ticketflujo?.estadoflujo?.descripcion;
+
+
+
+// Obtener el nombre del técnico desde la visita
+let tecnicoNombre = 'N/A';
+let ticketSeleccionado = record; // Reemplazar con el ticket que seleccionas en el frontend
+
+// Verificar si la visita tiene un técnico asignado
+if (record.seleccionar_visita && record.seleccionar_visita.visita && record.seleccionar_visita.visita.tecnico) {
+    tecnicoNombre = record.seleccionar_visita.visita.tecnico.Nombre;
+} else {
+    console.log('No se encontró técnico en la visita.');
+}
+
+console.log('Nombre del técnico: ', tecnicoNombre);
+
+
+
+// Obtener la justificación de la transición de estado con idEstadoots = 3
+let justificacion = 'N/A'; // Valor predeterminado
+if (record.transicion_status_tickets && record.transicion_status_tickets.length > 0) {
+    const transicion = record.transicion_status_tickets[0]; // Tomamos la primera transición
+    if (transicion.justificacion) {
+        justificacion = transicion.justificacion; // Asignamos la justificación si existe
+    }
+}
+
+console.log('Justificación: ', justificacion);
+
+
+
+
+
+
+                    console.log('Descripcion: ', estadoDescripcion);
                     newRow.find('td').css('background-color', estadoColor || '');  // Asigna el color, si existe
                     newRow.find('td').html(`
                         <div class="p-2 text-sm" style="color: black;">
                             <ul>
-                                <li><strong>SOLUCIÓN:</strong> ${record.solucion || 'N/A'}</li>
-                                <li><strong>ESTADO FLUJO:</strong> ${record.estadoflujo ? record.estadoflujo.descripcion : 'N/A'} </li>
-                                <li><strong>TÉCNICO:</strong> ${record.tecnico ? record.tecnico.Nombre : 'N/A'}</li>
+                                <li><strong>SOLUCIÓN:</strong> ${justificacion}</li>
+                              <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion || 'N/A'}</li> <!-- Aquí está el cambio -->
+                                <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
                             </ul>
                         </div>
                     `);
