@@ -1004,14 +1004,14 @@ class OrdenesTrabajoController extends Controller
             )
             ->where('ticketflujo.idTicket', $ticketId)
             ->get(); // Obtiene los resultados de la consulta
-    
+
         // Si es necesario, asegúrate de que las cadenas de texto estén correctamente codificadas en UTF-8
         $ticketFlujos->each(function ($flujo) {
             $flujo->usuario_nombre = mb_convert_encoding($flujo->usuario_nombre, 'UTF-8', 'auto');
             $flujo->comentarioflujo = mb_convert_encoding($flujo->comentarioflujo, 'UTF-8', 'auto');
             $flujo->estado_descripcion = mb_convert_encoding($flujo->estado_descripcion, 'UTF-8', 'auto');
         });
-    
+
         // Devuelve la respuesta en formato JSON con la codificación adecuada
         return response()->json([
             'estadosFlujo' => $ticketFlujos
@@ -1219,34 +1219,34 @@ class OrdenesTrabajoController extends Controller
             // Filtrar los anexos donde idTipovisita sea 2 o 3
             $query->whereIn('idTipovisita', [2, 3, 4]);
         }, 'condicionesTickets']) // Aquí usamos el nombre correcto de la relación (condicionesTickets)
-        ->where('idTickets', $ticketId)
-        ->get();
-    
+            ->where('idTickets', $ticketId)
+            ->get();
+
         Log::info('Visitas obteneidas: ', $visitas->toArray());
-    
+
         // Convertir las fechas a formato ISO 8601
         $visitas->each(function ($visita) {
             $visita->fecha_inicio_hora = $visita->fecha_inicio_hora->toIso8601String();
             $visita->fecha_final_hora = $visita->fecha_final_hora->toIso8601String();
-    
+
             // Incluir el nombre del técnico
             $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;  // Aquí asumimos que el campo 'nombre' está en el modelo Usuario
             $visita->idTicket = $visita->idTickets;  // Este es el ID del ticket asociado a la visita
             $visita->idVisita = $visita->idVisitas;  // Este es el ID de la visita
             $visita->nombre_visita = $visita->nombre; // Este es el nombre de la visita
-           
-    
-    
-    
-    
+
+
+
+
+
             $visita->servicio = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->servicio : null;
             $visita->motivo = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->motivo : null;
             $visita->titular = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->titular : null;
-    
+
             $visita->nombre = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->nombre : null;
             $visita->dni = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->dni : null;
             $visita->telefono = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->telefono : null;
-    
+
             // Iterar sobre los anexos y obtener los datos (solo los que tienen idTipovisita 2 o 3)
             $visita->anexos_visitas->each(function ($anexovisita) {
                 // Asegurarse de obtener todos los datos de los anexos
@@ -1261,17 +1261,17 @@ class OrdenesTrabajoController extends Controller
                 $anexovisita->lng = $anexovisita->lng;
                 $anexovisita->ubicacion = $anexovisita->ubicacion;
             });
-    
+
             // Verificar si existen condiciones para esta visita antes de usar each()
             if ($visita->condicionesTickets) {
                 // Log de las condiciones
                 Log::info('Condiciones de la visita: ', $visita->condicionesTickets->toArray());
-    
+
                 // Incluir las condiciones del ticket si existen
                 $visita->condicionesTickets->each(function ($condicion) {
                     // Log de cada condición
                     Log::info('Condición individual: ', $condicion->toArray());
-    
+
                     // Convertir la imagen de la condición a base64 si existe
                     if ($condicion->imagen) {
                         $condicion->imagen = base64_encode($condicion->imagen);
@@ -1282,7 +1282,7 @@ class OrdenesTrabajoController extends Controller
                 $visita->condicionesTickets = []; // O simplemente no hacer nada
             }
         });
-    
+
         return response()->json($visitas);
     }
 
@@ -2062,22 +2062,22 @@ class OrdenesTrabajoController extends Controller
     private function optimizeBase64Image($base64String, $quality = 60, $maxWidth = 800)
     {
         if (!$base64String) return null;
-    
+
         // Extraer el tipo de imagen
         preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches);
         $imageType = $matches[1] ?? 'jpeg'; // Si no se detecta tipo, usa JPEG
-    
+
         // Decodificar la imagen base64
         $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
         $image = imagecreatefromstring($imageData);
         if (!$image) return $base64String; // Si la imagen es inválida, devolver la original
-    
+
         // Obtener dimensiones
         $width = imagesx($image);
         $height = imagesy($image);
         $newWidth = min($width, $maxWidth);
         $newHeight = ($height / $width) * $newWidth; // Mantener proporción
-    
+
         // Crear nueva imagen con transparencia si es PNG
         $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
         if ($imageType === 'png') {
@@ -2089,10 +2089,10 @@ class OrdenesTrabajoController extends Controller
             $background = imagecolorallocate($resizedImage, 255, 255, 255); // Blanco para JPG
             imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $background);
         }
-    
+
         // Redimensionar imagen
         imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-    
+
         // Convertir a WebP con calidad optimizada
         ob_start();
         if ($imageType === 'png') {
@@ -2101,15 +2101,15 @@ class OrdenesTrabajoController extends Controller
             imagejpeg($resizedImage, null, $quality);
         }
         $compressedImage = ob_get_clean();
-    
+
         // Liberar memoria
         imagedestroy($image);
         imagedestroy($resizedImage);
-    
+
         // Devolver imagen comprimida en base64
         return 'data:image/webp;base64,' . base64_encode($compressedImage);
     }
-    
+
     public function generateInformePdfVisita($idOt, $idVisita)
     {
         $orden = Ticket::with([
@@ -2199,8 +2199,8 @@ class OrdenesTrabajoController extends Controller
             $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
                 return [
                     'foto_base64' => !empty($anexo->foto)
-                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
-                    : null,
+                        ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                        : null,
                     'descripcion' => $anexo->descripcion
                 ];
             });
@@ -2210,13 +2210,17 @@ class OrdenesTrabajoController extends Controller
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
                 'foto_base64' => !empty($foto->foto)
-                ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
-                : null,
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                    : null,
                 'descripcion' => $foto->descripcion
             ];
         });
 
-        $fechaCreacion = $orden->fecha_creacion ? date('d/m/Y', strtotime($orden->fecha_creacion)) : 'N/A';
+        // 🔹 Obtener la fecha_inicio de la visita seleccionada
+        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio)) // Formato dd/mm/yyyy
+            : 'N/A';
+
 
         // 🔹 Renderizar vista
         $html = View('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', [
@@ -2339,8 +2343,8 @@ class OrdenesTrabajoController extends Controller
             $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
                 return [
                     'foto_base64' => !empty($anexo->foto)
-                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
-                    : null,
+                        ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                        : null,
                     'descripcion' => $anexo->descripcion
                 ];
             });
@@ -2350,21 +2354,24 @@ class OrdenesTrabajoController extends Controller
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
                 'foto_base64' => !empty($foto->foto)
-                ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
-                : null,
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                    : null,
                 'descripcion' => $foto->descripcion
             ];
         });
 
 
 
-        // 🔹 FORMATEAR FECHA DE CREACIÓN DEL TICKET
-        $fechaCreacion = $orden->fecha_creacion ? date('d/m/Y', strtotime($orden->fecha_creacion)) : 'N/A';
+        // 🔹 Obtener la fecha_inicio de la visita seleccionada
+        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio)) // Formato dd/mm/yyyy
+            : 'N/A';
+
 
         // 🔹 PASAR DATOS A LA VISTA
         $html = View('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', [
             'orden' => $orden,
-            'fechaCreacion' => $fechaCreacion, // ✅ PASAMOS LA FECHA DE CREACIÓN A LA VISTA
+            'fechaCreacion' => $fechaCreacion, // ✅ Pasamos la fecha de la visita seleccionada
             'producto' => $producto,
             'transicionesStatusOt' => $transicionesStatusOt,
             'visitas' => $visitas,

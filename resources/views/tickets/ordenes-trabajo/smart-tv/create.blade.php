@@ -3,8 +3,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" /> 
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script> 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
 
 
@@ -36,7 +36,7 @@
 
 
     <!-- Contenedor principal -->
-    <div x-data="{ openClienteModal: false, openClienteGeneralModal: false, openMarcaModal:false, openModeloModal:false }" class="panel mt-6 p-5 max-w-4x2 mx-auto">
+    <div x-data="{ openClienteModal: false, openClienteGeneralModal: false, openMarcaModal: false, openModeloModal: false }" class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Orden de Trabajo</h2>
 
 
@@ -52,7 +52,8 @@
                 <div class="col-span-1">
                     <div class="flex items-center space-x-2">
                         <label for="idCliente" class="block text-sm font-medium">Usuario Final</label>
-                        <button type="button" class="btn btn-primary p-1 mb-2" @click="openClienteModal = true;     cargarClientesGenerales('idClienteGeneraloption'); ">
+                        <button type="button" class="btn btn-primary p-1 mb-2"
+                            @click="openClienteModal = true;     cargarClientesGenerales('idClienteGeneraloption'); ">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -69,7 +70,7 @@
                 <div>
 
 
-                <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2">
                         <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openClienteGeneralModal = true">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
@@ -81,7 +82,7 @@
 
 
                     <!-- <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label> -->
-                    
+
                     <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full ">
                         <option value="" selected>Seleccionar Cliente General</option>
                     </select>
@@ -100,13 +101,15 @@
 
                 <!-- Tienda (usa nice-select2) -->
                 <div>
-                <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2">
                         <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                        <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1 mb-2" role="button" target="_blank">
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-    </svg>
-</a>
+                        <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1 mb-2" role="button"
+                            target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </a>
 
                     </div>
                     <select id="idTienda" name="idTienda" class="select2 w-full" style="display:none">
@@ -134,38 +137,40 @@
                 <!-- Marca -->
                 <div>
 
-                
-                <div class="flex items-center space-x-2">
+
+                    <div class="flex items-center space-x-2">
                         <label for="idMarca" class="block text-sm font-medium">Marca</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openMarcaModal = true">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
                     </div>
                     <!-- Select para las marcas -->
-       <!-- Preload (spinner o mensaje) sobre el select -->
-    <div class="relative">
-        <div id="preload" class="flex justify-center items-center absolute inset-0 bg-gray-100 bg-opacity-50" style="display:none;">
-            <span>Cargando...</span>
-        </div>
+                    <!-- Preload (spinner o mensaje) sobre el select -->
+                    <div class="relative">
+                        <div id="preload"
+                            class="flex justify-center items-center absolute inset-0 bg-gray-100 bg-opacity-50"
+                            style="display:none;">
+                            <span>Cargando...</span>
+                        </div>
 
-        <!-- Select para las marcas -->
-        <select id="idMarca" name="idMarca" >
-            
-        </select>
-    </div>
+                        <!-- Select para las marcas -->
+                        <select id="idMarca" name="idMarca">
+
+                        </select>
+                    </div>
                 </div>
 
-          
+
                 <div>
-                    
-                <div class="flex items-center space-x-2">
+
+                    <div class="flex items-center space-x-2">
                         <label for="idModelo" class="block text-sm font-medium">Modelo</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openModeloModal = true">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
@@ -187,7 +192,8 @@
                 <div id="ticketSelectionContainer">
                     <label for="selectTickets" class="block text-sm font-medium" style="display: none;">Tickets
                         Relacionados</label>
-                    <select id="selectTickets" name="selectTickets" class="form-input w-full" style="display: none;">
+                    <select id="selectTickets" name="selectTickets" class="form-input w-full"
+                        style="display: none;">
                         <option value="" selected>Seleccionar Ticket</option>
                     </select>
                 </div>
@@ -202,8 +208,8 @@
                     <textarea id="fallaReportada" name="fallaReportada" rows="3" class="form-input w-full"
                         placeholder="Describa la falla reportada"></textarea>
                 </div>
-                 <!-- Falla Reportada -->
-                 <div class="col-span-2">
+                <!-- Falla Reportada -->
+                <div class="col-span-2">
                     <label for="linkubicacion" class="block text-sm font-medium">Link de Ubicacion</label>
                     <input id="linkubicacion" name="linkubicacion" rows="3" class="form-input w-full"
                         placeholder="Ingrese el link">
@@ -241,11 +247,9 @@
 
 
         <!-- Modal para crear nuevo Cliente (opcional) -->
-        <div x-show="openClienteModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
-            style="display: none;" @click.self="openClienteModal = false">
-            <div class="flex items-start justify-center min-h-screen px-4">
-                <div x-show="openClienteModal" x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8">
+        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="openClienteModal && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="openClienteModal = false">
+                <div x-show="openClienteModal" x-transition.duration.300 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Cliente</h5>
@@ -278,7 +282,7 @@
                             </div>
 
 
-        
+
 
 
 
@@ -402,12 +406,12 @@
 
 
 
-  <!-- Modal para crear nuevo Cliente GENERAL(opcional) -->
-  <div x-data="{ open: false, imagenPreview: null, imagenActual: '/assets/images/file-preview.svg' }" x-show="openClienteGeneralModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
-            style="display: none;" @click.self="openClienteGeneralModal = false">
-            <div class="flex items-start justify-center min-h-screen px-4">
-                <div x-show="openClienteGeneralModal" x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8">
+        <!-- Modal para crear nuevo Cliente GENERAL(opcional) -->
+        <div x-data="{ open: false, imagenPreview: null, imagenActual: '/assets/images/file-preview.svg' }" x-show="openClienteGeneralModal"
+            class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" style="display: none;"
+            @click.self="openClienteGeneralModal = false">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="openClienteGeneralModal = false">
+                <div x-show="openClienteGeneralModal" x-transition.duration.300 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Cliente General</h5>
@@ -423,43 +427,44 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario para nuevo Cliente -->
-            
-                    <form class="p-5 space-y-4" id="clientGeneralForm" enctype="multipart/form-data" method="post">
-                        @csrf <!-- Asegúrate de incluir el token CSRF -->
-                        <!-- Descripción -->
-                        <div>
-                            <label for="descripcion" class="block text-sm font-medium">Nombre</label>
-                            <input type="text" id="descripcion" name="descripcion" class="form-input w-full"
-                                placeholder="Ingrese la descripción" required>
-                        </div>
-                        <!-- Foto -->
-                        <div class="mb-5">
-                            <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
-                            <!-- Campo de archivo -->
-                            <input id="ctnFile" type="file" name="logo" accept="image/*" required
-                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
-                                @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual" />
 
-                            <!-- Contenedor de previsualización -->
-                            <div
-                                class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                                <template x-if="imagenPreview">
-                                    <img :src="imagenPreview" alt="Previsualización de la imagen"
-                                        class="w-40 h-40 object-cover">
-                                </template>
-                                <template x-if="!imagenPreview">
-                                    <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
-                                        class="w-50 h-40 object-cover">
-                                </template>
+                        <form class="p-5 space-y-4" id="clientGeneralForm" enctype="multipart/form-data"
+                            method="post">
+                            @csrf <!-- Asegúrate de incluir el token CSRF -->
+                            <!-- Descripción -->
+                            <div>
+                                <label for="descripcion" class="block text-sm font-medium">Nombre</label>
+                                <input type="text" id="descripcion" name="descripcion" class="form-input w-full"
+                                    placeholder="Ingrese la descripción" required>
                             </div>
-                        </div>
-                        <!-- Botones -->
-                        <div class="flex justify-end items-center mb-4">
-                            <button type="button" class="btn btn-outline-danger"
-                                @click="open = false">Cancelar</button>
-                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
-                        </div>
-                    </form>
+                            <!-- Foto -->
+                            <div class="mb-5">
+                                <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+                                <!-- Campo de archivo -->
+                                <input id="ctnFile" type="file" name="logo" accept="image/*" required
+                                    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
+                                    @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual" />
+
+                                <!-- Contenedor de previsualización -->
+                                <div
+                                    class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+                                    <template x-if="imagenPreview">
+                                        <img :src="imagenPreview" alt="Previsualización de la imagen"
+                                            class="w-40 h-40 object-cover">
+                                    </template>
+                                    <template x-if="!imagenPreview">
+                                        <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
+                                            class="w-50 h-40 object-cover">
+                                    </template>
+                                </div>
+                            </div>
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center mb-4">
+                                <button type="button" class="btn btn-outline-danger"
+                                @click="openClienteGeneralModal = false">Cancelar</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -471,11 +476,10 @@
 
 
         <!-- Modal para crear nueva Marca(opcional) -->
-  <div  x-show="openMarcaModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
-            style="display: none;" @click.self="openMarcaModal = false">
-            <div class="flex items-start justify-center min-h-screen px-4">
-                <div x-show="openMarcaModal" x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8">
+        <div x-show="openMarcaModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" style="display: none;"
+            @click.self="openMarcaModal = false">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="openMarcaModal = false">
+                <div x-show="openMarcaModal" x-transition.duration.300 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Marca</h5>
@@ -491,7 +495,7 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario para nuevo Cliente -->
-            
+
                         <form class="p-5 space-y-4" id="marcaForm" enctype="multipart/form-data" method="post">
                             @csrf <!-- Asegúrate de incluir el token CSRF -->
                             <!-- Nombre -->
@@ -503,7 +507,7 @@
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
-                                    @click="open = false">Cancelar</button>
+                                @click="openMarcaModal = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
@@ -517,12 +521,11 @@
 
 
 
-         <!-- Modal para crear nueva Marca(opcional) -->
-  <div  x-show="openModeloModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
+        <!-- Modal para crear nueva Marca(opcional) -->
+        <div x-show="openModeloModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
             style="display: none;" @click.self="openModeloModal = false">
-            <div class="flex items-start justify-center min-h-screen px-4">
-                <div x-show="openModeloModal" x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="openModeloModal = false">
+                <div x-show="openModeloModal" x-transition.duration.300 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Modelo</h5>
@@ -538,81 +541,87 @@
                     </div>
                     <div class="modal-scroll">
                         <!-- Formulario para nuevo Cliente -->
-            
+
                         <form class="p-5 space-y-4" id="modeloForm" enctype="multipart/form-data" method="post">
                             @csrf <!-- Asegúrate de incluir el token CSRF -->
                             <!-- Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input id="nombre" name="nombre" class="form-input w-full" placeholder="Ingrese el nombre del modelo" required>
+                                <input id="nombre" name="nombre" class="form-input w-full"
+                                    placeholder="Ingrese el nombre del modelo" required>
                             </div>
-                      <!-- Marca -->
-<div>
-    <label for="idMarcas" class="block text-sm font-medium">Marca</label>
-    <select id="idMarcas" name="idMarca" >
-       
-    </select>
-</div>
+                            <!-- Marca -->
+                            <div>
+                                <label for="idMarcas" class="block text-sm font-medium">Marca</label>
+                                <select id="idMarcas" name="idMarca">
 
-<script>
-    let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
+                                </select>
+                            </div>
 
-    // Función para cargar las marcas desde el servidor
-    function cargarMarcass() {
-        const select = document.getElementById('idMarcas');
+                            <script>
+                                let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
 
-        // Realizamos la solicitud fetch para obtener las marcas
-        fetch('/get-marcas')
-            .then(response => response.json()) // Convertir la respuesta en formato JSON
-            .then(data => {
-                // Limpiar las opciones actuales del select
-                select.innerHTML = '<option value="" disabled selected>Seleccione la Marca ESTOY AQUI</option>';
+                                // Función para cargar las marcas desde el servidor
+                                function cargarMarcass() {
+                                    const select = document.getElementById('idMarcas');
 
-                // Llenar el select con las marcas obtenidas
-                data.forEach(marca => {
-                    const option = document.createElement('option');
-                    option.value = marca.idMarca;
-                    option.textContent = marca.nombre;
-                    select.appendChild(option);
-                });
+                                    // Realizamos la solicitud fetch para obtener las marcas
+                                    fetch('/get-marcas')
+                                        .then(response => response.json()) // Convertir la respuesta en formato JSON
+                                        .then(data => {
+                                            // Limpiar las opciones actuales del select
+                                            select.innerHTML = '<option value="" disabled selected>Seleccione la Marca</option>';
 
-                // Si ya existe una instancia previa de nice-select, la destruye
-                if (select.niceSelectInstance) {
-                    select.niceSelectInstance.destroy();
-                }
+                                            // Llenar el select con las marcas obtenidas
+                                            data.forEach(marca => {
+                                                const option = document.createElement('option');
+                                                option.value = marca.idMarca;
+                                                option.textContent = marca.nombre;
+                                                select.appendChild(option);
+                                            });
 
-                // Inicializar nice-select (si usas nice-select) y guardar la instancia
-                select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
+                                            // Si ya existe una instancia previa de nice-select, la destruye
+                                            if (select.niceSelectInstance) {
+                                                select.niceSelectInstance.destroy();
+                                            }
 
-                // Mostrar el select después de cargar las marcas
-                select.style.display = 'block'; // O 'inline-block' según tu diseño
-            })
-            .catch(error => console.error('Error al cargar las marcas:', error));
-    }
+                                            // Inicializar nice-select (si usas nice-select) y guardar la instancia
+                                            select.niceSelectInstance = NiceSelect.bind(select, {
+                                                searchable: true
+                                            });
 
-    // Ocultar el select de marcas inicialmente
-    let selectMarca = document.getElementById('idMarcas');
-    selectMarca.style.display = 'none'; // Esto oculta el select de marcas al principio
+                                            // Mostrar el select después de cargar las marcas
+                                            select.style.display = 'block'; // O 'inline-block' según tu diseño
+                                        })
+                                        .catch(error => console.error('Error al cargar las marcas:', error));
+                                }
 
-    // Cargar las marcas solo si no se han cargado previamente
-    if (!marcasCargadas) {
-        cargarMarcass();
-        marcasCargadas = true;
-    }
-</script>
+                                // Ocultar el select de marcas inicialmente
+                                let selectMarca = document.getElementById('idMarcas');
+                                selectMarca.style.display = 'none'; // Esto oculta el select de marcas al principio
+
+                                // Cargar las marcas solo si no se han cargado previamente
+                                if (!marcasCargadas) {
+                                    cargarMarcass();
+                                    marcasCargadas = true;
+                                }
+                            </script>
                             <!-- Categoría -->
                             <div>
                                 <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
-                                <select id="idCategoria" name="idCategoria" class="select2 w-full" style="display:none" required>
+                                <select id="idCategoria" name="idCategoria" class="select2 w-full"
+                                    style="display:none" required>
                                     <option value="" disabled selected>Seleccione la Categoría</option>
                                     @foreach ($categorias as $categoria)
-                                        <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                                        <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
-                                <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
+                                <button type="button" class="btn btn-outline-danger"
+                                @click="openModeloModal = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
@@ -620,19 +629,6 @@
                 </div>
             </div>
         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
     </div>
 
 
@@ -642,7 +638,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-  
+
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
