@@ -5,11 +5,23 @@
 </span>
 
 <div class="flex gap-1 sm:gap-2 justify-center mt-2">
-    <button id="crearCordinacionBtn"
-        class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
-        Coordinación
-    </button>
+    @if($existeFlujo4)
+        <!-- Si existe el flujo con idEstadflujo = 4, ocultar el botón -->
+        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base" style="display: none;">
+            Coordinación
+        </button>
+    @else
+        <!-- Si no existe el flujo con idEstadflujo = 4, mostrar el botón -->
+        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
+            Coordinación
+        </button>
+    @endif
 </div>
+
+
+
+
+
 
 
 <div id="visitasContainer" class="mt-4">

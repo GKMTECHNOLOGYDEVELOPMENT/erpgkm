@@ -167,6 +167,8 @@ document.addEventListener("DOMContentLoaded", function() {
         document.addEventListener('DOMContentLoaded', function() {
             let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
             let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
+            // let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
+
 
 
   
@@ -274,6 +276,62 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
+
+
+
+    
+//     // Función para cargar las tiendas desde el servidor
+// function cargarTiendas() {
+//     const select = document.getElementById('idTienda');
+//     const preloadElement = document.getElementById('preloadTienda');
+
+//     // Mostrar el preload (cargando) sobre el select
+//     preloadElement.style.display = 'flex';
+
+//     fetch('/check-tiendas') // Realizamos la consulta al servidor
+//         .then(response => response.json()) // Convertir la respuesta en formato JSON
+//         .then(data => {
+//             // Limpiar las opciones actuales del select
+//             select.innerHTML = '<option value="" disabled selected>Seleccionar Tienda</option>';
+
+//             // Llenar el select con las tiendas
+//             data.forEach(tienda => {
+//                 const option = document.createElement('option');
+//                 option.value = tienda.idTienda;
+//                 option.textContent = tienda.nombre;
+//                 select.appendChild(option);
+//             });
+
+//             // Si ya existe una instancia previa de nice-select, la destruye
+//             if (select.niceSelectInstance) {
+//                 select.niceSelectInstance.destroy();
+//             }
+
+//             // Inicializa nice-select (si usas nice-select) y guarda la instancia
+//             select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
+
+//             // Ocultar el preload después de cargar las tiendas
+//             preloadElement.style.display = 'none';
+
+//             // Mostrar el select después de cargar las tiendas
+//             select.style.display = 'block'; // O 'inline-block' según tu diseño
+//         })
+//         .catch(error => {
+//             console.error('Error al cargar las tiendas:', error);
+//             preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
+//         });
+// }
+
+// // Ocultar el select de tiendas inicialmente
+// let selectTienda = document.getElementById('idTienda');
+// selectTienda.style.display = 'none'; // Esto oculta el select de tiendas al principio
+
+// // Cargar las tiendas solo si no se han cargado previamente
+// if (!tiendasCargadas) {
+//     cargarTiendas();
+//     tiendasCargadas = true;
+// }
+
     
 
 
@@ -323,40 +381,42 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-        // Evento de envío del formulario de cliente
-        document.getElementById('clienteForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Evitar el envío normal del formulario
+// Evento de envío del formulario de cliente
+document.getElementById('clienteForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evitar el envío normal del formulario
 
-            let formData = new FormData(this); // Obtener los datos del formulario
-            console.log('Datos del formulario:', Object.fromEntries(formData
-                .entries())); // Ver los datos del formulario
+    let formData = new FormData(this); // Obtener los datos del formulario
+    console.log('Datos del formulario:', Object.fromEntries(formData.entries())); // Ver los datos del formulario
 
-            fetch('/guardar-cliente', {
-                    method: 'POST',
-                    body: formData, // Enviar los datos del formulario
-                })
-                .then(response => response.json()) // Parsear la respuesta como JSON
-                .then(data => {
-                    console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
-                    if (data.errors) {
-                        // Mostrar errores si los hay
-                        toastr.error(data.errors);
-                    } else {
-                        // Mostrar mensaje de éxito
-                        toastr.success(data.message);
+    fetch('/guardar-cliente', {
+            method: 'POST',
+            body: formData, // Enviar los datos del formulario
+        })
+        .then(response => response.json()) // Parsear la respuesta como JSON
+        .then(data => {
+            console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
+            if (data.errors) {
+                // Mostrar solo el primer error
+                for (let field in data.errors) {
+                    toastr.error(data.errors[field][0]); // Mostrar solo el primer error del campo
+                    break; // Salir del bucle después de mostrar el primer error
+                }
+            } else {
+                // Mostrar mensaje de éxito
+                toastr.success(data.message);
 
-                        // Recargar los clientes después de guardar el cliente
-                        cargarClientes();
+                // Recargar los clientes después de guardar el cliente
+                cargarClientes();
 
-                        // Limpiar el formulario y cerrar el modal si es necesario
-                        document.getElementById('clienteForm').reset();
-                        openClienteModal = false; // Cerrar el modal si lo tienes
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al guardar el cliente:', error);
-                });
+                // Limpiar el formulario y cerrar el modal si es necesario
+                document.getElementById('clienteForm').reset();
+                openClienteModal = false; // Cerrar el modal si lo tienes
+            }
+        })
+        .catch(error => {
+            console.error('Error al guardar el cliente:', error);
         });
+});
 
 
 
@@ -399,41 +459,48 @@ document.addEventListener("DOMContentLoaded", function() {
             });
 
 
-             // Evento de envío del marca
-             document.getElementById('marcaForm').addEventListener('submit', function(event) {
-                event.preventDefault(); // Evitar el envío normal del formulario
-    
-                let formData = new FormData(this); // Obtener los datos del formulario
-                console.log('Datos del formulario:', Object.fromEntries(formData
-                    .entries())); // Ver los datos del formulario
-    
-                fetch('/guardar-marca-smart', {
-                        method: 'POST',
-                        body: formData, // Enviar los datos del formulario
-                    })
-                    .then(response => response.json()) // Parsear la respuesta como JSON
-                    .then(data => {
-                        console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
-                        if (data.errors) {
-                            // Mostrar errores si los hay
-                            toastr.error(data.errors);
-                        } else {
-                            // Mostrar mensaje de éxito
-                            toastr.success(data.message);
-    
-                            // Recargar los clientes después de guardar el cliente
-                            cargarMarcas();
-                            cargarMarcass();
-    
-                            // Limpiar el formulario y cerrar el modal si es necesario
-                            document.getElementById('marcaForm').reset();
-                            openClienteGeneralModal = false; // Cerrar el modal si lo tienes
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al guardar el cliente:', error);
-                    });
-            });
+// Evento de envío del formulario de marca
+document.getElementById('marcaForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Evitar el envío normal del formulario
+
+    let formData = new FormData(this); // Obtener los datos del formulario
+    console.log('Datos del formulario:', Object.fromEntries(formData.entries())); // Ver los datos del formulario
+
+    fetch('/guardar-marca-smart', {
+            method: 'POST',
+            body: formData, // Enviar los datos del formulario
+        })
+        .then(response => response.json()) // Parsear la respuesta como JSON
+        .then(data => {
+            console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
+
+            if (data.errors) {
+                // Mostrar solo el primer error de validación
+                for (let field in data.errors) {
+                    toastr.error(data.errors[field][0]); // Mostrar solo el primer error de cada campo
+                    break; // Salir del bucle después de mostrar el primer error
+                }
+            } else if (data.error) {
+                // Si hay un error general (como el que mencionas)
+                toastr.error(data.error); // Mostrar el mensaje de error general
+            } else {
+                // Mostrar mensaje de éxito
+                toastr.success(data.message);
+
+                // Recargar las marcas después de guardar la marca
+                cargarMarcas();
+                cargarMarcass();
+
+                // Limpiar el formulario y cerrar el modal si es necesario
+                document.getElementById('marcaForm').reset();
+                openMarcaModal = false; // Cerrar el modal si lo tienes
+            }
+        })
+        .catch(error => {
+            console.error('Error al guardar la marca:', error);
+        });
+});
+
 
 
 

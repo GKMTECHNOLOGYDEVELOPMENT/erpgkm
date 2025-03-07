@@ -29,4 +29,9 @@ class TransicionStatusTicket extends Model
     {
         return $this->belongsTo(Ticket::class, 'idTickets', 'idTickets');
     }
+
+    public function visita()
+    {
+        return $this->belongsTo(Visita::class, 'idVisitas');
+    }
 }

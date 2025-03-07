@@ -218,4 +218,9 @@ class Ticket extends Model
         return $this->hasMany(CondicionesTicket::class, 'idTickets', 'idTickets');
     }
 
+	public function seleccionarVisita()
+{
+    return $this->hasOne(SeleccionarVisita::class, 'idTickets', 'idTickets');
+}
+
 }

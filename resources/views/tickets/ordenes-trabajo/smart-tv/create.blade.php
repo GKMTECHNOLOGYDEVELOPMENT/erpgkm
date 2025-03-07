@@ -98,27 +98,32 @@
 
 
 
+<!-- Tienda (usa nice-select2) -->
+<div>
+    <div class="flex items-center space-x-2">
+        <label for="idTienda" class="block text-sm font-medium">Tienda</label>
+        <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1 mb-2" role="button" target="_blank">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+        </a>
+    </div>
 
-                <!-- Tienda (usa nice-select2) -->
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                        <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1 mb-2" role="button"
-                            target="_blank">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                        </a>
+    <!-- Select para las tiendas -->
+    <!-- Preload (spinner o mensaje) sobre el select -->
+    <div class="relative">
+        <div id="preloadTienda"
+            class="flex justify-center items-center absolute inset-0 bg-gray-100 bg-opacity-50"
+            style="display:none;">
+            <span>Cargando...</span>
+        </div>
 
-                    </div>
-                    <select id="idTienda" name="idTienda" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Tienda</option>
-                        @foreach ($tiendas as $tienda)
-                            <option value="{{ $tienda->idTienda }}">{{ $tienda->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+        <!-- Select para las tiendas -->
+        <select id="idTienda" name="idTienda" >
+           
+        </select>
+    </div>
+</div>
 
                 <!-- Dirección -->
                 <div>
@@ -635,7 +640,7 @@
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <script src="{{ asset('assets/js/tickets/smart/configuraciones.js') }}"></script>
-
+    <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
