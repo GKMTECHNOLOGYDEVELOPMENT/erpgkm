@@ -659,6 +659,7 @@ class OrdenesTrabajoController extends Controller
 
     public function getAll(Request $request)
     {
+        // Realizar la consulta
         $ordenesQuery = Ticket::with([
             'tecnico:idUsuario,Nombre',
             'usuario:idUsuario,Nombre',
@@ -667,29 +668,55 @@ class OrdenesTrabajoController extends Controller
             'tiposervicio:idTipoServicio,nombre',
             'estado_ot:idEstadoots,descripcion,color',
             'marca:idMarca,nombre',
-            'modelo.categoria:idCategoria,nombre', // Cargar la categoría a través del modelo
-            'ticketflujo.estadoflujo:idEstadflujo,descripcion,color' // Relacionamos ticketflujo con estadoflujo
-        ]);
+            'modelo.categoria:idCategoria,nombre',
+            'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
+            'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',  // Relación con seleccionarVisita
+            'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario', // Relación con visita
+            'seleccionarVisita.visita.tecnico:idUsuario,Nombre', // Relación con usuario para obtener el nombre del usuario
+            'visitas:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
+            'visitas.tecnico:idUsuario,Nombre', // Relación con usuario para obtener el nombre del usuario asociado con visitas
 
+
+   'transicion_status_tickets' => function($query) use ($request) {
+            // Filtrar por la visita seleccionada
+            if ($request->has('idVisita')) {
+                $query->whereHas('seleccionarVisita', function($subquery) use ($request) {
+                    $subquery->where('idVisitas', $request->idVisita); // Filtrar por idVisitas de la visita seleccionada
+                })->where('idEstadoots', 3); // Filtrar por idEstadoots = 3
+            }
+        }
+    ]);
+    
+        // Añadir logs para depuración
+        Log::debug('Consulta de tickets:', [
+            'tipoTicket' => $request->tipoTicket,
+            'marca' => $request->marca,
+            'clienteGeneral' => $request->clienteGeneral
+        ]);
+    
         // 🔹 Filtrar por tipo de ticket (1 o 2), si no se proporciona, por defecto muestra ambos
         if ($request->has('tipoTicket') && in_array($request->tipoTicket, [1, 2])) {
             $ordenesQuery->where('idTipotickets', $request->tipoTicket);
         }
-
+    
         // 🔹 Filtro por marca (si es proporcionado)
         if ($request->has('marca') && $request->marca != '') {
             $ordenesQuery->where('idMarca', $request->marca);
         }
-
+    
         // 🔹 Filtro por cliente general (si es proporcionado)
         if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
             $ordenesQuery->where('idClienteGeneral', $request->clienteGeneral);
         }
-
+    
+        // Obtener los resultados
         $ordenes = $ordenesQuery->paginate(10);
+    
+        // Loguear los resultados de la consulta
+        Log::debug('Resultado de la consulta de tickets:', $ordenes->toArray());
+    
         return response()->json($ordenes);
     }
-
 
 
     public function getClientesGeneralesss($idCliente)
