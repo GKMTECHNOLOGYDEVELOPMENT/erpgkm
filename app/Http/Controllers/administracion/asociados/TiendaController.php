@@ -297,4 +297,15 @@ public function validarNombre(Request $request)
 }
 
 
+public function checkTiendas(Request $request)
+{
+    // Obtener todas las tiendas sin filtrar por 'estado'
+    $tiendas = Tienda::all(); // Esto devuelve todas las tiendas
+
+    return response()->json($tiendas); // Devolvemos las tiendas en formato JSON
+}
+
+
+
+
 }

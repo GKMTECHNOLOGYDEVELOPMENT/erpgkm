@@ -264,6 +264,13 @@ class OrdenesTrabajoController extends Controller
         // Obtener el idTickets
         $ticketId = $ticket->idTickets;
 
+        // Verificar si existe un flujo con idEstadflujo = 4
+    $flujo = TicketFlujo::where('idTicket', $ticketId)
+    ->where('idEstadflujo', 4)
+    ->first();
+
+$existeFlujo4 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+
         $visita = DB::table('visitas')
             ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
             ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets') // Unimos con la tabla tickets
@@ -314,49 +321,110 @@ class OrdenesTrabajoController extends Controller
 
 
 
-        // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
-        $ticket = DB::table('tickets')->where('idTickets', $id)->first();
+        // // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
+        // $ticket = DB::table('tickets')->where('idTickets', $id)->first();
 
-        // Verificar que encontramos el ticket y que tiene un idTicketFlujo
-        if ($ticket) {
-            $idTicketFlujo = $ticket->idTicketFlujo;  // Obtener el idTicketFlujo del ticket
+        // // Verificar que encontramos el ticket y que tiene un idTicketFlujo
+        // if ($ticket) {
+        //     $idTicketFlujo = $ticket->idTicketFlujo;  // Obtener el idTicketFlujo del ticket
 
-            // Buscar en ticketflujo el idEstadflujo correspondiente al idTicketFlujo
-            $ticketFlujo = DB::table('ticketflujo')->where('idTicketFlujo', $idTicketFlujo)->first();
+        //     // Buscar en ticketflujo el idEstadflujo correspondiente al idTicketFlujo
+        //     $ticketFlujo = DB::table('ticketflujo')->where('idTicketFlujo', $idTicketFlujo)->first();
 
-            // Verifica que existe el ticketFlujo y su idEstadflujo
-            if ($ticketFlujo) {
-                $idEstadflujo = $ticketFlujo->idEstadflujo;  // Obtener el idEstadflujo del ticketflujo
+        //     // Verifica que existe el ticketFlujo y su idEstadflujo
+        //     if ($ticketFlujo) {
+        //         $idEstadflujo = $ticketFlujo->idEstadflujo;  // Obtener el idEstadflujo del ticketflujo
 
-                // Si el idEstadflujo del ticketflujo es 3, solo mostrar los estados con idEstadflujo 4
-                if ($idEstadflujo == 3) {
-                    $estadosFlujo = DB::table('estado_flujo')
-                        ->where('idEstadflujo', 4)  // Solo obtener el estado con idEstadflujo 4
-                        ->get();
-                } elseif ($idEstadflujo == 1) {
-                    // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
-                    $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3])  // Solo obtener el estado con idEstadflujo 3
-                        ->get();
-                } elseif ($idEstadflujo == 9) {
-                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                    $estadosFlujo = DB::table('estado_flujo')
-                        ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
-                        ->get();
-                } else {
-                    // Si no tiene idEstadflujo = 1, 3 o 9, verificar si es 6 o 7
-                    if (in_array($idEstadflujo, [6, 7])) {
-                        // Si tiene idEstadflujo 6 o 7, solo traer los estados con idEstadflujo 4
-                        $estadosFlujo = DB::table('estado_flujo')
-                            ->where('idEstadflujo', 4)  // Solo obtener el estado 4
-                            ->get();
-                    } else {
-                        // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
-                        $estadosFlujo = DB::table('estado_flujo')->get();
-                    }
-                }
+        //         // Si el idEstadflujo del ticketflujo es 3, solo mostrar los estados con idEstadflujo 4
+        //         if ($idEstadflujo == 3) {
+        //             $estadosFlujo = DB::table('estado_flujo')
+        //                 ->where('idEstadflujo', 4)  // Solo obtener el estado con idEstadflujo 4
+        //                 ->get();
+        //         } elseif ($idEstadflujo == 1) {
+        //             // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
+        //             $estadosFlujo = DB::table('estado_flujo')
+        //                 ->whereIn('idEstadflujo', [3])  // Solo obtener el estado con idEstadflujo 3
+        //                 ->get();
+        //         } elseif ($idEstadflujo == 9) {
+        //             // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+        //             $estadosFlujo = DB::table('estado_flujo')
+        //                 ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+        //                 ->get();
+        //         } else {
+        //             // Si no tiene idEstadflujo = 1, 3 o 9, verificar si es 6 o 7
+        //             if (in_array($idEstadflujo, [6, 7])) {
+        //                 // Si tiene idEstadflujo 6 o 7, solo traer los estados con idEstadflujo 4
+        //                 $estadosFlujo = DB::table('estado_flujo')
+        //                     ->where('idEstadflujo', 4)  // Solo obtener el estado 4
+        //                     ->get();
+        //             } else {
+        //                 // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
+        //                 $estadosFlujo = DB::table('estado_flujo')->get();
+        //             }
+        //         }
+        //     }
+        // }
+
+
+// Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
+$ticket = DB::table('tickets')->where('idTickets', $id)->first();
+
+// Verificar que encontramos el ticket y que tiene un idTicketFlujo
+if ($ticket) {
+    $idTicketFlujo = $ticket->idTicketFlujo;  // Obtener el idTicketFlujo del ticket
+
+    // Buscar en ticketflujo el idEstadflujo correspondiente al idTicketFlujo
+    $ticketFlujo = DB::table('ticketflujo')->where('idTicketFlujo', $idTicketFlujo)->first();
+
+    // Verifica que existe el ticketFlujo y su idEstadflujo
+    if ($ticketFlujo) {
+        $idEstadflujo = $ticketFlujo->idEstadflujo;  // Obtener el idEstadflujo del ticketflujo
+
+        // Si el idEstadflujo es 4, no mostrar ningún estado de flujo
+        if ($idEstadflujo == 4) {
+            $estadosFlujo = collect();  // Asignar una colección vacía si es 4 (no mostrar estados)
+        } elseif ($idEstadflujo == 3) {
+            // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
+            $estadosFlujo = DB::table('estado_flujo')
+                ->where('idEstadflujo', 4)  // Solo obtener el estado con idEstadflujo 4
+                ->get();
+        } elseif ($idEstadflujo == 2) {
+            // Si el idEstadflujo es 2, solo mostrar los estados con idEstadflujo 3
+            $estadosFlujo = DB::table('estado_flujo')
+                ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                ->get();
+        } elseif ($idEstadflujo == 1) {
+            // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
+            $estadosFlujo = DB::table('estado_flujo')
+                ->whereIn('idEstadflujo', [3])  // Solo obtener el estado con idEstadflujo 3
+                ->get();
+        } elseif ($idEstadflujo == 9) {
+            // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+            $estadosFlujo = DB::table('estado_flujo')
+                ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                ->get();
+        } elseif ($idEstadflujo == 8) {
+            // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+            $estadosFlujo = DB::table('estado_flujo')
+                ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                ->get();
+        } else {
+            // Si no tiene idEstadflujo = 1, 3, 8 o 9, verificar si es 6 o 7
+            if (in_array($idEstadflujo, [6, 7])) {
+                // Si tiene idEstadflujo 6 o 7, solo traer los estados con idEstadflujo 4
+                $estadosFlujo = DB::table('estado_flujo')
+                    ->where('idEstadflujo', 4)  // Solo obtener el estado 4
+                    ->get();
+            } else {
+                // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
+                $estadosFlujo = DB::table('estado_flujo')->get();
             }
         }
+    }
+}
+
+
+
 
 
 
@@ -384,7 +452,8 @@ class OrdenesTrabajoController extends Controller
             'id',
             'estadosFlujo',
             'colorEstado',
-            'visitaExistente'
+            'visitaExistente',
+            'existeFlujo4'  // Pasamos la variable que indica si existe flujo 4
 
         ));
     }
@@ -869,9 +938,9 @@ class OrdenesTrabajoController extends Controller
             // Validar los datos del formulario
             $validatedData = $request->validate([
                 'nombre' => 'required|string|max:255',
-                'documento' => 'required|string|max:255|unique:cliente,documento',
-                'telefono' => 'nullable|string|max:15',
-                'email' => 'nullable|email|max:255',
+                'documento' => 'required|string|max:16|unique:cliente,documento',
+                'telefono' => 'nullable|string|max:9|unique:cliente,telefono',
+                'email' => 'nullable|email|max:255|unique:cliente,email',
                 'direccion' => 'required|string|max:255',
                 'departamento' => 'required|string|max:255',
                 'provincia' => 'required|string|max:255',

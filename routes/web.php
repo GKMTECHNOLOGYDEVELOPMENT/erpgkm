@@ -118,6 +118,7 @@ Route::get('/obtenerClientesGenerales', [ClienteGeneralController::class, 'obten
 
 Route::get('/check-marcas', [MarcaController::class, 'checkMarcas']);
 
+Route::get('/check-tiendas', [TiendaController::class, 'checkTiendas']);
 
 
 // // Ruta para actualizar una tienda

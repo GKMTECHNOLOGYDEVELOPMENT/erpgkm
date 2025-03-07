@@ -20,7 +20,7 @@ class MarcaController extends Controller
         try {
             // Validar los datos del formulario
             $validatedData = $request->validate([
-                'nombre' => 'required|string|max:255',
+                'nombre' => 'required|string|max:255|unique:marca,nombre',
             ]);
     
             // Datos básicos de la marca con estado siempre en 1

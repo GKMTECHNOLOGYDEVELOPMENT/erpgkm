@@ -246,4 +246,64 @@ $('#nombre').on('input', function () {
 });
 
 
+let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
+
+
+
+
+
+    
+    // Función para cargar las tiendas desde el servidor
+    function cargarTiendas() {
+        const select = document.getElementById('idTienda');
+        const preloadElement = document.getElementById('preloadTienda');
+    
+        // Mostrar el preload (cargando) sobre el select
+        preloadElement.style.display = 'flex';
+    
+        fetch('/check-tiendas') // Realizamos la consulta al servidor
+            .then(response => response.json()) // Convertir la respuesta en formato JSON
+            .then(data => {
+                // Limpiar las opciones actuales del select
+                select.innerHTML = '<option value="" disabled selected>Seleccionar Tienda</option>';
+    
+                // Llenar el select con las tiendas
+                data.forEach(tienda => {
+                    const option = document.createElement('option');
+                    option.value = tienda.idTienda;
+                    option.textContent = tienda.nombre;
+                    select.appendChild(option);
+                });
+    
+                // Si ya existe una instancia previa de nice-select, la destruye
+                if (select.niceSelectInstance) {
+                    select.niceSelectInstance.destroy();
+                }
+    
+                // Inicializa nice-select (si usas nice-select) y guarda la instancia
+                select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
+    
+                // Ocultar el preload después de cargar las tiendas
+                preloadElement.style.display = 'none';
+    
+                // Mostrar el select después de cargar las tiendas
+                select.style.display = 'block'; // O 'inline-block' según tu diseño
+            })
+            .catch(error => {
+                console.error('Error al cargar las tiendas:', error);
+                preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
+            });
+    }
+    
+    // Ocultar el select de tiendas inicialmente
+    let selectTienda = document.getElementById('idTienda');
+    selectTienda.style.display = 'none'; // Esto oculta el select de tiendas al principio
+    
+    // Cargar las tiendas solo si no se han cargado previamente
+    if (!tiendasCargadas) {
+        cargarTiendas();
+        tiendasCargadas = true;
+    }
+
+
 

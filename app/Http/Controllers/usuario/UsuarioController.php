@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\usuario;
 
 use App\Http\Controllers\Controller;
+use App\Mail\UsuarioCreado;
 use App\Models\Rol;
 use App\Models\Sexo;
 use App\Models\Sucursal;
@@ -13,7 +14,10 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 
 class UsuarioController extends Controller
 {
@@ -62,7 +66,7 @@ class UsuarioController extends Controller
             'correo' => 'required|email|max:255',
             'profile-image' => 'nullable|image|max:1024', // Validar si se sube una imagen (máximo 1MB)
         ]);
-
+    
         // Si hay una imagen, la procesamos
         if ($request->hasFile('profile-image')) {
             $image = $request->file('profile-image');
@@ -70,26 +74,43 @@ class UsuarioController extends Controller
         } else {
             $imageData = null; // Si no se seleccionó una imagen, no se guarda nada
         }
-
+    
+        // Generar el "usuario" automáticamente con las primeras letras del nombre y apellidos + un número aleatorio
+        $usuarioNombre = strtolower(substr($request->Nombre, 0, 6));  // Primeras 6 letras del nombre
+        $usuarioApellidoPaterno = strtolower(substr($request->apellidoPaterno, 0, 6)); // Primeras 6 letras del apellido paterno
+    
+        // Combina el nombre y apellido sin espacios
+        $usuario = $usuarioNombre . $usuarioApellidoPaterno . rand(1, 9); // Número aleatorio entre 1 y 9
+    
+        // Eliminar cualquier espacio en el nombre de usuario generado
+        $usuario = str_replace(' ', '', $usuario);  // Eliminar espacios
+    
+        // Generar la "clave" automáticamente (puedes ajustar la longitud según lo desees)
+        $clave = Str::random(8); // Generar una contraseña aleatoria de 8 caracteres
+        $claveEncriptada = bcrypt($clave); // Encriptar la clave
+    
         // Crear un nuevo usuario y guardar los datos
-        $usuario = new Usuario();
-        $usuario->Nombre = $request->Nombre;
-        $usuario->apellidoPaterno = $request->apellidoPaterno;
-        $usuario->apellidoMaterno = $request->apellidoMaterno;
-        $usuario->idTipoDocumento = $request->idTipoDocumento;
-        $usuario->documento = $request->documento;
-        $usuario->telefono = $request->telefono;
-        $usuario->correo = $request->correo;
-        $usuario->avatar = $imageData; // Guardar la imagen binaria
-        $usuario->save();
-
+        $usuarioNuevo = new Usuario();
+        $usuarioNuevo->Nombre = $request->Nombre;
+        $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
+        $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
+        $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
+        $usuarioNuevo->documento = $request->documento;
+        $usuarioNuevo->telefono = $request->telefono;
+        $usuarioNuevo->correo = $request->correo;
+        $usuarioNuevo->avatar = $imageData; // Guardar la imagen binaria
+        $usuarioNuevo->usuario = $usuario; // Asignar el nombre de usuario generado
+        $usuarioNuevo->clave = $claveEncriptada; // Asignar la clave encriptada
+        $usuarioNuevo->save();
+    
+        // Enviar el correo electrónico con el usuario y la clave generados
+        Mail::to($request->correo)->send(new UsuarioCreado($usuario, $clave));
+    
         // Redirigir al usuario o mostrar un mensaje de éxito
-        return redirect()->route('usuario.edit', ['usuario' => $usuario->idUsuario])
-        ->with('success', 'Usuario creado correctamente');
+        return redirect()->route('usuario.edit', ['usuario' => $usuarioNuevo->idUsuario])
+            ->with('success', 'Usuario creado correctamente');
     }
-
-
-
+    
 
 
 
