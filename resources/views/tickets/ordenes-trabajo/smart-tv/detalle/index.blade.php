@@ -409,7 +409,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
-        const rowsPerPage = 10; // Número de filas por página
+        const rowsPerPage = 15; // Número de filas por página
         let currentPage = 1; // Página actual
 
         function cargarEstados() {
