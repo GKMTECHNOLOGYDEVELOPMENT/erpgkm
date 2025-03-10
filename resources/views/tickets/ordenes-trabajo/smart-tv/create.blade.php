@@ -715,34 +715,72 @@
             function extractCoordinates(url) {
                 console.log(`🔗 Analizando URL: ${url}`);
 
-                let regex = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g;
-                let matches = [...url.matchAll(regex)];
+                let lat, lng;
 
-                if (matches.length > 0) {
-                    let lastMatch = matches[matches.length - 1]; // Tomar la última coincidencia
+                // **1️⃣ Si la URL tiene '/search/', limpiar y extraer coordenadas**
+                if (url.includes("/search/")) {
+                    console.log("🛠 Se detectó una URL con 'search/', limpiando...");
 
-                    let lat = parseFloat(lastMatch[1]);
-                    let lng = parseFloat(lastMatch[2]);
+                    // Tomar solo lo que sigue después de "/search/"
+                    let cleanURL = url.split("/search/")[1];
 
-                    console.log(`✅ Coordenadas extraídas correctamente: Lat: ${lat}, Lng: ${lng}`);
+                    // Eliminar parámetros adicionales (como ?entry=tts)
+                    cleanURL = cleanURL.split("?")[0];
 
-                    // Asignar valores a los inputs
-                    latInput.value = lat;
-                    lngInput.value = lng;
+                    // Reemplazar `+` por espacio en caso de que haya codificaciones extrañas
+                    cleanURL = cleanURL.replace(/\+/g, " ");
 
-                    // Mover el marcador en el mapa
-                    updateMarker();
-                } else {
-                    console.warn("⚠️ No se encontraron coordenadas en la URL proporcionada.");
+                    // Separar la latitud y longitud (evitando espacios extra)
+                    let coords = cleanURL.split(",").map(c => c.trim());
+
+                    if (coords.length === 2) {
+                        lat = parseFloat(coords[0]);
+                        lng = parseFloat(coords[1]);
+
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            console.log(`✅ Coordenadas extraídas después de limpiar: Lat: ${lat}, Lng: ${lng}`);
+                        } else {
+                            console.warn("⚠️ No se pudieron convertir correctamente las coordenadas.");
+                            return;
+                        }
+                    }
                 }
+
+                // **2️⃣ Intentar extraer coordenadas con la regex clásica (!3d...!4d...)**
+                if (!lat || !lng) {
+                    let regexClassic = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g;
+                    let matchesClassic = [...url.matchAll(regexClassic)];
+
+                    if (matchesClassic.length > 0) {
+                        let lastMatch = matchesClassic[matchesClassic.length - 1]; // Tomar la última coincidencia
+                        lat = parseFloat(lastMatch[1]);
+                        lng = parseFloat(lastMatch[2]);
+                        console.log(`✅ Coordenadas extraídas (formato clásico): Lat: ${lat}, Lng: ${lng}`);
+                    }
+                }
+
+                // **3️⃣ Si no encontró coordenadas, mostrar advertencia**
+                if (isNaN(lat) || isNaN(lng)) {
+                    console.warn("⚠️ No se encontraron coordenadas válidas en la URL proporcionada.");
+                    return;
+                }
+
+                // **Asignar valores a los inputs**
+                latInput.value = lat;
+                lngInput.value = lng;
+
+                // **Mover el marcador en el mapa**
+                updateMarker();
             }
+
 
             // **Llamar al backend para expandir el link corto**
             async function expandShortURL(shortURL) {
                 console.log(`🔄 Intentando expandir el link corto: ${shortURL}`);
 
                 try {
-                    let response = await fetch(`http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+                    let response = await fetch(
+                        `http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
                     let data = await response.json();
 
                     if (data.expanded_url) {
@@ -980,8 +1018,17 @@
                                     let option = document.createElement('option');
                                     option.value = ticket
                                         .idTickets; // El valor será el id del ticket
+
+                                    // Formatear la fecha de creación
+                                    let fecha = new Date(ticket.fecha_creacion)
+                                        .toLocaleDateString('es-ES', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric'
+                                        });
+
                                     option.textContent =
-                                        `Ticket N°: ${ticket.numero_ticket} - Fecha: ${ticket.fecha_creacion}`;
+                                        `Ticket N°: ${ticket.numero_ticket} - Fecha: ${fecha}`;
                                     select.appendChild(option);
                                 });
                             } else {
@@ -1011,7 +1058,6 @@
                     window.open(`/ordenes/smart/${ticketId}/edit`, '_blank');
                 }
             });
-
         });
     </script>
 
