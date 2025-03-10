@@ -326,8 +326,8 @@ $visitaSeleccionada = DB::table('seleccionarvisita')
             ->get();
 
         // Otros datos que ya estás obteniendo
-        $encargado = Usuario::whereIn('idTipoUsuario', [4, 5])->get();
-        $tecnicos_apoyo = Usuario::where('idTipoUsuario', 4)->get();
+        $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
+        $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
         $clientes = Cliente::all();
         $clientesGenerales = ClienteGeneral::all();
         $modelos = Modelo::all();
@@ -1227,7 +1227,7 @@ if ($ticket) {
         $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
 
         // Asignar el idEstadflujo basado en el tipo de encargado
-        $idEstadflujo = ($encargado->idTipoUsuario == 4) ? 2 : 4;
+        $idEstadflujo = ($encargado->idTipoUsuario == 1) ? 2 : 1;
         Log::info('Asignando idEstadflujo', ['idEstadflujo' => $idEstadflujo]);
 
         // Insertar en la tabla ticketflujo

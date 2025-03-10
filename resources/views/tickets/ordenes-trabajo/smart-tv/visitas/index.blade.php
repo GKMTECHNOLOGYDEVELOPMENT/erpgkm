@@ -439,10 +439,10 @@ class="mb-5" @toggle-modal.window="open = !open">
                                     <option value="{{ $encargados->idUsuario }}"
                                         data-tipo="{{ $encargados->idTipoUsuario }}">
                                         {{ $encargados->Nombre }} -
-                                        @if ($encargados->idTipoUsuario == 4)
-                                            Técnico
+                                        @if ($encargados->idTipoUsuario == 1)
+                                            TÉCNICO
                                         @elseif($encargados->idTipoUsuario == 5)
-                                            Chofer
+                                            CHOFER
                                         @endif
                                     </option>
                                 @endforeach
