@@ -15,7 +15,7 @@
         }
 
         #map {
-            height: 300px;
+            height: 400px;
             width: 100%;
         }
     </style>
@@ -98,32 +98,34 @@
 
 
 
-<!-- Tienda (usa nice-select2) -->
-<div>
-    <div class="flex items-center space-x-2">
-        <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-        <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1 mb-2" role="button" target="_blank">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-        </a>
-    </div>
+                <!-- Tienda (usa nice-select2) -->
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <label for="idTienda" class="block text-sm font-medium">Tienda</label>
+                        <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1 mb-2" role="button"
+                            target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </a>
+                    </div>
 
-    <!-- Select para las tiendas -->
-    <!-- Preload (spinner o mensaje) sobre el select -->
-    <div class="relative">
-        <div id="preloadTienda"
-            class="flex justify-center items-center absolute inset-0 bg-gray-100 bg-opacity-50"
-            style="display:none;">
-            <span>Cargando...</span>
-        </div>
+                    <!-- Select para las tiendas -->
+                    <!-- Preload (spinner o mensaje) sobre el select -->
+                    <div class="relative">
+                        <div id="preloadTienda"
+                            class="flex justify-center items-center absolute inset-0 bg-gray-100 bg-opacity-50"
+                            style="display:none;">
+                            <span>Cargando...</span>
+                        </div>
 
-        <!-- Select para las tiendas -->
-        <select id="idTienda" name="idTienda" >
-           
-        </select>
-    </div>
-</div>
+                        <!-- Select para las tiendas -->
+                        <select id="idTienda" name="idTienda">
+
+                        </select>
+                    </div>
+                </div>
 
                 <!-- Dirección -->
                 <div>
@@ -224,14 +226,14 @@
                 <div>
                     <label for="latitud" class="block text-sm font-medium">Latitud</label>
                     <input id="latitud" type="text" name="lat" class="form-input w-full"
-                        placeholder="Latitud" readonly>
+                        placeholder="Latitud">
                 </div>
 
                 <!-- Longitud -->
                 <div>
                     <label for="longitud" class="block text-sm font-medium">Longitud</label>
                     <input id="longitud" type="text" name="lng" class="form-input w-full"
-                        placeholder="Longitud" readonly>
+                        placeholder="Longitud">
                 </div>
 
                 <!-- Mapa -->
@@ -254,7 +256,8 @@
         <!-- Modal para crear nuevo Cliente (opcional) -->
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="openClienteModal && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="openClienteModal = false">
-                <div x-show="openClienteModal" x-transition.duration.300 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
+                <div x-show="openClienteModal" x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Cliente</h5>
@@ -415,8 +418,10 @@
         <div x-data="{ open: false, imagenPreview: null, imagenActual: '/assets/images/file-preview.svg' }" x-show="openClienteGeneralModal"
             class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" style="display: none;"
             @click.self="openClienteGeneralModal = false">
-            <div class="flex items-start justify-center min-h-screen px-4" @click.self="openClienteGeneralModal = false">
-                <div x-show="openClienteGeneralModal" x-transition.duration.300 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
+            <div class="flex items-start justify-center min-h-screen px-4"
+                @click.self="openClienteGeneralModal = false">
+                <div x-show="openClienteGeneralModal" x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Cliente General</h5>
@@ -466,7 +471,7 @@
                             <!-- Botones -->
                             <div class="flex justify-end items-center mb-4">
                                 <button type="button" class="btn btn-outline-danger"
-                                @click="openClienteGeneralModal = false">Cancelar</button>
+                                    @click="openClienteGeneralModal = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
@@ -484,7 +489,8 @@
         <div x-show="openMarcaModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" style="display: none;"
             @click.self="openMarcaModal = false">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="openMarcaModal = false">
-                <div x-show="openMarcaModal" x-transition.duration.300 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
+                <div x-show="openMarcaModal" x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Marca</h5>
@@ -512,7 +518,7 @@
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
-                                @click="openMarcaModal = false">Cancelar</button>
+                                    @click="openMarcaModal = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
@@ -530,7 +536,8 @@
         <div x-show="openModeloModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
             style="display: none;" @click.self="openModeloModal = false">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="openModeloModal = false">
-                <div x-show="openModeloModal" x-transition.duration.300 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
+                <div x-show="openModeloModal" x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Modelo</h5>
@@ -626,7 +633,7 @@
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
-                                @click="openModeloModal = false">Cancelar</button>
+                                    @click="openModeloModal = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
@@ -638,9 +645,7 @@
 
 
 
-    <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
-    <script src="{{ asset('assets/js/tickets/smart/configuraciones.js') }}"></script>
-    <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
@@ -649,6 +654,142 @@
 
 
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("🔹 DOM completamente cargado");
+
+            // Obtener referencias a los elementos
+            const latInput = document.getElementById("latitud");
+            const lngInput = document.getElementById("longitud");
+            const linkInput = document.getElementById("linkubicacion");
+            const mapContainer = document.getElementById("map");
+
+            if (!latInput || !lngInput || !linkInput || !mapContainer) {
+                console.error("❌ No se encontraron los campos requeridos.");
+                return;
+            }
+
+            console.log("✅ Campos de latitud, longitud y link de ubicación encontrados");
+
+            // Coordenadas iniciales
+            const initialLat = -11.957242;
+            const initialLng = -77.0731862;
+
+            console.log(`📍 Coordenadas iniciales: Lat: ${initialLat}, Lng: ${initialLng}`);
+
+            // **Inicializar el mapa si aún no existe**
+            if (!window.map || !document.getElementById("map")._leaflet_id) {
+                console.log("🔄 Inicializando el mapa...");
+                window.map = L.map("map").setView([initialLat, initialLng], 15);
+                L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                    attribution: "&copy; OpenStreetMap contributors"
+                }).addTo(window.map);
+            } else {
+                console.log("✅ Mapa ya estaba inicializado.");
+            }
+
+            // **Crear el marcador inicial y hacerlo arrastrable**
+            let marker = L.marker([initialLat, initialLng], {
+                draggable: true
+            }).addTo(window.map);
+
+            console.log("✅ Mapa y marcador inicializados correctamente");
+
+            // **Actualizar el marcador y centrar el mapa**
+            function updateMarker() {
+                const lat = parseFloat(latInput.value);
+                const lng = parseFloat(lngInput.value);
+
+                console.log(`🔄 Intentando actualizar marcador a: Lat: ${lat}, Lng: ${lng}`);
+
+                // Validar coordenadas
+                if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                    marker.setLatLng([lat, lng]); // Mover marcador
+                    window.map.setView([lat, lng], 15); // Centrar el mapa
+                    console.log("✅ Marcador y mapa actualizados correctamente");
+                } else {
+                    console.warn("⚠️ Coordenadas inválidas, el marcador no se actualizará");
+                }
+            }
+
+            // **Extraer coordenadas correctas del link largo de Google Maps**
+            function extractCoordinates(url) {
+                console.log(`🔗 Analizando URL: ${url}`);
+
+                let regex = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g;
+                let matches = [...url.matchAll(regex)];
+
+                if (matches.length > 0) {
+                    let lastMatch = matches[matches.length - 1]; // Tomar la última coincidencia
+
+                    let lat = parseFloat(lastMatch[1]);
+                    let lng = parseFloat(lastMatch[2]);
+
+                    console.log(`✅ Coordenadas extraídas correctamente: Lat: ${lat}, Lng: ${lng}`);
+
+                    // Asignar valores a los inputs
+                    latInput.value = lat;
+                    lngInput.value = lng;
+
+                    // Mover el marcador en el mapa
+                    updateMarker();
+                } else {
+                    console.warn("⚠️ No se encontraron coordenadas en la URL proporcionada.");
+                }
+            }
+
+            // **Llamar al backend para expandir el link corto**
+            async function expandShortURL(shortURL) {
+                console.log(`🔄 Intentando expandir el link corto: ${shortURL}`);
+
+                try {
+                    let response = await fetch(`http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+                    let data = await response.json();
+
+                    if (data.expanded_url) {
+                        console.log(`✅ Link expandido: ${data.expanded_url}`);
+                        extractCoordinates(data.expanded_url);
+                    } else {
+                        console.warn("⚠️ No se pudo expandir el link corto.");
+                    }
+                } catch (error) {
+                    console.error("❌ Error al expandir el link corto:", error);
+                }
+            }
+
+            // **Escuchar cambios en el campo de link**
+            linkInput.addEventListener("change", function() {
+                let link = linkInput.value.trim();
+
+                if (link !== "") {
+                    // **Si el link es corto, lo expandimos primero**
+                    if (link.includes("maps.app.goo.gl")) {
+                        expandShortURL(link);
+                    } else {
+                        extractCoordinates(link);
+                    }
+                }
+            });
+
+            // **Escuchar cambios en los inputs de latitud y longitud**
+            latInput.addEventListener("change", updateMarker);
+            lngInput.addEventListener("change", updateMarker);
+
+            console.log("👂 Listos para escuchar cambios en los inputs");
+
+            // **Cuando el usuario mueve el marcador, actualizar los inputs con la nueva posición**
+            marker.on("dragend", function() {
+                const position = marker.getLatLng();
+                latInput.value = position.lat.toFixed(6);
+                lngInput.value = position.lng.toFixed(6);
+                console.log(`🎯 Marcador movido manualmente: Lat: ${position.lat}, Lng: ${position.lng}`);
+            });
+        });
+
+
+
+
+
+
         // Función para mostrar un toastr de error
         function showToast(message) {
             toastr.error(message, "Error", {
@@ -873,5 +1014,9 @@
 
         });
     </script>
+
+    <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
+    <script src="{{ asset('assets/js/tickets/smart/configuraciones.js') }}"></script>
+    <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script>
 
 </x-layout.default>
