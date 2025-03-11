@@ -693,7 +693,7 @@ if ($ticket) {
 
     public function getAll(Request $request)
 {
-    $ordenesQuery = Ticket::with([
+    $query = Ticket::with([
         'tecnico:idUsuario,Nombre',
         'usuario:idUsuario,Nombre',
         'cliente:idCliente,nombre',
@@ -702,26 +702,85 @@ if ($ticket) {
         'estado_ot:idEstadoots,descripcion,color',
         'marca:idMarca,nombre',
         'modelo.categoria:idCategoria,nombre',
-        'ticketflujo.estadoflujo:idEstadflujo,descripcion,color'
+        'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
+        'visitas' => function ($query) {
+            $query->select('idVisitas', 'idTickets', 'fecha_programada')
+                  ->latest('fecha_programada') // 🔥 Trae solo la última visita programada
+                  ->limit(1);
+        }
     ]);
 
+    // 🔹 FILTROS
     if ($request->has('tipoTicket') && in_array($request->tipoTicket, [1, 2])) {
-        $ordenesQuery->where('idTipotickets', $request->tipoTicket);
+        $query->where('idTipotickets', $request->tipoTicket);
     }
 
     if ($request->has('marca') && $request->marca != '') {
-        $ordenesQuery->where('idMarca', $request->marca);
+        $query->where('idMarca', $request->marca);
     }
 
     if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
-        $ordenesQuery->where('idClienteGeneral', $request->clienteGeneral);
+        $query->where('idClienteGeneral', $request->clienteGeneral);
     }
 
-    // 🔹 Obtener todos los registros en un solo JSON (sin paginación)
-    $ordenes = $ordenesQuery->get();
+    // 🔹 BÚSQUEDA GLOBAL (Corrección en `orWhereHas('visitas', ...)`)
+    if ($request->has('search') && !empty($request->input('search.value'))) {
+        $searchValue = $request->input('search.value');
 
-    return response()->json($ordenes);
+        $query->where(function ($q) use ($searchValue) {
+            $q->where('numero_ticket', 'LIKE', "%{$searchValue}%")
+              ->orWhere('fecha_creacion', 'LIKE', "%{$searchValue}%")
+              ->orWhereHas('modelo', function ($q) use ($searchValue) {
+                  $q->where('nombre', 'LIKE', "%{$searchValue}%");
+              })
+              ->orWhereHas('cliente', function ($q) use ($searchValue) {
+                  $q->where('nombre', 'LIKE', "%{$searchValue}%");
+              })
+              ->orWhere('serie', 'LIKE', "%{$searchValue}%")
+              ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+              ->orWhereHas('visitas', function ($q) use ($searchValue) { // ✅ Corrección aquí
+                  $q->where('fecha_programada', 'LIKE', "%{$searchValue}%");
+              });
+        });
+    }
+
+    // 🔹 TOTAL DE REGISTROS
+    $recordsTotal = Ticket::count();
+    $recordsFiltered = $query->count();
+
+    // 🔹 ORDENACIÓN SEGÚN DATATABLES (Corrección en `visitas`)
+    $columns = ['numero_ticket', 'fecha_creacion', 'visitas.fecha_programada']; // ✅ Corrección aquí
+    if ($request->has('order')) {
+        $orderByColumn = $columns[$request->input('order.0.column', 0)] ?? 'fecha_creacion';
+        $orderDir = $request->input('order.0.dir', 'asc');
+
+        if ($orderByColumn === 'visitas.fecha_programada') {
+            $query->orderBy(
+                Visita::select('fecha_programada')
+                    ->whereColumn('visitas.idTickets', 'tickets.idTickets')
+                    ->latest(),
+                $orderDir
+            );
+        } else {
+            $query->orderBy($orderByColumn, $orderDir);
+        }
+    }
+
+    // 🔹 PAGINACIÓN SEGÚN DATATABLES
+    $start = $request->input('start', 0);
+    $length = $request->input('length', 10);
+    $ordenes = $query->skip($start)->take($length)->get();
+
+    return response()->json([
+        "draw" => intval($request->input('draw')),
+        "recordsTotal" => $recordsTotal,
+        "recordsFiltered" => $recordsFiltered,
+        "data" => $ordenes
+    ]);
 }
+
+    
+    
 
 
 
