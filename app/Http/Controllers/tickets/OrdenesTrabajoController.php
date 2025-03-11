@@ -172,7 +172,7 @@ class OrdenesTrabajoController extends Controller
                 'serie' => 'required|string|max:255',
                 'fechaCompra' => 'required|date_format:Y-m-d',
                 'fallaReportada' => 'required|string|max:255',
-                'linkubicacion' =>  'required|string|max:255',
+                'linkubicacion' =>  'required|string',
                 'lat' => 'nullable|string|max:255',
                 'lng' => 'nullable|string|max:255',
             ]);
