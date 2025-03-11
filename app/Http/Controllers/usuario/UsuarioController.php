@@ -54,52 +54,70 @@ class UsuarioController extends Controller
     }
 
     public function store(Request $request)
-    {
-        try {
-            $request->validate([
-                'Nombre' => 'required|string|max:255',
-                'apellidoPaterno' => 'required|string|max:255',
-                'apellidoMaterno' => 'required|string|max:255',
-                'idTipoDocumento' => 'required|integer',
-                'documento' => 'required|string|max:255',
-                'telefono' => 'required|string|max:255',
-                'correo' => 'required|email|max:255',
-                'profile-image' => 'nullable|image|max:1024',
-            ]);
-    
-            $imageData = $request->hasFile('profile-image') ? file_get_contents($request->file('profile-image')) : null;
-    
-            $usuario = strtolower(substr($request->Nombre, 0, 6)) . strtolower(substr($request->apellidoPaterno, 0, 6)) . rand(1, 9);
-            $usuario = str_replace(' ', '', $usuario);
-            $clave = Str::random(8);
-            $claveEncriptada = bcrypt($clave);
-    
-            $usuarioNuevo = new Usuario();
-            $usuarioNuevo->Nombre = $request->Nombre;
-            $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
-            $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
-            $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
-            $usuarioNuevo->documento = $request->documento;
-            $usuarioNuevo->telefono = $request->telefono;
-            $usuarioNuevo->correo = $request->correo;
-            $usuarioNuevo->avatar = $imageData;
-            $usuarioNuevo->usuario = $usuario;
-            $usuarioNuevo->clave = $claveEncriptada;
-            $usuarioNuevo->estado = 1;
-            $usuarioNuevo->save();
-    
-            Mail::to($request->correo)->send(new UsuarioCreado($usuario, $clave));
-    
-            return response()->json([
-                'success' => true,
-                'message' => 'Usuario creado y datos enviados al correo.'
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['success' => false, 'errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
-        }
+{
+    try {
+        Log::info('Inicio del proceso de creación de usuario.');
+
+        // Validación
+        $request->validate([
+            'Nombre' => 'required|string|max:255',
+            'apellidoPaterno' => 'required|string|max:255',
+            'apellidoMaterno' => 'required|string|max:255',
+            'idTipoDocumento' => 'required|integer',
+            'documento' => 'required|string|max:255',
+            'telefono' => 'required|string|max:255',
+            'correo' => 'required|email|max:255',
+            'profile-image' => 'nullable|image|max:1024',
+        ]);
+        Log::info('Formulario validado con éxito.');
+
+        // Procesamiento de la imagen
+        $imageData = $request->hasFile('profile-image') ? file_get_contents($request->file('profile-image')) : null;
+        Log::info('Imagen procesada. ¿Imagen subida? ', ['has_image' => $request->hasFile('profile-image')]);
+
+        // Generación de usuario y clave
+        $usuario = strtolower(substr($request->Nombre, 0, 6)) . strtolower(substr($request->apellidoPaterno, 0, 6)) . rand(1, 9);
+        $usuario = str_replace(' ', '', $usuario);
+        $clave = Str::random(8);
+        $claveEncriptada = bcrypt($clave);
+
+        Log::info('Datos generados para el nuevo usuario:', [
+            'usuario' => $usuario,
+            'clave' => $clave
+        ]);
+
+        // Creación del usuario
+        $usuarioNuevo = new Usuario();
+        $usuarioNuevo->Nombre = $request->Nombre;
+        $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
+        $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
+        $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
+        $usuarioNuevo->documento = $request->documento;
+        $usuarioNuevo->telefono = $request->telefono;
+        $usuarioNuevo->correo = $request->correo;
+        $usuarioNuevo->avatar = $imageData;
+        $usuarioNuevo->usuario = $usuario;
+        $usuarioNuevo->clave = $claveEncriptada;
+        $usuarioNuevo->estado = 1;
+        $usuarioNuevo->save();
+        Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
+
+        // Enviar correo
+        Mail::to($request->correo)->send(new UsuarioCreado($usuario, $clave));
+        Log::info('Correo enviado al usuario.', ['correo' => $request->correo]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Usuario creado y datos enviados al correo.'
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('Error en la validación de los datos:', ['errors' => $e->errors()]);
+        return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+    } catch (\Exception $e) {
+        Log::error('Error inesperado al crear el usuario:', ['message' => $e->getMessage()]);
+        return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
     }
+}
     
     
 

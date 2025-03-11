@@ -1,11 +1,15 @@
-<!-- jQuery (necesario para Toastr) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- Toastr JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
-
 <x-layout.default>
+
+    <!-- Incluir el archivo CSS de Nice Select -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+
+    
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
+
+
+
+
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
@@ -43,8 +47,8 @@
 
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                <circle opacity="0.5" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="1.5" />
+                                <circle opacity="0.5" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="1.5" />
                                 <path d="M12 6V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                 <path
                                     d="M15 9.5C15 8.11929 13.6569 7 12 7C10.3431 7 9 8.11929 9 9.5C9 10.8807 10.3431 12 12 12C13.6569 12 15 13.1193 15 14.5C15 15.8807 13.6569 17 12 17C10.3431 17 9 15.8807 9 14.5"
@@ -61,7 +65,8 @@
 
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                <circle cx="12" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
+                                <circle cx="12" cy="6" r="4" stroke="currentColor"
+                                    stroke-width="1.5" />
                                 <ellipse opacity="0.5" cx="12" cy="17" rx="7" ry="4"
                                     stroke="currentColor" stroke-width="1.5" />
                             </svg>
@@ -92,9 +97,8 @@
                 </ul>
                 <template x-if="tab === 'home'">
                     <div>
-                        <form id="usuarioForm" method="POST"
-                            enctype="multipart/form-data"
-                            class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
+                    <form id="usuario-form" method="POST" enctype="multipart/form-data" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
+
                             @csrf
                             <h6 class="text-lg font-bold mb-5">Información General</h6>
                             <div class="flex flex-col sm:flex-row">
@@ -106,8 +110,7 @@
                                             class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto cursor-pointer" />
                                     </label>
                                     <!-- Input file oculto -->
-                                    <input type="file" id="profile-image" name="profile-image"
-                                        style="display:none;" accept="image/*" onchange="previewImage(event)" />
+                                    <input type="file" id="profile-image" name="profile-image" style="display:none;" accept="image/*" onchange="previewImage(event)" />
                                 </div>
 
                                 <!-- Formulario de campos -->
@@ -115,61 +118,51 @@
                                     <!-- Nombre Completo -->
                                     <div>
                                         <label for="Nombre">Nombre Completo</label>
-                                        <input id="Nombre" name="Nombre" type="text"
-                                            placeholder="Darlin Josue" class="form-input" />
+                                        <input id="Nombre" name="Nombre" type="text" placeholder="Darlin Josue" class="form-input" />
                                     </div>
 
                                     <!-- Apellido Paterno -->
                                     <div>
                                         <label for="apellidoPaterno">Apellido Paterno</label>
-                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text"
-                                            placeholder="Saldarriaga" class="form-input" />
+                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text" placeholder="Saldarriaga" class="form-input" />
                                     </div>
 
                                     <!-- Apellido Materno -->
                                     <div>
                                         <label for="apellidoMaterno">Apellido Materno</label>
-                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text"
-                                            placeholder="Cruz" class="form-input" />
+                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text" placeholder="Cruz" class="form-input" />
                                     </div>
 
                                     <!-- Tipo Documento -->
                                     <div>
-                                        <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
-                                            Documento</label>
-                                        <select id="idTipoDocumento" name="idTipoDocumento"
-                                            class="w-full form-input">
-                                            <option value="" disabled selected>Seleccionar Tipo Documento
-                                            </option>
+                                        <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
+                                        <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display: none">
+                                            <option value="" disabled selected>Seleccionar Tipo Documento</option>
 
                                             @foreach ($tiposDocumento as $tipoDocumento)
-                                                <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                    {{ $tipoDocumento->nombre }}
-                                                </option>
+                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                                {{ $tipoDocumento->nombre }}
+                                            </option>
                                             @endforeach
                                         </select>
                                     </div>
 
-
                                     <!-- Documento -->
                                     <div>
                                         <label for="documento">Documento</label>
-                                        <input id="documento" name="documento" type="text" placeholder="12345678"
-                                            class="form-input" />
+                                        <input id="documento" name="documento" type="text" placeholder="12345678" class="form-input" />
                                     </div>
 
                                     <!-- Teléfono -->
                                     <div>
                                         <label for="telefono">Teléfono</label>
-                                        <input id="telefono" type="text" name="telefono"
-                                            placeholder="962 952 239" class="form-input" />
+                                        <input id="telefono" type="text" name="telefono" placeholder="962 952 239" class="form-input" />
                                     </div>
 
                                     <!-- Email -->
                                     <div>
                                         <label for="correo">Correo Electronico</label>
-                                        <input id="correo" name="correo" type="email"
-                                            placeholder="darlin@gmail.com" class="form-input" />
+                                        <input id="correo" name="correo" type="email" placeholder="darlin@gmail.com" class="form-input" />
                                     </div>
 
                                     <!-- Botones -->
@@ -182,19 +175,91 @@
                         </form>
 
 
+                        <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Cuando se envía el formulario
+        document.getElementById('usuario-form').addEventListener('submit', function (e) {
+            e.preventDefault(); // Evita que el formulario se envíe de manera tradicional
+
+            // Creamos un objeto FormData para capturar todos los datos del formulario
+            var formData = new FormData(this);
+            console.log("Formulario enviado con los siguientes datos:");
+            console.log(formData); // Log de los datos del formulario
+
+            // Usamos fetch para enviar los datos de forma asíncrona
+            fetch(`/usuario/store`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => {
+                console.log("Respuesta del servidor:");
+                console.log(response); // Log de la respuesta del servidor
+                return response.json();
+            })
+            .then(data => {
+                console.log("Datos recibidos del servidor:");
+                console.log(data); // Log de los datos del servidor
+
+                // Si la respuesta contiene éxito, muestra un mensaje de éxito con toastr
+                if (data.success) {
+                    toastr.success(data.message, "Éxito", {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-right",
+                        timeOut: 5000
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error durante la petición:");
+                console.error(error); // Log de errores en la solicitud
+                // Si ocurre un error (como un error de validación o error interno)
+                if (error.response) {
+                    error.response.json().then(errors => {
+                        let errorMessages = '';
+                        for (let key in errors.errors) {
+                            if (errors.errors.hasOwnProperty(key)) {
+                                errorMessages += errors.errors[key].join(', ') + '\n';  // Concatenamos los errores
+                            }
+                        }
+                        toastr.error(errorMessages, "Error", {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: "toast-top-right",
+                            timeOut: 5000
+                        });  // Mostramos todos los errores en una alerta de error con toastr
+                    });
+                } else {
+                    toastr.error("Ocurrió un error inesperado.", "Error", {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-right",
+                        timeOut: 5000
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+
+
+
+
 
                         <form
                             class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
-
+                     
                             <h6 class="text-lg font-bold mb-5">Información Importante</h6>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
                                 <!-- Sueldo por Hora -->
                                 <div>
                                     <label for="sueldoPorHora">Sueldo por Hora</label>
-                                    <input type="number" name="sueldoPorHora" id="sueldoPorHora"
-                                        placeholder="Ejemplo: 20.5" class="form-input" step="0.01"
-                                        value="" />
+                                    <input type="number" name="sueldoPorHora" id="sueldoPorHora" placeholder="Ejemplo: 20.5" class="form-input" step="0.01" value="" />
                                 </div>
 
                                 <!-- Sucursal -->
@@ -203,8 +268,7 @@
                                     <select name="idSucursal" id="idSucursal" class="form-input">
                                         <option value="" disabled>Selecciona una Sucursal</option>
                                         @foreach ($sucursales as $sucursal)
-                                            <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}
-                                            </option>
+                                        <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -215,8 +279,7 @@
                                     <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
                                         <option value="" disabled>Selecciona un Tipo de Usuario</option>
                                         @foreach ($tiposUsuario as $tipoUsuario)
-                                            <option value="{{ $tipoUsuario->idTipoUsuario }}">
-                                                {{ $tipoUsuario->nombre }}</option>
+                                        <option value="{{ $tipoUsuario->idTipoUsuario }}">{{ $tipoUsuario->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -227,7 +290,7 @@
                                     <select name="idSexo" id="idSexo" class="form-input">
                                         <option value="" disabled>Selecciona un Sexo</option>
                                         @foreach ($sexos as $sexo)
-                                            <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
+                                        <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -238,7 +301,7 @@
                                     <select name="idRol" id="idRol" class="form-input">
                                         <option value="" disabled>Selecciona un Rol</option>
                                         @foreach ($roles as $rol)
-                                            <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
+                                        <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -249,8 +312,7 @@
                                     <select name="idTipoArea" id="idTipoArea" class="form-input">
                                         <option value="" disabled>Selecciona un Tipo de Área</option>
                                         @foreach ($tiposArea as $tipoArea)
-                                            <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}
-                                            </option>
+                                        <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -321,7 +383,8 @@
                                     <div class="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
                                         <div class="flex items-start justify-between py-3">
                                             <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                                <img src="/assets/images/card-americanexpress.svg" alt="image" />
+                                                <img src="/assets/images/card-americanexpress.svg"
+                                                    alt="image" />
                                             </div>
                                             <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
                                                 Mastercard <span
@@ -335,7 +398,8 @@
                                     <div class="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
                                         <div class="flex items-start justify-between py-3">
                                             <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                                <img src="/assets/images/card-mastercard.svg" alt="image" />
+                                                <img src="/assets/images/card-mastercard.svg"
+                                                    alt="image" />
                                             </div>
                                             <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
                                                 American Express<span
@@ -349,7 +413,8 @@
                                     <div>
                                         <div class="flex items-start justify-between py-3">
                                             <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                                <img src="/assets/images/card-visa.svg" alt="image" />
+                                                <img src="/assets/images/card-visa.svg"
+                                                    alt="image" />
                                             </div>
                                             <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
                                                 Visa<span
@@ -597,84 +662,31 @@
         </div>
     </div>
 
-    <!-- <script>
-        // Obtener el contexto del lienzo
-        var canvas = document.getElementById('firmaCanvas');
-        var ctx = canvas.getContext('2d');
-        var isDrawing = false;
-
-        // Iniciar dibujo
-        canvas.addEventListener('mousedown', function(e) {
-            isDrawing = true;
-            ctx.beginPath();
-            ctx.moveTo(e.offsetX, e.offsetY);
-        });
-
-        // Continuar dibujo
-        canvas.addEventListener('mousemove', function(e) {
-            if (isDrawing) {
-                ctx.lineTo(e.offsetX, e.offsetY);
-                ctx.stroke();
-            }
-        });
-
-        // Detener dibujo
-        canvas.addEventListener('mouseup', function() {
-            isDrawing = false;
-        });
-
-        // Limpiar firma
-        document.getElementById('limpiarFirma').addEventListener('click', function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-    </script> -->
-
+    <script>
+        // Inicializar Select2
+        document.addEventListener("DOMContentLoaded", function() {
+            // Inicializar todos los select con la clase "select2"
+            document.querySelectorAll('.select2').forEach(function(select) {
+                NiceSelect.bind(select, {
+                    searchable: true
+                });
+            });
+        })
+    </script>
     <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
     <!-- Agrega Select2 JS antes del cierre de </body> -->
 
+    <!-- Cargar jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+    <!-- <script>
+    $(document).ready(function() {
+        $('select').niceSelect();  // Aplica Nice Select a todos los selectores en la página
+    });
+</script> -->
     <script>
-        document.getElementById("usuarioForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Evita la recarga de la página
-
-            let form = this;
-            let formData = new FormData(form);
-
-            fetch("{{ route('usuarios.store') }}", {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        "Accept": "application/json",
-                        "X-Requested-With": "XMLHttpRequest",
-                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        toastr.options = {
-                            "closeButton": true,
-                            "progressBar": true,
-                            "positionClass": "toast-top-right", // Ajusta la posición si es necesario
-                            "timeOut": "5000" // Duración en milisegundos
-                        };
-                        toastr.success(data.message, "Éxito");
-
-                        form.reset(); // Limpia el formulario
-                    } else {
-                        let errorMessages = data.errors ? Object.values(data.errors).map(error => error[0])
-                            .join("<br>") : data.message;
-                        toastr.error(errorMessages, "Error");
-                    }
-                })
-                .catch(error => {
-                    toastr.error("Ocurrió un error inesperado.", "Error");
-                    console.error("Error:", error);
-                });
-        });
-
-
-        // Función para mostrar la imagen seleccionada antes de enviarla
+        // Función para mostrar la imagen seleccionada
         function previewImage(event) {
             var reader = new FileReader();
             reader.onload = function() {
@@ -685,5 +697,7 @@
         }
     </script>
 
+        <!-- Toastr JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
 </x-layout.default>
