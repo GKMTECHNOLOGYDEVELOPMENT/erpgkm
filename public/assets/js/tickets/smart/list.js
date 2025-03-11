@@ -26,31 +26,19 @@ document.addEventListener('alpine:init', () => {
                 .catch(error => console.error('Error al cargar marcas:', error));
         },
 
-        fetchDataAndInitTable(page = 1) {
+        fetchDataAndInitTable() {
             this.isLoading = true;
-            let url = `/api/ordenes?page=${page}&tipoTicket=1`;
-            if (this.marcaFilter) url += `&marca=${this.marcaFilter}`;
-            if (this.clienteGeneralFilter) url += `&clienteGeneral=${this.clienteGeneralFilter}`;
-            if (this.startDate) url += `&start_date=${this.startDate}`;
-            if (this.endDate) url += `&end_date=${this.endDate}`;
-
+            let url = `/api/ordenes?tipoTicket=1`;
+        
             fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error('Error al obtener datos del servidor');
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    // 🔹 ORDENAR POR FECHA DE CREACIÓN DESCENDENTE (últimos tickets primero)
-                    this.ordenesData = data.data.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
-                    this.currentPage = data.current_page;
-                    this.lastPage = data.last_page;
-
-                    // Destruir la tabla existente si ya está inicializada
+                    this.ordenesData = data.sort((a, b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
+        
                     if ($.fn.DataTable.isDataTable('#myTable1')) {
                         $('#myTable1').DataTable().destroy();
                     }
-
-                    // Inicializar DataTables
+        
                     this.datatable1 = $('#myTable1').DataTable({
                         data: this.formatDataForTable(this.ordenesData),
                         columns: [
@@ -66,16 +54,47 @@ document.addEventListener('alpine:init', () => {
                             { title: 'DIRECCIÓN' },
                             { title: 'MÁS' }
                         ],
-                        searching: true,
-                        paging: false,
+                        searching: true, 
+                        paging: true,
                         pageLength: 10,
-                        order: [], // 🔹 Desactivar ordenación automática de DataTables
+                        order: [],
                         language: {
                             search: 'Buscar...',
-                            lengthMenu: '',
                             zeroRecords: 'No se encontraron registros',
+                            lengthMenu: 'Mostrar _MENU_ registros por página',
+                            loadingRecords: 'Cargando...',
                             info: '',
+                            paginate: {
+                                first: 'Primero',
+                                last: 'Último',
+                                next: 'Siguiente',
+                                previous: 'Anterior'
+                            },
                         },
+        
+                        // 🔥 Mantiene el color en cada renderización de la tabla
+                        rowCallback: (row, data, index) => {
+                            let orden = this.ordenesData[index];
+                            if (orden && orden.ticketflujo && orden.ticketflujo.estadoflujo) {
+                                const estadoColor = orden.ticketflujo.estadoflujo.color;
+                                if (estadoColor) {
+                                    $(row).css('background-color', estadoColor);
+                                    $(row).find('td').css('color', 'black');
+                                }
+                            }
+                        },
+        
+                        // 🔥 Reagrega eventos en cada renderización
+                        drawCallback: () => {
+                            // Asegurar eventos para expandir detalles
+                            $('#myTable1 tbody').off('click', 'button.toggle-details').on('click', 'button.toggle-details', (event) => {
+                                const id = $(event.currentTarget).data('id');
+                                this.toggleRowDetails(event, id);
+                            });
+                        },
+
+
+
                         initComplete: () => {
 
                             this.ordenesData.forEach((orden, index) => {
@@ -177,70 +196,70 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        updatePagination() {
-            let paginationDiv = document.getElementById('pagination');
-            paginationDiv.innerHTML = '';
+        // updatePagination() {
+        //     let paginationDiv = document.getElementById('pagination');
+        //     paginationDiv.innerHTML = '';
 
-            let maxPagesToShow = 5;
-            let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
-            let endPage = Math.min(this.lastPage, startPage + maxPagesToShow - 1);
+        //     let maxPagesToShow = 5;
+        //     let startPage = Math.max(1, this.currentPage - Math.floor(maxPagesToShow / 2));
+        //     let endPage = Math.min(this.lastPage, startPage + maxPagesToShow - 1);
 
-            let paginationHTML = `<ul class="flex flex-wrap justify-center items-center gap-1 md:gap-2">`;
+        //     let paginationHTML = `<ul class="flex flex-wrap justify-center items-center gap-1 md:gap-2">`;
 
-            if (startPage > 1) {
-                paginationHTML += `
-                    <li>
-                        <button type="button" class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" 
-                        @click="fetchDataAndInitTable(1)">1</button>
-                    </li>`;
-                if (startPage > 2) paginationHTML += `<li><span class="px-2 md:px-3">...</span></li>`;
-            }
+        //     if (startPage > 1) {
+        //         paginationHTML += `
+        //             <li>
+        //                 <button type="button" class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" 
+        //                 @click="fetchDataAndInitTable(1)">1</button>
+        //             </li>`;
+        //         if (startPage > 2) paginationHTML += `<li><span class="px-2 md:px-3">...</span></li>`;
+        //     }
 
-            for (let i = startPage; i <= endPage; i++) {
-                paginationHTML += `
-                    <li>
-                        <button type="button" class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition text-sm md:text-base ${this.currentPage === i ? 'bg-primary text-white dark:text-white-light dark:bg-primary' : 'bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary'}"
-                        @click="fetchDataAndInitTable(${i})">${i}</button>
-                    </li>`;
-            }
+        //     for (let i = startPage; i <= endPage; i++) {
+        //         paginationHTML += `
+        //             <li>
+        //                 <button type="button" class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition text-sm md:text-base ${this.currentPage === i ? 'bg-primary text-white dark:text-white-light dark:bg-primary' : 'bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary'}"
+        //                 @click="fetchDataAndInitTable(${i})">${i}</button>
+        //             </li>`;
+        //     }
 
-            if (endPage < this.lastPage) {
-                if (endPage < this.lastPage - 1) paginationHTML += `<li><span class="px-2 md:px-3">...</span></li>`;
-                paginationHTML += `
-                    <li>
-                        <button type="button" class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" 
-                        @click="fetchDataAndInitTable(${this.lastPage})">${this.lastPage}</button>
-                    </li>`;
-            }
+        //     if (endPage < this.lastPage) {
+        //         if (endPage < this.lastPage - 1) paginationHTML += `<li><span class="px-2 md:px-3">...</span></li>`;
+        //         paginationHTML += `
+        //             <li>
+        //                 <button type="button" class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" 
+        //                 @click="fetchDataAndInitTable(${this.lastPage})">${this.lastPage}</button>
+        //             </li>`;
+        //     }
 
-            paginationHTML += `</ul>`;
+        //     paginationHTML += `</ul>`;
 
-            paginationHTML = `
-                <div class="flex flex-wrap justify-center items-center gap-1 md:gap-3">
-                    <button type="button" 
-                        class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" 
-                        ${this.currentPage === 1 ? 'disabled' : ''} 
-                        @click="fetchDataAndInitTable(${this.currentPage - 1})">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
+        //     paginationHTML = `
+        //         <div class="flex flex-wrap justify-center items-center gap-1 md:gap-3">
+        //             <button type="button" 
+        //                 class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" 
+        //                 ${this.currentPage === 1 ? 'disabled' : ''} 
+        //                 @click="fetchDataAndInitTable(${this.currentPage - 1})">
+        //                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        //                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        //                 </svg>
+        //             </button>
         
-                    ${paginationHTML}
+        //             ${paginationHTML}
         
-                    <button type="button" 
-                        class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" 
-                        ${this.currentPage === this.lastPage ? 'disabled' : ''} 
-                        @click="fetchDataAndInitTable(${this.currentPage + 1})">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
-            `;
+        //             <button type="button" 
+        //                 class="w-8 h-8 md:w-10 md:h-10 flex justify-center items-center font-semibold rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" 
+        //                 ${this.currentPage === this.lastPage ? 'disabled' : ''} 
+        //                 @click="fetchDataAndInitTable(${this.currentPage + 1})">
+        //                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        //                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        //                 </svg>
+        //             </button>
+        //         </div>
+        //     `;
 
-            paginationDiv.innerHTML = paginationHTML;
-        },
+        //     paginationDiv.innerHTML = paginationHTML;
+        // },
 
         toggleRowDetails(event, id) {
             let button = event.currentTarget;
@@ -257,31 +276,31 @@ document.addEventListener('alpine:init', () => {
 
 
 
-// Obtener el nombre del técnico desde la visita
-let tecnicoNombre = 'N/A';
-let ticketSeleccionado = record; // Reemplazar con el ticket que seleccionas en el frontend
+                    // Obtener el nombre del técnico desde la visita
+                    let tecnicoNombre = 'N/A';
+                    let ticketSeleccionado = record; // Reemplazar con el ticket que seleccionas en el frontend
 
-// Verificar si la visita tiene un técnico asignado
-if (record.seleccionar_visita && record.seleccionar_visita.visita && record.seleccionar_visita.visita.tecnico) {
-    tecnicoNombre = record.seleccionar_visita.visita.tecnico.Nombre;
-} else {
-    console.log('No se encontró técnico en la visita.');
-}
+                    // Verificar si la visita tiene un técnico asignado
+                    if (record.seleccionar_visita && record.seleccionar_visita.visita && record.seleccionar_visita.visita.tecnico) {
+                        tecnicoNombre = record.seleccionar_visita.visita.tecnico.Nombre;
+                    } else {
+                        console.log('No se encontró técnico en la visita.');
+                    }
 
-console.log('Nombre del técnico: ', tecnicoNombre);
+                    console.log('Nombre del técnico: ', tecnicoNombre);
 
 
 
-// Obtener la justificación de la transición de estado con idEstadoots = 3
-let justificacion = 'N/A'; // Valor predeterminado
-if (record.transicion_status_tickets && record.transicion_status_tickets.length > 0) {
-    const transicion = record.transicion_status_tickets[0]; // Tomamos la primera transición
-    if (transicion.justificacion) {
-        justificacion = transicion.justificacion; // Asignamos la justificación si existe
-    }
-}
+                    // Obtener la justificación de la transición de estado con idEstadoots = 3
+                    let justificacion = 'N/A'; // Valor predeterminado
+                    if (record.transicion_status_tickets && record.transicion_status_tickets.length > 0) {
+                        const transicion = record.transicion_status_tickets[0]; // Tomamos la primera transición
+                        if (transicion.justificacion) {
+                            justificacion = transicion.justificacion; // Asignamos la justificación si existe
+                        }
+                    }
 
-console.log('Justificación: ', justificacion);
+                    console.log('Justificación: ', justificacion);
 
 
 
