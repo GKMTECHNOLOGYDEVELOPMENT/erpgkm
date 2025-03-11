@@ -1308,8 +1308,9 @@ if ($ticket) {
 
         // Convertir las fechas a formato ISO 8601
         $visitas->each(function ($visita) {
-            $visita->fecha_inicio_hora = $visita->fecha_inicio_hora->toIso8601String();
-            $visita->fecha_final_hora = $visita->fecha_final_hora->toIso8601String();
+            $visita->fecha_inicio_hora = $visita->fecha_inicio_hora?->toIso8601String();
+            $visita->fecha_final_hora = $visita->fecha_final_hora?->toIso8601String();
+            
 
             // Incluir el nombre del técnico
             $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;  // Aquí asumimos que el campo 'nombre' está en el modelo Usuario

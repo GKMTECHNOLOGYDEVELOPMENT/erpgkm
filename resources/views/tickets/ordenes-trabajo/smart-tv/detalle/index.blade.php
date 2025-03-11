@@ -265,11 +265,14 @@
                 <label class="text-sm font-medium">Cliente General</label>
                 <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
                     <option value="" selected>Seleccionar Cliente General</option>
-                    <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
-                        {{ $orden->clienteGeneral->descripcion }}
-                    </option>
+                    @if($orden->clienteGeneral)
+                        <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+                            {{ $orden->clienteGeneral->descripcion }}
+                        </option>
+                    @endif
                 </select>
             </div>
+            
 
             <!-- Tienda -->
             <div>
