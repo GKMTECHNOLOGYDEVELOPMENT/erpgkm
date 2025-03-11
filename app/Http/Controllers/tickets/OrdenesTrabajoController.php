@@ -96,7 +96,7 @@ class OrdenesTrabajoController extends Controller
         // Obtener los datos necesarios
         $clientesGenerales = ClienteGeneral::all();
         $tiposServicio = TipoServicio::all();
-        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
+        $usuarios = Usuario::where('idTipoUsuario', 1)->get();
         $tiposTickets = Tipoticket::all();
         $clientes = Cliente::all();
         $tiendas = Tienda::all();
@@ -197,6 +197,7 @@ class OrdenesTrabajoController extends Controller
                 'idUsuario' => auth()->id(),
                 'fecha_creacion' => now(),
                 'idTipotickets' => 1,
+                'tipoServicio' => 1,
             ]);
 
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
