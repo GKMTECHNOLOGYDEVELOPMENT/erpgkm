@@ -64,9 +64,9 @@ class UsuarioController extends Controller
             'apellidoPaterno' => 'required|string|max:255',
             'apellidoMaterno' => 'required|string|max:255',
             'idTipoDocumento' => 'required|integer',
-            'documento' => 'required|string|max:255',
-            'telefono' => 'required|string|max:255',
-            'correo' => 'required|email|max:255',
+            'documento' => 'required|string|max:255|unique:usuarios,documento',
+            'telefono' => 'required|string|max:255|unique:usuarios,telefono',
+            'correo' => 'required|email|max:255|unique:usuarios,correo',
             'profile-image' => 'nullable|image|max:1024',
         ]);
         Log::info('Formulario validado con éxito.');
@@ -108,7 +108,9 @@ class UsuarioController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Usuario creado y datos enviados al correo.'
+            'message' => 'Usuario creado y datos enviados al correo.',
+            'usuarioId' => $usuarioNuevo->idUsuario  // Asegúrate de devolver el ID del nuevo usuario
+
         ]);
     } catch (\Illuminate\Validation\ValidationException $e) {
         Log::error('Error en la validación de los datos:', ['errors' => $e->errors()]);
@@ -125,56 +127,89 @@ class UsuarioController extends Controller
 
 
 
-    public function edit($id)
-    {
-        $usuario = Usuario::findOrFail($id); // Buscar al usuario por id
-        $tiposDocumento = TipoDocumento::all(); // Si es necesario obtener tipos de documento
-        $sucursales = Sucursal::all(); // Obtener todas las sucursales
-        $tiposUsuario = Tipousuario::all(); // Obtener todos los tipos de usuario
-        $sexos = Sexo::all(); // Obtener todos los sexos
-        $roles = Rol::all(); // Obtener todos los roles
-        $tiposArea = Tipoarea::all(); // Obtener todos los tipos de área
-        // Obtener los datos de los archivos JSON
-        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
-        $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
-        $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
+public function edit($id)
+{
+    // Intentamos obtener el usuario por su id
+    $usuario = Usuario::findOrFail($id); // Buscar al usuario por id
+    Log::info('Usuario encontrado:', ['usuario' => $usuario]);
 
-        // Buscar el departamento correspondiente a la usuario
-        $departamentoSeleccionado = array_filter($departamentos, function ($departamento) use ($usuario) {
-            return $departamento['id_ubigeo'] == $usuario->departamento;
-        });
-        $departamentoSeleccionado = reset($departamentoSeleccionado);  // Obtener el primer valor del array filtrado
+    // Obtener los datos para los selectores
+    $tiposDocumento = TipoDocumento::all(); // Si es necesario obtener tipos de documento
+    $sucursales = Sucursal::all(); // Obtener todas las sucursales
+    $tiposUsuario = Tipousuario::all(); // Obtener todos los tipos de usuario
+    $sexos = Sexo::all(); // Obtener todos los sexos
+    $roles = Rol::all(); // Obtener todos los roles
+    $tiposArea = Tipoarea::all(); // Obtener todos los tipos de área
+    Log::info('Datos de selección obtenidos:', [
+        'tiposDocumento' => $tiposDocumento,
+        'sucursales' => $sucursales,
+        'tiposUsuario' => $tiposUsuario,
+        'sexos' => $sexos,
+        'roles' => $roles,
+        'tiposArea' => $tiposArea
+    ]);
 
-        // Obtener provincias del departamento seleccionado
-        $provinciasDelDepartamento = [];
-        foreach ($provincias as $provincia) {
-            if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
-                $provinciasDelDepartamento[] = $provincia;
-            }
+
+    Log::info('Departamento del usuario:', ['departamento' => $usuario->departamento]);
+    Log::info('Provincia del usuario:', ['provincia' => $usuario->provincia]);
+    Log::info('Distrito del usuario:', ['distrito' => $usuario->distrito]);
+
+
+    // Obtener los datos de los archivos JSON
+    $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+    $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
+    $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
+    Log::info('Datos de archivos JSON cargados:', [
+        'departamentos' => count($departamentos),
+        'provincias' => count($provincias),
+        'distritos' => count($distritos)
+    ]);
+
+    Log::info('Departamento cargado del archivo JSON:', ['departamentos' => $departamentos]);
+
+
+    // Buscar el departamento correspondiente al usuario
+    $departamentoSeleccionado = array_filter($departamentos, function ($departamento) use ($usuario) {
+        return $departamento['id_ubigeo'] == $usuario->departamento;
+    });
+    $departamentoSeleccionado = reset($departamentoSeleccionado);  // Obtener el primer valor del array filtrado
+    Log::info('Departamento seleccionado:', ['departamento' => $departamentoSeleccionado]);
+
+    // Obtener provincias del departamento seleccionado
+    $provinciasDelDepartamento = [];
+    foreach ($provincias as $provincia) {
+        if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
+            $provinciasDelDepartamento[] = $provincia;
         }
-
-        // Buscar la provincia seleccionada en el array de provinciasDelDepartamento
-        $provinciaSeleccionada = null;
-        foreach ($provinciasDelDepartamento as $provincia) {
-            if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $usuario->provincia) {
-                $provinciaSeleccionada = $provincia;
-                break;
-            }
-        }
-
-        // Obtener los distritos correspondientes a la provincia seleccionada
-        $distritosDeLaProvincia = [];
-        foreach ($distritos as $distrito) {
-            if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
-                $distritosDeLaProvincia[] = $distrito;
-            }
-        }
-
-        // Definir distritoSeleccionado como null si no es necesario
-        $distritoSeleccionado = null;  // Si no es necesario, puedes omitir esta línea también
-
-        return view('usuario.edit', compact('usuario', 'tiposDocumento', 'sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea', 'departamentos', 'provinciasDelDepartamento', 'provinciaSeleccionada', 'distritosDeLaProvincia', 'distritoSeleccionado'));
     }
+    Log::info('Provincias del departamento seleccionado:', ['provincias' => count($provinciasDelDepartamento)]);
+
+    // Buscar la provincia seleccionada
+    $provinciaSeleccionada = null;
+    foreach ($provinciasDelDepartamento as $provincia) {
+        if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $usuario->provincia) {
+            $provinciaSeleccionada = $provincia;
+            break;
+        }
+    }
+    Log::info('Provincia seleccionada:', ['provincia' => $provinciaSeleccionada]);
+
+    // Obtener los distritos correspondientes a la provincia seleccionada
+    $distritosDeLaProvincia = [];
+    foreach ($distritos as $distrito) {
+        if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
+            $distritosDeLaProvincia[] = $distrito;
+        }
+    }
+    Log::info('Distritos de la provincia seleccionada:', ['distritos' => count($distritosDeLaProvincia)]);
+
+    // Definir distritoSeleccionado como null si no es necesario
+    $distritoSeleccionado = null;
+
+    // Devolver la vista con los datos requeridos
+    return view('usuario.edit', compact('usuario', 'tiposDocumento', 'sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea', 'departamentos', 'provinciasDelDepartamento', 'provinciaSeleccionada', 'distritosDeLaProvincia', 'distritoSeleccionado'));
+}
+
 
 
 

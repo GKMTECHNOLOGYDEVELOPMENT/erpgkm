@@ -128,6 +128,9 @@ public function store(TiendasRequest $request)
     // Definir distritoSeleccionado como null si no es necesario
     $distritoSeleccionado = null;  // Si no es necesario, puedes omitir esta línea también
 
+
+
+
     // Devolver la vista con los datos necesarios
     return view('administracion.asociados.tienda.edit', compact(
         'tienda', 

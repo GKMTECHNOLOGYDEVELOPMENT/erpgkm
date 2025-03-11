@@ -209,6 +209,24 @@
                         closeButton: true,
                         progressBar: true,
                         positionClass: "toast-top-right",
+                        timeOut: 1000,
+                        onHidden: function () {
+                            // Redirige a la página de edición del usuario después de que el toastr desaparezca
+                            window.location.href = '/usuario/' + data.usuarioId + '/edit'; // Redirección usando el ID del usuario
+                        }
+                    });
+                } else if (data.errors) {
+                    // Si el servidor envía errores, mostramos cada error en un toastr de error
+                    let errorMessages = '';
+                    for (let key in data.errors) {
+                        if (data.errors.hasOwnProperty(key)) {
+                            errorMessages += data.errors[key].join('<br>') + '<br>'; // Concatenamos los errores
+                        }
+                    }
+                    toastr.error(errorMessages, "Errores en el formulario", {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: "toast-top-right",
                         timeOut: 5000
                     });
                 }
@@ -216,36 +234,16 @@
             .catch(error => {
                 console.error("Error durante la petición:");
                 console.error(error); // Log de errores en la solicitud
-                // Si ocurre un error (como un error de validación o error interno)
-                if (error.response) {
-                    error.response.json().then(errors => {
-                        let errorMessages = '';
-                        for (let key in errors.errors) {
-                            if (errors.errors.hasOwnProperty(key)) {
-                                errorMessages += errors.errors[key].join(', ') + '\n';  // Concatenamos los errores
-                            }
-                        }
-                        toastr.error(errorMessages, "Error", {
-                            closeButton: true,
-                            progressBar: true,
-                            positionClass: "toast-top-right",
-                            timeOut: 5000
-                        });  // Mostramos todos los errores en una alerta de error con toastr
-                    });
-                } else {
-                    toastr.error("Ocurrió un error inesperado.", "Error", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-top-right",
-                        timeOut: 5000
-                    });
-                }
+                toastr.error("Ocurrió un error inesperado.", "Error", {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-right",
+                    timeOut: 5000
+                });
             });
         });
     });
 </script>
-
-
 
 
 
