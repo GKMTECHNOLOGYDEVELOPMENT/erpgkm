@@ -98,3 +98,4 @@ Route::get('/visita-seleccionada/{idVisita}', [OrdenesTrabajoController::class, 
 
 
 Route::get('/usuarios', [UsuarioController::class, 'getUsuarios']);
+Route::patch('/usuarios/{id}/estado', [UsuarioController::class, 'cambiarEstado']);
