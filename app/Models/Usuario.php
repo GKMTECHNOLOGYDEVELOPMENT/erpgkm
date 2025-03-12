@@ -72,7 +72,6 @@ class Usuario extends Authenticatable
 
 	protected $casts = [
 		'fechaNacimiento' => 'datetime',
-		// 'avatar' => 'binary',
 		'sueldoPorHora' => 'float',
 		'idSucursal' => 'int',
 		'idTipoDocumento' => 'int',
@@ -104,7 +103,8 @@ class Usuario extends Authenticatable
 		'idTipoUsuario',
 		'idSexo',
 		'idArea',
-		'idRol'
+		'idRol',
+		'firma'
 	];
 
 	public function sucursal()

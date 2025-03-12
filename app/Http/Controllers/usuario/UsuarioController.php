@@ -28,8 +28,14 @@ class UsuarioController extends Controller
 
         $usuario = Usuario::all();
 
+   
+
         return view('usuario.index', compact('usuario'));
     }
+
+
+
+
     public function perfil()
     {
         // Obtener el usuario autenticado
@@ -538,12 +544,28 @@ public function guardarCuenta(Request $request)
         }
     }
 
-
     public function getUsuarios()
     {
+        // Obtener usuarios con sus relaciones
         $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])->get();
+    
+        // Convertir los campos 'avatar' y 'firma' a base64
+        foreach ($usuarios as $usuario) {
+            if ($usuario->avatar) {
+                // Convertir el avatar a base64
+                $usuario->avatar = base64_encode($usuario->avatar);
+            }
+    
+            if ($usuario->firma) {
+                // Convertir la firma a base64
+                $usuario->firma = base64_encode($usuario->firma);
+            }
+        }
+    
+        // Devolver los datos como respuesta JSON
         return response()->json($usuarios);
     }
+    
 
 
 
