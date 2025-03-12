@@ -284,73 +284,69 @@
 
 
             @if (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0))
-                <!-- Nueva página con el título ANEXOS -->
-                <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
-                    <h2>ANEXOS</h2>
-                </div>
-
-                <div class="mt-4">
-                    @php $contador = 0; @endphp
-
-                    <!-- Primero las imágenes de la visita -->
-                    @if (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)
-                        @foreach ($imagenesAnexos as $anexo)
-                            @if (!empty($anexo['foto_base64']))
-                                @if ($contador % 2 == 0)
-                                    <!-- Primera hoja con el título "ANEXOS" SIN SALTO DE PÁGINA -->
-                                    <div class="flex flex-col items-center">
-                                    @else
-                                        <!-- A partir de la segunda hoja, forzamos un salto de página -->
-                                        <div class="flex flex-col items-center" style="page-break-before: always;">
-                                @endif
-
-                                <!-- Imagen más grande y centrada -->
-                                <div class="img-container">
-                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
+            <!-- Nueva página con el título ANEXOS -->
+            <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
+                <h2>ANEXOS</h2>
+            </div>
+        
+            <div class="mt-4">
+                @php $contador = 0; @endphp
+        
+                <!-- 🔹 Si hay imágenes de visita, solo mostramos esas -->
+                @if (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)
+                    @foreach ($imagenesAnexos as $anexo)
+                        @if (!empty($anexo['foto_base64']))
+                            @if ($contador % 2 == 0)
+                                <div class="flex flex-col items-center">
+                            @else
+                                <div class="flex flex-col items-center" style="page-break-before: always;">
+                            @endif
+        
+                            <div class="img-container">
+                                <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
+                            </div>
+        
+                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                IMAGEN DE LA VISITA
+                            </p>
+        
+                            @php $contador++; @endphp
+        
+                            @if ($contador % 2 == 0)
                                 </div>
-
-                                <!-- Descripción centrada -->
-                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                    IMAGEN DE LA VISITA
-                                </p>
-
-                                @php $contador++; @endphp
-
-                                @if ($contador % 2 == 0)
-                </div>
-            @endif
-            @endif
-            @endforeach
-            @endif
-
-            <!-- Luego las imágenes de los tickets anexos -->
-            @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
-                @foreach ($imagenesFotosTickets as $fotoTicket)
-                    @if (!empty($fotoTicket['foto_base64']))
-                        @if ($contador % 2 == 0)
-                            <div class="flex flex-col items-center" style="page-break-before: always;">
+                            @endif
                         @endif
-
-                        <!-- Imagen más grande y centrada -->
-                        <div class="img-container">
-                            <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
-                        </div>
-
-                        <!-- Descripción centrada -->
-                        <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                            {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
-                        </p>
-
-                        @php $contador++; @endphp
-
-                        @if ($contador % 2 == 0)
-        </div>
+                    @endforeach
+        
+                <!-- 🔹 Si NO hay imágenes de visita, mostramos las imágenes de los tickets anexos -->
+                @elseif (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
+                    @foreach ($imagenesFotosTickets as $fotoTicket)
+                        @if (!empty($fotoTicket['foto_base64']))
+                            @if ($contador % 2 == 0)
+                                <div class="">
+                            @else
+                                <div class="flex flex-col items-center" style="page-break-before: always;">
+                            @endif
+        
+                            <div class="img-container">
+                                <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del anexo">
+                            </div>
+        
+                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
+                            </p>
+        
+                            @php $contador++; @endphp
+        
+                            @if ($contador % 2 == 0)
+                                </div>
+                            @endif
+                        @endif
+                    @endforeach
+                @endif
+            </div>
         @endif
-        @endif
-        @endforeach
-        @endif
-    </div>
-    @endif
+        
 
     </div>
 </body>
