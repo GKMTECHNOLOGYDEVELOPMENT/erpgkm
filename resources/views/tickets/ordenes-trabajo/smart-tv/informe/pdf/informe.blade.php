@@ -254,7 +254,7 @@
                                 <p class="text-xs text-gray-500">N/A</p>
                             @endif
                         </div>
-                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1"> 
+                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
                         <p class="text-xs"><span class="font-bold"></span> {{ $visita['tecnico'] }}
                     </div>
@@ -265,10 +265,10 @@
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                                     class="h-20 max-w-[150px] mx-auto object-contain">
                             @else
-                            <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
+                                <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
                             @endif
                         </div>
-                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1"> 
+                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
                     </div>
                 </div>
@@ -290,22 +290,29 @@
             </div>
         
             <div class="mt-4">
-                @php $contador = 0; @endphp
+                @php 
+                    $contador = 0; 
+                    $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
+                @endphp
         
-                <!-- 🔹 Si hay imágenes de visita, solo mostramos esas -->
-                @if (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)
+                <!-- Primero las imágenes de la visita -->
+                @if ($hayFotosDeVisita)
                     @foreach ($imagenesAnexos as $anexo)
                         @if (!empty($anexo['foto_base64']))
                             @if ($contador % 2 == 0)
+                                <!-- Primera hoja SIN SALTO DE PÁGINA -->
                                 <div class="flex flex-col items-center">
                             @else
+                                <!-- A partir de la segunda hoja, forzamos un salto de página -->
                                 <div class="flex flex-col items-center" style="page-break-before: always;">
                             @endif
         
+                            <!-- Imagen centrada -->
                             <div class="img-container">
                                 <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                             </div>
         
+                            <!-- Descripción centrada -->
                             <p class="text-sm text-center text-gray-700 font-semibold mt-2">
                                 IMAGEN DE LA VISITA
                             </p>
@@ -317,28 +324,29 @@
                             @endif
                         @endif
                     @endforeach
+                @endif
         
-                <!-- 🔹 Si NO hay imágenes de visita, mostramos las imágenes de los tickets anexos -->
-                @elseif (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
+                <!-- Luego las imágenes de los tickets anexos, sin saltar a nueva hoja si no hay imágenes de visita -->
+                @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
                     @foreach ($imagenesFotosTickets as $fotoTicket)
                         @if (!empty($fotoTicket['foto_base64']))
-                            @if ($contador % 2 == 0)
-                                <div class="">
-                            @else
-                                <div class="flex flex-col items-center" style="page-break-before: always;">
+                            @if ($contador % 2 == 0 || !$hayFotosDeVisita)
+                                <div class="flex flex-col items-center" @if($contador % 2 == 0 && $hayFotosDeVisita) style="page-break-before: always;" @endif>
                             @endif
         
+                            <!-- Imagen centrada -->
                             <div class="img-container">
-                                <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del anexo">
+                                <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
                             </div>
         
+                            <!-- Descripción centrada -->
                             <p class="text-sm text-center text-gray-700 font-semibold mt-2">
                                 {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
                             </p>
         
                             @php $contador++; @endphp
         
-                            @if ($contador % 2 == 0)
+                            @if ($contador % 2 == 0 || !$hayFotosDeVisita)
                                 </div>
                             @endif
                         @endif
@@ -347,6 +355,7 @@
             </div>
         @endif
         
+
 
     </div>
 </body>

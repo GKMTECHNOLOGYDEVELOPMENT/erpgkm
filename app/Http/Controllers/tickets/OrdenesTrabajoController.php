@@ -2370,49 +2370,47 @@ class OrdenesTrabajoController extends Controller
             'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
             'modelo' => $orden->modelo->nombre ?? 'No especificado',
             'serie' => $orden->serie ?? 'No especificado',
-            'fallaReportada' => $orden->fallaReportada ?? 'No especificado' // 🔹 Agregamos la falla reportada
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
         ];
 
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
         $visitas = collect();
-        if ($orden->visitas) {
-            // Filtrar la visita seleccionada utilizando el idVisitas obtenido anteriormente
-            $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
 
-            if ($visitaSeleccionada) {
-                // Formatear la visita seleccionada para el informe
-                $visitas = collect([ // Creamos un array solo con la visita seleccionada
-                    [
-                        'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
-                        'fecha_programada' => $visitaSeleccionada->fecha_programada ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada)) : 'N/A',
-                        'hora_inicio' => $visitaSeleccionada->fecha_inicio ? date('H:i', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A',
-                        'hora_final' => $visitaSeleccionada->fecha_final ? date('H:i', strtotime($visitaSeleccionada->fecha_final)) : 'N/A',
-                        'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
-                        'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
-                        'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
-                        'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado')
-                    ]
-                ]);
-            }
+        if ($visitaSeleccionada) {
+            $visitas = collect([
+                [
+                    'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                    'fecha_programada' => $visitaSeleccionada->fecha_programada ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada)) : 'N/A',
+                    'hora_inicio' => $visitaSeleccionada->fecha_inicio ? date('H:i', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A',
+                    'hora_final' => $visitaSeleccionada->fecha_final ? date('H:i', strtotime($visitaSeleccionada->fecha_final)) : 'N/A',
+                    'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
+                    'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                    'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
+                    'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado')
+                ]
+            ]);
         }
-
 
         // 🔹 OBTENER FIRMAS FILTRADAS POR idTickets Y idVisitas
         $firma = DB::table('firmas')->where('idTickets', $idOt)
-            ->where('idVisitas', $idVisitasSeleccionada)  // Filtrar por la visita seleccionada
+            ->where('idVisitas', $idVisitasSeleccionada)
             ->first();
-
-        $firmaTecnico = $firma && !empty($firma->firma_tecnico)
-            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
-            : null;
 
         $firmaCliente = $firma && !empty($firma->firma_cliente)
             ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
             : null;
-        // 🔹 OBTENER IMÁGENES EN BASE64 (Filtrar los anexos de la visita seleccionada)
-        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
 
-        // Obtener los anexos de la visita seleccionada y optimizarlos
+        // 🔹 Obtener la firma del técnico (usuario) desde la tabla `usuarios`
+        $firmaTecnico = null;
+        if ($visitaSeleccionada && $visitaSeleccionada->tecnico) {
+            $tecnico = $visitaSeleccionada->tecnico;
+            if ($tecnico && !empty($tecnico->firma)) {
+                $firmaTecnico = 'data:image/png;base64,' . base64_encode($tecnico->firma);
+            }
+        }
+
+        // 🔹 Obtener imágenes de anexos y optimizarlas
         $imagenesAnexos = [];
         if ($visitaSeleccionada && $visitaSeleccionada->anexos_visitas) {
             $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
@@ -2425,7 +2423,7 @@ class OrdenesTrabajoController extends Controller
             });
         }
 
-        // Obtener las imágenes de los tickets y optimizarlas
+        // 🔹 Obtener imágenes de los tickets y optimizarlas
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
                 'foto_base64' => !empty($foto->foto)
@@ -2437,9 +2435,8 @@ class OrdenesTrabajoController extends Controller
 
         // 🔹 Obtener la fecha_inicio de la visita seleccionada
         $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio)) // Formato dd/mm/yyyy
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
             : 'N/A';
-
 
         // 🔹 Renderizar vista
         $html = View('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', [
@@ -2454,6 +2451,7 @@ class OrdenesTrabajoController extends Controller
             'imagenesFotosTickets' => $imagenesFotosTickets
         ])->render();
 
+        // 🔹 Generar PDF con Browsershot
         $pdfContent = Browsershot::html($html)
             ->format('A4')
             ->fullPage()
