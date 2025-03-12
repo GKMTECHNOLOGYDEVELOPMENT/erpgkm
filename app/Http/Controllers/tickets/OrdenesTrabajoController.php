@@ -782,7 +782,7 @@ class OrdenesTrabajoController extends Controller
             $query->where('idClienteGeneral', $request->clienteGeneral);
         }
 
-        // 🔹 BÚSQUEDA GLOBAL (Corrección en `orWhereHas('visitas', ...)`)
+        // 🔹 BÚSQUEDA GLOBAL (Ahora incluye CATEGORÍA y CLIENTE GENERAL)
         if ($request->has('search') && !empty($request->input('search.value'))) {
             $searchValue = $request->input('search.value');
 
@@ -792,16 +792,23 @@ class OrdenesTrabajoController extends Controller
                     ->orWhereHas('modelo', function ($q) use ($searchValue) {
                         $q->where('nombre', 'LIKE', "%{$searchValue}%");
                     })
+                    ->orWhereHas('modelo.categoria', function ($q) use ($searchValue) { // 🔥 Buscar en CATEGORÍA
+                        $q->where('nombre', 'LIKE', "%{$searchValue}%");
+                    })
+                    ->orWhereHas('clientegeneral', function ($q) use ($searchValue) { // 🔥 Buscar en CLIENTE GENERAL
+                        $q->where('descripcion', 'LIKE', "%{$searchValue}%");
+                    })
                     ->orWhereHas('cliente', function ($q) use ($searchValue) {
                         $q->where('nombre', 'LIKE', "%{$searchValue}%");
                     })
                     ->orWhere('serie', 'LIKE', "%{$searchValue}%")
                     ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                    ->orWhereHas('visitas', function ($q) use ($searchValue) { // ✅ Corrección aquí
+                    ->orWhereHas('visitas', function ($q) use ($searchValue) { // ✅ Buscar en fecha de visita
                         $q->where('fecha_programada', 'LIKE', "%{$searchValue}%");
                     });
             });
         }
+
 
         // 🔹 TOTAL DE REGISTROS
         $recordsTotal = Ticket::count();
