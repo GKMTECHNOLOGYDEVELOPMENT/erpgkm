@@ -114,8 +114,9 @@ class Usuario extends Authenticatable
 
 	public function tipoDocumento()
 	{
-		return $this->belongsTo(TipoDocumento::class, 'idTipoDocumento');
+		return $this->belongsTo(Tipodocumento::class, 'idTipoDocumento', 'idTipoDocumento');
 	}
+	
 	
 
 	public function tipoUsuario()

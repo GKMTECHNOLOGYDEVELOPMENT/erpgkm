@@ -64,7 +64,9 @@ document.addEventListener("alpine:init", () => {
             return data.map(usuario => [
                 `<div style="text-align: center;">${usuario.Nombre || "N/A"}</div>`,
                 `<div style="text-align: center;">${usuario.apellidoPaterno || "N/A"}</div>`,
-                `<div style="text-align: center;">${usuario.tipoDocumento ? usuario.tipoDocumento.nombre : "N/A"}</div>`,
+                // `<div style="text-align: center;">${usuario.tipoDocumento ? usuario.tipoDocumento.nombre : "N/A"}</div>`,
+                `<div style="text-align: center;">${usuario.tipoDocumento ? usuario.tipoDocumento.idTipoDocumento : "N/A"}</div>`,
+
                 `<div style="text-align: center;">${usuario.documento || "N/A"}</div>`,
                 `<div style="text-align: center;">${usuario.telefono || "N/A"}</div>`,
                 `<div style="text-align: center;">${usuario.tipoUsuario ? usuario.tipoUsuario.nombre : "N/A"}</div>`,

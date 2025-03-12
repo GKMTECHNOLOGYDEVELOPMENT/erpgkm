@@ -544,27 +544,41 @@ public function guardarCuenta(Request $request)
         }
     }
 
+    // use Illuminate\Support\Facades\Log;
+
     public function getUsuarios()
     {
+        // Log: Iniciando la obtención de usuarios
+        Log::debug('Iniciando la obtención de usuarios con relaciones');
+    
         // Obtener usuarios con sus relaciones
         $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])->get();
+    
+        // Log: Usuarios obtenidos
+        Log::debug('Usuarios obtenidos: ', ['usuarios' => $usuarios]);
     
         // Convertir los campos 'avatar' y 'firma' a base64
         foreach ($usuarios as $usuario) {
             if ($usuario->avatar) {
                 // Convertir el avatar a base64
                 $usuario->avatar = base64_encode($usuario->avatar);
+                Log::debug('Avatar convertido a base64 para el usuario', ['id' => $usuario->idUsuario, 'avatar' => $usuario->avatar]);
             }
     
             if ($usuario->firma) {
                 // Convertir la firma a base64
                 $usuario->firma = base64_encode($usuario->firma);
+                Log::debug('Firma convertida a base64 para el usuario', ['id' => $usuario->idUsuario, 'firma' => $usuario->firma]);
             }
         }
+    
+        // Log: Finalizando la función y enviando la respuesta
+        Log::debug('Finalizando la función getUsuarios, enviando respuesta');
     
         // Devolver los datos como respuesta JSON
         return response()->json($usuarios);
     }
+    
     
 
 
