@@ -342,7 +342,11 @@
             </div>
 
             <!-- Botón de Guardar -->
-            <div class="md:col-span-2 flex justify-end">
+            <div class="md:col-span-2 flex justify-end space-x-4">
+                <!-- Botón de Volver con outline-danger -->
+                <a href="{{ route('ordenes.smart') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
+            
+                <!-- Botón de Modificar -->
                 <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
             </div>
         </div>
