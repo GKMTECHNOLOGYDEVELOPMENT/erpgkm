@@ -452,7 +452,7 @@ class="mb-5" @toggle-modal.window="open = !open">
                         </div>
 
                         <!-- Mostrar checkbox "¿Necesita Apoyo?" solo si el encargado es Técnico -->
-                        <div x-show="encargadoTipo == 4" class="mt-4">
+                        <div x-show="encargadoTipo == 1" class="mt-4">
                             <label class="inline-flex items-center">
                                 <input type="checkbox" id="necesitaApoyo" name="necesita_apoyo"
                                     class="form-checkbox" x-model="necesitaApoyo">
