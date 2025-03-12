@@ -792,23 +792,8 @@ if ($ultimaVisita) {
     $recordsTotal = Ticket::count();
     $recordsFiltered = $query->count();
 
-    // 🔹 ORDENACIÓN SEGÚN DATATABLES (Corrección en `visitas`)
-    $columns = ['numero_ticket', 'fecha_creacion', 'visitas.fecha_programada']; // ✅ Corrección aquí
-    if ($request->has('order')) {
-        $orderByColumn = $columns[$request->input('order.0.column', 0)] ?? 'fecha_creacion';
-        $orderDir = $request->input('order.0.dir', 'asc');
-
-        if ($orderByColumn === 'visitas.fecha_programada') {
-            $query->orderBy(
-                Visita::select('fecha_programada')
-                    ->whereColumn('visitas.idTickets', 'tickets.idTickets')
-                    ->latest(),
-                $orderDir
-            );
-        } else {
-            $query->orderBy($orderByColumn, $orderDir);
-        }
-    }
+    // 🔹 ORDENACIÓN: Los tickets más recientes primero
+    $query->orderBy('fecha_creacion', 'desc');
 
     // 🔹 PAGINACIÓN SEGÚN DATATABLES
     $start = $request->input('start', 0);
