@@ -176,7 +176,7 @@
                 <div>
                     <label for="idSucursal">Sucursal</label>
                     <select name="idSucursal" id="idSucursal" class="form-input">
-                        <option value="" disabled>Selecciona una Sucursal</option>
+                        <option value="" selected disabled>Selecciona una Sucursal</option>
                         @foreach ($sucursales as $sucursal)
                             <option value="{{ $sucursal->idSucursal }}"
                                 {{ $usuario->idSucursal == $sucursal->idSucursal ? 'selected' : '' }}>
@@ -189,7 +189,7 @@
                 <div>
                     <label for="idTipoUsuario">Tipo de Usuario</label>
                     <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
-                        <option value="" disabled>Selecciona un Tipo de Usuario</option>
+                        <option value="" selected disabled>Selecciona un Tipo de Usuario</option>
                         @foreach ($tiposUsuario as $tipoUsuario)
                             <option value="{{ $tipoUsuario->idTipoUsuario }}"
                                 {{ $usuario->idTipoUsuario == $tipoUsuario->idTipoUsuario ? 'selected' : '' }}>
@@ -202,7 +202,7 @@
                 <div>
                     <label for="idSexo">Sexo</label>
                     <select name="idSexo" id="idSexo" class="form-input">
-                        <option value="" disabled>Selecciona un Sexo</option>
+                        <option value="" selected disabled>Selecciona un Sexo</option>
                         @foreach ($sexos as $sexo)
                             <option value="{{ $sexo->idSexo }}"
                                 {{ $usuario->idSexo == $sexo->idSexo ? 'selected' : '' }}>
@@ -215,7 +215,7 @@
                 <div>
                     <label for="idRol">Rol</label>
                     <select name="idRol" id="idRol" class="form-input">
-                        <option value="" disabled>Selecciona un Rol</option>
+                        <option value="" selected disabled>Selecciona un Rol</option>
                         @foreach ($roles as $rol)
                             <option value="{{ $rol->idRol }}"
                                 {{ $usuario->idRol == $rol->idRol ? 'selected' : '' }}>
@@ -228,7 +228,7 @@
                 <div>
                     <label for="idTipoArea">Tipo de Área</label>
                     <select name="idTipoArea" id="idTipoArea" class="form-input">
-                        <option value="" disabled>Selecciona un Tipo de Área</option>
+                        <option value="" selected disabled>Selecciona un Tipo de Área</option>
                         @foreach ($tiposArea as $tipoArea)
                             <option value="{{ $tipoArea->idTipoArea }}"
                                 {{ $usuario->idTipoArea == $tipoArea->idTipoArea ? 'selected' : '' }}>

@@ -102,10 +102,10 @@
                         @include('usuario.tabs.detalles-pago.index') <!-- Ajusta el path -->
                     </div>
                     <div x-show="tab === 'preferences'">
-                        @include('usuario.tabs.detalles-pago.index') <!-- Ajusta el path -->
+                        @include('usuario.tabs.configuracion.index') <!-- Ajusta el path -->
                     </div>
                     <div x-show="tab === 'danger-zone'">
-                        @include('usuario.tabs.detalles-pago.index') <!-- Ajusta el path -->
+                        @include('usuario.tabs.detalles.index') <!-- Ajusta el path -->
                     </div>
                 </div>
             </div>

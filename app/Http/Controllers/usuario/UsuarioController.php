@@ -4,6 +4,7 @@ namespace App\Http\Controllers\usuario;
 
 use App\Http\Controllers\Controller;
 use App\Mail\UsuarioCreado;
+use App\Models\CuentasBancarias;
 use App\Models\Rol;
 use App\Models\Sexo;
 use App\Models\Sucursal;
@@ -133,6 +134,29 @@ public function edit($id)
     $usuario = Usuario::findOrFail($id); // Buscar al usuario por id
     Log::info('Usuario encontrado:', ['usuario' => $usuario]);
 
+       // Obtener las cuentas bancarias del usuario
+       $cuentasBancarias = CuentasBancarias::where('idUsuario', $id)->get(); // Asumiendo que Cuentasbancarias es el modelo para la tabla cuentasbancarias
+       Log::info('Cuentas bancarias del usuario:', ['cuentasBancarias' => $cuentasBancarias]);
+
+
+        // Convertir la firma y la imagen del usuario a Base64
+    $firmaBase64 = null;
+    $avatarBase64 = null;
+
+    // Verificar si la firma está en formato binario, si es así convertirla
+    if ($usuario->firma) {
+        $firmaBase64 = base64_encode($usuario->firma); // Convertir la firma a base64
+        $firmaBase64 = "data:image/png;base64," . $firmaBase64; // Prependiendo el encabezado necesario para mostrar como imagen
+    }
+
+    // Verificar si el avatar (imagen) está en formato binario, si es así convertirla
+    if ($usuario->avatar) {
+        $avatarBase64 = base64_encode($usuario->avatar); // Convertir el avatar a base64
+        $avatarBase64 = "data:image/png;base64," . $avatarBase64; // Prependiendo el encabezado necesario para mostrar como imagen
+    }
+
+
+
     // Obtener los datos para los selectores
     $tiposDocumento = TipoDocumento::all(); // Si es necesario obtener tipos de documento
     $sucursales = Sucursal::all(); // Obtener todas las sucursales
@@ -207,12 +231,32 @@ public function edit($id)
     $distritoSeleccionado = null;
 
     // Devolver la vista con los datos requeridos
-    return view('usuario.edit', compact('usuario', 'tiposDocumento', 'sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea', 'departamentos', 'provinciasDelDepartamento', 'provinciaSeleccionada', 'distritosDeLaProvincia', 'distritoSeleccionado'));
+    return view('usuario.edit', compact('usuario', 'tiposDocumento', 'sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea', 'departamentos', 'provinciasDelDepartamento', 'provinciaSeleccionada', 'distritosDeLaProvincia', 'distritoSeleccionado', 'cuentasBancarias'));
 }
 
 
 
+public function guardarCuenta(Request $request)
+{
+    // Validar los datos recibidos
+    $request->validate([
+        'tipoCuenta' => 'required|integer|in:1,2', // 1 = Numero interbancario, 2 = Numero de cuenta
+        'numeroCuenta' => 'required|string|max:255',
+        'usuarioId' => 'required|integer|exists:usuarios,idUsuario', // Asegurarse de que el usuario existe
+    ]);
 
+    // Crear la cuenta bancaria
+    $cuentaBancaria = new CuentasBancarias();
+    $cuentaBancaria->tipodecuenta = $request->tipoCuenta;
+    $cuentaBancaria->numerocuenta = $request->numeroCuenta;
+    $cuentaBancaria->idUsuario = $request->usuarioId;
+
+    // Guardar en la base de datos
+    $cuentaBancaria->save();
+
+    // Devolver una respuesta JSON indicando que todo salió bien
+    return response()->json(['success' => true, 'message' => 'Cuenta bancaria guardada con éxito']);
+}
 
 
 
@@ -288,21 +332,89 @@ public function edit($id)
 
 
 
+    // public function config(Request $request, $id)
+    // {
+    //     // Validación de los campos, asegurando que no se repitan en la base de datos
+    //     $request->validate([
+    //         'sueldoPorHora' => 'required|numeric',
+    //         'idSucursal' => 'required|integer|exists:sucursal,idSucursal',  // Verifica si la sucursal existe
+    //         'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',  // Verifica si el tipo de usuario existe
+    //         'idSexo' => 'required|integer|exists:sexo,idSexo',  // Verifica si el sexo existe
+    //         'idRol' => 'required|integer|exists:rol,idRol',  // Verifica si el rol existe
+    //         'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',  // Verifica si el tipo de área existe
+    //     ]);
+
+    //     // Obtener el usuario
+    //     $usuario = Usuario::findOrFail($id);
+
+    //     // Actualizar los campos
+    //     $usuario->sueldoPorHora = $request->sueldoPorHora;
+    //     $usuario->idSucursal = $request->idSucursal;
+    //     $usuario->idTipoUsuario = $request->idTipoUsuario;
+    //     $usuario->idSexo = $request->idSexo;
+    //     $usuario->idRol = $request->idRol;
+    //     $usuario->idTipoArea = $request->idTipoArea;
+
+    //     // Guardar los cambios
+    //     $usuario->save();
+
+    //     // Respuesta exitosa en formato JSON
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Usuario actualizado correctamente',
+    //         'usuario' => $usuario
+    //     ], 200);
+    // }
+
+
     public function config(Request $request, $id)
     {
-        // Validación de los campos, asegurando que no se repitan en la base de datos
+        // Validación de los campos
         $request->validate([
             'sueldoPorHora' => 'required|numeric',
-            'idSucursal' => 'required|integer|exists:sucursal,idSucursal',  // Verifica si la sucursal existe
-            'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',  // Verifica si el tipo de usuario existe
-            'idSexo' => 'required|integer|exists:sexo,idSexo',  // Verifica si el sexo existe
-            'idRol' => 'required|integer|exists:rol,idRol',  // Verifica si el rol existe
-            'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',  // Verifica si el tipo de área existe
+            'idSucursal' => 'required|integer|exists:sucursal,idSucursal',
+            'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',
+            'idSexo' => 'required|integer|exists:sexo,idSexo',
+            'idRol' => 'required|integer|exists:rol,idRol',
+            'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',
         ]);
-
+    
+        Log::info('Validación completada', ['request_data' => $request->all()]);
+    
         // Obtener el usuario
         $usuario = Usuario::findOrFail($id);
+        Log::info('Usuario encontrado', ['usuario' => $usuario]);
+    
+ // Convertir la firma a Base64 si existe
+ $firmaBase64 = null;
+ if ($usuario->firma) {
+     $firmaBase64 = base64_encode($usuario->firma);
+     // Validar si la firma base64 es correcta
+     if (base64_decode($firmaBase64, true) === false) {
+         Log::error('Firma no válida en base64', ['usuario_id' => $usuario->idUsuario]);
+         $firmaBase64 = null;
+     } else {
+         $firmaBase64 = "data:image/png;base64," . $firmaBase64;
+     }
+ } else {
+     Log::info('No se encontró firma para el usuario');
+ }
 
+ // Convertir el avatar a Base64 si existe
+ $avatarBase64 = null;
+ if ($usuario->avatar) {
+     $avatarBase64 = base64_encode($usuario->avatar);
+     // Validar si el avatar base64 es correcto
+     if (base64_decode($avatarBase64, true) === false) {
+         Log::error('Avatar no válido en base64', ['usuario_id' => $usuario->idUsuario]);
+         $avatarBase64 = null;
+     } else {
+         $avatarBase64 = "data:image/png;base64," . $avatarBase64;
+     }
+ } else {
+     Log::info('No se encontró avatar para el usuario');
+ }
+    
         // Actualizar los campos
         $usuario->sueldoPorHora = $request->sueldoPorHora;
         $usuario->idSucursal = $request->idSucursal;
@@ -310,17 +422,23 @@ public function edit($id)
         $usuario->idSexo = $request->idSexo;
         $usuario->idRol = $request->idRol;
         $usuario->idTipoArea = $request->idTipoArea;
-
+    
+        Log::info('Campos del usuario actualizados', ['usuario_data' => $usuario->toArray()]);
+    
         // Guardar los cambios
         $usuario->save();
-
-        // Respuesta exitosa en formato JSON
+        Log::info('Usuario guardado exitosamente', ['usuario_id' => $usuario->idUsuario]);
+    
+        // Respuesta exitosa en formato JSON con Base64 para firma y avatar
         return response()->json([
             'success' => true,
             'message' => 'Usuario actualizado correctamente',
-            'usuario' => $usuario
+            'usuario' => $usuario,
+            'firmaBase64' => $firmaBase64,
+            'avatarBase64' => $avatarBase64
         ], 200);
     }
+
 
 
 

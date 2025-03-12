@@ -5,18 +5,20 @@
 </span>
 
 <div class="flex gap-1 sm:gap-2 justify-center mt-2">
-    @if($existeFlujo4)
-        <!-- Si existe el flujo con idEstadflujo = 4, ocultar el botón -->
-        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base" style="display: none;">
+    @if(!$existeFlujo4 && ($condicion || !$visitaExistente || $ultimaVisitaCondicion))
+        <!-- Si no existe el flujo con idEstadflujo = 4, existe una condición para el idTickets y idVisitas, o no existe ninguna visita, mostrar el botón -->
+        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
             Coordinación
         </button>
     @else
-        <!-- Si no existe el flujo con idEstadflujo = 4, mostrar el botón -->
-        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
+        <!-- Si no se cumple ninguna de las condiciones anteriores, ocultar el botón -->
+        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base" style="display: none;">
             Coordinación
         </button>
     @endif
 </div>
+
+
 
 
 

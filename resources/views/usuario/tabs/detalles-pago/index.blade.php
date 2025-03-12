@@ -16,9 +16,11 @@
                     <p>Por favor, firme en el área de abajo para completar el proceso de validación.</p>
 
                     <!-- Contenedor flexible -->
-                    <div class="w-full max-w-[700px] mx-auto">
-                        <canvas id="signature-pad" class="w-full h-auto border border-black"></canvas>
-                    </div>
+               <!-- Contenedor flexible -->
+<div class="w-full max-w-[700px] mx-auto">
+    <canvas id="signature-pad" class="border border-black"></canvas>
+</div>
+
 
 
                     <!-- Botones para limpiar y guardar la firma -->
@@ -163,57 +165,81 @@
 
 
             <div class="panel">
-                <div class="mb-5">
-                    <h5 class="font-semibold text-lg mb-4">Payment History</h5>
-                    <p>Changes to your <span class="text-primary">Payment Method</span> information
+                <div x-data="{ customUserId: @json($usuario->idUsuario) }" x-init="cargarCuentasBancarias(customUserId)" class="mb-5">
+                    <h5 class="font-semibold text-lg mb-4">Cuentas Bancarias</h5>
+                    <!-- <p>Changes to your <span class="text-primary">Payment Method</span> information
                         will take effect starting with scheduled payment and will be refelected on your
-                        next invoice.</p>
+                        next invoice.</p> -->
                 </div>
-                <div class="mb-5">
-                    <div class="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
-                        <div class="flex items-start justify-between py-3">
-                            <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                <img src="/assets/images/card-americanexpress.svg" alt="image" />
-                            </div>
-                            <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
-                                Mastercard <span
-                                    class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">XXXX
-                                    XXXX XXXX 9704</span></h6>
-                            <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                <button class="btn btn-dark">Edit</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
-                        <div class="flex items-start justify-between py-3">
-                            <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                <img src="/assets/images/card-mastercard.svg" alt="image" />
-                            </div>
-                            <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
-                                American Express<span
-                                    class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">XXXX
-                                    XXXX XXXX 310</span></h6>
-                            <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                <button class="btn btn-dark">Edit</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex items-start justify-between py-3">
-                            <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                <img src="/assets/images/card-visa.svg" alt="image" />
-                            </div>
-                            <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
-                                Visa<span
-                                    class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">XXXX
-                                    XXXX XXXX 5264</span></h6>
-                            <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
-                                <button class="btn btn-dark">Edit</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="mb-5" id="cuentas-bancarias">
+        <!-- Aquí se cargarán las cuentas bancarias dinámicamente con JS -->
+    </div>
             </div>
+
+            <script>
+// Recibe el `customUserId` pasado desde Alpine.js
+function cargarCuentasBancarias(customUserId) {
+    console.log("Cargando cuentas bancarias para el usuario con ID:", customUserId);
+
+    // Hacer una solicitud AJAX a la API de cuentas bancarias
+    fetch(`/api/cuentas-bancarias/${customUserId}`)
+        .then(response => {
+            if (!response.ok) {
+                console.error("Error en la solicitud de cuentas bancarias:", response.status);
+            }
+            return response.json();  // Parsear la respuesta JSON
+        })
+        .then(cuentasBancarias => {
+            console.log("Cuentas bancarias obtenidas:", cuentasBancarias);  // Ver los datos de las cuentas bancarias
+
+            const container = document.getElementById('cuentas-bancarias');
+            container.innerHTML = '';  // Limpiar contenido previo
+            
+            if (cuentasBancarias.length === 0) {
+                console.log("No se encontraron cuentas bancarias para este usuario.");
+            }
+
+            cuentasBancarias.forEach(cuenta => {
+                console.log("Procesando cuenta bancaria:", cuenta);  // Ver cada cuenta que estamos procesando
+                
+                // Crear un nuevo elemento para cada cuenta bancaria
+                const cuentaElement = document.createElement('div');
+                cuentaElement.classList.add('border-b', 'border-[#ebedf2]', 'dark:border-[#1b2e4b]');
+                cuentaElement.innerHTML = `
+                    <div class="flex items-start justify-between py-3">
+                        <div class="flex-none ltr:mr-4 rtl:ml-4">
+                            <!-- Aquí puedes agregar una imagen del tipo de tarjeta si es necesario -->
+                            <img src="/assets/images/card-visa.svg" alt="image" />
+                        </div>
+                        <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
+                            ${cuenta.tipodecuenta === 1 ? 'Mastercard' : 'Visa'} 
+                            <span class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">
+                                XXXX XXXX XXXX ${cuenta.numerocuenta.slice(-4)}
+                            </span>
+                        </h6>
+                        <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto">
+                           <button class="btn btn-primary">Ver</button>
+                            <button class="btn btn-dark">Edit</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(cuentaElement);
+            });
+        })
+        .catch(error => {
+            console.error('Error al cargar las cuentas bancarias:', error);  // Mostrar cualquier error que ocurra
+        });
+}
+
+// Cargar las cuentas bancarias cuando la página esté lista
+document.addEventListener('DOMContentLoaded', function() {
+    const customUserId = @json($usuario->idUsuario);
+    cargarCuentasBancarias(customUserId);
+});
+</script>
+
+
+
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div class="panel">
@@ -239,40 +265,52 @@
                                     value="{{ old('nacionalidad', $usuario->nacionalidad) }}" class="form-input" />
                             </div>
 
-                            <!-- Departamento -->
-                            <div>
-                                <label for="departamento" class="block text-sm font-medium">Departamento</label>
-                                <select id="departamento" name="departamento" class="form-input w-full">
-                                    <option value="" disabled selected>Seleccionar Departamento
-                                    </option>
-                                    @foreach ($departamentos as $departamento)
-                                        <option value="{{ $departamento['id_ubigeo'] }}"
-                                            {{ old('departamento', $usuario->departamento) == $departamento['id_ubigeo'] ? 'selected' : '' }}>
-                                            {{ $departamento['nombre_ubigeo'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div id="departamento-error" class="text-red-500 text-sm" style="display: none;"></div>
-                            </div>
+                            <!-- departamento -->
+                    <!-- Departamento -->
+                    <div>
+                    <label for="departamento" class="block text-sm font-medium">Departamento</label>
+                    <select id="departamento" name="departamento" class="form-input w-full">
+                        <option value="" disabled selected>Seleccionar Departamento</option>
+                        @foreach ($departamentos as $departamento)
+                            <option value="{{ $departamento['id_ubigeo'] }}"
+                                {{ old('departamento', $usuario->departamento) == $departamento['id_ubigeo'] ? 'selected' : '' }}>
+                                {{ $departamento['nombre_ubigeo'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div id="departamento-error" class="text-red-500 text-sm" style="display: none;"></div>
+                </div>
                         </div>
 
                         <!-- Información de Ubicación -->
                         <div class="mb-5">
-                            <div>
-                                <label for="provincia" class="block text-sm font-medium">Provincia</label>
-                                <select id="provincia" name="provincia" class="form-input w-full">
-                                    <option value="" disabled selected>Seleccionar Provincia
-                                    </option>
-                                </select>
-                            </div>
+                        <div>
+                    <label for="provincia" class="block text-sm font-medium">Provincia</label>
+                    <select id="provincia" name="provincia" class="form-input w-full">
+                        <option value="" disabled>Seleccionar Provincia</option>
+                        @foreach ($provinciasDelDepartamento as $provincia)
+                            <option value="{{ $provincia['id_ubigeo'] }}"
+                                {{ old('provincia', $usuario->provincia) == $provincia['id_ubigeo'] ? 'selected' : '' }}>
+                                {{ $provincia['nombre_ubigeo'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <div id="provincia-error" class="text-red-500 text-sm" style="display: none;"></div>
+                </div>
+                <div>
+                    <label for="distrito" class="block text-sm font-medium">Distrito</label>
+                    <select id="distrito" name="distrito" class="form-input w-full">
+                        <option value="" disabled>Seleccionar Distrito</option>
+                        @foreach ($distritosDeLaProvincia as $distrito)
+                            <option value="{{ $distrito['id_ubigeo'] }}"
+                                {{ old('distrito', $usuario->distrito) == $distrito['id_ubigeo'] ? 'selected' : '' }}>
+                                {{ $distrito['nombre_ubigeo'] }}
+                            </option>
+                        @endforeach
+                    </select>
 
-                            <div>
-                                <label for="distrito" class="block text-sm font-medium">Distrito</label>
-                                <select id="distrito" name="distrito" class="form-input w-full">
-                                    <option value="" disabled selected>Seleccionar Distrito
-                                    </option>
-                                </select>
-                            </div>
+                    <div id="distrito-error" class="text-red-500 text-sm" style="display: none;"></div>
+                </div>
 
                             <div>
                                 <label for="direccion" class="block text-sm font-medium">Dirección</label>
@@ -286,6 +324,90 @@
                         <!-- Botón de Actualización -->
                         <button type="submit" class="btn btn-primary">Actualizar</button>
                     </form>
+
+                    <script>
+                        
+
+    $(document).ready(function() {
+        // Cargar provincias y distritos al cargar el formulario si ya hay un departamento seleccionado
+        function cargarProvincias(departamentoId) {
+            $.get('/ubigeo/provincias/' + departamentoId, function(data) {
+                var provinciaSelect = $('#provincia');
+                provinciaSelect.empty().prop('disabled', false);
+                provinciaSelect.append(
+                    '<option value="" disabled selected>Seleccionar Provincia</option>');
+
+                data.forEach(function(provincia) {
+                    provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
+                        provincia.nombre_ubigeo + '</option>');
+                });
+
+                // Si hay provincia seleccionada previamente, se selecciona automáticamente
+                var provinciaSeleccionada = '{{ old('provincia', $usuario->provincia) }}';
+                if (provinciaSeleccionada) {
+                    $('#provincia').val(provinciaSeleccionada).change();
+                }
+            });
+        }
+
+        function cargarDistritos(provinciaId) {
+            $.get('/ubigeo/distritos/' + provinciaId, function(data) {
+                var distritoSelect = $('#distrito');
+                distritoSelect.empty().prop('disabled', false);
+                distritoSelect.append(
+                    '<option value="" disabled selected>Seleccionar Distrito</option>');
+
+                data.forEach(function(distrito) {
+                    distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
+                        distrito.nombre_ubigeo + '</option>');
+                });
+
+                // Si hay distrito seleccionado previamente, se selecciona automáticamente
+                var distritoSeleccionado = '{{ old('distrito', $usuario->distrito) }}';
+                if (distritoSeleccionado) {
+                    $('#distrito').val(distritoSeleccionado);
+                }
+            });
+        }
+
+        // Si ya hay un departamento seleccionado al cargar la página
+        var departamentoId = $('#departamento').val();
+        if (departamentoId) {
+            cargarProvincias(departamentoId);
+        }
+
+        // Cargar distritos si ya hay una provincia seleccionada al cargar la página
+        var provinciaId = $('#provincia').val();
+        if (provinciaId) {
+            cargarDistritos(provinciaId);
+        }
+
+        // Cuando se selecciona un nuevo departamento
+        $('#departamento').change(function() {
+            var departamentoId = $(this).val();
+            if (departamentoId) {
+                // Limpiar los selects de provincia y distrito
+                $('#provincia').empty().prop('disabled', true);
+                $('#distrito').empty().prop('disabled', true);
+
+                cargarProvincias(departamentoId);
+            }
+        });
+
+        // Cuando se selecciona una provincia
+        $('#provincia').on('change', function() {
+            var provinciaId = $(this).val();
+            if (provinciaId) {
+                // Limpiar el select de distritos
+                $('#distrito').empty().prop('disabled', true);
+
+                cargarDistritos(provinciaId);
+            }
+        });
+    });
+                    </script>
+
+                    <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
 
 
 
@@ -346,22 +468,68 @@
                     <h5 class="font-semibold text-lg mb-4">Numero de cuenta</h5>
                 </div>
                 <div class="mb-5">
-                    <form>
-                        <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="payBrand">Seleccione Tipo de cuenta</label>
-                                <select id="payBrand" class="form-select text-white-dark">
-                                    <option selected>Numero interbancario</option>
-                                    <option>Numeero de cuenta</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="payNumber">Numero de cuenta</label>
-                                <input id="payNumber" type="text" placeholder="Card Number" class="form-input" />
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-primary" id="saveBtn">Guardar</button>
-                    </form>
+                <form>
+    <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <label for="payBrand">Seleccione Tipo de cuenta</label>
+            <select id="payBrand" class="form-select text-white-dark">
+                <option selected>Seleccione una Opcion</option>
+                <option value="1">Numero interbancario</option>
+                <option value="2">Numero de cuenta</option>
+            </select>
+        </div>
+        <div>
+            <label for="payNumber">Numero de cuenta</label>
+            <input id="payNumber" type="text" placeholder="Card Number" class="form-input" />
+        </div>
+    </div>
+    <button type="button" class="btn btn-primary" id="saveBtn">Guardar</button>
+</form>
+
+<script>
+    document.getElementById('saveBtn').addEventListener('click', function() {
+        // Obtener los valores del formulario
+        const tipoCuenta = document.getElementById('payBrand').value;
+        const numeroCuenta = document.getElementById('payNumber').value;
+
+        // Verificar si ambos campos están completos
+        if (tipoCuenta && numeroCuenta) {
+            // Obtener el ID del usuario desde PHP (si lo tienes disponible en el frontend)
+            const usuarioId = @json($usuario->idUsuario); 
+
+            // Enviar los datos al backend usando fetch (AJAX)
+            fetch('/api/guardar-cuenta', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // Token CSRF para Laravel
+                },
+                body: JSON.stringify({
+                    tipoCuenta: tipoCuenta,
+                    numeroCuenta: numeroCuenta,
+                    usuarioId: usuarioId,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success('Cuenta bancaria guardada con éxito');
+                    // const customUserId = @json($usuario->idUsuario);
+                    // cargarCuentasBancarias(customUserId);
+                    // Puedes hacer algo más como actualizar la UI con la nueva cuenta guardada
+                } else {
+                    toastr.error('Hubo un error al guardar la cuenta bancaria');
+                }
+            })
+            .catch(error => {
+                console.error('Error al guardar la cuenta:', error);
+                toastr.error('Error al guardar la cuenta bancaria');
+            });
+        } else {
+            toastr.error('Por favor, complete todos los campos');
+        }
+    });
+</script>
                 </div>
             </div>
             <!-- Contenedor donde se mostrará el número guardado -->
@@ -494,83 +662,83 @@
     });
 
 
-    $(document).ready(function() {
-        // Cargar provincias y distritos al cargar el formulario si ya hay un departamento seleccionado
-        function cargarProvincias(departamentoId) {
-            $.get('/ubigeo/provincias/' + departamentoId, function(data) {
-                var provinciaSelect = $('#provincia');
-                provinciaSelect.empty().prop('disabled', false);
-                provinciaSelect.append(
-                    '<option value="" disabled selected>Seleccionar Provincia</option>');
+    // $(document).ready(function() {
+    //     // Cargar provincias y distritos al cargar el formulario si ya hay un departamento seleccionado
+    //     function cargarProvincias(departamentoId) {
+    //         $.get('/ubigeo/provincias/' + departamentoId, function(data) {
+    //             var provinciaSelect = $('#provincia');
+    //             provinciaSelect.empty().prop('disabled', false);
+    //             provinciaSelect.append(
+    //                 '<option value="" disabled selected>Seleccionar Provincia</option>');
 
-                data.forEach(function(provincia) {
-                    provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
-                        provincia.nombre_ubigeo + '</option>');
-                });
+    //             data.forEach(function(provincia) {
+    //                 provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
+    //                     provincia.nombre_ubigeo + '</option>');
+    //             });
 
-                // Si hay provincia seleccionada previamente, se selecciona automáticamente
-                var provinciaSeleccionada = '{{ old('provincia', $usuario->provincia) }}';
-                if (provinciaSeleccionada) {
-                    $('#provincia').val(provinciaSeleccionada).change();
-                }
-            });
-        }
+    //             // Si hay provincia seleccionada previamente, se selecciona automáticamente
+    //             var provinciaSeleccionada = '{{ old('provincia', $usuario->provincia) }}';
+    //             if (provinciaSeleccionada) {
+    //                 $('#provincia').val(provinciaSeleccionada).change();
+    //             }
+    //         });
+    //     }
 
-        function cargarDistritos(provinciaId) {
-            $.get('/ubigeo/distritos/' + provinciaId, function(data) {
-                var distritoSelect = $('#distrito');
-                distritoSelect.empty().prop('disabled', false);
-                distritoSelect.append(
-                    '<option value="" disabled selected>Seleccionar Distrito</option>');
+    //     function cargarDistritos(provinciaId) {
+    //         $.get('/ubigeo/distritos/' + provinciaId, function(data) {
+    //             var distritoSelect = $('#distrito');
+    //             distritoSelect.empty().prop('disabled', false);
+    //             distritoSelect.append(
+    //                 '<option value="" disabled selected>Seleccionar Distrito</option>');
 
-                data.forEach(function(distrito) {
-                    distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
-                        distrito.nombre_ubigeo + '</option>');
-                });
+    //             data.forEach(function(distrito) {
+    //                 distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
+    //                     distrito.nombre_ubigeo + '</option>');
+    //             });
 
-                // Si hay distrito seleccionado previamente, se selecciona automáticamente
-                var distritoSeleccionado = '{{ old('distrito', $usuario->distrito) }}';
-                if (distritoSeleccionado) {
-                    $('#distrito').val(distritoSeleccionado);
-                }
-            });
-        }
+    //             // Si hay distrito seleccionado previamente, se selecciona automáticamente
+    //             var distritoSeleccionado = '{{ old('distrito', $usuario->distrito) }}';
+    //             if (distritoSeleccionado) {
+    //                 $('#distrito').val(distritoSeleccionado);
+    //             }
+    //         });
+    //     }
 
-        // Si ya hay un departamento seleccionado al cargar la página
-        var departamentoId = $('#departamento').val();
-        if (departamentoId) {
-            cargarProvincias(departamentoId);
-        }
+    //     // Si ya hay un departamento seleccionado al cargar la página
+    //     var departamentoId = $('#departamento').val();
+    //     if (departamentoId) {
+    //         cargarProvincias(departamentoId);
+    //     }
 
-        // Cargar distritos si ya hay una provincia seleccionada al cargar la página
-        var provinciaId = $('#provincia').val();
-        if (provinciaId) {
-            cargarDistritos(provinciaId);
-        }
+    //     // Cargar distritos si ya hay una provincia seleccionada al cargar la página
+    //     var provinciaId = $('#provincia').val();
+    //     if (provinciaId) {
+    //         cargarDistritos(provinciaId);
+    //     }
 
-        // Cuando se selecciona un nuevo departamento
-        $('#departamento').change(function() {
-            var departamentoId = $(this).val();
-            if (departamentoId) {
-                // Limpiar los selects de provincia y distrito
-                $('#provincia').empty().prop('disabled', true);
-                $('#distrito').empty().prop('disabled', true);
+    //     // Cuando se selecciona un nuevo departamento
+    //     $('#departamento').change(function() {
+    //         var departamentoId = $(this).val();
+    //         if (departamentoId) {
+    //             // Limpiar los selects de provincia y distrito
+    //             $('#provincia').empty().prop('disabled', true);
+    //             $('#distrito').empty().prop('disabled', true);
 
-                cargarProvincias(departamentoId);
-            }
-        });
+    //             cargarProvincias(departamentoId);
+    //         }
+    //     });
 
-        // Cuando se selecciona una provincia
-        $('#provincia').on('change', function() {
-            var provinciaId = $(this).val();
-            if (provinciaId) {
-                // Limpiar el select de distritos
-                $('#distrito').empty().prop('disabled', true);
+    //     // Cuando se selecciona una provincia
+    //     $('#provincia').on('change', function() {
+    //         var provinciaId = $(this).val();
+    //         if (provinciaId) {
+    //             // Limpiar el select de distritos
+    //             $('#distrito').empty().prop('disabled', true);
 
-                cargarDistritos(provinciaId);
-            }
-        });
-    });
+    //             cargarDistritos(provinciaId);
+    //         }
+    //     });
+    // });
 
     // Inicializar Select2
     document.addEventListener("DOMContentLoaded", function() {
@@ -582,7 +750,7 @@
     });
 </script>
 
-<!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
+
 <!-- Agrega Select2 JS antes del cierre de </body> -->
 
 
@@ -604,3 +772,5 @@
         reader.readAsDataURL(event.target.files[0]);
     }
 </script>
+
+

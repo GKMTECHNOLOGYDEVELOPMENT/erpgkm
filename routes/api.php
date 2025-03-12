@@ -12,6 +12,7 @@ use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
+use App\Models\CuentasBancarias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -99,3 +100,15 @@ Route::get('/visita-seleccionada/{idVisita}', [OrdenesTrabajoController::class, 
 
 Route::get('/usuarios', [UsuarioController::class, 'getUsuarios']);
 Route::patch('/usuarios/{id}/estado', [UsuarioController::class, 'cambiarEstado']);
+
+
+Route::get('/cuentas-bancarias/{idUsuario}', function ($idUsuario) {
+    // Obtener las cuentas bancarias para el usuario especificado
+    $cuentasBancarias = CuentasBancarias::where('idUsuario', $idUsuario)->get();
+
+    // Retornar las cuentas bancarias en formato JSON
+    return response()->json($cuentasBancarias);
+});
+
+Route::post('/guardar-cuenta', [UsuarioController::class, 'guardarCuenta']);
+
