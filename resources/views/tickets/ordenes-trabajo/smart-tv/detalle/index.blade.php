@@ -250,29 +250,30 @@
             <div>
                 <label class="text-sm font-medium">Cliente</label>
                 <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
-                    <option value="" disabled>Seleccionar Cliente</option>
+                    <option value="">Seleccionar Cliente</option> <!-- Permite seleccionar un valor vacío -->
                     @foreach ($clientes as $cliente)
                         <option value="{{ $cliente->idCliente }}"
-                            {{ $cliente->idCliente == $orden->cliente->idCliente ? 'selected' : '' }}>
+                            {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
                             {{ $cliente->nombre }} - {{ $cliente->documento }}
                         </option>
                     @endforeach
                 </select>
             </div>
 
+
             <!-- Cliente General -->
             <div>
                 <label class="text-sm font-medium">Cliente General</label>
                 <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
                     <option value="" selected>Seleccionar Cliente General</option>
-                    @if($orden->clienteGeneral)
+                    @if ($orden->clienteGeneral)
                         <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
                             {{ $orden->clienteGeneral->descripcion }}
                         </option>
                     @endif
                 </select>
             </div>
-            
+
 
             <!-- Tienda -->
             <div>
@@ -427,7 +428,8 @@
                         renderTable(estados, currentPage);
                         setupPagination(estados.length);
                     } else {
-                        console.error('La respuesta no contiene un array de estados de flujo:', data.estadosFlujo);
+                        console.error('La respuesta no contiene un array de estados de flujo:', data
+                            .estadosFlujo);
                     }
                 })
                 .catch(error => {
@@ -467,7 +469,7 @@
 
                 // Botón "Más" y "Guardar" en la misma celda
                 const masCell = document.createElement("td");
-                masCell.classList.add("px-4", "py-2", "text-center","space-x-2");
+                masCell.classList.add("px-4", "py-2", "text-center", "space-x-2");
                 masCell.style.backgroundColor = ticketFlujo.estado_color; // Aplica el color del estado
 
                 // Botón "Más" (⋮)
@@ -478,7 +480,8 @@
 
                 // Botón "Guardar" como icono de check ✅ verde
                 const saveIconBtn = document.createElement("button");
-                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success", "text-white");
+                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success",
+                    "text-white");
                 saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
                 saveIconBtn.innerHTML = "✔"; // Ícono de check verde
 
@@ -496,15 +499,19 @@
                 const commentRow = document.createElement("tr");
                 commentRow.classList.add("hidden");
                 const commentCell = document.createElement("td");
-                commentCell.setAttribute("colspan", "4"); // Ajustado el colspan a la cantidad de columnas
+                commentCell.setAttribute("colspan",
+                "4"); // Ajustado el colspan a la cantidad de columnas
                 commentCell.classList.add("p-4");
-                commentCell.style.backgroundColor = ticketFlujo.estado_color; // Aplica el color del estado
+                commentCell.style.backgroundColor = ticketFlujo
+                .estado_color; // Aplica el color del estado
 
                 const textArea = document.createElement("textarea");
-                textArea.classList.add("w-full", "p-2", "rounded", "border", "border-black"); // 🔥 Borde negro
+                textArea.classList.add("w-full", "p-2", "rounded", "border",
+                "border-black"); // 🔥 Borde negro
                 textArea.textContent = ticketFlujo.comentarioflujo;
                 textArea.placeholder = "Escribe un comentario...";
-                textArea.style.backgroundColor = ticketFlujo.estado_color; // 🔥 Color de fondo del estado
+                textArea.style.backgroundColor = ticketFlujo
+                .estado_color; // 🔥 Color de fondo del estado
 
                 commentCell.appendChild(textArea);
                 commentRow.appendChild(commentCell);
@@ -566,24 +573,25 @@
                     let comentario = textArea.value;
 
                     fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-                        },
-                        body: JSON.stringify({
-                            comentario
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute("content")
+                            },
+                            body: JSON.stringify({
+                                comentario
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(result => {
-                        if (result.success) {
-                            toastr.success("Estado actualizado correctamente.");
-                        } else {
-                            toastr.error("Error al actualizar el estado.");
-                        }
-                    })
-                    .catch(error => console.error("Error al actualizar el estado:", error));
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                toastr.success("Estado actualizado correctamente.");
+                            } else {
+                                toastr.error("Error al actualizar el estado.");
+                            }
+                        })
+                        .catch(error => console.error("Error al actualizar el estado:", error));
                 });
             });
         }
