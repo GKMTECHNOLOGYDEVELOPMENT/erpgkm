@@ -548,36 +548,34 @@ public function guardarCuenta(Request $request)
 
     public function getUsuarios()
     {
-        // Log: Iniciando la obtención de usuarios
         Log::debug('Iniciando la obtención de usuarios con relaciones');
     
-        // Obtener usuarios con sus relaciones
-        $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])->get();
+        $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])->get()
+            ->map(function ($usuario) {
+                return [
+                    'idUsuario' => $usuario->idUsuario,
+                    'Nombre' => $usuario->Nombre,
+                    'apellidoPaterno' => $usuario->apellidoPaterno,
+                    'telefono' => $usuario->telefono ?? 'N/A',
+                    'correo' => $usuario->correo ?? 'N/A',
+                    'documento' => $usuario->documento ?? 'N/A',
+                    'estado' => $usuario->estado,
+                    'tipoDocumento' => $usuario->tipoDocumento ? $usuario->tipoDocumento->nombre : 'N/A',
+                    'tipoUsuario' => $usuario->tipoUsuario ? $usuario->tipoUsuario->nombre : 'N/A',
+                    'rol' => $usuario->rol ? $usuario->rol->nombre : 'N/A',
+                    'tipoArea' => $usuario->tipoArea ? $usuario->tipoArea->nombre : 'N/A',
+                    'avatar' => !empty($usuario->avatar) ? 'data:image/png;base64,' . base64_encode($usuario->avatar) : null,
+                    'tieneFirma' => !empty($usuario->firma), // 🔥 Solo enviamos `true` o `false`
+                ];
+            });
     
-        // Log: Usuarios obtenidos
-        Log::debug('Usuarios obtenidos: ', ['usuarios' => $usuarios]);
+        Log::debug('Usuarios obtenidos con relaciones:', ['usuarios' => $usuarios]);
     
-        // Convertir los campos 'avatar' y 'firma' a base64
-        foreach ($usuarios as $usuario) {
-            if ($usuario->avatar) {
-                // Convertir el avatar a base64
-                $usuario->avatar = base64_encode($usuario->avatar);
-                Log::debug('Avatar convertido a base64 para el usuario', ['id' => $usuario->idUsuario, 'avatar' => $usuario->avatar]);
-            }
-    
-            if ($usuario->firma) {
-                // Convertir la firma a base64
-                $usuario->firma = base64_encode($usuario->firma);
-                Log::debug('Firma convertida a base64 para el usuario', ['id' => $usuario->idUsuario, 'firma' => $usuario->firma]);
-            }
-        }
-    
-        // Log: Finalizando la función y enviando la respuesta
-        Log::debug('Finalizando la función getUsuarios, enviando respuesta');
-    
-        // Devolver los datos como respuesta JSON
         return response()->json($usuarios);
     }
+    
+    
+    
     
     
 

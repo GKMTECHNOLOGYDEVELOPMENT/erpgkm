@@ -13,15 +13,15 @@ document.addEventListener("alpine:init", () => {
                 .then(response => response.json())
                 .then(data => {
                     console.log("✅ Usuarios obtenidos:", data);
-        
+
                     // Ordenar por ID en orden descendente (usuarios más recientes primero)
                     this.usuariosData = data.sort((a, b) => b.idUsuario - a.idUsuario);
-        
+
                     this.initTable();
                 })
                 .catch(error => console.error("❌ Error al obtener usuarios:", error));
         },
-        
+
         initTable() {
             const tableElement = document.querySelector("#myTable1");
 
@@ -39,10 +39,11 @@ document.addEventListener("alpine:init", () => {
             console.log("📊 Inicializando Simple-DataTables...");
             this.datatable = new simpleDatatables.DataTable(tableElement, {
                 data: {
-                    headings: ["Nombre", "Apellido Paterno", "Tipo Documento", "Documento", "Teléfono", "Tipo Usuario", "Rol", "Área", "Estado", "Acción"],
+                    headings: ["Avatar", "Nombre", "Apellido Paterno", "Tipo Documento", "Documento", "Teléfono", "Email", "Tipo Usuario", "Rol", "Área", "Estado", "Firma", "Acción"],
                     data: this.formatDataForTable(this.usuariosData),
                 },
                 searchable: true,
+                sortable: false,
                 paging: true,
                 labels: {
                     placeholder: "Buscar...",
@@ -52,9 +53,10 @@ document.addEventListener("alpine:init", () => {
                 },
             });
 
-            // Centrando los encabezados y los datos
+            // 🔥 Centrar todo el contenido de la tabla (Encabezados y Datos)
             document.querySelectorAll("#myTable1 thead th, #myTable1 tbody td").forEach(cell => {
-                cell.style.textAlign = "center";
+                cell.style.textAlign = "center"; // Centrar texto
+                cell.style.verticalAlign = "middle"; // Centrar verticalmente
             });
 
             console.log("✅ Simple-DataTables inicializado correctamente.");
@@ -62,22 +64,45 @@ document.addEventListener("alpine:init", () => {
 
         formatDataForTable(data) {
             return data.map(usuario => [
+                `<div style="display: flex; justify-content: center; align-items: center;">
+                ${usuario.avatar ?
+                    `<img src="${usuario.avatar}" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; display: block; margin: auto;">`
+                    : `<svg class="w-10 h-10 text-gray-400 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                         <path d="M12 12c2.8 0 5-2.2 5-5s-2.2-5-5-5-5 2.2-5 5 2.2 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+                       </svg>`}
+            </div>`,
+
                 `<div style="text-align: center;">${usuario.Nombre || "N/A"}</div>`,
                 `<div style="text-align: center;">${usuario.apellidoPaterno || "N/A"}</div>`,
                 // `<div style="text-align: center;">${usuario.tipoDocumento ? usuario.tipoDocumento.nombre : "N/A"}</div>`,
-                `<div style="text-align: center;">${usuario.tipoDocumento ? usuario.tipoDocumento.idTipoDocumento : "N/A"}</div>`,
+                `<div style="text-align: center;">${usuario.tipoDocumento || "N/A"}</div>`,  // ACCEDE DIRECTAMENTE
 
                 `<div style="text-align: center;">${usuario.documento || "N/A"}</div>`,
                 `<div style="text-align: center;">${usuario.telefono || "N/A"}</div>`,
-                `<div style="text-align: center;">${usuario.tipoUsuario ? usuario.tipoUsuario.nombre : "N/A"}</div>`,
-                `<div style="text-align: center;">${usuario.rol ? usuario.rol.nombre : "N/A"}</div>`,
-                `<div style="text-align: center;">${usuario.tipoArea ? usuario.tipoArea.nombre : "N/A"}</div>`,
+                `<div style="text-align: center;">${usuario.correo || "N/A"}</div>`,
+                `<div style="text-align: center;">${usuario.tipoUsuario || "N/A"}</div>`,  // ACCEDE DIRECTAMENTE
+                `<div style="text-align: center;">${usuario.rol || "N/A"}</div>`,  // ACCEDE DIRECTAMENTE
+                `<div style="text-align: center;">${usuario.tipoArea || "N/A"}</div>`,  // ACCEDE DIRECTAMENTE
+
                 // Estado del usuario con badge de color
                 `<div style="text-align: center;">
                     ${usuario.estado === 1 ?
                     `<span class="badge badge-outline-success text-green-600 border-green-600 px-2 py-1 rounded-lg">Activo</span>` :
                     `<span class="badge badge-outline-danger text-red-600 border-red-600 px-2 py-1 rounded-lg">Inactivo</span>`}
                 </div>`,
+                // 🔥 Nueva columna para indicar si tiene firma
+                // 🔥 Mostrar si tiene firma sin mostrar la imagen
+                `<div style="text-align: center;">
+                    ${usuario.tieneFirma ?
+                    `<svg class="w-6 h-6 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="#22c55e" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M4.293 12.293a1 1 0 011.414 0L10 16.586l8.293-8.293a1 1 0 011.414 1.414l-9 9a1 1 0 01-1.414 0l-5-5a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>`
+                    :
+                    `<svg class="w-6 h-6 text-red-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18a8 8 0 110-16 8 8 0 010 16zm4.707-10.707a1 1 0 00-1.414-1.414L12 10.586 9.707 8.293a1 1 0 10-1.414 1.414L10.586 12l-2.293 2.293a1 1 0 101.414 1.414L12 13.414l2.293 2.293a1 1 0 001.414-1.414L13.414 12l2.293-2.293z" clip-rule="evenodd"/>
+                    </svg>`}
+                </div>`,
+
                 `<div style="text-align: center;" class="flex justify-center items-center gap-2">
                     <a href="/usuario/${usuario.idUsuario}/edit" class="text-blue-600 hover:text-blue-800" x-tooltip="Editar">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
