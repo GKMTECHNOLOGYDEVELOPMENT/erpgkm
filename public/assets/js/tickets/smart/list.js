@@ -32,7 +32,7 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.datatable1 = $('#myTable1').DataTable({
-                processing: true,
+                processing: false,
                 serverSide: true,
                 ajax: {
                     url: "/api/ordenes",
@@ -40,8 +40,14 @@ document.addEventListener('alpine:init', () => {
                     data: (d) => {
                         d.tipoTicket = 1;
                     },
+                    beforeSend: () => {
+                        this.isLoading = true; // 🔹 Muestra el preloader antes de la petición
+                    },
+                    complete: () => {
+                        this.isLoading = false; // 🔹 Oculta el preloader después de recibir datos
+                    },
                     dataSrc: (json) => {
-                        this.ordenesData = json.data; // Guardamos datos para usar en toggleRowDetails
+                        this.ordenesData = json.data; // Guardamos datos para toggleRowDetails
                         return json.data;
                     }
                 },
@@ -195,5 +201,11 @@ document.addEventListener('alpine:init', () => {
             year: 'numeric'
         });
     }
+    $(document).ready(function() {
+        setTimeout(() => {
+            $('.dataTables_length select').css('background-image', 'none');
+        }, 500);
+    });
+    
 
 });

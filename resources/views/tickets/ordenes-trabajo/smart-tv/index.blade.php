@@ -94,7 +94,7 @@
                         }
                     })" />
             </div>
- 
+
             <!-- Filtrar por Cliente General -->
             <div x-data="{ clienteGenerales: [], clienteGeneralFilter: '' }" x-init="fetch('/api/clientegenerales')
                 .then(response => response.json())
@@ -164,6 +164,17 @@
         <!-- Tabla y Paginación -->
         <div class="panel mt-6">
             <div class="relative overflow-x-auto custom-scroll">
+                <!-- Preloader -->
+                <!-- Preloader -->
+                <div x-show="isLoading" x-transition
+                    class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-100 z-50">
+                    <span class="w-4 h-4 m-auto">
+                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                    </span>
+                </div>
+
+
+
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
                 <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
                     <thead>
@@ -185,14 +196,6 @@
                         <!-- Los datos se llenarán dinámicamente -->
                     </tbody>
                 </table>
-
-                <!-- Preloader -->
-                <div x-show="isLoading"
-                    class="absolute inset-0 flex items-center justify-center bg-white bg-opaacity-75">
-                    <span class="w-10 h-10">
-                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-primary"></span>
-                    </span>
-                </div>
             </div>
             <!-- Paginación -->
             <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>

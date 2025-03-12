@@ -132,9 +132,10 @@ class Usuario extends Authenticatable
 
 	public function tipoArea()
 	{
-		return $this->belongsTo(TipoArea::class, 'idTipoArea');
+		return $this->belongsTo(TipoArea::class, 'idTipoArea', 'idTipoArea');
 	}
 	
+		
 
 	public function rol()
 	{
