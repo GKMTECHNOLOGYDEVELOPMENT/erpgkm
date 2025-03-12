@@ -1778,7 +1778,7 @@ if ($ultimaVisita) {
             $ticketflujo = DB::table('ticketflujo')->insertGetId([
                 'idTicket' => $request->idTickets,  // Usamos el idTickets de la solicitud
                 'idEstadflujo' => 9,               // Siempre 14 como estado
-                'idUsuario' => auth()->id(),        // ID del usuario autenticado
+                'idUsuario' => auth()->id(),
                 'fecha_creacion' => now(),          // Fecha actual
             ]);
 
