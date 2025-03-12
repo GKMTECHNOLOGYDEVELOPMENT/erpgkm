@@ -27,6 +27,7 @@
                                 <h5 class="font-semibold text-lg mb-4">Información de Usuario</h5>
                                 <p>Descargar los datos del usuario</p>
                                 <button type="button" class="btn btn-primary">Download Data</button>
+                     
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
