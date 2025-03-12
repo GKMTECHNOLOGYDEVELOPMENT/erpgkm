@@ -377,6 +377,11 @@ Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoContr
     ->name('obtener.firma.cliente')
     ->middleware('auth');
 
+    
+    Route::get('ordenes/smart/{id}/obtener-firma-tecnico', [OrdenesTrabajoController::class, 'obtenerFirmaTecnico'])
+    ->name('obtener.firma.tecnico')
+    ->middleware('auth');
+
 
 
 // routes/web.php

@@ -392,6 +392,47 @@ if ($ticket) {
     }
 }
 
+// Verificar si existe una condición para este ticket y visita
+$condicion = DB::table('condicionesticket')
+    ->where('idTickets', $ticketId)
+    ->where('idVisitas', $visitaId)
+    ->exists(); // Devuelve true si existe, false si no
+
+    // Obtener todas las visitas asociadas con el ticket
+$visitas = DB::table('visitas')
+->where('idTickets', $ticketId)  // Asumiendo que $ticketId es el id del ticket actual
+->get();
+
+// Verificar si alguna visita tiene una condición
+$condicionExistente = DB::table('condicionesticket')
+->whereIn('idVisitas', $visitas->pluck('idVisitas'))  // Obtener las visitas asociadas al ticket
+->exists();
+
+
+
+
+
+
+// Obtener todas las visitas asociadas a un ticket, ordenadas por el nombre
+$visitas = DB::table('visitas')
+    ->where('idTickets', $ticketId)
+    ->orderBy('nombre', 'desc')  // Ordenar por el nombre de la visita (para obtener la última visita con el nombre más alto)
+    ->get();
+
+// Verificar si hay visitas
+$ultimaVisita = $visitas->first();  // Obtener la última visita (la más alta en el orden alfabético)
+
+$ultimaVisitaCondicion = null;
+if ($ultimaVisita) {
+    // Verificar si existe una condición para esta última visita
+    $ultimaVisitaCondicion = DB::table('condicionesticket')
+        ->where('idTickets', $ticketId)
+        ->where('idVisitas', $ultimaVisita->idVisitas)
+        ->exists();  // Devuelve true si existe una condición
+}
+
+
+
         // Pasamos los datos a la vista
         return view("tickets.ordenes-trabajo.smart-tv.edit", compact(
             'ticket',
@@ -418,7 +459,10 @@ if ($ticket) {
             'visitaExistente',
             'existeFlujo4',
             'transicionExistente', // Pasamos la variable que indica si la transición existe
-              'visitaSeleccionada'  // Pasamos la variable que indica si la visita está seleccionada  // Pasamos la variable que indica si existe flujo 4
+            'visitaSeleccionada',  // Pasamos la variable que indica si la visita está seleccionada  // Pasamos la variable que indica si existe flujo 4
+            'condicion',  // Pasamos la variable $condicion a la vista
+            'condicionExistente',
+            'ultimaVisitaCondicion'
 
         ));
     }
@@ -1323,81 +1367,99 @@ if ($ticket) {
 
 
 
-
-
     public function obtenerVisitas($ticketId)
     {
+        Log::info('Obteniendo visitas para el ticket: ' . $ticketId);
+    
         // Obtener todas las visitas del ticket, incluyendo el técnico, los anexos y las condiciones
         $visitas = Visita::with(['tecnico', 'anexos_visitas' => function ($query) {
-            // Filtrar los anexos donde idTipovisita sea 2 o 3
             $query->whereIn('idTipovisita', [2, 3, 4]);
-        }, 'condicionesTickets']) // Aquí usamos el nombre correcto de la relación (condicionesTickets)
+        }, 'condicionesTickets'])
             ->where('idTickets', $ticketId)
             ->get();
-
-        Log::info('Visitas obteneidas: ', $visitas->toArray());
-
+    
+        Log::info('Visitas obtenidas para ticket ' . $ticketId, ['total_visitas' => $visitas->count()]);
+    
+        // Verificar si se han obtenido visitas
+        if ($visitas->isEmpty()) {
+            Log::warning('No se encontraron visitas para el ticket: ' . $ticketId);
+        }
+    
         // Convertir las fechas a formato ISO 8601
         $visitas->each(function ($visita) {
+            Log::info('Procesando visita ID: ' . $visita->idVisitas, [
+                'nombre' => $visita->nombre,
+                'fecha_inicio_hora' => $visita->fecha_inicio_hora,
+                'fecha_final_hora' => $visita->fecha_final_hora
+            ]);
+    
             $visita->fecha_inicio_hora = $visita->fecha_inicio_hora?->toIso8601String();
             $visita->fecha_final_hora = $visita->fecha_final_hora?->toIso8601String();
-
             // Incluir el nombre del técnico
-            $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;  // Aquí asumimos que el campo 'nombre' está en el modelo Usuario
-            $visita->idTicket = $visita->idTickets;  // Este es el ID del ticket asociado a la visita
-            $visita->idVisita = $visita->idVisitas;  // Este es el ID de la visita
-            $visita->nombre_visita = $visita->nombre; // Este es el nombre de la visita
-
-
-
-
-
+            $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;
+            $visita->idTicket = $visita->idTickets;
+            $visita->idVisita = $visita->idVisitas;
+            $visita->nombre_visita = $visita->nombre;
+    
+            Log::info('Visita procesada', ['nombre_tecnico' => $visita->nombre_tecnico, 'idTicket' => $visita->idTicket]);
+    
             $visita->servicio = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->servicio : null;
             $visita->motivo = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->motivo : null;
             $visita->titular = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->titular : null;
-
+    
             $visita->nombre = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->nombre : null;
             $visita->dni = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->dni : null;
             $visita->telefono = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->telefono : null;
-
-            // Iterar sobre los anexos y obtener los datos (solo los que tienen idTipovisita 2 o 3)
+    
+            // Excluir la firma y avatar del técnico si existe
+            if ($visita->tecnico) {
+                $visita->tecnico->makeHidden(['firma', 'avatar']);
+            }
+    
             $visita->anexos_visitas->each(function ($anexovisita) {
-                // Asegurarse de obtener todos los datos de los anexos
-                // Convertir la foto a base64 si existe
+                Log::info('Procesando anexo de visita', [
+                    'idTipovisita' => $anexovisita->idTipovisita,
+                    'ubicacion' => $anexovisita->ubicacion
+                ]);
+    
                 if ($anexovisita->foto) {
                     $anexovisita->foto = base64_encode($anexovisita->foto);
+                    Log::info('Foto de anexo convertida a base64');
                 }
-                // Si quieres incluir la descripción, lat, lng y ubicación
+    
                 $anexovisita->descripcion = $anexovisita->descripcion;
-                $anexovisita->idTipovisita = $anexovisita->idTipovisita;
                 $anexovisita->lat = $anexovisita->lat;
                 $anexovisita->lng = $anexovisita->lng;
                 $anexovisita->ubicacion = $anexovisita->ubicacion;
             });
-
-            // Verificar si existen condiciones para esta visita antes de usar each()
+    
             if ($visita->condicionesTickets) {
-                // Log de las condiciones
-                Log::info('Condiciones de la visita: ', $visita->condicionesTickets->toArray());
-
-                // Incluir las condiciones del ticket si existen
+                Log::info('Condiciones encontradas para la visita ID: ' . $visita->idVisitas);
+                
                 $visita->condicionesTickets->each(function ($condicion) {
-                    // Log de cada condición
-                    Log::info('Condición individual: ', $condicion->toArray());
-
-                    // Convertir la imagen de la condición a base64 si existe
+                    Log::info('Procesando condición', [
+                        'servicio' => $condicion->servicio,
+                        'motivo' => $condicion->motivo
+                    ]);
+    
                     if ($condicion->imagen) {
                         $condicion->imagen = base64_encode($condicion->imagen);
+                        Log::info('Imagen de condición convertida a base64');
                     }
                 });
             } else {
-                // Si no hay condiciones, puedes manejar el caso
-                $visita->condicionesTickets = []; // O simplemente no hacer nada
+                Log::warning('No se encontraron condiciones para la visita ID: ' . $visita->idVisitas);
+                $visita->condicionesTickets = [];
             }
         });
-
+    
+        // Devolver las visitas como respuesta JSON
         return response()->json($visitas);
     }
+    
+
+
+
 
 
 
@@ -2120,6 +2182,50 @@ if ($ticket) {
 
 
 
+    public function obtenerFirmaTecnico($id)
+{
+    // Obtener el idVisitas directamente con una consulta más eficiente
+    $idVisitas = DB::table('seleccionarvisita')
+        ->where('idTickets', $id) // Relacionamos el idTickets que hemos recibido
+        ->value('idVisitas'); // Obtenemos el idVisitas correspondiente
+
+    if (!$idVisitas) {
+        return response()->json(['error' => 'No se encontró la visita relacionada con este ticket'], 404);
+    }
+
+    // Obtener el idUsuario (técnico) de la tabla visitas
+    $idUsuario = DB::table('visitas')
+        ->where('idVisitas', $idVisitas)
+        ->value('idUsuario'); // Obtenemos el idUsuario (técnico) asociado con esta visita
+
+    if (!$idUsuario) {
+        return response()->json(['error' => 'No se encontró el técnico asociado a esta visita'], 404);
+    }
+
+    // Obtener la firma del técnico desde la tabla usuarios
+    $firmaTecnico = DB::table('usuarios')
+        ->where('idUsuario', $idUsuario)
+        ->value('firma'); // Obtenemos la firma en formato binario
+
+    // Verificar si la firma existe
+    if ($firmaTecnico) {
+        // Si la firma es un string base64, la usamos directamente
+        if (strpos($firmaTecnico, 'data:image/') !== false) {
+            return response()->json(['firma' => $firmaTecnico]);
+        }
+
+        // Si la firma no está en base64, la convertimos
+        $firmaTecnicoBase64 = base64_encode($firmaTecnico);
+        return response()->json(['firma' => "data:image/png;base64,$firmaTecnicoBase64"]);
+    }
+
+    return response()->json(['firma' => null], 404);
+}
+
+
+
+
+
 
 
 
@@ -2439,9 +2545,9 @@ if ($ticket) {
             ->first();
 
         // Aplicar optimización de imágenes a las firmas
-        $firmaTecnico = $firma && !empty($firma->firma_tecnico)
-            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
-            : null;
+        // $firmaTecnico = $firma && !empty($firma->firma_tecnico)
+        //     ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
+        //     : null;
 
         $firmaCliente = $firma && !empty($firma->firma_cliente)
             ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
@@ -2449,6 +2555,19 @@ if ($ticket) {
 
         // 🔹 OBTENER IMÁGENES EN BASE64 (Filtrar los anexos de la visita seleccionada)
         $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+
+        // 🔹 Obtener la firma del técnico (usuario)
+    $firmaTecnico = null;
+    if ($visitaSeleccionada && $visitaSeleccionada->tecnico) {
+        // Obtener el técnico (usuario) asociado a la visita
+        $tecnico = $visitaSeleccionada->tecnico;
+
+        // Comprobar si el técnico tiene una firma en la tabla `usuarios`
+        if ($tecnico && !empty($tecnico->firma)) {
+            // Codificar la firma en base64 para ser mostrada en el PDF
+            $firmaTecnico = 'data:image/png;base64,' . base64_encode($tecnico->firma);
+        }
+    }
 
         // Obtener los anexos de la visita seleccionada y optimizarlos
         $imagenesAnexos = [];

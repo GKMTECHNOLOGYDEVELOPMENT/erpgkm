@@ -8,9 +8,11 @@
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
             <img id="firmaTecnicoImg" class="w-full h-full object-contain" src="" alt="Firma del Técnico">
         </div>
-        <div class="flex space-x-3 mt-4">
 
-        </div>
+          <!-- Mensaje si no hay firma -->
+          <p id="noFirmaTecnico" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita.</p> 
+        <!-- Botón de refrescar -->
+        <button type="button" class="btn btn-info mt-4" onclick="cargarFirmaTecnico();">🔄 Refrescar Firma Tecnico</button>
     </div>
 
     <!-- Firma del Cliente -->
@@ -56,6 +58,57 @@
 
 
 <script>
+    // Función para cargar la firma del técnico
+function cargarFirmaTecnico() {
+    const ticketId = document.getElementById('ticketId').value; // Obtener el id del ticket
+    console.log("Obteniendo firma del técnico para el ticket ID:", ticketId); // Log para verificar el ticketId
+
+    // Obtener la firma del técnico desde el servidor
+    fetch(`/ordenes/smart/${ticketId}/obtener-firma-tecnico`)
+        .then(response => {
+            console.log("Respuesta recibida:", response); // Log para verificar la respuesta
+            return response.json();
+        })
+        .then(data => {
+            console.log("Firma del técnico recibida:", data); // Verificar la respuesta completa
+            const noFirmaTecnico = document.getElementById('noFirmaTecnico'); // Elemento para el mensaje
+
+            const firmaTecnicoImg = document.getElementById('firmaTecnicoImg'); // Imagen de la firma
+
+            // Verificar si la firma existe
+            if (data.firma) {
+                const base64Data = data.firma.replace(/^data:image\/\w+;base64,/, ''); // Extraer base64
+
+                // Verificar si la firma base64 es válida
+                if (base64Data.length > 100) {
+                    firmaTecnicoImg.src = `data:image/png;base64,${base64Data}`; // Mostrar firma
+                    noFirmaTecnico.classList.add('hidden'); // Ocultar mensaje de "No hay firma"
+                    
+                    console.log("Firma del técnico cargada en la imagen.");
+                } else {
+                    console.log("La firma Base64 está vacía o es inválida.");
+                    mostrarMensajeSinFirmaTecnico();
+                }
+            } else {
+                console.log("No se encontró la firma del técnico.");
+                mostrarMensajeSinFirmaTecnico();
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar la firma del técnico:', error);
+            mostrarMensajeSinFirmaTecnico();
+        });
+}
+
+ // Mostrar mensaje si no hay firma
+ function mostrarMensajeSinFirmaTecnico() {
+        const noFirmaTecnico = document.getElementById('noFirmaTecnico');
+        const firmaTecnicoImg = document.getElementById('firmaTecnicoImg');
+        firmaTecnicoImg.src = ''; // Limpiar imagen de firma
+        noFirmaTecnico.classList.remove('hidden'); // Mostrar mensaje de "No hay firma"
+    }
+
+
     // Función para cargar la firma del cliente
     function cargarFirmaCliente() {
         const ticketId = document.getElementById('ticketId').value; // Obtener el id del ticket
@@ -154,6 +207,7 @@ function pendienteRepuestos() {
     // Inicializar las firmas cuando el DOM esté listo
     document.addEventListener("DOMContentLoaded", () => {
         cargarFirmaCliente(); // Cargar la firma del cliente después de inicializar
+        cargarFirmaTecnico();
         // Si necesitas cargar una firma del técnico, puedes llamar a cargarFirmaTecnico(firmaBase64);
     });
 </script>
