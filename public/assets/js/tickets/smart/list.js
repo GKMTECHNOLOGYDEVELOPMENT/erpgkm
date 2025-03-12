@@ -25,12 +25,12 @@ document.addEventListener('alpine:init', () => {
 
         fetchDataAndInitTable() {
             this.isLoading = true;
-        
+
             // 🔹 Destruir DataTable antes de inicializarlo de nuevo
             if ($.fn.DataTable.isDataTable('#myTable1')) {
                 $('#myTable1').DataTable().destroy();
             }
-        
+
             this.datatable1 = $('#myTable1').DataTable({
                 processing: true,
                 serverSide: true,
@@ -60,7 +60,7 @@ document.addEventListener('alpine:init', () => {
                             return "N/A";
                         }
                     },
-                    
+
                     { title: 'CATEGORIA', data: "modelo.categoria.nombre", defaultContent: "N/A" },
                     { title: 'GENERAL', data: "clientegeneral.descripcion", defaultContent: "N/A" },
                     { title: 'MODELO', data: "modelo.nombre", defaultContent: "N/A" },
@@ -98,26 +98,37 @@ document.addEventListener('alpine:init', () => {
                         previous: 'Anterior'
                     }
                 },
-        
+
                 rowCallback: (row, data) => {
                     const estadoColor = data.ticketflujo?.estadoflujo?.color || '';
+
                     if (estadoColor) {
-                        $(row).css('background-color', estadoColor);
-                        $(row).find('td').css('color', 'black');
+                        $(row)
+                            .addClass('estado-bg')
+                            .attr('data-bg', estadoColor); // Guarda el color en un atributo
                     }
                 },
-        
+
                 drawCallback: () => {
+                    $('#myTable1 tbody tr.estado-bg').each(function () {
+                        const bgColor = $(this).attr('data-bg');
+
+                        // 🔥 Aplica los estilos en línea con !important
+                        $(this).attr('style', `background-color: ${bgColor} !important;`);
+                        $(this).find('td').attr('style', 'color: black !important;');
+                    });
+
                     $('#myTable1 tbody').off('click', '.toggle-details').on('click', '.toggle-details', (event) => {
                         const id = $(event.currentTarget).data('id');
                         this.toggleRowDetails(id);
                     });
                 }
+
             });
-        
+
             this.isLoading = false;
         },
-        
+
 
 
         getEditButton(data) {
@@ -159,16 +170,16 @@ document.addEventListener('alpine:init', () => {
                     let tecnicoNombre = record.seleccionar_visita?.visita?.tecnico?.Nombre || 'N/A';
                     let justificacion = record.transicion_status_tickets?.[0]?.justificacion || 'N/A';
 
-                    newRow.find('td').css('background-color', estadoColor);
+                    newRow.find('td').attr("style", `background-color: ${estadoColor} !important; color: black !important;`);
                     newRow.find('td').html(`
-                        <div class="p-2 text-sm" style="color: black;">
-                            <ul>
-                                <li><strong>SOLUCIÓN:</strong> ${justificacion}</li>
-                                <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
-                                <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
-                            </ul>
-                        </div>
-                    `);
+                <div class="p-2 text-sm">
+                    <ul>
+                        <li><strong>SOLUCIÓN:</strong> ${justificacion}</li>
+                        <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
+                        <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
+                    </ul>
+                </div>
+            `);
                     currentRow.after(newRow);
                 }
             }
@@ -184,5 +195,5 @@ document.addEventListener('alpine:init', () => {
             year: 'numeric'
         });
     }
-    
+
 });
