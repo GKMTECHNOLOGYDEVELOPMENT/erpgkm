@@ -421,6 +421,8 @@ Route::get('/ultima-modificacion/{idTickets}', [OrdenesTrabajoController::class,
 
 
 
+// Route::put('/usuario/actualizacion/{usuario}', [UsuarioController::class, 'update'])->name('updateusuario');
+Route::post('/usuarios/{id}/update', [UsuarioController::class, 'update'])->name('usuarios.update');
 
 // Rutas para obtener modelos por marca
 Route::get('/modelos/{idMarca}', [OrdenesTrabajoController::class, 'obtenerModelosPorMarca']);
@@ -431,8 +433,6 @@ Route::get('/create/usuario', [UsuarioController::class, 'create'])->name('usuar
 Route::get('/usuario/{usuario}/edit', [UsuarioController::class, 'edit'])->name('usuario.edit');
 Route::post('/usuario/store', [UsuarioController::class, 'store'])->name('usuarios.store');
 
-
-Route::put('/usuarios/{usuario}', [UsuarioController::class, 'update'])->name('usuarios.update');
 
 
 

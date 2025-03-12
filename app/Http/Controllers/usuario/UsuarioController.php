@@ -264,186 +264,95 @@ public function guardarCuenta(Request $request)
     return response()->json(['success' => true, 'message' => 'Cuenta bancaria guardada con éxito']);
 }
 
+public function update(Request $request, $id)
+{
+    // Validación de los datos
+    $validated = $request->validate([
+        'Nombre' => 'required|string|max:255',
+        'apellidoPaterno' => 'required|string|max:255',
+        'apellidoMaterno' => 'required|string|max:255',
+        'idTipoDocumento' => 'required|integer',
+        'documento' => 'required|string|max:255',
+        'telefono' => 'required|string|max:255',
+        'correo' => 'required|email|max:255',
+        'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validación de la imagen
+    ]);
 
+    // Obtener el usuario por su id
+    $usuario = Usuario::findOrFail($id);
 
+    // Actualizar los datos del usuario
+    $usuario->Nombre = $request->input('Nombre');
+    $usuario->apellidoPaterno = $request->input('apellidoPaterno');
+    $usuario->apellidoMaterno = $request->input('apellidoMaterno');
+    $usuario->idTipoDocumento = $request->input('idTipoDocumento');
+    $usuario->documento = $request->input('documento');
+    $usuario->telefono = $request->input('telefono');
+    $usuario->correo = $request->input('correo');
 
-    public function update(Request $request, $id)
-    {
-        // Validar los datos del formulario
-        $request->validate([
-            'Nombre' => 'required|string|max:255',
-            'apellidoPaterno' => 'required|string|max:255',
-            'apellidoMaterno' => 'required|string|max:255',
-            'idTipoDocumento' => 'required|integer',
-            'documento' => 'required|string|max:255|unique:usuarios,documento,' . $id . ',idUsuario', // Asegúrate de que no se repita el documento
-            'telefono' => 'required|string|max:255|unique:usuarios,telefono,' . $id . ',idUsuario', // Asegúrate de que no se repita el teléfono
-            'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id . ',idUsuario', // Asegúrate de que no se repita el correo
-            'profile-image' => 'nullable|image|max:1024',
-        ]);
+    // Verificar si se subió una nueva imagen
+    if ($request->hasFile('profile-image')) {
+        // Obtener la imagen
+        $image = $request->file('profile-image');
 
-        Log::info('Inicio de la actualización de usuario', ['user_id' => $id]);
+        // Convertir la imagen a binario
+        $imageData = file_get_contents($image->getRealPath());
 
-        // Buscar al usuario y actualizar sus datos
-        $usuario = Usuario::findOrFail($id);
-
-        Log::info('Usuario encontrado', ['usuario' => $usuario]);
-
-        // Si se ha subido una imagen de perfil, actualizarla
-        if ($request->hasFile('profile-image')) {
-            $image = $request->file('profile-image');
-            // Asegurarse de que la imagen esté correctamente codificada en base64
-            $imageData = base64_encode(file_get_contents($image)); // Convertir la imagen a base64
-
-            Log::info('Imagen de perfil cargada', ['image_name' => $image->getClientOriginalName(), 'image_size' => $image->getSize()]);
-
-            $usuario->avatar = $imageData;
-        }
-
-        // Actualizar los demás campos
-        $usuario->Nombre = $request->Nombre;
-        $usuario->apellidoPaterno = $request->apellidoPaterno;
-        $usuario->apellidoMaterno = $request->apellidoMaterno;
-        $usuario->idTipoDocumento = $request->idTipoDocumento;
-        $usuario->documento = $request->documento;
-        $usuario->telefono = $request->telefono;
-        $usuario->correo = $request->correo;
-
-        Log::info('Datos de usuario actualizados', [
-            'Nombre' => $usuario->Nombre,
-            'apellidoPaterno' => $usuario->apellidoPaterno,
-            'apellidoMaterno' => $usuario->apellidoMaterno,
-            'telefono' => $usuario->telefono,
-            'correo' => $usuario->correo,
-        ]);
-
-        $usuario->save();
-
-        Log::info('Usuario guardado exitosamente', ['usuario_id' => $usuario->idUsuario]);
-
-        // Devolver la respuesta JSON con los datos actualizados
-        return response()->json([
-            'success' => true,
-            'message' => 'Usuario actualizado correctamente',
-            'usuario' => $usuario,
-            'avatar' => $usuario->avatar // Si deseas enviar el avatar actualizado
-        ], 200); // Asegúrate de enviar el código de estado 200 (OK)
+        // Guardar la imagen en el campo 'avatar' como binario
+        $usuario->avatar = $imageData;
     }
 
+    // Guardar los cambios en la base de datos
+    $usuario->save();
+
+    // Devolver una respuesta JSON con éxito
+    return response()->json(['success' => 'Datos actualizados correctamente']);
+}
 
 
+public function config(Request $request, $id)
+{
+    // Validación de los campos
+    $request->validate([
+        'sueldoPorHora' => 'required|numeric',
+        'idSucursal' => 'required|integer|exists:sucursal,idSucursal',
+        'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',
+        'idSexo' => 'required|integer|exists:sexo,idSexo',
+        'idRol' => 'required|integer|exists:rol,idRol',
+        'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',
+    ]);
 
+    Log::info('Validación completada', ['request_data' => $request->all()]);
 
+    // Obtener el usuario
+    $usuario = Usuario::findOrFail($id);
+    Log::info('Usuario encontrado', ['usuario' => $usuario]);
 
+    // Actualizar los campos básicos
+    $usuario->sueldoPorHora = $request->sueldoPorHora;
+    $usuario->idSucursal = $request->idSucursal;
+    $usuario->idTipoUsuario = $request->idTipoUsuario;
+    $usuario->idSexo = $request->idSexo;
+    $usuario->idRol = $request->idRol;
+    $usuario->idTipoArea = $request->idTipoArea;
 
+    Log::info('Campos del usuario actualizados', ['usuario_data' => $usuario->toArray()]);
 
-
-
-    // public function config(Request $request, $id)
-    // {
-    //     // Validación de los campos, asegurando que no se repitan en la base de datos
-    //     $request->validate([
-    //         'sueldoPorHora' => 'required|numeric',
-    //         'idSucursal' => 'required|integer|exists:sucursal,idSucursal',  // Verifica si la sucursal existe
-    //         'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',  // Verifica si el tipo de usuario existe
-    //         'idSexo' => 'required|integer|exists:sexo,idSexo',  // Verifica si el sexo existe
-    //         'idRol' => 'required|integer|exists:rol,idRol',  // Verifica si el rol existe
-    //         'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',  // Verifica si el tipo de área existe
-    //     ]);
-
-    //     // Obtener el usuario
-    //     $usuario = Usuario::findOrFail($id);
-
-    //     // Actualizar los campos
-    //     $usuario->sueldoPorHora = $request->sueldoPorHora;
-    //     $usuario->idSucursal = $request->idSucursal;
-    //     $usuario->idTipoUsuario = $request->idTipoUsuario;
-    //     $usuario->idSexo = $request->idSexo;
-    //     $usuario->idRol = $request->idRol;
-    //     $usuario->idTipoArea = $request->idTipoArea;
-
-    //     // Guardar los cambios
-    //     $usuario->save();
-
-    //     // Respuesta exitosa en formato JSON
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Usuario actualizado correctamente',
-    //         'usuario' => $usuario
-    //     ], 200);
-    // }
-
-
-    public function config(Request $request, $id)
-    {
-        // Validación de los campos
-        $request->validate([
-            'sueldoPorHora' => 'required|numeric',
-            'idSucursal' => 'required|integer|exists:sucursal,idSucursal',
-            'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',
-            'idSexo' => 'required|integer|exists:sexo,idSexo',
-            'idRol' => 'required|integer|exists:rol,idRol',
-            'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',
-        ]);
     
-        Log::info('Validación completada', ['request_data' => $request->all()]);
-    
-        // Obtener el usuario
-        $usuario = Usuario::findOrFail($id);
-        Log::info('Usuario encontrado', ['usuario' => $usuario]);
-    
- // Convertir la firma a Base64 si existe
- $firmaBase64 = null;
- if ($usuario->firma) {
-     $firmaBase64 = base64_encode($usuario->firma);
-     // Validar si la firma base64 es correcta
-     if (base64_decode($firmaBase64, true) === false) {
-         Log::error('Firma no válida en base64', ['usuario_id' => $usuario->idUsuario]);
-         $firmaBase64 = null;
-     } else {
-         $firmaBase64 = "data:image/png;base64," . $firmaBase64;
-     }
- } else {
-     Log::info('No se encontró firma para el usuario');
- }
 
- // Convertir el avatar a Base64 si existe
- $avatarBase64 = null;
- if ($usuario->avatar) {
-     $avatarBase64 = base64_encode($usuario->avatar);
-     // Validar si el avatar base64 es correcto
-     if (base64_decode($avatarBase64, true) === false) {
-         Log::error('Avatar no válido en base64', ['usuario_id' => $usuario->idUsuario]);
-         $avatarBase64 = null;
-     } else {
-         $avatarBase64 = "data:image/png;base64," . $avatarBase64;
-     }
- } else {
-     Log::info('No se encontró avatar para el usuario');
- }
-    
-        // Actualizar los campos
-        $usuario->sueldoPorHora = $request->sueldoPorHora;
-        $usuario->idSucursal = $request->idSucursal;
-        $usuario->idTipoUsuario = $request->idTipoUsuario;
-        $usuario->idSexo = $request->idSexo;
-        $usuario->idRol = $request->idRol;
-        $usuario->idTipoArea = $request->idTipoArea;
-    
-        Log::info('Campos del usuario actualizados', ['usuario_data' => $usuario->toArray()]);
-    
-        // Guardar los cambios
-        $usuario->save();
-        Log::info('Usuario guardado exitosamente', ['usuario_id' => $usuario->idUsuario]);
-    
-        // Respuesta exitosa en formato JSON con Base64 para firma y avatar
-        return response()->json([
-            'success' => true,
-            'message' => 'Usuario actualizado correctamente',
-            'usuario' => $usuario,
-            'firmaBase64' => $firmaBase64,
-            'avatarBase64' => $avatarBase64
-        ], 200);
-    }
+    // Guardar los cambios
+    $usuario->save();
+    Log::info('Usuario guardado exitosamente', ['usuario_id' => $usuario->idUsuario]);
+
+    // Respuesta exitosa en formato JSON con Base64 para firma y avatar
+    return response()->json([
+        'success' => true,
+        'message' => 'Usuario actualizado correctamente',
+        'usuario' => $usuario->only(['idUsuario', 'sueldoPorHora', 'idSucursal', 'idTipoUsuario', 'idSexo', 'idRol', 'idTipoArea']) // Excluyendo avatar y firma
+    ], 200);
+}
+
+
 
 
 
