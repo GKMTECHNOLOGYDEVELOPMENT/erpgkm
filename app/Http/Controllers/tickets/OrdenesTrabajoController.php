@@ -287,10 +287,7 @@ class OrdenesTrabajoController extends Controller
             ->first();
 
 
-
-
         $visitaExistente = $visita ? true : false;
-
 
         $visitaId = $visita ? $visita->idVisitas : null; // Si no hay visita, será null
 
@@ -408,11 +405,6 @@ class OrdenesTrabajoController extends Controller
             ->whereIn('idVisitas', $visitas->pluck('idVisitas'))  // Obtener las visitas asociadas al ticket
             ->exists();
 
-
-
-
-
-
         // Obtener todas las visitas asociadas a un ticket, ordenadas por el nombre
         $visitas = DB::table('visitas')
             ->where('idTickets', $ticketId)
@@ -433,13 +425,80 @@ class OrdenesTrabajoController extends Controller
 
 
 
+
+
+
+// Inicializamos la variable con un valor predeterminado
+$condicionexistenteservicio = false;  // Valor por defecto
+
+// Si la visita está seleccionada, proceder a verificar la condición
+if ($visitaSeleccionada) {
+    // Verificar si existe una condición para este ticket y visita con servicio = 1
+    $condicionexistenteservicio = DB::table('condicionesticket')
+        ->where('idTickets', $ticketId)  // Filtrar por idTickets
+        ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+        ->where('servicio', 1)           // Filtrar donde servicio = 1
+        ->exists();  // Devuelve true si existe una fila que cumple con los criterios
+}
+
+
+// Inicializamos la variable con un valor predeterminado
+$condicionexistevisita = false;  // Valor por defecto
+
+// Si la visita está seleccionada, proceder a verificar la condición
+if ($visitaSeleccionada) {
+    // Verificar si existe una condición para este ticket y visita (sin considerar el servicio)
+    $condicionexistevisita = DB::table('condicionesticket')
+        ->where('idTickets', $ticketId)  // Filtrar por idTickets
+        ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+        ->exists();  // Devuelve true si existe una fila que cumple con los criterios
+}
+
+
+// Inicializamos la variable con un valor predeterminado
+$titular = null;  // Valor por defecto, puede ser 0 o 1
+
+// Si la visita está seleccionada, proceder a verificar la condición
+if ($visitaSeleccionada) {
+    // Verificar si existe una condición para este ticket y visita
+    $titular = DB::table('condicionesticket')
+        ->where('idTickets', $ticketId)  // Filtrar por idTickets
+        ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+        ->value('titular');  // Obtener el valor de la columna 'titular'
+}
+
+// Si titular tiene un valor, puedes usarlo para comprobar si es 0 o 1
+if ($titular === 0) {
+    // Acción para cuando titular es 0
+} elseif ($titular === 1) {
+    // Acción para cuando titular es 1
+} else {
+    // Acción si titular no es 0 ni 1 (en caso de que no tenga un valor definido)
+}
+
+
+
+$tieneTresOMasFotos = false;    // Valor por defecto
+
+
+// Si la visita está seleccionada, proceder a verificar las condiciones
+if ($visitaSeleccionada) {
+
+   // Verificar si hay 3 o más fotos para este ticket y visita
+   $tieneTresOMasFotos = DB::table('fotostickest')
+   ->where('idTickets', $ticketId)  // Filtrar por idTickets
+   ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+   ->count() >= 3;  // Devuelve true si hay 3 o más fotos
+}
+
+
+
         // Pasamos los datos a la vista
         return view("tickets.ordenes-trabajo.smart-tv.edit", compact(
             'ticket',
             'orden',
             'modelos',
             'usuario',
-
             'clientes',
             'clientesGenerales',
             'tiendas',
@@ -462,7 +521,12 @@ class OrdenesTrabajoController extends Controller
             'visitaSeleccionada',  // Pasamos la variable que indica si la visita está seleccionada  // Pasamos la variable que indica si existe flujo 4
             'condicion',  // Pasamos la variable $condicion a la vista
             'condicionExistente',
-            'ultimaVisitaCondicion'
+            'ultimaVisitaCondicion',
+            'condicionexistenteservicio',
+            'condicionexistevisita', 
+            'titular',
+            'tieneTresOMasFotos'  // Pasamos la nueva variable a la vista
+
 
         ));
     }
