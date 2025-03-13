@@ -96,8 +96,8 @@
 
 
     
-                @if ($visitaExistente && !$condicionServicio && !$visitaConCondicion )
-
+               
+@if($visitaExistente)
           
         <li>
             <a href="javascript:;"
@@ -147,12 +147,11 @@
 
  
   
+
+
+
+
     @endif
-
-
-
-
-
 
 
 
