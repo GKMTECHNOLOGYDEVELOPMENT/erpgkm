@@ -8,8 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\Ticket; // Asegúrate de tener este modelo
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
-use App\Models\ClienteGeneral; // Reemplaza con el modelo correcto
-use App\Models\TipoServicio; // Reemplaza con el modelo correcto
+use App\Models\Clientegeneral; // Reemplaza con el modelo correcto
+use App\Models\Tiposervicio; // Reemplaza con el modelo correcto
 use App\Models\Usuario; // Reemplaza con el modelo correcto
 use App\Models\Tipoticket; // Reemplaza con el modelo correcto
 use App\Models\Cliente; // Reemplaza con el modelo correcto
@@ -20,7 +20,7 @@ use App\Models\Marca; // Reemplaza con el modelo correcto
 use App\Models\Modelo; // Reemplaza con el modelo correcto
 use App\Models\Modificacion;
 use App\Models\Ticketapoyo;
-use App\Models\TipoDocumento; // Reemplaza con el modelo correcto
+use App\Models\Tipodocumento; // Reemplaza con el modelo correcto
 use App\Models\Visita;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TicketExport;
@@ -52,8 +52,8 @@ class OrdenesTrabajoController extends Controller
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
         // Obtener los datos necesarios
-        $clientesGenerales = ClienteGeneral::all();
-        $tiposServicio = TipoServicio::all();
+        $clientesGenerales = Clientegeneral::all();
+        $tiposServicio = Tiposervicio::all();
         $usuarios = Usuario::where('idTipoUsuario', 4)->get();
         $tiposTickets = Tipoticket::all();
         $clientes = Cliente::all();
@@ -94,8 +94,8 @@ class OrdenesTrabajoController extends Controller
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
         // Obtener los datos necesarios
-        $clientesGenerales = ClienteGeneral::all();
-        $tiposServicio = TipoServicio::all();
+        $clientesGenerales = Clientegeneral::all();
+        $tiposServicio = Tiposervicio::all();
         $usuarios = Usuario::where('idTipoUsuario', 1)->get();
         $tiposTickets = Tipoticket::all();
         $clientes = Cliente::all();
@@ -126,10 +126,10 @@ class OrdenesTrabajoController extends Controller
         $clientes = Cliente::where('estado', 1)->get();
         $tiendas = Tienda::all();
         $usuarios = Usuario::where('idTipoUsuario', 1)->get();
-        $tiposServicio = TipoServicio::all();
+        $tiposServicio = Tiposervicio::all();
         $marcas = Marca::all();
         $modelos = Modelo::all();
-        $tiposDocumento = TipoDocumento::all();
+        $tiposDocumento = Tipodocumento::all();
         $categorias = Categoria::all();
 
 
@@ -327,7 +327,7 @@ class OrdenesTrabajoController extends Controller
         $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
         $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
         $clientes = Cliente::all();
-        $clientesGenerales = ClienteGeneral::all();
+        $clientesGenerales = Clientegeneral::all();
         $modelos = Modelo::all();
         $tiendas = Tienda::all();
         $marcas = Marca::all();
