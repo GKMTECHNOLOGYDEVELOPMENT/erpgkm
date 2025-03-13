@@ -428,18 +428,30 @@ class OrdenesTrabajoController extends Controller
 
 
 
-// Inicializamos la variable con un valor predeterminado
-$condicionexistenteservicio = false;  // Valor por defecto
+// // Inicializamos la variable con un valor predeterminado
+// $condicionexistenteservicio = false;  // Valor por defecto
 
-// Si la visita está seleccionada, proceder a verificar la condición
+// // Si la visita está seleccionada, proceder a verificar la condición
+// if ($visitaSeleccionada) {
+//     // Verificar si existe una condición para este ticket y visita con servicio = 1
+//     $condicionexistenteservicio = DB::table('condicionesticket')
+//         ->where('idTickets', $ticketId)  // Filtrar por idTickets
+//         ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+//         ->where('servicio', 1)           // Filtrar donde servicio = 1
+//         ->exists();  // Devuelve true si existe una fila que cumple con los criterios
+// }
+
+$condicionServicio = false;  // Valor por defecto
+
 if ($visitaSeleccionada) {
-    // Verificar si existe una condición para este ticket y visita con servicio = 1
-    $condicionexistenteservicio = DB::table('condicionesticket')
-        ->where('idTickets', $ticketId)  // Filtrar por idTickets
-        ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
-        ->where('servicio', 1)           // Filtrar donde servicio = 1
-        ->exists();  // Devuelve true si existe una fila que cumple con los criterios
-}
+// Verificar si la visita seleccionada tiene una condición con servicio = 1
+$condicionServicio = DB::table('condicionesticket')
+    ->where('idTickets', $ticketId)
+    ->where('idVisitas', $visitaId)
+    ->where('servicio', 1)
+    ->exists();
+    }
+
 
 
 // Inicializamos la variable con un valor predeterminado
@@ -493,6 +505,31 @@ if ($visitaSeleccionada) {
 
 
 
+$numeroVisitas = DB::table('visitas')
+    ->where('idTickets', $ticketId)  // Filtramos por el idTickets del ticket actual
+    ->count();  // Contamos las filas que cumplen la condición
+
+    
+
+    $visitasConCondiciones = DB::table('condicionesticket')
+    ->whereIn('idVisitas', $visitas->pluck('idVisitas'))  // Filtramos por las visitas del ticket
+    ->exists();  // Devuelve true si al menos una visita tiene una condición
+
+
+
+    $visitaConCondicion = false;    // Valor por defecto
+    // Si la visita está seleccionada, proceder a verificar las condiciones
+if ($visitaSeleccionada) {
+
+    // Verificar si la visita tiene una condición
+$visitaConCondicion = DB::table('condicionesticket')
+->where('idTickets', $ticketId)
+->where('idVisitas', $visitaId)
+->exists(); // Devuelve true si la visita tiene una condición, false si no
+}
+
+
+
         // Pasamos los datos a la vista
         return view("tickets.ordenes-trabajo.smart-tv.edit", compact(
             'ticket',
@@ -522,10 +559,14 @@ if ($visitaSeleccionada) {
             'condicion',  // Pasamos la variable $condicion a la vista
             'condicionExistente',
             'ultimaVisitaCondicion',
-            'condicionexistenteservicio',
+            // 'condicionexistenteservicio',
             'condicionexistevisita', 
             'titular',
-            'tieneTresOMasFotos'  // Pasamos la nueva variable a la vista
+            'tieneTresOMasFotos',  // Pasamos la nueva variable a la vista
+            'numeroVisitas',  // Pasamos el número de visitas a la vista
+            'visitasConCondiciones',  // Pasamos la variable que indica si hay condiciones para las visitas
+            'condicionServicio',
+            'visitaConCondicion' // Pasamos la variable que indica si la visita tiene una condición
 
 
         ));
