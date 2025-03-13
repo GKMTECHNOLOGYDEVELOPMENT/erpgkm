@@ -96,7 +96,7 @@
 
 
     
-                @if ($visitaExistente && $visitasConCondiciones && !$condicionServicio  )
+                @if ($visitaExistente && !$condicionServicio && !$visitaConCondicion )
 
           
         <li>
