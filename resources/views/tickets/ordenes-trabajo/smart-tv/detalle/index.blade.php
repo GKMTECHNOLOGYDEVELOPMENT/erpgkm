@@ -36,51 +36,62 @@
         x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
         x-transition:leave="transition ease-in-out duration-300 transform"
         x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
-        class="fixed top-0 right-0 w-80 sm:w-[600px] md:w-[700px] lg:w-[800px] h-full bg-white shadow-lg z-50 p-6 flex flex-col rounded-l-lg">
+        class="fixed top-0 right-0 w-80 sm:w-[600px] md:w-[700px] lg:w-[800px] h-full bg-white dark:bg-gray-900 shadow-lg z-50 p-6 flex flex-col rounded-l-lg">
 
         <!-- Encabezado del modal -->
-        <div class="flex justify-between items-center border-b pb-3">
-            <h2 class="text-lg font-semibold text-gray-800">Historial de Cambios</h2>
-            <button @click="openModal = false" class="text-gray-500 hover:text-gray-700">
+        <div class="flex justify-between items-center border-b pb-3 border-gray-300 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
+            <button @click="openModal = false"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
 
         <!-- Contenido del modal con tabla -->
         <div class="mt-4 overflow-y-auto">
-            <table class="w-full border-collapse border border-gray-300">
-                <thead class="bg-gray-100">
+            <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
+                <thead class="bg-gray-100 dark:bg-gray-800">
                     <tr>
-                        <th class="border border-gray-300 px-4 py-2 text-sm font-semibold w-1/5">Campo</th>
-                        <th class="border border-gray-300 px-4 py-2 text-sm font-semibold w-1/5">Valor Antiguo</th>
-                        <th class="border border-gray-300 px-4 py-2 text-sm font-semibold w-1/5">Valor Nuevo</th>
-                        <th class="border border-gray-300 px-4 py-2 text-sm font-semibold w-1/5">Fecha de Modificación
-                        </th>
-                        <th class="border border-gray-300 px-4 py-2 text-sm font-semibold w-1/5">Usuario</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Campo</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Valor Antiguo</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Valor Nuevo</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Fecha de Modificación</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Usuario</th>
                     </tr>
                 </thead>
                 <tbody id="historialModificaciones">
                     <!-- Preload visible mientras se cargan los datos -->
                     <tr id="preload" style="display: none;">
-                        <td colspan="5" class="text-center">
+                        <td colspan="5" class="text-center text-gray-900 dark:text-gray-200">
                             <span class="w-5 h-5 m-auto mb-10">
-                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                                <span
+                                    class="animate-ping inline-flex h-full w-full rounded-full bg-info dark:bg-blue-500"></span>
                             </span>
                             Cargando datos...
                         </td>
                     </tr>
                 </tbody>
-
             </table>
         </div>
+
         <!-- Contenedor de paginación -->
         <div class="flex justify-center mt-4">
             <ul id="pagination" class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
                 <!-- Los botones de paginación se generarán dinámicamente -->
             </ul>
         </div>
-
     </div>
+
 </div>
 
 
@@ -345,7 +356,7 @@
             <div class="md:col-span-2 flex justify-end space-x-4">
                 <!-- Botón de Volver con outline-danger -->
                 <a href="{{ route('ordenes.smart') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
-            
+
                 <!-- Botón de Modificar -->
                 <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
             </div>
@@ -504,18 +515,18 @@
                 commentRow.classList.add("hidden");
                 const commentCell = document.createElement("td");
                 commentCell.setAttribute("colspan",
-                "4"); // Ajustado el colspan a la cantidad de columnas
+                    "4"); // Ajustado el colspan a la cantidad de columnas
                 commentCell.classList.add("p-4");
                 commentCell.style.backgroundColor = ticketFlujo
-                .estado_color; // Aplica el color del estado
+                    .estado_color; // Aplica el color del estado
 
                 const textArea = document.createElement("textarea");
                 textArea.classList.add("w-full", "p-2", "rounded", "border",
-                "border-black"); // 🔥 Borde negro
+                    "border-black"); // 🔥 Borde negro
                 textArea.textContent = ticketFlujo.comentarioflujo;
                 textArea.placeholder = "Escribe un comentario...";
                 textArea.style.backgroundColor = ticketFlujo
-                .estado_color; // 🔥 Color de fondo del estado
+                    .estado_color; // 🔥 Color de fondo del estado
 
                 commentCell.appendChild(textArea);
                 commentRow.appendChild(commentCell);
