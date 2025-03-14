@@ -6,12 +6,13 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="javascript:;" class="text-primary hover:underline">Cast</a>
+                <a href="{{ route('administracion.cast') }}" class="text-primary hover:underline">Cast</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Editar Cast</span>
             </li>
         </ul>
+        
     </div>
     <!-- Formulario de Crear o Editar Cast -->
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">

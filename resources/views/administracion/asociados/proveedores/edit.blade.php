@@ -6,12 +6,12 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="javascript:;" class="text-primary hover:underline">Proveedores</a>
+                <a href="{{ route('administracion.proveedores') }}" class="text-primary hover:underline">Proveedores</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Editar Proveedores</span>
             </li>
-        </ul>
+        </ul>        
     </div>
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR PROVEEDOR</h2>

@@ -62,6 +62,18 @@
     
         }
     }">
+        <!-- Breadcrumb -->
+        <div>
+            <ul class="flex space-x-2 rtl:space-x-reverse mt-4">
+                <li>
+                    <a href="{{ route('ordenes.smart') }}" class="text-primary hover:underline">Órdenes</a>
+                </li>
+                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                    <span>Editar OT</span>
+                </li>
+            </ul>
+               
+        </div>
         <!-- Contenedor de Tabs Responsivo -->
         <div class="overflow-x-auto">
             <ul class="flex gap-2 sm:gap-3 justify-start sm:justify-center mt-3 mb-5 whitespace-nowrap">

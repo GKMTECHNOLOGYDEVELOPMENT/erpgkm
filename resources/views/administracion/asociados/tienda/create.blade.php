@@ -12,12 +12,12 @@
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse mt-4">
                 <li>
-                    <a href="javascript:;" class="text-primary hover:underline">Tienda</a>
+                    <a href="{{ route('administracion.tienda') }}" class="text-primary hover:underline">Tienda</a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                     <span>Agregar Tienda</span>
                 </li>
-            </ul>
+            </ul>            
         </div>
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Tienda</h2>
