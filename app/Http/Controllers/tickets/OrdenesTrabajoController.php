@@ -428,105 +428,105 @@ class OrdenesTrabajoController extends Controller
 
 
 
-// // Inicializamos la variable con un valor predeterminado
-// $condicionexistenteservicio = false;  // Valor por defecto
+        // // Inicializamos la variable con un valor predeterminado
+        // $condicionexistenteservicio = false;  // Valor por defecto
 
-// // Si la visita está seleccionada, proceder a verificar la condición
-// if ($visitaSeleccionada) {
-//     // Verificar si existe una condición para este ticket y visita con servicio = 1
-//     $condicionexistenteservicio = DB::table('condicionesticket')
-//         ->where('idTickets', $ticketId)  // Filtrar por idTickets
-//         ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
-//         ->where('servicio', 1)           // Filtrar donde servicio = 1
-//         ->exists();  // Devuelve true si existe una fila que cumple con los criterios
-// }
+        // // Si la visita está seleccionada, proceder a verificar la condición
+        // if ($visitaSeleccionada) {
+        //     // Verificar si existe una condición para este ticket y visita con servicio = 1
+        //     $condicionexistenteservicio = DB::table('condicionesticket')
+        //         ->where('idTickets', $ticketId)  // Filtrar por idTickets
+        //         ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+        //         ->where('servicio', 1)           // Filtrar donde servicio = 1
+        //         ->exists();  // Devuelve true si existe una fila que cumple con los criterios
+        // }
 
-$condicionServicio = false;  // Valor por defecto
+        $condicionServicio = false;  // Valor por defecto
 
-if ($visitaSeleccionada) {
-// Verificar si la visita seleccionada tiene una condición con servicio = 1
-$condicionServicio = DB::table('condicionesticket')
-    ->where('idTickets', $ticketId)
-    ->where('idVisitas', $visitaId)
-    ->where('servicio', 1)
-    ->exists();
-    }
-
-
-
-// Inicializamos la variable con un valor predeterminado
-$condicionexistevisita = false;  // Valor por defecto
-
-// Si la visita está seleccionada, proceder a verificar la condición
-if ($visitaSeleccionada) {
-    // Verificar si existe una condición para este ticket y visita (sin considerar el servicio)
-    $condicionexistevisita = DB::table('condicionesticket')
-        ->where('idTickets', $ticketId)  // Filtrar por idTickets
-        ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
-        ->exists();  // Devuelve true si existe una fila que cumple con los criterios
-}
-
-
-// Inicializamos la variable con un valor predeterminado
-$titular = null;  // Valor por defecto, puede ser 0 o 1
-
-// Si la visita está seleccionada, proceder a verificar la condición
-if ($visitaSeleccionada) {
-    // Verificar si existe una condición para este ticket y visita
-    $titular = DB::table('condicionesticket')
-        ->where('idTickets', $ticketId)  // Filtrar por idTickets
-        ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
-        ->value('titular');  // Obtener el valor de la columna 'titular'
-}
-
-// Si titular tiene un valor, puedes usarlo para comprobar si es 0 o 1
-if ($titular === 0) {
-    // Acción para cuando titular es 0
-} elseif ($titular === 1) {
-    // Acción para cuando titular es 1
-} else {
-    // Acción si titular no es 0 ni 1 (en caso de que no tenga un valor definido)
-}
+        if ($visitaSeleccionada) {
+            // Verificar si la visita seleccionada tiene una condición con servicio = 1
+            $condicionServicio = DB::table('condicionesticket')
+                ->where('idTickets', $ticketId)
+                ->where('idVisitas', $visitaId)
+                ->where('servicio', 1)
+                ->exists();
+        }
 
 
 
-$tieneTresOMasFotos = false;    // Valor por defecto
+        // Inicializamos la variable con un valor predeterminado
+        $condicionexistevisita = false;  // Valor por defecto
+
+        // Si la visita está seleccionada, proceder a verificar la condición
+        if ($visitaSeleccionada) {
+            // Verificar si existe una condición para este ticket y visita (sin considerar el servicio)
+            $condicionexistevisita = DB::table('condicionesticket')
+                ->where('idTickets', $ticketId)  // Filtrar por idTickets
+                ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+                ->exists();  // Devuelve true si existe una fila que cumple con los criterios
+        }
 
 
-// Si la visita está seleccionada, proceder a verificar las condiciones
-if ($visitaSeleccionada) {
+        // Inicializamos la variable con un valor predeterminado
+        $titular = null;  // Valor por defecto, puede ser 0 o 1
 
-   // Verificar si hay 3 o más fotos para este ticket y visita
-   $tieneTresOMasFotos = DB::table('fotostickest')
-   ->where('idTickets', $ticketId)  // Filtrar por idTickets
-   ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
-   ->count() >= 3;  // Devuelve true si hay 3 o más fotos
-}
+        // Si la visita está seleccionada, proceder a verificar la condición
+        if ($visitaSeleccionada) {
+            // Verificar si existe una condición para este ticket y visita
+            $titular = DB::table('condicionesticket')
+                ->where('idTickets', $ticketId)  // Filtrar por idTickets
+                ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+                ->value('titular');  // Obtener el valor de la columna 'titular'
+        }
 
-
-
-$numeroVisitas = DB::table('visitas')
-    ->where('idTickets', $ticketId)  // Filtramos por el idTickets del ticket actual
-    ->count();  // Contamos las filas que cumplen la condición
-
-    
-
-    $visitasConCondiciones = DB::table('condicionesticket')
-    ->whereIn('idVisitas', $visitas->pluck('idVisitas'))  // Filtramos por las visitas del ticket
-    ->exists();  // Devuelve true si al menos una visita tiene una condición
-
+        // Si titular tiene un valor, puedes usarlo para comprobar si es 0 o 1
+        if ($titular === 0) {
+            // Acción para cuando titular es 0
+        } elseif ($titular === 1) {
+            // Acción para cuando titular es 1
+        } else {
+            // Acción si titular no es 0 ni 1 (en caso de que no tenga un valor definido)
+        }
 
 
-    $visitaConCondicion = false;    // Valor por defecto
-    // Si la visita está seleccionada, proceder a verificar las condiciones
-if ($visitaSeleccionada) {
 
-    // Verificar si la visita tiene una condición
-$visitaConCondicion = DB::table('condicionesticket')
-->where('idTickets', $ticketId)
-->where('idVisitas', $visitaId)
-->exists(); // Devuelve true si la visita tiene una condición, false si no
-}
+        $tieneTresOMasFotos = false;    // Valor por defecto
+
+
+        // Si la visita está seleccionada, proceder a verificar las condiciones
+        if ($visitaSeleccionada) {
+
+            // Verificar si hay 3 o más fotos para este ticket y visita
+            $tieneTresOMasFotos = DB::table('fotostickest')
+                ->where('idTickets', $ticketId)  // Filtrar por idTickets
+                ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
+                ->count() >= 3;  // Devuelve true si hay 3 o más fotos
+        }
+
+
+
+        $numeroVisitas = DB::table('visitas')
+            ->where('idTickets', $ticketId)  // Filtramos por el idTickets del ticket actual
+            ->count();  // Contamos las filas que cumplen la condición
+
+
+
+        $visitasConCondiciones = DB::table('condicionesticket')
+            ->whereIn('idVisitas', $visitas->pluck('idVisitas'))  // Filtramos por las visitas del ticket
+            ->exists();  // Devuelve true si al menos una visita tiene una condición
+
+
+
+        $visitaConCondicion = false;    // Valor por defecto
+        // Si la visita está seleccionada, proceder a verificar las condiciones
+        if ($visitaSeleccionada) {
+
+            // Verificar si la visita tiene una condición
+            $visitaConCondicion = DB::table('condicionesticket')
+                ->where('idTickets', $ticketId)
+                ->where('idVisitas', $visitaId)
+                ->exists(); // Devuelve true si la visita tiene una condición, false si no
+        }
 
 
 
@@ -560,7 +560,7 @@ $visitaConCondicion = DB::table('condicionesticket')
             'condicionExistente',
             'ultimaVisitaCondicion',
             // 'condicionexistenteservicio',
-            'condicionexistevisita', 
+            'condicionexistevisita',
             'titular',
             'tieneTresOMasFotos',  // Pasamos la nueva variable a la vista
             'numeroVisitas',  // Pasamos el número de visitas a la vista
@@ -887,31 +887,67 @@ $visitaConCondicion = DB::table('condicionesticket')
             $query->where('idClienteGeneral', $request->clienteGeneral);
         }
 
-        // 🔹 BÚSQUEDA GLOBAL (Ahora incluye CATEGORÍA y CLIENTE GENERAL)
+        // 🔹 BÚSQUEDA GLOBAL (Prioriza Estado Flujo Exacto)
         if ($request->has('search') && !empty($request->input('search.value'))) {
-            $searchValue = $request->input('search.value');
+            $searchValue = trim($request->input('search.value')); // 🔥 Eliminar espacios en blanco
 
-            $query->where(function ($q) use ($searchValue) {
-                $q->where('numero_ticket', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('fecha_creacion', 'LIKE', "%{$searchValue}%")
-                    ->orWhereHas('modelo', function ($q) use ($searchValue) {
-                        $q->where('nombre', 'LIKE', "%{$searchValue}%");
-                    })
-                    ->orWhereHas('modelo.categoria', function ($q) use ($searchValue) { // 🔥 Buscar en CATEGORÍA
-                        $q->where('nombre', 'LIKE', "%{$searchValue}%");
-                    })
-                    ->orWhereHas('clientegeneral', function ($q) use ($searchValue) { // 🔥 Buscar en CLIENTE GENERAL
-                        $q->where('descripcion', 'LIKE', "%{$searchValue}%");
-                    })
-                    ->orWhereHas('cliente', function ($q) use ($searchValue) {
-                        $q->where('nombre', 'LIKE', "%{$searchValue}%");
-                    })
-                    ->orWhere('serie', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                    ->orWhereHas('visitas', function ($q) use ($searchValue) { // ✅ Buscar en fecha de visita
-                        $q->where('fecha_programada', 'LIKE', "%{$searchValue}%");
+            // 🔥 Verificar si la búsqueda coincide con una fecha en formato d/m/Y
+            $formattedDate = false;
+            if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $searchValue)) {
+                try {
+                    $formattedDate = \Carbon\Carbon::createFromFormat('d/m/Y', $searchValue)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    $formattedDate = false; // Si falla la conversión, ignorar
+                }
+            }
+
+            // 🔥 Verificar si la búsqueda coincide con un Estado Flujo exacto
+            $isEstadoFlujo = EstadoFlujo::whereRaw('BINARY descripcion = ?', [$searchValue])->exists();
+
+            if ($isEstadoFlujo) {
+                // 🔹 Si la búsqueda es un ESTADO FLUJO, filtrar solo por eso
+                $query->whereHas('ticketflujo', function ($q) use ($searchValue) {
+                    $q->whereHas('estadoFlujo', function ($q2) use ($searchValue) {
+                        $q2->whereRaw('BINARY descripcion = ?', [$searchValue]); // 🔥 Comparación exacta
                     });
-            });
+                });
+            } elseif ($formattedDate) {
+                // 🔹 Si es una fecha válida, buscar en `fecha_creacion`
+                $query->whereDate('fecha_creacion', '=', $formattedDate);
+            } else {
+                // 🔹 Aplicar la búsqueda normal si NO es un estado flujo ni una fecha
+                $query->where(function ($q) use ($searchValue) {
+                    $q->where('serie', $searchValue) // 🔥 Prioriza coincidencias exactas en SERIE
+                        ->orWhere('numero_ticket', $searchValue) // 🔥 Prioriza coincidencias exactas en N. TICKET
+                        ->orWhere('serie', 'LIKE', "%{$searchValue}%") // 🔥 Luego busca coincidencias parciales en SERIE
+                        ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%") // 🔥 Luego busca coincidencias parciales en N. TICKET
+                        ->orWhere('fecha_creacion', 'LIKE', "%{$searchValue}%") // 🔥 Asegurar que se busque bien en fechas
+                        ->orWhereHas('modelo', function ($q) use ($searchValue) {
+                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
+                        })
+                        ->orWhereHas('modelo.categoria', function ($q) use ($searchValue) {
+                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
+                        })
+                        ->orWhereHas('clientegeneral', function ($q) use ($searchValue) {
+                            $q->where('descripcion', 'LIKE', "%{$searchValue}%");
+                        })
+                        ->orWhereHas('cliente', function ($q) use ($searchValue) {
+                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
+                        })
+                        ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                        ->orWhereHas('visitas', function ($q) use ($searchValue) {
+                            $q->where('fecha_programada', 'LIKE', "%{$searchValue}%");
+                        });
+                });
+                // 🔹 Asegurar que los registros con coincidencia EXACTA en `serie` o `numero_ticket` aparezcan primero
+                $query->orderByRaw("
+        CASE 
+            WHEN serie = ? THEN 1
+            WHEN numero_ticket = ? THEN 2
+            ELSE 3 
+        END
+    ", [$searchValue, $searchValue]);
+            }
         }
 
 
