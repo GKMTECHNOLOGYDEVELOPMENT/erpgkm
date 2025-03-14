@@ -40,7 +40,7 @@
                             Perfil
                         </a>
                     </li>
-                    <li class="inline-block">
+                    <!-- <li class="inline-block">
                         <a href="javascript:;"
                             class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
                             :class="{ '!border-primary text-primary': tab == 'payment-details' }"
@@ -94,7 +94,7 @@
                             </svg>
                             Deshabilitar
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
                 <template x-if="tab === 'home'">
                     <div>
@@ -245,9 +245,49 @@
         });
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tipoDocumentoSelect = document.getElementById('idTipoDocumento');
+    const documentoInput = document.getElementById('documento');
+    const formulario = document.getElementById('usuario-form');
 
+    // Mapeo de los tipos de documentos con su longitud correspondiente
+    const tipoDocumentoLongitudes = {
+        'DNI': 8,
+        'RUC': 11,
+        'PASAPORTE': 12,
+        'CPP': 12,
+        'CARNET DE EXTRANJERIA': 20
+    };
 
+    // Función para ajustar la longitud del documento
+    tipoDocumentoSelect.addEventListener('change', function() {
+        const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex].text;
 
+        // Establecemos el número de caracteres requeridos para el tipo de documento
+        const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado] || 255;  // por defecto, 255 caracteres si no coincide
+
+        // Establecemos el atributo 'maxlength' del input de documento
+        documentoInput.setAttribute('maxlength', longitudMaxima);
+        documentoInput.placeholder = `Introduce un ${tipoSeleccionado} de ${longitudMaxima} dígitos`;
+    });
+
+    // Validación al enviar el formulario
+    formulario.addEventListener('submit', function(event) {
+        const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex].text;
+        const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado];
+
+        // Verifica si la longitud del documento es válida
+        if (documentoInput.value.length !== longitudMaxima) {
+            event.preventDefault();  // Evita que el formulario se envíe
+            alert(`El número de dígitos para ${tipoSeleccionado} debe ser ${longitudMaxima} caracteres.`);
+        }
+    });
+
+    // Disparar el evento de 'change' para inicializar la longitud del campo al cargar la página
+    tipoDocumentoSelect.dispatchEvent(new Event('change'));
+});
+</script>
 
                         <form
                             class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
@@ -265,7 +305,7 @@
                                 <div>
                                     <label for="idSucursal">Sucursal</label>
                                     <select name="idSucursal" id="idSucursal" class="form-input">
-                                        <option value="" disabled>Selecciona una Sucursal</option>
+                                        <option value="" disabled selected>Selecciona una Sucursal</option>
                                         @foreach ($sucursales as $sucursal)
                                         <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}</option>
                                         @endforeach
@@ -276,7 +316,7 @@
                                 <div>
                                     <label for="idTipoUsuario">Tipo de Usuario</label>
                                     <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
-                                        <option value="" disabled>Selecciona un Tipo de Usuario</option>
+                                        <option value="" disabled selected>Selecciona un Tipo de Usuario</option>
                                         @foreach ($tiposUsuario as $tipoUsuario)
                                         <option value="{{ $tipoUsuario->idTipoUsuario }}">{{ $tipoUsuario->nombre }}</option>
                                         @endforeach
@@ -287,7 +327,7 @@
                                 <div>
                                     <label for="idSexo">Sexo</label>
                                     <select name="idSexo" id="idSexo" class="form-input">
-                                        <option value="" disabled>Selecciona un Sexo</option>
+                                        <option value="" disabled selected>Selecciona un Sexo</option>
                                         @foreach ($sexos as $sexo)
                                         <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
                                         @endforeach
@@ -298,7 +338,7 @@
                                 <div>
                                     <label for="idRol">Rol</label>
                                     <select name="idRol" id="idRol" class="form-input">
-                                        <option value="" disabled>Selecciona un Rol</option>
+                                        <option value="" disabled selected>Selecciona un Rol</option>
                                         @foreach ($roles as $rol)
                                         <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
                                         @endforeach
@@ -309,7 +349,7 @@
                                 <div>
                                     <label for="idTipoArea">Tipo de Área</label>
                                     <select name="idTipoArea" id="idTipoArea" class="form-input">
-                                        <option value="" disabled>Selecciona un Tipo de Área</option>
+                                        <option value="" disabled selected>Selecciona un Tipo de Área</option>
                                         @foreach ($tiposArea as $tipoArea)
                                         <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}</option>
                                         @endforeach
@@ -318,7 +358,7 @@
 
                                 <!-- Botones -->
                                 <div class="sm:col-span-2 mt-3">
-                                    <button type="submit" class="btn btn-primary mr-2">Actualizar</button>
+                                    <button type="submit" disabled class="btn btn-primary mr-2">Actualizar</button>
                                     <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
                                 </div>
                         </form>

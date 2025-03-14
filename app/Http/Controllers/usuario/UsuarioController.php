@@ -60,22 +60,110 @@ class UsuarioController extends Controller
         return view('usuario.create', compact('tiposDocumento', 'sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea', 'departamentos'));
     }
 
-    public function store(Request $request)
+//     public function store(Request $request)
+// {
+//     try {
+//         Log::info('Inicio del proceso de creación de usuario.');
+
+//         // Validación
+//         $request->validate([
+//             'Nombre' => 'required|string|max:255',
+//             'apellidoPaterno' => 'required|string|max:255',
+//             'apellidoMaterno' => 'required|string|max:255',
+//             'idTipoDocumento' => 'required|integer',
+//             'documento' => 'required|string|max:255|unique:usuarios,documento',
+//             'telefono' => 'required|string|max:255|unique:usuarios,telefono',
+//             'correo' => 'required|email|max:255|unique:usuarios,correo',
+//             'profile-image' => 'nullable|image|max:1024',
+//         ]);
+//         Log::info('Formulario validado con éxito.');
+
+//         // Procesamiento de la imagen
+//         $imageData = $request->hasFile('profile-image') ? file_get_contents($request->file('profile-image')) : null;
+//         Log::info('Imagen procesada. ¿Imagen subida? ', ['has_image' => $request->hasFile('profile-image')]);
+
+//         // Generación de usuario y clave
+//         $usuario = strtolower(substr($request->Nombre, 0, 6)) . strtolower(substr($request->apellidoPaterno, 0, 6)) . rand(1, 9);
+//         $usuario = str_replace(' ', '', $usuario);
+//         $clave = Str::random(8);
+//         $claveEncriptada = bcrypt($clave);
+
+//         Log::info('Datos generados para el nuevo usuario:', [
+//             'usuario' => $usuario,
+//             'clave' => $clave
+//         ]);
+
+//         // Creación del usuario
+//         $usuarioNuevo = new Usuario();
+//         $usuarioNuevo->Nombre = $request->Nombre;
+//         $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
+//         $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
+//         $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
+//         $usuarioNuevo->documento = $request->documento;
+//         $usuarioNuevo->telefono = $request->telefono;
+//         $usuarioNuevo->correo = $request->correo;
+//         $usuarioNuevo->avatar = $imageData;
+//         $usuarioNuevo->usuario = $usuario;
+//         $usuarioNuevo->clave = $claveEncriptada;
+//         $usuarioNuevo->estado = 1;
+//         $usuarioNuevo->save();
+//         Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
+
+//         // Enviar correo
+//         Mail::to($request->correo)->send(new UsuarioCreado($usuario, $clave));
+//         Log::info('Correo enviado al usuario.', ['correo' => $request->correo]);
+
+//         return response()->json([
+//             'success' => true,
+//             'message' => 'Usuario creado y datos enviados al correo.',
+//             'usuarioId' => $usuarioNuevo->idUsuario  // Asegúrate de devolver el ID del nuevo usuario
+
+//         ]);
+//     } catch (\Illuminate\Validation\ValidationException $e) {
+//         Log::error('Error en la validación de los datos:', ['errors' => $e->errors()]);
+//         return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+//     } catch (\Exception $e) {
+//         Log::error('Error inesperado al crear el usuario:', ['message' => $e->getMessage()]);
+//         return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
+//     }
+// }
+    
+
+
+
+public function store(Request $request)
 {
     try {
         Log::info('Inicio del proceso de creación de usuario.');
 
-        // Validación
+        // Validación personalizada para el documento según el tipo
+        $documentoReglas = [
+            'DNI' => 'required|digits:8', // 8 dígitos para DNI
+            'RUC' => 'required|digits:11', // 11 dígitos para RUC
+            'PASAPORTE' => 'required|digits:12', // 12 dígitos para PASAPORTE
+            'CPP' => 'required|digits:12', // 12 dígitos para CPP
+            'CARNET DE EXTRANJERIA' => 'required|digits:20', // 20 dígitos para CARNET DE EXTRANJERIA
+        ];
+
+        // Recuperamos el tipo de documento
+        $tipoDocumentoId = $request->idTipoDocumento;
+
+        // Aquí asumo que tienes un modelo `TipoDocumento` para obtener el nombre del tipo
+        $tipoDocumento = \App\Models\TipoDocumento::findOrFail($tipoDocumentoId);
+        $tipoDocumentoNombre = $tipoDocumento->nombre;
+
+        // Validamos según el tipo de documento seleccionado
         $request->validate([
             'Nombre' => 'required|string|max:255',
             'apellidoPaterno' => 'required|string|max:255',
             'apellidoMaterno' => 'required|string|max:255',
             'idTipoDocumento' => 'required|integer',
-            'documento' => 'required|string|max:255|unique:usuarios,documento',
+            'documento' => $documentoReglas[$tipoDocumentoNombre] ?? 'required|string|max:255|unique:usuarios,documento', // Valida según el tipo
             'telefono' => 'required|string|max:255|unique:usuarios,telefono',
             'correo' => 'required|email|max:255|unique:usuarios,correo',
             'profile-image' => 'nullable|image|max:1024',
         ]);
+
         Log::info('Formulario validado con éxito.');
 
         // Procesamiento de la imagen
@@ -127,7 +215,7 @@ class UsuarioController extends Controller
         return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
     }
 }
-    
+
     
 
 
