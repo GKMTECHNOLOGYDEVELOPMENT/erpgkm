@@ -487,48 +487,75 @@ document.addEventListener('DOMContentLoaded', function() {
 </form>
 
 <script>
-    document.getElementById('saveBtn').addEventListener('click', function() {
-        // Obtener los valores del formulario
-        const tipoCuenta = document.getElementById('payBrand').value;
-        const numeroCuenta = document.getElementById('payNumber').value;
+ document.getElementById('payBrand').addEventListener('change', function() {
+    const tipoCuenta = this.value;
+    const numeroCuentaInput = document.getElementById('payNumber');
+    
+    // Limpiar campo de número de cuenta antes de validar
+    numeroCuentaInput.value = '';
+    numeroCuentaInput.removeAttribute('maxlength');
+    numeroCuentaInput.setAttribute('placeholder', 'Numero de cuenta');
+    
+    // Establecer el número máximo de dígitos en el campo según el tipo de cuenta
+    if (tipoCuenta == "1") {
+        // Si es Número interbancario, se establece 20 dígitos
+        numeroCuentaInput.setAttribute('maxlength', '20');
+        numeroCuentaInput.setAttribute('placeholder', 'Numero interbancario (20 digitos)');
+    } else if (tipoCuenta == "2") {
+        // Si es Número de cuenta, se establece entre 13 a 24 dígitos
+        numeroCuentaInput.setAttribute('maxlength', '24');
+        numeroCuentaInput.setAttribute('placeholder', 'Numero de cuenta (13-24 digitos)');
+    }
+});
 
-        // Verificar si ambos campos están completos
-        if (tipoCuenta && numeroCuenta) {
-            // Obtener el ID del usuario desde PHP (si lo tienes disponible en el frontend)
-            const usuarioId = @json($usuario->idUsuario); 
+document.getElementById('saveBtn').addEventListener('click', function() {
+    const tipoCuenta = document.getElementById('payBrand').value;
+    const numeroCuenta = document.getElementById('payNumber').value;
 
-            // Enviar los datos al backend usando fetch (AJAX)
-            fetch('/api/guardar-cuenta', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // Token CSRF para Laravel
-                },
-                body: JSON.stringify({
-                    tipoCuenta: tipoCuenta,
-                    numeroCuenta: numeroCuenta,
-                    usuarioId: usuarioId,
-                })
+    // Validación según el tipo de cuenta
+    if (tipoCuenta == "1" && numeroCuenta.length !== 20) {
+        toastr.error('El número interbancario debe tener exactamente 20 dígitos.');
+        return;
+    }
+
+    if (tipoCuenta == "2" && (numeroCuenta.length < 13 || numeroCuenta.length > 24)) {
+        toastr.error('El número de cuenta debe tener entre 13 y 24 dígitos.');
+        return;
+    }
+
+    if (tipoCuenta && numeroCuenta) {
+        const usuarioId = @json($usuario->idUsuario);
+
+        fetch('/api/guardar-cuenta', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({
+                tipoCuenta: tipoCuenta,
+                numeroCuenta: numeroCuenta,
+                usuarioId: usuarioId,
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    toastr.success('Cuenta bancaria guardada con éxito');
-                    // const customUserId = @json($usuario->idUsuario);
-                    // cargarCuentasBancarias(customUserId);
-                    // Puedes hacer algo más como actualizar la UI con la nueva cuenta guardada
-                } else {
-                    toastr.error('Hubo un error al guardar la cuenta bancaria');
-                }
-            })
-            .catch(error => {
-                console.error('Error al guardar la cuenta:', error);
-                toastr.error('Error al guardar la cuenta bancaria');
-            });
-        } else {
-            toastr.error('Por favor, complete todos los campos');
-        }
-    });
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success('Cuenta bancaria guardada con éxito');
+            } else {
+                toastr.error('Hubo un error al guardar la cuenta bancaria');
+            }
+        })
+        .catch(error => {
+            console.error('Error al guardar la cuenta:', error);
+            toastr.error('Error al guardar la cuenta bancaria');
+        });
+    } else {
+        toastr.error('Por favor, complete todos los campos');
+    }
+});
+
+
 </script>
                 </div>
             </div>

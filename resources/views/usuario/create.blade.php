@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Verifica si la longitud del documento es válida
         if (documentoInput.value.length !== longitudMaxima) {
             event.preventDefault();  // Evita que el formulario se envíe
-            alert(`El número de dígitos para ${tipoSeleccionado} debe ser ${longitudMaxima} caracteres.`);
+            toastr.error(`El número de dígitos para ${tipoSeleccionado} debe ser ${longitudMaxima} caracteres.`);
         }
     });
 

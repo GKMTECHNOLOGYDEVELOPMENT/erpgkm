@@ -366,6 +366,7 @@ x-init="obtenerUbicacion()">
 <!-- Contenedor donde se agregarán las visitas -->
 <div id="cordinacionContainer" class="mt-5 flex flex-col space-y-4"></div>
 
+
 <!-- MODAL PARA CREAR VISITA USANDO ALPINE.JS -->
 <div x-data="{
     open: false, 
@@ -761,7 +762,16 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('encargado', encargado);
     formData.append('necesita_apoyo', necesitaApoyo);
     formData.append('tecnicos_apoyo', tecnicosApoyo);
+
+        // Si 'necesita_apoyo' está marcado, agregar técnicos de apoyo al FormData
+if (necesitaApoyo && tecnicosApoyo.length > 0) {
+    tecnicosApoyo.forEach((tecnicoId) => {
+        formData.append('tecnicos_apoyo[]', tecnicoId);  // Asegúrate de enviar como array
+    });
+}
     formData.append('idTickets', ticketId);
+
+
 
     // Si hay una imagen, agregarla directamente al FormData
     if (imagenVisita) {

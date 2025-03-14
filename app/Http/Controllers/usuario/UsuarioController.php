@@ -159,7 +159,7 @@ public function store(Request $request)
             'apellidoMaterno' => 'required|string|max:255',
             'idTipoDocumento' => 'required|integer',
             'documento' => $documentoReglas[$tipoDocumentoNombre] ?? 'required|string|max:255|unique:usuarios,documento', // Valida según el tipo
-            'telefono' => 'required|string|max:255|unique:usuarios,telefono',
+            'telefono' => 'required|string|digits:9|unique:usuarios,telefono',
             'correo' => 'required|email|max:255|unique:usuarios,correo',
             'profile-image' => 'nullable|image|max:1024',
         ]);
@@ -335,7 +335,7 @@ public function guardarCuenta(Request $request)
     // Validar los datos recibidos
     $request->validate([
         'tipoCuenta' => 'required|integer|in:1,2', // 1 = Numero interbancario, 2 = Numero de cuenta
-        'numeroCuenta' => 'required|string|max:255',
+        'numeroCuenta' => 'required|string',
         'usuarioId' => 'required|integer|exists:usuarios,idUsuario', // Asegurarse de que el usuario existe
     ]);
 
