@@ -13,12 +13,13 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="javascript:;" class="text-primary hover:underline">Usuarios</a>
+                <a href="{{ route('usuario') }}" class="text-primary hover:underline">Usuarios</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Agregar Usuario</span>
             </li>
         </ul>
+        
         <div class="pt-5">
             <div x-data="{ tab: 'home' }">
                 <ul

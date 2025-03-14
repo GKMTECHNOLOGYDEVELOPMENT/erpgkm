@@ -20,12 +20,12 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="javascript:;" class="text-primary hover:underline">Clientes</a>
+                <a href="{{ route('administracion.clientes') }}" class="text-primary hover:underline">Clientes</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Editar Clientes</span>
             </li>
-        </ul>
+        </ul>        
     </div>
     <!-- Formulario de Editar Cliente -->
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">

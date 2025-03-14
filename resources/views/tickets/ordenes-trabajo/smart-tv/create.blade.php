@@ -24,12 +24,13 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse mt-4">
             <li>
-                <a href="javascript:;" class="text-primary hover:underline">Órdenes</a>
+                <a href="{{ route('ordenes.smart') }}" class="text-primary hover:underline">Órdenes</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Agregar Orden de Trabajo</span>
             </li>
         </ul>
+           
     </div>
 
 

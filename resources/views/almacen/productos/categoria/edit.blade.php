@@ -2,12 +2,12 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="javascript:;" class="text-primary hover:underline">Categorías</a>
+                <a href="{{ route('categorias.index') }}" class="text-primary hover:underline">Categorías</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Editar Categoría</span>
             </li>
-        </ul>
+        </ul>        
     </div>
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR CATEGORÍA</h2>
