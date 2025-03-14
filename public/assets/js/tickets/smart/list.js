@@ -34,6 +34,7 @@ document.addEventListener('alpine:init', () => {
             this.datatable1 = $('#myTable1').DataTable({
                 processing: false,
                 serverSide: true,
+                order: [[2, 'desc']], // 🔥 Mantener orden por "F. TICKET" (fecha_creacion)
                 ajax: {
                     url: "/api/ordenes",
                     type: "GET",
