@@ -106,9 +106,9 @@ document.addEventListener("DOMContentLoaded", function() {
         locale: "es",
         allowInput: true,
         disableMobile: "true",
+        maxDate: "today",  // Esto limita la selección a la fecha actual
         onChange: function(selectedDates, dateStr, instance) {
-            document.getElementById("fechaCompra").value = instance.formatDate(selectedDates[0],
-                "Y-m-d");
+            document.getElementById("fechaCompra").value = instance.formatDate(selectedDates[0], "Y-m-d");
         }
     });
 });

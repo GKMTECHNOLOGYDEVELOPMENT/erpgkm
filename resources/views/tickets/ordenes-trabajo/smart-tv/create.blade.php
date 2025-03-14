@@ -138,7 +138,9 @@
                 <div>
                     <label for="fechaCompra" class="block text-sm font-medium">Fecha de Compra</label>
                     <input id="fechaCompra" name="fechaCompra" type="date" class="form-input w-full"
-                        placeholder="Seleccionar fecha">
+                        placeholder="Seleccionar fecha" >
+
+                        
                 </div>
 
                 <!-- Marca -->
@@ -950,6 +952,8 @@
                     input.parentNode.appendChild(errorText);
                 }
                 errorText.textContent = "La fecha de compra no puede ser mayor a la fecha actual.";
+
+                showToast('La fecha de compra no puede ser mayor a la fecha actual.');
             } else {
                 input.classList.remove('border-red-500');
                 let errorText = document.getElementById(`error-${input.id}`);
