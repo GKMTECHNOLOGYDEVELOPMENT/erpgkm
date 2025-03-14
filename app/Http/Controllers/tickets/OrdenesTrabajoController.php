@@ -891,6 +891,16 @@ class OrdenesTrabajoController extends Controller
         if ($request->has('search') && !empty($request->input('search.value'))) {
             $searchValue = trim($request->input('search.value')); // 🔥 Eliminar espacios en blanco
 
+            // 🔥 Verificar si la búsqueda coincide con una fecha en formato d/m/Y
+            $formattedDate = false;
+            if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $searchValue)) {
+                try {
+                    $formattedDate = \Carbon\Carbon::createFromFormat('d/m/Y', $searchValue)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    $formattedDate = false; // Si falla la conversión, ignorar
+                }
+            }
+
             // 🔥 Verificar si la búsqueda coincide con un Estado Flujo exacto
             $isEstadoFlujo = EstadoFlujo::whereRaw('BINARY descripcion = ?', [$searchValue])->exists();
 
@@ -901,12 +911,17 @@ class OrdenesTrabajoController extends Controller
                         $q2->whereRaw('BINARY descripcion = ?', [$searchValue]); // 🔥 Comparación exacta
                     });
                 });
+            } elseif ($formattedDate) {
+                // 🔹 Si es una fecha válida, buscar en `fecha_creacion`
+                $query->whereDate('fecha_creacion', '=', $formattedDate);
             } else {
-                // 🔹 Aplicar la búsqueda normal si NO es un estado flujo
+                // 🔹 Aplicar la búsqueda normal si NO es un estado flujo ni una fecha
                 $query->where(function ($q) use ($searchValue) {
-                    $q->where('serie', $searchValue)
-                        ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
-                        ->orWhere('fecha_creacion', 'LIKE', "%{$searchValue}%")
+                    $q->where('serie', $searchValue) // 🔥 Prioriza coincidencias exactas en SERIE
+                        ->orWhere('numero_ticket', $searchValue) // 🔥 Prioriza coincidencias exactas en N. TICKET
+                        ->orWhere('serie', 'LIKE', "%{$searchValue}%") // 🔥 Luego busca coincidencias parciales en SERIE
+                        ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%") // 🔥 Luego busca coincidencias parciales en N. TICKET
+                        ->orWhere('fecha_creacion', 'LIKE', "%{$searchValue}%") // 🔥 Asegurar que se busque bien en fechas
                         ->orWhereHas('modelo', function ($q) use ($searchValue) {
                             $q->where('nombre', 'LIKE', "%{$searchValue}%");
                         })
@@ -919,14 +934,22 @@ class OrdenesTrabajoController extends Controller
                         ->orWhereHas('cliente', function ($q) use ($searchValue) {
                             $q->where('nombre', 'LIKE', "%{$searchValue}%");
                         })
-                        ->orWhere('serie', 'LIKE', "%{$searchValue}%")
                         ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                         ->orWhereHas('visitas', function ($q) use ($searchValue) {
                             $q->where('fecha_programada', 'LIKE', "%{$searchValue}%");
                         });
                 });
+                // 🔹 Asegurar que los registros con coincidencia EXACTA en `serie` o `numero_ticket` aparezcan primero
+                $query->orderByRaw("
+        CASE 
+            WHEN serie = ? THEN 1
+            WHEN numero_ticket = ? THEN 2
+            ELSE 3 
+        END
+    ", [$searchValue, $searchValue]);
             }
         }
+
 
         // 🔹 TOTAL DE REGISTROS
         $recordsTotal = Ticket::count();

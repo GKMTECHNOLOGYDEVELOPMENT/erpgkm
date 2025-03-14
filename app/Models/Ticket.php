@@ -206,11 +206,11 @@ class Ticket extends Model
         return $this->belongsTo(Rol::class, 'idRol', 'id'); // Relación con la tabla "rol"
     }
 
-// Define la relación con la tabla ticketflujo
-public function ticketflujo()
-{
-    return $this->hasOne(TicketFlujo::class, 'idTicket', 'idTickets'); // 🔥 CORREGIDO
-}
+	// Define la relación con la tabla ticketflujo
+    public function ticketflujo()
+    {
+        return $this->belongsTo(TicketFlujo::class, 'idTicketFlujo', 'idTicketFlujo');
+    }
 
 
 	// Relación con el modelo CondicionesTicket

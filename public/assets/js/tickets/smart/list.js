@@ -9,11 +9,23 @@ document.addEventListener('alpine:init', () => {
         isLoading: false,
 
         init() {
+            this.injectStyles(); // 🔥 Agrega los estilos automáticamente
             this.fetchMarcas();
             this.fetchDataAndInitTable();
             this.$watch('marcaFilter', () => this.fetchDataAndInitTable());
             this.$watch('startDate', () => this.fetchDataAndInitTable());
             this.$watch('endDate', () => this.fetchDataAndInitTable());
+        },
+        injectStyles() {
+            const style = document.createElement("style");
+            style.innerHTML = `
+                .solucion-text {
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    max-width: 1500px;
+                }
+            `;
+            document.head.appendChild(style);
         },
 
         fetchMarcas() {
@@ -181,7 +193,7 @@ document.addEventListener('alpine:init', () => {
                     newRow.find('td').html(`
                 <div class="p-2 text-sm">
                     <ul>
-                        <li><strong>SOLUCIÓN:</strong> ${justificacion}</li>
+                    <li><strong>SOLUCIÓN:</strong> <span class="solucion-text">${justificacion}</span></li>
                         <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
                         <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
                     </ul>
@@ -202,11 +214,11 @@ document.addEventListener('alpine:init', () => {
             year: 'numeric'
         });
     }
-    $(document).ready(function() {
+    $(document).ready(function () {
         setTimeout(() => {
             $('.dataTables_length select').css('background-image', 'none');
         }, 500);
     });
-    
+
 
 });
