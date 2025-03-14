@@ -2,12 +2,12 @@
                     <div class="switch">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                             <div class="panel space-y-5">
-                                <h5 class="font-semibold text-lg mb-4">Purge Cache</h5>
-                                <p>Remove the active resource from the cache without waiting for the predetermined cache
+                                <h5 class="font-semibold text-lg mb-4">En Proceso</h5>
+                                {{-- <p>Remove the active resource from the cache without waiting for the predetermined cache
                                     expiry time.</p>
-                                <button class="btn btn-secondary">Clear</button>
+                                <button class="btn btn-secondary">Clear</button> --}}
                             </div>
-                            <div class="panel space-y-5">
+                            {{-- <div class="panel space-y-5">
                                 <h5 class="font-semibold text-lg mb-4">Desactivar cuenta</h5>
                                 <p>You will not be able to receive messages, notifications for up to 24 hours.</p>
                                 <label class="w-12 h-6 relative">
@@ -22,7 +22,7 @@
                                 <h5 class="font-semibold text-lg mb-4">Eliminar cuenta</h5>
                                 <p>Once you delete the account, there is no going back. Please be certain.</p>
                                 <button class="btn btn-danger btn-delete-account">Delete my account</button>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </template>

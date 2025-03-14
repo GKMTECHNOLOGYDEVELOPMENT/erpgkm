@@ -2,8 +2,8 @@
                     <div class="switch">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
                             <div class="panel space-y-5">
-                                <h5 class="font-semibold text-lg mb-4">Choose Theme</h5>
-                                <div class="flex justify-around">
+                                <h5 class="font-semibold text-lg mb-4">En Proceso</h5>
+                                {{-- <div class="flex justify-around">
                                     <label class="inline-flex cursor-pointer">
                                         <input class="form-radio ltr:mr-4 rtl:ml-4 cursor-pointer" type="radio"
                                             name="flexRadioDefault" checked="" />
@@ -21,9 +21,9 @@
                                                 src="/assets/images/settings-dark.svg" />
                                         </span>
                                     </label>
-                                </div>
+                                </div> --}}
                             </div>
-                            <div class="panel space-y-5">
+                            {{-- <div class="panel space-y-5">
                                 <h5 class="font-semibold text-lg mb-4">Información de Usuario</h5>
                                 <p>Descargar los datos del usuario</p>
                                 <button type="button" class="btn btn-primary">Download Data</button>
@@ -99,6 +99,6 @@
                                         class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white  dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
                                 </label>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 </template>
