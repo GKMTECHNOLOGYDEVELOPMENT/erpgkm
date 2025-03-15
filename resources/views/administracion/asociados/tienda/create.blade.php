@@ -137,12 +137,13 @@
 
                     <div id="dirrecion-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
-
-                <!-- Link de Ubicación -->
+                <!-- Referencia -->
                 <div>
-                    <label for="linkubicacion" class="block text-sm font-medium">Link de Ubicación</label>
-                    <input id="linkubicacion" name="linkubicacion" type="text" class="form-input w-full"
-                        placeholder="Ingrese el link de Google Maps">
+                    <label for="referencia" class="block text-sm font-medium">Link de Ubicación</label>
+                    <input id="referencia" type="text" class="form-input w-full" placeholder="Ingrese el link de Google Maps"
+                        name="referencia">
+
+                        <div id="referencia-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
                 <!-- Latitud -->
                 <div>
@@ -181,7 +182,7 @@
             // Obtener referencias a los elementos
             const latInput = document.getElementById("latitud");
             const lngInput = document.getElementById("longitud");
-            const linkInput = document.getElementById("linkubicacion");
+            const linkInput = document.getElementById("referencia");
             const mapContainer = document.getElementById("map");
 
             if (!latInput || !lngInput || !linkInput || !mapContainer) {
