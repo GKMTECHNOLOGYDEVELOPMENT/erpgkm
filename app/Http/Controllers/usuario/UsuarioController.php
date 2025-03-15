@@ -335,13 +335,15 @@ public function guardarCuenta(Request $request)
     // Validar los datos recibidos
     $request->validate([
         'tipoCuenta' => 'required|integer|in:1,2', // 1 = Numero interbancario, 2 = Numero de cuenta
-        'numeroCuenta' => 'required|string',
+        'banco' => 'required|int', 
+        'numeroCuenta' => 'required|int',
         'usuarioId' => 'required|integer|exists:usuarios,idUsuario', // Asegurarse de que el usuario existe
     ]);
 
     // Crear la cuenta bancaria
     $cuentaBancaria = new CuentasBancarias();
     $cuentaBancaria->tipodecuenta = $request->tipoCuenta;
+    $cuentaBancaria->banco = $request->banco;
     $cuentaBancaria->numerocuenta = $request->numeroCuenta;
     $cuentaBancaria->idUsuario = $request->usuarioId;
 

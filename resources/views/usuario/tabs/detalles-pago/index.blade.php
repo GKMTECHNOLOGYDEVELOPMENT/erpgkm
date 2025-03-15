@@ -457,14 +457,40 @@
                 <div class="mb-5">
                     <form>
                         <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+    <label for="banco">Banco</label>
+    <select id="banco" class="form-select text-white-dark">
+        <option selected>Seleccione una Opción</option>
+        <option value="1">Banco de Crédito del Perú</option>
+        <option value="2">BBVA Perú</option>
+        <option value="3">Scotiabank Perú</option>
+        <option value="4">Interbank</option>
+        <option value="5">Banco de la Nación</option>
+        <option value="6">Banco de Comercio</option>
+        <option value="7">Banco Interamericano de Finanzas (BanBif)</option>
+        <option value="8">Banco Pichincha</option>
+        <option value="9">Citibank Perú</option>
+        <option value="10">MiBanco</option>
+        <option value="11">Banco GNB Perú</option>
+        <option value="12">Banco Falabella</option>
+        <option value="13">Banco Ripley</option>
+        <option value="14">Banco Santander Perú</option>
+        <option value="15">Alfin Banco</option>
+        <option value="16">Bank of China</option>
+        <option value="17">Bci Perú</option>
+        <option value="18">ICBC Perú Bank</option>
+    </select>
+</div>
+
                             <div>
                                 <label for="payBrand">Tipo de Cuenta Bancaria</label>
                                 <select id="payBrand" class="form-select text-white-dark">
                                     <option selected>Seleccione una Opcion</option>
-                                    <option value="1">Cuenta de Ahorro</option>
-                                    <option value="2">Cuenta Corriente</option>
+                                    <option value="1">Numero de cuenta</option>
+                                    <option value="2">Numero interbancario </option>
                                 </select>
                             </div>
+                 
                             <div>
                                 <label for="payNumber">Numero de cuenta</label>
                                 <input id="payNumber" type="text" placeholder="Numero de cuenta"
