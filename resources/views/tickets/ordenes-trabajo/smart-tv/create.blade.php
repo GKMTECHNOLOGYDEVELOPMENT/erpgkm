@@ -783,7 +783,7 @@
 
                 try {
                     let response = await fetch(
-                        `http://192.168.0.204:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+                        `http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
                     let data = await response.json();
 
                     if (data.expanded_url) {

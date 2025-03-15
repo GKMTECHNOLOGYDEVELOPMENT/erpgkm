@@ -103,31 +103,43 @@
                                 }
                             });
 
-                            // Función para cargar la firma del servidor
                             const cargarFirma = () => {
-                                const userId =
-                                    {{ $usuario->idUsuario }}; // Asegúrate de que esta variable sea correctamente insertada desde el backend
-                                const url = `/usuario/firma/${userId}`; // URL para obtener la firma
+                                console.log("Ejecutando cargarFirma...");
+                                const signatureCanvas = document.getElementById("signature-pad");
 
-                                // Fetch para obtener la firma
+                                if (!signatureCanvas) {
+                                    console.warn("⏳ Esperando a que el canvas esté en el DOM...");
+                                    setTimeout(cargarFirma, 500); // Reintenta después de 500ms
+                                    return;
+                                }
+
+                                console.log("✅ Canvas encontrado, cargando firma...");
+
+                                const ctx = signatureCanvas.getContext("2d");
+                                if (!ctx) {
+                                    console.error("❌ No se pudo obtener el contexto 2D del canvas.");
+                                    return;
+                                }
+
+                                const userId = {{ $usuario->idUsuario }};
+                                const url = `/usuario/firma/${userId}`;
+
                                 fetch(url)
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.firma) {
-                                            // Si la firma existe, la mostramos en el canvas
                                             const image = new Image();
-                                            image.src = data
-                                                .firma; // La firma es una cadena base64 con el prefijo data:image/png;base64,
+                                            image.crossOrigin = "anonymous";
+                                            image.src = data.firma;
 
                                             image.onload = () => {
-                                                // Cuando la imagen se cargue, dibujamos la firma en el lienzo
-                                                const ctx = signatureCanvas.getContext('2d');
-                                                ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas
-                                                    .height); // Limpiamos el lienzo
-                                                ctx.drawImage(image, 0, 0); // Dibujamos la firma en el lienzo
+                                                signatureCanvas.width = 300;
+                                                signatureCanvas.height = 150;
+                                                ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+                                                ctx.drawImage(image, 0, 0, signatureCanvas.width, signatureCanvas.height);
                                             };
                                         } else {
-                                            console.log("No hay firma guardada para este usuario.");
+                                            console.log("No hay firma guardada.");
                                         }
                                     })
                                     .catch(error => {
@@ -787,3 +799,4 @@ document.getElementById('saveBtn').addEventListener('click', function() {
         reader.readAsDataURL(event.target.files[0]);
     }
 </script>
+
