@@ -461,13 +461,13 @@
                                 <label for="payBrand">Tipo de Cuenta Bancaria</label>
                                 <select id="payBrand" class="form-select text-white-dark">
                                     <option selected>Seleccione una Opcion</option>
-                                    <option value="1">Cuenta de Ahorro</option>
-                                    <option value="2">Cuenta Corriente</option>
+                                    <option value="1">Cuenta numero interbancario</option>
+                                    <option value="2">Número de cuenta</option>
                                 </select>
                             </div>
                             <div>
                                 <label for="payNumber">Numero de cuenta</label>
-                                <input id="payNumber" type="text" placeholder="Numero de cuenta"
+                                <input id="payNumber" type="text" placeholder="Número de cuenta"
                                     class="form-input" />
                             </div>
                         </div>
