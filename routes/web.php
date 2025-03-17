@@ -347,10 +347,23 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::put('/helpdesk/update/{id}', [OrdenesHelpdeskController::class, 'updateHelpdesk'])->name('helpdesk.update');
     Route::get('/export-helpdesk-excel', [OrdenesHelpdeskController::class, 'exportHelpdeskToExcel'])->name('export.helpdesk.excel');
     Route::get('/helpdesk/get-all', [OrdenesHelpdeskController::class, 'getAll'])->name('helpdesk.getAll');
-
-
     Route::get('/helpdesk/soporte/{id}/edit', [OrdenesHelpdeskController::class, 'editSoporte'])
         ->name('helpdesk.soporte.edit');
+
+    // Rutas para Levantamiento
+    Route::get('/helpdesk/{id}/levantamiento/detalle', [OrdenesHelpdeskController::class, 'detalleLevantamiento'])->name('helpdesk.levantamiento.detalle');
+    Route::get('/helpdesk/{id}/levantamiento/visitas', [OrdenesHelpdeskController::class, 'visitasLevantamiento'])->name('helpdesk.levantamiento.visitas');
+    Route::get('/helpdesk/{id}/levantamiento/informacion', [OrdenesHelpdeskController::class, 'informacionLevantamiento'])->name('helpdesk.levantamiento.informacion');
+    Route::get('/helpdesk/{id}/levantamiento/firmas', [OrdenesHelpdeskController::class, 'firmasLevantamiento'])->name('helpdesk.levantamiento.firmas');
+
+    // Rutas para Soporte
+    Route::get('/helpdesk/{id}/soporte/detalle', [OrdenesHelpdeskController::class, 'detalleSoporte'])->name('helpdesk.soporte.detalle');
+    Route::get('/helpdesk/{id}/soporte/visitas', [OrdenesHelpdeskController::class, 'visitasSoporte'])->name('helpdesk.soporte.visitas');
+    Route::get('/helpdesk/{id}/soporte/informacion', [OrdenesHelpdeskController::class, 'informacionSoporte'])->name('helpdesk.soporte.informacion');
+    Route::get('/helpdesk/{id}/soporte/firmas', [OrdenesHelpdeskController::class, 'firmasSoporte'])->name('helpdesk.soporte.firmas');
+
+
+    
 
 
 
