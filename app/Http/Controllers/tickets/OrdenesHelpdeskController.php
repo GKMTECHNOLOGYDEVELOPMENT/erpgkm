@@ -129,11 +129,11 @@ class OrdenesHelpdeskController extends Controller
 
             // 🔹 Redirigir según el tipo de servicio seleccionado
             if ($validatedData['tipoServicio'] == 1) {
-                return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
-                    ->with('success', 'Orden de trabajo creada correctamente (Levantamiento de Información).');
-            } elseif ($validatedData['tipoServicio'] == 2) {
                 return redirect()->route('ordenes.helpdesk.soporte.edit', ['id' => $ticket->idTickets])
                     ->with('success', 'Orden de trabajo creada correctamente (Soporte On Site).');
+            } elseif ($validatedData['tipoServicio'] == 2) {
+                return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
+                    ->with('success', 'Orden de trabajo creada correctamente (Levantamiento de Información).');
             } else {
                 return redirect()->route('ordenes.helpdesk.index')->with('success', 'Orden de trabajo creada correctamente.');
             }
@@ -213,6 +213,140 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
+    public function detalleLevantamiento($id)
+    {
+        $orden = Ticket::with([
+            'marca',
+            'modelo',
+            'cliente',
+            'tecnico',
+            'tienda',
+            'estadoflujo',
+            'usuario'
+        ])->findOrFail($id);
+
+        $clientes = Cliente::all();
+        $clientesGenerales = ClienteGeneral::all();
+        $estadosFlujo = EstadoFlujo::all();
+        $modelos = Modelo::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+        $usuarios = Usuario::all();
+        $tiposServicio = TipoServicio::all();
+
+        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.detalle.index', compact(
+            'orden',
+            'clientes',
+            'clientesGenerales',
+            'estadosFlujo',
+            'modelos',
+            'tiendas',
+            'marcas',
+            'usuarios',
+            'tiposServicio'
+        ));
+    }
+
+    public function visitasLevantamiento($id)
+    {
+        $orden = Ticket::with(['visitas.tecnico', 'cliente'])->findOrFail($id);
+        $visitas = Visita::where('idTickets', $id)->get();
+        $usuarios = Usuario::all();
+
+        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index', compact('orden', 'visitas', 'usuarios'));
+    }
+
+    public function informacionLevantamiento($id)
+    {
+        $orden = Ticket::with([
+            'marca',
+            'modelo',
+            'cliente',
+            'tecnico',
+            'tienda',
+            'estadoflujo',
+            'usuario'
+        ])->findOrFail($id);
+
+        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.informacion.index', compact('orden'));
+    }
+
+    public function firmasLevantamiento($id)
+    {
+        $orden = Ticket::with(['cliente', 'usuario'])->findOrFail($id);
+
+        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index', compact('orden'));
+    }
+
+
+
+
+
+    public function detalleSoporte($id)
+    {
+        $orden = Ticket::with([
+            'marca',
+            'modelo',
+            'cliente',
+            'tecnico',
+            'tienda',
+            'estadoflujo',
+            'usuario'
+        ])->findOrFail($id);
+
+        $clientes = Cliente::all();
+        $clientesGenerales = ClienteGeneral::all();
+        $estadosFlujo = EstadoFlujo::all();
+        $modelos = Modelo::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+        $usuarios = Usuario::all();
+        $tiposServicio = TipoServicio::all();
+
+        return view('tickets.ordenes-trabajo.helpdesk.soporte.detalle.index', compact(
+            'orden',
+            'clientes',
+            'clientesGenerales',
+            'estadosFlujo',
+            'modelos',
+            'tiendas',
+            'marcas',
+            'usuarios',
+            'tiposServicio'
+        ));
+    }
+
+    public function visitasSoporte($id)
+    {
+        $orden = Ticket::with(['visitas.tecnico', 'cliente'])->findOrFail($id);
+        $visitas = Visita::where('idTickets', $id)->get();
+        $usuarios = Usuario::all();
+
+        return view('tickets.ordenes-trabajo.helpdesk.soporte.visitas.index', compact('orden', 'visitas', 'usuarios'));
+    }
+
+    public function informacionSoporte($id)
+    {
+        $orden = Ticket::with([
+            'marca',
+            'modelo',
+            'cliente',
+            'tecnico',
+            'tienda',
+            'estadoflujo',
+            'usuario'
+        ])->findOrFail($id);
+
+        return view('tickets.ordenes-trabajo.helpdesk.soporte.informacion.index', compact('orden'));
+    }
+
+    public function firmasSoporte($id)
+    {
+        $orden = Ticket::with(['cliente', 'usuario'])->findOrFail($id);
+
+        return view('tickets.ordenes-trabajo.helpdesk.soporte.firmas.index', compact('orden'));
+    }
+
 
     public function updateHelpdesk(Request $request, $id)
     {
@@ -225,19 +359,19 @@ class OrdenesHelpdeskController extends Controller
             'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
             'fallaReportada' => 'required|string|max:255',
         ]);
-    
+
         $orden = Ticket::findOrFail($id);
         $orden->update($validatedData);
-    
+
         // 🔹 Determinar a qué vista redirigir según el tipo de servicio
-        $rutaEdicion = ($orden->tipoServicio == 1) 
-            ? 'helpdesk.levantamiento.edit' 
+        $rutaEdicion = ($orden->tipoServicio == 1)
+            ? 'helpdesk.levantamiento.edit'
             : 'helpdesk.soporte.edit';
-    
+
         return redirect()->route($rutaEdicion, ['id' => $id])
             ->with('success', 'Orden actualizada correctamente.');
     }
-    
+
 
     public function exportHelpdeskToExcel()
     {
