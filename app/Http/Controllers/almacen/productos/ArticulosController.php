@@ -16,17 +16,30 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class ArticulosController extends Controller
 {
     public function index()
-    {   
-        $unidades= Unidad::all();
-        $tiposArticulo= Tipoarticulo::all();
-        $modelos = Modelo::with(['marca','categoria'])
-        -> where('estado', 1)
-        ->get();
-        
+    {
+        $unidades = Unidad::all();
+        $tiposArticulo = Tipoarticulo::all();
+        $modelos = Modelo::with(['marca', 'categoria'])
+            ->where('estado', 1)
+            ->get();
+
         $monedas = Moneda::all();
         // Retorna la vista para artículos
-        return view('almacen.productos.articulos.index', compact('unidades','tiposArticulo','modelos', 'monedas'));
+        return view('almacen.productos.articulos.index', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
     }
+
+    public function create()
+    {
+        // Obtener datos para los selects
+        $unidades = Unidad::all();
+        $tiposArticulo = Tipoarticulo::all();
+        $modelos = Modelo::with(['marca', 'categoria'])->where('estado', 1)->get();
+        $monedas = Moneda::all();
+
+        // Retornar la vista con los datos necesarios
+        return view('almacen.productos.articulos.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
+    }
+
 
     public function store(Request $request)
     {
@@ -87,8 +100,8 @@ class ArticulosController extends Controller
     public function edit($id)
     {
         $articulo = Articulo::findOrFail($id);
-        $unidades= Unidad::all();
-        $tiposArticulo= Tipoarticulo::all();
+        $unidades = Unidad::all();
+        $tiposArticulo = Tipoarticulo::all();
         $modelos = Modelo::all();
         $monedas = Moneda::all();
         return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas'));
