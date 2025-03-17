@@ -964,8 +964,8 @@ if (necesitaApoyo && tecnicosApoyo.length > 0) {
     });
 </script>
 
-<!-- <script>
+<script>
     var ticketId = {{ $ticketId }};
-</script> -->
+</script>
 
 <script src="{{ asset('assets/js/tickets/smart/visitas.js') }}"></script>

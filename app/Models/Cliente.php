@@ -94,4 +94,9 @@ class Cliente extends Model
 	{
 		return $this->hasMany(Tienda::class, 'idCliente');
 	}
+	 // Relación muchos a muchos con ClienteGeneral
+	 public function clienteGenerales()
+	 {
+		 return $this->belongsToMany(ClienteGeneral::class, 'cliente_clientegeneral', 'idCliente', 'idClienteGeneral');
+	 }
 }
