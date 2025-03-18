@@ -44,23 +44,17 @@
                     </button>
 
                     <!-- Botón Agregar -->
-                    <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
-                        @click="$dispatch('toggle-modal')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-                            fill="none">
-                            <path
-                                d="M4 4H20C20.5523 4 21 4.44772 21 5V19C21 19.5523 20.5523 20 20 20H4C3.44772 20 3 19.5523 3 19V5C3 4.44772 3.44772 4 4 4Z"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M7 9H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M7 13H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M7 17H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                    <a href="{{ route('articulos.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 4H20C20.5523 4 21 4.44772 21 5V19C21 19.5523 20.5523 20 20 20H4C3.44772 20 3 19.5523 3 19V5C3 4.44772 3 4 4 4Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M7 9H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M7 13H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M7 17H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         <span>Agregar</span>
-                    </button>
+                    </a>
+                    
                 </div>
             </div>
 
@@ -370,7 +364,6 @@
         });
     </script>
     <script src="{{ asset('assets/js/articulos/articulos.js') }}"></script>
-    <script src="{{ asset('assets/js/articulos/articulosStore.js') }}"></script>
     <!-- <script src="{{ asset('assets/js/articulos/articulosValidaciones.js') }}"></script> -->
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
