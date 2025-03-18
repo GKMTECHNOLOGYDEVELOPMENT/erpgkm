@@ -369,6 +369,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::post('/check-nombre', [OrdenesTrabajoController::class, 'checkNombre'])->name('checkNombre');
 });
 
+Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 'actualizarHelpdesk'])->name('formActualizarOrdenHelpdesk');
 
 
 Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])

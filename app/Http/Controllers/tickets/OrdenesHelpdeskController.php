@@ -386,50 +386,41 @@ class OrdenesHelpdeskController extends Controller
 
 
 
-
-    public function actualizarOrden(Request $request, $id)
+    public function actualizarHelpdesk(Request $request, $id)
     {
         // Log para ver los datos que se están recibiendo
         Log::info('Datos recibidos para actualizar la orden:', $request->all());
-
+    
         // Validar los datos del formulario
         $validated = $request->validate([
             'idCliente' => 'required|exists:cliente,idCliente',
             'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
-            'idTecnico' => 'required|exists:usuarios,idUsuario',
             'idTienda' => 'required|exists:tienda,idTienda',
-            'direccion' => 'required|string|max:255',
-            'idMarca' => 'required|exists:marca,idMarca',
-            'idModelo' => 'required|exists:modelo,idModelo',
-            'serie' => 'required|string|max:255',
-            'fechaCompra' => 'required|date',
+            'idTecnico' => 'required|exists:usuarios,idUsuario',
             'fallaReportada' => 'nullable|string',
         ]);
-
+    
         // Encontrar la orden y actualizarla
         $orden = Ticket::findOrFail($id); // Usamos findOrFail para asegurarnos que la orden existe
-
+    
         // Log para verificar que se encontró la orden
         Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
-
+    
         // Actualizar los campos de la orden
         $orden->idCliente = $request->idCliente;
         $orden->idClienteGeneral = $request->idClienteGeneral;
         $orden->idTienda = $request->idTienda;
-        $orden->direccion = $request->direccion;
-        $orden->idMarca = $request->idMarca;
-        $orden->idModelo = $request->idModelo;
-        $orden->serie = $request->serie;
-        $orden->fechaCompra = $request->fechaCompra;
+        $orden->idTecnico = $request->idTecnico;
         $orden->fallaReportada = $request->fallaReportada;
-
+    
         // Guardar los cambios
         $orden->save();
-
+    
         // Log para confirmar que los cambios se guardaron
         Log::info('Orden actualizada:', ['id' => $orden->id, 'nuevos_datos' => $orden->toArray()]);
-
+    
         // Responder con éxito
         return response()->json(['success' => true]);
     }
+    
 }

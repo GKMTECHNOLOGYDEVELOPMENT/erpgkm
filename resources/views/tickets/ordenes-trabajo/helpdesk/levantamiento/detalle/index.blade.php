@@ -10,7 +10,7 @@
 <!-- Estilos adicionales para el log -->
 
 
-<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo N°
+<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo  N°
     {{ $orden->idTickets }}</span>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -108,7 +108,7 @@
 
     <!-- Contenedor del Botón -->
     <div class="md:col-span-2 flex justify-end">
-        <button id="guardarFallaReportada" class="btn btn-primary">Modificar</button>
+        <button id="guardarFallaReportadalevantamiento" class="btn btn-primary">Modificar</button>
     </div>
 
 
@@ -517,11 +517,7 @@
                 idCliente: $('#idCliente').val(),
                 idClienteGeneral: $('#idClienteGeneral').val(),
                 idTienda: $('#idTienda').val(),
-                direccion: $('input[name="direccion"]').val(),
-                idMarca: $('#idMarca').val(),
-                idModelo: $('#idModelo').val(),
-                serie: $('input[name="serie"]').val(),
-                fechaCompra: $('input[name="fechaCompra"]').val(),
+                idTecnico: $('#idTecnico').val(),
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
             };
 
@@ -537,34 +533,9 @@
                 }
             }
 
-            // Validar que la fecha de compra no sea en el futuro
-            var fechaCompra = new Date(formData.fechaCompra);
-            var fechaActual = new Date();
-
-            // Eliminar la hora de las fechas para compararlas correctamente
-            fechaActual.setHours(0, 0, 0, 0);
-            fechaCompra.setHours(0, 0, 0, 0);
-
-            if (fechaCompra > fechaActual) {
-                toastr.error('La fecha de compra no puede ser una fecha futura.');
-                return; // Detener el envío si la fecha de compra es en el futuro
-            }
-
-            // Validar el campo "serie" (permitir letras y números, pero no el signo -)
-            var serie = formData.serie;
-            var serieRegex =
-                /^[a-zA-Z0-9]+$/; // Expresión regular que permite solo letras y números, pero no el signo -
-
-            if (!serie || !serieRegex.test(serie)) {
-                toastr.error(
-                    'El número de serie no puede contener caracteres especiales o un signo "-".');
-                return; // Detener el envío si el número de serie no es válido
-            }
-
             // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
-            console.log("Token CSRF obtenido:",
-                csrfToken); // Asegúrate de que el token se obtiene correctamente
+            console.log("Token CSRF obtenido:", csrfToken); // Asegúrate de que el token se obtiene correctamente
 
             // Verificar si el token CSRF es válido
             if (!csrfToken) {
@@ -575,7 +546,7 @@
 
             // Enviar datos por AJAX
             $.ajax({
-                url: '/actualizar-orden/' + idOrden, // Pasar el id de la orden en la URL
+                url: '/actualizar-orden-helpdesk/' + idOrden, // Pasar el id de la orden en la URL
                 method: 'PUT', // Usar PUT para la actualización
                 data: formData,
                 headers: {

@@ -10,7 +10,7 @@
 <!-- Estilos adicionales para el log -->
 
 
-<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo N°
+<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden  de Trabajo N°
     {{ $orden->idTickets }}</span>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
