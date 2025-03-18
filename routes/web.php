@@ -484,6 +484,7 @@ Route::get('/usuario/firma/{idUsuario}', [UsuarioController::class, 'obtenerFirm
 
 Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'guardarFirma']);
 
+Route::get('/clientes/{id}', [OrdenesHelpdeskController::class, 'getClientes']);
 
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');

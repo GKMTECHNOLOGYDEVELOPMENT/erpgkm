@@ -89,7 +89,7 @@
 
         <!-- Cargar contenido según tipo de servicio -->
         <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
-            @if ($tipoServicio == 1)  {{-- Levantamiento de Información --}}
+            @if ($tipoServicio == 2)  {{-- Levantamiento de Información --}}
                 <div x-show="tab === 'detalle'">
                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.detalle.index')
                 </div>
@@ -102,7 +102,7 @@
                 <div x-show="tab === 'firmas'">
                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
                 </div>
-            @elseif ($tipoServicio == 2)  {{-- Soporte On Site --}}
+            @elseif ($tipoServicio == 1)  {{-- Soporte On Site --}}
                 <div x-show="tab === 'detalle'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.detalle.index')
                 </div>
