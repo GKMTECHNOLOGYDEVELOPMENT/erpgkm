@@ -252,7 +252,6 @@ Route::prefix('modelos')->name('modelos.')->group(function () {
 /// INICIO ARTICULOS ///
 Route::prefix('articulos')->name('articulos.')->group(function () {
     Route::get('/', [ArticulosController::class, 'index'])->name('index'); // Mostrar la vista principal
-    Route::get('/create', [ArticulosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [ArticulosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [ArticulosController::class, 'edit'])->name('edit'); // Editar un artículo
     Route::put('/update/{id}', [ArticulosController::class, 'update'])->name('update'); // Actualizar un artículo
