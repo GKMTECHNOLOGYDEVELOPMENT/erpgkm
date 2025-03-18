@@ -14,14 +14,14 @@ use Maatwebsite\Excel\Concerns\WithDrawings;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
-class ClientesGeneralExport implements 
-    FromCollection, 
-    WithMapping, 
-    WithHeadings, 
-    ShouldAutoSize, 
-    WithStyles, 
-    WithColumnWidths, 
-    WithCustomStartCell, 
+class ClientesGeneralExport implements
+    FromCollection,
+    WithMapping,
+    WithHeadings,
+    ShouldAutoSize,
+    WithStyles,
+    WithColumnWidths,
+    WithCustomStartCell,
     WithDrawings
 {
     private const HEADERS = ['#', 'Nombre', 'Foto', 'Estado'];
@@ -76,18 +76,30 @@ class ClientesGeneralExport implements
     public function drawings()
     {
         $drawings = [];
-        $rowIndex = 5; // Inicia en la fila siguiente a los encabezados
+        $rowIndex = 5;
 
         foreach ($this->clientes as $cliente) {
             if ($cliente->foto) {
+                // Crear un archivo temporal para la imagen
+                $tempFilePath = storage_path('app/temp_images/' . uniqid() . '.jpg');
+
+                // Asegurar que el directorio existe
+                if (!file_exists(dirname($tempFilePath))) {
+                    mkdir(dirname($tempFilePath), 0777, true);
+                }
+
+                // Guardar la imagen desde el BLOB
+                file_put_contents($tempFilePath, $cliente->foto);
+
+                // Crear la imagen en Excel
                 $drawing = new Drawing();
                 $drawing->setName('Foto');
                 $drawing->setDescription($cliente->descripcion);
-                $drawing->setPath(public_path($cliente->foto)); // Ruta de la imagen
-                $drawing->setHeight(60); // Altura de la imagen
-                $drawing->setCoordinates('C' . $rowIndex); // Ubica la imagen en la columna "C"
-                $drawing->setOffsetX(55); // Centra horizontalmente
-                $drawing->setOffsetY(15); // Centra verticalmente
+                $drawing->setPath($tempFilePath);
+                $drawing->setHeight(60);
+                $drawing->setCoordinates('C' . $rowIndex);
+                $drawing->setOffsetX(55);
+                $drawing->setOffsetY(15);
                 $drawings[] = $drawing;
             }
             $rowIndex++;
@@ -95,6 +107,8 @@ class ClientesGeneralExport implements
 
         return $drawings;
     }
+
+
 
     public function styles(Worksheet $sheet): array
     {

@@ -39,7 +39,7 @@
             <div class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
                 <template x-if="fotoPreview">
                     <img :src="fotoPreview" alt="Previsualización de la foto"
-                        class="w-40 h-40 object-cover object-center">
+                        class="w-50 h-40 object-cover object-center">
                 </template>
                 <template x-if="!fotoPreview">
                     <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
