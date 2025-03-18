@@ -249,8 +249,7 @@ class OrdenesTrabajoController extends Controller
     }
 
 
-
-
+   
     public function edit($id)
     {
         $usuario = Auth::user();

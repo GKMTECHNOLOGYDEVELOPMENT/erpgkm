@@ -156,6 +156,10 @@ class OrdenesHelpdeskController extends Controller
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
             ->findOrFail($id);
 
+
+             // Obtener el estado de flujo y el color del ticket
+        $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
+
         // Obtener listas necesarias para el formulario
         $clientes = Cliente::all();
         $clientesGenerales = ClienteGeneral::all();
@@ -164,12 +168,18 @@ class OrdenesHelpdeskController extends Controller
         $tiendas = Tienda::all();
         $marcas = Marca::all();
 
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+        $ticketId = $ticket->idTickets;
+
         // 🔹 Aquí se añade la variable $usuarios para solucionar el error
         $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
         $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
+            'ticket',
+            'ticketId',
+            'id',
             'usuarios',
             'tiposServicio',
             'modelos',
@@ -177,7 +187,8 @@ class OrdenesHelpdeskController extends Controller
             'clientesGenerales',
             'tiendas',
             'marcas',
-            'estadosFlujo'
+            'estadosFlujo',
+            'colorEstado'
         ));
     }
     public function editSoporte($id)
@@ -188,6 +199,9 @@ class OrdenesHelpdeskController extends Controller
         // Obtener la orden con relaciones
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
             ->findOrFail($id);
+               // Obtener el estado de flujo y el color del ticket
+        $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
+
 
         // Obtener listas necesarias para el formulario
         $clientes = Cliente::all();
@@ -199,6 +213,9 @@ class OrdenesHelpdeskController extends Controller
         $usuarios = Usuario::all();
         $tiposServicio = TipoServicio::all();
 
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+        $ticketId = $ticket->idTickets;
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
@@ -208,7 +225,8 @@ class OrdenesHelpdeskController extends Controller
             'clientesGenerales',
             'tiendas',
             'marcas',
-            'estadosFlujo'
+            'estadosFlujo',
+            'colorEstado'
         ));
     }
 
@@ -249,11 +267,53 @@ class OrdenesHelpdeskController extends Controller
 
     public function visitasLevantamiento($id)
     {
-        $orden = Ticket::with(['visitas.tecnico', 'cliente'])->findOrFail($id);
-        $visitas = Visita::where('idTickets', $id)->get();
-        $usuarios = Usuario::all();
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
-        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index', compact('orden', 'visitas', 'usuarios'));
+        // Obtener la orden con relaciones
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
+            ->findOrFail($id);
+            $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+ // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
+ $ticket = DB::table('tickets')->where('idTickets', $id)->first();
+            
+    // Obtener el idTickets
+    $ticketId = $ticket->idTickets;
+            $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
+
+            $encargado = Usuario::whereIn('idTipoUsuario', [1])->get();
+            $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
+
+        // Obtener listas necesarias para el formulario
+        $clientes = Cliente::all();
+        $clientesGenerales = ClienteGeneral::all();
+        $estadosFlujo = EstadoFlujo::all();
+        $modelos = Modelo::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+
+        // 🔹 Aquí se añade la variable $usuarios para solucionar el error
+        $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
+        $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
+
+          // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
+          $ticket = DB::table('tickets')->where('idTickets', $id)->first();
+
+        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index', compact(
+            'orden',
+            'usuarios',
+            'tiposServicio',
+            'modelos',
+            'clientes',
+            'clientesGenerales',
+            'tiendas',
+            'marcas',
+            'estadosFlujo',
+            'colorEstado',
+            'encargado',
+            'tecnicos_apoyo',
+            'ticketId',
+            'ticket'));
     }
 
     public function informacionLevantamiento($id)
