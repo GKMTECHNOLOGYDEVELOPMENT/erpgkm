@@ -509,7 +509,7 @@
     $(document).ready(function() {
         var idOrden = @json($orden->idTickets);
 
-        $('#guardarFallaReportada').on('click', function(e) {
+        $('#guardarFallaReportadalevantamiento').on('click', function(e) {
             e.preventDefault(); // Prevenir que se recargue la página
 
             // Recoger los datos del formulario

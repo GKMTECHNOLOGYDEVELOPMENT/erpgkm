@@ -30,7 +30,7 @@
                 <span>Agregar Orden de Trabajo</span>
             </li>
         </ul>
-           
+
     </div>
 
 
@@ -139,9 +139,9 @@
                 <div>
                     <label for="fechaCompra" class="block text-sm font-medium">Fecha de Compra</label>
                     <input id="fechaCompra" name="fechaCompra" type="date" class="form-input w-full"
-                        placeholder="Seleccionar fecha" >
+                        placeholder="Seleccionar fecha">
 
-                        
+
                 </div>
 
                 <!-- Marca -->
@@ -219,10 +219,23 @@
                         placeholder="Describa la falla reportada"></textarea>
                 </div>
                 <!-- Falla Reportada -->
-                <div class="col-span-2">
+                <div>
                     <label for="linkubicacion" class="block text-sm font-medium">Link de Ubicacion</label>
                     <input id="linkubicacion" name="linkubicacion" rows="3" class="form-input w-full"
                         placeholder="Ingrese el link">
+                </div>
+
+                <!-- Latitud -->
+                <div>
+                    <label for="esRecojo" class="block text-sm font-medium mb-2">Es recojo</label>
+                    <div>
+                        <label class="w-12 h-6 relative mt-3">
+                            <input type="checkbox" id="esRecojo" name="esRecojo"
+                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                            <span
+                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Latitud -->
@@ -286,8 +299,9 @@
                                 <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
                                     placeholder="Seleccionar Cliente General" multiple style="display:none">
                                     @foreach ($clientesGenerales as $clienteGeneral)
-                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">
-                                            {{ $clienteGeneral->descripcion }}</option>
+                                    <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                        {{ $clienteGeneral->descripcion }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -320,9 +334,9 @@
                                         style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
-                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}
-                                            </option>
+                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                            {{ $tipoDocumento->nombre }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -368,9 +382,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                            <option value="{{ $departamento['id_ubigeo'] }}">
-                                                {{ $departamento['nombre_ubigeo'] }}
-                                            </option>
+                                        <option value="{{ $departamento['id_ubigeo'] }}">
+                                            {{ $departamento['nombre_ubigeo'] }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -628,8 +642,8 @@
                                     style="display:none" required>
                                     <option value="" disabled selected>Seleccione la Categoría</option>
                                     @foreach ($categorias as $categoria)
-                                        <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
-                                        </option>
+                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>

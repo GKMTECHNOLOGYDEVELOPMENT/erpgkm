@@ -152,6 +152,11 @@ class OrdenesHelpdeskController extends Controller
         $usuario = Auth::user();
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
+        $estadosOTS = DB::table('estado_ots')
+        ->whereIn('idEstadoots', [2, 4, 5])
+        ->get();
+
+
         // Obtener la orden con relaciones
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
             ->findOrFail($id);
@@ -188,6 +193,7 @@ class OrdenesHelpdeskController extends Controller
             'clientes',
             'clientesGenerales',
             'tiendas',
+            'estadosOTS',
             'marcas',
             'estadosFlujo',
             'colorEstado',
