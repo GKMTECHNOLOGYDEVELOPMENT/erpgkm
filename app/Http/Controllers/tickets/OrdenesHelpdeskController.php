@@ -119,7 +119,7 @@ class OrdenesHelpdeskController extends Controller
                 'idTecnico' => $validatedData['idTecnico'],
                 'tipoServicio' => $validatedData['tipoServicio'],
                 'idUsuario' => auth()->id(),
-                'idEstadoots' => 17,
+
                 'fallaReportada' => $validatedData['fallaReportada'],
                 'fecha_creacion' => now(),
                 'idTipotickets' => 2,
@@ -128,10 +128,10 @@ class OrdenesHelpdeskController extends Controller
             Log::debug('Orden de trabajo creada correctamente.');
 
             // 🔹 Redirigir según el tipo de servicio seleccionado
-            if ($validatedData['tipoServicio'] == 1) {
+            if ($validatedData['tipoServicio'] == 2) {
                 return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
                     ->with('success', 'Orden de trabajo creada correctamente (Levantamiento de Información).');
-            } elseif ($validatedData['tipoServicio'] == 2) {
+            } elseif ($validatedData['tipoServicio'] == 1) {
                 return redirect()->route('ordenes.helpdesk.soporte.edit', ['id' => $ticket->idTickets])
                     ->with('success', 'Orden de trabajo creada correctamente (Soporte On Site).');
             } else {
@@ -155,6 +155,15 @@ class OrdenesHelpdeskController extends Controller
         // Obtener la orden con relaciones
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
             ->findOrFail($id);
+            $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+
+            
+    // Obtener el idTickets
+    $ticketId = $ticket->idTickets;
+            $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
+
+            $encargado = Usuario::whereIn('idTipoUsuario', [1])->get();
+            $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
 
         // Obtener listas necesarias para el formulario
         $clientes = Cliente::all();
@@ -168,6 +177,9 @@ class OrdenesHelpdeskController extends Controller
         $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
         $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
 
+          // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
+          $ticket = DB::table('tickets')->where('idTickets', $id)->first();
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
@@ -177,7 +189,14 @@ class OrdenesHelpdeskController extends Controller
             'clientesGenerales',
             'tiendas',
             'marcas',
-            'estadosFlujo'
+            'estadosFlujo',
+            'colorEstado',
+            'encargado',
+            'tecnicos_apoyo',
+            'ticketId',
+            'ticket',
+            'id'
+
         ));
     }
 
