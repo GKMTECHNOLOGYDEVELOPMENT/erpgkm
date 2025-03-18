@@ -24,6 +24,26 @@
             background-color: #dc3545;
             color: white;
         }
+        
+        .skeleton-loading {
+            background: linear-gradient(-90deg, #e0e0e0 0%, #f5f5f5 50%, #e0e0e0 100%);
+            background-size: 400% 400%;
+            animation: skeleton-animation 1.2s ease-in-out infinite;
+        }
+
+        @keyframes skeleton-animation {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
     </style>
 
     @if (session('success'))

@@ -27,17 +27,28 @@ function initNiceSelect() {
             select.classList.remove("nice-select-applied");
         }
 
-        // Aplicar Nice Select
-        try {
-            NiceSelect.bind(select, {
-                searchable: true
-            });
-            select.style.display = "none";
-            select.classList.add("nice-select-applied");
-            select.dataset.niceSelectInitialized = true;
-        } catch (error) {
-            console.error("❌ Error inicializando Nice Select en:", select.id, error);
-        }
+        // **🔥 Agregar Skeleton Loading antes de inicializar**
+        const skeleton = document.createElement("div");
+        skeleton.className = "skeleton-loading w-full h-10 bg-gray-300 animate-pulse rounded-md";
+        select.style.display = "none"; // Ocultar el select original
+        select.parentNode.insertBefore(skeleton, select);
+
+        // Aplicar Nice Select después de un pequeño delay
+        setTimeout(() => {
+            try {
+                NiceSelect.bind(select, { searchable: true });
+
+                // **🔥 Remover Skeleton Loading y mostrar el select**
+                select.style.display = "none";
+                select.classList.add("nice-select-applied");
+                skeleton.remove();
+
+                select.dataset.niceSelectInitialized = true;
+                console.log("✅ Nice Select aplicado en:", select.id);
+            } catch (error) {
+                console.error("❌ Error inicializando Nice Select en:", select.id, error);
+            }
+        }, 600); // Tiempo del Skeleton antes de mostrar select real
     });
 }
 
