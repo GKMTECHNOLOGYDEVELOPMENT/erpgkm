@@ -29,7 +29,7 @@
     <!-- Cliente -->
     <div>
         <label class="block text-sm font-medium">Cliente</label>
-        <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
+        <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display:none">
             <option value="" disabled>Seleccionar Cliente</option>
             @foreach ($clientes as $cliente)
                 <option value="{{ $cliente->idCliente }}"
@@ -39,7 +39,6 @@
             @endforeach
         </select>
     </div>
-
 
     <!-- Cliente General -->
     <div>
@@ -59,7 +58,7 @@
     <!-- Tienda -->
     <div>
         <label class="block text-sm font-medium">Tienda</label>
-        <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none">
+        <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
             <option value="" disabled>Seleccionar Tienda</option>
             @foreach ($tiendas as $tienda)
                 <option value="{{ $tienda->idTienda }}" {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
@@ -72,7 +71,7 @@
     <!-- Técnico -->
     <div>
         <label for="idTecnico" class="block text-sm font-medium">Técnico</label>
-        <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display: none">
+        <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display:none">
             <option value="" disabled>Seleccionar Técnico</option>
             @foreach ($usuarios as $usuario)
                 <option value="{{ $usuario->idUsuario }}"
@@ -85,7 +84,7 @@
     <!-- Tipo de Servicio -->
     <div>
         <label for="tipoServicio" class="block text-sm font-medium">Tipo de Servicio</label>
-        <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display: none" disabled>
+        <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display:none" disabled>
             <option value="" disabled>Seleccionar Tipo de Servicio</option>
             @foreach ($tiposServicio as $tipo)
                 <option value="{{ $tipo->idTipoServicio }}"
@@ -147,9 +146,7 @@
     </div>
     <!-- Div para mostrar la última modificación -->
     <div class="mt-4">
-        Última modificación: <span
-            class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2"
-            id="ultimaModificacion"></span>
+        Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
     </div>
     <!-- Estados disponibles (draggables) -->
     <div class="mt-3 overflow-x-auto">
@@ -176,9 +173,14 @@
 
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Inicializar NiceSelect2
+        document.querySelectorAll('.select2').forEach(function(select) {
+            NiceSelect.bind(select, {
+                searchable: true
+            });
+        });
 
         // Inicializar Flatpickr en "Fecha de Compra"
         flatpickr("#fechaCompra", {

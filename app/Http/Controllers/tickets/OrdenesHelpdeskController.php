@@ -129,11 +129,11 @@ class OrdenesHelpdeskController extends Controller
 
             // 🔹 Redirigir según el tipo de servicio seleccionado
             if ($validatedData['tipoServicio'] == 1) {
-                return redirect()->route('ordenes.helpdesk.soporte.edit', ['id' => $ticket->idTickets])
-                    ->with('success', 'Orden de trabajo creada correctamente (Soporte On Site).');
-            } elseif ($validatedData['tipoServicio'] == 2) {
                 return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
                     ->with('success', 'Orden de trabajo creada correctamente (Levantamiento de Información).');
+            } elseif ($validatedData['tipoServicio'] == 2) {
+                return redirect()->route('ordenes.helpdesk.soporte.edit', ['id' => $ticket->idTickets])
+                    ->with('success', 'Orden de trabajo creada correctamente (Soporte On Site).');
             } else {
                 return redirect()->route('ordenes.helpdesk.index')->with('success', 'Orden de trabajo creada correctamente.');
             }
@@ -156,10 +156,6 @@ class OrdenesHelpdeskController extends Controller
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
             ->findOrFail($id);
 
-
-             // Obtener el estado de flujo y el color del ticket
-        $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
-
         // Obtener listas necesarias para el formulario
         $clientes = Cliente::all();
         $clientesGenerales = ClienteGeneral::all();
@@ -168,18 +164,12 @@ class OrdenesHelpdeskController extends Controller
         $tiendas = Tienda::all();
         $marcas = Marca::all();
 
-        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-        $ticketId = $ticket->idTickets;
-
         // 🔹 Aquí se añade la variable $usuarios para solucionar el error
         $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
         $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
-            'ticket',
-            'ticketId',
-            'id',
             'usuarios',
             'tiposServicio',
             'modelos',
@@ -187,8 +177,7 @@ class OrdenesHelpdeskController extends Controller
             'clientesGenerales',
             'tiendas',
             'marcas',
-            'estadosFlujo',
-            'colorEstado'
+            'estadosFlujo'
         ));
     }
     public function editSoporte($id)
@@ -199,9 +188,6 @@ class OrdenesHelpdeskController extends Controller
         // Obtener la orden con relaciones
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
             ->findOrFail($id);
-               // Obtener el estado de flujo y el color del ticket
-        $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
-
 
         // Obtener listas necesarias para el formulario
         $clientes = Cliente::all();
@@ -212,9 +198,6 @@ class OrdenesHelpdeskController extends Controller
         $marcas = Marca::all();
         $usuarios = Usuario::all();
         $tiposServicio = TipoServicio::all();
-
-        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-        $ticketId = $ticket->idTickets;
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
@@ -225,187 +208,10 @@ class OrdenesHelpdeskController extends Controller
             'clientesGenerales',
             'tiendas',
             'marcas',
-            'estadosFlujo',
-            'colorEstado'
+            'estadosFlujo'
         ));
     }
 
-
-    public function detalleLevantamiento($id)
-    {
-        $orden = Ticket::with([
-            'marca',
-            'modelo',
-            'cliente',
-            'tecnico',
-            'tienda',
-            'estadoflujo',
-            'usuario'
-        ])->findOrFail($id);
-
-        $clientes = Cliente::all();
-        $clientesGenerales = ClienteGeneral::all();
-        $estadosFlujo = EstadoFlujo::all();
-        $modelos = Modelo::all();
-        $tiendas = Tienda::all();
-        $marcas = Marca::all();
-        $usuarios = Usuario::all();
-        $tiposServicio = TipoServicio::all();
-
-        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.detalle.index', compact(
-            'orden',
-            'clientes',
-            'clientesGenerales',
-            'estadosFlujo',
-            'modelos',
-            'tiendas',
-            'marcas',
-            'usuarios',
-            'tiposServicio'
-        ));
-    }
-
-    public function visitasLevantamiento($id)
-    {
-        $usuario = Auth::user();
-        $rol = $usuario->rol->nombre ?? 'Sin Rol';
-
-        // Obtener la orden con relaciones
-        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
-            ->findOrFail($id);
-            $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
- // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
- $ticket = DB::table('tickets')->where('idTickets', $id)->first();
-            
-    // Obtener el idTickets
-    $ticketId = $ticket->idTickets;
-            $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
-
-            $encargado = Usuario::whereIn('idTipoUsuario', [1])->get();
-            $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
-
-        // Obtener listas necesarias para el formulario
-        $clientes = Cliente::all();
-        $clientesGenerales = ClienteGeneral::all();
-        $estadosFlujo = EstadoFlujo::all();
-        $modelos = Modelo::all();
-        $tiendas = Tienda::all();
-        $marcas = Marca::all();
-
-        // 🔹 Aquí se añade la variable $usuarios para solucionar el error
-        $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
-        $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
-
-          // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
-          $ticket = DB::table('tickets')->where('idTickets', $id)->first();
-
-        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index', compact(
-            'orden',
-            'usuarios',
-            'tiposServicio',
-            'modelos',
-            'clientes',
-            'clientesGenerales',
-            'tiendas',
-            'marcas',
-            'estadosFlujo',
-            'colorEstado',
-            'encargado',
-            'tecnicos_apoyo',
-            'ticketId',
-            'ticket'));
-    }
-
-    public function informacionLevantamiento($id)
-    {
-        $orden = Ticket::with([
-            'marca',
-            'modelo',
-            'cliente',
-            'tecnico',
-            'tienda',
-            'estadoflujo',
-            'usuario'
-        ])->findOrFail($id);
-
-        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.informacion.index', compact('orden'));
-    }
-
-    public function firmasLevantamiento($id)
-    {
-        $orden = Ticket::with(['cliente', 'usuario'])->findOrFail($id);
-
-        return view('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index', compact('orden'));
-    }
-
-
-
-
-
-    public function detalleSoporte($id)
-    {
-        $orden = Ticket::with([
-            'marca',
-            'modelo',
-            'cliente',
-            'tecnico',
-            'tienda',
-            'estadoflujo',
-            'usuario'
-        ])->findOrFail($id);
-
-        $clientes = Cliente::all();
-        $clientesGenerales = ClienteGeneral::all();
-        $estadosFlujo = EstadoFlujo::all();
-        $modelos = Modelo::all();
-        $tiendas = Tienda::all();
-        $marcas = Marca::all();
-        $usuarios = Usuario::all();
-        $tiposServicio = TipoServicio::all();
-
-        return view('tickets.ordenes-trabajo.helpdesk.soporte.detalle.index', compact(
-            'orden',
-            'clientes',
-            'clientesGenerales',
-            'estadosFlujo',
-            'modelos',
-            'tiendas',
-            'marcas',
-            'usuarios',
-            'tiposServicio'
-        ));
-    }
-
-    public function visitasSoporte($id)
-    {
-        $orden = Ticket::with(['visitas.tecnico', 'cliente'])->findOrFail($id);
-        $visitas = Visita::where('idTickets', $id)->get();
-        $usuarios = Usuario::all();
-
-        return view('tickets.ordenes-trabajo.helpdesk.soporte.visitas.index', compact('orden', 'visitas', 'usuarios'));
-    }
-
-    public function informacionSoporte($id)
-    {
-        $orden = Ticket::with([
-            'marca',
-            'modelo',
-            'cliente',
-            'tecnico',
-            'tienda',
-            'estadoflujo',
-            'usuario'
-        ])->findOrFail($id);
-
-        return view('tickets.ordenes-trabajo.helpdesk.soporte.informacion.index', compact('orden'));
-    }
-
-    public function firmasSoporte($id)
-    {
-        $orden = Ticket::with(['cliente', 'usuario'])->findOrFail($id);
-
-        return view('tickets.ordenes-trabajo.helpdesk.soporte.firmas.index', compact('orden'));
-    }
 
 
     public function updateHelpdesk(Request $request, $id)
@@ -419,19 +225,19 @@ class OrdenesHelpdeskController extends Controller
             'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
             'fallaReportada' => 'required|string|max:255',
         ]);
-
+    
         $orden = Ticket::findOrFail($id);
         $orden->update($validatedData);
-
+    
         // 🔹 Determinar a qué vista redirigir según el tipo de servicio
-        $rutaEdicion = ($orden->tipoServicio == 1)
-            ? 'helpdesk.levantamiento.edit'
+        $rutaEdicion = ($orden->tipoServicio == 1) 
+            ? 'helpdesk.levantamiento.edit' 
             : 'helpdesk.soporte.edit';
-
+    
         return redirect()->route($rutaEdicion, ['id' => $id])
             ->with('success', 'Orden actualizada correctamente.');
     }
-
+    
 
     public function exportHelpdeskToExcel()
     {
