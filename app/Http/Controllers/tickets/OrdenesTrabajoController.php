@@ -30,6 +30,7 @@ use App\Models\Categoria;
 use App\Models\CondicionesTicket;
 use App\Models\Fotostickest;
 use App\Models\SeleccionarVisita;
+use App\Models\SolicitudEntrega;
 use App\Models\TicketFlujo;
 use App\Models\TransicionStatusTicket;
 use Carbon\Carbon;
@@ -3010,4 +3011,43 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
         // Retornar la imagen como base64
         return response()->json(['imagen' => base64_encode($imagen->imagen)]);
     }
+
+
+
+
+
+    public function guardarSolicitud(Request $request)
+    {
+        // Validar la solicitud
+        $validated = $request->validate([
+            'idTickets' => 'required|integer',
+            'idVisitas' => 'required|integer',
+        ]);
+    
+        // Verificar si ya existe una solicitud de entrega con el mismo idTickets, idVisitas y estado 0
+        $existeSolicitud = SolicitudEntrega::where('idTickets', $validated['idTickets'])
+                                            ->where('idVisitas', $validated['idVisitas'])
+                                            ->where('estado', 0)
+                                            ->exists();
+    
+        // Si ya existe una solicitud con esos parámetros, devolver un error
+        if ($existeSolicitud) {
+            return response()->json(['success' => false, 'message' => 'Ya existe una solicitud de entrega para esta visita.'], 400);
+        }
+    
+        // Crear un nuevo registro en la tabla solicitudentrega
+        $solicitud = new SolicitudEntrega();
+        $solicitud->idTickets = $validated['idTickets'];
+        $solicitud->idVisitas = $validated['idVisitas'];
+        $solicitud->idUsuario = Auth::id(); // Obtener el id del usuario autenticado
+        $solicitud->comentario = ''; // No asignamos ningún comentario
+        $solicitud->estado = 0; // Estado inicial es 0
+        $solicitud->save();
+    
+        return response()->json(['success' => true, 'message' => 'Solicitud de entrega guardada correctamente.']);
+    }
+    
+
+
+
 }

@@ -4,7 +4,15 @@
 <div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">
     <!-- Firma del Técnico -->
     <div class="w-full md:w-[500px] flex flex-col items-center">
-        <p class="mb-2 text-lg font-bold text-center">FIRMA DEL TÉCNICO</p>
+    <p class="mb-2 text-lg font-bold text-center">
+    @if ($tipoUsuario == 5)
+        FIRMA DEL CHOFER
+    @elseif ($tipoUsuario == 1)
+        FIRMA DEL TÉCNICO
+    @else
+        FIRMA
+    @endif
+</p>
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
             <img id="firmaTecnicoImg" class="w-full h-full object-contain" src="" alt="Firma del Técnico">
         </div>
@@ -12,7 +20,7 @@
           <!-- Mensaje si no hay firma -->
           <p id="noFirmaTecnico" class="text-red-500 mt-4 text-center hidden">No hay firma para esta visita.</p> 
         <!-- Botón de refrescar -->
-        <button type="button" class="btn btn-info mt-4" onclick="cargarFirmaTecnico();">🔄 Refrescar Firma Tecnico</button>
+        <button type="button" class="btn btn-info mt-4" onclick="cargarFirmaTecnico();">🔄 Refrescar Firma</button>
     </div>
 
     <!-- Firma del Cliente -->
@@ -30,6 +38,9 @@
 </div>
 
 <input type="hidden" id="ticketId" value="{{ $id }}">
+
+<input type="hidden" id="visitaId" value="{{ $visitaId }}">
+
 
 
 <!-- Condición para mostrar los botones según el tipo de usuario -->
@@ -170,6 +181,42 @@ function cargarFirmaTecnico() {
                 mostrarMensajeSinFirma();
             });
     }
+
+
+    function solicitudEntrega() {
+    const ticketId = document.getElementById('ticketId').value; // Obtener el id del ticket
+    const visitaId = document.getElementById('visitaId').value; // Obtener el id de la visita (puedes pasarlo como un input oculto o extraerlo de otra parte)
+
+    console.log("Enviando solicitud de entrega para el ticket ID:", ticketId, "y visita ID:", visitaId);
+
+    // Hacer la solicitud AJAX para guardar la solicitud de entrega
+    fetch('/solicitud-entrega', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            idTickets: ticketId,  // Enviar el id del ticket
+            idVisitas: visitaId   // Enviar el id de la visita
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log(data.message); // Mostrar el mensaje de éxito
+            alert('Solicitud de entrega guardada correctamente.');
+            // Si necesitas hacer algo más (como recargar la página o actualizar la vista), puedes hacerlo aquí
+        } else {
+            alert('Error al guardar la solicitud de entrega.');
+        }
+    })
+    .catch(error => {
+        console.error('Error al enviar la solicitud de entrega:', error);
+        alert('Hubo un error al enviar la solicitud de entrega.');
+    });
+}
+
 
     // Mostrar mensaje si no hay firma
     function mostrarMensajeSinFirma() {

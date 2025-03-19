@@ -487,6 +487,10 @@ Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'guardarFirm
 Route::get('/clientes/{id}', [OrdenesHelpdeskController::class, 'getClientes']);
 
 
+Route::post('/solicitud-entrega', [OrdenesTrabajoController::class, 'guardarSolicitud'])->name('solicitud.entrega');
+
+
+
 Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');
 Route::view('/apps/invoice/add', 'apps.invoice.add');
