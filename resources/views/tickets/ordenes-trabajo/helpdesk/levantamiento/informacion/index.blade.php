@@ -31,33 +31,6 @@
     </div>
 
 
-    <!-- Sección de Herramientas -->
-    <div class="p-5 rounded-lg shadow-md">
-        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Herramientas</span>
-        <div class="flex justify-end mt-2">
-            <button type="button" id="addHerramienta" class="btn btn-primary">+</button>
-        </div>
-        <!-- Contenedor con altura definida y scroll -->
-        <div id="herramientasContainer" class="h-40 border overflow-y-auto p-3 rounded-lg mt-2">
-            <div class="flex items-center gap-2 mt-2 herramienta-row">
-                <select class="form-input w-full herramienta-select">
-                    <option value="DISCO DURO DE 2 TB">DISCO DURO DE 2 TB</option>
-                    <option value="MEMORIA RAM 16GB">MEMORIA RAM 16GB</option>
-                    <option value="PROCESADOR INTEL I7">PROCESADOR INTEL I7</option>
-                </select>
-                <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
-                <button type="button" class="btn btn-danger removeHerramienta hidden">-</button>
-            </div>
-        </div>
-
-
-
-        <div class="flex justify-end mt-6">
-            <button type="submit" class="btn btn-primary px-6 py-2">Guardar</button>
-        </div>
-    </div>
-
-    
 </div>
 
 
@@ -477,14 +450,6 @@ function renderizarPrevisualizacion() {
 
     });
 </script>
-
-
-
-
-
-
-
-
 
 
 <script>
