@@ -155,9 +155,9 @@
                 </div>
                 <div x-show="tab === 'recursos'">
                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.recursos.index')
-                    <div x-show="tab === 'firmas'">
-                        @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
-                    </div>
+                <div x-show="tab === 'firmas'">
+                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
+                </div>
                 @elseif ($tipoServicio == 1)
                     {{-- Soporte On Site --}}
                     <div x-show="tab === 'detalle'">
@@ -166,7 +166,7 @@
                     <div x-show="tab === 'visitas'">
                         @include('tickets.ordenes-trabajo.helpdesk.soporte.visitas.index')
                     </div>
-                    <div x-show="tab === 'informacion'">
+                    <div x-show="tab === 'desarrollo'">
                         @include('tickets.ordenes-trabajo.helpdesk.soporte.informacion.index')
                     </div>
                     <div x-show="tab === 'firmas'">
