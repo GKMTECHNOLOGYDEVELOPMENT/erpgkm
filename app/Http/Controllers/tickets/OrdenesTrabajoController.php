@@ -332,7 +332,7 @@ class OrdenesTrabajoController extends Controller
         // $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
 
         // Asumiendo que tienes el colorEstado ya disponible en tu controlador
-$colorEstado = '#B5FA37'; // Este color lo puedes obtener dinámicamente según lo que estés trabajando
+// $colorEstado = '#B5FA37'; // Este color lo puedes obtener dinámicamente según lo que estés trabajando
 
 // Filtrar los encargados según el color del estado
 if ($colorEstado == '#B5FA37') {
@@ -346,7 +346,7 @@ if ($colorEstado == '#B5FA37') {
     $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
 }
 
-
+ 
 
 
         $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
@@ -408,7 +408,7 @@ if ($colorEstado == '#B5FA37') {
                 } elseif ($idEstadflujo == 1) {
                     // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [3, 8])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 9) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
