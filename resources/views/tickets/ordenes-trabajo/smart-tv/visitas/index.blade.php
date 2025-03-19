@@ -431,26 +431,28 @@ class="mb-5" @toggle-modal.window="open = !open">
                             </div>
                         </div>
 
-                        <!-- Encargado -->
-                        <div>
-                            <label for="encargado" class="block text-sm font-medium">Encargado</label>
-                            <select id="encargado" name="encargado" class="select2 w-full" style="display: none"
-                                @change="encargadoTipo = $event.target.options[$event.target.selectedIndex].dataset.tipo">
-                                <option value="" disabled selected>Seleccionar Encargado</option>
-                                <!-- Aquí se itera sobre los usuarios -->
-                                @foreach ($encargado as $encargados)
-                                    <option value="{{ $encargados->idUsuario }}"
-                                        data-tipo="{{ $encargados->idTipoUsuario }}">
-                                        {{ $encargados->Nombre }} -
-                                        @if ($encargados->idTipoUsuario == 1)
-                                            TÉCNICO
-                                        @elseif($encargados->idTipoUsuario == 5)
-                                            CHOFER
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                     
+
+<div>
+    <label for="encargado" class="block text-sm font-medium">Encargado</label>
+    <select id="encargado" name="encargado" class="select2 w-full">
+        <option value="" disabled selected>Seleccionar Encargado</option>
+        <!-- Aquí se itera sobre los usuarios -->
+        @foreach ($encargado as $encargados)
+            <option value="{{ $encargados->idUsuario }}"
+                data-tipo="{{ $encargados->idTipoUsuario }}"
+                class="{{ $encargados->idTipoUsuario == 1 ? 'tecnico' : 'chofer' }}">
+                {{ $encargados->Nombre }} -
+                @if ($encargados->idTipoUsuario == 1)
+                    TÉCNICO
+                @elseif($encargados->idTipoUsuario == 5)
+                    CHOFER
+                @endif
+            </option>
+        @endforeach
+    </select>
+</div>
+
 
                         <!-- Mostrar checkbox "¿Necesita Apoyo?" solo si el encargado es Técnico -->
                         <div x-show="encargadoTipo == 1" class="mt-4">

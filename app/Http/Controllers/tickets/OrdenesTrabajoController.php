@@ -175,6 +175,8 @@ class OrdenesTrabajoController extends Controller
                 'linkubicacion' =>  'required|string',
                 'lat' => 'nullable|string|max:255',
                 'lng' => 'nullable|string|max:255',
+                // 'esRecojo' => 'nullable|in:on', // Aceptar 'on' como valor
+
             ]);
 
             Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
@@ -202,9 +204,13 @@ class OrdenesTrabajoController extends Controller
 
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
 
+
+              // Verificar si el checkbox es "Es recojo" está marcado
+              $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
+
             $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
                 'idTicket' => $ticket->idTickets, // ID del ticket recién creado
-                'idEstadflujo' => 1,  // Estado inicial de flujo
+                'idEstadflujo' => $estadoFlujo,  // Estado inicial de flujo
                 'idUsuario' => auth()->id(),  // Usuario autenticado
                 'fecha_creacion' => now(),
             ]);
@@ -323,7 +329,26 @@ class OrdenesTrabajoController extends Controller
             ->get();
 
         // Otros datos que ya estás obteniendo
-        $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
+        // $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
+
+        // Asumiendo que tienes el colorEstado ya disponible en tu controlador
+$colorEstado = '#B5FA37'; // Este color lo puedes obtener dinámicamente según lo que estés trabajando
+
+// Filtrar los encargados según el color del estado
+if ($colorEstado == '#B5FA37') {
+    // Si el colorEstado es #B5FA37, solo obtener los usuarios de tipo 1 (TÉCNICO)
+    $encargado = Usuario::where('idTipoUsuario', 5)->get();
+} elseif ($colorEstado == '#FBCACD') {
+    // Si el colorEstado es #FBCACD, solo obtener los usuarios de tipo 5 (CHOFER)
+    $encargado = Usuario::where('idTipoUsuario', 1)->get();
+} else {
+    // Si no es ninguno de esos colores, traer ambos tipos (1 y 5)
+    $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
+}
+
+
+
+
         $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
         $clientes = Cliente::all();
         $clientesGenerales = Clientegeneral::all();
@@ -356,8 +381,30 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 2) {
                     // Si el idEstadflujo es 2, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                    ->whereIn('idEstadflujo', [3,10])  // Obtener los estados con idEstadflujo 3 y 4
+                    ->get();
+                } elseif ($idEstadflujo == 11) {
+                        // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
+                        $estadosFlujo = DB::table('estado_flujo')
+                        ->whereIn('idEstadflujo', [12, 13, 14, 15, 16, 17 ])  // Obtener los estados con idEstadflujo 3 y 4
                         ->get();
+                    
+                } elseif ($idEstadflujo == 12) {
+                    // Si el id Estado flujo es 12 tiene que salir 
+                    $estadosFlujo = DB::table('estado_flujo')
+                    ->where('idEstadflujo', 18)  
+                    ->get();
+                } elseif ($idEstadflujo == 18) {
+                    // Si el id Estado flujo es 12 tiene que salir 
+                    $estadosFlujo = DB::table('estado_flujo')
+                    ->where('idEstadflujo', 3)  
+                    ->get();
+                }elseif ($idEstadflujo == 10) {
+                        // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
+                        $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 11)  // Solo obtener el estado con idEstadflujo 4
+                        ->get();
+
                 } elseif ($idEstadflujo == 1) {
                     // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
@@ -368,10 +415,12 @@ class OrdenesTrabajoController extends Controller
                     $estadosFlujo = DB::table('estado_flujo')
                         ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
                         ->get();
-                } elseif ($idEstadflujo == 8) {
+                }  
+                
+                elseif ($idEstadflujo == 8) {
                     // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [3,1])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } else {
                     // Si no tiene idEstadflujo = 1, 3, 8 o 9, verificar si es 6 o 7
@@ -1450,7 +1499,7 @@ class OrdenesTrabajoController extends Controller
         $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
 
         // Asignar el idEstadflujo basado en el tipo de encargado
-        $idEstadflujo = ($encargado->idTipoUsuario == 1) ? 2 : 1;
+        $idEstadflujo = ($encargado->idTipoUsuario == 1) ? 2 : 2;
         Log::info('Asignando idEstadflujo', ['idEstadflujo' => $idEstadflujo]);
 
         // Insertar en la tabla ticketflujo
