@@ -288,64 +288,86 @@
                         </svg>
                     </a>
                 
+               
+               
+               
+               
                     <!-- 🔹 Menú de Notificaciones -->
-                    <ul x-cloak x-show="open" x-transition x-transition.duration.300ms
-                        class="absolute ltr:-right-2 rtl:-left-2 top-11 bg-white dark:bg-gray-900 text-dark dark:text-white-dark 
-                        w-[300px] sm:w-[350px] shadow-lg rounded-lg divide-y dark:divide-white/10 z-50">
-                        
-                        <!-- 🔹 Encabezado -->
-                        <li>
-                            <div class="flex items-center px-4 py-2 justify-between font-semibold">
-                                <h4 class="text-lg">Notificaciones</h4>
-                                <template x-if="notifications.length">
-                                    <span class="badge bg-primary/80" x-text="notifications.length + ' nuevas'"></span>
-                                </template>
-                            </div>
-                        </li>
-                
-                        <!-- 🔹 Últimas 3 Notificaciones -->
-                        <ul class="divide-y dark:divide-white/10">
-                            <template x-for="notification in notifications.slice(-3)" :key="notification.id">
-                                <li class="dark:text-white-light/90">
-                                    <div class="flex items-center px-4 py-2">
-                                        <img class="w-12 h-12 rounded-full object-cover" 
-                                            :src="`/assets/images/${notification.profile}`" alt="image" />
-                
-                                        <div class="ltr:pl-3 rtl:pr-3 flex-auto">
-                                            <h6 x-html="notification.message"></h6>
-                                            <span class="text-xs block font-normal dark:text-gray-500"
-                                                x-text="notification.time"></span>
-                                        </div>
-                
-                                        <!-- ✅ Aceptar -->
-                                        <button @click="aceptarNotificacion(notification.id)">
-                                            <svg width="20" height="20" fill="none" stroke="green" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                        </button>
-                
-                                        <!-- ❌ Denegar -->
-                                        <button @click="denegarNotificacion(notification.id)">
-                                            <svg width="20" height="20" fill="none" stroke="red" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </li>
-                            </template>
-                        </ul>
-                
-                        <!-- 🔹 Botón "Ver todas las notificaciones" -->
-                        <template x-if="notifications.length > 3">
-                            <li>
-                                <div class="p-4">
-                                    <button class="btn btn-primary block w-full btn-small" @click="showModal = true">
-                                        Ver todas las notificaciones
-                                    </button>
-                                </div>
-                            </li>
-                        </template>
-                    </ul>
+<ul x-cloak x-show="open" x-transition x-transition.duration.300ms
+    class="absolute ltr:-right-2 rtl:-left-2 top-11 bg-white dark:bg-gray-900 text-dark dark:text-white-dark 
+    w-[300px] sm:w-[350px] shadow-lg rounded-lg divide-y dark:divide-white/10 z-50">
+
+    <!-- 🔹 Encabezado -->
+    <li>
+        <div class="flex items-center px-4 py-2 justify-between font-semibold">
+            <h4 class="text-lg">Notificaciones</h4>
+            <template x-if="notifications.length">
+                <span class="badge bg-primary/80" x-text="notifications.length + ' nuevas'"></span>
+            </template>
+        </div>
+    </li>
+
+    <!-- 🔹 Últimas 3 Notificaciones -->
+    <ul class="divide-y dark:divide-white/10">
+        <template x-for="notification in notifications.slice(-3)" :key="notification.id">
+            <li class="dark:text-white-light/90">
+                <div class="flex items-center px-4 py-2">
+                    <img class="w-12 h-12 rounded-full object-cover" 
+                        :src="`/assets/images/${notification.profile}`" alt="image" />
+
+                    <div class="ltr:pl-3 rtl:pr-3 flex-auto">
+                        <h6 x-html="notification.message"></h6>
+                        <span class="text-xs block font-normal dark:text-gray-500"
+                            x-text="notification.time"></span>
+                    </div>
+
+                    <!-- ✅ Aceptar -->
+                    <button @click="aceptarNotificacion(notification.id)">
+                        <svg width="20" height="20" fill="none" stroke="green" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </button>
+
+                    <!-- ❌ Denegar -->
+                    <button @click="denegarNotificacion(notification.id)">
+                        <svg width="20" height="20" fill="none" stroke="red" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    <!-- 👁️ Ver Ticket (Nuevo Botón) -->
+                    <a :href="`/ordenes/smart/${notification.idTickets}/edit`" class="text-blue-500" target="_blank">
+                            <svg width="20" height="20" fill="none" stroke="blue" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5l7.5-7.5-7.5-7.5-7.5 7.5 7.5 7.5z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"></path>
+                            </svg>
+                    </a>
+
+
+                </div>
+            </li>
+        </template>
+    </ul>
+
+    <!-- 🔹 Botón "Ver todas las notificaciones" -->
+    <template x-if="notifications.length > 3">
+        <li>
+            <div class="p-4">
+                <button class="btn btn-primary block w-full btn-small" @click="showModal = true">
+                    Ver todas las notificaciones
+                </button>
+            </div>
+        </li>
+    </template>
+</ul>
+
+
+
+
+
+
+
+
                 
                     <!-- 🔥 MODAL con todas las notificaciones -->
                     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="showModal && '!block'">
@@ -401,6 +423,10 @@
                 
                 
                 
+
+
+
+
                 
                 
                 
@@ -1169,6 +1195,9 @@
         </ul>
     </div>
 </header>
+
+
+
 <script>
     document.addEventListener("alpine:init", () => {
         Alpine.data("header", () => ({
@@ -1188,45 +1217,90 @@
                         }
                     }
                 }
+
+                 // Llamar a la API para obtener las solicitudes con estado = 0
+                 this.obtenerSolicitudes();
+
+                      // Ejecutar obtenerSolicitudes cada 5 segundos
+            setInterval(() => {
+                this.obtenerSolicitudes();
+            }, 5000);  // 5000ms = 5 segundos
             },
 
-            notifications: [{
-                    id: 1,
-                    profile: 'user-profile.jpeg',
-                    message: '<strong class="text-sm mr-1">John Doe</strong>invite you to <strong>Prototyping</strong>',
-                    time: '45 min ago',
-                },
-                {
-                    id: 2,
-                    profile: 'profile-34.jpeg',
-                    message: '<strong class="text-sm mr-1">Adam Nolan</strong>mentioned you to <strong>UX Basics</strong>',
-                    time: '9h Ago',
-                },
-                {
-                    id: 3,
-                    profile: 'profile-16.jpeg',
-                    message: '<strong class="text-sm mr-1">Anna Morgan</strong>Upload a file',
-                    time: '9h Ago',
-                },
-                {
-                    id: 4,
-                    profile: 'profile-16.jpeg',
-                    message: '<strong class="text-sm mr-1">Anna Morgan</strong>Upload a file',
-                    time: '9h Ago',
-                },
-                {
-                    id: 5,
-                    profile: 'profile-16.jpeg',
-                    message: '<strong class="text-sm mr-1">Anna Morgan</strong>Upload a file',
-                    time: '9h Ago',
-                },
-                {
-                    id: 6,
-                    profile: 'profile-34.jpeg',
-                    message: '<strong class="text-sm mr-1">Adam Nolan</strong>mentioned you to <strong>UX Basics</strong>',
-                    time: '9h Ago',
-                },
-            ],
+            notifications: [],
+
+
+
+
+   // Método para obtener las solicitudes desde la API de Laravel
+            obtenerSolicitudes() {
+                fetch('/api/solicitudentrega')  // La URL de la API de Laravel
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);  // Verifica la respuesta de la API
+
+                        // Procesar los datos obtenidos
+                        this.notifications = data.map(solicitud => ({
+                            id: solicitud.idSolicitudentrega,  // Asegúrate de que el ID esté bien asignado
+                            idTickets: solicitud.idTickets,
+                            profile: 'user-profile.jpeg',  // Puedes personalizar esto
+                            message: `<strong class="text-sm mr-1">Solicitud de entrega</strong><br> 
+          El Chofer ${solicitud.nombre_usuario} envió una solicitud para una entrega.
+          
+          <strong class="text-sm mr-1">Numero Ticket </strong><br> 
+         ${solicitud.numero_ticket}`,  // Mostrar ID Ticket e ID Visita
+         time: solicitud.fechaHora,  // Mostrar la fecha y hora de la solicitud
+        }));
+                    })
+                    .catch(error => console.error('Error al obtener las solicitudes:', error));
+            },
+
+            
+            aceptarNotificacion(id) {
+                fetch(`/api/solicitudentrega/aceptar/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Solicitud aceptada:', data);
+                    // Actualizar la lista de notificaciones si es necesario
+                })
+                .catch(error => {
+                    console.error('Error al aceptar la solicitud:', error);
+                });
+            },
+
+
+            denegarNotificacion(id) {
+    fetch(`/api/solicitudentrega/denegar/${id}`, {
+        method: 'PUT',  // Cambié el método a PUT, asumiendo que este es el correcto para actualizar el estado.
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Solicitud rechazada con éxito.') {
+            // Muestra un mensaje de éxito
+            alert('La solicitud ha sido rechazada con éxito.');
+            
+            // Aquí podrías también actualizar la lista de notificaciones si es necesario
+            // Por ejemplo, eliminar la notificación o actualizar su estado
+            console.log('Solicitud rechazada:', data);
+        } else {
+            // Muestra un mensaje en caso de que no se haya encontrado la solicitud
+            alert('Error: No se encontró la solicitud.');
+        }
+    })
+    .catch(error => {
+        console.error('Error al rechazar la solicitud:', error);
+        alert('Hubo un error al rechazar la solicitud.');
+    });
+},
+
 
             messages: [{
                     id: 1,
@@ -1351,3 +1425,5 @@
         }));
     });
 </script>
+
+

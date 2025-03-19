@@ -11,8 +11,8 @@ class SolicitudEntrega extends Model
 
     // Especificamos la tabla si el nombre no sigue la convención
     protected $table = 'solicitudentrega';
+	protected $primaryKey = 'idSolicitudentrega';
 	public $timestamps = false;
-
     // Especificamos los campos que son asignables masivamente
     protected $fillable = [
         'idTickets',
@@ -20,5 +20,6 @@ class SolicitudEntrega extends Model
         'idUsuario',
         'comentario',
         'estado',
+        'fechaHora'
     ];
 }

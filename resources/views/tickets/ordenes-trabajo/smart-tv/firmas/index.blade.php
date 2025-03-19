@@ -39,7 +39,7 @@
 
 <input type="hidden" id="ticketId" value="{{ $id }}">
 
-<input type="hidden" id="visitaId" value="{{ $visitaId }}">
+<input type="hidden" id="visitaId" value="{{ $idVisitaSeleccionada }}">
 
 
 

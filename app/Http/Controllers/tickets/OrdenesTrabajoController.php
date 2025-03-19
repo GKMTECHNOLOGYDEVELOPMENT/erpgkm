@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\tickets;
 
+use App\Events\NotificacionNueva;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -648,7 +649,8 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
             'visitasConCondiciones',  // Pasamos la variable que indica si hay condiciones para las visitas
             'condicionServicio',
             'visitaConCondicion', // Pasamos la variable que indica si la visita tiene una condición
-            'tipoUsuario'
+            'tipoUsuario',
+            'idVisitaSeleccionada'
 
         ));
     }
@@ -3042,10 +3044,121 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
         $solicitud->idUsuario = Auth::id(); // Obtener el id del usuario autenticado
         $solicitud->comentario = ''; // No asignamos ningún comentario
         $solicitud->estado = 0; // Estado inicial es 0
+        $solicitud->fechaHora = now(); // Almacenar la fecha y hora actual
+
         $solicitud->save();
+    
+        // Crear la notificación
+        $notification = [
+            'id' => $solicitud->id,
+            'message' => 'Nueva solicitud de entrega pendiente para el ticket #' . $solicitud->idTickets,
+            'time' => now()->diffForHumans(),
+            'profile' => 'default-profile.jpeg', // Asegúrate de tener una imagen predeterminada
+        ];
+    
+        // Emitir el evento de notificación
+        broadcast(new NotificacionNueva($notification));
     
         return response()->json(['success' => true, 'message' => 'Solicitud de entrega guardada correctamente.']);
     }
+
+
+
+
+
+
+    // public function obtenerSolicitudes()
+    // {
+    //     // Obtener solicitudes con estado = 0
+    //     $solicitudes = Solicitudentrega::where('estado', 0)->get(['idSolicitudentrega', 'comentario', 'idTickets', 'idVisitas']);
+        
+    //     return response()->json($solicitudes);
+    // }
+
+
+    public function obtenerSolicitudes()
+    {
+        // Obtener solicitudes con estado = 0
+        $solicitudes = Solicitudentrega::where('solicitudentrega.estado', 0)  // Especificar la tabla para 'estado'
+            ->join('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+            ->join('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+            ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+            ->select(
+                'solicitudentrega.idSolicitudentrega',
+                'solicitudentrega.comentario',
+                'solicitudentrega.idTickets',
+                'solicitudentrega.idVisitas',
+                'tickets.numero_ticket',   // Agregar el número de ticket
+                'usuarios.Nombre as nombre_usuario',  // Agregar el nombre del usuario
+                'solicitudentrega.fechaHora'  // Agregar la fecha y hora de la solicitud
+            )
+            ->get();
+        
+        return response()->json($solicitudes);
+    }
+
+    public function aceptarSolicitud($id)
+    {
+        // Asegúrate de que estamos usando el campo correcto: 'idSolicitudentrega'
+        $solicitud = Solicitudentrega::where('idSolicitudentrega', $id)->first();
+    
+        if ($solicitud) {
+            $solicitud->estado = 1;  // Estado 1 significa "Aceptada"
+            $solicitud->save();
+            return response()->json(['message' => 'Solicitud aceptada con éxito.']);
+        }
+    
+        return response()->json(['message' => 'Solicitud no encontrada.'], 404);
+    }
+
+
+    
+    public function denegarSolicitud($id)
+{
+    // Aquí cambiamos 'find()' por 'where' y usamos 'idSolicitudentrega'
+    $solicitud = Solicitudentrega::where('idSolicitudentrega', $id)->first();
+
+    if ($solicitud) {
+        $solicitud->estado = 2;  // Estado 2 significa "Rechazada"
+        $solicitud->save();
+        return response()->json(['message' => 'Solicitud rechazada con éxito.']);
+    }
+
+    return response()->json(['message' => 'Solicitud no encontrada.'], 404);
+}
+
+
+
+// Método para calcular el tiempo transcurrido usando Carbon
+private function calcularTiempoTranscurrido($fechaHora)
+{
+    $now = Carbon::now();
+    $fechaSolicitud = Carbon::parse($fechaHora);
+
+    // Calculamos la diferencia en minutos
+    $diffInMinutes = $now->diffInMinutes($fechaSolicitud);
+
+    // Dependiendo de la diferencia, formateamos el tiempo
+    if ($diffInMinutes < 1) {
+        return 'Hace un momento';
+    } elseif ($diffInMinutes < 5) {
+        return 'Hace un momento';
+    } elseif ($diffInMinutes < 30) {
+        return "Hace $diffInMinutes minutos";
+    } elseif ($diffInMinutes < 60) {
+        return 'Hace una hora';
+    } elseif ($diffInMinutes < 1440) {  // 1440 minutos = 1 día
+        $diffInHours = $now->diffInHours($fechaSolicitud);
+        return "Hace $diffInHours horas";
+    } elseif ($diffInMinutes < 2880) {  // 2880 minutos = 2 días
+        return 'Hace un día';
+    } else {
+        $diffInDays = $now->diffInDays($fechaSolicitud);
+        return "Hace $diffInDays días";
+    }
+}
+
+
     
 
 
