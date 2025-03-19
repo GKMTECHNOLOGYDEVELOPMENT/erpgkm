@@ -38,6 +38,19 @@
         </div>
     @endif
 
+
+    <!-- Breadcrumb -->
+    <div>
+        <ul class="flex space-x-2 rtl:space-x-reverse mt-4">
+            <li>
+                <a href="{{ route('ordenes.helpdesk') }}" class="text-primary hover:underline">Órdenes</a>
+            </li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <span>Editar OT</span>
+            </li>
+        </ul>
+
+    </div>
     <!-- Definir el tipo de servicio -->
     @php
         $tipoServicio = $orden->tipoServicio; // ID del tipo de servicio
