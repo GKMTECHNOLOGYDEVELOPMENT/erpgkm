@@ -38,6 +38,19 @@
         </div>
     @endif
 
+
+    <!-- Breadcrumb -->
+    <div>
+        <ul class="flex space-x-2 rtl:space-x-reverse mt-4">
+            <li>
+                <a href="{{ route('ordenes.helpdesk') }}" class="text-primary hover:underline">Órdenes</a>
+            </li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <span>Editar OT</span>
+            </li>
+        </ul>
+
+    </div>
     <!-- Definir el tipo de servicio -->
     @php
         $tipoServicio = $orden->tipoServicio; // ID del tipo de servicio
@@ -142,9 +155,9 @@
                 </div>
                 <div x-show="tab === 'recursos'">
                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.recursos.index')
-                    <div x-show="tab === 'firmas'">
-                        @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
-                    </div>
+                <div x-show="tab === 'firmas'">
+                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
+                </div>
                 @elseif ($tipoServicio == 1)
                     {{-- Soporte On Site --}}
                     <div x-show="tab === 'detalle'">
@@ -153,7 +166,7 @@
                     <div x-show="tab === 'visitas'">
                         @include('tickets.ordenes-trabajo.helpdesk.soporte.visitas.index')
                     </div>
-                    <div x-show="tab === 'informacion'">
+                    <div x-show="tab === 'desarrollo'">
                         @include('tickets.ordenes-trabajo.helpdesk.soporte.informacion.index')
                     </div>
                     <div x-show="tab === 'firmas'">

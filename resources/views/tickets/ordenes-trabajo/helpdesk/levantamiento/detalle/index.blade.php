@@ -12,7 +12,7 @@
 
 <!-- 📌 Encabezado de la Orden -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
-    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">
         Orden de Trabajo N° {{ $orden->idTickets }}
     </span>
 </div>
@@ -121,7 +121,7 @@
 
 <!-- Nueva Card: Historial de Estados -->
 <div id="estadosCard" class="mt-4 p-4">
-    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">Historial de Estados</span>
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Historial de Estados</span>
     <!-- Tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">
         <table class="min-w-[600px] border-collapse">
