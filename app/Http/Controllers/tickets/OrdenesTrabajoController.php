@@ -472,23 +472,6 @@ if ($colorEstado == '#B5FA37') {
         }
 
 
-
-
-
-
-        // // Inicializamos la variable con un valor predeterminado
-        // $condicionexistenteservicio = false;  // Valor por defecto
-
-        // // Si la visita está seleccionada, proceder a verificar la condición
-        // if ($visitaSeleccionada) {
-        //     // Verificar si existe una condición para este ticket y visita con servicio = 1
-        //     $condicionexistenteservicio = DB::table('condicionesticket')
-        //         ->where('idTickets', $ticketId)  // Filtrar por idTickets
-        //         ->where('idVisitas', $visitaId)  // Filtrar por idVisitas (la visita seleccionada)
-        //         ->where('servicio', 1)           // Filtrar donde servicio = 1
-        //         ->exists();  // Devuelve true si existe una fila que cumple con los criterios
-        // }
-
         $condicionServicio = false;  // Valor por defecto
 
         if ($visitaSeleccionada) {
@@ -576,6 +559,55 @@ if ($colorEstado == '#B5FA37') {
                 ->exists(); // Devuelve true si la visita tiene una condición, false si no
         }
 
+        
+        
+        
+        $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario
+
+// Consulta para obtener el idUsuario de la visita seleccionada para ese ticket
+$idVisitaSeleccionada = DB::table('seleccionarvisita')
+    ->where('idTickets', $ticketId)  // Filtro por ticketId
+    ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
+
+Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada); // Log de la visita seleccionada
+
+// Si se encuentra una visita seleccionada
+if ($idVisitaSeleccionada) {
+
+    // Obtener el idUsuario de la visita seleccionada
+    $idUsuario = DB::table('visitas')
+        ->where('idTickets', $ticketId)  // Filtro por ticketId
+        ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisita seleccionada
+        ->value('idUsuario');  // Obtenemos el idUsuario de esa visita
+
+    Log::info('idUsuario obtenido de la visita seleccionada: ' . $idUsuario); // Log de idUsuario
+
+    // Si encontramos un idUsuario, obtener el idTipoUsuario del usuario
+    if ($idUsuario) {
+        $tipoUsuario = DB::table('usuarios')
+            ->where('idUsuario', $idUsuario)  // Filtro por idUsuario
+            ->value('idTipoUsuario');  // Obtenemos el idTipoUsuario
+
+        Log::info('Tipo de usuario obtenido: ' . $tipoUsuario);  // Log del tipo de usuario
+    } else {
+        Log::warning('No se encontró un idUsuario para la visita seleccionada.'); // Log si no se encuentra el idUsuario
+    }
+} else {
+    Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
+}
+
+// Puedes agregar un log final para revisar el valor de $tipoUsuario
+Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
+
+
+        // dd($tipoUsuario);  // Esto debería mostrar el valor de tipoUsuario
+
+
+     
+
+
+
+
 
 
         // Pasamos los datos a la vista
@@ -614,8 +646,8 @@ if ($colorEstado == '#B5FA37') {
             'numeroVisitas',  // Pasamos el número de visitas a la vista
             'visitasConCondiciones',  // Pasamos la variable que indica si hay condiciones para las visitas
             'condicionServicio',
-            'visitaConCondicion' // Pasamos la variable que indica si la visita tiene una condición
-
+            'visitaConCondicion', // Pasamos la variable que indica si la visita tiene una condición
+            'tipoUsuario'
 
         ));
     }
@@ -1593,6 +1625,9 @@ if ($colorEstado == '#B5FA37') {
             $visita->fecha_final_hora = $visita->fecha_final_hora?->toIso8601String();
             // Incluir el nombre del técnico
             $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;
+
+            $visita->idTipoUsuario = $visita->tecnico ? $visita->tecnico->idTipoUsuario : null;
+
             $visita->idTicket = $visita->idTickets;
             $visita->idVisita = $visita->idVisitas;
             $visita->nombre_visita = $visita->nombre;

@@ -23,6 +23,18 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
         const nombre_visita = visita.nombre_visita || 'Nombre de la visita';
 
+
+            // Lógica para personalizar el texto según idTipoUsuario
+            let tipoResponsable = '';
+            if (visita.idTipoUsuario === 5) {
+              tipoResponsable = 'Chofer responsable'; // Para idTipoUsuario = 5
+            } else if (visita.idTipoUsuario === 1) {
+              tipoResponsable = 'Técnico responsable'; // Para idTipoUsuario = 1
+            }
+
+
+            
+
         // CARD PRINCIPAL QUE ENVUELVE TODO
         const cardContainer = document.createElement('div');
         cardContainer.className = 'rounded-lg shadow-xl p-6 w-full sm:max-w-4xl mx-auto mt-6';
@@ -53,7 +65,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         // Nombre de la Visita con el Técnico al costado (Aplicando badge-outline-primary a todo)
         visitaTitle.innerHTML = `
         <span class="badge badge-outline-primary text-lg font-semibold px-3 py-1 rounded-lg shadow-md block text-center sm:text-left break-words w-full">
-        ${nombre_visita} <br class="hidden sm:block"> Técnico responsable: ${nombreTecnico}
+        ${nombre_visita} <br class="hidden sm:block"> ${tipoResponsable}: ${nombreTecnico}
     </span>
 `;
 
