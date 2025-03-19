@@ -3,7 +3,8 @@
         <div class="relative bg-white flex w-full items-center px-5 py-2.5 dark:bg-[#0e1726]">
             <div class="horizontal-logo flex lg:hidden justify-between items-center ltr:mr-2 rtl:ml-2">
                 <a href="/" class="main-logo flex items-center shrink-0">
-                    <img class="w-8 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/auth/profile.png" alt="image" />
+                    <img class="w-8 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/auth/profile.png"
+                        alt="image" />
                     <span
                         class="text-2xl ltr:ml-1.5 rtl:mr-1.5  font-semibold  align-middle hidden md:inline dark:text-white-light transition-all duration-300">GKM</span>
                 </a>
@@ -82,8 +83,8 @@
                                 placeholder="Search..." />
                             <button type="button"
                                 class="absolute w-9 h-9 inset-0 ltr:right-auto rtl:left-auto appearance-none peer-focus:text-primary">
-                                <svg class="mx-auto" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
+                                <svg class="mx-auto" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="11.5" cy="11.5" r="9.5" stroke="currentColor"
                                         stroke-width="1.5" opacity="0.5" />
                                     <path d="M18.5 18.5L22 22" stroke="currentColor" stroke-width="1.5"
@@ -109,8 +110,8 @@
                         @click="search = ! search">
                         <svg class="w-4.5 h-4.5 mx-auto dark:text-[#d0d2d6]" width="20" height="20"
                             viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="11.5" cy="11.5" r="9.5" stroke="currentColor" stroke-width="1.5"
-                                opacity="0.5" />
+                            <circle cx="11.5" cy="11.5" r="9.5" stroke="currentColor"
+                                stroke-width="1.5" opacity="0.5" />
                             <path d="M18.5 18.5L22 22" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" />
                         </svg>
@@ -122,11 +123,13 @@
                         @click="$store.app.toggleTheme('dark')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5" />
+                            <circle cx="12" cy="12" r="5" stroke="currentColor"
+                                stroke-width="1.5" />
                             <path d="M12 2V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             <path d="M12 20V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             <path d="M4 12L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            <path d="M22 12L20 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            <path d="M22 12L20 12" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" />
                             <path opacity="0.5" d="M19.7778 4.22266L17.5558 6.25424" stroke="currentColor"
                                 stroke-width="1.5" stroke-linecap="round" />
                             <path opacity="0.5" d="M4.22217 4.22266L6.44418 6.25424" stroke="currentColor"
@@ -198,7 +201,8 @@
                             <path
                                 d="M6 8L8.1589 9.79908C9.99553 11.3296 10.9139 12.0949 12 12.0949C13.0861 12.0949 14.0045 11.3296 15.8411 9.79908"
                                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            <circle cx="19" cy="5" r="3" stroke="currentColor" stroke-width="1.5" />
+                            <circle cx="19" cy="5" r="3" stroke="currentColor"
+                                stroke-width="1.5" />
                         </svg>
                     </a>
                     <ul x-cloak x-show="open" x-transition x-transition.duration.300ms
@@ -271,139 +275,135 @@
                         </template>
                     </ul>
                 </div>
-                <div class="dropdown" x-data="dropdown" @click.outside="open = false">
-                    <a href="javascript:;"
-                        class="relative block p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60"
-                        @click="toggle">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M19.0001 9.7041V9C19.0001 5.13401 15.8661 2 12.0001 2C8.13407 2 5.00006 5.13401 5.00006 9V9.7041C5.00006 10.5491 4.74995 11.3752 4.28123 12.0783L3.13263 13.8012C2.08349 15.3749 2.88442 17.5139 4.70913 18.0116C9.48258 19.3134 14.5175 19.3134 19.291 18.0116C21.1157 17.5139 21.9166 15.3749 20.8675 13.8012L19.7189 12.0783C19.2502 11.3752 19.0001 10.5491 19.0001 9.7041Z"
+                <div x-data="{ open: false, showModal: false }" @click.outside="open = false">
+                    <!-- 🔔 Botón de Notificaciones -->
+                    <a href="javascript:;" class="relative block p-2 rounded-full bg-white-light/40 dark:bg-dark/40 
+                        hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60" @click="open = !open">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19.0001 9.7041V9C19.0001 5.13401 15.8661 2 12.0001 2C8.13407 2 5.00006 5.13401 5.00006 9V9.7041C5.00006 10.5491 4.74995 11.3752 4.28123 12.0783L3.13263 13.8012C2.08349 15.3749 2.88442 17.5139 4.70913 18.0116C9.48258 19.3134 14.5175 19.3134 19.291 18.0116C21.1157 17.5139 21.9166 15.3749 20.8675 13.8012L19.7189 12.0783C19.2502 11.3752 19.0001 10.5491 19.0001 9.7041Z"
                                 stroke="currentColor" stroke-width="1.5" />
                             <path d="M7.5 19C8.15503 20.7478 9.92246 22 12 22C14.0775 22 15.845 20.7478 16.5 19"
                                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             <path d="M12 6V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
-
-                        <span class="flex absolute w-3 h-3 ltr:right-0 rtl:left-0 top-0">
-                            <span
-                                class="animate-ping absolute ltr:-left-[3px] rtl:-right-[3px] -top-[3px] inline-flex h-full w-full rounded-full bg-success/50 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full w-[6px] h-[6px] bg-success"></span>
-                        </span>
                     </a>
-                    <div x-data="notificaciones">
-                        <ul x-cloak x-show="open" x-transition x-transition.duration.300ms
-                            class="ltr:-right-2 rtl:-left-2 top-11 !py-0 text-dark dark:text-white-dark w-[300px] sm:w-[350px] divide-y dark:divide-white/10">
+                
+                    <!-- 🔹 Menú de Notificaciones -->
+                    <ul x-cloak x-show="open" x-transition x-transition.duration.300ms
+                        class="absolute ltr:-right-2 rtl:-left-2 top-11 bg-white dark:bg-gray-900 text-dark dark:text-white-dark 
+                        w-[300px] sm:w-[350px] shadow-lg rounded-lg divide-y dark:divide-white/10 z-50">
+                        
+                        <!-- 🔹 Encabezado -->
+                        <li>
+                            <div class="flex items-center px-4 py-2 justify-between font-semibold">
+                                <h4 class="text-lg">Notificaciones</h4>
+                                <template x-if="notifications.length">
+                                    <span class="badge bg-primary/80" x-text="notifications.length + ' nuevas'"></span>
+                                </template>
+                            </div>
+                        </li>
+                
+                        <!-- 🔹 Últimas 3 Notificaciones -->
+                        <ul class="divide-y dark:divide-white/10">
+                            <template x-for="notification in notifications.slice(-3)" :key="notification.id">
+                                <li class="dark:text-white-light/90">
+                                    <div class="flex items-center px-4 py-2">
+                                        <img class="w-12 h-12 rounded-full object-cover" 
+                                            :src="`/assets/images/${notification.profile}`" alt="image" />
+                
+                                        <div class="ltr:pl-3 rtl:pr-3 flex-auto">
+                                            <h6 x-html="notification.message"></h6>
+                                            <span class="text-xs block font-normal dark:text-gray-500"
+                                                x-text="notification.time"></span>
+                                        </div>
+                
+                                        <!-- ✅ Aceptar -->
+                                        <button @click="aceptarNotificacion(notification.id)">
+                                            <svg width="20" height="20" fill="none" stroke="green" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </button>
+                
+                                        <!-- ❌ Denegar -->
+                                        <button @click="denegarNotificacion(notification.id)">
+                                            <svg width="20" height="20" fill="none" stroke="red" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </li>
+                            </template>
+                        </ul>
+                
+                        <!-- 🔹 Botón "Ver todas las notificaciones" -->
+                        <template x-if="notifications.length > 3">
                             <li>
-                                <div
-                                    class="flex items-center px-4 py-2 justify-between font-semibold hover:!bg-transparent">
-                                    <h4 class="text-lg">Notificaciones</h4>
-                                    <template x-if="notifications.length">
-                                        <span class="badge bg-primary/80"
-                                            x-text="notifications.length + 'New'"></span>
-                                    </template>
+                                <div class="p-4">
+                                    <button class="btn btn-primary block w-full btn-small" @click="showModal = true">
+                                        Ver todas las notificaciones
+                                    </button>
                                 </div>
                             </li>
-
-                            <ul>
-                                <template x-for="notification in notifications" :key="notification.id">
-                                    <li class="dark:text-white-light/90">
-                                        <div class="flex items-center px-4 py-2 group">
-                                            <!-- Imagen del usuario -->
-                                            <div class="grid place-content-center rounded">
-                                                <div class="w-12 h-12 relative">
-                                                    <img class="w-12 h-12 rounded-full object-cover"
-                                                        :src="`/assets/images/${notification.profile}`"
-                                                        alt="image" />
-                                                </div>
-                                            </div>
-
-                                            <!-- Mensaje y Hora -->
-                                            <div class="ltr:pl-3 rtl:pr-3 flex flex-auto">
-                                                <div class="ltr:pr-3 rtl:pl-3">
+                        </template>
+                    </ul>
+                
+                    <!-- 🔥 MODAL con todas las notificaciones -->
+                    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="showModal && '!block'">
+                        <div class="flex items-start justify-center min-h-screen px-4" @click.self="showModal = false">
+                            <div x-show="showModal" x-transition x-transition.duration.300 
+                                class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg">
+                                
+                                <!-- 🔹 Encabezado del Modal -->
+                                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                                    <div class="font-bold text-lg">Todas las Notificaciones</div>
+                                    <button type="button" class="text-white-dark hover:text-dark" @click="showModal = false">
+                                        ✖
+                                    </button>
+                                </div>
+                
+                                <!-- 🔹 Lista con Scroll -->
+                                <div class="p-5 max-h-[400px] overflow-y-auto">
+                                    <ul class="divide-y dark:divide-white/10">
+                                        <template x-for="notification in notifications" :key="notification.id">
+                                            <li class="dark:text-white-light/90 flex items-center px-4 py-2">
+                                                <img class="w-12 h-12 rounded-full object-cover" 
+                                                    :src="`/assets/images/${notification.profile}`" alt="image" />
+                                                <div class="ml-3 flex-auto">
                                                     <h6 x-html="notification.message"></h6>
                                                     <span class="text-xs block font-normal dark:text-gray-500"
                                                         x-text="notification.time"></span>
                                                 </div>
-
-                                                <!-- ✅ Botón Aceptar -->
-                                                <button type="button"
-                                                    class="ml-auto text-success opacity-100 hover:bg-green-200 p-1 rounded-full transition"
-                                                    @click="aceptarNotificacion(notification.id)">
-                                                    <svg width="20" height="20" fill="none"
-                                                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M5 13l4 4L19 7"></path>
+                
+                                                <!-- ✅ Aceptar -->
+                                                <button @click="aceptarNotificacion(notification.id)">
+                                                    <svg width="20" height="20" fill="none" stroke="green" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                                                     </svg>
                                                 </button>
-
-                                                <!-- ❌ Botón Denegar -->
-                                                <button type="button"
-                                                    class="ml-2 text-danger opacity-100 hover:bg-red-200 p-1 rounded-full transition"
-                                                    @click="denegarNotificacion(notification.id)">
-                                                    <svg width="20" height="20" fill="none"
-                                                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            d="M6 18L18 6M6 6l12 12"></path>
+                
+                                                <!-- ❌ Denegar -->
+                                                <button @click="denegarNotificacion(notification.id)">
+                                                    <svg width="20" height="20" fill="none" stroke="red" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                                                     </svg>
                                                 </button>
-
-                                                <!-- 🗑️ Botón Eliminar -->
-                                                <button type="button"
-                                                    class="ml-2 text-gray-500 hover:text-danger hover:bg-gray-200 p-1 rounded-full transition"
-                                                    @click="removeNotification(notification.id)">
-                                                    <svg width="20" height="20" fill="none"
-                                                        stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <circle cx="12" cy="12" r="10"
-                                                            stroke="currentColor" stroke-width="1.5" />
-                                                        <path d="M14.5 9.5L9.5 14.5M9.5 9.5L14.5 14.5"
-                                                            stroke="currentColor" stroke-width="1.5"
-                                                            stroke-linecap="round" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </template>
-                            </ul>
-                    </div>
-
-
-
-                    <template x-if="notifications.length">
-                        <li>
-                            <div class="p-4">
-                                <button class="btn btn-primary block w-full btn-small" @click="toggle">Ver
-                                    todas</button>
-                            </div>
-                        </li>
-                    </template>
-                    <template x-if="!notifications.length">
-                        <li>
-                            <div class="!grid place-content-center hover:!bg-transparent text-lg min-h-[200px]">
-                                <div class="mx-auto ring-4 ring-primary/30 rounded-full mb-4 text-primary">
-                                    <svg width="40" height="40" viewBox="0 0 20 20" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path opacity="0.5"
-                                            d="M20 10C20 4.47715 15.5228 0 10 0C4.47715 0 0 4.47715 0 10C0 15.5228 4.47715 20 10 20C15.5228 20 20 15.5228 20 10Z"
-                                            fill="currentColor" />
-                                        <path
-                                            d="M10 4.25C10.4142 4.25 10.75 4.58579 10.75 5V11C10.75 11.4142 10.4142 11.75 10 11.75C9.58579 11.75 9.25 11.4142 9.25 11V5C9.25 4.58579 9.58579 4.25 10 4.25Z"
-                                            fill="currentColor" />
-                                        <path
-                                            d="M10 15C10.5523 15 11 14.5523 11 14C11 13.4477 10.5523 13 10 13C9.44772 13 9 13.4477 9 14C9 14.5523 9.44772 15 10 15Z"
-                                            fill="currentColor" />
-                                    </svg>
+                                            </li>
+                                        </template>
+                                    </ul>
                                 </div>
-                                No data available.
                             </div>
-                        </li>
-                    </template>
-                    </ul>
+                        </div>
+                    </div>
                 </div>
+                
+                
+                
+                
+                
+                
+                
+                
+                
                 <div class="dropdown flex-shrink-0" x-data="dropdown" @click.outside="open = false">
                     <a href="javascript:;" class="relative group" @click="toggle()">
                         <span><img class="w-9 h-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
@@ -420,17 +420,15 @@
                                 </div>
                                 <div class="ltr:pl-4 rtl:pr-4 truncate">
                                     <h4 class="text-base">
-                                        {{ auth()->user()->Nombre }}
-                                        <span
-                                            class="text-xs bg-success-light rounded text-success px-1 ltr:ml-2 rtl:ml-2">
-                                            {{ auth()->user()->rol->nombre ?? 'Rol no definido' }} Si tienes una
-                                            relación de rol
+                                    {{ auth()->user()->Nombre }} 
+                                    <span class="text-xs bg-success-light rounded text-success px-1 ltr:ml-2 rtl:ml-2">
+                                    {{ auth()->user()->rol->nombre ?? 'Rol no definido' }} Si tienes una relación de rol
 
                                         </span>
                                     </h4>
                                     <a class="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
-                                        href="javascript:;">
-                                        {{ auth()->user()->correo }}
+                                    href="javascript:;">
+                                    {{ auth()->user()->correo }}
                                     </a>
                                 </div>
                             </div>
@@ -491,9 +489,8 @@
                             <form action="{{ route('logout') }}" method="POST" class="w-full">
                                 @csrf
                                 <button type="submit" class="text-danger !py-3 flex items-center w-full">
-                                    <svg class="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0 rotate-90" width="18"
-                                        height="18" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0 rotate-90" width="18" height="18"
+                                        viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path opacity="0.5"
                                             d="M17 9.00195C19.175 9.01406 20.3529 9.11051 21.1213 9.8789C22 10.7576 22 12.1718 22 15.0002V16.0002C22 18.8286 22 20.2429 21.1213 21.1215C20.2426 22.0002 18.8284 22.0002 16 22.0002H8C5.17157 22.0002 3.75736 22.0002 2.87868 21.1215C2 20.2429 2 18.8286 2 16.0002L2 15.0002C2 12.1718 2 10.7576 2.87868 9.87889C3.64706 9.11051 4.82497 9.01406 7 9.00195"
                                             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -530,8 +527,8 @@
                     <div class="right_arrow">
                         <svg class="w-4 h-4 rotate-90" width="16" height="16" viewBox="0 0 24 24"
                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
@@ -587,8 +584,8 @@
                     <div class="right_arrow">
                         <svg class="w-4 h-4 rotate-90" width="16" height="16" viewBox="0 0 24 24"
                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
@@ -662,8 +659,8 @@
                     <div class="right_arrow">
                         <svg class="w-4 h-4 rotate-90" width="16" height="16" viewBox="0 0 24 24"
                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
@@ -729,8 +726,8 @@
                     <div class="right_arrow">
                         <svg class="w-4 h-4 rotate-90" width="16" height="16" viewBox="0 0 24 24"
                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
@@ -814,8 +811,8 @@
                     <div class="right_arrow">
                         <svg class="w-4 h-4 rotate-90" width="16" height="16" viewBox="0 0 24 24"
                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
@@ -901,8 +898,8 @@
                     <div class="right_arrow">
                         <svg class="w-4 h-4 rotate-90" width="16" height="16" viewBox="0 0 24 24"
                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
@@ -977,8 +974,8 @@
                     <div class="right_arrow">
                         <svg class="w-4 h-4 rotate-90" width="16" height="16" viewBox="0 0 24 24"
                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
@@ -1146,8 +1143,8 @@
                     <div class="right_arrow">
                         <svg class="w-4 h-4 rotate-90" width="16" height="16" viewBox="0 0 24 24"
                             fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
+                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                     </div>
                 </a>
@@ -1172,48 +1169,7 @@
         </ul>
     </div>
 </header>
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
 <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('notificaciones', () => ({
-            notifications: [{
-                    id: 1,
-                    profile: 'user-profile.jpeg',
-                    message: 'Acaba de llegar una entrega del chofer <strong>Juan Pérez</strong>',
-                    time: 'Hace 5 min'
-                },
-                {
-                    id: 2,
-                    profile: 'profile-34.jpeg',
-                    message: 'Acaba de llegar una entrega del chofer <strong>Carlos Rodríguez</strong>',
-                    time: 'Hace 20 min'
-                },
-                {
-                    id: 3,
-                    profile: 'profile-16.jpeg',
-                    message: 'Acaba de llegar una entrega del chofer <strong>Ana Morales</strong>',
-                    time: 'Hace 1 hora'
-                }
-            ],
-
-            // Función para aceptar notificación
-            aceptarNotificacion(id) {
-                alert(`✅ Notificación ${id} aceptada`);
-                this.notifications = this.notifications.filter(n => n.id !== id);
-            },
-
-            // Función para denegar notificación
-            denegarNotificacion(id) {
-                alert(`❌ Notificación ${id} denegada`);
-                this.notifications = this.notifications.filter(n => n.id !== id);
-            },
-
-            // Función para eliminar notificación
-            removeNotification(id) {
-                this.notifications = this.notifications.filter(n => n.id !== id);
-            }
-        }));
-    });
     document.addEventListener("alpine:init", () => {
         Alpine.data("header", () => ({
             init() {
@@ -1234,7 +1190,43 @@
                 }
             },
 
-
+            notifications: [{
+                    id: 1,
+                    profile: 'user-profile.jpeg',
+                    message: '<strong class="text-sm mr-1">John Doe</strong>invite you to <strong>Prototyping</strong>',
+                    time: '45 min ago',
+                },
+                {
+                    id: 2,
+                    profile: 'profile-34.jpeg',
+                    message: '<strong class="text-sm mr-1">Adam Nolan</strong>mentioned you to <strong>UX Basics</strong>',
+                    time: '9h Ago',
+                },
+                {
+                    id: 3,
+                    profile: 'profile-16.jpeg',
+                    message: '<strong class="text-sm mr-1">Anna Morgan</strong>Upload a file',
+                    time: '9h Ago',
+                },
+                {
+                    id: 4,
+                    profile: 'profile-16.jpeg',
+                    message: '<strong class="text-sm mr-1">Anna Morgan</strong>Upload a file',
+                    time: '9h Ago',
+                },
+                {
+                    id: 5,
+                    profile: 'profile-16.jpeg',
+                    message: '<strong class="text-sm mr-1">Anna Morgan</strong>Upload a file',
+                    time: '9h Ago',
+                },
+                {
+                    id: 6,
+                    profile: 'profile-34.jpeg',
+                    message: '<strong class="text-sm mr-1">Adam Nolan</strong>mentioned you to <strong>UX Basics</strong>',
+                    time: '9h Ago',
+                },
+            ],
 
             messages: [{
                     id: 1,
