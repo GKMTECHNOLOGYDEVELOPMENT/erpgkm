@@ -10,116 +10,118 @@
 <!-- Estilos adicionales para el log -->
 
 
-<span class="text-lg font-semibold mb-4 badge bg-success">Detalles de la Orden de Trabajo  N°
-    {{ $orden->idTickets }}</span>
+<!-- 📌 Encabezado de la Orden -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">
+        Orden de Trabajo N° {{ $orden->idTickets }}
+    </span>
+</div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+<!-- 🛠️ Formulario de Detalles -->
+<div class="p-6 mt-4">
+    <form action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}" enctype="multipart/form-data"
+        method="POST">
+        @csrf
+        @method('PUT')
 
-    <div>
-        <form action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}" enctype="multipart/form-data"
-            method="POST">
-            @csrf
-            @method('PUT')
-            <label class="block text-sm font-medium">Ticket</label>
-            <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}" readonly>
-    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Ticket -->
+            <div>
+                <label class="text-sm font-medium">Ticket</label>
+                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}"
+                    readonly>
+            </div>
 
+            <!-- Cliente -->
+            <div>
+                <label class="text-sm font-medium">Cliente</label>
+                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
+                    <option value="">Seleccionar Cliente</option>
+                    @foreach ($clientes as $cliente)
+                        <option value="{{ $cliente->idCliente }}"
+                            {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
+                            {{ $cliente->nombre }} - {{ $cliente->documento }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
+            <!-- Cliente General -->
+            <div>
+                <label class="text-sm font-medium">Cliente General</label>
+                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+                    <option value="" selected>Seleccionar Cliente General</option>
+                    @if ($orden->clienteGeneral)
+                        <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+                            {{ $orden->clienteGeneral->descripcion }}
+                        </option>
+                    @endif
+                </select>
+            </div>
 
-    <!-- Cliente -->
-    <div>
-        <label class="block text-sm font-medium">Cliente</label>
-        <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display:none">
-            <option value="" disabled>Seleccionar Cliente</option>
-            @foreach ($clientes as $cliente)
-                <option value="{{ $cliente->idCliente }}"
-                    {{ $cliente->idCliente == $orden->cliente->idCliente ? 'selected' : '' }}>
-                    {{ $cliente->nombre }} - {{ $cliente->documento }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+            <!-- Tienda -->
+            <div>
+                <label class="text-sm font-medium">Tienda</label>
+                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
+                    <option value="" disabled>Seleccionar Tienda</option>
+                    @foreach ($tiendas as $tienda)
+                        <option value="{{ $tienda->idTienda }}"
+                            {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
+                            {{ $tienda->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-    <!-- Cliente General -->
-    <div>
-        <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-        <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
-            <option value="" selected>Seleccionar Cliente General</option>
-            <!-- Aquí cargaremos el cliente general por defecto usando Blade -->
-            <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
-                {{ $orden->clienteGeneral->descripcion }}
-            </option>
-        </select>
-    </div>
+            <!-- Técnico -->
+            <div>
+                <label class="text-sm font-medium">Técnico</label>
+                <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display: none">
+                    <option value="" disabled>Seleccionar Técnico</option>
+                    @foreach ($usuarios as $usuario)
+                        <option value="{{ $usuario->idUsuario }}"
+                            {{ $usuario->idUsuario == $orden->idTecnico ? 'selected' : '' }}>
+                            {{ $usuario->Nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
+            <!-- Tipo de Servicio -->
+            <div>
+                <label class="text-sm font-medium">Tipo de Servicio</label>
+                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display: none"
+                    disabled>
+                    <option value="" disabled>Seleccionar Tipo de Servicio</option>
+                    @foreach ($tiposServicio as $tipo)
+                        <option value="{{ $tipo->idTipoServicio }}"
+                            {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
+                            {{ $tipo->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+                <!-- Input oculto para mantener el valor al enviar el formulario -->
+                <input type="hidden" name="tipoServicio" value="{{ $orden->tipoServicio }}">
+            </div>
 
+            <!-- Falla Reportada -->
+            <div class="md:col-span-2">
+                <label class="text-sm font-medium">Falla Reportada</label>
+                <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
+            </div>
 
-
-    <!-- Tienda -->
-    <div>
-        <label class="block text-sm font-medium">Tienda</label>
-        <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
-            <option value="" disabled>Seleccionar Tienda</option>
-            @foreach ($tiendas as $tienda)
-                <option value="{{ $tienda->idTienda }}" {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
-                    {{ $tienda->nombre }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-
-    <!-- Técnico -->
-    <div>
-        <label for="idTecnico" class="block text-sm font-medium">Técnico</label>
-        <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display:none">
-            <option value="" disabled>Seleccionar Técnico</option>
-            @foreach ($usuarios as $usuario)
-                <option value="{{ $usuario->idUsuario }}"
-                    {{ $usuario->idUsuario == $orden->idTecnico ? 'selected' : '' }}>
-                    {{ $usuario->Nombre }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <!-- Tipo de Servicio -->
-    <div>
-        <label for="tipoServicio" class="block text-sm font-medium">Tipo de Servicio</label>
-        <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display:none" disabled>
-            <option value="" disabled>Seleccionar Tipo de Servicio</option>
-            @foreach ($tiposServicio as $tipo)
-                <option value="{{ $tipo->idTipoServicio }}"
-                    {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
-                    {{ $tipo->nombre }}
-                </option>
-            @endforeach
-        </select>
-        <!-- Input oculto para mantener el valor al enviar el formulario -->
-        <input type="hidden" name="tipoServicio" value="{{ $orden->tipoServicio }}">
-    </div>
-
-
-
-
-    <!-- Falla Reportada -->
-    <div>
-        <label for="fallaReportada" class="block text-sm font-medium">Falla Reportada</label>
-        <textarea id="fallaReportada" name="fallaReportada" rows="1" class="form-input w-full bg-gray-100">{{ $orden->fallaReportada }}</textarea>
-    </div>
-
-    <!-- Contenedor del Botón -->
-    <div class="md:col-span-2 flex justify-end">
-        <button id="guardarFallaReportadalevantamiento" class="btn btn-primary">Modificar</button>
-    </div>
-
-
+            <!-- Botón de Guardar -->
+            <div class="md:col-span-2 flex justify-end space-x-4">
+                <a href="{{ route('ordenes.smart') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
+                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
+            </div>
+        </div>
     </form>
 </div>
 
-
-
 <!-- Nueva Card: Historial de Estados -->
-<div id="estadosCard" class="mt-4 p-4 shadow-lg rounded-lg">
-    <span class="text-lg font-semibold mb-4 badge bg-success">Historial de Estados</span>
+<div id="estadosCard" class="mt-4 p-4">
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Historial de Estados</span>
     <!-- Tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">
         <table class="min-w-[600px] border-collapse">
@@ -128,43 +130,44 @@
                     <th class="px-4 py-2 text-center">Estado</th>
                     <th class="px-4 py-2 text-center">Usuario</th>
                     <th class="px-4 py-2 text-center">Fecha</th>
-                    <th class="px-4 py-2 text-center">Acciones</th>
+                    <th class="px-4 py-2 text-center">Más</th>
                 </tr>
             </thead>
             <tbody id="estadosTableBody">
-                <!-- Fila inicial (no eliminable) -->
-                <tr class="bg-dark-dark-light border-dark-dark-light">
-                    <td class="px-4 py-2 text-center">{{ $orden->estadoflujo->descripcion ?? 'Sin estado' }}</td>
-                    <td class="px-4 py-2 text-center">{{ $orden->usuario->Nombre ?? 'Sin Nombre' }}</td>
-                    <td class="px-4 py-2 text-center min-w-[200px]">{{ $orden->fecha_creacion ?? 'sin fecha' }}</td>
-                    <td class="px-4 py-2 text-center">
-                        <span class="text-gray-500">-</span>
-                    </td>
-                </tr>
+                <!-- Aquí se llenarán los estados de flujo -->
             </tbody>
         </table>
     </div>
-    <!-- Div para mostrar la última modificación -->
-    <div class="mt-4">
-        Última modificación: <span class="bg-gray-100 dark:bg-gray-700 p-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-800 dark:text-white text-sm inline-block mt-2" id="ultimaModificacion"></span>
-    </div>
-    <!-- Estados disponibles (draggables) -->
+
+
+
+    <!-- Contenedor de Estados -->
     <div class="mt-3 overflow-x-auto">
-        <div id="draggableContainer" class="flex space-x-2">
-            <div class="draggable-state bg-primary/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Recojo">
-                Recojo
-            </div>
-            <div class="draggable-state bg-secondary/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Coordinado">
-                Coordinado
-            </div>
-            <div class="draggable-state bg-success/20 px-3 py-1 rounded cursor-move" draggable="true"
-                data-state="Operativo">
-                Operativo
-            </div>
+        <div id="draggableContainer" class="flex space-x-2 w-max">
+            @foreach ($estadosFlujo as $estado)
+                <div class="draggable-state min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-move text-white text-center shadow-md"
+                    style="background-color: {{ $estado->color }}; color: black;" draggable="true"
+                    data-state="{{ $estado->descripcion }}">
+                    {{ $estado->descripcion }}
+                </div>
+            @endforeach
         </div>
     </div>
+
+
+    <!-- Div para mostrar la última modificación (Responsive) -->
+    <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
+        <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
+            Última modificación:
+        </span>
+        <span id="ultimaModificacion"
+            class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600 
+               rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
+        </span>
+    </div>
+
+
+
 </div>
 
 
@@ -535,7 +538,8 @@
 
             // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
-            console.log("Token CSRF obtenido:", csrfToken); // Asegúrate de que el token se obtiene correctamente
+            console.log("Token CSRF obtenido:",
+            csrfToken); // Asegúrate de que el token se obtiene correctamente
 
             // Verificar si el token CSRF es válido
             if (!csrfToken) {
@@ -546,7 +550,8 @@
 
             // Enviar datos por AJAX
             $.ajax({
-                url: '/actualizar-orden-helpdesk/' + idOrden, // Pasar el id de la orden en la URL
+                url: '/actualizar-orden-helpdesk/' +
+                idOrden, // Pasar el id de la orden en la URL
                 method: 'PUT', // Usar PUT para la actualización
                 data: formData,
                 headers: {
