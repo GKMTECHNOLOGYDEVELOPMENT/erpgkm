@@ -204,16 +204,16 @@ function cargarFirmaTecnico() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            console.log(data.message); // Mostrar el mensaje de éxito
-            alert('Solicitud de entrega guardada correctamente.');
+            // console.log(data.message); // Mostrar el mensaje de éxito
+            toastr.success('Solicitud de entrega guardada correctamente.');
             // Si necesitas hacer algo más (como recargar la página o actualizar la vista), puedes hacerlo aquí
         } else {
-            alert('Error al guardar la solicitud de entrega.');
+            toastr.error('Error al guardar la solicitud de entrega.');
         }
     })
     .catch(error => {
         console.error('Error al enviar la solicitud de entrega:', error);
-        alert('Hubo un error al enviar la solicitud de entrega.');
+        toastr.error('Hubo un error al enviar la solicitud de entrega.');
     });
 }
 

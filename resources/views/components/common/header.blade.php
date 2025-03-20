@@ -1237,7 +1237,7 @@
                 fetch('/api/solicitudentrega')  // La URL de la API de Laravel
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);  // Verifica la respuesta de la API
+                        // console.log(data);  // Verifica la respuesta de la API
 
                         // Procesar los datos obtenidos
                         this.notifications = data.map(solicitud => ({
