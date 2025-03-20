@@ -74,7 +74,7 @@
                     <div class="flex items-center space-x-2">
                         <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openClienteGeneralModal = true">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 22 22"
                                 stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
@@ -98,12 +98,11 @@
                 </div>
 
 
-
-                <!-- Tienda (usa nice-select2) -->
+                <!-- Contenedor de Tienda -->
                 <div>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2 ">
                         <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                        <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1 mb-2" role="button"
+                        <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1" role="button"
                             target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="2">
@@ -112,27 +111,24 @@
                         </a>
                     </div>
 
-                    <!-- Select para las tiendas -->
-                    <!-- Preload (spinner o mensaje) sobre el select -->
-                    <div class="relative">
-                        <div id="preloadTienda"
-                            class="flex justify-center items-center absolute inset-0 bg-gray-100 bg-opacity-50"
-                            style="display:none;">
-                            <span>Cargando...</span>
-                        </div>
-
-                        <!-- Select para las tiendas -->
-                        <select id="idTienda" name="idTienda">
-
+                    <!-- Select para tiendas (solo si el cliente es tienda) -->
+                    <div id="selectTiendaContainer">
+                        <select id="idTienda" name="idTienda" class="form-input w-full ">
+                            <option value="">Seleccionar Tienda</option>
                         </select>
                     </div>
+
+                    <!-- Input para escribir el nombre de la tienda (si el cliente NO es tienda) -->
+                    <input type="text" id="nombreTiendaInput" name="nombreTienda" class="form-input w-full hidden"
+                        placeholder="Ingrese el nombre de la tienda">
                 </div>
+
 
                 <!-- Dirección -->
                 <div>
-                    <label for="direccion" class="block text-sm font-medium">Dirección</label>
+                    <label for="direccion" class="block text-sm font-medium">Dirección / Referencia</label>
                     <input id="direccion" type="text" name="direccion" class="form-input w-full"
-                        placeholder="Ingrese la dirección">
+                        placeholder="Ingrese la dirección o referencia">
                 </div>
 
                 <!-- Fecha de Compra -->
@@ -299,9 +295,9 @@
                                 <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
                                     placeholder="Seleccionar Cliente General" multiple style="display:none">
                                     @foreach ($clientesGenerales as $clienteGeneral)
-                                    <option value="{{ $clienteGeneral->idClienteGeneral }}">
-                                        {{ $clienteGeneral->descripcion }}
-                                    </option>
+                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                            {{ $clienteGeneral->descripcion }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -334,9 +330,9 @@
                                         style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
-                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                            {{ $tipoDocumento->nombre }}
-                                        </option>
+                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                                {{ $tipoDocumento->nombre }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -382,9 +378,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                        <option value="{{ $departamento['id_ubigeo'] }}">
-                                            {{ $departamento['nombre_ubigeo'] }}
-                                        </option>
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -642,8 +638,8 @@
                                     style="display:none" required>
                                     <option value="" disabled selected>Seleccione la Categoría</option>
                                     @foreach ($categorias as $categoria)
-                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
-                                    </option>
+                                        <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -1082,6 +1078,6 @@
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <script src="{{ asset('assets/js/tickets/smart/configuraciones.js') }}"></script>
-    <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script>
+    {{-- <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script> --}}
 
 </x-layout.default>

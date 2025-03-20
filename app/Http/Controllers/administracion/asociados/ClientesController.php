@@ -7,6 +7,7 @@ use App\Http\Requests\ClienteRequest;
 use App\Models\Cliente;
 use App\Models\Clientegeneral;
 use App\Models\Tipodocumento;
+use App\Models\Tienda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -105,22 +106,22 @@ class ClientesController extends Controller
     }
 
     public function agregarClientesGenerales(Request $request, $idCliente)
-{
-    $clientesGenerales = $request->input('clientesGenerales');
+    {
+        $clientesGenerales = $request->input('clientesGenerales');
 
-    // Eliminar todos los clientes generales actuales de la base de datos para este cliente
-    DB::table('cliente_clientegeneral')->where('idCliente', $idCliente)->delete();
+        // Eliminar todos los clientes generales actuales de la base de datos para este cliente
+        DB::table('cliente_clientegeneral')->where('idCliente', $idCliente)->delete();
 
-    // Insertar los nuevos clientes generales seleccionados
-    foreach ($clientesGenerales as $idClienteGeneral) {
-        DB::table('cliente_clientegeneral')->insert([
-            'idCliente' => $idCliente,
-            'idClienteGeneral' => $idClienteGeneral,
-        ]);
+        // Insertar los nuevos clientes generales seleccionados
+        foreach ($clientesGenerales as $idClienteGeneral) {
+            DB::table('cliente_clientegeneral')->insert([
+                'idCliente' => $idCliente,
+                'idClienteGeneral' => $idClienteGeneral,
+            ]);
+        }
+
+        return response()->json(['success' => true]);
     }
-
-    return response()->json(['success' => true]);
-}
 
 
 
@@ -132,10 +133,10 @@ class ClientesController extends Controller
         $cliente = Cliente::findOrFail($id); // Buscar cliente por ID
 
         $clientesGenerales = ClienteGeneral::all(); // Obtener todos los clientes generales
-        $clientesGeneralesAsociados = ClienteGeneral::whereIn('idClienteGeneral', function($query) use ($cliente) {
+        $clientesGeneralesAsociados = ClienteGeneral::whereIn('idClienteGeneral', function ($query) use ($cliente) {
             $query->select('idClienteGeneral')
-                  ->from('cliente_clientegeneral')
-                  ->where('idCliente', $cliente->idCliente); // Asociado al cliente actual
+                ->from('cliente_clientegeneral')
+                ->where('idCliente', $cliente->idCliente); // Asociado al cliente actual
         })->get(); // Clientes generales asociados al cliente específico
 
         $tiposDocumento = TipoDocumento::all(); // Obtener todos los tipos de documento
@@ -194,48 +195,84 @@ class ClientesController extends Controller
 
     public function clientesGeneralesAsociados($idCliente)
     {
-        $clientesGeneralesAsociados = ClienteGeneral::whereIn('idClienteGeneral', function($query) use ($idCliente) {
+        $clientesGeneralesAsociados = ClienteGeneral::whereIn('idClienteGeneral', function ($query) use ($idCliente) {
             $query->select('idClienteGeneral')
-                  ->from('cliente_clientegeneral')
-                  ->where('idCliente', $idCliente); // Asociado al cliente específico
+                ->from('cliente_clientegeneral')
+                ->where('idCliente', $idCliente); // Asociado al cliente específico
         })->get();
-    
+
         return response()->json($clientesGeneralesAsociados);
     }
-    
+
     public function obtenerClientesGeneralesAsociados($idCliente)
-{
-    // Obtener los clientes generales asociados
-    $clientesGenerales = DB::table('cliente_clientegeneral')
-        ->join('clientes_generales', 'cliente_clientegeneral.idClienteGeneral', '=', 'clientes_generales.idClienteGeneral')
-        ->where('cliente_clientegeneral.idCliente', $idCliente)
-        ->select('clientes_generales.idClienteGeneral', 'clientes_generales.descripcion')
-        ->get();
+    {
+        // Obtener los clientes generales asociados
+        $clientesGenerales = DB::table('cliente_clientegeneral')
+            ->join('clientes_generales', 'cliente_clientegeneral.idClienteGeneral', '=', 'clientes_generales.idClienteGeneral')
+            ->where('cliente_clientegeneral.idCliente', $idCliente)
+            ->select('clientes_generales.idClienteGeneral', 'clientes_generales.descripcion')
+            ->get();
 
-    return response()->json($clientesGenerales);
-}
-
-
-
-// Método para agregar cliente general
-public function agregarClienteGeneral($idCliente, $idClienteGeneral)
-{
-    // Verificar si la relación ya existe
-    $exists = DB::table('cliente_clientegeneral')
-                ->where('idCliente', $idCliente)
-                ->where('idClienteGeneral', $idClienteGeneral)
-                ->exists();
-
-    if (!$exists) {
-        DB::table('cliente_clientegeneral')->insert([
-            'idCliente' => $idCliente,
-            'idClienteGeneral' => $idClienteGeneral
-        ]);
-        return response()->json(['success' => true]);
-    } else {
-        return response()->json(['success' => false, 'message' => 'La relación ya existe.']);
+        return response()->json($clientesGenerales);
     }
-}
+
+    public function obtenerCliente($idCliente)
+    {
+        $cliente = Cliente::find($idCliente);
+
+        if (!$cliente) {
+            return response()->json(['error' => 'Cliente no encontrado'], 404);
+        }
+
+        return response()->json([
+            'idCliente' => $cliente->idCliente,
+            'nombre' => $cliente->nombre,
+            'documento' => $cliente->documento,
+            'esTienda' => $cliente->esTienda == 1 ? "SI" : "NO", // Convertimos el 1 en "SI" y 0 en "NO"
+        ]);
+    }
+
+    /**
+     * Obtener las tiendas asociadas a un cliente si es tienda
+     */
+    public function obtenerTiendas($idCliente)
+    {
+        // Verificamos si el cliente es tienda
+        $cliente = Cliente::find($idCliente);
+
+        if (!$cliente) {
+            return response()->json(['error' => 'Cliente no encontrado'], 404);
+        }
+
+        if ($cliente->esTienda != 1) {
+            return response()->json(['error' => 'El cliente no es una tienda'], 400);
+        }
+
+        // Obtener las tiendas relacionadas a ese cliente
+        $tiendas = Tienda::where('idCliente', $idCliente)->get();
+
+        return response()->json($tiendas);
+    }
+
+    // Método para agregar cliente general
+    public function agregarClienteGeneral($idCliente, $idClienteGeneral)
+    {
+        // Verificar si la relación ya existe
+        $exists = DB::table('cliente_clientegeneral')
+            ->where('idCliente', $idCliente)
+            ->where('idClienteGeneral', $idClienteGeneral)
+            ->exists();
+
+        if (!$exists) {
+            DB::table('cliente_clientegeneral')->insert([
+                'idCliente' => $idCliente,
+                'idClienteGeneral' => $idClienteGeneral
+            ]);
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['success' => false, 'message' => 'La relación ya existe.']);
+        }
+    }
 
 
 
@@ -249,13 +286,13 @@ public function agregarClienteGeneral($idCliente, $idClienteGeneral)
             'idCliente' => $idCliente,
             'idClienteGeneral' => $idClienteGeneral
         ]);
-        
+
         // Verificar si existe la relación antes de eliminarla
         $relacionExistente = DB::table('cliente_clientegeneral')
             ->where('idCliente', $idCliente)
             ->where('idClienteGeneral', $idClienteGeneral)
             ->exists();
-    
+
         if (!$relacionExistente) {
             Log::warning('No se encontró la relación entre cliente y cliente general', [
                 'idCliente' => $idCliente,
@@ -263,13 +300,13 @@ public function agregarClienteGeneral($idCliente, $idClienteGeneral)
             ]);
             return response()->json(['success' => false, 'message' => 'No se encontró la relación']);
         }
-        
+
         // Eliminar la relación en la tabla cliente_clientegeneral
         $deleted = DB::table('cliente_clientegeneral')
             ->where('idCliente', $idCliente)
             ->where('idClienteGeneral', $idClienteGeneral)
             ->delete();
-        
+
         // Verificar si la eliminación fue exitosa
         if ($deleted) {
             Log::debug('Cliente general eliminado con éxito', [
@@ -285,7 +322,7 @@ public function agregarClienteGeneral($idCliente, $idClienteGeneral)
             return response()->json(['success' => false, 'message' => 'Error al eliminar la relación']);
         }
     }
-    
+
 
 
     // Método para actualizar el cliente

@@ -207,8 +207,8 @@ class OrdenesTrabajoController extends Controller
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
 
 
-              // Verificar si el checkbox es "Es recojo" está marcado
-              $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
+            // Verificar si el checkbox es "Es recojo" está marcado
+            $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
 
             $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
                 'idTicket' => $ticket->idTickets, // ID del ticket recién creado
@@ -257,7 +257,7 @@ class OrdenesTrabajoController extends Controller
     }
 
 
-   
+
     public function edit($id)
     {
         $usuario = Auth::user();
@@ -334,21 +334,21 @@ class OrdenesTrabajoController extends Controller
         // $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
 
         // Asumiendo que tienes el colorEstado ya disponible en tu controlador
-// $colorEstado = '#B5FA37'; // Este color lo puedes obtener dinámicamente según lo que estés trabajando
+        // $colorEstado = '#B5FA37'; // Este color lo puedes obtener dinámicamente según lo que estés trabajando
 
-// Filtrar los encargados según el color del estado
-if ($colorEstado == '#B5FA37') {
-    // Si el colorEstado es #B5FA37, solo obtener los usuarios de tipo 1 (TÉCNICO)
-    $encargado = Usuario::where('idTipoUsuario', 5)->get();
-} elseif ($colorEstado == '#FBCACD') {
-    // Si el colorEstado es #FBCACD, solo obtener los usuarios de tipo 5 (CHOFER)
-    $encargado = Usuario::where('idTipoUsuario', 1)->get();
-} else {
-    // Si no es ninguno de esos colores, traer ambos tipos (1 y 5)
-    $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
-}
+        // Filtrar los encargados según el color del estado
+        if ($colorEstado == '#B5FA37') {
+            // Si el colorEstado es #B5FA37, solo obtener los usuarios de tipo 1 (TÉCNICO)
+            $encargado = Usuario::where('idTipoUsuario', 5)->get();
+        } elseif ($colorEstado == '#FBCACD') {
+            // Si el colorEstado es #FBCACD, solo obtener los usuarios de tipo 5 (CHOFER)
+            $encargado = Usuario::where('idTipoUsuario', 1)->get();
+        } else {
+            // Si no es ninguno de esos colores, traer ambos tipos (1 y 5)
+            $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
+        }
 
- 
+
 
 
         $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
@@ -383,30 +383,28 @@ if ($colorEstado == '#B5FA37') {
                 } elseif ($idEstadflujo == 2) {
                     // Si el idEstadflujo es 2, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                    ->whereIn('idEstadflujo', [3,10])  // Obtener los estados con idEstadflujo 3 y 4
-                    ->get();
-                } elseif ($idEstadflujo == 11) {
-                        // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
-                        $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [12, 13, 14, 15, 16, 17 ])  // Obtener los estados con idEstadflujo 3 y 4
+                        ->whereIn('idEstadflujo', [3, 10])  // Obtener los estados con idEstadflujo 3 y 4
                         ->get();
-                    
+                } elseif ($idEstadflujo == 11) {
+                    // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->whereIn('idEstadflujo', [12, 13, 14, 15, 16, 17])  // Obtener los estados con idEstadflujo 3 y 4
+                        ->get();
                 } elseif ($idEstadflujo == 12) {
                     // Si el id Estado flujo es 12 tiene que salir 
                     $estadosFlujo = DB::table('estado_flujo')
-                    ->where('idEstadflujo', 18)  
-                    ->get();
+                        ->where('idEstadflujo', 18)
+                        ->get();
                 } elseif ($idEstadflujo == 18) {
                     // Si el id Estado flujo es 12 tiene que salir 
                     $estadosFlujo = DB::table('estado_flujo')
-                    ->where('idEstadflujo', 3)  
-                    ->get();
-                }elseif ($idEstadflujo == 10) {
-                        // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
-                        $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 3)
+                        ->get();
+                } elseif ($idEstadflujo == 10) {
+                    // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
+                    $estadosFlujo = DB::table('estado_flujo')
                         ->where('idEstadflujo', 11)  // Solo obtener el estado con idEstadflujo 4
                         ->get();
-
                 } elseif ($idEstadflujo == 1) {
                     // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
@@ -417,12 +415,10 @@ if ($colorEstado == '#B5FA37') {
                     $estadosFlujo = DB::table('estado_flujo')
                         ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
                         ->get();
-                }  
-                
-                elseif ($idEstadflujo == 8) {
+                } elseif ($idEstadflujo == 8) {
                     // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3,1])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [3, 1])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } else {
                     // Si no tiene idEstadflujo = 1, 3, 8 o 9, verificar si es 6 o 7
@@ -561,51 +557,51 @@ if ($colorEstado == '#B5FA37') {
                 ->exists(); // Devuelve true si la visita tiene una condición, false si no
         }
 
-        
-        
-        
+
+
+
         $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario
 
-// Consulta para obtener el idUsuario de la visita seleccionada para ese ticket
-$idVisitaSeleccionada = DB::table('seleccionarvisita')
-    ->where('idTickets', $ticketId)  // Filtro por ticketId
-    ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
+        // Consulta para obtener el idUsuario de la visita seleccionada para ese ticket
+        $idVisitaSeleccionada = DB::table('seleccionarvisita')
+            ->where('idTickets', $ticketId)  // Filtro por ticketId
+            ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
 
-Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada); // Log de la visita seleccionada
+        Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada); // Log de la visita seleccionada
 
-// Si se encuentra una visita seleccionada
-if ($idVisitaSeleccionada) {
+        // Si se encuentra una visita seleccionada
+        if ($idVisitaSeleccionada) {
 
-    // Obtener el idUsuario de la visita seleccionada
-    $idUsuario = DB::table('visitas')
-        ->where('idTickets', $ticketId)  // Filtro por ticketId
-        ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisita seleccionada
-        ->value('idUsuario');  // Obtenemos el idUsuario de esa visita
+            // Obtener el idUsuario de la visita seleccionada
+            $idUsuario = DB::table('visitas')
+                ->where('idTickets', $ticketId)  // Filtro por ticketId
+                ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisita seleccionada
+                ->value('idUsuario');  // Obtenemos el idUsuario de esa visita
 
-    Log::info('idUsuario obtenido de la visita seleccionada: ' . $idUsuario); // Log de idUsuario
+            Log::info('idUsuario obtenido de la visita seleccionada: ' . $idUsuario); // Log de idUsuario
 
-    // Si encontramos un idUsuario, obtener el idTipoUsuario del usuario
-    if ($idUsuario) {
-        $tipoUsuario = DB::table('usuarios')
-            ->where('idUsuario', $idUsuario)  // Filtro por idUsuario
-            ->value('idTipoUsuario');  // Obtenemos el idTipoUsuario
+            // Si encontramos un idUsuario, obtener el idTipoUsuario del usuario
+            if ($idUsuario) {
+                $tipoUsuario = DB::table('usuarios')
+                    ->where('idUsuario', $idUsuario)  // Filtro por idUsuario
+                    ->value('idTipoUsuario');  // Obtenemos el idTipoUsuario
 
-        Log::info('Tipo de usuario obtenido: ' . $tipoUsuario);  // Log del tipo de usuario
-    } else {
-        Log::warning('No se encontró un idUsuario para la visita seleccionada.'); // Log si no se encuentra el idUsuario
-    }
-} else {
-    Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
-}
+                Log::info('Tipo de usuario obtenido: ' . $tipoUsuario);  // Log del tipo de usuario
+            } else {
+                Log::warning('No se encontró un idUsuario para la visita seleccionada.'); // Log si no se encuentra el idUsuario
+            }
+        } else {
+            Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
+        }
 
-// Puedes agregar un log final para revisar el valor de $tipoUsuario
-Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
+        // Puedes agregar un log final para revisar el valor de $tipoUsuario
+        Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
 
 
         // dd($tipoUsuario);  // Esto debería mostrar el valor de tipoUsuario
 
 
-     
+
 
 
 
@@ -2177,66 +2173,44 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
 
     public function guardarImagen(Request $request)
     {
-        // Validar la solicitud
+        // Validar que se envíen imágenes y descripciones en array
         $request->validate([
-            'imagen' => 'required|image|max:2048', // Validamos que la imagen sea válida y no mayor de 2MB
-            'descripcion' => 'required|string|max:255',
-            'ticket_id' => 'required|integer|exists:tickets,idTickets', // Validamos que el ID del ticket exista
+            'imagenes' => 'required|array', // Asegura que es un array
+            'imagenes.*' => 'image|max:2048', // Cada imagen no debe exceder 2MB
+            'descripciones' => 'required|array',
+            'descripciones.*' => 'string|max:255',
+            'ticket_id' => 'required|integer|exists:tickets,idTickets',
         ]);
 
-        // Obtener los datos de la solicitud
-        $imagen = $request->file('imagen'); // Imagen en formato binario
-        $descripcion = $request->input('descripcion');
-        $ticket_id = $request->input('ticket_id');
-
-        // Log para verificar los datos recibidos
-        Log::info('Datos recibidos para guardar la imagen:');
-        Log::info('Descripción: ' . $descripcion);
-        Log::info('Ticket ID: ' . $ticket_id);
-        Log::info('Imagen: ' . $imagen->getClientOriginalName()); // Nombre original del archivo
-
-        // Buscar el idVisitas asociado con el ticket en la tabla seleccionarvisita
+        // Obtener el idVisitas del ticket
         $visita = DB::table('seleccionarvisita')
-            ->where('idTickets', $ticket_id)
-            ->first(); // Obtenemos la primera visita asociada con el ticket
+            ->where('idTickets', $request->ticket_id)
+            ->first();
 
-        // Verificar si se encontró el visita_id
         if (!$visita) {
-            Log::error('No se encontró una visita válida para este ticket.');
             return response()->json(['success' => false, 'message' => 'No se encontró una visita válida para este ticket.'], 400);
         }
 
-        // Obtener el idVisitas
         $visita_id = $visita->idVisitas;
 
-        // Log para verificar el idVisitas encontrado
-        Log::info('Visita ID encontrado: ' . $visita_id);
+        $imagenesGuardadas = [];
 
-        // Convertir la imagen a binario
-        $imagen_binaria = file_get_contents($imagen->getRealPath());
+        // Recorrer las imágenes y guardarlas
+        foreach ($request->file('imagenes') as $index => $imagen) {
+            $descripcion = $request->descripciones[$index] ?? 'Sin descripción';
+            $imagen_binaria = file_get_contents($imagen->getRealPath());
 
-        // Log para verificar si la conversión de la imagen fue exitosa
-        Log::info('Tamaño de la imagen binaria: ' . strlen($imagen_binaria));
-
-        // Crear la entrada en la base de datos
-        $foto = new Fotostickest();
-        $foto->idTickets = $ticket_id;
-        $foto->idVisitas = $visita_id;
-        $foto->foto = $imagen_binaria; // Guardamos la imagen en binario
-        $foto->descripcion = $descripcion;
-
-        try {
+            $foto = new Fotostickest();
+            $foto->idTickets = $request->ticket_id;
+            $foto->idVisitas = $visita_id;
+            $foto->foto = $imagen_binaria;
+            $foto->descripcion = $descripcion;
             $foto->save();
-            // Log para verificar que la imagen se guardó correctamente
-            Log::info('Imagen guardada con éxito en la base de datos.');
-        } catch (\Exception $e) {
-            // Log para capturar errores en el proceso de guardado
-            Log::error('Error al guardar la imagen en la base de datos: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Error al guardar la imagen en la base de datos.'], 500);
+
+            $imagenesGuardadas[] = ['id' => $foto->id, 'descripcion' => $descripcion];
         }
 
-        // Devolver una respuesta exitosa
-        return response()->json(['success' => true, 'message' => 'Imagen guardada correctamente.']);
+        return response()->json(['success' => true, 'message' => 'Imágenes guardadas correctamente.', 'imagenes' => $imagenesGuardadas]);
     }
 
 
@@ -3030,18 +3004,18 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
             'idTickets' => 'required|integer',
             'idVisitas' => 'required|integer',
         ]);
-    
+
         // Verificar si ya existe una solicitud de entrega con el mismo idTickets, idVisitas y estado 0
         $existeSolicitud = SolicitudEntrega::where('idTickets', $validated['idTickets'])
-                                            ->where('idVisitas', $validated['idVisitas'])
-                                            ->where('estado', 0)
-                                            ->exists();
-    
+            ->where('idVisitas', $validated['idVisitas'])
+            ->where('estado', 0)
+            ->exists();
+
         // Si ya existe una solicitud con esos parámetros, devolver un error
         if ($existeSolicitud) {
             return response()->json(['success' => false, 'message' => 'Ya existe una solicitud de entrega para esta visita.'], 400);
         }
-    
+
         // Crear un nuevo registro en la tabla solicitudentrega
         $solicitud = new SolicitudEntrega();
         $solicitud->idTickets = $validated['idTickets'];
@@ -3052,7 +3026,7 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
         $solicitud->fechaHora = now(); // Almacenar la fecha y hora actual
 
         $solicitud->save();
-    
+
         // Crear la notificación
         $notification = [
             'id' => $solicitud->id,
@@ -3060,10 +3034,10 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
             'time' => now()->diffForHumans(),
             'profile' => 'default-profile.jpeg', // Asegúrate de tener una imagen predeterminada
         ];
-    
+
         // Emitir el evento de notificación
         broadcast(new NotificacionNueva($notification));
-    
+
         return response()->json(['success' => true, 'message' => 'Solicitud de entrega guardada correctamente.']);
     }
 
@@ -3076,7 +3050,7 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
     // {
     //     // Obtener solicitudes con estado = 0
     //     $solicitudes = Solicitudentrega::where('estado', 0)->get(['idSolicitudentrega', 'comentario', 'idTickets', 'idVisitas']);
-        
+
     //     return response()->json($solicitudes);
     // }
 
@@ -3098,7 +3072,7 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
                 'solicitudentrega.fechaHora'  // Agregar la fecha y hora de la solicitud
             )
             ->get();
-        
+
         return response()->json($solicitudes);
     }
 
@@ -3116,7 +3090,7 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
     
         // Buscar la solicitud por el ID
         $solicitud = Solicitudentrega::where('idSolicitudentrega', $id)->first();
-    
+
         if ($solicitud) {
             // Cambiar el estado de la solicitud a "Aceptada"
             $solicitud->estado = 1; // Estado "Aceptada"
@@ -3157,73 +3131,54 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
     
             return response()->json(['message' => 'Solicitud aceptada con éxito.']);
         }
-    
+
         return response()->json(['message' => 'Solicitud no encontrada.'], 404);
     }
 
 
 
-
-    
-    
-
-
-
-    
-
-
-
-
-
-    
     public function denegarSolicitud($id)
-{
-    // Aquí cambiamos 'find()' por 'where' y usamos 'idSolicitudentrega'
-    $solicitud = Solicitudentrega::where('idSolicitudentrega', $id)->first();
+    {
+        // Aquí cambiamos 'find()' por 'where' y usamos 'idSolicitudentrega'
+        $solicitud = Solicitudentrega::where('idSolicitudentrega', $id)->first();
 
-    if ($solicitud) {
-        $solicitud->estado = 2;  // Estado 2 significa "Rechazada"
-        $solicitud->save();
-        return response()->json(['message' => 'Solicitud rechazada con éxito.']);
+        if ($solicitud) {
+            $solicitud->estado = 2;  // Estado 2 significa "Rechazada"
+            $solicitud->save();
+            return response()->json(['message' => 'Solicitud rechazada con éxito.']);
+        }
+
+        return response()->json(['message' => 'Solicitud no encontrada.'], 404);
     }
 
-    return response()->json(['message' => 'Solicitud no encontrada.'], 404);
-}
 
 
+    // Método para calcular el tiempo transcurrido usando Carbon
+    private function calcularTiempoTranscurrido($fechaHora)
+    {
+        $now = Carbon::now();
+        $fechaSolicitud = Carbon::parse($fechaHora);
 
-// Método para calcular el tiempo transcurrido usando Carbon
-private function calcularTiempoTranscurrido($fechaHora)
-{
-    $now = Carbon::now();
-    $fechaSolicitud = Carbon::parse($fechaHora);
+        // Calculamos la diferencia en minutos
+        $diffInMinutes = $now->diffInMinutes($fechaSolicitud);
 
-    // Calculamos la diferencia en minutos
-    $diffInMinutes = $now->diffInMinutes($fechaSolicitud);
-
-    // Dependiendo de la diferencia, formateamos el tiempo
-    if ($diffInMinutes < 1) {
-        return 'Hace un momento';
-    } elseif ($diffInMinutes < 5) {
-        return 'Hace un momento';
-    } elseif ($diffInMinutes < 30) {
-        return "Hace $diffInMinutes minutos";
-    } elseif ($diffInMinutes < 60) {
-        return 'Hace una hora';
-    } elseif ($diffInMinutes < 1440) {  // 1440 minutos = 1 día
-        $diffInHours = $now->diffInHours($fechaSolicitud);
-        return "Hace $diffInHours horas";
-    } elseif ($diffInMinutes < 2880) {  // 2880 minutos = 2 días
-        return 'Hace un día';
-    } else {
-        $diffInDays = $now->diffInDays($fechaSolicitud);
-        return "Hace $diffInDays días";
+        // Dependiendo de la diferencia, formateamos el tiempo
+        if ($diffInMinutes < 1) {
+            return 'Hace un momento';
+        } elseif ($diffInMinutes < 5) {
+            return 'Hace un momento';
+        } elseif ($diffInMinutes < 30) {
+            return "Hace $diffInMinutes minutos";
+        } elseif ($diffInMinutes < 60) {
+            return 'Hace una hora';
+        } elseif ($diffInMinutes < 1440) {  // 1440 minutos = 1 día
+            $diffInHours = $now->diffInHours($fechaSolicitud);
+            return "Hace $diffInHours horas";
+        } elseif ($diffInMinutes < 2880) {  // 2880 minutos = 2 días
+            return 'Hace un día';
+        } else {
+            $diffInDays = $now->diffInDays($fechaSolicitud);
+            return "Hace $diffInDays días";
+        }
     }
-}
-
-
-    
-
-
-
 }

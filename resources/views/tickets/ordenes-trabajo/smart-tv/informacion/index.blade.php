@@ -1,23 +1,26 @@
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
-<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Detalles de los Estados</span>
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+    style="background-color: {{ $colorEstado }};">Detalles de los Estados</span>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 items-start">
     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="md:col-span-1 mt-4">
             <label for="estado" class="block text-sm font-medium">Estado</label>
-          
-            <select id="estado" name="estado" class="selectize" onchange="actualizarColorEstado(this)" style="display: none">
-            <option value="" disabled selected>Selecciona una opción</option>
+
+            <select id="estado" name="estado" class="selectize" onchange="actualizarColorEstado(this)"
+                style="display: none">
+                <option value="" disabled selected>Selecciona una opción</option>
 
                 @foreach ($estadosOTS as $index => $estado)
-                    <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}" {{ $index == 0 ? 'selected' : '' }}>
+                    <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}"
+                        {{ $index == 0 ? 'selected' : '' }}>
                         {{ $estado->descripcion }}
                     </option>
                 @endforeach
             </select>
-            
+
         </div>
 
         <div class="md:col-span-2">
@@ -78,7 +81,7 @@
 
 
 
-<!-- Modal para agregar imagen -->
+<!-- Modal para agregar imágenes -->
 <div id="modalAgregarImagen" x-data="{ open: false }" x-ref="modal" @toggle-modal-agregar-imagen.window="open = !open">
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
@@ -101,28 +104,16 @@
                 <!-- Cuerpo del Modal -->
                 <div class="p-5 space-y-4 overflow-y-auto max-h-[400px]">
                     <form id="formAgregarImagen">
-                        <!-- Descripción -->
-                        <div>
-                            <label class="block text-sm font-medium">Descripción</label>
-                            <input type="text" id="descripcionImagen" class="form-input w-full">
-                        </div>
-
                         <!-- Selección de Imagen -->
                         <div class="mt-4">
-                            <label class="block text-sm font-medium mb-2">Seleccionar Imagen</label>
-                            <input type="file" id="imagenInput" accept="image/*"
+                            <label class="block text-sm font-medium mb-2">Seleccionar Imágenes</label>
+                            <input type="file" id="imagenInput" accept="image/*" multiple
                                 class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
-                        </div>
-
-                        <!-- Botón Agregar -->
-                        <div class="flex justify-end mt-4 gap-2">
-
-                            <button type="button" class="btn btn-secondary" id="agregarImagen">Agregar</button>
                         </div>
 
                         <!-- Contenedor de imágenes seleccionadas en el modal -->
                         <div id="imagePreviewContainer"
-                            class="preview-container mt-4 p-2 border rounded-lg overflow-y-auto max-h-40">
+                            class="preview-container mt-4 p-2 border rounded-lg overflow-y-auto max-h-40 flex flex-wrap gap-2">
                         </div>
 
                     </form>
@@ -133,12 +124,13 @@
                     <button type="button" class="btn btn-outline-danger" @click="open = false">
                         Cancelar
                     </button>
-                    <button type="submit" class="btn btn-primary" id="guardarImagen">Reset</button>
+                    <button type="submit" class="btn btn-primary" id="guardarImagen">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
@@ -150,29 +142,24 @@
          *  1️⃣ Elementos del DOM
          * -------------------------------- */
         const estadoSelect = document.getElementById("estado");
-        const guardarEstadoBtn = document.getElementById("guardarEstado");
         const cardFotos = document.getElementById("cardFotos");
         const abrirModalBtn = document.getElementById("abrirModalAgregarImagen");
         const cerrarModalBtn = document.getElementById("cerrarModal");
-        const formAgregarImagen = document.getElementById("formAgregarImagen");
         const modalAgregarImagen = document.getElementById("modalAgregarImagen");
         const imagenInput = document.getElementById("imagenInput");
-        const descripcionInput = document.getElementById("descripcionImagen");
         const imagePreviewContainer = document.getElementById("imagePreviewContainer");
         const swiperWrapper = document.getElementById("swiperWrapper");
-        const agregarImagenBtn = document.getElementById("agregarImagen");
         const guardarImagenBtn = document.getElementById("guardarImagen");
 
         /** -------------------------------
          *  2️⃣ Variables Globales
          * -------------------------------- */
-        let imagenes = JSON.parse(localStorage.getItem("imagenesSolucion")) || [];
+        const ticketId = "{{ $ticket->idTickets }}";
+        const visitaId = "{{ $visitaId ?? 'null' }}";
 
         /** -------------------------------
          *  3️⃣ Funciones
          * -------------------------------- */
-
-
 
         // ✅ Muestra u oculta la sección de imágenes dependiendo del estado seleccionado
         function toggleCardFotos() {
@@ -184,64 +171,37 @@
             }
         }
 
+        // ✅ Previsualizar imágenes en el modal al seleccionar archivos
+        imagenInput.addEventListener("change", function() {
+            imagePreviewContainer.innerHTML =
+            ""; // Limpiar el contenedor antes de agregar nuevas imágenes
 
+            Array.from(imagenInput.files).forEach((file, index) => {
+                const reader = new FileReader();
 
+                reader.onload = function(event) {
+                    const imageUrl = event.target.result;
 
-      // ✅ Renderiza las imágenes seleccionadas en el modal antes de guardarlas
-function renderizarPrevisualizacion() {
-    imagePreviewContainer.innerHTML = ""; // Limpiar el contenedor de previsualización
-
-    // Obtener las imágenes desde la base de datos
-    const ticketId = {{ $ticket->idTickets }}; // Obtener el ticketId
-    const visitaId = {{ $visitaId ?? 'null' }}; // Obtener el visitaId, si no es null
-
-    fetch(`/api/imagenes/${ticketId}/${visitaId}`) // Llamada a la API
-        .then(response => response.json())
-        .then(data => {
-            if (data.imagenes && data.imagenes.length > 0) {
-                imagePreviewContainer.classList.remove("hidden"); // Mostrar el contenedor
-
-                data.imagenes.forEach((img, index) => {
                     let preview = document.createElement("div");
-                    preview.classList.add("preview-item", "flex", "flex-col", "items-center", "gap-2", "p-2", "rounded-lg", "shadow");
-
-                    // Asegúrate de que la propiedad `src` esté correctamente definida
-                    const imagenSrc = img.src || 'ruta_por_defecto_si_no_hay_imagen'; // Ruta por defecto si no hay imagen
+                    preview.classList.add("preview-item", "flex", "flex-col",
+                        "items-center", "gap-2", "p-2", "rounded-lg", "shadow");
 
                     preview.innerHTML = `
-                        <img src="${imagenSrc}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
-                        <span class="text-xs font-semibold text-gray-700 text-center">${img.description ? img.description : "Sin descripción"}</span>
-                        <button onclick="eliminarImagen(${index})" class="btn btn-danger text-white px-2 py-1 text-xs rounded">
-                            Eliminar
-                        </button>
-                    `;
+                    <img src="${imageUrl}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
+                    <input type="text" placeholder="Descripción de la imagen ${index + 1}" 
+                        class="descripcion-input form-input w-full text-sm p-1 rounded border border-gray-300">
+                `;
 
-                    imagePreviewContainer.appendChild(preview); // Agregar la previsualización al contenedor
-                });
-            } else {
-                imagePreviewContainer.classList.add("hidden"); // Ocultar si no hay imágenes
-            }
-        })
-        .catch(error => {
-            console.error("Error al cargar las imágenes:", error);
-            imagePreviewContainer.classList.add("hidden"); // Ocultar en caso de error
+                    imagePreviewContainer.appendChild(preview);
+                };
+
+                reader.readAsDataURL(file);
+            });
         });
-}
 
-
-
-
-
-
-
-
-        // ✅ Renderiza las imágenes en el Swiper
+        // ✅ Renderizar imágenes existentes en el Swiper
         function renderizarImagenes() {
             swiperWrapper.innerHTML = ""; // Limpiar el swiper antes de agregar nuevas imágenes
-
-            // Obtener las imágenes desde la base de datos
-            const ticketId = {{ $ticket->idTickets }};
-            const visitaId = {{ $visitaId ?? 'null' }};
 
             fetch(`/api/imagenes/${ticketId}/${visitaId}`)
                 .then(response => response.json())
@@ -253,29 +213,21 @@ function renderizarPrevisualizacion() {
                                 "items-center", "justify-center");
 
                             swiperSlide.innerHTML = `
-                        <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
-                            <img src="${img.src}" alt="Imagen ${index + 1}" class="w-full h-full object-cover rounded-lg" />
-                            
-                            <!-- Descripción con fondo translúcido, SCROLL, y tamaño limitado -->
-                            <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium 
-                                        max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
-                                <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
-                                    ${img.description ? img.description : "Sin descripción"}
+                            <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
+                                <img src="${img.src}" alt="Imagen ${index + 1}" class="w-full h-full object-cover rounded-lg" />
+                                <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium 
+                                            max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
+                                    <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
+                                        ${img.description ? img.description : "Sin descripción"}
+                                    </div>
                                 </div>
                             </div>
-
-                            <!-- Botón para eliminar la imagen -->
-                            <button onclick="eliminarImagen(${index})" class="absolute top-2 right-2 btn btn-danger text-white p-1 rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                    `;
+                        `;
                             swiperWrapper.appendChild(swiperSlide);
                         });
 
-                        swiper5.update(); // Actualizar el swiper para que se muestren las nuevas imágenes
+                        // 🔹 Asegurar que el Swiper se actualiza correctamente
+                        setTimeout(() => swiper5.update(), 100);
                     }
                 })
                 .catch(error => {
@@ -283,58 +235,62 @@ function renderizarPrevisualizacion() {
                 });
         }
 
+        // ✅ Guardar imágenes en la base de datos
+        if (guardarImagenBtn) {
+            guardarImagenBtn.addEventListener("click", function() {
+                if (imagenInput.files.length === 0) {
+                    toastr.error("Debe seleccionar al menos una imagen.");
+                    return;
+                }
 
+                const formData = new FormData();
 
-
-
-        // ✅ Elimina una imagen (tanto del modal como del Swiper)
-        window.eliminarImagen = function(index) {
-            // Obtener el ID del ticket y la visita
-            const ticketId = {{ $ticket->idTickets }};
-            const visitaId = {{ $visitaId ?? 'null' }};
-
-            // Obtener las imágenes desde la API
-            fetch(`/api/imagenes/${ticketId}/${visitaId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.imagenes && data.imagenes[index]) {
-                        const imagenId = data.imagenes[index].id; // Obtener el ID de la imagen
-
-                        // Enviar solicitud para eliminar la imagen en la base de datos
-                        fetch(`/api/eliminarImagen/${imagenId}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                }
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    // Recargar las imágenes después de eliminar
-                                    renderizarImagenes(); // Actualizar el Swiper
-                                    renderizarPrevisualizacion(); // Actualizar el modal
-                                    toastr.success("Imagen eliminada correctamente.");
-                                } else {
-                                    toastr.error("Error al eliminar la imagen.");
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Error:", error);
-                                toastr.error("Hubo un error al eliminar la imagen.");
-                            });
-                    } else {
-                        toastr.error("La imagen no existe o no se pudo encontrar.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al cargar las imágenes:", error);
-                    toastr.error("Hubo un error al cargar las imágenes.");
+                Array.from(imagenInput.files).forEach((file, index) => {
+                    const descripcion = imagePreviewContainer.children[index]?.querySelector(
+                        ".descripcion-input").value || "Sin descripción";
+                    formData.append("imagenes[]", file);
+                    formData.append("descripciones[]", descripcion);
                 });
-        };
 
-        /** -------------------------------
-         *  4️⃣ Eventos
-         * -------------------------------- */
+                formData.append("ticket_id", ticketId);
+                formData.append("visita_id", visitaId);
+
+                fetch('/api/guardarImagen', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(text);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success("Imágenes guardadas correctamente.");
+                            modalAgregarImagen.classList.add("hidden");
+                            imagenInput.value = "";
+                            imagePreviewContainer.innerHTML = "";
+
+                            // 🔹 Llamar a renderizarImagenes() para actualizar el Swiper
+                            renderizarImagenes();
+                        } else {
+                            toastr.error("Error al guardar las imágenes.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        toastr.error("Hubo un error al guardar las imágenes.");
+                    });
+            });
+        } else {
+            console.error("guardarImagenBtn no encontrado en el DOM");
+        }
 
         // ✅ Maneja el cambio del select "Estado"
         estadoSelect.addEventListener("change", toggleCardFotos);
@@ -342,75 +298,11 @@ function renderizarPrevisualizacion() {
         // ✅ Abre el modal de agregar imagen
         abrirModalBtn.addEventListener("click", function() {
             modalAgregarImagen.classList.remove("hidden");
-            renderizarImagenes();
-            renderizarPrevisualizacion(); // Mostrar imágenes al abrir el modal
         });
 
         // ✅ Cierra el modal de agregar imagen
         cerrarModalBtn.addEventListener("click", function() {
             modalAgregarImagen.classList.add("hidden");
-            imagenInput.value = "";
-            descripcionInput.value = "";
-        });
-
-        // ✅ Agregar imagen y enviarla al servidor para guardar en la base de datos
-        agregarImagenBtn.addEventListener("click", function() {
-            const file = imagenInput.files[0];
-            const descripcion = descripcionInput.value.trim();
-
-            if (!file || descripcion === "") {
-                toastr.error("Debe seleccionar una imagen y escribir una descripción.");
-                return;
-            }
-
-            const formData = new FormData(); // Usamos FormData para enviar archivos
-            formData.append("imagen", file); // Agregar el archivo
-            formData.append("descripcion", descripcion); // Agregar la descripción
-            formData.append("ticket_id", {{ $ticket->idTickets }}); // ID del ticket
-            formData.append("visita_id", {{ $visitaId ?? 'null' }}); // ID de la visita (si existe)
-
-            // Log para verificar que los datos se están agregando al FormData
-            console.log("Archivo seleccionado:", file);
-            console.log("Descripción:", descripcion);
-            console.log("Ticket ID:", {{ $ticket->idTickets }});
-            console.log("Visita ID:", {{ $visitaId ?? 'null' }});
-
-            // Enviar la imagen al servidor usando AJAX
-            fetch('/api/guardarImagen', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: formData // Pasamos los datos como FormData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Respuesta del servidor:",
-                        data); // Log para ver la respuesta del servidor
-                    if (data.success) {
-                        toastr.success("Imagen guardada correctamente.");
-                        renderizarImagenes(); // Actualizar la vista de imágenes
-                        renderizarPrevisualizacion(); // Actualizar la vista de imágenes en el modal
-
-                    } else {
-                        toastr.error("Error al guardar la imagen.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    toastr.error("Hubo un error al guardar la imagen.");
-                });
-
-            // Limpiar los campos después de enviar la imagen
-            imagenInput.value = "";
-            descripcionInput.value = "";
-        });
-
-        // ✅ Guarda las imágenes en localStorage y las muestra en el Swiper
-        guardarImagenBtn.addEventListener("click", function() {
-            modalAgregarImagen.classList.add("hidden");
-            imagenInput.value = "";
-            descripcionInput.value = "";
         });
 
         /** -------------------------------
@@ -445,7 +337,6 @@ function renderizarPrevisualizacion() {
 
         // ✅ Renderizar imágenes al cargar la página
         renderizarImagenes();
-
     });
 </script>
 
@@ -503,42 +394,41 @@ function renderizarPrevisualizacion() {
 
 
 <script>
-  document.getElementById("estado").addEventListener("change", function() {
-    const estadoId = this.value;
-    const ticketId = {{ $ticket->idTickets }};
-    const visitaId = {{ $visitaId ?? 'null' }};
+    document.getElementById("estado").addEventListener("change", function() {
+        const estadoId = this.value;
+        const ticketId = {{ $ticket->idTickets }};
+        const visitaId = {{ $visitaId ?? 'null' }};
 
-    // Obtener la justificación del estado seleccionado
-    fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Mostrar la justificación en el textarea
-                document.getElementById("justificacion").value = data.justificacion || "";
-            } else {
-                toastr.error(data.message || "Error al obtener la justificación");
+        // Obtener la justificación del estado seleccionado
+        fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar la justificación en el textarea
+                    document.getElementById("justificacion").value = data.justificacion || "";
+                } else {
+                    toastr.error(data.message || "Error al obtener la justificación");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                toastr.error("Error al obtener la justificación.");
+            });
+
+        // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
+        if (estadoId == 3) {
+            const cardFotos = document.getElementById("cardFotos");
+            if (cardFotos) {
+                cardFotos.style.display = "block"; // Mostrar el elemento
+
             }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            toastr.error("Error al obtener la justificación.");
-        });
-
-    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
-    if (estadoId == 3) {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "block"; // Mostrar el elemento
-
-            renderizarPrevisualizacion();
+        } else {
+            const cardFotos = document.getElementById("cardFotos");
+            if (cardFotos) {
+                cardFotos.style.display = "none"; // Ocultar el elemento
+            }
         }
-    } else {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "none"; // Ocultar el elemento
-        }
-    }
-});
+    });
 
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar todos los select con la clase .selectize
