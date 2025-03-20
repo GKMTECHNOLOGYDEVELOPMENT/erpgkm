@@ -904,7 +904,7 @@
 
         // Validación en tiempo real para campos obligatorios
         const camposObligatorios = [
-            'idCliente', 'idClienteGeneral', 'idTienda',
+            'idCliente', 'idClienteGeneral',
             'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada'
         ];
 

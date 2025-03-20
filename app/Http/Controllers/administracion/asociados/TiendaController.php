@@ -86,6 +86,10 @@ public function store(TiendasRequest $request)
   }
 
 
+
+  
+
+
   public function edit($id)
 {
     // Buscar la tienda que se quiere editar

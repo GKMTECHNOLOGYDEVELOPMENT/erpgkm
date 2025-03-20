@@ -157,38 +157,135 @@ class OrdenesTrabajoController extends Controller
 
 
 
+    // public function storesmart(Request $request)
+    // {
+    //     try {
+    //         Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
+
+    //         // Validación de los datos
+    //         $validatedData = $request->validate([
+    //             'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
+    //             'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+    //             'idCliente' => 'required|integer|exists:cliente,idCliente',
+    //             'idTienda' => 'required|integer|exists:tienda,idTienda',
+    //             'direccion' => 'required|string|max:255',
+    //             'idMarca' => 'required|integer|exists:marca,idMarca',
+    //             'idModelo' => 'required|integer|exists:modelo,idModelo',
+    //             'serie' => 'required|string|max:255',
+    //             'fechaCompra' => 'required|date_format:Y-m-d',
+    //             'fallaReportada' => 'required|string',
+    //             'linkubicacion' =>  'required|string',
+    //             'lat' => 'nullable|string|max:255',
+    //             'lng' => 'nullable|string|max:255',
+    //             // 'esRecojo' => 'nullable|in:on', // Aceptar 'on' como valor
+
+    //         ]);
+
+    //         Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
+
+    //         // Crear la nueva orden de trabajo
+    //         $ticket = Ticket::create([
+    //             'numero_ticket' => $validatedData['nroTicket'],
+    //             'idClienteGeneral' => $validatedData['idClienteGeneral'],
+    //             'idCliente' => $validatedData['idCliente'],
+    //             'idTienda' => $validatedData['idTienda'],
+    //             'direccion' => $validatedData['direccion'],
+    //             'idMarca' => $validatedData['idMarca'],
+    //             'idModelo' => $validatedData['idModelo'],
+    //             'serie' => $validatedData['serie'],
+    //             'fechaCompra' => $validatedData['fechaCompra'],
+    //             'linkubicacion' => $validatedData['linkubicacion'],
+    //             'fallaReportada' => $validatedData['fallaReportada'],
+    //             'lat' => $validatedData['lat'],
+    //             'lng' => $validatedData['lng'],
+    //             'idUsuario' => auth()->id(),
+    //             'fecha_creacion' => now(),
+    //             'idTipotickets' => 1,
+    //             'tipoServicio' => 1,
+    //         ]);
+
+    //         Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
+
+
+    //         // Verificar si el checkbox es "Es recojo" está marcado
+    //         $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
+
+    //         $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
+    //             'idTicket' => $ticket->idTickets, // ID del ticket recién creado
+    //             'idEstadflujo' => $estadoFlujo,  // Estado inicial de flujo
+    //             'idUsuario' => auth()->id(),  // Usuario autenticado
+    //             'fecha_creacion' => now(),
+    //         ]);
+
+
+    //         Log::info('Flujo de trabajo guardado correctamente', [
+    //             'idTicket' => $ticket->idTickets,
+    //             'idTicketFlujo' => $ticketFlujoId
+    //         ]);
+
+    //         // Actualizar el ticket con el idTicketFlujo generado
+    //         $ticket->idTicketFlujo = $ticketFlujoId;
+    //         $ticket->save();
+
+    //         Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
+
+    //         // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
+    //         return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
+    //             ->with('success', 'Orden de trabajo creada correctamente.');
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         // En caso de error en la validación
+    //         Log::error('Errores de validación', ['errors' => $e->errors()]);
+    //         return redirect()->back()->withErrors($e->errors())->withInput();
+    //     } catch (\Exception $e) {
+    //         // En caso de cualquier otro error
+    //         Log::error('Error al crear la orden de trabajo', ['exception' => $e->getMessage()]);
+    //         return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
+    //     }
+    // }
     public function storesmart(Request $request)
     {
         try {
             Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
-
+    
             // Validación de los datos
             $validatedData = $request->validate([
                 'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
                 'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
                 'idCliente' => 'required|integer|exists:cliente,idCliente',
-                'idTienda' => 'required|integer|exists:tienda,idTienda',
+                'idTienda' => 'nullable|integer|exists:tienda,idTienda', // Permitir que idTienda sea nullable
                 'direccion' => 'required|string|max:255',
                 'idMarca' => 'required|integer|exists:marca,idMarca',
                 'idModelo' => 'required|integer|exists:modelo,idModelo',
                 'serie' => 'required|string|max:255',
                 'fechaCompra' => 'required|date_format:Y-m-d',
                 'fallaReportada' => 'required|string',
-                'linkubicacion' =>  'required|string',
+                'linkubicacion' => 'required|string',
                 'lat' => 'nullable|string|max:255',
                 'lng' => 'nullable|string|max:255',
-                // 'esRecojo' => 'nullable|in:on', // Aceptar 'on' como valor
-
             ]);
-
+    
             Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
-
+    
+            // Verificar si el cliente no es una tienda y se proporcionó un nombre de tienda
+            $tiendaId = $validatedData['idTienda'];
+    
+            // Si no hay idTienda, significa que se está creando una tienda
+            if (!$tiendaId && $request->has('nombreTienda') && $request->input('nombreTienda') !== "") {
+                // Crear la tienda con los datos proporcionados
+                $tienda = Tienda::create([
+                    'nombre' => $request->input('nombreTienda'),
+                ]);
+    
+                $tiendaId = $tienda->idTienda; // Guardar el ID de la tienda recién creada
+                Log::info('Tienda creada', ['tienda' => $tienda]);
+            }
+    
             // Crear la nueva orden de trabajo
             $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['nroTicket'],
                 'idClienteGeneral' => $validatedData['idClienteGeneral'],
                 'idCliente' => $validatedData['idCliente'],
-                'idTienda' => $validatedData['idTienda'],
+                'idTienda' => $tiendaId,  // Guardar el idTienda (ya sea el existente o el creado)
                 'direccion' => $validatedData['direccion'],
                 'idMarca' => $validatedData['idMarca'],
                 'idModelo' => $validatedData['idModelo'],
@@ -203,32 +300,75 @@ class OrdenesTrabajoController extends Controller
                 'idTipotickets' => 1,
                 'tipoServicio' => 1,
             ]);
-
+    
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
-
-
-            // Verificar si el checkbox es "Es recojo" está marcado
-            $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
-
-            $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
-                'idTicket' => $ticket->idTickets, // ID del ticket recién creado
-                'idEstadflujo' => $estadoFlujo,  // Estado inicial de flujo
-                'idUsuario' => auth()->id(),  // Usuario autenticado
-                'fecha_creacion' => now(),
-            ]);
-
-
-            Log::info('Flujo de trabajo guardado correctamente', [
-                'idTicket' => $ticket->idTickets,
-                'idTicketFlujo' => $ticketFlujoId
-            ]);
-
-            // Actualizar el ticket con el idTicketFlujo generado
-            $ticket->idTicketFlujo = $ticketFlujoId;
-            $ticket->save();
-
-            Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
-
+    
+            // Verificar si el checkbox "Entrega a Lab" está marcado
+            if ($request->has('entregaLab') && $request->input('entregaLab') === 'on') {
+                // Si "Entrega a Lab" está marcado, solo se crea la visita y su flujo relacionado
+    
+                // Crear la visita
+                $visita = Visita::create([
+                    'nombre' => 'Laboratorio',  // El nombre de la visita
+                    'fecha_programada' => now(),  // Fecha y hora programada: ahora
+                    'fecha_asignada' => now(),    // Fecha de asignación: ahora
+                    'fechas_desplazamiento' => null, // Asumimos que este campo puede ser null
+                    'fecha_llegada' => null,  // Asumimos que este campo puede ser null
+                    'fecha_inicio' => null,  // El campo 'fecha_inicio' debe ser null
+                    'fecha_final' => null,  // El campo 'fecha_final' debe ser null
+                    'estado' => 1,  // Estado inicial (puedes ajustarlo según sea necesario)
+                    'idTickets' => $ticket->idTickets,  // El ID del ticket relacionado
+                    'idUsuario' => 39,  // ID del usuario relacionado, en este caso es 39
+                    'fecha_inicio_hora' => null,  // Este campo puede ser null
+                    'fecha_final_hora' => null,  // Este campo puede ser null
+                    'necesita_apoyo' => 0,  // Necesita apoyo (por defecto se establece en 0)
+                    'tipoServicio' => 7,  // Tipo de servicio es 7, según lo solicitado
+                ]);
+    
+                Log::info('Visita creada correctamente para laboratorio', ['visita' => $visita]);
+    
+                // Crear el flujo de trabajo con idEstadflujo = 10 (estado para "entrega a laboratorio")
+                $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
+                    'idTicket' => $ticket->idTickets,
+                    'idEstadflujo' => 10,  // Estado de flujo "entrega a laboratorio"
+                    'idUsuario' => auth()->id(),
+                    'fecha_creacion' => now(),
+                ]);
+    
+                Log::info('Flujo de trabajo guardado correctamente', [
+                    'idTicket' => $ticket->idTickets,
+                    'idTicketFlujo' => $ticketFlujoId
+                ]);
+    
+                // Actualizar el ticket con el idTicketFlujo generado
+                $ticket->idTicketFlujo = $ticketFlujoId;
+                $ticket->save();
+    
+                Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
+    
+            } else {
+                // Si "Entrega a Lab" no está marcado, se maneja el flujo "es recojo"
+                $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
+    
+                $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
+                    'idTicket' => $ticket->idTickets,
+                    'idEstadflujo' => $estadoFlujo,  // Estado inicial de flujo
+                    'idUsuario' => auth()->id(),
+                    'fecha_creacion' => now(),
+                ]);
+    
+                Log::info('Flujo de trabajo guardado correctamente', [
+                    'idTicket' => $ticket->idTickets,
+                    'idTicketFlujo' => $ticketFlujoId
+                ]);
+    
+                // Actualizar el ticket con el idTicketFlujo generado
+                $ticket->idTicketFlujo = $ticketFlujoId;
+                $ticket->save();
+    
+                Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
+            }
+    
             // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
             return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
                 ->with('success', 'Orden de trabajo creada correctamente.');
@@ -242,6 +382,7 @@ class OrdenesTrabajoController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
+    
 
 
 
@@ -260,7 +401,7 @@ class OrdenesTrabajoController extends Controller
 
 
 
-    
+
     public function edit($id)
     {
         $usuario = Auth::user();
@@ -300,6 +441,9 @@ class OrdenesTrabajoController extends Controller
         $visitaExistente = $visita ? true : false;
 
         $visitaId = $visita ? $visita->idVisitas : null; // Si no hay visita, será null
+
+        $tipoServicio = $visita ? $visita->tipoServicio : null;
+
 
 
         // Verificar si existe una transición en transicion_status_ticket con idEstadoots = 4
@@ -649,7 +793,9 @@ class OrdenesTrabajoController extends Controller
             'condicionServicio',
             'visitaConCondicion', // Pasamos la variable que indica si la visita tiene una condición
             'tipoUsuario',
-            'idVisitaSeleccionada'
+            'idVisitaSeleccionada',
+            'tipoServicio'  // Pasamos el tipoServicio a la vista
+
 
         ));
     }
