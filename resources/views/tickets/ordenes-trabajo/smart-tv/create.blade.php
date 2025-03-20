@@ -214,14 +214,8 @@
                     <textarea id="fallaReportada" name="fallaReportada" rows="3" class="form-input w-full"
                         placeholder="Describa la falla reportada"></textarea>
                 </div>
-                <!-- Falla Reportada -->
-                <div>
-                    <label for="linkubicacion" class="block text-sm font-medium">Link de Ubicacion</label>
-                    <input id="linkubicacion" name="linkubicacion" rows="3" class="form-input w-full"
-                        placeholder="Ingrese el link">
-                </div>
 
-                <!-- Latitud -->
+                
                 <div>
                     <label for="esRecojo" class="block text-sm font-medium mb-2">Es recojo</label>
                     <div>
@@ -232,6 +226,24 @@
                                 class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
                         </label>
                     </div>
+                </div>
+
+                <div>
+                    <label for="entregaLab" class="block text-sm font-medium mb-2">Entrega a Lab.</label>
+                    <div>
+                        <label class="w-12 h-6 relative mt-3">
+                            <input type="checkbox" id="entregaLab" name="entregaLab"
+                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                            <span
+                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                        </label>
+                    </div>
+                </div>
+                <!-- Falla Reportada -->
+                <div class="col-span-2">
+                    <label for="linkubicacion" class="block text-sm font-medium">Link de Ubicacion</label>
+                    <input id="linkubicacion" name="linkubicacion" rows="3" class="form-input w-full"
+                        placeholder="Ingrese el link">
                 </div>
 
                 <!-- Latitud -->
