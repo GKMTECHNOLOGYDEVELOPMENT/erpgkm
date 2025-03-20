@@ -118,3 +118,10 @@ Route::get('/solicitudentrega', [OrdenesTrabajoController::class, 'obtenerSolici
 Route::put('/solicitudentrega/aceptar/{id}', [OrdenesTrabajoController::class, 'aceptarSolicitud']);
 // Ruta para rechazar la solicitud (estado = 2)
 Route::put('/solicitudentrega/denegar/{id}', [OrdenesTrabajoController::class, 'denegarSolicitud']);
+
+
+// Ruta para obtener los datos de un cliente específico
+Route::get('/cliente/{idCliente}', [ClientesController::class, 'obtenerCliente']);
+
+// Ruta para obtener las tiendas asociadas a un cliente
+Route::get('/cliente/{idCliente}/tiendas', [ClientesController::class, 'obtenerTiendas']);

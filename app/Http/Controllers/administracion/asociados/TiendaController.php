@@ -24,12 +24,17 @@ public function index()
 
 public function create()
 {
+    // Filtrar clientes con estado activo y que tengan tipo de documento "RUC"
+    $clientes = Cliente::where('estado', 1)
+        ->whereHas('tipoDocumento', function ($query) {
+            $query->where('nombre', 'RUC');
+        })->get();
 
+    $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
 
-        $clientes = Cliente::where('estado', 1)->get();
-        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
-        return view('administracion.asociados.tienda.create', compact('clientes', 'departamentos'));
+    return view('administracion.asociados.tienda.create', compact('clientes', 'departamentos'));
 }
+
     
   // Método para almacenar la tienda
 public function store(TiendasRequest $request)
