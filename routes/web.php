@@ -329,12 +329,14 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
         ->name('checkUpdates');
 
-        Route::get('smart/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
-        Route::get('smart/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
+    Route::get('smart/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
+    Route::get('smart/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
+    Route::get('help/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
+    Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
 
-    
-        // ✅ Ruta corregida para verificar actualizaciones
-        Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
+
+    // ✅ Ruta corregida para verificar actualizaciones
+    Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
         ->name('checkUpdates');
 
 
@@ -375,12 +377,12 @@ Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 
 Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])
     ->name('guardar.firma.cliente');
 
-    Route::get('ordenes/smart/{id}/obtener-firma-cliente', [OrdenesTrabajoController::class, 'obtenerFirmaCliente'])
+Route::get('ordenes/smart/{id}/obtener-firma-cliente', [OrdenesTrabajoController::class, 'obtenerFirmaCliente'])
     ->name('obtener.firma.cliente')
     ->middleware('auth');
 
-    
-    Route::get('ordenes/smart/{id}/obtener-firma-tecnico', [OrdenesTrabajoController::class, 'obtenerFirmaTecnico'])
+
+Route::get('ordenes/smart/{id}/obtener-firma-tecnico', [OrdenesTrabajoController::class, 'obtenerFirmaTecnico'])
     ->name('obtener.firma.tecnico')
     ->middleware('auth');
 
@@ -390,7 +392,7 @@ Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoContr
 
 Route::get('/get-marcas', [MarcaController::class, 'checkMarcas']);
 
-    
+
 
 
 
