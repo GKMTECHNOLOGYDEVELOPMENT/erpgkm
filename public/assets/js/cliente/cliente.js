@@ -65,12 +65,14 @@ document.addEventListener("alpine:init", () => {
         // Actualiza esta función para que incluya los nuevos datos de cliente
         formatDataForTable(data) {
             return data.map((cliente) => [
-                `<div style="text-align: center;">${cliente.idTipoDocumento}</div>`, // Tipo de Documento
-                `<div style="text-align: center;">${cliente.documento}</div>`,       // Documento
-                `<div style="text-align: center;">${cliente.nombre}</div>`,          // Nombre
-                `<div style="text-align: center;">${cliente.telefono}</div>`,        // Teléfono
-                `<div style="text-align: center;">${cliente.email}</div>`,           // Email
-                `<div style="text-align: center;">${cliente.direccion}</div>`,       // Dirección
+                `<div style="text-align: center;">${cliente.idTipoDocumento || 'N/A'}</div>`, // Tipo de Documento
+                `<div style="text-align: center;">${cliente.documento || 'N/A'}</div>`,       // Documento
+                `<div style="text-align: center;">${cliente.nombre || 'N/A'}</div>`,          // Nombre
+                `<div style="text-align: center;">${cliente.telefono || 'N/A'}</div>`,        // Teléfono
+                `<div style="text-align: center;">${cliente.email || 'N/A'}</div>`,           // Email
+                `<div style="text-align: center; white-space: pre-line; word-wrap: break-word;">
+                    ${cliente.direccion || 'N/A'}
+                </div>`,  // Dirección
                 `<div style="text-align: center;">
                     ${cliente.estado === 'Activo' ?
                     `<span class="badge badge-outline-success">Activo</span>` :
