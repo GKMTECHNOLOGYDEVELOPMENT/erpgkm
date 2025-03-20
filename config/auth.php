@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+        'driver' => 'passport',  // O 'token' si estás usando Laravel Passport o tokens simples
+        'provider' => 'users',
+        ],
     ],
 
     /*

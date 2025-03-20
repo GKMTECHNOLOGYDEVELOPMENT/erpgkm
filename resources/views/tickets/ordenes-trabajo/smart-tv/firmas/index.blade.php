@@ -208,7 +208,7 @@ function cargarFirmaTecnico() {
             toastr.success('Solicitud de entrega guardada correctamente.');
             // Si necesitas hacer algo más (como recargar la página o actualizar la vista), puedes hacerlo aquí
         } else {
-            toastr.error('Error al guardar la solicitud de entrega.');
+            toastr.error(data.message || 'Error al guardar la solicitud de entrega.');
         }
     })
     .catch(error => {

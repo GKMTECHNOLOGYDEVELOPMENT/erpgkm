@@ -115,6 +115,5 @@ Route::get('/cuentas-bancarias/{idUsuario}', function ($idUsuario) {
 Route::post('/guardar-cuenta', [UsuarioController::class, 'guardarCuenta']);
 Route::get('/solicitudentrega', [OrdenesTrabajoController::class, 'obtenerSolicitudes']);
 // Ruta para aceptar la solicitud (estado = 1)
-Route::put('/solicitudentrega/aceptar/{id}', [OrdenesTrabajoController::class, 'aceptarSolicitud']);
 // Ruta para rechazar la solicitud (estado = 2)
 Route::put('/solicitudentrega/denegar/{id}', [OrdenesTrabajoController::class, 'denegarSolicitud']);

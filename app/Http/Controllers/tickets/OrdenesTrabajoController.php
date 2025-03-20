@@ -1631,6 +1631,11 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
 
             $visita->idTipoUsuario = $visita->tecnico ? $visita->tecnico->idTipoUsuario : null;
 
+
+            // Incluir tipoServicio
+        $visita->tipoServicio = $visita->tipoServicio;  // Trae el campo tipoServi
+
+        
             $visita->idTicket = $visita->idTickets;
             $visita->idVisita = $visita->idVisitas;
             $visita->nombre_visita = $visita->nombre;
@@ -3097,19 +3102,77 @@ Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
         return response()->json($solicitudes);
     }
 
+
+
+
+
+
     public function aceptarSolicitud($id)
     {
-        // Asegúrate de que estamos usando el campo correcto: 'idSolicitudentrega'
+        // Verificar si el usuario está autenticado
+        if (!auth()->check()) {
+            return response()->json(['message' => 'Usuario no autenticado.'], 401);
+        }
+    
+        // Buscar la solicitud por el ID
         $solicitud = Solicitudentrega::where('idSolicitudentrega', $id)->first();
     
         if ($solicitud) {
-            $solicitud->estado = 1;  // Estado 1 significa "Aceptada"
+            // Cambiar el estado de la solicitud a "Aceptada"
+            $solicitud->estado = 1; // Estado "Aceptada"
             $solicitud->save();
+    
+            // Registrar el ID del usuario autenticado
+            Log::info('Usuario autenticado ID: ' . auth()->user()->idUsuario);
+    
+            // Crear una nueva visita
+            $visita = new Visita();
+            $visita->nombre = 'Laboratorio';
+            $visita->fecha_programada = now();
+            $visita->fecha_asignada = now();
+            $visita->estado = 0;
+            $visita->tipoServicio = 7;
+            $visita->idTickets = $solicitud->idTickets;
+            $visita->idUsuario = auth()->user()->idUsuario;
+            $visita->save();
+    
+            // Registrar el flujo en ticketflujo
+            $ticketFlujo = new TicketFlujo();
+            $ticketFlujo->idTicket = $solicitud->idTickets;
+            $ticketFlujo->idEstadflujo = 10; // Estado de flujo
+            $ticketFlujo->idUsuario = auth()->user()->idUsuario;
+            $ticketFlujo->fecha_creacion = now();
+            $ticketFlujo->comentarioflujo = 'Ingresare comentario'; // Comentario
+            $ticketFlujo->save();
+    
+            // Obtener el idTicketFlujo recién creado
+            $idTicketFlujo = $ticketFlujo->idTicketFlujo;
+    
+            // Actualizar el registro en la tabla 'tickets' con el idTicketFlujo
+            $ticket = Ticket::where('idTickets', $solicitud->idTickets)->first();
+            if ($ticket) {
+                $ticket->idTicketFlujo = $idTicketFlujo; // Actualizar con el idTicketFlujo
+                $ticket->save();
+            }
+    
             return response()->json(['message' => 'Solicitud aceptada con éxito.']);
         }
     
         return response()->json(['message' => 'Solicitud no encontrada.'], 404);
     }
+
+
+
+
+    
+    
+
+
+
+    
+
+
+
 
 
     

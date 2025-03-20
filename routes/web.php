@@ -64,6 +64,9 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 // Route::get('/login', function () { return view('auth.login'); })->name('login');
 // Ruta para manejar el envío del formulario de login
 Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+
+
 // Ruta para cerrar sesión
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Ruta protegida con middleware 'auth'
@@ -487,8 +490,10 @@ Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'guardarFirm
 Route::get('/clientes/{id}', [OrdenesHelpdeskController::class, 'getClientes']);
 
 
-Route::post('/solicitud-entrega', [OrdenesTrabajoController::class, 'guardarSolicitud'])->name('solicitud.entrega');
+Route::post('/solicitud-entrega', [OrdenesTrabajoController::class, 'guardarSolicitud'])->name('solicitud.entrega')->middleware('auth');
 
+Route::put('/solicitudentrega/aceptar/{id}', [OrdenesTrabajoController::class, 'aceptarSolicitud'])
+    ->middleware('auth'); // Middleware para autenticar al usuario
 
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');

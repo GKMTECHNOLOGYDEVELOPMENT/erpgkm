@@ -22,7 +22,11 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const fechaFinal = formatDate(visita.fecha_final_hora);
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
         const nombre_visita = visita.nombre_visita || 'Nombre de la visita';
-
+// Obtener el tipoServicio de la visita
+const tipoServicio = visita.tipoServicio;
+    
+// Hacer el console.log para ver el tipoServicio
+console.log("Tipo de servicio:", tipoServicio);
 
             // Lógica para personalizar el texto según idTipoUsuario
             let tipoResponsable = '';
@@ -114,7 +118,9 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             <div class="grid grid-cols-1 sm:grid-cols-2 text-center gap-2">
               <div class="flex flex-col items-center">
                 <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
-                <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha de Programación</span>
+<span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+  ${visita.tipoServicio === 7 ? 'Fecha de Aprobación' : 'Fecha de Programación'}
+</span>
               </div>
               <div class="flex flex-col items-center">
                 <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
@@ -124,19 +130,24 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             
             <!-- Botón para ver imagen -->
             <div class="flex justify-center mt-2">
-            <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-            id="viewImageButton-${visita.idVisitas}" 
-            data-image-type="visita"
-            data-id="${visita.idVisitas}"
-            title="Ver imagen">
-      <i class="fa-solid fa-image text-sm sm:text-base"></i> 
-    </button>
+    <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+        id="viewImageButton-${visita.idVisitas}" 
+        data-image-type="visita"
+        data-id="${visita.idVisitas}"
+        title="Ver imagen"
+        style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
+  <i class="fa-solid fa-image text-sm sm:text-base"></i> 
+</button>
+
             </div>                   
           </div>
         `;
 
 
 
+
+        
+     
 
         // Tarjeta de Técnico en Desplazamiento con el botón de "like"
         const tecnicoCard = document.createElement('div');
@@ -147,34 +158,49 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
             <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
               <div class="flex flex-col items-center">
                 <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
-                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">En Desplazamiento</span>
-              </div>
+  <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+          ${tipoServicio === 7 ? 'En Llegada' : 'En Desplazamiento'}
+        </span>              </div>
              <div class="flex flex-col items-center">
         <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
         <!-- Mostrar la ubicación -->
-        <span id="ubicacion-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-          <!-- Aquí verificamos si existen anexos, y si es así, mostramos la primera ubicación -->
-${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2) ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2).ubicacion : 'Ubicación no disponible'}
-        </span>
+      <span id="ubicacion-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+  <!-- Aquí verificamos si tipoServicio es igual a 7, si es así, mostrar "GKM TECHNOLOGY" -->
+  ${visita.tipoServicio === 7 ? 'GKM TECHNOLOGY' :
+    (visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2) 
+    ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2).ubicacion 
+    : 'Ubicación no disponible')}
+</span>
+
       </div>
               <div class="flex flex-col items-center">
-                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
-                <span id="fechaDesplazamiento-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-                  ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
-                </span>
+<span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+  ${visita.tipoServicio === 7 ? 'Solicitud' : 'Fecha'}
+</span>
+${visita.tipoServicio === 7 ? 
+  `<span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Aprobada</span>` : 
+  `<span id="fechaDesplazamiento-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+    ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
+  </span>`
+}
+
+
+                
               </div>
             </div>
         
             <!-- Botón de acción -->
             <div class="flex justify-center mt-2">
               <button class="badge bg-info text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                      id="likeButton-${visita.idVisitas}">
+                      id="likeButton-${visita.idVisitas}"         style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
+
                 <i class="fa-solid fa-route text-sm sm:text-base"></i> 
                 <span class="text-xs sm:text-sm">Iniciar Desplazamiento</span>
               </button>
             </div>                   
           </div>
         `;
+
 
 
 
