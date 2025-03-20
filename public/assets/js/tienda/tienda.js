@@ -27,7 +27,7 @@ document.addEventListener("alpine:init", () => {
                     // Inicializar DataTable con las nuevas cabeceras
                     this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
                         data: {
-                            headings: ["RUC", "Nombre", "Celular", "Email", "Dirección", "Referencia", "Acción"], // Nuevas cabeceras
+                            headings: ["RUC", "Nombre", "Celular", "Email", "Dirección", "Acción"], // Nuevas cabeceras
                             data: this.formatDataForTable(data),
                         },
                         searchable: true,
@@ -56,12 +56,13 @@ document.addEventListener("alpine:init", () => {
         // Actualiza esta función para que incluya los nuevos datos
         formatDataForTable(data) {
             return data.map((tienda) => [
-                `<div style="text-align: center;">${tienda.ruc}</div>`,       // RUC de la tienda
-                `<div style="text-align: center;">${tienda.nombre}</div>`,    // Nombre de la tienda
-                `<div style="text-align: center;">${tienda.celular}</div>`,   // Celular de la tienda
-                `<div style="text-align: center;">${tienda.email}</div>`,     // Email de la tienda
-                `<div style="text-align: center;">${tienda.direccion}</div>`, // Dirección de la tienda
-                `<div style="text-align: center;">${tienda.referencia}</div>`,  // Referencia de la tienda
+                `<div style="text-align: center;">${tienda.ruc || 'N/A'}</div>`,       // RUC
+                `<div style="text-align: center;">${tienda.nombre || 'N/A'}</div>`,    // Nombre
+                `<div style="text-align: center;">${tienda.celular || 'N/A'}</div>`,   // Celular
+                `<div style="text-align: center;">${tienda.email || 'N/A'}</div>`,     // Email
+                `<div style="text-align: center; white-space: pre-line; word-wrap: break-word;">
+                    ${tienda.direccion || 'N/A'}
+                </div>`,  // Dirección
                 `<div style="text-align: center;" class="flex justify-center items-center">
              <a href="/tienda/${tienda.idTienda}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
@@ -87,7 +88,7 @@ document.addEventListener("alpine:init", () => {
 
         deleteTienda(idTienda) {
             // console.log(`Se ha iniciado la solicitud para eliminar la tienda con ID: ${idTienda}`);
-        
+
             new window.Swal({
                 icon: 'warning',
                 title: '¿Estás seguro?',
@@ -100,26 +101,26 @@ document.addEventListener("alpine:init", () => {
             }).then((result) => {
                 if (result.value) {
                     // console.log(`Confirmada la eliminación de la tienda con ID: ${idTienda}`);
-        
+
                     // Hacer la solicitud de eliminación
                     fetch(`/api/tiendas/${idTienda}`, {
                         method: "DELETE",
                     })
                         .then((response) => {
                             // console.log(`Respuesta del servidor para la tienda con ID: ${idTienda}: ${response.status}`);
-                            
+
                             // Verificar si la respuesta fue un error 400
                             if (!response.ok) {
                                 return response.json().then((data) => {
                                     throw new Error(data.error || "Error desconocido");
                                 });
                             }
-                            
+
                             return response.json();
                         })
                         .then(() => {
                             // console.log(`Tienda ${idTienda} eliminada con éxito`);
-        
+
                             // Actualizar la tabla eliminando la fila
                             this.tiendaData = this.tiendaData.filter(
                                 (tienda) => tienda.idTienda !== idTienda
@@ -128,7 +129,7 @@ document.addEventListener("alpine:init", () => {
                                 (row) =>
                                     row.cells[0].innerHTML === idTienda.toString()
                             );
-        
+
                             // Mostrar notificación de éxito
                             new window.Swal({
                                 title: '¡Eliminado!',
@@ -142,7 +143,7 @@ document.addEventListener("alpine:init", () => {
                         })
                         .catch((error) => {
                             // console.error("Error al eliminar tienda:", error);
-        
+
                             // Mostrar notificación de error
                             new window.Swal({
                                 title: 'Error',
@@ -156,8 +157,8 @@ document.addEventListener("alpine:init", () => {
                 }
             });
         }
-        
-        
+
+
 
     }));
 });
