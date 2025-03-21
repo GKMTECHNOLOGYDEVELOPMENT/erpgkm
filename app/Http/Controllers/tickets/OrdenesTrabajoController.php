@@ -246,7 +246,7 @@ class OrdenesTrabajoController extends Controller
     {
         try {
             Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
-    
+
             // Validación de los datos
             $validatedData = $request->validate([
                 'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
@@ -263,23 +263,23 @@ class OrdenesTrabajoController extends Controller
                 'lat' => 'nullable|string|max:255',
                 'lng' => 'nullable|string|max:255',
             ]);
-    
+
             Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
-    
+
             // Verificar si el cliente no es una tienda y se proporcionó un nombre de tienda
             $tiendaId = $validatedData['idTienda'];
-    
+
             // Si no hay idTienda, significa que se está creando una tienda
             if (!$tiendaId && $request->has('nombreTienda') && $request->input('nombreTienda') !== "") {
                 // Crear la tienda con los datos proporcionados
                 $tienda = Tienda::create([
                     'nombre' => $request->input('nombreTienda'),
                 ]);
-    
+
                 $tiendaId = $tienda->idTienda; // Guardar el ID de la tienda recién creada
                 Log::info('Tienda creada', ['tienda' => $tienda]);
             }
-    
+
             // Crear la nueva orden de trabajo
             $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['nroTicket'],
@@ -300,13 +300,13 @@ class OrdenesTrabajoController extends Controller
                 'idTipotickets' => 1,
                 'tipoServicio' => 1,
             ]);
-    
+
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
-    
+
             // Verificar si el checkbox "Entrega a Lab" está marcado
             if ($request->has('entregaLab') && $request->input('entregaLab') === 'on') {
                 // Si "Entrega a Lab" está marcado, solo se crea la visita y su flujo relacionado
-    
+
                 // Crear la visita
                 $visita = Visita::create([
                     'nombre' => 'Laboratorio',  // El nombre de la visita
@@ -324,9 +324,9 @@ class OrdenesTrabajoController extends Controller
                     'necesita_apoyo' => 0,  // Necesita apoyo (por defecto se establece en 0)
                     'tipoServicio' => 7,  // Tipo de servicio es 7, según lo solicitado
                 ]);
-    
+
                 Log::info('Visita creada correctamente para laboratorio', ['visita' => $visita]);
-    
+
                 // Crear el flujo de trabajo con idEstadflujo = 10 (estado para "entrega a laboratorio")
                 $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
                     'idTicket' => $ticket->idTickets,
@@ -334,41 +334,40 @@ class OrdenesTrabajoController extends Controller
                     'idUsuario' => auth()->id(),
                     'fecha_creacion' => now(),
                 ]);
-    
+
                 Log::info('Flujo de trabajo guardado correctamente', [
                     'idTicket' => $ticket->idTickets,
                     'idTicketFlujo' => $ticketFlujoId
                 ]);
-    
+
                 // Actualizar el ticket con el idTicketFlujo generado
                 $ticket->idTicketFlujo = $ticketFlujoId;
                 $ticket->save();
-    
+
                 Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
-    
             } else {
                 // Si "Entrega a Lab" no está marcado, se maneja el flujo "es recojo"
                 $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
-    
+
                 $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
                     'idTicket' => $ticket->idTickets,
                     'idEstadflujo' => $estadoFlujo,  // Estado inicial de flujo
                     'idUsuario' => auth()->id(),
                     'fecha_creacion' => now(),
                 ]);
-    
+
                 Log::info('Flujo de trabajo guardado correctamente', [
                     'idTicket' => $ticket->idTickets,
                     'idTicketFlujo' => $ticketFlujoId
                 ]);
-    
+
                 // Actualizar el ticket con el idTicketFlujo generado
                 $ticket->idTicketFlujo = $ticketFlujoId;
                 $ticket->save();
-    
+
                 Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
             }
-    
+
             // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
             return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
                 ->with('success', 'Orden de trabajo creada correctamente.');
@@ -382,7 +381,7 @@ class OrdenesTrabajoController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
-    
+
 
 
 
@@ -1778,9 +1777,9 @@ class OrdenesTrabajoController extends Controller
 
 
             // Incluir tipoServicio
-        $visita->tipoServicio = $visita->tipoServicio;  // Trae el campo tipoServi
+            $visita->tipoServicio = $visita->tipoServicio;  // Trae el campo tipoServi
 
-        
+
             $visita->idTicket = $visita->idTickets;
             $visita->idVisita = $visita->idVisitas;
             $visita->nombre_visita = $visita->nombre;
@@ -2645,13 +2644,27 @@ class OrdenesTrabajoController extends Controller
         if (!$base64String) return null;
 
         // Extraer el tipo de imagen
-        preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches);
-        $imageType = $matches[1] ?? 'jpeg'; // Si no se detecta tipo, usa JPEG
+        if (!preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches)) {
+            return $base64String; // Si no es imagen base64 válida, devolverla sin cambios
+        }
+
+        $imageType = strtolower($matches[1]); // Convertir a minúsculas (jpeg, png, webp)
 
         // Decodificar la imagen base64
         $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
-        $image = imagecreatefromstring($imageData);
-        if (!$image) return $base64String; // Si la imagen es inválida, devolver la original
+
+        // Evitar errores con imágenes corruptas
+        if (!$imageData) {
+            \Log::error("Error al decodificar imagen base64.");
+            return $base64String;
+        }
+
+        // Crear la imagen desde la cadena binaria
+        $image = @imagecreatefromstring($imageData);
+        if (!$image) {
+            \Log::error("Error al procesar la imagen con imagecreatefromstring.");
+            return $base64String; // Retornar imagen original si no se puede procesar
+        }
 
         // Obtener dimensiones
         $width = imagesx($image);
@@ -2674,12 +2687,17 @@ class OrdenesTrabajoController extends Controller
         // Redimensionar imagen
         imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
-        // Convertir a WebP con calidad optimizada
+        // Convertir y optimizar
         ob_start();
         if ($imageType === 'png') {
-            imagepng($resizedImage, null, 9); // Mantener transparencia
-        } else {
+            imagepng($resizedImage, null, 9); // Mantener transparencia y alta compresión
+            $optimizedType = 'png';
+        } elseif ($imageType === 'jpeg' || $imageType === 'jpg') {
             imagejpeg($resizedImage, null, $quality);
+            $optimizedType = 'jpeg';
+        } else {
+            imagewebp($resizedImage, null, $quality); // WebP para imágenes no compatibles
+            $optimizedType = 'webp';
         }
         $compressedImage = ob_get_clean();
 
@@ -2687,9 +2705,10 @@ class OrdenesTrabajoController extends Controller
         imagedestroy($image);
         imagedestroy($resizedImage);
 
-        // Devolver imagen comprimida en base64
-        return 'data:image/webp;base64,' . base64_encode($compressedImage);
+        // Retornar imagen optimizada en base64
+        return "data:image/{$optimizedType};base64," . base64_encode($compressedImage);
     }
+
 
     public function generateInformePdfVisita($idOt, $idVisita)
     {
@@ -3236,7 +3255,7 @@ class OrdenesTrabajoController extends Controller
         if (!auth()->check()) {
             return response()->json(['message' => 'Usuario no autenticado.'], 401);
         }
-    
+
         // Buscar la solicitud por el ID
         $solicitud = Solicitudentrega::where('idSolicitudentrega', $id)->first();
 
@@ -3244,10 +3263,10 @@ class OrdenesTrabajoController extends Controller
             // Cambiar el estado de la solicitud a "Aceptada"
             $solicitud->estado = 1; // Estado "Aceptada"
             $solicitud->save();
-    
+
             // Registrar el ID del usuario autenticado
             Log::info('Usuario autenticado ID: ' . auth()->user()->idUsuario);
-    
+
             // Crear una nueva visita
             $visita = new Visita();
             $visita->nombre = 'Laboratorio';
@@ -3258,7 +3277,7 @@ class OrdenesTrabajoController extends Controller
             $visita->idTickets = $solicitud->idTickets;
             $visita->idUsuario = auth()->user()->idUsuario;
             $visita->save();
-    
+
             // Registrar el flujo en ticketflujo
             $ticketFlujo = new TicketFlujo();
             $ticketFlujo->idTicket = $solicitud->idTickets;
@@ -3267,17 +3286,17 @@ class OrdenesTrabajoController extends Controller
             $ticketFlujo->fecha_creacion = now();
             $ticketFlujo->comentarioflujo = 'Ingresare comentario'; // Comentario
             $ticketFlujo->save();
-    
+
             // Obtener el idTicketFlujo recién creado
             $idTicketFlujo = $ticketFlujo->idTicketFlujo;
-    
+
             // Actualizar el registro en la tabla 'tickets' con el idTicketFlujo
             $ticket = Ticket::where('idTickets', $solicitud->idTickets)->first();
             if ($ticket) {
                 $ticket->idTicketFlujo = $idTicketFlujo; // Actualizar con el idTicketFlujo
                 $ticket->save();
             }
-    
+
             return response()->json(['message' => 'Solicitud aceptada con éxito.']);
         }
 
