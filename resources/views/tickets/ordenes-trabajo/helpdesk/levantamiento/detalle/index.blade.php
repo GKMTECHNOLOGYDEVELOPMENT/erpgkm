@@ -15,6 +15,10 @@
     <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">
         Orden de Trabajo N° {{ $orden->idTickets }}
     </span>
+
+    
+
+
 </div>
 
 <!-- 🛠️ Formulario de Detalles -->
@@ -174,6 +178,207 @@
 
 
 
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
+        const rowsPerPage = 15; // Número de filas por página
+        let currentPage = 1; // Página actual
+
+        function cargarEstados() {
+            fetch(`/ticket/${ticketId}/estados`)
+                .then(response => response.json())
+                .then(data => {
+                    const estadosTableBody = document.getElementById("estadosTableBody");
+                    estadosTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar los nuevos estados
+
+                    if (Array.isArray(data.estadosFlujo)) {
+                        const estados = data.estadosFlujo;
+                        renderTable(estados, currentPage);
+                        setupPagination(estados.length);
+                    } else {
+                        console.error('La respuesta no contiene un array de estados de flujo:', data
+                            .estadosFlujo);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cargando los estados:', error);
+                });
+        }
+
+        function renderTable(estados, page) {
+            const estadosTableBody = document.getElementById("estadosTableBody");
+            estadosTableBody.innerHTML = "";
+
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const estadosPaginados = estados.slice(start, end);
+
+            estadosPaginados.forEach(ticketFlujo => {
+                const estado = ticketFlujo.estado_descripcion; // Cambié a 'estado_descripcion'
+                const usuario = ticketFlujo.usuario_nombre; // Cambié a 'usuario_nombre'
+
+                // Fila principal
+                const row = document.createElement("tr");
+
+                const estadoCell = document.createElement("td");
+                estadoCell.classList.add("px-4", "py-2", "text-center", "text-black");
+                estadoCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
+                estadoCell.textContent = estado;
+
+                const usuarioCell = document.createElement("td");
+                usuarioCell.classList.add("px-4", "py-2", "text-center", "text-black");
+                usuarioCell.textContent = usuario ? usuario : 'Sin Nombre';
+                usuarioCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
+
+                const fechaCell = document.createElement("td");
+                fechaCell.classList.add("px-4", "py-2", "text-center", "text-black");
+                fechaCell.textContent = ticketFlujo.fecha_creacion;
+                fechaCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
+
+                // Botón "Más" y "Guardar" en la misma celda
+                const masCell = document.createElement("td");
+                masCell.classList.add("px-4", "py-2", "text-center", "space-x-2");
+                masCell.style.backgroundColor = ticketFlujo.estado_color; // Aplica el color del estado
+
+                // Botón "Más" (⋮)
+                const masBtn = document.createElement("button");
+                masBtn.classList.add("toggle-comment", "px-3", "py-1", "rounded", "bg-gray-300");
+                masBtn.textContent = "⋮";
+                masBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
+
+                // Botón "Guardar" como icono de check ✅ verde
+                const saveIconBtn = document.createElement("button");
+                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success",
+                    "text-white");
+                saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
+                saveIconBtn.innerHTML = "✔"; // Ícono de check verde
+
+                // Agregar botones a la celda
+                masCell.appendChild(masBtn);
+                masCell.appendChild(saveIconBtn);
+
+                row.appendChild(estadoCell);
+                row.appendChild(usuarioCell);
+                row.appendChild(fechaCell);
+                row.appendChild(masCell);
+                estadosTableBody.appendChild(row);
+
+                // Fila oculta para comentario
+                const commentRow = document.createElement("tr");
+                commentRow.classList.add("hidden");
+                const commentCell = document.createElement("td");
+                commentCell.setAttribute("colspan",
+                    "4"); // Ajustado el colspan a la cantidad de columnas
+                commentCell.classList.add("p-4");
+                commentCell.style.backgroundColor = ticketFlujo
+                    .estado_color; // Aplica el color del estado
+
+                const textArea = document.createElement("textarea");
+                textArea.classList.add("w-full", "p-2", "rounded", "border",
+                    "border-black"); // 🔥 Borde negro
+                textArea.textContent = ticketFlujo.comentarioflujo;
+                textArea.placeholder = "Escribe un comentario...";
+                textArea.style.backgroundColor = ticketFlujo
+                    .estado_color; // 🔥 Color de fondo del estado
+
+                commentCell.appendChild(textArea);
+                commentRow.appendChild(commentCell);
+
+                estadosTableBody.appendChild(commentRow);
+            });
+
+            agregarEventosComentarios();
+        }
+
+        function setupPagination(totalRows) {
+            const paginationContainer = document.getElementById("paginationControls");
+            paginationContainer.innerHTML = ""; // Limpiar paginación previa
+
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            if (totalPages > 1) {
+                const prevBtn = document.createElement("button");
+                prevBtn.textContent = "Anterior";
+                prevBtn.classList.add("px-4", "py-2", "bg-gray-300", "rounded", "mx-1");
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.addEventListener("click", () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        cargarEstados();
+                    }
+                });
+
+                const nextBtn = document.createElement("button");
+                nextBtn.textContent = "Siguiente";
+                nextBtn.classList.add("px-4", "py-2", "bg-gray-300", "rounded", "mx-1");
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.addEventListener("click", () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        cargarEstados();
+                    }
+                });
+
+                paginationContainer.appendChild(prevBtn);
+                paginationContainer.appendChild(nextBtn);
+            }
+        }
+
+        function agregarEventosComentarios() {
+            document.querySelectorAll('.toggle-comment').forEach(button => {
+                button.addEventListener('click', function() {
+                    let parentCell = this.closest('td'); // Celda donde están los elementos
+                    let row = this.closest('tr').nextElementSibling;
+                    row.classList.toggle('hidden'); // Mostrar/ocultar la fila de comentario
+                });
+            });
+
+            document.querySelectorAll('.save-comment').forEach(button => {
+                button.addEventListener('click', function() {
+                    let flujoId = this.dataset.flujoId; // Obtener idTicketFlujo
+                    let row = this.closest('tr').nextElementSibling;
+                    let textArea = row.querySelector("textarea");
+                    let comentario = textArea.value;
+
+                    fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute("content")
+                            },
+                            body: JSON.stringify({
+                                comentario
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                toastr.success("Estado actualizado correctamente.");
+                            } else {
+                                toastr.error("Error al actualizar el estado.");
+                            }
+                        })
+                        .catch(error => console.error("Error al actualizar el estado:", error));
+                });
+            });
+        }
+
+        // Cargar estados al iniciar
+        cargarEstados();
+        setInterval(cargarEstados, 30000);
+    });
+</script>
+
+
+
+
+
+
+<!-- Agregar Axios desde un CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
@@ -277,13 +482,21 @@
 
 
 
-        /* ================================
-           Registro de cambios en drag & drop
-        ================================ */
+        // Pasa los estados de flujo desde Blade a JavaScript
+        const estadosFlujo = @json($estadosFlujo);
+
+        // Función para obtener el ID del estado a partir de la descripción
+        function getStateId(stateDescription) {
+            const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
+            return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
+        }
+
+        // Código drag & drop
         const draggables = document.querySelectorAll(".draggable-state");
         draggables.forEach(function(draggable) {
             draggable.addEventListener("dragstart", function(e) {
-                e.dataTransfer.setData("text/plain", this.dataset.state);
+                e.dataTransfer.setData("text/plain", this.dataset
+                    .state); // Obtén la descripción del estado
             });
         });
 
@@ -291,41 +504,66 @@
         dropZone.addEventListener("dragover", function(e) {
             e.preventDefault();
         });
+
         dropZone.addEventListener("drop", function(e) {
             e.preventDefault();
-            const state = e.dataTransfer.getData("text/plain");
-            if (state) {
+            const stateDescription = e.dataTransfer.getData("text/plain");
+            if (stateDescription) {
                 const draggableEl = document.querySelector(
-                    "#draggableContainer .draggable-state[data-state='" + state + "']");
+                    "#draggableContainer .draggable-state[data-state='" + stateDescription + "']");
                 if (draggableEl) {
                     draggableEl.remove();
                 }
-                const usuario = "{{ auth()->user()->name }}";
+
+                const usuario = "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
                 const fecha = formatDate(new Date());
-                const newRow = document.createElement("tr");
+                const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
+
+                // Obtener el ID del estado basado en la descripción
+                const estadoId = getStateId(stateDescription);
+
                 let rowClasses = "";
-                if (state === "Recojo") {
+                if (estadoId === 1) {
                     rowClasses = "bg-primary/20 border-primary/20";
-                } else if (state === "Coordinado") {
+                } else if (estadoId === 2) {
                     rowClasses = "bg-secondary/20 border-secondary/20";
-                } else if (state === "Operativo") {
+                } else if (estadoId === 3) {
                     rowClasses = "bg-success/20 border-success/20";
                 }
+
+                const newRow = document.createElement("tr");
                 newRow.className = rowClasses;
                 newRow.innerHTML = `
-        <td class="px-4 py-2 text-center">${state}</td>
-        <td class="px-4 py-2 text-center">${usuario}</td>
-        <td class="px-4 py-2 text-center">${fecha}</td>
-        <td class="px-4 py-2 text-center flex justify-center items-center">
-          <button class="delete-state btn btn-danger btn-sm">X</button>
-        </td>
-      `;
+            <td class="px-4 py-2 text-center">${stateDescription}</td>
+            <td class="px-4 py-2 text-center">${usuario}</td>
+            <td class="px-4 py-2 text-center">${fecha}</td>
+        `;
                 dropZone.appendChild(newRow);
-                // Actualizar log de modificación por cambio de estado
-                document.getElementById('ultimaModificacion').textContent =
-                    `${fecha} por ${usuario}: Se modificó Estado a "${state}"`;
+
+                // Enviar la solicitud AJAX para guardar el estado
+                axios.post("{{ route('guardarEstado') }}", {
+                        idTicket: ticketId,
+                        idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+                        idUsuario: usuario,
+                        comentarioflujo: 'Ingresar comentario para el flujo', // Comentario opcional
+                    })
+                    .then(response => {
+                        // Si la respuesta es exitosa
+                        console.log("Estado guardado exitosamente");
+                        location.reload();
+                        // Actualizar log de modificación
+                        document.getElementById('ultimaModificacion').textContent =
+                            `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
+                    })
+                    .catch(error => {
+                        // Manejar el error si ocurre
+                        console.error("Error al guardar el estado", error);
+                    });
             }
         });
+
+
+
 
         function reinitializeDraggable(element) {
             element.setAttribute("draggable", "true");
@@ -417,7 +655,7 @@
             fetch(`/get-clientes-generales/${clienteId}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Datos recibidos:', data); // Para depurar
+                    // console.log('Datos recibidos:', data); // Para depurar
 
                     // Obtener el select de "Cliente General"
                     var clienteGeneralSelect = document.getElementById('idClienteGeneral');
@@ -507,12 +745,11 @@
     });
 </script>
 
-
 <script>
     $(document).ready(function() {
         var idOrden = @json($orden->idTickets);
 
-        $('#guardarFallaReportadalevantamiento').on('click', function(e) {
+        $('#guardarFallaReportada').on('click', function(e) {
             e.preventDefault(); // Prevenir que se recargue la página
 
             // Recoger los datos del formulario
@@ -539,7 +776,7 @@
             // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             console.log("Token CSRF obtenido:",
-            csrfToken); // Asegúrate de que el token se obtiene correctamente
+                csrfToken); // Asegúrate de que el token se obtiene correctamente
 
             // Verificar si el token CSRF es válido
             if (!csrfToken) {
@@ -550,8 +787,7 @@
 
             // Enviar datos por AJAX
             $.ajax({
-                url: '/actualizar-orden-helpdesk/' +
-                idOrden, // Pasar el id de la orden en la URL
+                url: '/actualizar-orden-helpdesk/' + idOrden, // Pasar el id de la orden en la URL
                 method: 'PUT', // Usar PUT para la actualización
                 data: formData,
                 headers: {
@@ -574,3 +810,4 @@
         });
     });
 </script>
+

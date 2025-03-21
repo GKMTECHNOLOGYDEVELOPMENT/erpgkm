@@ -112,7 +112,7 @@
                             <span id="precio_compra_symbol">S/</span>
                         </button>
                         <input id="precio_compra" name="precio_compra" type="number" class="form-input flex-1">
-                        <input type="hidden" id="moneda_compra" name="moneda_compra" value="soles">
+                        <input type="hidden" id="moneda_compra" name="moneda_compra" value="0">
                     </div>
                 </div>
 
@@ -125,7 +125,7 @@
                             <span id="precio_venta_symbol">S/</span>
                         </button>
                         <input id="precio_venta" name="precio_venta" type="number" class="form-input flex-1">
-                        <input type="hidden" id="moneda_venta" name="moneda_venta" value="soles">
+                        <input type="hidden" id="moneda_venta" name="moneda_venta" value="0">
                     </div>
                 </div>
 
@@ -201,10 +201,10 @@
 
             if (symbol.textContent === "S/") {
                 symbol.textContent = "$";
-                monedaInput.value = "dolares";
+                monedaInput.value = 0;  // Establecer valor como 0 para dólares
             } else {
                 symbol.textContent = "S/";
-                monedaInput.value = "soles";
+                monedaInput.value = 1;  // Establecer valor como 1 para soles
             }
         });
 
@@ -215,10 +215,10 @@
 
             if (symbol.textContent === "S/") {
                 symbol.textContent = "$";
-                monedaInput.value = "dolares";
+                monedaInput.value = 0;  // Establecer valor como 0 para dólares
             } else {
                 symbol.textContent = "S/";
-                monedaInput.value = "soles";
+                monedaInput.value = 1;  // Establecer valor como 1 para soles
             }
         });
     </script>

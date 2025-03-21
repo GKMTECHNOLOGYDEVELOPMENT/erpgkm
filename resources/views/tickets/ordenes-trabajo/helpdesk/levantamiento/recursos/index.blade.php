@@ -95,18 +95,18 @@
         <div class="flex justify-end mt-2">
             <button type="button" id="addHerramienta" class="btn btn-primary">+</button>
         </div>
-        <!-- Contenedor con altura definida y scroll -->
-        <div id="herramientasContainer" class="h-40 border overflow-y-auto p-3 rounded-lg mt-2">
-            <div class="flex items-center gap-2 mt-2 herramienta-row">
-                <select class="form-input w-full herramienta-select">
-                    <option value="DISCO DURO DE 2 TB">DISCO DURO DE 2 TB</option>
-                    <option value="MEMORIA RAM 16GB">MEMORIA RAM 16GB</option>
-                    <option value="PROCESADOR INTEL I7">PROCESADOR INTEL I7</option>
-                </select>
-                <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
-                <button type="button" class="btn btn-danger removeHerramienta hidden">-</button>
-            </div>
-        </div>
+     <!-- Contenedor de Herramientas (idTipoArticulo = 1) -->
+<div id="herramientasContainer" class="h-40 border overflow-y-auto p-3 rounded-lg mt-2">
+    <div class="flex items-center gap-2 mt-2 herramienta-row">
+        <select class="form-input w-full herramienta-select">
+            @foreach($articulosTipo1 as $articulo)
+                <option value="{{ $articulo->nombre }}">{{ $articulo->nombre }}</option>
+            @endforeach
+        </select>
+        <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
+        <button type="button" class="btn btn-danger removeHerramienta hidden">-</button>
+    </div>
+</div>
 
 
 
@@ -122,16 +122,16 @@
             <button type="button" id="addProducto" class="btn btn-primary">+</button>
         </div>
         <div id="productosContainer" class="h-40 border overflow-y-auto p-3 rounded-lg mt-2">
-            <div class="flex items-center gap-2 mt-2 producto-row">
-                <select class="form-input w-full producto-select">
-                    <option value="MONITOR 27 PULGADAS">MONITOR 27 PULGADAS</option>
-                    <option value="TECLADO MECÁNICO">TECLADO MECÁNICO</option>
-                    <option value="MOUSE GAMER">MOUSE GAMER</option>
-                </select>
-                <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
-                <button type="button" class="btn btn-danger removeProducto hidden">-</button>
-            </div>
+        <div class="flex items-center gap-2 mt-2 producto-row">
+            <select class="form-input w-full producto-select">
+                @foreach($articulosTipo2 as $articulo)
+                    <option value="{{ $articulo->nombre }}">{{ $articulo->nombre }}</option>
+                @endforeach
+            </select>
+            <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
+            <button type="button" class="btn btn-danger removeProducto hidden">-</button>
         </div>
+    </div>
         <div class="flex justify-end mt-6">
             <button type="submit" class="btn btn-primary guardarProductos">Guardar</button>
         </div>
@@ -145,16 +145,16 @@
             <button type="button" id="addRepuesto" class="btn btn-primary">+</button>
         </div>
         <div id="repuestosContainer" class="h-40 border overflow-y-auto p-3 rounded-lg mt-2">
-            <div class="flex items-center gap-2 mt-2 repuesto-row">
-                <select class="form-input w-full repuesto-select">
-                    <option value="BATERÍA PARA LAPTOP">BATERÍA PARA LAPTOP</option>
-                    <option value="PLACA MADRE ASUS">PLACA MADRE ASUS</option>
-                    <option value="FAN DE REFRIGERACIÓN">FAN DE REFRIGERACIÓN</option>
-                </select>
-                <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
-                <button type="button" class="btn btn-danger removeRepuesto hidden">-</button>
-            </div>
+        <div class="flex items-center gap-2 mt-2 repuesto-row">
+            <select class="form-input w-full repuesto-select">
+                @foreach($articulosTipo3 as $articulo)
+                    <option value="{{ $articulo->nombre }}">{{ $articulo->nombre }}</option>
+                @endforeach
+            </select>
+            <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
+            <button type="button" class="btn btn-danger removeRepuesto hidden">-</button>
         </div>
+    </div>
         <div class="flex justify-end mt-6">
             <button type="submit" class="btn btn-primary guardarRepuestos">Guardar</button>
         </div>
@@ -167,22 +167,25 @@
             <button type="button" id="addInsumo" class="btn btn-primary">+</button>
         </div>
         <div id="insumosContainer" class="h-40 border overflow-y-auto p-3 rounded-lg mt-2">
-            <div class="flex items-center gap-2 mt-2 insumo-row">
-                <select class="form-input w-full insumo-select">
-                    <option value="CABLE HDMI">CABLE HDMI</option>
-                    <option value="TONER PARA IMPRESORA">TONER PARA IMPRESORA</option>
-                    <option value="PAPEL FOTOGRÁFICO">PAPEL FOTOGRÁFICO</option>
-                </select>
-                <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
-                <button type="button" class="btn btn-danger removeInsumo hidden">-</button>
-            </div>
+        <div class="flex items-center gap-2 mt-2 insumo-row">
+            <select class="form-input w-full insumo-select">
+                @foreach($articulosTipo4 as $articulo)
+                    <option value="{{ $articulo->nombre }}">{{ $articulo->nombre }}</option>
+                @endforeach
+            </select>
+            <input type="number" class="form-input w-20 cantidad-input" min="1" value="1">
+            <button type="button" class="btn btn-danger removeInsumo hidden">-</button>
         </div>
+    </div>
         <div class="flex justify-end mt-6">
             <button type="submit" class="btn btn-primary guardarInsumos">Guardar</button>
         </div>
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
 

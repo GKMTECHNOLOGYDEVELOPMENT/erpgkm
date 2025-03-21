@@ -88,7 +88,7 @@ class ArticulosController extends Controller
                 'data' => $articulo,
             ]);
         } catch (\Exception $e) {
-            Log::error('Error al guardar el artículo: ' . $e->getMessage());
+       
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un error al guardar el artículo.',
@@ -106,6 +106,9 @@ class ArticulosController extends Controller
         $monedas = Moneda::all();
         return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas'));
     }
+
+
+    
 
     public function update(Request $request, $id)
     {

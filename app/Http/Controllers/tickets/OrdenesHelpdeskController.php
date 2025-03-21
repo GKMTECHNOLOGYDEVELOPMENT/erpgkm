@@ -21,6 +21,7 @@ use App\Models\EstadoFlujo;
 use App\Models\Visita;
 use App\Models\ClienteClientegeneral;
 use App\Exports\HelpdeskTicketExport;
+use App\Models\Articulo;
 
 class OrdenesHelpdeskController extends Controller
 {
@@ -92,6 +93,9 @@ class OrdenesHelpdeskController extends Controller
         ));
     }
 
+
+
+
     public function storehelpdesk(Request $request)
     {
         try {
@@ -127,6 +131,26 @@ class OrdenesHelpdeskController extends Controller
 
             Log::debug('Orden de trabajo creada correctamente.');
 
+               // Crear el flujo de trabajo con idEstadflujo = 10 (estado para "entrega a laboratorio")
+               $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
+                'idTicket' => $ticket->idTickets,
+                'idEstadflujo' => 1,  // Estado de flujo "entrega a laboratorio"
+                'idUsuario' => auth()->id(),
+                'fecha_creacion' => now(),
+            ]);
+
+            Log::info('Flujo de trabajo guardado correctamente', [
+                'idTicket' => $ticket->idTickets,
+                'idTicketFlujo' => $ticketFlujoId
+            ]);
+
+            // Actualizar el ticket con el idTicketFlujo generado
+            $ticket->idTicketFlujo = $ticketFlujoId;
+            $ticket->save();
+
+            
+            Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
+
             // 🔹 Redirigir según el tipo de servicio seleccionado
             if ($validatedData['tipoServicio'] == 2) {
                 return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
@@ -145,6 +169,14 @@ class OrdenesHelpdeskController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
+
+
+
+
+
+
+
+
 
 
     public function editHelpdesk($id)
@@ -185,6 +217,12 @@ class OrdenesHelpdeskController extends Controller
         // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
         $ticket = DB::table('tickets')->where('idTickets', $id)->first();
 
+         // Obtener los articulos según el idTipoArticulo
+    $articulosTipo1 = Articulo::where('idTipoArticulo', 1)->get();  // Artículos con idTipoArticulo = 1
+    $articulosTipo2 = Articulo::where('idTipoArticulo', 2)->get();  // Artículos con idTipoArticulo = 2
+    $articulosTipo3 = Articulo::where('idTipoArticulo', 3)->get();  // Artículos con idTipoArticulo = 3
+    $articulosTipo4 = Articulo::where('idTipoArticulo', 4)->get();  // Artículos con idTipoArticulo = 4
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
@@ -201,10 +239,18 @@ class OrdenesHelpdeskController extends Controller
             'tecnicos_apoyo',
             'ticketId',
             'ticket',
-            'id'
+            'id',
+            'articulosTipo1',
+            'articulosTipo2',
+            'articulosTipo3',
+            'articulosTipo4'
 
         ));
     }
+
+
+
+
 
 
 
@@ -453,4 +499,7 @@ class OrdenesHelpdeskController extends Controller
         // Responder con éxito
         return response()->json(['success' => true]);
     }
+
+
+    
 }
