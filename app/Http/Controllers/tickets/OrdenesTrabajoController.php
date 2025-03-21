@@ -154,94 +154,6 @@ class OrdenesTrabajoController extends Controller
     }
 
 
-
-
-
-    // public function storesmart(Request $request)
-    // {
-    //     try {
-    //         Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
-
-    //         // Validación de los datos
-    //         $validatedData = $request->validate([
-    //             'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
-    //             'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
-    //             'idCliente' => 'required|integer|exists:cliente,idCliente',
-    //             'idTienda' => 'required|integer|exists:tienda,idTienda',
-    //             'direccion' => 'required|string|max:255',
-    //             'idMarca' => 'required|integer|exists:marca,idMarca',
-    //             'idModelo' => 'required|integer|exists:modelo,idModelo',
-    //             'serie' => 'required|string|max:255',
-    //             'fechaCompra' => 'required|date_format:Y-m-d',
-    //             'fallaReportada' => 'required|string',
-    //             'linkubicacion' =>  'required|string',
-    //             'lat' => 'nullable|string|max:255',
-    //             'lng' => 'nullable|string|max:255',
-    //             // 'esRecojo' => 'nullable|in:on', // Aceptar 'on' como valor
-
-    //         ]);
-
-    //         Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
-
-    //         // Crear la nueva orden de trabajo
-    //         $ticket = Ticket::create([
-    //             'numero_ticket' => $validatedData['nroTicket'],
-    //             'idClienteGeneral' => $validatedData['idClienteGeneral'],
-    //             'idCliente' => $validatedData['idCliente'],
-    //             'idTienda' => $validatedData['idTienda'],
-    //             'direccion' => $validatedData['direccion'],
-    //             'idMarca' => $validatedData['idMarca'],
-    //             'idModelo' => $validatedData['idModelo'],
-    //             'serie' => $validatedData['serie'],
-    //             'fechaCompra' => $validatedData['fechaCompra'],
-    //             'linkubicacion' => $validatedData['linkubicacion'],
-    //             'fallaReportada' => $validatedData['fallaReportada'],
-    //             'lat' => $validatedData['lat'],
-    //             'lng' => $validatedData['lng'],
-    //             'idUsuario' => auth()->id(),
-    //             'fecha_creacion' => now(),
-    //             'idTipotickets' => 1,
-    //             'tipoServicio' => 1,
-    //         ]);
-
-    //         Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
-
-
-    //         // Verificar si el checkbox es "Es recojo" está marcado
-    //         $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
-
-    //         $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
-    //             'idTicket' => $ticket->idTickets, // ID del ticket recién creado
-    //             'idEstadflujo' => $estadoFlujo,  // Estado inicial de flujo
-    //             'idUsuario' => auth()->id(),  // Usuario autenticado
-    //             'fecha_creacion' => now(),
-    //         ]);
-
-
-    //         Log::info('Flujo de trabajo guardado correctamente', [
-    //             'idTicket' => $ticket->idTickets,
-    //             'idTicketFlujo' => $ticketFlujoId
-    //         ]);
-
-    //         // Actualizar el ticket con el idTicketFlujo generado
-    //         $ticket->idTicketFlujo = $ticketFlujoId;
-    //         $ticket->save();
-
-    //         Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
-
-    //         // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
-    //         return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
-    //             ->with('success', 'Orden de trabajo creada correctamente.');
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         // En caso de error en la validación
-    //         Log::error('Errores de validación', ['errors' => $e->errors()]);
-    //         return redirect()->back()->withErrors($e->errors())->withInput();
-    //     } catch (\Exception $e) {
-    //         // En caso de cualquier otro error
-    //         Log::error('Error al crear la orden de trabajo', ['exception' => $e->getMessage()]);
-    //         return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
-    //     }
-    // }
     public function storesmart(Request $request)
     {
         try {
@@ -318,7 +230,7 @@ class OrdenesTrabajoController extends Controller
                     'fecha_final' => null,  // El campo 'fecha_final' debe ser null
                     'estado' => 1,  // Estado inicial (puedes ajustarlo según sea necesario)
                     'idTickets' => $ticket->idTickets,  // El ID del ticket relacionado
-                    'idUsuario' => 39,  // ID del usuario relacionado, en este caso es 39
+                    'idUsuario' => $this->obtenerIdUsuario(),  // Llamar a la función para obtener el idUsuario correcto
                     'fecha_inicio_hora' => null,  // Este campo puede ser null
                     'fecha_final_hora' => null,  // Este campo puede ser null
                     'necesita_apoyo' => 0,  // Necesita apoyo (por defecto se establece en 0)
@@ -383,6 +295,23 @@ class OrdenesTrabajoController extends Controller
         }
     }
     
+
+    /**
+ * Función para obtener el idUsuario correcto para la visita
+ */
+private function obtenerIdUsuario()
+{
+    $idUsuarioAutenticado = auth()->id(); // Obtener el ID del usuario autenticado
+
+    // Si el idUsuario autenticado es 6 o 7, se asigna ese ID
+    if (in_array($idUsuarioAutenticado, [6, 7])) {
+        return $idUsuarioAutenticado;
+    }
+
+    // Si el idUsuario autenticado no es ni 6 ni 7, seleccionamos aleatoriamente entre 6 y 7
+    return rand(6, 7); // Seleccionar aleatoriamente entre 6 y 7
+}
+
 
 
 
@@ -749,6 +678,35 @@ class OrdenesTrabajoController extends Controller
 
 
 
+        $idtipoServicio = null;  // Inicializamos la variable para el tipo de servicio
+
+// Consulta para obtener el idVisita de la visita seleccionada para ese ticket
+$idVisitaSeleccionada = DB::table('seleccionarvisita')
+    ->where('idTickets', $ticketId)  // Filtro por ticketId
+    ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
+
+Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada); // Log de la visita seleccionada
+
+// Si se encuentra una visita seleccionada
+if ($idVisitaSeleccionada) {
+
+    // Obtener el tipoServicio de la visita seleccionada
+    $idtipoServicio = DB::table('visitas')
+        ->where('idTickets', $ticketId)  // Filtro por ticketId
+        ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisita seleccionada
+        ->value('tipoServicio');  // Obtenemos el tipoServicio
+
+    Log::info('Tipo de servicio obtenido: ' . $idtipoServicio);  // Log del tipo de servicio
+
+} else {
+    Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
+}
+
+// Puedes agregar un log final para revisar el valor de tipoServicio
+Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
+
+
+
 
 
 
@@ -794,8 +752,8 @@ class OrdenesTrabajoController extends Controller
             'visitaConCondicion', // Pasamos la variable que indica si la visita tiene una condición
             'tipoUsuario',
             'idVisitaSeleccionada',
-            'tipoServicio'  // Pasamos el tipoServicio a la vista
-
+            'tipoServicio',  // Pasamos el tipoServicio a la vista
+            'idtipoServicio'
 
         ));
     }
@@ -1625,12 +1583,23 @@ class OrdenesTrabajoController extends Controller
             return response()->json(['success' => false, 'message' => 'El técnico ya tiene una visita asignada en este horario.'], 400);
         }
 
+        // Obtener el tipo de usuario del encargado
+    $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
+    $tipoServicio = 1; // Default para técnico (idTipoUsuario 1)
+
+    // Asignar tipoServicio basado en el tipo de usuario
+    if ($encargado->idTipoUsuario == 5) {
+        $tipoServicio = 3; // Si el tipo de usuario es 4, asignamos 3 (por ejemplo, Chofer)
+    }
+
         // Crear la nueva visita
         $visita = new Visita();
         $visita->nombre = $request->nombre;
         $visita->fecha_programada = $request->fecha_visita;
         $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
         $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
+        $visita->tipoServicio = $tipoServicio; // O el valor correspondiente que quieras
+
         $visita->idUsuario = $request->encargado;
 
         Log::info('Creando la visita', ['visita' => $visita]);
@@ -1638,7 +1607,6 @@ class OrdenesTrabajoController extends Controller
         // Asignar 0 o 1 a "necesita_apoyo"
         $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
 
-        $visita->tipoServicio = 1; // O el valor correspondiente que quieras
         $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
 
         // Guardar la visita
@@ -3256,7 +3224,20 @@ class OrdenesTrabajoController extends Controller
             $visita->estado = 0;
             $visita->tipoServicio = 7;
             $visita->idTickets = $solicitud->idTickets;
-            $visita->idUsuario = auth()->user()->idUsuario;
+            // $visita->idUsuario = auth()->user()->idUsuario;
+
+ // Obtener el idUsuario del usuario autenticado
+ $idUsuarioAutenticado = auth()->user()->idUsuario;
+        
+ // Lógica para asignar el idUsuario según las condiciones
+ if (in_array($idUsuarioAutenticado, [10, 9])) {
+     // Si el idUsuario autenticado es 6 o 7, asignarlo a la visita
+     $visita->idUsuario = $idUsuarioAutenticado;
+ } else {
+     // Si el usuario no es 6 ni 7, asignamos aleatoriamente entre 6 y 7
+     $visita->idUsuario = rand(10, 9);
+ }
+
             $visita->save();
     
             // Registrar el flujo en ticketflujo

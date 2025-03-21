@@ -1,6 +1,6 @@
 <span class="text-lg font-semibold mb-4 badge bg-success">Firmas</span>
 
-<!-- Contenedor general -->
+<!-- Contenedor generaldf -->
 <div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">
     <!-- Firma del Técnico -->
     <div class="w-full md:w-[500px] flex flex-col items-center">
