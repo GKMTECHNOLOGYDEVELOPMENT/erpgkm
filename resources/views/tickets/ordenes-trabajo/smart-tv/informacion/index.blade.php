@@ -174,7 +174,7 @@
         // ✅ Previsualizar imágenes en el modal al seleccionar archivos
         imagenInput.addEventListener("change", function() {
             imagePreviewContainer.innerHTML =
-            ""; // Limpiar el contenedor antes de agregar nuevas imágenes
+                ""; // Limpiar el contenedor antes de agregar nuevas imágenes
 
             Array.from(imagenInput.files).forEach((file, index) => {
                 const reader = new FileReader();
@@ -199,6 +199,29 @@
             });
         });
 
+        window.eliminarImagen = function(imagenId) {
+            fetch(`/api/eliminarImagen/${imagenId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        toastr.success("Imagen eliminada correctamente.");
+                        renderizarImagenes(); // Refrescar el swiper
+                    } else {
+                        toastr.error("Error al eliminar la imagen.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    toastr.error("Hubo un error al eliminar la imagen.");
+                });
+        };
+
+
         // ✅ Renderizar imágenes existentes en el Swiper
         function renderizarImagenes() {
             swiperWrapper.innerHTML = ""; // Limpiar el swiper antes de agregar nuevas imágenes
@@ -213,16 +236,30 @@
                                 "items-center", "justify-center");
 
                             swiperSlide.innerHTML = `
-                            <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
-                                <img src="${img.src}" alt="Imagen ${index + 1}" class="w-full h-full object-cover rounded-lg" />
-                                <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium 
-                                            max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
-                                    <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
-                                        ${img.description ? img.description : "Sin descripción"}
+                                <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
+                                    <img src="${img.src}" alt="Imagen ${index + 1}" class="w-full h-full object-cover rounded-lg" />
+
+                                    <!-- Botón "X" para eliminar -->
+                                    <button onclick="eliminarImagen(${img.id})"
+                                        class="absolute top-2 right-2 w-8 h-8 bg-danger hover:bg-red-700 text-white transition-colors duration-200
+                                            rounded-full shadow-md flex items-center justify-center z-10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+
+
+
+                                    <!-- Descripción -->
+                                    <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium 
+                                                max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
+                                        <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
+                                            ${img.description ? img.description : "Sin descripción"}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+
                             swiperWrapper.appendChild(swiperSlide);
                         });
 
