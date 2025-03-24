@@ -22,6 +22,8 @@ use App\Models\Visita;
 use App\Models\ClienteClientegeneral;
 use App\Exports\HelpdeskTicketExport;
 use App\Models\Articulo;
+use App\Models\SeleccionarVisita;
+use App\Models\Suministro;
 
 class OrdenesHelpdeskController extends Controller
 {
@@ -195,8 +197,34 @@ class OrdenesHelpdeskController extends Controller
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
 
 
+
         // Obtener el idTickets
         $ticketId = $ticket->idTickets;
+
+
+
+// Buscar la visita seleccionada para el ticket
+$VisitaIdd = DB::table('seleccionarvisita')
+    ->where('idTickets', $ticketId)
+    ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
+
+Log::info('Visita seleccionada, VisitaIdd: ' . $VisitaIdd);  // Log de la visita seleccionada
+
+// Si se encuentra una visita seleccionada
+if ($VisitaIdd) {
+    // Obtener más detalles de la visita seleccionada (si lo necesitas)
+    $visita = DB::table('visitas')
+        ->where('idVisitas', $VisitaIdd)
+        ->first();
+
+    Log::info('Detalles de la visita seleccionada:', (array) $visita);  // Log de los detalles de la visita
+} else {
+    Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId);  // Log si no se encuentra una visita seleccionada
+}
+
+
+
+
         $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
 
         $encargado = Usuario::whereIn('idTipoUsuario', [1])->get();
@@ -244,6 +272,7 @@ class OrdenesHelpdeskController extends Controller
             'tecnicos_apoyo',
             'ticketId',
             'ticket',
+            'visitaId',
             'id',
             'articulosTipo1',
             'articulosTipo2',
@@ -255,9 +284,219 @@ class OrdenesHelpdeskController extends Controller
         ));
     }
 
+    // public function store(Request $request)
+    // {
+    //     // Validar los datos recibidos
+    //     $request->validate([
+    //         'herramientas' => 'array',
+    //         'productos' => 'array',
+    //         'repuestos' => 'array',
+    //         'insumos' => 'array',
+    //         'herramientas.*.idArticulos' => 'required|exists:articulos,idArticulos',
+    //         'productos.*.idArticulos' => 'required|exists:articulos,idArticulos',
+    //         'repuestos.*.idArticulos' => 'required|exists:articulos,idArticulos',
+    //         'insumos.*.idArticulos' => 'required|exists:articulos,idArticulos',
+    //         'herramientas.*.cantidad' => 'required|integer|min:1',
+    //         'productos.*.cantidad' => 'required|integer|min:1',
+    //         'repuestos.*.cantidad' => 'required|integer|min:1',
+    //         'insumos.*.cantidad' => 'required|integer|min:1',
+    //     ]);
 
+    //     // Insertar suministros de herramientas
+    //     foreach ($request->herramientas as $herramienta) {
+    //         Suministro::create([
+    //             'idTickets' => $herramienta['idTickets'],
+    //             'idVisitas' => $herramienta['idVisitas'],
+    //             'idArticulos' => $herramienta['idArticulos'],
+    //             'cantidad' => $herramienta['cantidad'],
+    //             'tipo' => 'herramienta',  // Si quieres almacenar el tipo de suministro
+    //         ]);
+    //     }
 
+    //     // Insertar suministros de productos
+    //     foreach ($request->productos as $producto) {
+    //         Suministro::create([
+    //             'idTickets' => $producto['idTickets'],
+    //             'idVisitas' => $producto['idVisitas'],
+    //             'idArticulos' => $producto['idArticulos'],
+    //             'cantidad' => $producto['cantidad'],
+    //             'tipo' => 'producto',  // Similar para productos
+    //         ]);
+    //     }
 
+    //     // Insertar suministros de repuestos
+    //     foreach ($request->repuestos as $repuesto) {
+    //         Suministro::create([
+    //             'idTickets' => $repuesto['idTickets'],
+    //             'idVisitas' => $repuesto['idVisitas'],
+    //             'idArticulos' => $repuesto['idArticulos'],
+    //             'cantidad' => $repuesto['cantidad'],
+    //             'tipo' => 'repuesto',
+    //         ]);
+    //     }
+
+    //     // Insertar suministros de insumos
+    //     foreach ($request->insumos as $insumo) {
+    //         Suministro::create([
+    //             'idTickets' => $insumo['idTickets'],
+    //             'idVisitas' => $insumo['idVisitas'],
+    //             'idArticulos' => $insumo['idArticulos'],
+    //             'cantidad' => $insumo['cantidad'],
+    //             'tipo' => 'insumo',
+    //         ]);
+    //     }
+
+    //     // Responder con éxito
+    //     return response()->json(['success' => true]);
+    // }
+
+    public function store(Request $request)
+    {
+        // Validar los datos recibidos
+        $request->validate([
+            'herramientas' => 'array',
+            'productos' => 'array',
+            'repuestos' => 'array',
+            'insumos' => 'array',
+            'herramientas.*.idArticulos' => 'required|exists:articulos,idArticulos',
+            'productos.*.idArticulos' => 'required|exists:articulos,idArticulos',
+            'repuestos.*.idArticulos' => 'required|exists:articulos,idArticulos',
+            'insumos.*.idArticulos' => 'required|exists:articulos,idArticulos',
+            'herramientas.*.cantidad' => 'required|integer|min:1',
+            'productos.*.cantidad' => 'required|integer|min:1',
+            'repuestos.*.cantidad' => 'required|integer|min:1',
+            'insumos.*.cantidad' => 'required|integer|min:1',
+        ]);
+    
+        $errores = [];
+    
+        // Insertar suministros de herramientas
+        foreach ($request->herramientas as $herramienta) {
+            $existeSuministro = Suministro::where('idTickets', $herramienta['idTickets'])
+                                          ->where('idVisitas', $herramienta['idVisitas'])
+                                          ->where('idArticulos', $herramienta['idArticulos'])
+                                          ->exists();
+    
+            $nombreArticulo = Articulo::find($herramienta['idArticulos'])->nombre;  // Obtener el nombre del artículo
+    
+            if ($existeSuministro) {
+                $errores[] = "El suministro de la herramienta '{$nombreArticulo}' ya existe para este ticket y visita.";
+            } else {
+                Suministro::create([
+                    'idTickets' => $herramienta['idTickets'],
+                    'idVisitas' => $herramienta['idVisitas'],
+                    'idArticulos' => $herramienta['idArticulos'],
+                    'cantidad' => $herramienta['cantidad'],
+                    'tipo' => 'herramienta',
+                ]);
+            }
+        }
+    
+        // Insertar suministros de productos
+        foreach ($request->productos as $producto) {
+            $existeSuministro = Suministro::where('idTickets', $producto['idTickets'])
+                                          ->where('idVisitas', $producto['idVisitas'])
+                                          ->where('idArticulos', $producto['idArticulos'])
+                                          ->exists();
+    
+            $nombreArticulo = Articulo::find($producto['idArticulos'])->nombre;  // Obtener el nombre del artículo
+    
+            if ($existeSuministro) {
+                $errores[] = "El suministro del producto '{$nombreArticulo}' ya existe para este ticket y visita.";
+            } else {
+                Suministro::create([
+                    'idTickets' => $producto['idTickets'],
+                    'idVisitas' => $producto['idVisitas'],
+                    'idArticulos' => $producto['idArticulos'],
+                    'cantidad' => $producto['cantidad'],
+                    'tipo' => 'producto',
+                ]);
+            }
+        }
+    
+        // Insertar suministros de repuestos
+        foreach ($request->repuestos as $repuesto) {
+            $existeSuministro = Suministro::where('idTickets', $repuesto['idTickets'])
+                                          ->where('idVisitas', $repuesto['idVisitas'])
+                                          ->where('idArticulos', $repuesto['idArticulos'])
+                                          ->exists();
+    
+            $nombreArticulo = Articulo::find($repuesto['idArticulos'])->nombre;  // Obtener el nombre del artículo
+    
+            if ($existeSuministro) {
+                $errores[] = "El suministro del repuesto '{$nombreArticulo}' ya existe para este ticket y visita.";
+            } else {
+                Suministro::create([
+                    'idTickets' => $repuesto['idTickets'],
+                    'idVisitas' => $repuesto['idVisitas'],
+                    'idArticulos' => $repuesto['idArticulos'],
+                    'cantidad' => $repuesto['cantidad'],
+                    'tipo' => 'repuesto',
+                ]);
+            }
+        }
+    
+        // Insertar suministros de insumos
+        foreach ($request->insumos as $insumo) {
+            $existeSuministro = Suministro::where('idTickets', $insumo['idTickets'])
+                                          ->where('idVisitas', $insumo['idVisitas'])
+                                          ->where('idArticulos', $insumo['idArticulos'])
+                                          ->exists();
+    
+            $nombreArticulo = Articulo::find($insumo['idArticulos'])->nombre;  // Obtener el nombre del artículo
+    
+            if ($existeSuministro) {
+                $errores[] = "El suministro del insumo '{$nombreArticulo}' ya existe para este ticket y visita.";
+            } else {
+                Suministro::create([
+                    'idTickets' => $insumo['idTickets'],
+                    'idVisitas' => $insumo['idVisitas'],
+                    'idArticulos' => $insumo['idArticulos'],
+                    'cantidad' => $insumo['cantidad'],
+                    'tipo' => 'insumo',
+                ]);
+            }
+        }
+    
+        // Si hay errores, devolverlos
+        if (!empty($errores)) {
+            return response()->json(['success' => false, 'errores' => $errores]);
+        }
+    
+        // Si no hay errores, retornar éxito
+        return response()->json(['success' => true]);
+    }
+    
+
+    public function getSuministros(Request $request)
+    {
+        // Obtener los datos de la visita seleccionada usando el ID de la visita seleccionada
+        $seleccionadaVisita = SeleccionarVisita::where('idselecionarvisita', $request->idseleccionvisita)->first();
+        
+        // Verificar si no se encontró la visita
+        // if (!$seleccionadaVisita) {
+        //     Log::error('Visita no encontrada', ['idseleccionvisita' => $request->idseleccionvisita]);
+        //     return response()->json(['error' => 'Visita no encontrada'], 404);
+        // }
+    
+        // Log para ver si encontramos la visita
+        Log::info('Visita encontrada', ['idseleccionvisita' => $request->idseleccionvisita, 'visita' => $seleccionadaVisita]);
+    
+        $idTickets = $seleccionadaVisita->idTickets;
+        $idVisitas = $seleccionadaVisita->idVisitas;
+    
+        // Obtener suministros para el ticket y la visita actuales
+        $suministros = Suministro::where('idTickets', $idTickets)
+                                 ->where('idVisitas', $idVisitas)
+                                 ->get();
+    
+        // Log para verificar los suministros obtenidos
+        Log::info('Suministros encontrados', ['suministros' => $suministros]);
+    
+        // Devolver los suministros existentes al frontend
+        return response()->json($suministros);
+    }
+    
 
 
 
@@ -506,6 +745,79 @@ class OrdenesHelpdeskController extends Controller
         // Responder con éxito
         return response()->json(['success' => true]);
     }
+
+
+
+
+    public function seleccionarVisitaLevantamiento(Request $request)
+{
+    // Validar los datos que vienen del frontend
+    $validated = $request->validate([
+        'idTickets' => 'required|integer',
+        'idVisitas' => 'required|integer',
+        'vistaseleccionada' => 'required|string|max:255',
+    ]);
+
+    // Log de los datos validados
+    Log::info('Datos validados en seleccionarVisitaLevantamiento:', $validated);
+
+    // Buscar si ya existe un registro con el mismo idTickets
+    $seleccionarVisita = SeleccionarVisita::where('idTickets', $validated['idTickets'])->first();
+
+    // Log del resultado de la búsqueda
+    if ($seleccionarVisita) {
+        Log::info('Visita encontrada para actualizar:', ['idTickets' => $validated['idTickets'], 'idVisitas' => $validated['idVisitas']]);
+    } else {
+        Log::info('No se encontró visita, se creará un nuevo registro:', ['idTickets' => $validated['idTickets']]);
+    }
+
+    // Si el registro ya existe, actualizamos los campos
+    if ($seleccionarVisita) {
+        $seleccionarVisita->idVisitas = $validated['idVisitas'];
+        $seleccionarVisita->vistaseleccionada = $validated['vistaseleccionada'];
+
+        // Log antes de guardar
+        Log::info('Actualizando visita:', ['idVisitas' => $seleccionarVisita->idVisitas, 'vistaseleccionada' => $seleccionarVisita->vistaseleccionada]);
+
+        $seleccionarVisita->save();
+
+        return response()->json(['success' => true, 'message' => 'Visita actualizada correctamente.']);
+    }
+
+    // Si no existe, creamos un nuevo registro
+    $seleccionarVisita = new SeleccionarVisita();
+    $seleccionarVisita->idTickets = $validated['idTickets'];
+    $seleccionarVisita->idVisitas = $validated['idVisitas'];
+    $seleccionarVisita->vistaseleccionada = $validated['vistaseleccionada'];
+
+    // Log antes de guardar el nuevo registro
+    Log::info('Guardando nueva visita:', ['idTickets' => $seleccionarVisita->idTickets, 'idVisitas' => $seleccionarVisita->idVisitas, 'vistaseleccionada' => $seleccionarVisita->vistaseleccionada]);
+
+    // Guardar en la base de datos
+    if ($seleccionarVisita->save()) {
+        Log::info('Visita seleccionada guardada correctamente.');
+        return response()->json(['success' => true, 'message' => 'Visita seleccionada guardada correctamente.']);
+    } else {
+        Log::error('Hubo un error al guardar la visita seleccionada.');
+        return response()->json(['success' => false, 'message' => 'Hubo un error al guardar la visita seleccionada.']);
+    }
+}
+
+
+
+public function verificarVisitaSeleccionadaLevantamiento($idVisita)
+{
+    // Verifica si la visita está en la tabla 'seleccionarvisita'
+    $visita = DB::table('seleccionarvisita')
+        ->where('idVisitas', $idVisita)
+        ->first();
+
+    // Si la visita está seleccionada, devuelve true; de lo contrario, false
+    return response()->json([
+        'seleccionada' => $visita ? true : false
+    ]);
+}
+
 
 
     
