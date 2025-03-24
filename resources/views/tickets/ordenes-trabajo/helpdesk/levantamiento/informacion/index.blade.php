@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
-<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Detalles de los Estados</span>
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">Detalles de los Estados</span>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 items-start">
     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">

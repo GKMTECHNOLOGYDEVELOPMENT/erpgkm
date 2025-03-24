@@ -13,8 +13,7 @@
 <!-- Contenedor Alpine.js para el botón y el modal -->
 <div x-data="{ openModal: false }">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
-        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
-            style="background-color: {{ $colorEstado }};">
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">
             Orden de Trabajo N° {{ $orden->idTickets }}
         </span>
 
@@ -340,7 +339,7 @@
 
             <!-- Botón de Guardar -->
             <div class="md:col-span-2 flex justify-end space-x-4">
-                <a href="{{ route('ordenes.smart') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
+                <a href="{{ route('ordenes.helpdesk') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
                 <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
             </div>
         </div>
