@@ -71,7 +71,7 @@ function formatDate(dateString) {
   
   
           // Realizar la consulta al backend para verificar si la visita ha sido seleccionada
-          fetch(`/api/visita-seleccionada/${idVisita}`)
+          fetch(`/api/visita-seleccionada-levantamiento/${idVisita}`)
             .then(response => response.json())
             .then(data => {
               if (data.seleccionada) {
@@ -190,7 +190,7 @@ function formatDate(dateString) {
               const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
   
               // Llamada al backend para guardar la visita seleccionada
-              fetch('/api/seleccionar-visita', {
+              fetch('/api/seleccionar-visita-levantamiento', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -1025,7 +1025,7 @@ function formatDate(dateString) {
                                         const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
   
                                         // Llamada al backend para guardar la visita seleccionada
-                                        fetch('/api/seleccionar-visita', {
+                                        fetch('/api/seleccionar-visita-levantamiento', {
                                           method: 'POST',
                                           headers: {
                                             'Content-Type': 'application/json',

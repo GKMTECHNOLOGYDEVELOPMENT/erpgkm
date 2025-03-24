@@ -27,12 +27,16 @@ class Suministro extends Model
 
 	protected $casts = [
 		'cantidad' => 'int',
-		'idTickets' => 'int'
+		'idTickets' => 'int',
+		'idArticulos' => 'int',
+		'idVisitas' => 'int'
 	];
 
 	protected $fillable = [
 		'cantidad',
-		'idTickets'
+		'idTickets',
+		'idArticulos',
+		'idVisitas'
 	];
 
 	public function ticket()

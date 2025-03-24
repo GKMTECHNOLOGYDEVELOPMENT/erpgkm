@@ -10,6 +10,7 @@ use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
+use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\CuentasBancarias;
@@ -94,8 +95,12 @@ Route::get('/verificarFechaExistente/{idVisita}', [OrdenesTrabajoController::cla
 
 
 Route::post('/seleccionar-visita', [OrdenesTrabajoController::class, 'seleccionarVisita'])->name('seleccionarVisita');
+Route::post('/seleccionar-visita-levantamiento', [OrdenesHelpdeskController::class, 'seleccionarVisitaLevantamiento'])->name('seleccionarVisita');
+
 // Ruta para verificar si una visita está seleccionada
 Route::get('/visita-seleccionada/{idVisita}', [OrdenesTrabajoController::class, 'verificarVisitaSeleccionada']);
+Route::get('/visita-seleccionada-levantamiento/{idVisita}', [OrdenesTrabajoController::class, 'verificarVisitaSeleccionada']);
+Route::get('/suministros/{idseleccionvisita}', [OrdenesHelpdeskController::class, 'getSuministros']);
 
 
 Route::get('/usuarios', [UsuarioController::class, 'getUsuarios']);
