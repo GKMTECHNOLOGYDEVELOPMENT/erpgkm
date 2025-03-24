@@ -27,15 +27,15 @@
     </style>
 
     @if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
     @endif
 
     @if (session('error'))
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
     @endif
 
 
@@ -53,7 +53,7 @@
     </div>
     <!-- Definir el tipo de servicio -->
     @php
-    $tipoServicio = $orden->tipoServicio; // ID del tipo de servicio
+        $tipoServicio = $orden->tipoServicio; // ID del tipo de servicio
     @endphp
 
     <div class="mb-5" x-data="{ tab: 'detalle' }">
@@ -98,21 +98,22 @@
                 </a>
             </li>
             @if ($tipoServicio == 2)
-            {{-- Levantamiento de Información: Mostrar Recursos --}}
-            <li>
-                <a href="javascript:;"
-                    class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
-                    :class="{ '!bg-success text-white': tab === 'recursos' }" @click="tab = 'recursos'; console.log(tab)">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8L7 4H17L21 8V20H3V8Z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12V16M15 12V16" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8H21" />
-                    </svg>
+                {{-- Levantamiento de Información: Mostrar Recursos --}}
+                <li>
+                    <a href="javascript:;"
+                        class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
+                        :class="{ '!bg-success text-white': tab === 'recursos' }"
+                        @click="tab = 'recursos'; console.log(tab)">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8L7 4H17L21 8V20H3V8Z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12V16M15 12V16" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8H21" />
+                        </svg>
 
-                    Recursos
-                </a>
-            </li>
+                        Recursos
+                    </a>
+                </li>
             @endif
             <li>
                 <a href="javascript:;"
@@ -143,22 +144,23 @@
         <!-- Cargar contenido según tipo de servicio -->
         <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
             @if ($tipoServicio == 2)
-            {{-- Levantamiento de Información --}}
-            <div x-show="tab === 'detalle'">
-                @include('tickets.ordenes-trabajo.helpdesk.levantamiento.detalle.index')
-            </div>
-            <div x-show="tab === 'visitas'">
-                @include('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index')
-            </div>
-            <div x-show="tab === 'desarrollo'">
-                @include('tickets.ordenes-trabajo.helpdesk.levantamiento.informacion.index')
-            </div>
-            <div x-show="tab === 'recursos'">
-                @include('tickets.ordenes-trabajo.helpdesk.levantamiento.recursos.index')
-            <div x-show="tab === 'firmas'">
-                @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
-            </div>
-                @elseif ($tipoServicio == 1)
+                {{-- Levantamiento de Información --}}
+                <div x-show="tab === 'detalle'">
+                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.detalle.index')
+                </div>
+                <div x-show="tab === 'visitas'">
+                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index')
+                </div>
+                <div x-show="tab === 'desarrollo'">
+                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.informacion.index')
+                </div>
+                <div x-show="tab === 'recursos'">
+                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.recursos.index')
+                </div>
+                <div x-show="tab === 'firmas'">
+                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
+                </div>
+            @elseif ($tipoServicio == 1)
                 {{-- Soporte On Site --}}
                 <div x-show="tab === 'detalle'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.detalle.index')
@@ -172,9 +174,9 @@
                 <div x-show="tab === 'firmas'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.firmas.index')
                 </div>
-                @endif
-            </div>
+            @endif
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </x-layout.default>

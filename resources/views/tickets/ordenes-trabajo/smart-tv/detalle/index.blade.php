@@ -101,16 +101,25 @@
     const ticketId = '{{ $id }}'; // Error aquí, ya que ticketId ya fue declarado en PHP
 
     function obtenerLabelsFormulario() {
-        const labels = {};
+        const labels = {
+            horaInicioInput: 'Hora Inicio',
+            horaFinInput: 'Hora Fin',
+            fechaVisitaInput: 'Fecha Visita',
+            nombreVisitaInput: 'Nombre de la Visita',
+            // Podés seguir agregando más si querés personalizar más campos
+        };
+
         document.querySelectorAll("form label").forEach(label => {
-            const input = label.nextElementSibling; // Tomamos el input, select o textarea después del label
+            const input = label.nextElementSibling || label.parentElement.querySelector(
+                'input, select, textarea');
             if (input) {
                 const name = input.getAttribute("name") || input.getAttribute("id");
-                if (name) {
-                    labels[name] = label.textContent.trim(); // Guardamos el label asociado al name o id
+                if (name && !labels[name]) {
+                    labels[name] = label.textContent.trim(); // fallback si no está en el diccionario
                 }
             }
         });
+
         return labels;
     }
 

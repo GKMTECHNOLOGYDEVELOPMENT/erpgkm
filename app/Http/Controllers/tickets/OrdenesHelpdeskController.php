@@ -212,7 +212,9 @@ class OrdenesHelpdeskController extends Controller
 
         // 🔹 Aquí se añade la variable $usuarios para solucionar el error
         $usuarios = Usuario::all(); // Obtener todos los técnicos disponibles
-        $tiposServicio = TipoServicio::all(); // Obtener tipos de servicio disponibles
+        $tipoUsuario = Auth::user()->idTipoUsuario; // ✅
+        $idtipoServicio = $orden->tipoServicio ?? null;
+        $tiposServicio = TipoServicio::all();
 
         // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
         $ticket = DB::table('tickets')->where('idTickets', $id)->first();
@@ -223,9 +225,12 @@ class OrdenesHelpdeskController extends Controller
     $articulosTipo3 = Articulo::where('idTipoArticulo', 3)->get();  // Artículos con idTipoArticulo = 3
     $articulosTipo4 = Articulo::where('idTipoArticulo', 4)->get();  // Artículos con idTipoArticulo = 4
 
+    $idVisitaSeleccionada = null; 
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
+            'tipoUsuario',
             'tiposServicio',
             'modelos',
             'clientes',
@@ -243,7 +248,9 @@ class OrdenesHelpdeskController extends Controller
             'articulosTipo1',
             'articulosTipo2',
             'articulosTipo3',
-            'articulosTipo4'
+            'articulosTipo4',
+            'idVisitaSeleccionada',
+            'idtipoServicio'
 
         ));
     }

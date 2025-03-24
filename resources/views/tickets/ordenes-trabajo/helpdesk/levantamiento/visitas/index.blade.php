@@ -399,9 +399,9 @@ class="mb-5" @toggle-modal.window="open = !open">
                         <div class="w-full">
                             <label class="block text-sm font-medium mb-1">Rango de atención</label>
                             <div class="flex space-x-2">
-                                <input id="horaInicioInput" type="text" class="form-input w-1/2"
+                                <input id="horaInicioInput" type="text" name="Hora Inicio"class="form-input w-1/2"
                                     placeholder="Elige la hora de Inicio" required>
-                                <input id="horaFinInput" type="text" class="form-input w-1/2"
+                                <input id="horaFinInput" type="text" name="Hora Fin" class="form-input w-1/2"
                                     placeholder="Elige la hora de Fin" required>
                             </div>
                         </div>
