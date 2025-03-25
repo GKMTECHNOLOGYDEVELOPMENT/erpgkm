@@ -296,20 +296,20 @@ class OrdenesTrabajoController extends Controller
 
 
     /**
- * Función para obtener el idUsuario correcto para la visita
- */
-private function obtenerIdUsuario()
-{
-    $idUsuarioAutenticado = auth()->id(); // Obtener el ID del usuario autenticado
+     * Función para obtener el idUsuario correcto para la visita
+     */
+    private function obtenerIdUsuario()
+    {
+        $idUsuarioAutenticado = auth()->id(); // Obtener el ID del usuario autenticado
 
-    // Si el idUsuario autenticado es 6 o 7, se asigna ese ID
-    if (in_array($idUsuarioAutenticado, [6, 7])) {
-        return $idUsuarioAutenticado;
+        // Si el idUsuario autenticado es 6 o 7, se asigna ese ID
+        if (in_array($idUsuarioAutenticado, [6, 7])) {
+            return $idUsuarioAutenticado;
+        }
+
+        // Si el idUsuario autenticado no es ni 6 ni 7, seleccionamos aleatoriamente entre 6 y 7
+        return rand(6, 7); // Seleccionar aleatoriamente entre 6 y 7
     }
-
-    // Si el idUsuario autenticado no es ni 6 ni 7, seleccionamos aleatoriamente entre 6 y 7
-    return rand(6, 7); // Seleccionar aleatoriamente entre 6 y 7
-}
 
 
 
@@ -414,13 +414,13 @@ private function obtenerIdUsuario()
         // Filtrar los encargados según el color del estado
         if ($colorEstado == '#B5FA37') {
             // Si el colorEstado es #B5FA37, solo obtener los usuarios de tipo 1 (TÉCNICO)
-            $encargado = Usuario::where('idTipoUsuario', 5)->get();
+            $encargado = Usuario::where('idTipoUsuario', 4)->get();
         } elseif ($colorEstado == '#FBCACD') {
             // Si el colorEstado es #FBCACD, solo obtener los usuarios de tipo 5 (CHOFER)
             $encargado = Usuario::where('idTipoUsuario', 1)->get();
         } else {
             // Si no es ninguno de esos colores, traer ambos tipos (1 y 5)
-            $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
+            $encargado = Usuario::whereIn('idTipoUsuario', [1, 4])->get();
         }
 
 
@@ -679,30 +679,30 @@ private function obtenerIdUsuario()
 
         $idtipoServicio = null;  // Inicializamos la variable para el tipo de servicio
 
-// Consulta para obtener el idVisita de la visita seleccionada para ese ticket
-$idVisitaSeleccionada = DB::table('seleccionarvisita')
-    ->where('idTickets', $ticketId)  // Filtro por ticketId
-    ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
+        // Consulta para obtener el idVisita de la visita seleccionada para ese ticket
+        $idVisitaSeleccionada = DB::table('seleccionarvisita')
+            ->where('idTickets', $ticketId)  // Filtro por ticketId
+            ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
 
-Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada); // Log de la visita seleccionada
+        Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada); // Log de la visita seleccionada
 
-// Si se encuentra una visita seleccionada
-if ($idVisitaSeleccionada) {
+        // Si se encuentra una visita seleccionada
+        if ($idVisitaSeleccionada) {
 
-    // Obtener el tipoServicio de la visita seleccionada
-    $idtipoServicio = DB::table('visitas')
-        ->where('idTickets', $ticketId)  // Filtro por ticketId
-        ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisita seleccionada
-        ->value('tipoServicio');  // Obtenemos el tipoServicio
+            // Obtener el tipoServicio de la visita seleccionada
+            $idtipoServicio = DB::table('visitas')
+                ->where('idTickets', $ticketId)  // Filtro por ticketId
+                ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisita seleccionada
+                ->value('tipoServicio');  // Obtenemos el tipoServicio
 
-    Log::info('Tipo de servicio obtenido: ' . $idtipoServicio);  // Log del tipo de servicio
+            Log::info('Tipo de servicio obtenido: ' . $idtipoServicio);  // Log del tipo de servicio
 
-} else {
-    Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
-}
+        } else {
+            Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
+        }
 
-// Puedes agregar un log final para revisar el valor de tipoServicio
-Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
+        // Puedes agregar un log final para revisar el valor de tipoServicio
+        Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
 
 
 
@@ -1583,13 +1583,13 @@ Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
         }
 
         // Obtener el tipo de usuario del encargado
-    $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
-    $tipoServicio = 1; // Default para técnico (idTipoUsuario 1)
+        $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
+        $tipoServicio = 1; // Default para técnico (idTipoUsuario 1)
 
-    // Asignar tipoServicio basado en el tipo de usuario
-    if ($encargado->idTipoUsuario == 5) {
-        $tipoServicio = 3; // Si el tipo de usuario es 4, asignamos 3 (por ejemplo, Chofer)
-    }
+        // Asignar tipoServicio basado en el tipo de usuario
+        if ($encargado->idTipoUsuario == 4) {
+            $tipoServicio = 3; // Si el tipo de usuario es 4, asignamos 3 (por ejemplo, Chofer)
+        }
 
         // Crear la nueva visita
         $visita = new Visita();
@@ -2787,8 +2787,18 @@ Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
             ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
             : 'N/A';
 
-        // 🔹 Renderizar vista
-        $html = View('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', [
+        // 🔹 Verificar si el técnico es de tipoUsuario = 4
+        $tipoUsuario = null;
+        if ($visitaSeleccionada && $visitaSeleccionada->tecnico) {
+            $tipoUsuario = $visitaSeleccionada->tecnico->idTipoUsuario ?? null;
+        }
+
+        // 🔹 Determinar la vista del PDF según el tipo de usuario
+        $vistaPdf = ($tipoUsuario == 4)
+            ? 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer'
+            : 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
+
+        $html = View($vistaPdf, [
             'orden' => $orden,
             'fechaCreacion' => $fechaCreacion,
             'producto' => $producto,
@@ -2880,7 +2890,10 @@ Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
                         'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
                         'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
                         'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
-                        'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado')
+                        'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
+                        'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                        'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa'
+                        
                     ]
                 ]);
             }
@@ -2947,10 +2960,20 @@ Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
             : 'N/A';
 
 
-        // 🔹 PASAR DATOS A LA VISTA
-        $html = View('tickets.ordenes-trabajo.smart-tv.informe.pdf.informe', [
+        // 🔹 Verificar si el técnico es de tipoUsuario = 4
+        $tipoUsuario = null;
+        if ($visitaSeleccionada && $visitaSeleccionada->tecnico) {
+            $tipoUsuario = $visitaSeleccionada->tecnico->idTipoUsuario ?? null;
+        }
+
+        // 🔹 Determinar la vista del PDF según el tipo de usuario
+        $vistaPdf = ($tipoUsuario == 4)
+            ? 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer'
+            : 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
+
+        $html = View($vistaPdf, [
             'orden' => $orden,
-            'fechaCreacion' => $fechaCreacion, // ✅ Pasamos la fecha de la visita seleccionada
+            'fechaCreacion' => $fechaCreacion,
             'producto' => $producto,
             'transicionesStatusOt' => $transicionesStatusOt,
             'visitas' => $visitas,
@@ -3245,17 +3268,17 @@ Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
             $visita->idTickets = $solicitud->idTickets;
             // $visita->idUsuario = auth()->user()->idUsuario;
 
- // Obtener el idUsuario del usuario autenticado
- $idUsuarioAutenticado = auth()->user()->idUsuario;
-        
- // Lógica para asignar el idUsuario según las condiciones
- if (in_array($idUsuarioAutenticado, [10, 9])) {
-     // Si el idUsuario autenticado es 6 o 7, asignarlo a la visita
-     $visita->idUsuario = $idUsuarioAutenticado;
- } else {
-     // Si el usuario no es 6 ni 7, asignamos aleatoriamente entre 6 y 7
-     $visita->idUsuario = rand(10, 9);
- }
+            // Obtener el idUsuario del usuario autenticado
+            $idUsuarioAutenticado = auth()->user()->idUsuario;
+
+            // Lógica para asignar el idUsuario según las condiciones
+            if (in_array($idUsuarioAutenticado, [10, 9])) {
+                // Si el idUsuario autenticado es 6 o 7, asignarlo a la visita
+                $visita->idUsuario = $idUsuarioAutenticado;
+            } else {
+                // Si el usuario no es 6 ni 7, asignamos aleatoriamente entre 6 y 7
+                $visita->idUsuario = rand(10, 9);
+            }
 
             $visita->save();
 

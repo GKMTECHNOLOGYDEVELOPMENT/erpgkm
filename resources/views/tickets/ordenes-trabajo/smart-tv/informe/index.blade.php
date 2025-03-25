@@ -1,3 +1,7 @@
+@php
+    $rutaPdf = route('ordenes.generateInformePdf', ['idOt' => $orden->idTickets]);
+@endphp
+
 <div class="mt-4 border rounded-lg overflow-hidden">
     <!-- Contenedor del PDF -->
     <div id="pdfContainer">
@@ -7,7 +11,7 @@
     <!-- Mensaje para móviles -->
     <div id="mobilePdfMessage" class="hidden flex flex-col items-center justify-center p-5 text-center">
         <p class="text-gray-700 text-sm mb-2">📄 No se puede mostrar el PDF en dispositivos móviles.</p>
-        <a href="{{ route('ordenes.generateInformePdf', ['idOt' => $orden->idTickets]) }}" download
+        <a href="{{ $rutaPdf }}" download
             class="btn btn-primary text-white px-4 py-2 rounded-lg shadow-md transition-all duration-200">
             📥 Descargar PDF
         </a>
@@ -24,7 +28,7 @@
 
             // Ajustar vista según el tamaño de la pantalla
             function ajustarVista() {
-                if (window.innerWidth < 640) { 
+                if (window.innerWidth < 640) {
                     pdfContainer.classList.add("hidden"); // Oculta el iframe en móviles
                     mobilePdfMessage.classList.remove("hidden"); // Muestra el mensaje y botón de descarga
                 } else {
@@ -42,8 +46,7 @@
             // Cargar el PDF en el iframe
             function cargarPdf() {
                 console.log("Recargando PDF...");
-                iframe.src = "{{ route('ordenes.generateInformePdf', ['idOt' => $orden->idTickets]) }}" + '?' +
-                    new Date().getTime();
+                iframe.src = "{{ $rutaPdf }}" + '?' + new Date().getTime();
             }
 
             // Verificar cambios en la base de datos

@@ -500,7 +500,7 @@ Route::post('/solicitud-entrega', [OrdenesTrabajoController::class, 'guardarSoli
 Route::put('/solicitudentrega/aceptar/{id}', [OrdenesTrabajoController::class, 'aceptarSolicitud'])
     ->middleware('auth'); // Middleware para autenticar al usuario
 
-    Route::post('/suministros/store', [OrdenesHelpdeskController::class, 'store']);
+Route::post('/suministros/store', [OrdenesHelpdeskController::class, 'store']);
 
 
 
