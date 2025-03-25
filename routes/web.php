@@ -502,6 +502,10 @@ Route::put('/solicitudentrega/aceptar/{id}', [OrdenesTrabajoController::class, '
 
 Route::post('/suministros/store', [OrdenesHelpdeskController::class, 'store']);
 
+Route::post('/guardar-suministros', [OrdenesHelpdeskController::class, 'guardarSuministros'])->middleware('auth');
+Route::get('/get-suministros/{ticketId}/{visitaId}', [OrdenesHelpdeskController::class, 'getSuministros']);
+Route::delete('/eliminar-suministro/{idSuministro}', [OrdenesHelpdeskController::class, 'eliminarSuministros']);
+Route::patch('/actualizar-suministro/{id}', [OrdenesHelpdeskController::class, 'actualizarCantidad']);
 
 
 

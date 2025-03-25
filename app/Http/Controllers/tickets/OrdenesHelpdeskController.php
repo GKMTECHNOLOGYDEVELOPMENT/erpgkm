@@ -248,12 +248,34 @@ class OrdenesHelpdeskController extends Controller
         $ticket = DB::table('tickets')->where('idTickets', $id)->first();
 
         // Obtener los articulos según el idTipoArticulo
-        $articulosTipo1 = Articulo::where('idTipoArticulo', 1)->get();  // Artículos con idTipoArticulo = 1
-        $articulosTipo2 = Articulo::where('idTipoArticulo', 2)->get();  // Artículos con idTipoArticulo = 2
-        $articulosTipo3 = Articulo::where('idTipoArticulo', 3)->get();  // Artículos con idTipoArticulo = 3
-        $articulosTipo4 = Articulo::where('idTipoArticulo', 4)->get();  // Artículos con idTipoArticulo = 4
+        $articulos = DB::table('articulos')
+        ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
+        ->select('articulos.idArticulos', 'articulos.nombre', 'articulos.idTipoArticulo', 'tipoarticulos.nombre as tipo_nombre')
+        ->get();
+    
+ 
 
-        $idVisitaSeleccionada = null;
+   // Inicializamos la variable para idVisitaSeleccionada
+$idVisitaSeleccionada = null;
+
+// Consulta para obtener el idVisita de la visita seleccionada para ese ticket
+$idVisitaSeleccionada = DB::table('seleccionarvisita')
+    ->where('idTickets', $ticketId)  // Filtro por ticketId
+    ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
+
+// Log de la visita seleccionada
+Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada);
+
+// Si se encuentra una visita seleccionada
+if ($idVisitaSeleccionada) {
+    Log::info('Se encontró una visita seleccionada para el ticket: ' . $ticketId);
+} else {
+    Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
+}
+
+// Puedes agregar un log final para revisar el valor de idVisita
+Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
+
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
@@ -274,15 +296,139 @@ class OrdenesHelpdeskController extends Controller
             'ticket',
             'VisitaIdd',
             'id',
-            'articulosTipo1',
-            'articulosTipo2',
-            'articulosTipo3',
-            'articulosTipo4',
+            'articulos',
             'idVisitaSeleccionada',
             'idtipoServicio'
 
         ));
     }
+
+
+    public function guardarSuministros(Request $request)
+    {
+        $articulos = $request->articulos;
+        $ticketId = $request->ticketId;
+        $visitaId = $request->visitaId;
+    
+        foreach ($articulos as $articulo) {
+            // Verificar si el artículo ya está guardado para este ticket y visita
+            $existe = DB::table('suministros')
+                ->where('idTickets', $ticketId)
+                ->where('idVisitas', $visitaId)
+                ->where('idArticulos', $articulo['id'])
+                ->exists();
+    
+            if ($existe) {
+                return response()->json(['message' => 'El artículo ya ha sido agregado para este ticket y visita.'], 400);
+            }
+    
+            // Guardar el artículo si no existe
+            DB::table('suministros')->insert([
+                'idTickets' => $ticketId,
+                'idVisitas' => $visitaId,
+                'idArticulos' => $articulo['id'],
+                'cantidad' => $articulo['cantidad'],
+            ]);
+        }
+    
+        return response()->json(['message' => 'Suministros guardados correctamente.']);
+    }
+    
+
+
+    // public function getSuministros($ticketId, $visitaId)
+    // {
+    //     // Obtener los suministros asociados con el ticketId y visitaId
+    //     $suministros = DB::table('suministros')
+    //         ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
+    //         ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo') // Hacemos el join con tipoarticulos
+    //         ->where('suministros.idTickets', $ticketId)
+    //         ->where('suministros.idVisitas', $visitaId)
+    //         ->select('articulos.idArticulos', 'articulos.nombre', 'tipoarticulos.nombre as tipo_nombre', 'suministros.cantidad') // Seleccionamos también el tipo_nombre
+    //         ->get();
+    
+    //     return response()->json($suministros);
+    // }
+
+
+    public function getSuministros($ticketId, $visitaId)
+{
+    // Obtener los suministros asociados con el ticketId y visitaId
+    $suministros = DB::table('suministros')
+        ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
+        ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo') // Hacemos el join con tipoarticulos
+        ->where('suministros.idTickets', $ticketId)
+        ->where('suministros.idVisitas', $visitaId)
+        ->select('suministros.idSuministros', 'articulos.idArticulos', 'articulos.nombre', 'tipoarticulos.nombre as tipo_nombre', 'suministros.cantidad') // Añadir idSuministros aquí
+        ->get();
+
+    // Verificar los datos obtenidos
+    Log::info('Suministros obtenidos:', ['suministros' => $suministros]);
+
+    return response()->json($suministros);
+}
+
+public function actualizarCantidad(Request $request, $id)
+{
+    // Validar los datos
+    $request->validate([
+        'cantidad' => 'required|integer|min:1',  // Asegúrate de que la cantidad sea válida
+    ]);
+
+    // Obtener el suministro
+    $suministro = Suministro::find($id);
+
+    // Si no se encuentra el suministro
+    if (!$suministro) {
+        return response()->json(['message' => 'Suministro no encontrado.'], 404);
+    }
+
+    // Actualizar la cantidad
+    $suministro->cantidad = $request->input('cantidad');
+    $suministro->save();
+
+    // Devolver respuesta
+    return response()->json(['message' => 'Cantidad actualizada correctamente.']);
+}
+    
+
+
+
+
+
+    public function eliminarSuministros($idSuministro)
+    {
+        try {
+            // Log para ver qué ID estamos intentando eliminar
+            Log::info('Eliminando suministro con ID: ' . $idSuministro);
+
+            // Eliminar el suministro por ID
+            $deleted = DB::table('suministros')->where('idSuministros', $idSuministro)->delete();
+
+            // Verificar si se eliminó algo
+            if ($deleted) {
+                // Log para confirmar que el artículo fue eliminado
+                Log::info('Suministro con ID ' . $idSuministro . ' eliminado correctamente.');
+                
+                // Respuesta exitosa
+                return response()->json(['message' => 'Artículo eliminado correctamente.']);
+            } else {
+                // Log en caso de que no se haya encontrado el suministro para eliminar
+                Log::warning('No se encontró el suministro con ID: ' . $idSuministro);
+                
+                return response()->json(['message' => 'No se encontró el artículo para eliminar.'], 404);
+            }
+        } catch (\Exception $e) {
+            // Log para capturar el error
+            Log::error('Error al eliminar el suministro con ID ' . $idSuministro . ': ' . $e->getMessage());
+
+            // En caso de error
+            return response()->json(['message' => 'Error al eliminar el artículo.'], 500);
+        }
+    }
+    
+
+
 
     // public function store(Request $request)
     // {
@@ -468,34 +614,34 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-    public function getSuministros(Request $request)
-    {
-        // Obtener los datos de la visita seleccionada usando el ID de la visita seleccionada
-        $seleccionadaVisita = SeleccionarVisita::where('idselecionarvisita', $request->idseleccionvisita)->first();
+    // public function getSuministros(Request $request)
+    // {
+    //     // Obtener los datos de la visita seleccionada usando el ID de la visita seleccionada
+    //     $seleccionadaVisita = SeleccionarVisita::where('idselecionarvisita', $request->idseleccionvisita)->first();
 
-        // Verificar si no se encontró la visita
-        // if (!$seleccionadaVisita) {
-        //     Log::error('Visita no encontrada', ['idseleccionvisita' => $request->idseleccionvisita]);
-        //     return response()->json(['error' => 'Visita no encontrada'], 404);
-        // }
+    //     // Verificar si no se encontró la visita
+    //     // if (!$seleccionadaVisita) {
+    //     //     Log::error('Visita no encontrada', ['idseleccionvisita' => $request->idseleccionvisita]);
+    //     //     return response()->json(['error' => 'Visita no encontrada'], 404);
+    //     // }
 
-        // Log para ver si encontramos la visita
-        Log::info('Visita encontrada', ['idseleccionvisita' => $request->idseleccionvisita, 'visita' => $seleccionadaVisita]);
+    //     // Log para ver si encontramos la visita
+    //     Log::info('Visita encontrada', ['idseleccionvisita' => $request->idseleccionvisita, 'visita' => $seleccionadaVisita]);
 
-        $idTickets = $seleccionadaVisita->idTickets;
-        $idVisitas = $seleccionadaVisita->idVisitas;
+    //     $idTickets = $seleccionadaVisita->idTickets;
+    //     $idVisitas = $seleccionadaVisita->idVisitas;
 
-        // Obtener suministros para el ticket y la visita actuales
-        $suministros = Suministro::where('idTickets', $idTickets)
-            ->where('idVisitas', $idVisitas)
-            ->get();
+    //     // Obtener suministros para el ticket y la visita actuales
+    //     $suministros = Suministro::where('idTickets', $idTickets)
+    //         ->where('idVisitas', $idVisitas)
+    //         ->get();
 
-        // Log para verificar los suministros obtenidos
-        Log::info('Suministros encontrados', ['suministros' => $suministros]);
+    //     // Log para verificar los suministros obtenidos
+    //     Log::info('Suministros encontrados', ['suministros' => $suministros]);
 
-        // Devolver los suministros existentes al frontend
-        return response()->json($suministros);
-    }
+    //     // Devolver los suministros existentes al frontend
+    //     return response()->json($suministros);
+    // }
 
 
 
