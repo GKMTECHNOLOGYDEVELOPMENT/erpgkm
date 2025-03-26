@@ -1,18 +1,24 @@
 <x-layout.default>
 
-<link href="https://cdn.jsdelivr.net/npm/niceselect@2.1.0/niceselect.css" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/nice-select2@2.1.0/dist/css/nice-select2.min.css" rel="stylesheet" />
+    <!-- Select2 JS -->
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nice-select2@2.1.0/dist/js/nice-select2.min.js"></script>
 
 
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="{{ route('administracion.cliente-general') }}" class="text-primary hover:underline">Cliente General</a>
+                <a href="{{ route('administracion.cliente-general') }}" class="text-primary hover:underline">Cliente
+                    General</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Editar Cliente General</span>
             </li>
         </ul>
-        
+
     </div>
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR CLIENTE GENERAL</h2>
@@ -33,50 +39,53 @@
                 @enderror
             </div>
 
-            
-<!-- Select con Niceselect -->
+<!-- Select múltiple para Marcas -->
 <div>
-    <label for="marca" class="block text-sm font-medium">Marca</label>
-    <select name="marca" id="marca" class="niceselect form-input w-full" required>
-        <option value="" disabled selected>Selecciona una marca</option>
-        
-        <!-- Iteramos sobre las marcas y las mostramos como opciones -->
+    <label for="marcas" class="block text-sm font-medium mb-1">Marcas</label>
+    <select name="marcas[]" id="marcas" class="nice-select w-full" multiple>
         @foreach ($marcas as $marca)
-            <option value="{{ $marca->id }}" 
-                {{ old('marca', $cliente->marca_id) == $marca->id ? 'selected' : '' }}>
-                {{ $marca->nombre }} <!-- Asumí que la marca tiene un atributo 'nombre' -->
+            <option value="{{ $marca->idMarca }}"
+                {{ $marcasAsociadas->contains($marca->idMarca) ? 'selected' : '' }}>
+                {{ $marca->nombre }}
             </option>
         @endforeach
     </select>
-
-    @error('marca')
-        <span class="text-red-500 text-sm">{{ $message }}</span>
-    @enderror
 </div>
+
+<!-- Contenedor para mostrar los seleccionados -->
+<div class="mt-3">
+    <strong>Seleccionados:</strong>
+    <div id="selected-marcas"
+        class="mt-2 flex flex-wrap gap-2 border border-gray-300 rounded-md p-2 min-h-[45px] text-xs">
+    </div>
+</div>
+
+
 
 
 
             <!-- Campo para la imagen -->
             <div x-data="{ fotoPreview: '{{ $cliente->foto ? $cliente->foto : '' }}' }">
-            <label for="foto" class="block text-sm font-medium">Foto</label>
-            <input type="file" id="foto" name="foto" accept="image/*"
-                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
-                @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ $cliente->foto }}'">
-            <div class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                <template x-if="fotoPreview">
-                    <img :src="fotoPreview" alt="Previsualización de la foto"
-                        class="w-50 h-40 object-cover object-center">
-                </template>
-                <template x-if="!fotoPreview">
-                    <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
-                        Sin imagen
-                    </div>
-                </template>
+                <label for="foto" class="block text-sm font-medium">Foto</label>
+                <input type="file" id="foto" name="foto" accept="image/*"
+                    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
+                    @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ $cliente->foto }}'">
+                <div
+                    class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+                    <template x-if="fotoPreview">
+                        <img :src="fotoPreview" alt="Previsualización de la foto"
+                            class="w-50 h-40 object-cover object-center">
+                    </template>
+                    <template x-if="!fotoPreview">
+                        <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
+                            Sin imagen
+                        </div>
+                    </template>
+                </div>
+                @error('foto')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
             </div>
-            @error('foto')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-        </div>
 
 
             <!-- Estado -->
@@ -86,9 +95,11 @@
                     <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
                     <input type="hidden" name="estado" value="0">
                     <div class="w-12 h-6 relative">
-                        <input type="checkbox" id="estado" name="estado" class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-                               value="1" {{ $cliente->estado ? 'checked' : '' }} />
-                        <span for="estado" class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                        <input type="checkbox" id="estado" name="estado"
+                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                            value="1" {{ $cliente->estado ? 'checked' : '' }} />
+                        <span for="estado"
+                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
                     </div>
                 </div>
             </div>
@@ -102,13 +113,36 @@
     </div>
 
 
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Inicializar NiceSelect2
+            NiceSelect.bind(document.getElementById("marcas"), {
+                searchable: true,
+            });
     
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Inicializa niceselect en todos los select con la clase 'niceselect'
-        document.querySelectorAll('.niceselect').forEach(function (select) {
-            new Niceselect(select);
+            // Mostrar seleccionados personalizados
+            function actualizarSeleccionados() {
+                const select = document.getElementById("marcas");
+                const seleccionados = Array.from(select.selectedOptions).map(opt => opt.text);
+                const contenedor = document.getElementById("selected-marcas");
+    
+                contenedor.innerHTML = ""; // Limpiar
+                seleccionados.forEach(nombre => {
+                    const chip = document.createElement("span");
+                    chip.className = "bg-blue-500 text-primary px-2 py-1 rounded";
+                    chip.textContent = nombre;
+                    contenedor.appendChild(chip);
+                });
+            }
+    
+            // Detectar cambios
+            document.getElementById("marcas").addEventListener("change", actualizarSeleccionados);
+    
+            // Mostrar los que ya están seleccionados al iniciar
+            actualizarSeleccionados();
         });
-    });
-</script>
+    </script>
+    
+
 </x-layout.default>
