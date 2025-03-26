@@ -29,7 +29,7 @@
     </div>
     <!-- Formulario de Editar Cliente -->
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
-        <h2 class="text-xl font-bold mb-5">EDITAR CLIENTES</h2>
+        <h2 class="text-xl font-bold mb-5">EDITAR CLIENTESs</h2>
         <div class="p-5">
             <form id="clienteForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
                 action="{{ route('clientes.update', $cliente->idCliente) }}">
@@ -50,19 +50,8 @@
                     </div>
                 </div>
 
-                <!-- ClienteGeneral -->
-                <div>
-                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display: none">
-                        <option value="" disabled selected>Seleccionar Cliente General</option>
-                        @foreach ($clientesGenerales as $clienteGeneral)
-                            <option value="{{ $clienteGeneral->idClienteGeneral }}"
-                                {{ old('idClienteGeneral', $cliente->idClienteGeneral) == $clienteGeneral->idClienteGeneral ? 'selected' : '' }}>
-                                {{ $clienteGeneral->descripcion }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+
+
 
                 <!-- Nombre -->
                 <div>
