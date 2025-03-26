@@ -24,6 +24,8 @@ use App\Exports\HelpdeskTicketExport;
 use App\Models\Articulo;
 use App\Models\SeleccionarVisita;
 use App\Models\Suministro;
+use App\Models\TransicionStatusTicket;
+use Spatie\Browsershot\Browsershot;
 
 class OrdenesHelpdeskController extends Controller
 {
@@ -249,32 +251,32 @@ class OrdenesHelpdeskController extends Controller
 
         // Obtener los articulos según el idTipoArticulo
         $articulos = DB::table('articulos')
-        ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
-        ->select('articulos.idArticulos', 'articulos.nombre', 'articulos.idTipoArticulo', 'tipoarticulos.nombre as tipo_nombre')
-        ->get();
-    
- 
+            ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
+            ->select('articulos.idArticulos', 'articulos.nombre', 'articulos.idTipoArticulo', 'tipoarticulos.nombre as tipo_nombre')
+            ->get();
 
-   // Inicializamos la variable para idVisitaSeleccionada
-$idVisitaSeleccionada = null;
 
-// Consulta para obtener el idVisita de la visita seleccionada para ese ticket
-$idVisitaSeleccionada = DB::table('seleccionarvisita')
-    ->where('idTickets', $ticketId)  // Filtro por ticketId
-    ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
 
-// Log de la visita seleccionada
-Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada);
+        // Inicializamos la variable para idVisitaSeleccionada
+        $idVisitaSeleccionada = null;
 
-// Si se encuentra una visita seleccionada
-if ($idVisitaSeleccionada) {
-    Log::info('Se encontró una visita seleccionada para el ticket: ' . $ticketId);
-} else {
-    Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
-}
+        // Consulta para obtener el idVisita de la visita seleccionada para ese ticket
+        $idVisitaSeleccionada = DB::table('seleccionarvisita')
+            ->where('idTickets', $ticketId)  // Filtro por ticketId
+            ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
 
-// Puedes agregar un log final para revisar el valor de idVisita
-Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
+        // Log de la visita seleccionada
+        Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada);
+
+        // Si se encuentra una visita seleccionada
+        if ($idVisitaSeleccionada) {
+            Log::info('Se encontró una visita seleccionada para el ticket: ' . $ticketId);
+        } else {
+            Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
+        }
+
+        // Puedes agregar un log final para revisar el valor de idVisita
+        Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
 
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
@@ -312,7 +314,7 @@ Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
         $articulos = $request->articulos;
         $ticketId = $request->ticketId;
         $visitaId = $request->visitaId;
-        
+
         foreach ($articulos as $articulo) {
             // Verificar si el artículo ya está guardado para este ticket y visita
             $existe = DB::table('suministros')
@@ -320,7 +322,7 @@ Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
                 ->where('idVisitas', $visitaId)
                 ->where('idArticulos', $articulo['id'])
                 ->exists();
-            
+
             if ($existe) {
                 // Si existe, actualizar la cantidad del artículo
                 DB::table('suministros')
@@ -338,15 +340,15 @@ Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
                 ]);
             }
         }
-    
+
         return response()->json(['message' => 'Suministros guardados correctamente.']);
     }
-    
 
 
 
 
-    
+
+
 
 
     // public function getSuministros($ticketId, $visitaId)
@@ -359,51 +361,51 @@ Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
     //         ->where('suministros.idVisitas', $visitaId)
     //         ->select('articulos.idArticulos', 'articulos.nombre', 'tipoarticulos.nombre as tipo_nombre', 'suministros.cantidad') // Seleccionamos también el tipo_nombre
     //         ->get();
-    
+
     //     return response()->json($suministros);
     // }
 
 
     public function getSuministros($ticketId, $visitaId)
-{
-    // Obtener los suministros asociados con el ticketId y visitaId
-    $suministros = DB::table('suministros')
-        ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
-        ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo') // Hacemos el join con tipoarticulos
-        ->where('suministros.idTickets', $ticketId)
-        ->where('suministros.idVisitas', $visitaId)
-        ->select('suministros.idSuministros', 'articulos.idArticulos', 'articulos.nombre', 'tipoarticulos.nombre as tipo_nombre', 'suministros.cantidad') // Añadir idSuministros aquí
-        ->get();
+    {
+        // Obtener los suministros asociados con el ticketId y visitaId
+        $suministros = DB::table('suministros')
+            ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
+            ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo') // Hacemos el join con tipoarticulos
+            ->where('suministros.idTickets', $ticketId)
+            ->where('suministros.idVisitas', $visitaId)
+            ->select('suministros.idSuministros', 'articulos.idArticulos', 'articulos.nombre', 'tipoarticulos.nombre as tipo_nombre', 'suministros.cantidad') // Añadir idSuministros aquí
+            ->get();
 
-    // Verificar los datos obtenidos
-    Log::info('Suministros obtenidos:', ['suministros' => $suministros]);
+        // Verificar los datos obtenidos
+        Log::info('Suministros obtenidos:', ['suministros' => $suministros]);
 
-    return response()->json($suministros);
-}
-
-public function actualizarCantidad(Request $request, $id)
-{
-    // Validar los datos
-    $request->validate([
-        'cantidad' => 'required|integer|min:1',  // Asegúrate de que la cantidad sea válida
-    ]);
-
-    // Obtener el suministro
-    $suministro = Suministro::find($id);
-
-    // Si no se encuentra el suministro
-    if (!$suministro) {
-        return response()->json(['message' => 'Suministro no encontrado.'], 404);
+        return response()->json($suministros);
     }
 
-    // Actualizar la cantidad
-    $suministro->cantidad = $request->input('cantidad');
-    $suministro->save();
+    public function actualizarCantidad(Request $request, $id)
+    {
+        // Validar los datos
+        $request->validate([
+            'cantidad' => 'required|integer|min:1',  // Asegúrate de que la cantidad sea válida
+        ]);
 
-    // Devolver respuesta
-    return response()->json(['message' => 'Cantidad actualizada correctamente.']);
-}
-    
+        // Obtener el suministro
+        $suministro = Suministro::find($id);
+
+        // Si no se encuentra el suministro
+        if (!$suministro) {
+            return response()->json(['message' => 'Suministro no encontrado.'], 404);
+        }
+
+        // Actualizar la cantidad
+        $suministro->cantidad = $request->input('cantidad');
+        $suministro->save();
+
+        // Devolver respuesta
+        return response()->json(['message' => 'Cantidad actualizada correctamente.']);
+    }
+
 
 
 
@@ -422,13 +424,13 @@ public function actualizarCantidad(Request $request, $id)
             if ($deleted) {
                 // Log para confirmar que el artículo fue eliminado
                 Log::info('Suministro con ID ' . $idSuministro . ' eliminado correctamente.');
-                
+
                 // Respuesta exitosa
                 return response()->json(['message' => 'Artículo eliminado correctamente.']);
             } else {
                 // Log en caso de que no se haya encontrado el suministro para eliminar
                 Log::warning('No se encontró el suministro con ID: ' . $idSuministro);
-                
+
                 return response()->json(['message' => 'No se encontró el artículo para eliminar.'], 404);
             }
         } catch (\Exception $e) {
@@ -439,7 +441,7 @@ public function actualizarCantidad(Request $request, $id)
             return response()->json(['message' => 'Error al eliminar el artículo.'], 500);
         }
     }
-    
+
 
 
 
@@ -975,5 +977,216 @@ public function actualizarCantidad(Request $request, $id)
         return response()->json([
             'seleccionada' => $visita ? true : false
         ]);
+    }
+
+
+    private function optimizeBase64Image($base64String, $quality = 60, $maxWidth = 800)
+    {
+        if (!$base64String) return null;
+
+        // Extraer el tipo de imagen
+        if (!preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches)) {
+            return $base64String; // Si no es imagen base64 válida, devolverla sin cambios
+        }
+
+        $imageType = strtolower($matches[1]); // Convertir a minúsculas (jpeg, png, webp)
+
+        // Decodificar la imagen base64
+        $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
+
+        // Evitar errores con imágenes corruptas
+        if (!$imageData) {
+            \Log::error("Error al decodificar imagen base64.");
+            return $base64String;
+        }
+
+        // Crear la imagen desde la cadena binaria
+        $image = @imagecreatefromstring($imageData);
+        if (!$image) {
+            \Log::error("Error al procesar la imagen con imagecreatefromstring.");
+            return $base64String; // Retornar imagen original si no se puede procesar
+        }
+
+        // Obtener dimensiones
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $newWidth = min($width, $maxWidth);
+        $newHeight = ($height / $width) * $newWidth; // Mantener proporción
+
+        // Crear nueva imagen con transparencia si es PNG
+        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+        if ($imageType === 'png') {
+            imagealphablending($resizedImage, false);
+            imagesavealpha($resizedImage, true);
+            $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
+            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+        } else {
+            $background = imagecolorallocate($resizedImage, 255, 255, 255); // Blanco para JPG
+            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $background);
+        }
+
+        // Redimensionar imagen
+        imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        // Convertir y optimizar
+        ob_start();
+        if ($imageType === 'png') {
+            imagepng($resizedImage, null, 9); // Mantener transparencia y alta compresión
+            $optimizedType = 'png';
+        } elseif ($imageType === 'jpeg' || $imageType === 'jpg') {
+            imagejpeg($resizedImage, null, $quality);
+            $optimizedType = 'jpeg';
+        } else {
+            imagewebp($resizedImage, null, $quality); // WebP para imágenes no compatibles
+            $optimizedType = 'webp';
+        }
+        $compressedImage = ob_get_clean();
+
+        // Liberar memoria
+        imagedestroy($image);
+        imagedestroy($resizedImage);
+
+        // Retornar imagen optimizada en base64
+        return "data:image/{$optimizedType};base64," . base64_encode($compressedImage);
+    }
+
+    public function generateLevantamientoPdf($idOt)
+    {
+        $orden = Ticket::with([
+            'cliente',
+            'clienteGeneral',
+            'tienda',
+            'tecnico',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot',
+            'visitas.tecnico',
+            'visitas.anexos_visitas',
+            'visitas.fotostickest'
+        ])->findOrFail($idOt);
+
+        // 🔹 Logo del cliente general
+        $logoClienteGeneral = null;
+        if ($orden->clienteGeneral && $orden->clienteGeneral->foto) {
+            $logoClienteGeneral = 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto);
+        }
+
+        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
+        if (!$seleccionada) {
+            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada.']);
+        }
+
+        $idVisitasSeleccionada = $seleccionada->idVisitas;
+
+        $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->whereNotNull('justificacion')
+            ->where('justificacion', '!=', '')
+            ->with('estado_ot')
+            ->get();
+
+        $producto = [
+            'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
+            'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
+            'modelo' => $orden->modelo->nombre ?? 'No especificado',
+            'serie' => $orden->serie ?? 'No especificado',
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+        ];
+
+        $suministros = Suministro::with('articulo.tipoArticulo', 'articulo.modelo.marca')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->get();
+
+
+
+        $visitas = collect();
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+
+        if ($visitaSeleccionada) {
+            $visitas = collect([
+                [
+                    'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                    'fecha_programada' => $visitaSeleccionada->fecha_programada ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada)) : 'N/A',
+                    'hora_inicio' => $visitaSeleccionada->fecha_inicio ? date('H:i', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A',
+                    'hora_final' => $visitaSeleccionada->fecha_final ? date('H:i', strtotime($visitaSeleccionada->fecha_final)) : 'N/A',
+                    'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
+                    'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                    'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
+                    'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
+                    'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                    'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+                ]
+            ]);
+        }
+
+        $firma = DB::table('firmas')->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->first();
+
+        $firmaCliente = $firma && !empty($firma->firma_cliente)
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            : null;
+
+        $firmaTecnico = null;
+        if ($visitaSeleccionada && $visitaSeleccionada->tecnico && !empty($visitaSeleccionada->tecnico->firma)) {
+            $firmaTecnico = 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma);
+        }
+
+        $imagenesAnexos = [];
+        if ($visitaSeleccionada && $visitaSeleccionada->anexos_visitas) {
+            $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
+                return [
+                    'foto_base64' => !empty($anexo->foto)
+                        ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                        : null,
+                    'descripcion' => $anexo->descripcion
+                ];
+            });
+        }
+
+        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+            return [
+                'foto_base64' => !empty($foto->foto)
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                    : null,
+                'descripcion' => $foto->descripcion
+            ];
+        });
+
+        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+            : 'N/A';
+
+        $vistaPdf = 'tickets.ordenes-trabajo.helpdesk.levantamiento.informe.pdf.index';
+
+        $html = View($vistaPdf, [
+            'orden' => $orden,
+            'fechaCreacion' => $fechaCreacion,
+            'producto' => $producto,
+            'transicionesStatusOt' => $transicionesStatusOt,
+            'visitas' => $visitas,
+            'firmaTecnico' => $firmaTecnico,
+            'firmaCliente' => $firmaCliente,
+            'imagenesAnexos' => $imagenesAnexos,
+            'imagenesFotosTickets' => $imagenesFotosTickets,
+            'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
+            'logoClienteGeneral' => $logoClienteGeneral,
+            'suministros' => $suministros,
+        ])->render();
+
+        $pdfContent = Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->pdf();
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="levantamiento_' . $idOt . '.pdf"');
     }
 }

@@ -3,30 +3,114 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <style>
-    /* Asegúrate de tener las reglas CSS como las has colocado antes */
-    /* ... */
+    /* ======== Modo Claro (Default) ======== */
+    .select2-container--default .select2-selection--single {
+        background-color: #fff;
+        border-color: #e8e8e8 !important;
+        height: 36px;
+        /* Tamaño más pequeño */
+        line-height: 34px;
+        /* Alineación */
+        font-size: 14px;
+        /* Texto más pequeño */
+        padding: 0 10px;
+        /* Espaciado más compacto */
+    }
+
+    /* Ajustar el texto dentro del select */
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: var(--tw-text-opacity) !important;
+        line-height: 34px;
+        /* Alineación */
+        font-size: 14px;
+        /* Tamaño de texto más pequeño */
+        padding-left: 6px;
+        /* Espacio interno */
+    }
+
+    /* Flecha de selección */
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 34px;
+        /* Alineación */
+    }
+
+    /* Opciones seleccionadas */
+    .select2-container--default .select2-results__option--selected {
+        font-weight: 700;
+    }
+
+    /* Dropdown */
+    .select2-container--default .select2-dropdown {
+        border-radius: 5px;
+        box-shadow: 0 0 0 1px #4444441c;
+        font-size: 14px;
+        /* Ajuste del texto */
+    }
+
+    /* Input de búsqueda */
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1px solid #e8e8e8;
+        font-size: 13px;
+        /* Texto más pequeño */
+        padding: 6px;
+        /* Más compacto */
+    }
+
+    /* ======== Modo Oscuro ======== */
+    .dark .select2-container--default .select2-selection--single {
+        background-color: #1b2e4b !important;
+        border-color: #253b5c !important;
+        color: #888ea8 !important;
+        height: 36px;
+        /* Tamaño más pequeño */
+        line-height: 34px;
+        /* Alineación */
+        font-size: 14px;
+        /* Texto más pequeño */
+        padding: 0 10px;
+    }
+
+    .dark .select2-container--default .select2-dropdown {
+        background-color: #1b2e4b !important;
+    }
+
+    .dark .select2-container--default .select2-results__option--highlighted,
+    .dark .select2-container--default .select2-results__option--selected {
+        background-color: #132136 !important;
+        border-color: #253b5c !important;
+    }
+
+    /* Input de búsqueda en modo oscuro */
+    .dark .select2-container--default .select2-search--dropdown .select2-search__field {
+        background-color: #132136 !important;
+        border-color: #253b5c !important;
+        color: #fff !important;
+        font-size: 13px;
+        padding: 6px;
+    }
 </style>
 
 <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md mt-6">
     <span class="text-sm sm:text-lg font-semibold badge bg-success">Artículos</span>
-<!-- Selector e Input -->
-<div class="mt-4 mb-6 flex items-center gap-4">
-    <!-- Select para elegir artículo -->
-    <select id="articuloSelect" class="w-56 herramienta-select">
-        <option selected disabled value="">Seleccione un artículo</option>
-        @foreach ($articulos as $articulo)
+    <!-- Selector e Input -->
+    <div class="mt-4 mb-6 flex items-center gap-4">
+        <!-- Select para elegir artículo -->
+        <select id="articuloSelect" class="w-56 herramienta-select">
+            <option selected disabled value="">Seleccione un artículo</option>
+            @foreach ($articulos as $articulo)
             <option value="{{ $articulo->idArticulos }}">
-                {{ strtoupper($articulo->nombre) }}
+                {{ strtoupper($articulo->nombre) }} - {{ strtoupper($articulo->tipo_nombre) }}
             </option>
-        @endforeach
-    </select>
+            
+            @endforeach
+        </select>
 
-    <!-- Input para la cantidad -->
-    <input type="number" id="articuloCantidad" class="form-input w-16 text-center" value="1" min="1" />
+        <!-- Input para la cantidad -->
+        <input type="number" id="articuloCantidad" class="form-input w-16 text-center" value="1" min="1" />
 
-    <!-- Botón para agregar el artículo -->
-    <button id="agregarArticulo" class="btn btn-primary">Agregar</button>
-</div>
+        <!-- Botón para agregar el artículo -->
+        <button id="agregarArticulo" class="btn btn-primary">Agregar</button>
+    </div>
 
 
 
@@ -57,27 +141,36 @@
 <input type="hidden" id="visitaId" value="{{ $idVisitaSeleccionada }}">
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        $('#articuloSelect').select2({
+            placeholder: 'Seleccione un artículo',
+            allowClear: true,
+            width: '100%' // Ajuste responsivo
+        });
+    });
+</script>
 
 <script>
- document.addEventListener("DOMContentLoaded", function() {
-    const articuloSelect = document.getElementById("articuloSelect");
-    const articuloCantidad = document.getElementById("articuloCantidad");
-    const tablaBody = document.getElementById("tablaResumenHerramientas");
-    let articulosSeleccionados = [];
+    document.addEventListener("DOMContentLoaded", function() {
+        const articuloSelect = document.getElementById("articuloSelect");
+        const articuloCantidad = document.getElementById("articuloCantidad");
+        const tablaBody = document.getElementById("tablaResumenHerramientas");
+        let articulosSeleccionados = [];
 
-    // Obtener ticketId y visitaId una sola vez
-    const ticketId = document.getElementById("ticketId").value;
-    const visitaId = document.getElementById("visitaId").value;
+        // Obtener ticketId y visitaId una sola vez
+        const ticketId = document.getElementById("ticketId").value;
+        const visitaId = document.getElementById("visitaId").value;
 
-    // Función para renderizar la tabla de artículos
-    function renderTabla() {
-        console.log("Renderizando la tabla...");  // Verificar si se entra en la función
+        // Función para renderizar la tabla de artículos
+        function renderTabla() {
+            console.log("Renderizando la tabla..."); // Verificar si se entra en la función
 
-        tablaBody.innerHTML = "";
+            tablaBody.innerHTML = "";
 
-        articulosSeleccionados.forEach((art, index) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
+            articulosSeleccionados.forEach((art, index) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
                 <td class="px-3 py-1">${art.nombre}</td>
                 <td class="px-3 py-1 text-center">
                     <input type="number" min="1" value="${art.cantidad}" 
@@ -88,245 +181,252 @@
           
                 </td>
             `;
-            tablaBody.appendChild(tr);
-        });
-
-        // Log para verificar que se está renderizando correctamente la tabla
-    console.log("Tabla renderizada con los artículos:", tablaBody.innerHTML);
-    }
-
-    function obtenerSuministros() {
-    fetch(`/get-suministros/${ticketId}/${visitaId}`)
-        .then(response => response.json())
-        .then(data => {
-            // Asignar los suministros obtenidos a la tabla, incluyendo el id
-            articulosSeleccionados = data.map(item => ({
-                idSuministros: item.idSuministros, // Añadimos el idSuministros aquí
-                id: item.idArticulos,       // Asegúrate de incluir el id aquí
-                nombre: item.nombre,
-                cantidad: item.cantidad
-            }));
-            renderTabla();
-        })
-        .catch(error => {
-            console.error('Error al obtener los suministros:', error);
-        });
-}
-
-
-    // Llamada inicial para obtener los suministros
-    obtenerSuministros();
-
-
-  function agregarOActualizarArticulo() {
-    const id = articuloSelect.value;
-    const nombre = articuloSelect.options[articuloSelect.selectedIndex]?.text;
-    const cantidad = parseInt(articuloCantidad.value);
-
-    // Asegúrate de que el id sea válido
-    if (!id || id === "" || cantidad < 1) {
-        toastr.error("Por favor, selecciona un artículo válido y una cantidad.");
-        return;
-    }
-
-    // Verificar si el artículo que se está agregando ya existe en los artículos seleccionados
-    const indexExistente = articulosSeleccionados.findIndex(a => a.id === id);
-
-    // Si el artículo ya existe, actualizamos la cantidad
-    if (indexExistente !== -1) {
-        articulosSeleccionados[indexExistente].cantidad = cantidad;
-    } else {
-        // Verificar si el nuevo artículo que estamos agregando ya existe entre los artículos seleccionados
-        // Esto solo verifica el nuevo artículo que estamos agregando, no los existentes
-        const articuloRepetido = articulosSeleccionados.find(art => art.id === id);
-
-        if (articuloRepetido) {
-            toastr.error('Este artículo ya ha sido agregado anteriormente.');
-            return; // Si el artículo ya está en la lista, no lo agregamos
-        }
-
-        // Si el artículo no existe, lo agregamos con su id y el idSuministros vacío
-        articulosSeleccionados.push({
-            id: id,
-            nombre: nombre,
-            cantidad: cantidad,
-            idSuministros: null  // Inicializamos como null, lo actualizaremos cuando se obtenga del servidor
-        });
-    }
-
-    console.log("Artículos seleccionados:", articulosSeleccionados); // Verifica lo que se está agregando
-
-    renderTabla();
-
-    // Reset
-    articuloSelect.value = "";
-    $(articuloSelect).val(null).trigger("change");
-    articuloCantidad.value = 1;
-}
-
-
-
-
-
-
-    // Agregar artículo al hacer clic en el botón "Agregar"
-    document.getElementById("agregarArticulo").addEventListener("click", function() {
-        agregarOActualizarArticulo();
-    });
-
-
-    
-    tablaBody.addEventListener("click", function(e) {
-    if (e.target.classList.contains("eliminarArticulo")) {
-        // Log para verificar si el botón de eliminar fue clickeado
-        console.log('Botón de eliminar clickeado');
-        
-        const idSuministro = e.target.dataset.id; // Obtener el idSuministro desde el botón
-
-        // Log para verificar el valor de idSuministro
-        console.log('idSuministro:', idSuministro);
-
-        if (!idSuministro) {
-            console.error('idSuministro no encontrado');
-            return;
-        }
-
-        // Hacer la solicitud al servidor para eliminar el suministro
-        fetch(`/eliminar-suministro/${idSuministro}`, { // Usamos idSuministro en la URL
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'  // Token de seguridad CSRF si estás usando Laravel
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Log para ver la respuesta del servidor
-            console.log('Respuesta del servidor:', data);
-
-            if (data.message === 'Artículo eliminado correctamente.') {
-                // Eliminar el artículo de la tabla de suministros en el frontend
-                articulosSeleccionados = articulosSeleccionados.filter(art => art.idSuministros !== idSuministro);
-
-                // Log para verificar si articulosSeleccionados se actualizó correctamente
-                console.log("Artículos después de la eliminación:", articulosSeleccionados);
-
-                location.reload();
-                // Volver a renderizar la tabla
-                renderTabla();
-            } else {
-                toastr.error('Por favor actualize la pagina');
-            }
-        })
-        .catch(error => {
-            console.error('Error al hacer la solicitud:', error);
-            toastr.error('Hubo un error al eliminar el suministro');
-        });
-    }
-});
-
-
-
-
-   // Actualizar cantidad al modificar el input
-tablaBody.addEventListener("input", function(e) {
-    if (e.target.classList.contains("actualizarCantidad")) {
-        const index = e.target.dataset.index;
-        const nuevaCantidad = parseInt(e.target.value);
-
-        if (nuevaCantidad > 0) {
-            articulosSeleccionados[index].cantidad = nuevaCantidad;
-
-            // Ahora enviamos la actualización al servidor
-            const idSuministro = articulosSeleccionados[index].idSuministros;  // ID del suministro
-            const url = `/actualizar-suministro/${idSuministro}`;  // URL de la ruta de actualización
-
-            fetch(url, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',  // Asegúrate de que el token CSRF esté presente
-                },
-                body: JSON.stringify({ cantidad: nuevaCantidad })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Respuesta del servidor:', data);
-                if (data.message) {
-                    toastr.success(data.message);  // Muestra el mensaje de éxito
-                }
-            })
-            .catch(error => {
-                console.error('Error al actualizar cantidad:', error);
-                toastr.error('Hubo un error al actualizar la cantidad.');
+                tablaBody.appendChild(tr);
             });
+
+            // Log para verificar que se está renderizando correctamente la tabla
+            console.log("Tabla renderizada con los artículos:", tablaBody.innerHTML);
         }
-    }
-});
+
+        function obtenerSuministros() {
+            fetch(`/get-suministros/${ticketId}/${visitaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Asignar los suministros obtenidos a la tabla, incluyendo el id
+                    articulosSeleccionados = data.map(item => ({
+                        idSuministros: item.idSuministros, // Añadimos el idSuministros aquí
+                        id: item.idArticulos, // Asegúrate de incluir el id aquí
+                        nombre: item.nombre,
+                        cantidad: item.cantidad
+                    }));
+                    renderTabla();
+                })
+                .catch(error => {
+                    console.error('Error al obtener los suministros:', error);
+                });
+        }
 
 
-// Guardar suministros al hacer clic en "Guardar"
-document.querySelector(".guardarHerramientas").addEventListener("click", function(e) {
-    e.preventDefault();
-
-    // Recolectar los artículos seleccionados
-    const articulosData = articulosSeleccionados.map(art => ({
-        id: art.id,
-        cantidad: art.cantidad
-    }));
-
-     // Verificar que todos los artículos tengan un id
-     const articulosInvalidos = articulosData.filter(articulo => !articulo.id);
-    if (articulosInvalidos.length > 0) {
-        toastr.error('Por favor actualize la pagina .');
-        return;
-    }
+        // Llamada inicial para obtener los suministros
+        obtenerSuministros();
 
 
-    console.log("Enviando datos:", articulosData); // Muestra los datos que estamos enviando
+        function agregarOActualizarArticulo() {
+            const id = articuloSelect.value;
+            const nombre = articuloSelect.options[articuloSelect.selectedIndex]?.text;
+            const cantidad = parseInt(articuloCantidad.value);
 
-    fetch('/guardar-suministros', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            articulos: articulosData,
-            ticketId: ticketId,  // Ya está declarada arriba
-            visitaId: visitaId  // Ya está declarada arriba
-        })
-    })
-    .then(response => {
-        console.log("Respuesta recibida del servidor:", response); // Ver la respuesta antes de procesarla
-        return response.text(); // Recibe la respuesta como texto primero
-    })
-    .then(data => {
-        console.log("Contenido de la respuesta:", data); // Ver el contenido recibido
-
-        // Si la respuesta es válida JSON, lo convertimos
-        try {
-            const jsonResponse = JSON.parse(data);
-            console.log("Respuesta JSON procesada:", jsonResponse); // Ver la respuesta JSON procesada
-
-            if (jsonResponse.message) {
-                toastr.success(jsonResponse.message); // Mostrar mensaje de éxito
-
-                // location.reload();
-
+            // Asegúrate de que el id sea válido
+            if (!id || id === "" || cantidad < 1) {
+                toastr.error("Por favor, selecciona un artículo válido y una cantidad.");
+                return;
             }
-        } catch (error) {
-            console.error('Error al parsear JSON:', error);
-            toastr.error('Error en la respuesta del servidor.');
+
+            // Verificar si el artículo que se está agregando ya existe en los artículos seleccionados
+            const indexExistente = articulosSeleccionados.findIndex(a => a.id === id);
+
+            // Si el artículo ya existe, actualizamos la cantidad
+            if (indexExistente !== -1) {
+                articulosSeleccionados[indexExistente].cantidad = cantidad;
+            } else {
+                // Verificar si el nuevo artículo que estamos agregando ya existe entre los artículos seleccionados
+                // Esto solo verifica el nuevo artículo que estamos agregando, no los existentes
+                const articuloRepetido = articulosSeleccionados.find(art => art.id === id);
+
+                if (articuloRepetido) {
+                    toastr.error('Este artículo ya ha sido agregado anteriormente.');
+                    return; // Si el artículo ya está en la lista, no lo agregamos
+                }
+
+                // Si el artículo no existe, lo agregamos con su id y el idSuministros vacío
+                articulosSeleccionados.push({
+                    id: id,
+                    nombre: nombre,
+                    cantidad: cantidad,
+                    idSuministros: null // Inicializamos como null, lo actualizaremos cuando se obtenga del servidor
+                });
+            }
+
+            console.log("Artículos seleccionados:",
+            articulosSeleccionados); // Verifica lo que se está agregando
+
+            renderTabla();
+
+            // Reset
+            articuloSelect.value = "";
+            $(articuloSelect).val(null).trigger("change");
+            articuloCantidad.value = 1;
         }
-    })
-    .catch(error => {
-        console.error('Error en la solicitud AJAX:', error);
-        toastr.error('Hubo un error al guardar los suministros.');
+
+
+
+
+
+
+        // Agregar artículo al hacer clic en el botón "Agregar"
+        document.getElementById("agregarArticulo").addEventListener("click", function() {
+            agregarOActualizarArticulo();
+        });
+
+
+
+        tablaBody.addEventListener("click", function(e) {
+            if (e.target.classList.contains("eliminarArticulo")) {
+                // Log para verificar si el botón de eliminar fue clickeado
+                console.log('Botón de eliminar clickeado');
+
+                const idSuministro = e.target.dataset.id; // Obtener el idSuministro desde el botón
+
+                // Log para verificar el valor de idSuministro
+                console.log('idSuministro:', idSuministro);
+
+                if (!idSuministro) {
+                    console.error('idSuministro no encontrado');
+                    return;
+                }
+
+                // Hacer la solicitud al servidor para eliminar el suministro
+                fetch(`/eliminar-suministro/${idSuministro}`, { // Usamos idSuministro en la URL
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}' // Token de seguridad CSRF si estás usando Laravel
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Log para ver la respuesta del servidor
+                        console.log('Respuesta del servidor:', data);
+
+                        if (data.message === 'Artículo eliminado correctamente.') {
+                            // Eliminar el artículo de la tabla de suministros en el frontend
+                            articulosSeleccionados = articulosSeleccionados.filter(art => art
+                                .idSuministros !== idSuministro);
+
+                            // Log para verificar si articulosSeleccionados se actualizó correctamente
+                            console.log("Artículos después de la eliminación:",
+                                articulosSeleccionados);
+
+                            location.reload();
+                            // Volver a renderizar la tabla
+                            renderTabla();
+                        } else {
+                            toastr.error('Por favor actualize la pagina');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al hacer la solicitud:', error);
+                        toastr.error('Hubo un error al eliminar el suministro');
+                    });
+            }
+        });
+
+
+
+
+        // Actualizar cantidad al modificar el input
+        tablaBody.addEventListener("input", function(e) {
+            if (e.target.classList.contains("actualizarCantidad")) {
+                const index = e.target.dataset.index;
+                const nuevaCantidad = parseInt(e.target.value);
+
+                if (nuevaCantidad > 0) {
+                    articulosSeleccionados[index].cantidad = nuevaCantidad;
+
+                    // Ahora enviamos la actualización al servidor
+                    const idSuministro = articulosSeleccionados[index]
+                    .idSuministros; // ID del suministro
+                    const url =
+                    `/actualizar-suministro/${idSuministro}`; // URL de la ruta de actualización
+
+                    fetch(url, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}', // Asegúrate de que el token CSRF esté presente
+                            },
+                            body: JSON.stringify({
+                                cantidad: nuevaCantidad
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Respuesta del servidor:', data);
+                            if (data.message) {
+                                toastr.success(data.message); // Muestra el mensaje de éxito
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al actualizar cantidad:', error);
+                            toastr.error('Hubo un error al actualizar la cantidad.');
+                        });
+                }
+            }
+        });
+
+
+        // Guardar suministros al hacer clic en "Guardar"
+        document.querySelector(".guardarHerramientas").addEventListener("click", function(e) {
+            e.preventDefault();
+
+            // Recolectar los artículos seleccionados
+            const articulosData = articulosSeleccionados.map(art => ({
+                id: art.id,
+                cantidad: art.cantidad
+            }));
+
+            // Verificar que todos los artículos tengan un id
+            const articulosInvalidos = articulosData.filter(articulo => !articulo.id);
+            if (articulosInvalidos.length > 0) {
+                toastr.error('Por favor actualize la pagina .');
+                return;
+            }
+
+
+            console.log("Enviando datos:", articulosData); // Muestra los datos que estamos enviando
+
+            fetch('/guardar-suministros', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        articulos: articulosData,
+                        ticketId: ticketId, // Ya está declarada arriba
+                        visitaId: visitaId // Ya está declarada arriba
+                    })
+                })
+                .then(response => {
+                    console.log("Respuesta recibida del servidor:",
+                    response); // Ver la respuesta antes de procesarla
+                    return response.text(); // Recibe la respuesta como texto primero
+                })
+                .then(data => {
+                    console.log("Contenido de la respuesta:", data); // Ver el contenido recibido
+
+                    // Si la respuesta es válida JSON, lo convertimos
+                    try {
+                        const jsonResponse = JSON.parse(data);
+                        console.log("Respuesta JSON procesada:",
+                        jsonResponse); // Ver la respuesta JSON procesada
+
+                        if (jsonResponse.message) {
+                            toastr.success(jsonResponse.message); // Mostrar mensaje de éxito
+
+                            // location.reload();
+
+                        }
+                    } catch (error) {
+                        console.error('Error al parsear JSON:', error);
+                        toastr.error('Error en la respuesta del servidor.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en la solicitud AJAX:', error);
+                    toastr.error('Hubo un error al guardar los suministros.');
+                });
+        });
+
     });
-});
-
-});
-
 </script>
-

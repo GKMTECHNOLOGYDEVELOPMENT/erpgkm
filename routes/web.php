@@ -331,15 +331,12 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/export-excel', [OrdenesTrabajoController::class, 'exportToExcel'])->name('export.excel');
     Route::get('/smart/informe/{idOt}/pdf', [OrdenesTrabajoController::class, 'generateInformePdf'])
         ->name('generateInformePdf');
-    // ✅ Ruta corregida para verificar actualizaciones
-    Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
-        ->name('checkUpdates');
 
     Route::get('smart/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
     Route::get('smart/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
     Route::get('help/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
     Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
-   
+
 
     // ✅ Ruta corregida para verificar actualizaciones
     Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
@@ -359,6 +356,11 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
     Route::get('/helpdesk/soporte/{id}/edit', [OrdenesHelpdeskController::class, 'editSoporte'])
         ->name('helpdesk.soporte.edit');
+    Route::get('/helpdesk/pdf/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdf'])
+        ->name('helpdesk.pdf.levantamiento');
+
+
+
 
 
 

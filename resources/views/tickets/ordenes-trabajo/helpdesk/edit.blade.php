@@ -56,7 +56,28 @@
         $tipoServicio = $orden->tipoServicio; // ID del tipo de servicio
     @endphp
 
-    <div class="mb-5" x-data="{ tab: 'detalle' }">
+    <div class="mb-5" x-data="{
+        tab: 'detalle',
+        loading: false,
+        cargarPdf() {
+            const iframe = document.getElementById('informePdfFrame');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+        
+            // Mostrar spinner
+            loadingSpinner.classList.remove('hidden');
+        
+            // Leer ruta desde el atributo
+            const ruta = iframe.getAttribute('data-src');
+            iframe.src = ruta + '?' + new Date().getTime();
+        
+            iframe.onload = () => loadingSpinner.classList.add('hidden');
+            
+            // Hacerla pública por si JS externo la quiere usar
+            window.cargarPdfDesdeAlpine = this.cargarPdf;
+        }
+        
+    }">
+
         <!-- Tabs -->
         <ul
             class="grid grid-cols-4 gap-2 sm:flex sm:flex-wrap sm:justify-center mt-3 mb-5 sm:space-x-3 rtl:space-x-reverse">
@@ -159,6 +180,19 @@
                 </div>
                 <div x-show="tab === 'firmas'">
                     @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
+                </div>
+                <div x-show="tab === 'informe'">
+                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.informe.index')
+                    <div id="loadingSpinner"
+                        class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                            role="status">
+                            <span class="w-5 h-5 m-auto mb-10">
+                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                            </span>
+                        </div>
+                    </div>
+
                 </div>
             @elseif ($tipoServicio == 1)
                 {{-- Soporte On Site --}}

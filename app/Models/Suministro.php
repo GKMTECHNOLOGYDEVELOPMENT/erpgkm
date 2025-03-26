@@ -43,4 +43,10 @@ class Suministro extends Model
 	{
 		return $this->belongsTo(Ticket::class, 'idTickets');
 	}
+
+	public function articulo()
+{
+    return $this->belongsTo(Articulo::class, 'idArticulos', 'idArticulos');
+}
+
 }
