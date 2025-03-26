@@ -16,5 +16,8 @@ class Vehiculo extends Model
         'numero_placa'
     ];
 
-
+    public function usuario()
+    {
+        return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
+    }
 }
