@@ -111,7 +111,7 @@ class OrdenesHelpdeskController extends Controller
                 'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
                 'idCliente' => 'required|integer|exists:cliente,idCliente',
                 'idTienda' => 'required|integer|exists:tienda,idTienda',
-                'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
+                // 'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
                 'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
                 'fallaReportada' => 'required|string|max:255',
             ]);
@@ -124,7 +124,7 @@ class OrdenesHelpdeskController extends Controller
                 'idClienteGeneral' => $validatedData['idClienteGeneral'],
                 'idCliente' => $validatedData['idCliente'],
                 'idTienda' => $validatedData['idTienda'],
-                'idTecnico' => $validatedData['idTecnico'],
+                // 'idTecnico' => $validatedData['idTecnico'],
                 'tipoServicio' => $validatedData['tipoServicio'],
                 'idUsuario' => auth()->id(),
 

@@ -68,7 +68,7 @@
                 </div>
 
                 <!-- Técnico -->
-                <div>
+                <!-- <div>
                     <label for="idTecnico" class="block text-sm font-medium">Técnico</label>
                     <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Técnico</option>
@@ -76,7 +76,7 @@
                         <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
                         @endforeach
                     </select>
-                </div>
+                </div> -->
 
                 <!-- Tipo de Servicio -->
                 <div>
