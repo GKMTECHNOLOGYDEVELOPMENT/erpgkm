@@ -2892,7 +2892,8 @@ class OrdenesTrabajoController extends Controller
                         'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
                         'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
                         'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
-                        'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa'
+                        'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+
                         
                     ]
                 ]);

@@ -13,6 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+
 /**
  * Class Usuario
  * 
@@ -116,14 +117,14 @@ class Usuario extends Authenticatable
 	{
 		return $this->belongsTo(Tipodocumento::class, 'idTipoDocumento', 'idTipoDocumento');
 	}
-	
-	
+
+
 
 	public function tipoUsuario()
 	{
 		return $this->belongsTo(Tipousuario::class, 'idTipoUsuario');
 	}
-	
+
 
 	public function sexo()
 	{
@@ -134,8 +135,8 @@ class Usuario extends Authenticatable
 	{
 		return $this->belongsTo(Tipoarea::class, 'idTipoArea', 'idTipoArea');
 	}
-	
-		
+
+
 
 	public function rol()
 	{
@@ -150,7 +151,7 @@ class Usuario extends Authenticatable
 	public function conversaciones()
 	{
 		return $this->belongsToMany(Conversacione::class, 'usuariosconversaciones', 'idUsuario', 'idConversacion')
-					->withPivot('idUsuariosConversacion', 'fechaAgregado', 'rol');
+			->withPivot('idUsuariosConversacion', 'fechaAgregado', 'rol');
 	}
 
 	public function facturacions()
@@ -209,8 +210,12 @@ class Usuario extends Authenticatable
 	}
 
 	// Relación con TicketApoyo
-    public function ticketApoyos()
-    {
-        return $this->hasMany(TicketApoyo::class, 'idTecnico', 'idUsuario');
-    }
+	public function ticketApoyos()
+	{
+		return $this->hasMany(TicketApoyo::class, 'idTecnico', 'idUsuario');
+	}
+	public function vehiculo()
+	{
+		return $this->hasOne(Vehiculo::class, 'idUsuario', 'idUsuario');
+	}
 }
