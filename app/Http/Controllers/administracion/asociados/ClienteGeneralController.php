@@ -121,11 +121,82 @@ public function edit($id)
         $cliente->foto = 'data:image/jpeg;base64,' . base64_encode($cliente->foto);
     }
 
+    $marcasAsociadas = Marca::whereIn('idMarca', function ($query) use ($cliente) {
+        $query->select('idMarca')
+              ->from('marca_clientegeneral')
+              ->where('idClienteGeneral', $cliente->idClienteGeneral); // Asociado al cliente actual
+    })->get(); // Marcas asociadas al cliente general
+    
+
     // Retornar vista con los datos del cliente y las marcas
-    return view('administracion.asociados.clienteGeneral.edit', compact('cliente', 'marcas'));
+    return view('administracion.asociados.clienteGeneral.edit', compact('cliente', 'marcas','marcasAsociadas'));
 }
 
 
+
+
+
+
+// Método para agregar una marca a un cliente general
+public function agregarMarcaClienteGeneral($idClienteGeneral, $idMarca)
+{
+    // Verificar si la relación ya existe
+    $exists = DB::table('marca_clientegeneral')
+        ->where('idClienteGeneral', $idClienteGeneral)
+        ->where('idMarca', $idMarca)
+        ->exists();
+
+    if (!$exists) {
+        // Si no existe la relación, insertarla en la tabla intermedia
+        DB::table('marca_clientegeneral')->insert([
+            'idClienteGeneral' => $idClienteGeneral,
+            'idMarca' => $idMarca
+        ]);
+        return response()->json(['success' => true]);
+    } else {
+        return response()->json(['success' => false, 'message' => 'La relación ya existe.']);
+    }
+}
+
+// Método para eliminar una marca de un cliente general
+public function eliminarMarcaClienteGeneral($idClienteGeneral, $idMarca)
+{
+    // Verificar si existe la relación antes de eliminarla
+    $relacionExistente = DB::table('marca_clientegeneral')
+        ->where('idClienteGeneral', $idClienteGeneral)
+        ->where('idMarca', $idMarca)
+        ->exists();
+
+    if (!$relacionExistente) {
+        return response()->json(['success' => false, 'message' => 'No se encontró la relación']);
+    }
+
+    // Eliminar la relación de la tabla marca_clientegeneral
+    $deleted = DB::table('marca_clientegeneral')
+        ->where('idClienteGeneral', $idClienteGeneral)
+        ->where('idMarca', $idMarca)
+        ->delete();
+
+    if ($deleted) {
+        return response()->json(['success' => true]);
+    } else {
+        return response()->json(['success' => false, 'message' => 'Error al eliminar la relación']);
+    }
+}
+
+
+public function marcasAsociadas($idClienteGeneral)
+{
+    // Obtener las marcas asociadas al cliente general a través de la tabla intermedia
+    $marcasAsociadas = Marca::whereIn('idMarca', function ($query) use ($idClienteGeneral) {
+        $query->select('idMarca')
+              ->from('marca_clientegeneral')
+              ->where('idClienteGeneral', $idClienteGeneral); // Asociado al cliente general específico
+    })->get();
+
+    // Retornar las marcas en formato JSON
+    return response()->json($marcasAsociadas);
+}
 
     
 
