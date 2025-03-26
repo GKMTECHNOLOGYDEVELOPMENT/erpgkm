@@ -71,6 +71,8 @@
 
     // Función para renderizar la tabla de artículos
     function renderTabla() {
+        console.log("Renderizando la tabla...");  // Verificar si se entra en la función
+
         tablaBody.innerHTML = "";
 
         articulosSeleccionados.forEach((art, index) => {
@@ -88,6 +90,9 @@
             `;
             tablaBody.appendChild(tr);
         });
+
+        // Log para verificar que se está renderizando correctamente la tabla
+    console.log("Tabla renderizada con los artículos:", tablaBody.innerHTML);
     }
 
     function obtenerSuministros() {
@@ -171,15 +176,14 @@
 
 
     
-
     tablaBody.addEventListener("click", function(e) {
     if (e.target.classList.contains("eliminarArticulo")) {
-        // Agregar log para verificar si se encuentra el botón
+        // Log para verificar si el botón de eliminar fue clickeado
         console.log('Botón de eliminar clickeado');
         
         const idSuministro = e.target.dataset.id; // Obtener el idSuministro desde el botón
 
-        // Agregar log para verificar si el idSuministro es correcto
+        // Log para verificar el valor de idSuministro
         console.log('idSuministro:', idSuministro);
 
         if (!idSuministro) {
@@ -187,6 +191,7 @@
             return;
         }
 
+        // Hacer la solicitud al servidor para eliminar el suministro
         fetch(`/eliminar-suministro/${idSuministro}`, { // Usamos idSuministro en la URL
             method: 'DELETE',
             headers: {
@@ -196,16 +201,21 @@
         })
         .then(response => response.json())
         .then(data => {
-            // Agregar log para ver la respuesta
+            // Log para ver la respuesta del servidor
             console.log('Respuesta del servidor:', data);
 
             if (data.message === 'Artículo eliminado correctamente.') {
-    // Eliminar el artículo de la tabla de suministros en el frontend
-    articulosSeleccionados = articulosSeleccionados.filter(art => art.idSuministros !== idSuministro);
-    renderTabla();  // Volver a renderizar la tabla
-} else {
-    alert('Error al eliminar el suministro');
-}
+                // Eliminar el artículo de la tabla de suministros en el frontend
+                articulosSeleccionados = articulosSeleccionados.filter(art => art.idSuministros !== idSuministro);
+
+                // Log para verificar si articulosSeleccionados se actualizó correctamente
+                console.log("Artículos después de la eliminación:", articulosSeleccionados);
+
+                // Volver a renderizar la tabla
+                renderTabla();
+            } else {
+                alert('Error al eliminar el suministro');
+            }
         })
         .catch(error => {
             console.error('Error al hacer la solicitud:', error);
