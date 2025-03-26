@@ -27,11 +27,16 @@ class Marca extends Model
 
 	protected $fillable = [
 		'nombre',
+		'foto',
 		'estado'
 	];
 
 	public function modelos()
 	{
 		return $this->hasMany(Modelo::class, 'idMarca');
+	}
+	public function clientesGenerales()
+	{
+		return $this->belongsToMany(ClienteGeneral::class, 'marca_clientegeneral', 'idMarca', 'idClienteGeneral');
 	}
 }
