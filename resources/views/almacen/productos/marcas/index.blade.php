@@ -68,7 +68,7 @@
     </div>
 
     <!-- Modal -->
-    <div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
+    <div x-data="{ open: false, imagenPreview: null, imagenActual: '/assets/images/file-preview.svg' }" class="mb-5" @toggle-modal.window="open = !open">
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
                 <div x-show="open" x-transition.duration.300
@@ -95,6 +95,28 @@
                                 <input type="text" id="nombre" name="nombre" class="form-input w-full"
                                     placeholder="Ingrese el nombre de la marca" required>
                             </div>
+
+                                   <!-- Foto -->
+                        <div class="mb-5">
+                            <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+                            <!-- Campo de archivo -->
+                            <input id="ctnFile" type="file" name="foto" accept="image/*" required
+                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
+                                @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual" />
+
+                            <!-- Contenedor de previsualización -->
+                            <div
+                                class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+                                <template x-if="imagenPreview">
+                                    <img :src="imagenPreview" alt="Previsualización de la imagen"
+                                        class="w-40 h-40 object-cover">
+                                </template>
+                                <template x-if="!imagenPreview">
+                                    <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
+                                        class="w-50 h-40 object-cover">
+                                </template>
+                            </div>
+                        </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"

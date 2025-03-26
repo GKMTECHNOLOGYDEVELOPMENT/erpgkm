@@ -26,6 +26,9 @@ function showMessage(
     });
 }
 
+
+
+
 // Aquí va tu código para el formulario, incluyendo el fetch y demás
 document.getElementById('clientGeneralForm').addEventListener('submit', function (event) {
     event.preventDefault(); // Evita el envío del formulario tradicional
@@ -67,8 +70,7 @@ document.getElementById('clientGeneralForm').addEventListener('submit', function
                 }
 
                 // Recargar la página
-                window.location.reload();
-            } else {
+                window.location.href = `/cliente-general/${data.id}/edit`; // Redirige al cliente recién creado para editarlo
                 // Mostrar alerta de error
                 showMessage('Hubo un error al guardar el cliente.', 'top-end');
             }
