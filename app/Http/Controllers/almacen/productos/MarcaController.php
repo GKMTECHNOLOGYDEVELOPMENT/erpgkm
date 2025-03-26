@@ -197,9 +197,13 @@ class MarcaController extends Controller
 
     public function checkMarcas(Request $request)
     {
-        // Aquí hacemos una consulta para obtener las marcas activas (o según el estado que necesites)
-        $marcas = Marca::where('estado', 1)->get(); // Filtramos por 'estado' igual a 1 (activas)
-
+        // Obtenemos las marcas activas
+        $marcas = Marca::where('estado', 1)->get();
+    
+        // Ocultamos el campo 'foto'
+        $marcas->makeHidden('foto');
+    
         return response()->json($marcas); // Devolvemos los datos en formato JSON
     }
+    
 }

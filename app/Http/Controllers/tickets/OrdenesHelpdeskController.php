@@ -880,7 +880,7 @@ class OrdenesHelpdeskController extends Controller
             'idCliente' => 'required|exists:cliente,idCliente',
             'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
             'idTienda' => 'required|exists:tienda,idTienda',
-            'idTecnico' => 'required|exists:usuarios,idUsuario',
+            
             'fallaReportada' => 'nullable|string',
         ]);
 
@@ -894,7 +894,7 @@ class OrdenesHelpdeskController extends Controller
         $orden->idCliente = $request->idCliente;
         $orden->idClienteGeneral = $request->idClienteGeneral;
         $orden->idTienda = $request->idTienda;
-        $orden->idTecnico = $request->idTecnico;
+     
         $orden->fallaReportada = $request->fallaReportada;
 
         // Guardar los cambios

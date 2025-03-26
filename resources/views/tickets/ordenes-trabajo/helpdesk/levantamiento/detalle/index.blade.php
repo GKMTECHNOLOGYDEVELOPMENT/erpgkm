@@ -300,8 +300,15 @@
                 </select>
             </div>
 
-            <!-- Técnico -->
+            <!-- Dirrecion -->
             <div>
+                <label class="text-sm font-medium">Dirrecion</label>
+                <input type="text" class="form-input w-full bg-gray-100" value="{{$orden->tienda->direccion}}"
+                    readonly>
+            </div>
+
+            <!-- Técnico -->
+            <!-- <div>
                 <label class="text-sm font-medium">Técnico</label>
                 <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display: none">
                     <option value="" disabled>Seleccionar Técnico</option>
@@ -312,7 +319,7 @@
                         </option>
                     @endforeach
                 </select>
-            </div>
+            </div> -->
 
             <!-- Tipo de Servicio -->
             <div>
