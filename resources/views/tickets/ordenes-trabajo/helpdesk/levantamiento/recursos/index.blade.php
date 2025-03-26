@@ -301,7 +301,7 @@ document.querySelector(".guardarHerramientas").addEventListener("click", functio
             if (jsonResponse.message) {
                 alert(jsonResponse.message); // Mostrar mensaje de éxito
 
-                location.reload();
+                // location.reload();
 
             }
         } catch (error) {
