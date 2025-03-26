@@ -1,5 +1,8 @@
 <x-layout.default>
 
+<link href="https://cdn.jsdelivr.net/npm/niceselect@2.1.0/niceselect.css" rel="stylesheet">
+
+
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
@@ -29,6 +32,29 @@
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
+
+            
+<!-- Select con Niceselect -->
+<div>
+    <label for="marca" class="block text-sm font-medium">Marca</label>
+    <select name="marca" id="marca" class="niceselect form-input w-full" required>
+        <option value="" disabled selected>Selecciona una marca</option>
+        
+        <!-- Iteramos sobre las marcas y las mostramos como opciones -->
+        @foreach ($marcas as $marca)
+            <option value="{{ $marca->id }}" 
+                {{ old('marca', $cliente->marca_id) == $marca->id ? 'selected' : '' }}>
+                {{ $marca->nombre }} <!-- Asumí que la marca tiene un atributo 'nombre' -->
+            </option>
+        @endforeach
+    </select>
+
+    @error('marca')
+        <span class="text-red-500 text-sm">{{ $message }}</span>
+    @enderror
+</div>
+
+
 
             <!-- Campo para la imagen -->
             <div x-data="{ fotoPreview: '{{ $cliente->foto ? $cliente->foto : '' }}' }">
@@ -74,4 +100,15 @@
             </div>
         </form>
     </div>
+
+
+    
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializa niceselect en todos los select con la clase 'niceselect'
+        document.querySelectorAll('.niceselect').forEach(function (select) {
+            new Niceselect(select);
+        });
+    });
+</script>
 </x-layout.default>
