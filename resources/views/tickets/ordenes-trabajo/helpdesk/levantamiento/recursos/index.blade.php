@@ -125,7 +125,7 @@
 
     // Asegúrate de que el id sea válido
     if (!id || id === "" || cantidad < 1) {
-        alert("Por favor, selecciona un artículo válido y una cantidad.");
+        toastr.error("Por favor, selecciona un artículo válido y una cantidad.");
         return;
     }
 
@@ -141,7 +141,7 @@
         const articuloRepetido = articulosSeleccionados.find(art => art.id === id);
 
         if (articuloRepetido) {
-            alert('Este artículo ya ha sido agregado anteriormente.');
+            toastr.error('Este artículo ya ha sido agregado anteriormente.');
             return; // Si el artículo ya está en la lista, no lo agregamos
         }
 
@@ -211,15 +211,16 @@
                 // Log para verificar si articulosSeleccionados se actualizó correctamente
                 console.log("Artículos después de la eliminación:", articulosSeleccionados);
 
+                location.reload();
                 // Volver a renderizar la tabla
                 renderTabla();
             } else {
-                alert('Error al eliminar el suministro');
+                toastr.error('Por favor actualize la pagina');
             }
         })
         .catch(error => {
             console.error('Error al hacer la solicitud:', error);
-            alert('Hubo un error al eliminar el suministro');
+            toastr.error('Hubo un error al eliminar el suministro');
         });
     }
 });
@@ -252,12 +253,12 @@ tablaBody.addEventListener("input", function(e) {
             .then(data => {
                 console.log('Respuesta del servidor:', data);
                 if (data.message) {
-                    alert(data.message);  // Muestra el mensaje de éxito
+                    toastr.success(data.message);  // Muestra el mensaje de éxito
                 }
             })
             .catch(error => {
                 console.error('Error al actualizar cantidad:', error);
-                alert('Hubo un error al actualizar la cantidad.');
+                toastr.error('Hubo un error al actualizar la cantidad.');
             });
         }
     }
@@ -277,7 +278,7 @@ document.querySelector(".guardarHerramientas").addEventListener("click", functio
      // Verificar que todos los artículos tengan un id
      const articulosInvalidos = articulosData.filter(articulo => !articulo.id);
     if (articulosInvalidos.length > 0) {
-        alert('Algunos artículos no tienen un ID válido.');
+        toastr.error('Por favor actualize la pagina .');
         return;
     }
 
@@ -309,19 +310,19 @@ document.querySelector(".guardarHerramientas").addEventListener("click", functio
             console.log("Respuesta JSON procesada:", jsonResponse); // Ver la respuesta JSON procesada
 
             if (jsonResponse.message) {
-                alert(jsonResponse.message); // Mostrar mensaje de éxito
+                toastr.success(jsonResponse.message); // Mostrar mensaje de éxito
 
                 // location.reload();
 
             }
         } catch (error) {
             console.error('Error al parsear JSON:', error);
-            alert('Error en la respuesta del servidor.');
+            toastr.error('Error en la respuesta del servidor.');
         }
     })
     .catch(error => {
         console.error('Error en la solicitud AJAX:', error);
-        alert('Hubo un error al guardar los suministros.');
+        toastr.error('Hubo un error al guardar los suministros.');
     });
 });
 

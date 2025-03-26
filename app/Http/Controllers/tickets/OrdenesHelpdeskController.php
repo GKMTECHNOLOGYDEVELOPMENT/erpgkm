@@ -304,12 +304,15 @@ Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
     }
 
 
+
+
+
     public function guardarSuministros(Request $request)
     {
         $articulos = $request->articulos;
         $ticketId = $request->ticketId;
         $visitaId = $request->visitaId;
-    
+        
         foreach ($articulos as $articulo) {
             // Verificar si el artículo ya está guardado para este ticket y visita
             $existe = DB::table('suministros')
@@ -317,22 +320,32 @@ Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
                 ->where('idVisitas', $visitaId)
                 ->where('idArticulos', $articulo['id'])
                 ->exists();
-    
+            
             if ($existe) {
-                return response()->json(['message' => 'El artículo ya ha sido agregado para este ticket y visita.'], 400);
+                // Si existe, actualizar la cantidad del artículo
+                DB::table('suministros')
+                    ->where('idTickets', $ticketId)
+                    ->where('idVisitas', $visitaId)
+                    ->where('idArticulos', $articulo['id'])
+                    ->update(['cantidad' => DB::raw('cantidad + ' . $articulo['cantidad'])]);
+            } else {
+                // Si no existe, insertar el artículo nuevo
+                DB::table('suministros')->insert([
+                    'idTickets' => $ticketId,
+                    'idVisitas' => $visitaId,
+                    'idArticulos' => $articulo['id'],
+                    'cantidad' => $articulo['cantidad'],
+                ]);
             }
-    
-            // Guardar el artículo si no existe
-            DB::table('suministros')->insert([
-                'idTickets' => $ticketId,
-                'idVisitas' => $visitaId,
-                'idArticulos' => $articulo['id'],
-                'cantidad' => $articulo['cantidad'],
-            ]);
         }
     
         return response()->json(['message' => 'Suministros guardados correctamente.']);
     }
+    
+
+
+
+
     
 
 
