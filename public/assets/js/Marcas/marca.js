@@ -26,7 +26,7 @@ document.addEventListener('alpine:init', () => {
                     // Inicializar DataTable
                     this.datatable1 = new simpleDatatables.DataTable('#myTable1', {
                         data: {
-                            headings: ['Nombre', 'Estado', 'Acción'],
+                            headings: ['Nombre', 'Estado', 'Foto', 'Acción'],
                             data: this.formatDataForTable(data),
                         },
                         searchable: true,
@@ -61,7 +61,10 @@ document.addEventListener('alpine:init', () => {
                     ? `<span class="badge badge-outline-success">Activo</span>`
                     : `<span class="badge badge-outline-danger">Inactivo</span>`
                 }</div>`, // Columna: Estado
-                `<div style="text-align: center;">${marca.foto ? `<img src="${marca.foto}" alt="Foto de la marca" style="max-width: 50px; max-height: 50px;"/>` : 'No disponible'}</div>`, // Columna: Foto
+                `<div style="text-align: center;">${marca.foto 
+                    ? `<img src="${marca.foto}" class="w-10 h-10 rounded-full object-cover mx-auto" alt="Foto" />` 
+                    : '<div class="text-center">Sin imagen</div>'}</div>`,
+                // Columna: Foto
                 `<div style="text-align: center;" class="flex justify-center items-center">
                     <a href="/marcas/${marca.idMarca}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">

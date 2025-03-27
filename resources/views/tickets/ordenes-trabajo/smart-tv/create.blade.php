@@ -136,14 +136,17 @@
                     <label for="fechaCompra" class="block text-sm font-medium">Fecha de Compra</label>
                     <input id="fechaCompra" name="fechaCompra" type="date" class="form-input w-full"
                         placeholder="Seleccionar fecha">
+                </div>
 
-
+                <!-- Fecha de fecha_creacion -->
+                <div>
+                    <label for="fechaTicket" class="block text-sm font-medium">Fecha de Ticket</label>
+                    <input id="fechaTicket" name="fecha_creacion" type="date" class="form-input w-full"
+                        placeholder="Seleccionar fecha">
                 </div>
 
                 <!-- Marca -->
                 <div>
-
-
                     <div class="flex items-center space-x-2">
                         <label for="idMarca" class="block text-sm font-medium">Marca</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openMarcaModal = true">
@@ -215,7 +218,7 @@
                         placeholder="Describa la falla reportada"></textarea>
                 </div>
 
-                
+
                 <div>
                     <label for="esRecojo" class="block text-sm font-medium mb-2">Es recojo</label>
                     <div>

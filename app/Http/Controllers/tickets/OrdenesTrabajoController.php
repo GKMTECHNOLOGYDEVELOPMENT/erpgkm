@@ -170,6 +170,7 @@ class OrdenesTrabajoController extends Controller
                 'idModelo' => 'required|integer|exists:modelo,idModelo',
                 'serie' => 'required|string|max:255',
                 'fechaCompra' => 'required|date_format:Y-m-d',
+                'fecha_creacion' => 'required|date_format:Y-m-d',
                 'fallaReportada' => 'required|string',
                 'linkubicacion' => 'required|string',
                 'lat' => 'nullable|string|max:255',
@@ -208,7 +209,7 @@ class OrdenesTrabajoController extends Controller
                 'lat' => $validatedData['lat'],
                 'lng' => $validatedData['lng'],
                 'idUsuario' => auth()->id(),
-                'fecha_creacion' => now(),
+                'fecha_creacion' => $validatedData['fecha_creacion'],
                 'idTipotickets' => 1,
                 'tipoServicio' => 1,
             ]);

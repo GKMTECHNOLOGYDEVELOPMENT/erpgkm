@@ -99,19 +99,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 document.addEventListener("DOMContentLoaded", function () {
-    flatpickr("#fechaCompra", {
+    const config = {
         dateFormat: "d/m/Y",
         altInput: true,
         altFormat: "F j, Y",
         locale: "es",
         allowInput: true,
         disableMobile: "true",
-        maxDate: "today",  // Esto limita la selección a la fecha actual
+        maxDate: "today",
+        defaultDate: "today", // 👈 Mostrar la fecha actual por defecto
         onChange: function (selectedDates, dateStr, instance) {
-            document.getElementById("fechaCompra").value = instance.formatDate(selectedDates[0], "Y-m-d");
+            instance.input.value = instance.formatDate(selectedDates[0], "Y-m-d");
         }
-    });
+    };
+
+    flatpickr("#fechaCompra", config);
+    flatpickr("#fechaTicket", config);
 });
+
+
 
 
 
