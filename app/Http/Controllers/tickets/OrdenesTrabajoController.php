@@ -1183,9 +1183,13 @@ Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
 
     public function marcaapi()
     {
-        $marcas = Marca::all(); // O lo que sea necesario para recuperar las marcas
+        $marcas = Marca::all()->makeHidden(['foto']); // Oculta el campo 'foto' de las marcas
+    
         return response()->json($marcas);
     }
+    
+
+
 
     public function clienteGeneralApi()
     {
