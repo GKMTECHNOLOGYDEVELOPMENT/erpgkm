@@ -228,6 +228,7 @@ class ClientesController extends Controller
             'idCliente' => $cliente->idCliente,
             'nombre' => $cliente->nombre,
             'documento' => $cliente->documento,
+            'direccion' => $cliente->direccion, // 👈 AÑADIDO
             'esTienda' => $cliente->esTienda == 1 ? "SI" : "NO", // Convertimos el 1 en "SI" y 0 en "NO"
         ]);
     }

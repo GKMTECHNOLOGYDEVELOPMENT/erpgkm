@@ -188,8 +188,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     option.value = cliente.idCliente;
                     option.textContent = `${cliente.nombre} - ${cliente.documento}`;
                     option.dataset.tienda = cliente.esTienda;
+                    option.dataset.direccion = cliente.direccion; // <--- AÑADIDO
                     select.appendChild(option);
                 });
+
 
                 // Si ya existe una instancia previa de nice-select, la destruye
                 if (select.niceSelectInstance) {
@@ -220,167 +222,169 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-// Función para cargar todas las marcas desde el servidor
-function cargarTodasLasMarcas() {
-    const select = document.getElementById('idMarca');
-    const preloadElement = document.getElementById('preload');
+    // Función para cargar todas las marcas desde el servidor
+    function cargarTodasLasMarcas() {
+        const select = document.getElementById('idMarca');
+        const preloadElement = document.getElementById('preload');
 
-    // Mostrar el preload (cargando) sobre el select
-    preloadElement.style.display = 'flex';
+        // Mostrar el preload (cargando) sobre el select
+        preloadElement.style.display = 'flex';
 
-    // Asegurarse de que el select esté oculto mientras se cargan las marcas
-    select.style.display = 'none'; // Ocultar el select de marcas inicialmente
+        // Asegurarse de que el select esté oculto mientras se cargan las marcas
+        select.style.display = 'none'; // Ocultar el select de marcas inicialmente
 
-    fetch('/check-marcas') // Realizamos la consulta al servidor para obtener todas las marcas
-        .then(response => response.json()) // Convertir la respuesta en formato JSON
-        .then(data => {
-            // Limpiar las opciones actuales del select
-            select.innerHTML = '<option value="" disabled selected>Seleccionar Marca</option>';
+        fetch('/check-marcas') // Realizamos la consulta al servidor para obtener todas las marcas
+            .then(response => response.json()) // Convertir la respuesta en formato JSON
+            .then(data => {
+                // Limpiar las opciones actuales del select
+                select.innerHTML = '<option value="" disabled selected>Seleccionar Marca</option>';
 
-            // Verificar si hay datos
-            if (data.length > 0) {
-                // Llenar el select con las marcas
-                data.forEach(marca => {
+                // Verificar si hay datos
+                if (data.length > 0) {
+                    // Llenar el select con las marcas
+                    data.forEach(marca => {
+                        const option = document.createElement('option');
+                        option.value = marca.idMarca;
+                        option.textContent = marca.nombre;
+                        select.appendChild(option);
+                    });
+                    // Mostrar el select después de cargar las marcas
+                    select.style.display = 'block'; // Mostrar el select
+                } else {
+                    // Si no hay marcas disponibles, mostrar un mensaje
                     const option = document.createElement('option');
-                    option.value = marca.idMarca;
-                    option.textContent = marca.nombre;
+                    option.value = '';
+                    option.textContent = 'No hay marcas disponibles';
                     select.appendChild(option);
-                });
-                // Mostrar el select después de cargar las marcas
-                select.style.display = 'block'; // Mostrar el select
-            } else {
-                // Si no hay marcas disponibles, mostrar un mensaje
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'No hay marcas disponibles';
-                select.appendChild(option);
-            }
+                }
 
-            // Ocultar el preload después de cargar las marcas
-            preloadElement.style.display = 'none';
+                // Ocultar el preload después de cargar las marcas
+                preloadElement.style.display = 'none';
 
-            // Inicializa nice-select (si usas nice-select) y guarda la instancia
-            if (select.niceSelectInstance) {
-                select.niceSelectInstance.destroy();
-            }
-            select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
+                // Inicializa nice-select (si usas nice-select) y guarda la instancia
+                if (select.niceSelectInstance) {
+                    select.niceSelectInstance.destroy();
+                }
+                select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
 
-        })
-        .catch(error => {
-            console.error('Error al cargar las marcas:', error);
-            preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
-        });
-}
+            })
+            .catch(error => {
+                console.error('Error al cargar las marcas:', error);
+                preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
+            });
+    }
 
-// Función para cargar las marcas desde el servidor según el cliente general seleccionado
-function cargarMarcasPorClienteGeneral(clienteGeneralId) {
-    const select = document.getElementById('idMarca');
-    const preloadElement = document.getElementById('preload');
+    // Función para cargar las marcas desde el servidor según el cliente general seleccionado
+    function cargarMarcasPorClienteGeneral(clienteGeneralId) {
+        const select = document.getElementById('idMarca');
+        const preloadElement = document.getElementById('preload');
 
-    // Mostrar el preload (cargando) sobre el select
-    preloadElement.style.display = 'flex';
+        // Mostrar el preload (cargando) sobre el select
+        preloadElement.style.display = 'flex';
 
-    // Asegurarse de que el select esté oculto mientras se cargan las marcas
-    select.style.display = 'none'; // Ocultar el select de marcas inicialmente
+        // Asegurarse de que el select esté oculto mientras se cargan las marcas
+        select.style.display = 'none'; // Ocultar el select de marcas inicialmente
 
-    fetch(`/marcas-por-cliente-general/${clienteGeneralId}`) // Realizamos la consulta al servidor para obtener las marcas de un cliente general específico
-        .then(response => response.json()) // Convertir la respuesta en formato JSON
-        .then(data => {
-            // Limpiar las opciones actuales del select
-            select.innerHTML = '<option value="" disabled selected>Seleccionar Marca</option>';
+        fetch(`/marcas-por-cliente-general/${clienteGeneralId}`) // Realizamos la consulta al servidor para obtener las marcas de un cliente general específico
+            .then(response => response.json()) // Convertir la respuesta en formato JSON
+            .then(data => {
+                // Limpiar las opciones actuales del select
+                select.innerHTML = '<option value="" disabled selected>Seleccionar Marca</option>';
 
-            // Verificar si hay datos
-            if (data.length > 0) {
-                // Llenar el select con las marcas
-                data.forEach(marca => {
+                // Verificar si hay datos
+                if (data.length > 0) {
+                    // Llenar el select con las marcas
+                    data.forEach(marca => {
+                        const option = document.createElement('option');
+                        option.value = marca.idMarca;
+                        option.textContent = marca.nombre;
+                        select.appendChild(option);
+                    });
+                    // Mostrar el select después de cargar las marcas
+                    select.style.display = 'block'; // Mostrar el select
+                } else {
+                    // Si no hay marcas asociadas, mostrar un mensaje
                     const option = document.createElement('option');
-                    option.value = marca.idMarca;
-                    option.textContent = marca.nombre;
+                    option.value = '';
+                    option.textContent = 'No hay marcas disponibles';
                     select.appendChild(option);
-                });
-                // Mostrar el select después de cargar las marcas
-                select.style.display = 'block'; // Mostrar el select
-            } else {
-                // Si no hay marcas asociadas, mostrar un mensaje
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'No hay marcas disponibles';
-                select.appendChild(option);
-            }
+                }
 
-            // Ocultar el preload después de cargar las marcas
-            preloadElement.style.display = 'none';
+                // Ocultar el preload después de cargar las marcas
+                preloadElement.style.display = 'none';
 
-            // Inicializa nice-select (si usas nice-select) y guarda la instancia
-            if (select.niceSelectInstance) {
-                select.niceSelectInstance.destroy();
-            }
-            select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
+                // Inicializa nice-select (si usas nice-select) y guarda la instancia
+                if (select.niceSelectInstance) {
+                    select.niceSelectInstance.destroy();
+                }
+                select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
 
-        })
-        .catch(error => {
-            console.error('Error al cargar las marcas:', error);
-            preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
-        });
-}
-
-// Evento para cuando se selecciona un cliente general
-document.getElementById('idClienteGeneral').addEventListener('change', function () {
-    let clienteGeneralId = this.value;
-    if (clienteGeneralId) {
-        console.log('Cliente General seleccionado:', clienteGeneralId);
-        cargarMarcasPorClienteGeneral(clienteGeneralId);  // Llamamos la función para cargar las marcas según el cliente general
-    } else {
-        // Si no hay cliente general seleccionado, cargar todas las marcas
-        cargarTodasLasMarcas();
+            })
+            .catch(error => {
+                console.error('Error al cargar las marcas:', error);
+                preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
+            });
     }
-});
 
-// Cargar todas las marcas inicialmente si no hay cliente general seleccionado
-window.onload = function() {
-    let clienteGeneralId = document.getElementById('idClienteGeneral').value;
-    if (!clienteGeneralId) {
-        cargarTodasLasMarcas(); // Si no hay cliente general seleccionado al cargar la página, cargamos todas las marcas
+    // Evento para cuando se selecciona un cliente general
+    document.getElementById('idClienteGeneral').addEventListener('change', function () {
+        let clienteGeneralId = this.value;
+        if (clienteGeneralId) {
+            console.log('Cliente General seleccionado:', clienteGeneralId);
+            cargarMarcasPorClienteGeneral(clienteGeneralId);  // Llamamos la función para cargar las marcas según el cliente general
+        } else {
+            // Si no hay cliente general seleccionado, cargar todas las marcas
+            cargarTodasLasMarcas();
+        }
+    });
+
+    // Cargar todas las marcas inicialmente si no hay cliente general seleccionado
+    window.onload = function () {
+        let clienteGeneralId = document.getElementById('idClienteGeneral').value;
+        if (!clienteGeneralId) {
+            cargarTodasLasMarcas(); // Si no hay cliente general seleccionado al cargar la página, cargamos todas las marcas
+        }
     }
-}
 
 
 
 
-    
+
 
 
     $(document).ready(function () {
         console.log("🔹 DOM completamente cargado");
-    
+
         // Elementos
         const clienteSelect = $("#idCliente");
         const tiendaSelectContainer = $("#selectTiendaContainer"); // Contenedor del select de tiendas
         const tiendaSelect = $("#idTienda"); // Select de tiendas
         const tiendaInput = $("#nombreTiendaInput"); // Input de tienda
-    
+
         // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
         tiendaSelect.removeAttr("class style").addClass("form-input w-full");
-    
+
         // Ocultar select de tiendas e input al inicio
         tiendaSelectContainer.hide();
         tiendaInput.hide();
-    
         // 🔹 Escuchar cambios en el select de cliente
         clienteSelect.on("change", function () {
             let clienteId = clienteSelect.val();
-    
+
             if (!clienteId) {
                 console.warn("⚠️ No se ha seleccionado un cliente.");
                 return;
             }
-    
+
             console.log(`🔍 Cliente seleccionado: ${clienteId}`);
-    
+
             // Llamar a la API para verificar si el cliente es tienda
             $.get(`/api/cliente/${clienteId}`, function (data) {
                 console.log("📌 Datos del cliente:", data);
-    
+
+                // 👉 Establecer dirección automáticamente
+                $("#direccion").val(data.direccion || "");
+
                 if (data.esTienda === "SI" || data.esTienda === 1) {
                     console.log("🏪 Cliente es tienda, cargando tiendas...");
                     mostrarSelectTiendas(clienteId);
@@ -392,19 +396,20 @@ window.onload = function() {
                 console.error("❌ Error al obtener los datos del cliente.");
             });
         });
-    
+
+
         function mostrarSelectTiendas(clienteId) {
             tiendaSelectContainer.show();
             tiendaSelect.hide();
             tiendaInput.hide();
-    
+
             // 🔹 Limpiar y resetear el select
             tiendaSelect.empty().append('<option value="">Seleccionar Tienda</option>');
-    
+
             // 🔹 Llamar a la API para obtener las tiendas del cliente
             $.get(`/api/cliente/${clienteId}/tiendas`, function (data) {
                 console.log("🏪 Tiendas obtenidas:", data);
-    
+
                 if (data.length > 0) {
                     data.forEach(tienda => {
                         tiendaSelect.append(`<option value="${tienda.idTienda}">${tienda.nombre}</option>`);
@@ -419,21 +424,21 @@ window.onload = function() {
                 tiendaSelect.show(); // ✅ Mostramos el select después de cargar los datos
             });
         }
-    
+
         // ✅ Función para ocultar el select de tiendas y mostrar el input de texto
         function ocultarSelectTiendas() {
             tiendaSelectContainer.hide();
             tiendaSelect.hide();
             tiendaInput.show();
         }
-    
+
         // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
         if (clienteSelect.val()) {
             clienteSelect.trigger("change");
         }
     });
-    
-    
+
+
     // Evento para cuando se selecciona un cliente
     document.getElementById('idCliente').addEventListener('change', function () {
         let clienteId = this.value;
@@ -697,6 +702,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+selectCliente.addEventListener('change', function () {
+    const selectedOption = this.options[this.selectedIndex];
+    const direccion = selectedOption.dataset.direccion || '';
+    document.getElementById('direccion').value = direccion;
+});
+
 
 
 
