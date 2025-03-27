@@ -172,57 +172,6 @@
             @endif
 
 
-
-
-
-            {{-- @if ($visitas->isNotEmpty())
-            <div class="red-bg mt-4">Detalles de la Visita</div>
-            <div class="space-y-3 mt-3">
-                @foreach ($visitas as $visita)
-                    <div
-                        class="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-300 p-4 flex justify-between items-center">
-                        <div class="w-2/3"> <!-- Ajustado para dar más espacio a la imagen --> --}}
-            {{-- <h3 class="text-lg font-semibold text-gray-800">{{ $visita['nombre'] }}</h3> --}}
-
-            <!-- Fecha Programada -->
-            {{-- <div class="flex items-center text-xs text-gray-600 mt-1">
-                                <svg class="w-4 h-4 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3M16 7V3M4 11h16M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <p><span class="font-semibold">Fecha Programada:</span>
-                                    {{ $visita['fecha_programada'] }}</p>
-                            </div> --}}
-
-            <!-- Inicio de Servicio -->
-            {{-- <div class="flex items-center text-xs text-gray-600 mt-1">
-                                <svg class="w-4 h-4 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7M5 13l4 4L19 7" />
-                                </svg>
-                                <p><span class="font-semibold">Inicio de Servicio:</span>
-                                    {{ $visita['fecha_llegada'] }}</p>
-                            </div> --}}
-
-            <!-- Técnico Responsable -->
-            {{-- <div class="flex items-center text-xs text-gray-600 mt-1">
-                                <svg class="w-4 h-4 text-purple-500 mr-2" xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M14 7V3M10 7V3M4 11h16M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <p><span class="font-semibold">Técnico:</span> {{ $visita['tecnico'] }}</p>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif --}}
-
-
-
             @if ($transicionesStatusOt->isNotEmpty())
                 @php
                     // 🔥 Definir el orden deseado según el ID de estado en la BD
@@ -247,7 +196,7 @@
                         </div>
 
                         <!-- Justificación debajo del estado -->
-                        <div class="p-3 rounded-md">
+                        <div class="w-full text-xs">
                             <p class="text-xs text-gray-700">{{ $transicion->justificacion }}</p>
                         </div>
                     @endforeach
@@ -262,33 +211,40 @@
             <div class="footer text-center text-gray-500 text-xs">
 
                 <div class="flex justify-between mt-6 page-break-inside-avoid">
+                    <!-- Firma del Técnico -->
                     <div class="w-1/2 text-center">
-                        <div class="inline-block mb-2">
+                        <div class="inline-block mb-2 h-20 flex justify-center items-center">
                             @if ($firmaTecnico)
                                 <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
                                     class="h-20 max-w-[150px] mx-auto object-contain">
                             @else
-                                <p class="text-xs text-gray-500">N/A</p>
+                                <div class="h-full flex items-center justify-center w-[150px]">
+                                    <p class="text-xs text-gray-500">N/A</p>
+                                </div>
                             @endif
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
-                        <p class="text-xs"><span class="font-bold"></span> {{ $visita['tecnico'] }}
+                        <p class="text-xs">{{ $visita['tecnico'] }}</p>
                     </div>
 
+                    <!-- Firma del Cliente -->
                     <div class="w-1/2 text-center">
-                        <div class="inline-block mb-2">
+                        <div class="inline-block mb-2 h-20 flex justify-center items-center">
                             @if ($firmaCliente)
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                                     class="h-20 max-w-[150px] mx-auto object-contain">
                             @else
-                                <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
+                                <div class="h-full flex items-center justify-center w-[150px]">
+                                    <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
+                                </div>
                             @endif
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
                     </div>
                 </div>
+
 
                 <!-- Información adicional -->
                 <p class="mt-2">

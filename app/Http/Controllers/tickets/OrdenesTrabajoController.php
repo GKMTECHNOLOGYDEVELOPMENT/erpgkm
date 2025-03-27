@@ -2873,6 +2873,8 @@ class OrdenesTrabajoController extends Controller
             'serie' => $orden->serie ?? 'No especificado',
             'fallaReportada' => $orden->fallaReportada ?? 'No especificado' // 🔹 Agregamos la falla reportada
         ];
+        $marca = $orden->modelo->marca ?? null;
+
 
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
         $visitas = collect();
@@ -2895,7 +2897,7 @@ class OrdenesTrabajoController extends Controller
                         'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
                         'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
 
-                        
+
                     ]
                 ]);
             }
@@ -2982,7 +2984,8 @@ class OrdenesTrabajoController extends Controller
             'firmaTecnico' => $firmaTecnico,
             'firmaCliente' => $firmaCliente,
             'imagenesAnexos' => $imagenesAnexos,
-            'imagenesFotosTickets' => $imagenesFotosTickets
+            'imagenesFotosTickets' => $imagenesFotosTickets,
+            'marca' => $marca // ✅ <-- Aquí la agregas
         ])->render();
 
         // 🔹 GENERAR PDF EN MEMORIA CON BROWSERSHOT
