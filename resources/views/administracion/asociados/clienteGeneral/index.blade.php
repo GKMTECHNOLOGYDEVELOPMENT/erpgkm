@@ -17,7 +17,8 @@
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex items-center flex-wrap mb-5">
                     <!-- Botón Exportar a Excel -->
-                    <button type="button" class="btn btn-success btn-sm m-1" onclick="window.location='{{ route('clientes-general.exportExcel') }}'">
+                    <button type="button" class="btn btn-success btn-sm m-1"
+                        onclick="window.location='{{ route('clientes-general.exportExcel') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
                             <path
@@ -91,26 +92,30 @@
                                 placeholder="Ingrese la descripción" required>
                         </div>
                         <!-- Foto -->
-                        <div class="mb-5">
+                        <div class="mb-5" x-data>
                             <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+
                             <!-- Campo de archivo -->
                             <input id="ctnFile" type="file" name="logo" accept="image/*" required
                                 class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
                                 @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual" />
 
                             <!-- Contenedor de previsualización -->
-                            <div
-                                class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                                <template x-if="imagenPreview">
-                                    <img :src="imagenPreview" alt="Previsualización de la imagen"
-                                        class="w-40 h-40 object-cover">
-                                </template>
-                                <template x-if="!imagenPreview">
-                                    <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
-                                        class="w-50 h-40 object-cover">
-                                </template>
+                            <div class="flex justify-center mt-4">
+                                <div
+                                    class="w-full max-w-xs h-40 border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center bg-white">
+                                    <template x-if="imagenPreview">
+                                        <img :src="imagenPreview" alt="Previsualización de la imagen"
+                                            class="w-full h-full object-contain" />
+                                    </template>
+                                    <template x-if="!imagenPreview">
+                                        <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
+                                            class="w-full h-full object-contain" />
+                                    </template>
+                                </div>
                             </div>
                         </div>
+
                         <!-- Botones -->
                         <div class="flex justify-end items-center mb-4">
                             <button type="button" class="btn btn-outline-danger"
@@ -133,9 +138,9 @@
         };
     </script>
     <script>
-    window.Laravel = {
-        csrfToken: '{{ csrf_token() }}',
-        routeClientStore: '{{ route('cliente-general.store') }}'
+        window.Laravel = {
+            csrfToken: '{{ csrf_token() }}',
+            routeClientStore: '{{ route('cliente-general.store') }}'
         };
     </script>
     <script src="{{ asset('assets/js/clientegeneral/clientegeneralvalidaciones.js') }}"></script>

@@ -90,10 +90,14 @@
                     <select id="idModelo" name="idModelo" class="select2 w-full" style="display: none">
                         <option value="" disabled selected>Seleccionar Modelo</option>
                         @foreach ($modelos as $modelo)
-                            <option value="{{ $modelo->idModelo }}">{{ $modelo->nombre }} - {{ $modelo->marca->nombre }}
-                                - {{ $modelo->categoria->nombre }}</option>
+                            <option value="{{ $modelo->idModelo }}">
+                                {{ $modelo->nombre }} -
+                                {{ $modelo->marca->nombre ?? 'Sin Marca' }} -
+                                {{ $modelo->categoria->nombre ?? 'Sin Categoría' }}
+                            </option>
                         @endforeach
                     </select>
+                    
                 </div>
 
                 <!-- Peso -->

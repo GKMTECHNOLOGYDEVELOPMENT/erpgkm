@@ -39,26 +39,26 @@
                 @enderror
             </div>
 
-<!-- Select múltiple para Marcas -->
-<div>
-    <label for="marcas" class="block text-sm font-medium mb-1">Marcas</label>
-    <select name="marcas[]" id="marcas" class="nice-select w-full" multiple>
-        @foreach ($marcas as $marca)
-            <option value="{{ $marca->idMarca }}"
-                {{ $marcasAsociadas->contains($marca->idMarca) ? 'selected' : '' }}>
-                {{ $marca->nombre }}
-            </option>
-        @endforeach
-    </select>
-</div>
+            <!-- Select múltiple para Marcas -->
+            <div>
+                <label for="marcas" class="block text-sm font-medium mb-1">Marcas</label>
+                <select name="marcas[]" id="marcas" class="nice-select w-full" multiple>
+                    @foreach ($marcas as $marca)
+                        <option value="{{ $marca->idMarca }}"
+                            {{ $marcasAsociadas->contains($marca->idMarca) ? 'selected' : '' }}>
+                            {{ $marca->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-<!-- Contenedor para mostrar los seleccionados -->
-<div class="mt-3">
-    <strong>Seleccionados:</strong>
-    <div id="selected-marcas"
-        class="mt-2 flex flex-wrap gap-2 border border-gray-300 rounded-md p-2 min-h-[45px] text-xs">
-    </div>
-</div>
+            <!-- Contenedor para mostrar los seleccionados -->
+            <div class="mt-3">
+                <strong>Seleccionados:</strong>
+                <div id="selected-marcas"
+                    class="mt-2 flex flex-wrap gap-2 border border-gray-300 rounded-md p-2 min-h-[45px] text-xs">
+                </div>
+            </div>
 
 
 
@@ -66,26 +66,33 @@
 
             <!-- Campo para la imagen -->
             <div x-data="{ fotoPreview: '{{ $cliente->foto ? $cliente->foto : '' }}' }">
-                <label for="foto" class="block text-sm font-medium">Foto</label>
+                <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+
                 <input type="file" id="foto" name="foto" accept="image/*"
                     class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
                     @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ $cliente->foto }}'">
-                <div
-                    class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                    <template x-if="fotoPreview">
-                        <img :src="fotoPreview" alt="Previsualización de la foto"
-                            class="w-50 h-40 object-cover object-center">
-                    </template>
-                    <template x-if="!fotoPreview">
-                        <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
-                            Sin imagen
-                        </div>
-                    </template>
+
+                <!-- Previsualización centrada -->
+                <div class="flex justify-center mt-4">
+                    <div
+                        class="w-full max-w-xs h-40 border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center bg-white">
+                        <template x-if="fotoPreview">
+                            <img :src="fotoPreview" alt="Previsualización de la foto"
+                                class="w-full h-full object-contain" />
+                        </template>
+                        <template x-if="!fotoPreview">
+                            <div class="flex items-center justify-center w-full h-full text-gray-400 text-sm">
+                                Sin imagen
+                            </div>
+                        </template>
+                    </div>
                 </div>
+
                 @error('foto')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
+
 
 
             <!-- Estado -->
@@ -115,18 +122,18 @@
 
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             // Inicializar NiceSelect2
             NiceSelect.bind(document.getElementById("marcas"), {
                 searchable: true,
             });
-    
+
             // Mostrar seleccionados personalizados
             function actualizarSeleccionados() {
                 const select = document.getElementById("marcas");
                 const seleccionados = Array.from(select.selectedOptions).map(opt => opt.text);
                 const contenedor = document.getElementById("selected-marcas");
-    
+
                 contenedor.innerHTML = ""; // Limpiar
                 seleccionados.forEach(nombre => {
                     const chip = document.createElement("span");
@@ -135,14 +142,14 @@
                     contenedor.appendChild(chip);
                 });
             }
-    
+
             // Detectar cambios
             document.getElementById("marcas").addEventListener("change", actualizarSeleccionados);
-    
+
             // Mostrar los que ya están seleccionados al iniciar
             actualizarSeleccionados();
         });
     </script>
-    
+
 
 </x-layout.default>

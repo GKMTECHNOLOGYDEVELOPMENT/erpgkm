@@ -13,7 +13,8 @@
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR MARCA</h2>
 
-        <form action="{{ route('marcas.update', $marca->idMarca) }}" method="POST" class="space-y-4">
+        <form action="{{ route('marcas.update', $marca->idMarca) }}" method="POST" class="space-y-4"
+            enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -27,6 +28,37 @@
                 @enderror
             </div>
 
+            <!-- Campo Foto con previsualización -->
+            <div x-data="{ fotoPreview: '{{ $marca->foto ? 'data:image/jpeg;base64,' . base64_encode($marca->foto) : '' }}' }">
+                <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+
+                <input type="file" name="foto" id="foto" accept="image/*"
+                    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
+                    @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ $marca->foto ? 'data:image/jpeg;base64,' . base64_encode($marca->foto) : '' }}'">
+
+                <!-- Previsualización centrada -->
+                <div class="flex justify-center mt-4">
+                    <div
+                        class="w-full max-w-xs h-40 border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center bg-white">
+                        <template x-if="fotoPreview">
+                            <img :src="fotoPreview" alt="Previsualización de la imagen"
+                                class="w-full h-full object-contain" />
+                        </template>
+                        <template x-if="!fotoPreview">
+                            <div class="flex items-center justify-center w-full h-full text-gray-400 text-sm">
+                                Sin imagen
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                @error('foto')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
+
+
             <!-- Switch de Estado -->
             <div>
                 <label for="estado" class="block text-sm font-medium">Estado</label>
@@ -34,9 +66,11 @@
                     <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
                     <input type="hidden" name="estado" value="0">
                     <div class="w-12 h-6 relative">
-                        <input type="checkbox" id="estado" name="estado" class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-                               value="1" {{ $marca->estado ? 'checked' : '' }} />
-                        <span for="estado" class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                        <input type="checkbox" id="estado" name="estado"
+                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                            value="1" {{ $marca->estado ? 'checked' : '' }} />
+                        <span for="estado"
+                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
                     </div>
                 </div>
             </div>

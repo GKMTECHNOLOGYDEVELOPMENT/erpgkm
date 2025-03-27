@@ -62,7 +62,7 @@ document.addEventListener('alpine:init', () => {
             return data.map((cliente) => [
                 `<div style="text-align: center;">${cliente.descripcion}</div>`,
                 cliente.foto
-                ? `<img src="data:image/jpeg;base64,${cliente.foto}" class="w-10 h-10 rounded-full object-cover mx-auto" alt="Foto" />`
+                ? `<img src="data:image/jpeg;base64,${cliente.foto}" class="w-20 h-10 object-contain mx-auto rounded-md " alt="Foto" />`
                 : '<div class="text-center">Sin imagen</div>', // ⬅️ Se asegura centrado
                 cliente.estado === 'Activo'
                 ? `<div class="text-center"><span class="badge badge-outline-success">Activo</span></div>`

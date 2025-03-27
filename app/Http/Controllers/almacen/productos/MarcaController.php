@@ -112,27 +112,35 @@ class MarcaController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            // Validar los datos del formulario
             $validatedData = $request->validate([
                 'nombre' => 'required|string|max:255',
                 'estado' => 'nullable|boolean',
+                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // validar imagen
             ]);
-
-            // Obtener la marca
+    
             $marca = Marca::findOrFail($id);
             Log::info("Actualizando marca con ID: $id");
-
-            // Actualizar los datos de la marca
-            $marca->update($validatedData);
-
-            return redirect()->route('marcas.index')
-                ->with('success', 'Marca actualizada exitosamente.');
+    
+            $marca->update([
+                'nombre' => $validatedData['nombre'],
+                'estado' => $request->has('estado') ? 1 : 0,
+            ]);
+    
+            if ($request->hasFile('foto')) {
+                $imagenBinaria = file_get_contents($request->file('foto')->getRealPath());
+    
+                \DB::table('marca')
+                    ->where('idMarca', $marca->idMarca)
+                    ->update(['foto' => $imagenBinaria]);
+            }
+    
+            return redirect()->route('marcas.index')->with('success', 'Marca actualizada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al actualizar la marca: ' . $e->getMessage());
-            return redirect()->route('marcas.index')
-                ->with('error', 'Ocurrió un error al actualizar la marca.');
+            return redirect()->route('marcas.index')->with('error', 'Ocurrió un error al actualizar la marca.');
         }
     }
+    
 
     public function destroy($id)
     {

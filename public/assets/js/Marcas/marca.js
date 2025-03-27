@@ -26,7 +26,7 @@ document.addEventListener('alpine:init', () => {
                     // Inicializar DataTable
                     this.datatable1 = new simpleDatatables.DataTable('#myTable1', {
                         data: {
-                            headings: ['Nombre', 'Estado', 'Foto', 'Acción'],
+                            headings: ['Nombre', 'Foto', 'Estado', 'Acción'],
                             data: this.formatDataForTable(data),
                         },
                         searchable: true,
@@ -57,13 +57,13 @@ document.addEventListener('alpine:init', () => {
         formatDataForTable(data) {
             return data.map((marca) => [
                 `<div style="text-align: center;">${marca.nombre}</div>`, // Columna: Nombre
+                `<div style="text-align: center;">${marca.foto 
+                    ? `<img src="${marca.foto}" class="w-20 h-10 object-contain mx-auto rounded-md " alt="Foto" />`
+                    : '<div class="text-center">Sin imagen</div>'}</div>`,                
                 `<div style="text-align: center;">${marca.estado === 'Activo'
                     ? `<span class="badge badge-outline-success">Activo</span>`
                     : `<span class="badge badge-outline-danger">Inactivo</span>`
                 }</div>`, // Columna: Estado
-                `<div style="text-align: center;">${marca.foto 
-                    ? `<img src="${marca.foto}" class="w-10 h-10 rounded-full object-cover mx-auto" alt="Foto" />` 
-                    : '<div class="text-center">Sin imagen</div>'}</div>`,
                 // Columna: Foto
                 `<div style="text-align: center;" class="flex justify-center items-center">
                     <a href="/marcas/${marca.idMarca}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
