@@ -97,7 +97,7 @@
                             </option>
                         @endforeach
                     </select>
-                    
+
                 </div>
 
                 <!-- Peso -->
@@ -136,23 +136,34 @@
 
 
                 <!-- Foto -->
-                <div class="mb-5" x-data="{ fotoPreview: null }">
+                <div class="mb-5" x-data="{ fotoPreview: '{{ old('foto') ? old('foto') : (isset($articulo) && $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : '') }}' }">
                     <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+
                     <input id="foto" name="foto" type="file" accept="image/*"
                         class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
-                        @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" />
-                    <div
-                        class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                        <template x-if="fotoPreview">
-                            <img :src="fotoPreview" alt="Previsualización de la foto"
-                                class="w-40 h-40 object-cover">
-                        </template>
-                        <template x-if="!fotoPreview">
-                            <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
-                                class="w-50 h-40 object-cover">
-                        </template>
+                        @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ isset($articulo) && $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : '' }}'" />
+
+                    <!-- Previsualización centrada -->
+                    <div class="flex justify-center mt-4">
+                        <div
+                            class="w-full max-w-xs h-40 border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center bg-white">
+                            <template x-if="fotoPreview">
+                                <img :src="fotoPreview" alt="Previsualización de la imagen"
+                                    class="w-full h-full object-contain" />
+                            </template>
+                            <template x-if="!fotoPreview">
+                                <div class="flex items-center justify-center w-full h-full text-gray-400 text-sm">
+                                    Sin imagen
+                                </div>
+                            </template>
+                        </div>
                     </div>
+
+                    @error('foto')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
                 </div>
+
                 <!-- Mostrar en Web -->
                 <div class="mb-5">
                     <label for="mostrarWeb" class="block text-sm font-medium mb-2">Mostrar en Web</label>
@@ -205,10 +216,10 @@
 
             if (symbol.textContent === "S/") {
                 symbol.textContent = "$";
-                monedaInput.value = 0;  // Establecer valor como 0 para dólares
+                monedaInput.value = 0; // Establecer valor como 0 para dólares
             } else {
                 symbol.textContent = "S/";
-                monedaInput.value = 1;  // Establecer valor como 1 para soles
+                monedaInput.value = 1; // Establecer valor como 1 para soles
             }
         });
 
@@ -219,10 +230,10 @@
 
             if (symbol.textContent === "S/") {
                 symbol.textContent = "$";
-                monedaInput.value = 0;  // Establecer valor como 0 para dólares
+                monedaInput.value = 0; // Establecer valor como 0 para dólares
             } else {
                 symbol.textContent = "S/";
-                monedaInput.value = 1;  // Establecer valor como 1 para soles
+                monedaInput.value = 1; // Establecer valor como 1 para soles
             }
         });
     </script>

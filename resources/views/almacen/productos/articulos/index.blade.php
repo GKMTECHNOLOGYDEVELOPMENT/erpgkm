@@ -45,16 +45,22 @@
 
                     <!-- Botón Agregar -->
                     <a href="{{ route('articulos.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
-                            <path d="M4 4H20C20.5523 4 21 4.44772 21 5V19C21 19.5523 20.5523 20 20 20H4C3.44772 20 3 19.5523 3 19V5C3 4.44772 3 4 4 4Z"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M7 9H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M7 13H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M7 17H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                            fill="none">
+                            <path
+                                d="M4 4H20C20.5523 4 21 4.44772 21 5V19C21 19.5523 20.5523 20 20 20H4C3.44772 20 3 19.5523 3 19V5C3 4.44772 3 4 4 4Z"
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M7 9H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M7 13H17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M7 17H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                         <span>Agregar</span>
                     </a>
-                    
+
                 </div>
             </div>
 
@@ -62,236 +68,256 @@
         </div>
     </div>
 
-    
+
 
     <!-- Modal -->
-<div x-data="{ open: false, ocultarPrecios: false }" class="mb-5" @toggle-modal.window="open = !open">
-    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
-        <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
-            <div x-show="open" x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
-                <!-- Header del Modal -->
-                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg">Agregar Artículo</h5>
-                    <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-6 h-6">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-scroll">
-                    <!-- Formulario -->
-                    <form class="p-5 space-y-4" id="articuloForm" enctype="multipart/form-data" method="post">
-                        @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- CODIGO DE BARRAS -->
-                            <div>
-                                <label for="codigo_barras" class="block text-sm font-medium">Codigo de barras</label>
-                                <input id="codigo_barras" name="codigo_barras" type="text" class="form-input w-full"
-                                    placeholder="CODIGO DE BARRAS" required>
-                            </div>
+    <div x-data="{ open: false, ocultarPrecios: false }" class="mb-5" @toggle-modal.window="open = !open">
+        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
+                <div x-show="open" x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
+                    <!-- Header del Modal -->
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <h5 class="font-bold text-lg">Agregar Artículo</h5>
+                        <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" class="w-6 h-6">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-scroll">
+                        <!-- Formulario -->
+                        <form class="p-5 space-y-4" id="articuloForm" enctype="multipart/form-data" method="post">
+                            @csrf
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- CODIGO DE BARRAS -->
+                                <div>
+                                    <label for="codigo_barras" class="block text-sm font-medium">Codigo de
+                                        barras</label>
+                                    <input id="codigo_barras" name="codigo_barras" type="text"
+                                        class="form-input w-full" placeholder="CODIGO DE BARRAS" required>
+                                </div>
 
-                            <!-- SKU -->
-                            <div>
-                                <label for="sku" class="block text-sm font-medium">SKU</label>
-                                <input id="sku" name="sku" type="text" class="form-input w-full"
-                                    placeholder="SKU">
-                            </div>
+                                <!-- SKU -->
+                                <div>
+                                    <label for="sku" class="block text-sm font-medium">SKU</label>
+                                    <input id="sku" name="sku" type="text" class="form-input w-full"
+                                        placeholder="SKU">
+                                </div>
 
-                            <!-- Nombre -->
-                            <div>
-                                <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input id="nombre" name="nombre" type="text" class="form-input w-full"
-                                    placeholder="Ingrese el nombre" required>
-                            </div>
+                                <!-- Nombre -->
+                                <div>
+                                    <label for="nombre" class="block text-sm font-medium">Nombre</label>
+                                    <input id="nombre" name="nombre" type="text" class="form-input w-full"
+                                        placeholder="Ingrese el nombre" required>
+                                </div>
 
-                            <!-- Fecha de Ingreso -->
-                            <div>
-                                <label for="fechaIngreso" class="block text-sm font-medium">Fecha de Ingreso</label>
-                                <input id="fechaIngreso" name="fechaIngreso" type="text"
-                                    class="form-input w-full" placeholder="Seleccionar fecha">
-                            </div>
+                                <!-- Fecha de Ingreso -->
+                                <div>
+                                    <label for="fechaIngreso" class="block text-sm font-medium">Fecha de
+                                        Ingreso</label>
+                                    <input id="fechaIngreso" name="fechaIngreso" type="text"
+                                        class="form-input w-full" placeholder="Seleccionar fecha">
+                                </div>
 
-                            <script>
-                                document.addEventListener("DOMContentLoaded", function() {
-                                    flatpickr("#fechaIngreso", {
-                                        dateFormat: "Y-m-d",
-                                        defaultDate: new Date(),
-                                        altInput: true,
-                                        altFormat: "F j, Y",
-                                        locale: "es",
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        flatpickr("#fechaIngreso", {
+                                            dateFormat: "Y-m-d",
+                                            defaultDate: new Date(),
+                                            altInput: true,
+                                            altFormat: "F j, Y",
+                                            locale: "es",
+                                        });
                                     });
-                                });
-                            </script>
+                                </script>
 
-                            <!-- Stock Total -->
-                            <div>
-                                <label for="stock_total" class="block text-sm font-medium">Stock Total</label>
-                                <input id="stock_total" name="stock_total" type="number"
-                                    class="form-input w-full" placeholder="Ingrese el stock total" required>
-                            </div>
-
-                            <!-- Stock Mínimo -->
-                            <div>
-                                <label for="stock_minimo" class="block text-sm font-medium">Stock Mínimo</label>
-                                <input id="stock_minimo" name="stock_minimo" type="number"
-                                    class="form-input w-full" placeholder="Ingrese el stock mínimo">
-                            </div>
-
-                            <!-- ID Unidad -->
-                            <div>
-                                <label for="idUnidad" class="block text-sm font-medium">Unidad</label>
-                                <select id="idUnidad" name="idUnidad" class="select2 w-full"
-                                    style="display:none">
-                                    <option value="" disabled selected>Seleccionar Unidad</option>
-                                    @foreach ($unidades as $unidad)
-                                        <option value="{{ $unidad->idUnidad }}">{{ $unidad->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- ID Tipo Artículo -->
-                            <div>
-                                <label for="idTipoArticulo" class="block text-sm font-medium">Tipo Artículo</label>
-                                <select id="idTipoArticulo" name="idTipoArticulo" class="select2 w-full"
-                                    style="display:none">
-                                    <option value="" disabled selected>Seleccionar Tipo Artículo</option>
-                                    @foreach ($tiposArticulo as $tipoArticulo)
-                                        <option value="{{ $tipoArticulo->idTipoArticulo }}">
-                                            {{ $tipoArticulo->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- ID Modelo -->
-                            <div>
-                                <label for="idModelo" class="block text-sm font-medium">Modelo</label>
-                                <select id="idModelo" name="idModelo" class="select2 w-full"
-                                    style="display:none">
-                                    <option value="" disabled selected>Seleccionar Modelo</option>
-                                    @foreach ($modelos as $modelo)
-                                    <option value="{{ $modelo->idModelo }}">{{ $modelo->nombre }} - {{ $modelo->marca->nombre }} - {{ $modelo->categoria->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Peso -->
-                            <div>
-                                <label for="peso" class="block text-sm font-medium">Peso</label>
-                                <input id="peso" name="peso" type="text" class="form-input w-full"
-                                    placeholder="Ingrese el peso">
-                            </div>
-
-                            <!-- Moneda Compra (Oculto si el checkbox está activado) -->
-                            <div x-show="!ocultarPrecios" class="mb-5">
-                                <label for="moneda_compra" class="block text-sm font-medium">Moneda de Compra</label>
-                                <select id="moneda_compra" name="moneda_compra" class="form-input w-full">
-                                    @foreach ($monedas as $moneda)
-                                        <option value="{{ $moneda->idMonedas }}">{{ $moneda->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Precio Compra (Oculto si el checkbox está activado) -->
-                            <div x-show="!ocultarPrecios" class="mb-5">
-                                <label for="precio_compra" class="block text-sm font-medium">Precio de Compra</label>
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
-                                        <span id="precio_compra_symbol">S/</span>
-                                    </div>
-                                    <input id="precio_compra" name="precio_compra" type="number"
-                                        class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
-                                        placeholder="Ingrese el precio de compra" />
-                                </div>
-                            </div>
-
-                            <!-- Moneda Venta (Oculto si el checkbox está activado) -->
-                            <div x-show="!ocultarPrecios" class="mb-5">
-                                <label for="moneda_venta" class="block text-sm font-medium">Moneda de Venta</label>
-                                <select id="moneda_venta" name="moneda_venta" class="form-input w-full">
-                                    @foreach ($monedas as $moneda)
-                                        <option value="{{ $moneda->idMonedas }}">{{ $moneda->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Precio Venta (Oculto si el checkbox está activado) -->
-                            <div x-show="!ocultarPrecios" class="mb-5">
-                                <label for="precio_venta" class="block text-sm font-medium">Precio de Venta</label>
-                                <div class="flex">
-                                    <div
-                                        class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
-                                        <span id="precio_venta_symbol">S/</span>
-                                    </div>
-                                    <input id="precio_venta" name="precio_venta" type="number"
-                                        class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
-                                        placeholder="Ingrese el precio de venta" />
-                                </div>
-                            </div>
-
-                            <!-- Foto -->
-                            <div class="mb-5" x-data="{ fotoPreview: null }">
-                                <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
-                                <input id="foto" name="foto" type="file" accept="image/*"
-                                    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
-                                    @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" />
-                                <div class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                                    <template x-if="fotoPreview">
-                                        <img :src="fotoPreview" alt="Previsualización de la foto"
-                                            class="w-40 h-40 object-cover">
-                                    </template>
-                                    <template x-if="!fotoPreview">
-                                        <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
-                                            class="w-50 h-40 object-cover">
-                                    </template>
-                                </div>
-                            </div>
-
-                            <!-- Mostrar en Web -->
-                            <div class="mb-5">
-                                <label for="mostrarWeb" class="block text-sm font-medium mb-2">Mostrar en Web</label>
+                                <!-- Stock Total -->
                                 <div>
-                                    <label class="w-12 h-6 relative mt-3">
-                                        <input type="checkbox" id="mostrarWeb" name="mostrarWeb"
-                                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                                        <span
-                                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-                                    </label>
+                                    <label for="stock_total" class="block text-sm font-medium">Stock Total</label>
+                                    <input id="stock_total" name="stock_total" type="number"
+                                        class="form-input w-full" placeholder="Ingrese el stock total" required>
                                 </div>
-                            </div>
 
-                            <!-- Ocultar Precios -->
-                            <div class="mb-5">
-                                <label for="ocultarprecios" class="block text-sm font-medium mb-2">Ocultar Precios</label>
+                                <!-- Stock Mínimo -->
                                 <div>
-                                    <label class="w-12 h-6 relative mt-3">
-                                        <input type="checkbox" id="ocultarprecios" name="ocultarprecios"
-                                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-                                            x-model="ocultarPrecios" />
-                                        <span
-                                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-                                    </label>
+                                    <label for="stock_minimo" class="block text-sm font-medium">Stock Mínimo</label>
+                                    <input id="stock_minimo" name="stock_minimo" type="number"
+                                        class="form-input w-full" placeholder="Ingrese el stock mínimo">
                                 </div>
+
+                                <!-- ID Unidad -->
+                                <div>
+                                    <label for="idUnidad" class="block text-sm font-medium">Unidad</label>
+                                    <select id="idUnidad" name="idUnidad" class="select2 w-full"
+                                        style="display:none">
+                                        <option value="" disabled selected>Seleccionar Unidad</option>
+                                        @foreach ($unidades as $unidad)
+                                            <option value="{{ $unidad->idUnidad }}">{{ $unidad->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- ID Tipo Artículo -->
+                                <div>
+                                    <label for="idTipoArticulo" class="block text-sm font-medium">Tipo
+                                        Artículo</label>
+                                    <select id="idTipoArticulo" name="idTipoArticulo" class="select2 w-full"
+                                        style="display:none">
+                                        <option value="" disabled selected>Seleccionar Tipo Artículo</option>
+                                        @foreach ($tiposArticulo as $tipoArticulo)
+                                            <option value="{{ $tipoArticulo->idTipoArticulo }}">
+                                                {{ $tipoArticulo->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- ID Modelo -->
+                                <div>
+                                    <label for="idModelo" class="block text-sm font-medium">Modelo</label>
+                                    <select id="idModelo" name="idModelo" class="select2 w-full"
+                                        style="display:none">
+                                        <option value="" disabled selected>Seleccionar Modelo</option>
+                                        @foreach ($modelos as $modelo)
+                                            <option value="{{ $modelo->idModelo }}">
+                                                {{ $modelo->nombre }} -
+                                                {{ $modelo->marca?->nombre ?? 'Sin Marca' }} -
+                                                {{ $modelo->categoria?->nombre ?? 'Sin Categoría' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Peso -->
+                                <div>
+                                    <label for="peso" class="block text-sm font-medium">Peso</label>
+                                    <input id="peso" name="peso" type="text" class="form-input w-full"
+                                        placeholder="Ingrese el peso">
+                                </div>
+
+                                <!-- Moneda Compra (Oculto si el checkbox está activado) -->
+                                <div x-show="!ocultarPrecios" class="mb-5">
+                                    <label for="moneda_compra" class="block text-sm font-medium">Moneda de
+                                        Compra</label>
+                                    <select id="moneda_compra" name="moneda_compra" class="form-input w-full">
+                                        @foreach ($monedas as $moneda)
+                                            <option value="{{ $moneda->idMonedas }}">{{ $moneda->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Precio Compra (Oculto si el checkbox está activado) -->
+                                <div x-show="!ocultarPrecios" class="mb-5">
+                                    <label for="precio_compra" class="block text-sm font-medium">Precio de
+                                        Compra</label>
+                                    <div class="flex">
+                                        <div
+                                            class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
+                                            <span id="precio_compra_symbol">S/</span>
+                                        </div>
+                                        <input id="precio_compra" name="precio_compra" type="number"
+                                            class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
+                                            placeholder="Ingrese el precio de compra" />
+                                    </div>
+                                </div>
+
+                                <!-- Moneda Venta (Oculto si el checkbox está activado) -->
+                                <div x-show="!ocultarPrecios" class="mb-5">
+                                    <label for="moneda_venta" class="block text-sm font-medium">Moneda de
+                                        Venta</label>
+                                    <select id="moneda_venta" name="moneda_venta" class="form-input w-full">
+                                        @foreach ($monedas as $moneda)
+                                            <option value="{{ $moneda->idMonedas }}">{{ $moneda->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Precio Venta (Oculto si el checkbox está activado) -->
+                                <div x-show="!ocultarPrecios" class="mb-5">
+                                    <label for="precio_venta" class="block text-sm font-medium">Precio de
+                                        Venta</label>
+                                    <div class="flex">
+                                        <div
+                                            class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
+                                            <span id="precio_venta_symbol">S/</span>
+                                        </div>
+                                        <input id="precio_venta" name="precio_venta" type="number"
+                                            class="form-input ltr:rounded-l-none rtl:rounded-r-none flex-1"
+                                            placeholder="Ingrese el precio de venta" />
+                                    </div>
+                                </div>
+
+                                <!-- Foto -->
+                                <div class="mb-5" x-data="{ fotoPreview: null }">
+                                    <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+
+                                    <input id="foto" name="foto" type="file" accept="image/*"
+                                        class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
+                                        @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null" />
+
+                                    <!-- Previsualización centrada -->
+                                    <div class="flex justify-center mt-4">
+                                        <div
+                                            class="w-full max-w-xs h-40 border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center bg-white">
+                                            <template x-if="fotoPreview">
+                                                <img :src="fotoPreview" alt="Previsualización de la imagen"
+                                                    class="w-full h-full object-contain" />
+                                            </template>
+                                            <template x-if="!fotoPreview">
+                                                <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
+                                                    class="w-full h-full object-contain" />
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <!-- Mostrar en Web -->
+                                <div class="mb-5">
+                                    <label for="mostrarWeb" class="block text-sm font-medium mb-2">Mostrar en
+                                        Web</label>
+                                    <div>
+                                        <label class="w-12 h-6 relative mt-3">
+                                            <input type="checkbox" id="mostrarWeb" name="mostrarWeb"
+                                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                                            <span
+                                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Ocultar Precios -->
+                                <div class="mb-5">
+                                    <label for="ocultarprecios" class="block text-sm font-medium mb-2">Ocultar
+                                        Precios</label>
+                                    <div>
+                                        <label class="w-12 h-6 relative mt-3">
+                                            <input type="checkbox" id="ocultarprecios" name="ocultarprecios"
+                                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                                x-model="ocultarPrecios" />
+                                            <span
+                                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
                             </div>
 
-                        </div>
-
-                        <!-- Botones -->
-                        <div class="flex justify-end items-center mt-4">
-                            <button type="button" class="btn btn-outline-danger"
-                                @click="open = false">Cancelar</button>
-                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
-                        </div>
-                    </form>
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center mt-4">
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="open = false">Cancelar</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
     <script>
