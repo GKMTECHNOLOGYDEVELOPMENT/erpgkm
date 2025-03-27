@@ -130,7 +130,7 @@
                 contenedor.innerHTML = ""; // Limpiar
                 seleccionados.forEach(nombre => {
                     const chip = document.createElement("span");
-                    chip.className = "bg-blue-500 text-primary px-2 py-1 rounded";
+                    chip.className = "bg-primary text-white px-2 py-1 rounded";
                     chip.textContent = nombre;
                     contenedor.appendChild(chip);
                 });
