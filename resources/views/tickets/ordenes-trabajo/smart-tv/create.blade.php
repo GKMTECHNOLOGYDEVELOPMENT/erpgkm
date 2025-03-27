@@ -163,7 +163,7 @@
                         </div>
 
                         <!-- Select para las marcas -->
-                        <select id="idMarca" name="idMarca">
+                        <select style="display: none;" id="idMarca" name="idMarca">
 
                         </select>
                     </div>

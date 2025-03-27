@@ -220,21 +220,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
+// Función para cargar todas las marcas desde el servidor
+function cargarTodasLasMarcas() {
+    const select = document.getElementById('idMarca');
+    const preloadElement = document.getElementById('preload');
 
-    // Función para cargar las marcas desde el servidor
-    function cargarMarcas() {
-        const select = document.getElementById('idMarca');
-        const preloadElement = document.getElementById('preload');
+    // Mostrar el preload (cargando) sobre el select
+    preloadElement.style.display = 'flex';
 
-        // Mostrar el preload (cargando) sobre el select
-        preloadElement.style.display = 'flex';
+    // Asegurarse de que el select esté oculto mientras se cargan las marcas
+    select.style.display = 'none'; // Ocultar el select de marcas inicialmente
 
-        fetch('/check-marcas') // Realizamos la consulta al servidor
-            .then(response => response.json()) // Convertir la respuesta en formato JSON
-            .then(data => {
-                // Limpiar las opciones actuales del select
-                select.innerHTML = '<option value="" disabled selected>Seleccionar Marca</option>';
+    fetch('/check-marcas') // Realizamos la consulta al servidor para obtener todas las marcas
+        .then(response => response.json()) // Convertir la respuesta en formato JSON
+        .then(data => {
+            // Limpiar las opciones actuales del select
+            select.innerHTML = '<option value="" disabled selected>Seleccionar Marca</option>';
 
+            // Verificar si hay datos
+            if (data.length > 0) {
                 // Llenar el select con las marcas
                 data.forEach(marca => {
                     const option = document.createElement('option');
@@ -242,36 +246,108 @@ document.addEventListener('DOMContentLoaded', function () {
                     option.textContent = marca.nombre;
                     select.appendChild(option);
                 });
-
-                // Si ya existe una instancia previa de nice-select, la destruye
-                if (select.niceSelectInstance) {
-                    select.niceSelectInstance.destroy();
-                }
-
-                // Inicializa nice-select (si usas nice-select) y guarda la instancia
-                select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
-
-                // Ocultar el preload después de cargar las marcas
-                preloadElement.style.display = 'none';
-
                 // Mostrar el select después de cargar las marcas
-                select.style.display = 'block'; // O 'inline-block' según tu diseño
-            })
-            .catch(error => {
-                console.error('Error al cargar las marcas:', error);
-                preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
-            });
-    }
+                select.style.display = 'block'; // Mostrar el select
+            } else {
+                // Si no hay marcas disponibles, mostrar un mensaje
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No hay marcas disponibles';
+                select.appendChild(option);
+            }
 
-    // Ocultar el select de marcas inicialmente
-    let selectMarca = document.getElementById('idMarca');
-    selectMarca.style.display = 'none'; // Esto oculta el select de marcas al principio
+            // Ocultar el preload después de cargar las marcas
+            preloadElement.style.display = 'none';
 
-    // Cargar las marcas solo si no se han cargado previamente
-    if (!marcasCargadas) {
-        cargarMarcas();
-        marcasCargadas = true;
+            // Inicializa nice-select (si usas nice-select) y guarda la instancia
+            if (select.niceSelectInstance) {
+                select.niceSelectInstance.destroy();
+            }
+            select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
+
+        })
+        .catch(error => {
+            console.error('Error al cargar las marcas:', error);
+            preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
+        });
+}
+
+// Función para cargar las marcas desde el servidor según el cliente general seleccionado
+function cargarMarcasPorClienteGeneral(clienteGeneralId) {
+    const select = document.getElementById('idMarca');
+    const preloadElement = document.getElementById('preload');
+
+    // Mostrar el preload (cargando) sobre el select
+    preloadElement.style.display = 'flex';
+
+    // Asegurarse de que el select esté oculto mientras se cargan las marcas
+    select.style.display = 'none'; // Ocultar el select de marcas inicialmente
+
+    fetch(`/marcas-por-cliente-general/${clienteGeneralId}`) // Realizamos la consulta al servidor para obtener las marcas de un cliente general específico
+        .then(response => response.json()) // Convertir la respuesta en formato JSON
+        .then(data => {
+            // Limpiar las opciones actuales del select
+            select.innerHTML = '<option value="" disabled selected>Seleccionar Marca</option>';
+
+            // Verificar si hay datos
+            if (data.length > 0) {
+                // Llenar el select con las marcas
+                data.forEach(marca => {
+                    const option = document.createElement('option');
+                    option.value = marca.idMarca;
+                    option.textContent = marca.nombre;
+                    select.appendChild(option);
+                });
+                // Mostrar el select después de cargar las marcas
+                select.style.display = 'block'; // Mostrar el select
+            } else {
+                // Si no hay marcas asociadas, mostrar un mensaje
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No hay marcas disponibles';
+                select.appendChild(option);
+            }
+
+            // Ocultar el preload después de cargar las marcas
+            preloadElement.style.display = 'none';
+
+            // Inicializa nice-select (si usas nice-select) y guarda la instancia
+            if (select.niceSelectInstance) {
+                select.niceSelectInstance.destroy();
+            }
+            select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
+
+        })
+        .catch(error => {
+            console.error('Error al cargar las marcas:', error);
+            preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
+        });
+}
+
+// Evento para cuando se selecciona un cliente general
+document.getElementById('idClienteGeneral').addEventListener('change', function () {
+    let clienteGeneralId = this.value;
+    if (clienteGeneralId) {
+        console.log('Cliente General seleccionado:', clienteGeneralId);
+        cargarMarcasPorClienteGeneral(clienteGeneralId);  // Llamamos la función para cargar las marcas según el cliente general
+    } else {
+        // Si no hay cliente general seleccionado, cargar todas las marcas
+        cargarTodasLasMarcas();
     }
+});
+
+// Cargar todas las marcas inicialmente si no hay cliente general seleccionado
+window.onload = function() {
+    let clienteGeneralId = document.getElementById('idClienteGeneral').value;
+    if (!clienteGeneralId) {
+        cargarTodasLasMarcas(); // Si no hay cliente general seleccionado al cargar la página, cargamos todas las marcas
+    }
+}
+
+
+
+
+    
 
 
     $(document).ready(function () {
@@ -358,66 +434,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     
     
-
-
-
-
-    //     // Función para cargar las tiendas desde el servidor
-    // function cargarTiendas() {
-    //     const select = document.getElementById('idTienda');
-    //     const preloadElement = document.getElementById('preloadTienda');
-
-    //     // Mostrar el preload (cargando) sobre el select
-    //     preloadElement.style.display = 'flex';
-
-    //     fetch('/check-tiendas') // Realizamos la consulta al servidor
-    //         .then(response => response.json()) // Convertir la respuesta en formato JSON
-    //         .then(data => {
-    //             // Limpiar las opciones actuales del select
-    //             select.innerHTML = '<option value="" disabled selected>Seleccionar Tienda</option>';
-
-    //             // Llenar el select con las tiendas
-    //             data.forEach(tienda => {
-    //                 const option = document.createElement('option');
-    //                 option.value = tienda.idTienda;
-    //                 option.textContent = tienda.nombre;
-    //                 select.appendChild(option);
-    //             });
-
-    //             // Si ya existe una instancia previa de nice-select, la destruye
-    //             if (select.niceSelectInstance) {
-    //                 select.niceSelectInstance.destroy();
-    //             }
-
-    //             // Inicializa nice-select (si usas nice-select) y guarda la instancia
-    //             select.niceSelectInstance = NiceSelect.bind(select, { searchable: true });
-
-    //             // Ocultar el preload después de cargar las tiendas
-    //             preloadElement.style.display = 'none';
-
-    //             // Mostrar el select después de cargar las tiendas
-    //             select.style.display = 'block'; // O 'inline-block' según tu diseño
-    //         })
-    //         .catch(error => {
-    //             console.error('Error al cargar las tiendas:', error);
-    //             preloadElement.style.display = 'none'; // Ocultar el preload en caso de error
-    //         });
-    // }
-
-    // // Ocultar el select de tiendas inicialmente
-    // let selectTienda = document.getElementById('idTienda');
-    // selectTienda.style.display = 'none'; // Esto oculta el select de tiendas al principio
-
-    // // Cargar las tiendas solo si no se han cargado previamente
-    // if (!tiendasCargadas) {
-    //     cargarTiendas();
-    //     tiendasCargadas = true;
-    // }
-
-
-
-
-
     // Evento para cuando se selecciona un cliente
     document.getElementById('idCliente').addEventListener('change', function () {
         let clienteId = this.value;

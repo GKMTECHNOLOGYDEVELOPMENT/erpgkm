@@ -5,6 +5,7 @@ namespace App\Http\Controllers\almacen\productos;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Marca;
+use App\Models\MarcaClienteGeneral;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
@@ -205,5 +206,20 @@ class MarcaController extends Controller
     
         return response()->json($marcas); // Devolvemos los datos en formato JSON
     }
+
+
+    // Dentro del controlador
+
+public function getMarcasByClienteGeneral($idClienteGeneral)
+{
+    // Obtener las marcas relacionadas con el cliente general
+    $marcas = MarcaClienteGeneral::where('idClienteGeneral', $idClienteGeneral)
+                                  ->with('marca') // Asumiendo que tienes una relación en el modelo
+                                  ->get()
+                                  ->pluck('marca'); // Opción para obtener solo las marcas, dependiendo de tu estructura
+
+    return response()->json($marcas);
+}
+
     
 }

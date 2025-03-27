@@ -401,6 +401,9 @@ Route::get('ordenes/smart/{id}/obtener-firma-tecnico', [OrdenesTrabajoController
 Route::get('/get-marcas', [MarcaController::class, 'checkMarcas']);
 
 
+Route::get('/marcas-por-cliente-general/{idClienteGeneral}', [MarcaController::class, 'getMarcasByClienteGeneral']);
+
+
 
 
 
