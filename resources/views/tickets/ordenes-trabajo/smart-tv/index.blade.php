@@ -182,6 +182,7 @@
                 <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
                     <thead>
                         <tr>
+                            <th class="text-center px-4 py-2">ID</th>
                             <th class="text-center px-4 py-2">EDITAR</th>
                             <th class="text-center px-4 py-2">N. TICKET</th>
                             <th class="text-center px-4 py-2">F. TICKET</th>

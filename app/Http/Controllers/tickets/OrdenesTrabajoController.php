@@ -1142,12 +1142,22 @@ class OrdenesTrabajoController extends Controller
         $recordsFiltered = $query->count();
 
         // 🔹 ORDENACIÓN: Los tickets más recientes primero
-        $query->orderBy('fecha_creacion', 'desc');
+        $query->select('tickets.*')->orderBy('idTickets', 'desc');
+        $ordenes = $query->skip($request->input('start', 0))
+            ->take($request->input('length', 10))
+            ->get();
 
-        // 🔹 PAGINACIÓN SEGÚN DATATABLES
-        $start = $request->input('start', 0);
-        $length = $request->input('length', 10);
-        $ordenes = $query->skip($start)->take($length)->get();
+        // 🔥 LIMPIA los datos para evitar UTF-8 mal formado
+        $ordenes = $ordenes->map(function ($item) {
+            $arr = json_decode(json_encode($item), true);
+            array_walk_recursive($arr, function (&$v) {
+                if (is_string($v)) {
+                    $v = mb_convert_encoding($v, 'UTF-8', 'UTF-8');
+                }
+            });
+            return $arr;
+        });
+
 
         return response()->json([
             "draw" => intval($request->input('draw')),
