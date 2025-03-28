@@ -1120,6 +1120,9 @@ class OrdenesTrabajoController extends Controller
                         ->orWhereHas('cliente', function ($q) use ($searchValue) {
                             $q->where('nombre', 'LIKE', "%{$searchValue}%");
                         })
+                        ->orWhereHas('marca', function ($q) use ($searchValue) {
+                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
+                        })                        
                         ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                         ->orWhereHas('visitas', function ($q) use ($searchValue) {
                             $q->where('fecha_programada', 'LIKE', "%{$searchValue}%");
@@ -1139,14 +1142,15 @@ class OrdenesTrabajoController extends Controller
 
         // 🔹 TOTAL DE REGISTROS
         $recordsTotal = Ticket::count();
-        $recordsFiltered = $query->count();
+        $query->orderBy('idTickets', 'desc');
 
-        // 🔹 ORDENACIÓN: Los tickets más recientes primero
-        $query->select('tickets.*')->orderBy('idTickets', 'desc');
+        // ✅ Clonamos la query justo ANTES de paginar
+        $recordsFiltered = (clone $query)->count();
+        
         $ordenes = $query->skip($request->input('start', 0))
             ->take($request->input('length', 10))
             ->get();
-
+        
         // 🔥 LIMPIA los datos para evitar UTF-8 mal formado
         $ordenes = $ordenes->map(function ($item) {
             $arr = json_decode(json_encode($item), true);
@@ -1194,7 +1198,7 @@ class OrdenesTrabajoController extends Controller
 
     public function marcaapi()
     {
-        $marcas = Marca::all(); // O lo que sea necesario para recuperar las marcas
+        $marcas = Marca::all()->makeHidden(['foto']);
         return response()->json($marcas);
     }
 
