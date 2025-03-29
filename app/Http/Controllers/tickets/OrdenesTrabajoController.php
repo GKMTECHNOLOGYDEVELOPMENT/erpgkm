@@ -1124,6 +1124,9 @@ class OrdenesTrabajoController extends Controller
                         ->orWhereHas('cliente', function ($q) use ($searchValue) {
                             $q->where('nombre', 'LIKE', "%{$searchValue}%");
                         })
+                        ->orWhereHas('marca', function ($q) use ($searchValue) {
+                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
+                        })
                         ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                         ->orWhereHas('visitas', function ($q) use ($searchValue) {
                             $q->where('fecha_programada', 'LIKE', "%{$searchValue}%");
@@ -1143,15 +1146,26 @@ class OrdenesTrabajoController extends Controller
 
         // 🔹 TOTAL DE REGISTROS
         $recordsTotal = Ticket::count();
-        $recordsFiltered = $query->count();
+        $query->orderBy('idTickets', 'desc');
 
-        // 🔹 ORDENACIÓN: Los tickets más recientes primero
-        $query->orderBy('fecha_creacion', 'desc');
+        // ✅ Clonamos la query justo ANTES de paginar
+        $recordsFiltered = (clone $query)->count();
 
-        // 🔹 PAGINACIÓN SEGÚN DATATABLES
-        $start = $request->input('start', 0);
-        $length = $request->input('length', 10);
-        $ordenes = $query->skip($start)->take($length)->get();
+        $ordenes = $query->skip($request->input('start', 0))
+            ->take($request->input('length', 10))
+            ->get();
+
+        // 🔥 LIMPIA los datos para evitar UTF-8 mal formado
+        $ordenes = $ordenes->map(function ($item) {
+            $arr = json_decode(json_encode($item), true);
+            array_walk_recursive($arr, function (&$v) {
+                if (is_string($v)) {
+                    $v = mb_convert_encoding($v, 'UTF-8', 'UTF-8');
+                }
+            });
+            return $arr;
+        });
+
 
         return response()->json([
             "draw" => intval($request->input('draw')),
@@ -1188,7 +1202,7 @@ class OrdenesTrabajoController extends Controller
 
     public function marcaapi()
     {
-        $marcas = Marca::all(); // O lo que sea necesario para recuperar las marcas
+        $marcas = Marca::all()->makeHidden(['foto']);
         return response()->json($marcas);
     }
 
@@ -3010,6 +3024,126 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+    private function buildInformeHtml($idOt)
+    {
+        $orden = Ticket::with([
+            'cliente',
+            'clienteGeneral',
+            'tienda',
+            'tecnico',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot',
+            'visitas.tecnico',
+            'visitas.anexos_visitas',
+            'visitas.fotostickest'
+        ])->findOrFail($idOt);
+
+        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
+        if (!$seleccionada) return '<h1>Visita no encontrada</h1>';
+
+        $idVisitasSeleccionada = $seleccionada->idVisitas;
+        $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->whereNotNull('justificacion')
+            ->where('justificacion', '!=', '')
+            ->with('estado_ot')
+            ->get();
+
+        $producto = [
+            'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
+            'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
+            'modelo' => $orden->modelo->nombre ?? 'No especificado',
+            'serie' => $orden->serie ?? 'No especificado',
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+        ];
+        $marca = $orden->modelo->marca ?? null;
+
+        $visitas = collect();
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+        if ($visitaSeleccionada) {
+            $visitas = collect([[
+                'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                'fecha_programada' => optional($visitaSeleccionada->fecha_programada)->format('d/m/Y'),
+                'hora_inicio' => optional($visitaSeleccionada->fecha_inicio)->format('H:i'),
+                'hora_final' => optional($visitaSeleccionada->fecha_final)->format('H:i'),
+                'fecha_llegada' => optional($visitaSeleccionada->fecha_llegada)->format('d/m/Y H:i'),
+                'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
+                'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
+                'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+            ]]);
+        }
+
+        $firma = DB::table('firmas')->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->first();
+
+        $firmaCliente = $firma && !empty($firma->firma_cliente)
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            : null;
+
+        $firmaTecnico = null;
+        if ($visitaSeleccionada && $visitaSeleccionada->tecnico && !empty($visitaSeleccionada->tecnico->firma)) {
+            $firmaTecnico = 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma);
+        }
+
+        $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
+            return [
+                'foto_base64' => !empty($anexo->foto)
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                    : null,
+                'descripcion' => $anexo->descripcion
+            ];
+        });
+
+        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+            return [
+                'foto_base64' => !empty($foto->foto)
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                    : null,
+                'descripcion' => $foto->descripcion
+            ];
+        });
+
+        $fechaCreacion = optional($visitaSeleccionada->fecha_inicio)->format('d/m/Y') ?? 'N/A';
+        $tipoUsuario = $visitaSeleccionada->tecnico->idTipoUsuario ?? null;
+
+        $vistaPdf = ($tipoUsuario == 4)
+            ? 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer'
+            : 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
+
+        return view($vistaPdf, [
+            'orden' => $orden,
+            'fechaCreacion' => $fechaCreacion,
+            'producto' => $producto,
+            'transicionesStatusOt' => $transicionesStatusOt,
+            'visitas' => $visitas,
+            'firmaTecnico' => $firmaTecnico,
+            'firmaCliente' => $firmaCliente,
+            'imagenesAnexos' => $imagenesAnexos,
+            'imagenesFotosTickets' => $imagenesFotosTickets,
+            'marca' => $marca
+        ])->render();
+    }
+
+    public function vistaPreviaImagen($idOt)
+    {
+        $html = $this->buildInformeHtml($idOt);
+    
+        return response(
+            Browsershot::html($html)
+                ->windowSize(800, 1200)
+                ->fullPage()
+                ->noSandbox()
+                ->emulateMedia('screen')
+                ->waitUntilNetworkIdle()
+                ->screenshot(),
+            200
+        )->header('Content-Type', 'image/png');
+    }
+    
 
 
 

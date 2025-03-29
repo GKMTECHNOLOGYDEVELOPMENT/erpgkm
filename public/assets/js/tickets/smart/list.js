@@ -4,18 +4,30 @@ document.addEventListener('alpine:init', () => {
         ordenesData: [],
         marcas: [],
         marcaFilter: '',
+        clienteGeneralFilter: '',
         startDate: '',
         endDate: '',
         isLoading: false,
 
         init() {
-            this.injectStyles(); // 🔥 Agrega los estilos automáticamente
-            this.fetchMarcas();
-            this.fetchDataAndInitTable();
-            this.$watch('marcaFilter', () => this.fetchDataAndInitTable());
-            this.$watch('startDate', () => this.fetchDataAndInitTable());
-            this.$watch('endDate', () => this.fetchDataAndInitTable());
+            this.$nextTick(() => {
+                this.injectStyles();
+                this.fetchMarcas();
+                this.fetchDataAndInitTable();
+                this.$watch('marcaFilter', () => this.fetchDataAndInitTable());
+                this.$watch('startDate', () => this.fetchDataAndInitTable());
+                this.$watch('endDate', () => this.fetchDataAndInitTable());
+                // ✅ Escuchar filtro de cliente general
+                document.addEventListener('cliente-general-cambio', (e) => {
+                    this.clienteGeneralFilter = e.detail;
+                    this.isLoading = true; // ✅ Mostrar preloader
+                    this.fetchDataAndInitTable();
+                });
+                
+
+            });
         },
+
         injectStyles() {
             const style = document.createElement("style");
             style.innerHTML = `
@@ -38,6 +50,7 @@ document.addEventListener('alpine:init', () => {
         fetchDataAndInitTable() {
             this.isLoading = true;
 
+
             // 🔹 Destruir DataTable antes de inicializarlo de nuevo
             if ($.fn.DataTable.isDataTable('#myTable1')) {
                 $('#myTable1').DataTable().destroy();
@@ -46,13 +59,15 @@ document.addEventListener('alpine:init', () => {
             this.datatable1 = $('#myTable1').DataTable({
                 processing: false,
                 serverSide: true,
-                order: [[2, 'desc']], // 🔥 Mantener orden por "F. TICKET" (fecha_creacion)
+                order: [[0, 'desc']], // 👈 ORDENAR POR ID
                 ajax: {
                     url: "/api/ordenes",
                     type: "GET",
                     data: (d) => {
                         d.tipoTicket = 1;
+                        d.clienteGeneral = this.clienteGeneralFilter; // 👈 Agregado
                     },
+
                     beforeSend: () => {
                         this.isLoading = true; // 🔹 Muestra el preloader antes de la petición
                     },
@@ -60,11 +75,14 @@ document.addEventListener('alpine:init', () => {
                         this.isLoading = false; // 🔹 Oculta el preloader después de recibir datos
                     },
                     dataSrc: (json) => {
-                        this.ordenesData = json.data; // Guardamos datos para toggleRowDetails
+                        console.log("👉 Datos recibidos del servidor:", json.data); // 🔥 Esto te mostrará los registros devueltos
+                        this.ordenesData = json.data;
                         return json.data;
                     }
+                    
                 },
                 columns: [
+                    { title: 'ID', data: "idTickets" }, // 👈 NUEVA COLUMNA
                     { title: 'EDITAR', data: null, orderable: false, render: this.getEditButton },
                     { title: 'N. TICKET', data: "numero_ticket", defaultContent: "N/A" },
                     { title: 'F. TICKET', data: "fecha_creacion", defaultContent: "N/A", render: formatDate },
@@ -74,14 +92,14 @@ document.addEventListener('alpine:init', () => {
                         defaultContent: "N/A",
                         render: function (data) {
                             if (data && data.length > 0) {
-                                return formatDate(data[0].fecha_programada); // ✅ Obtiene la última visita
+                                return formatDate(data[0].fecha_programada);
                             }
                             return "N/A";
                         }
                     },
-
                     { title: 'CATEGORIA', data: "modelo.categoria.nombre", defaultContent: "N/A" },
                     { title: 'GENERAL', data: "clientegeneral.descripcion", defaultContent: "N/A" },
+                    { title: 'MARCA', data: "marca.nombre", defaultContent: "N/A" },
                     { title: 'MODELO', data: "modelo.nombre", defaultContent: "N/A" },
                     { title: 'SERIE', data: "serie", defaultContent: "N/A" },
                     { title: 'CLIENTE', data: "cliente.nombre", defaultContent: "N/A" },
@@ -96,14 +114,17 @@ document.addEventListener('alpine:init', () => {
                     },
                     { title: 'MÁS', data: null, orderable: false, render: this.getMoreButton }
                 ],
+
                 columnDefs: [
-                    { targets: "_all", className: "text-center" }, // 🔥 Centrar todas las columnas
-                    { targets: 9, width: "200px", className: "text-wrap" } // 🔥 Reducir ancho de DIRECCIÓN y permitir salto de línea
+                    { targets: 0, visible: false }, // ✅ OCULTA ID
+                    { targets: 7, visible: false }, // 👈 Oculta MARCA (ajusta el índice si cambió)
+                    { targets: "_all", className: "text-center" },
+                    { targets: 10, width: "200px", className: "text-wrap" } // DIRECCIÓN
                 ],
                 searching: true,
                 paging: true,
                 pageLength: 10,
-                order: [],
+                order: [[0, 'desc']], // ✅ ORDENA POR ID
                 language: {
                     search: 'Buscar...',
                     zeroRecords: 'No se encontraron registros',

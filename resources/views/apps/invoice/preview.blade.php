@@ -1,7 +1,7 @@
 <x-layout.default>
 
 
-    <div x-data="invoicePreview">
+    {{-- <div x-data="invoicePreview">
         <div class="flex items-center lg:justify-end justify-center flex-wrap gap-4 mb-6">
             <button type="button" class="btn btn-info gap-2">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -72,13 +72,13 @@
                         stroke="currentColor" stroke-width="1.5"></path>
                 </svg>
                 Edit </a>
-        </div>
+        </div> --}}
         <div class="panel">
             <div class="flex justify-between flex-wrap gap-4 px-4">
-                <div class="text-2xl font-semibold uppercase">Invoice</div>
+                <div class="text-2xl font-semibold uppercase">DATOS DEL ENVIO</div>
                 <div class="shrink-0">
-                    <img src="/assets/images/logo.svg" alt="image"
-                        class="w-14 ltr:ml-auto rtl:mr-auto" />
+                    <img src="/assets/images/auth/logogkm2.png" alt="image"
+                        class="w-40 ltr:ml-auto rtl:mr-auto" />
                 </div>
             </div>
             <div class="ltr:text-right rtl:text-left px-4">
@@ -165,7 +165,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="grid sm:grid-cols-2 grid-cols-1 px-4 mt-6">
+            {{-- <div class="grid sm:grid-cols-2 grid-cols-1 px-4 mt-6">
                 <div></div>
                 <div class="ltr:text-right rtl:text-left space-y-2">
                     <div class="flex items-center">
@@ -189,7 +189,7 @@
                         <div class="w-[37%]">$3945</div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
     <script>
