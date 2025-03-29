@@ -108,6 +108,15 @@
                     </label>
                 </div>
 
+                
+                <div id="esEnvioContainer" class="hidden">
+                    <label class="block text-sm font-medium mb-2">¿Es Envio?</label>
+                    <label class="w-12 h-6 relative inline-block">
+                        <input type="checkbox" id="esEnvio" name="esEnvio" class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                        <span class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                    </label>
+                </div>
+
 
                 <!-- Botones -->
                 <div class="md:col-span-2 flex justify-end mt-4">
@@ -117,6 +126,8 @@
             </form>
         </div>
     </div>
+
+    
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializa Select2 solo una vez para otros selects si es necesario
@@ -130,6 +141,7 @@
         // Lógica para mostrar el checkbox si el tipo de servicio es "SOPORTE ON SITE"
         const selectTipoServicio = document.getElementById("tipoServicio");
         const esRecojoContainer = document.getElementById("esRecojoContainer");
+        const esEnvioContainer = document.getElementById("esEnvioContainer");
 
         function verificarTipoServicio() {
             const tipoSeleccionado = selectTipoServicio.options[selectTipoServicio.selectedIndex];
@@ -137,8 +149,10 @@
 
             if (nombreTipo === "SOPORTE ON SITE") {
                 esRecojoContainer.classList.remove("hidden");
+                esEnvioContainer.classList.remove("hidden");
             } else {
                 esRecojoContainer.classList.add("hidden");
+                esEnvioContainer.classList.add("hidden");
             }
         }
 
