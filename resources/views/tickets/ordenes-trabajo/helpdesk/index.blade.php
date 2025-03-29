@@ -125,42 +125,52 @@
             <div class="flex flex-wrap items-end gap-2">
                 <!-- Botón Agregar -->
                 <a href="{{ route('ordenes.createhelpdesk') }}" class="btn btn-primary btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m4-4H8" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <!-- Línea vertical -->
+                        <line x1="12" y1="6" x2="12" y2="18" stroke-linecap="round" />
+                        <!-- Línea horizontal -->
+                        <line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round" />
                     </svg>
                 </a>
-                
+
 
                 <!-- Botón Exportar (Excel) -->
                 <div x-data="{ open: false }" class="relative">
                     <a href="{{ route('ordenes.export.helpdesk.excel') }}" class="btn btn-success btn-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" viewBox="0 0 24 24"
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" viewBox="0 0 24 24"
                             fill="currentColor">
+                            <!-- Fondo del ícono de Excel -->
                             <path
                                 d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2H6Z"
-                                fill="#2E7D32" />
-                            <path d="M14 2V8H20" fill="#1B5E20" />
+                                fill="#107C41" />
+                            <!-- Parte superior de la hoja de Excel -->
+                            <path d="M14 2V8H20" fill="#0B5E30" />
+                            <!-- Letra X de Excel -->
                             <path d="M9 13L15 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
                             <path d="M15 13L9 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
                         </svg>
+
                     </a>
                 </div>
 
                 <!-- Botón Refrescar -->
                 <button @click="startDate = ''; endDate = ''; marcaFilter = ''; fetchDataAndInitTable()"
                     class="btn btn-secondary btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <polyline points="23 4 23 10 17 10" />
-                        <polyline points="1 20 1 14 7 14" />
-                        <path d="M3.51 9a9 9 0 0114.36-3.36L23 10" />
-                        <path d="M20.49 15a9 9 0 01-14.36 3.36L1 14" />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <!-- Flecha superior derecha -->
+                        <polyline points="23 4 23 10 17 10" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Flecha inferior izquierda -->
+                        <polyline points="1 20 1 14 7 14" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Línea curva superior -->
+                        <path d="M3.51 9a9 9 0 0114.36-3.36L23 10" stroke-linecap="round" stroke-linejoin="round" />
+                        <!-- Línea curva inferior -->
+                        <path d="M20.49 15a9 9 0 01-14.36 3.36L1 14" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
+
                 </button>
             </div>
         </div>
@@ -168,16 +178,29 @@
         <!-- Tabla y Paginación -->
         <div class="panel mt-6">
             <div class="relative overflow-x-auto custom-scroll">
+                <!-- Preloader -->
+                <div x-show="isLoading" x-transition class="absolute inset-0 flex items-center justify-center z-50">
+                    <span class="relative flex items-center justify-center w-16 h-16">
+                        <!-- Cuadrado blanco de fondo más grande -->
+                        <span class="absolute w-14 h-14 bg-white rounded-md"></span>
+                        <!-- Círculo animado -->
+                        <span class="animate-ping inline-flex h-5 w-5 rounded-full bg-info"></span>
+                    </span>
+                </div>
+
+
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
                 <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
                     <thead>
                         <tr>
+                            <th class="text-center px-4 py-2">ID</th>
                             <th class="text-center px-4 py-2">EDITAR</th>
                             <th class="text-center px-4 py-2">N. TICKET</th>
                             <th class="text-center px-4 py-2">F. TICKET</th>
                             <th class="text-center px-4 py-2">F. VISITA</th>
                             <th class="text-center px-4 py-2">CATEGORIA</th>
                             <th class="text-center px-4 py-2">GENERAL</th>
+                            <th class="text-center px-4 py-2">MARCA</th>
                             <th class="text-center px-4 py-2">MODELO</th>
                             <th class="text-center px-4 py-2">SERIE</th>
                             <th class="text-center px-4 py-2">CLIENTE</th>
@@ -189,14 +212,6 @@
                         <!-- Los datos se llenarán dinámicamente -->
                     </tbody>
                 </table>
-
-                <!-- Preloader -->
-                <div x-show="isLoading"
-                    class="absolute inset-0 flex items-center justify-center bg-white bg-opaacity-75">
-                    <span class="w-10 h-10">
-                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-primary"></span>
-                    </span>
-                </div>
             </div>
             <!-- Paginación -->
             <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>
