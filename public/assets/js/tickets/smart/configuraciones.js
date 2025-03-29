@@ -94,32 +94,48 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-
-
-
-
 document.addEventListener("DOMContentLoaded", function () {
-    const config = {
-        dateFormat: "d/m/Y",
-        altInput: true,
-        altFormat: "F j, Y",
-        locale: "es",
-        allowInput: true,
-        disableMobile: "true",
-        maxDate: "today",
-        defaultDate: "today", // 👈 Mostrar la fecha actual por defecto
+    // Configuración para la fecha de compra (solo fecha, sin hora)
+    const configFechaCompra = {
+        dateFormat: "d/m/Y", // Formato de fecha sin hora
+        altInput: true, // Mostrar en un formato alternativo
+        altFormat: "F j, Y", // Formato alternativo para mostrar
+        locale: "es", // Idioma en español
+        allowInput: true, // Permitir que el usuario ingrese manualmente la fecha
+        disableMobile: "true", // Deshabilitar el calendario en móviles (si es necesario)
+        maxDate: "today", // No permitir fechas futuras
         onChange: function (selectedDates, dateStr, instance) {
-            instance.input.value = instance.formatDate(selectedDates[0], "Y-m-d");
+            // Convertir la fecha a formato Y-m-d al seleccionarla
+            const formattedDate = instance.formatDate(selectedDates[0], "Y-m-d");
+            instance.input.value = formattedDate; // Asignar el valor con el formato correcto
+
+            // Mostrar en consola el valor formateado
+            console.log("Fecha de compra seleccionada (Y-m-d):", formattedDate);
         }
     };
 
-    flatpickr("#fechaCompra", config);
-    flatpickr("#fechaTicket", config);
+    flatpickr("#fechaCompra", configFechaCompra); // Inicializar para la fecha de compra
+
+    // Configuración para la fecha del ticket (con fecha y hora)
+    const configFechaTicket = {
+        ...configFechaCompra, // Copiar la configuración anterior
+        enableTime: true, // Activar la selección de la hora
+        noCalendar: false, // Asegurar que el calendario de fechas esté visible
+        dateFormat: "Y-m-d H:i", // Formato de fecha y hora (Ajustado para enviar Y-m-d H:i)
+        altFormat: "F j, Y H:i", // Formato alternativo para mostrar
+        time_24hr: true, // Utilizar formato de 24 horas para la hora
+        onChange: function (selectedDates, dateStr, instance) {
+            // Asignar el valor con el formato adecuado para fecha y hora
+            const formattedDateTime = instance.formatDate(selectedDates[0], "Y-m-d H:i");
+            instance.input.value = formattedDateTime; // Asignar el valor con el formato correcto
+
+            // Mostrar en consola el valor formateado
+            console.log("Fecha y hora seleccionada (Y-m-d H:i):", formattedDateTime);
+        }
+    };
+
+    flatpickr("#fechaTicket", configFechaTicket); // Inicializar para la fecha de ticket
 });
-
-
-
-
 
 
 
