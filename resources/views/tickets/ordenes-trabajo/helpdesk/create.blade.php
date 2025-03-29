@@ -67,16 +67,7 @@
                     </select>
                 </div>
 
-                <!-- Técnico -->
-                <!-- <div>
-                    <label for="idTecnico" class="block text-sm font-medium">Técnico</label>
-                    <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Técnico</option>
-                        @foreach ($usuarios as $usuario)
-                        <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
-                        @endforeach
-                    </select>
-                </div> -->
+            
 
                 <!-- Tipo de Servicio -->
                 <div>
@@ -196,7 +187,7 @@
         // Obtener los valores de los campos
         const numeroTicket = document.getElementById("numero_ticket").value.trim();
         const idClienteGeneral = document.getElementById("idClienteGeneral").value;
-        const idTecnico = document.getElementById("idTecnico").value;
+    
         const idCliente = document.getElementById("idCliente").value;
         const tipoServicio = document.getElementById("tipoServicio").value;
         const idTienda = document.getElementById("idTienda").value;
@@ -228,10 +219,7 @@
             createErrorText('fallaReportada', 'Campo falla vacío');
         }
 
-        if (!idTecnico) {
-            isValid = false;
-            createErrorText('idTecnico', 'Campo tecnico vacío');
-        }
+  
 
         if (!idTienda) {
             isValid = false;
@@ -245,81 +233,101 @@
         }
     });
 
-    // Agregar un event listener a cada campo para eliminar el error cuando se complete
+    document.addEventListener("DOMContentLoaded", function () {
+    // Lista de campos de entrada
     const fields = [
-        'numero_ticket',
-        'idClienteGeneral',
-        'idCliente',
-        'tipoServicio',
-        'fallaReportada',
-        'idTecnico',
-        'idTienda'
+        "numero_ticket",
+        "idClienteGeneral",
+        "idCliente",
+        "tipoServicio",
+        "fallaReportada",
+
+        "idTienda"
     ];
 
-    fields.forEach(function(fieldId) {
+    fields.forEach(function (fieldId) {
         const field = document.getElementById(fieldId);
-        field.addEventListener('input', function() {
-            if (field.value.trim() !== '') {
-                removeErrorText(fieldId); // Eliminar el mensaje de error si el campo no está vacío
-            }
-        });
+        if (field) { // Verifica que el elemento exista antes de agregar el event listener
+            field.addEventListener("input", function () {
+                if (field.value.trim() !== "") {
+                    removeErrorText(fieldId); // Eliminar el mensaje de error si el campo no está vacío
+                }
+            });
+        } else {
+            console.warn(`Elemento con id "${fieldId}" no encontrado.`);
+        }
     });
 
-     // Para los selects, validar que el valor seleccionado no sea vacío (o el primer valor por defecto)
-     const selectFields = [
-        'idClienteGeneral',
-        'idCliente',
-        'tipoServicio',
-        'idTecnico',
-        'idTienda'
+    // Lista de selects
+    const selectFields = [
+        "idClienteGeneral",
+        "idCliente",
+        "tipoServicio",
+    
+        "idTienda"
     ];
 
-    selectFields.forEach(function(selectId) {
+    selectFields.forEach(function (selectId) {
         const select = document.getElementById(selectId);
-        select.addEventListener('change', function() {
-            if (select.value !== '') {
-                removeErrorText(selectId); // Eliminar el mensaje de error si el select tiene una opción válida seleccionada
-            }
-        });
+        if (select) { // Verifica que el select exista antes de agregar el event listener
+            select.addEventListener("change", function () {
+                if (select.value !== "") {
+                    removeErrorText(selectId); // Eliminar el mensaje de error si el select tiene una opción válida seleccionada
+                }
+            });
+        } else {
+            console.warn(`Elemento con id "${selectId}" no encontrado.`);
+        }
     });
+});
 
 
 
-        // Lógica para obtener clientes relacionados con el Cliente General
-        const selectClienteGeneral = document.getElementById('idClienteGeneral');
-        const selectCliente = document.getElementById('idCliente');
+    document.addEventListener("DOMContentLoaded", function () {
+    const selectClienteGeneral = document.getElementById("idClienteGeneral");
+    const selectCliente = document.getElementById("idCliente");
 
-        selectClienteGeneral.addEventListener('change', function() {
-            const idClienteGeneral = this.value;
+    selectClienteGeneral.addEventListener("change", function () {
+        const idClienteGeneral = this.value;
+        console.log("Cliente General seleccionado:", idClienteGeneral); // Depuración
 
-            // Limpiar las opciones del select de Cliente, pero no el select entero
-            selectCliente.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
+        // Limpiar las opciones del select de Cliente
+        selectCliente.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
 
-            // Hacer la solicitud AJAX solo si se selecciona un Cliente General
-            if (idClienteGeneral) {
-                fetch(`/clientes/${idClienteGeneral}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Asegúrate de que el array de clientes sea válido y tenga elementos
-                        if (data.length > 0) {
-                            // Iterar sobre los datos para agregar las opciones
-                            data.forEach(cliente => {
-                                const option = document.createElement('option');
-                                option.value = cliente.idCliente;
-                                option.textContent = `${cliente.nombre} - ${cliente.documento}`;
-                                selectCliente.appendChild(option);
-                            });
-                        } else {
-                            // Si no hay clientes relacionados, mostrar una opción vacía
-                            const option = document.createElement('option');
-                            option.value = '';
-                            option.textContent = 'No hay clientes disponibles';
+        // Verificar que se haya seleccionado un Cliente General
+        if (idClienteGeneral) {
+            fetch(`/clientes/${idClienteGeneral}`)
+                .then(response => {
+                    console.log("Estado de la respuesta:", response.status);
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Datos recibidos:", data); // Ver los datos en la consola
+
+                    if (Array.isArray(data) && data.length > 0) {
+                        data.forEach(cliente => {
+                            console.log("Agregando cliente:", cliente);
+                            const option = document.createElement("option");
+                            option.value = cliente.idCliente;
+                            option.textContent = `${cliente.nombre} - ${cliente.documento}`;
                             selectCliente.appendChild(option);
-                        }
-                    })
-                    .catch(error => console.error('Error al obtener los clientes:', error));
-            }
-        });
+                        });
+                    } else {
+                        console.warn("No hay clientes disponibles.");
+                        const option = document.createElement("option");
+                        option.value = "";
+                        option.textContent = "No hay clientes disponibles";
+                        selectCliente.appendChild(option);
+                    }
+                })
+                .catch(error => console.error("Error en la solicitud:", error));
+        }
+    });
+});
+
 
       // Validación en tiempo real para el número de ticket
       document.getElementById('numero_ticket').addEventListener('input', function() {
