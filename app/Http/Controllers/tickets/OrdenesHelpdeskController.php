@@ -34,6 +34,7 @@ class OrdenesHelpdeskController extends Controller
     {
         // Obtener usuario autenticado y su rol
         $usuario = Auth::user();
+  
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
         // Obtener los datos necesarios
@@ -1189,4 +1190,14 @@ class OrdenesHelpdeskController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="levantamiento_' . $idOt . '.pdf"');
     }
+
+
+
+    public function obtenerClientes($idClienteGeneral)
+{
+    $clientes = Cliente::where('cliente_general_id', $idClienteGeneral)->get();
+
+    return response()->json($clientes);
+}
+
 }

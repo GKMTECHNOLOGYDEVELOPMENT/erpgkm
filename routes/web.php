@@ -518,6 +518,10 @@ Route::patch('/actualizar-suministro/{id}', [OrdenesHelpdeskController::class, '
 
 
 
+Route::get('/clientes/{idClienteGeneral}', [OrdenesHelpdeskController::class, 'obtenerClientes']);
+
+
+
 Route::view('/apps/invoice/list', 'apps.invoice.list');
 Route::view('/apps/invoice/preview', 'apps.invoice.preview');
 Route::view('/apps/invoice/add', 'apps.invoice.add');
