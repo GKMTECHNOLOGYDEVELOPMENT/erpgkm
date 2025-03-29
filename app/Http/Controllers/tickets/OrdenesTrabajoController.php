@@ -472,12 +472,12 @@ class OrdenesTrabajoController extends Controller
                         ->whereIn('idEstadflujo', [12, 13, 14, 15, 16, 17])  // Obtener los estados con idEstadflujo 3 y 4
                         ->get();
                 } elseif ($idEstadflujo == 12) {
-                    // Si el id Estado flujo es 12 tiene que salir 
+                    // Si el id Estado flujo es 12 tiene que salir
                     $estadosFlujo = DB::table('estado_flujo')
                         ->where('idEstadflujo', 18)
                         ->get();
                 } elseif ($idEstadflujo == 18) {
-                    // Si el id Estado flujo es 12 tiene que salir 
+                    // Si el id Estado flujo es 12 tiene que salir
                     $estadosFlujo = DB::table('estado_flujo')
                         ->where('idEstadflujo', 3)
                         ->get();
@@ -1135,10 +1135,10 @@ class OrdenesTrabajoController extends Controller
                 });
                 // 🔹 Asegurar que los registros con coincidencia EXACTA en `serie` o `numero_ticket` aparezcan primero
                 $query->orderByRaw("
-        CASE 
+        CASE
             WHEN serie = ? THEN 1
             WHEN numero_ticket = ? THEN 2
-            ELSE 3 
+            ELSE 3
         END
     ", [$searchValue, $searchValue]);
             }
@@ -3132,7 +3132,7 @@ class OrdenesTrabajoController extends Controller
     public function vistaPreviaImagen($idOt)
     {
         $html = $this->buildInformeHtml($idOt);
-    
+
         return response(
             Browsershot::html($html)
                 ->windowSize(800, 1200)
@@ -3144,7 +3144,7 @@ class OrdenesTrabajoController extends Controller
             200
         )->header('Content-Type', 'image/png');
     }
-    
+
 
 
 
