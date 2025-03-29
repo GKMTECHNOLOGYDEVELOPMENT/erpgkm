@@ -381,6 +381,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
 
 
+Route::get('/informe/vista-previa-imagen/{idOt}', [OrdenesTrabajoController::class, 'vistaPreviaImagen'])->name('informe.vista-previa.imagen');
 
 Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 'actualizarHelpdesk'])->name('formActualizarOrdenHelpdesk');
 

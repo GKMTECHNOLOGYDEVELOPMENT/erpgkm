@@ -5,18 +5,17 @@
 
     <!-- Firma -->
     <div class="flex justify-center items-center min-h-screen px-4">
-        <div class="w-full max-w-[320px] flex flex-col items-center" x-data="modal">
+        <div class="w-full max-w-[360px] flex flex-col items-center" x-data="modal">
 
-            <!-- Botón "Ejemplo de firma" arriba del título -->
-            <button type="button" class="btn btn-primary mb-2" @click="toggle">
-                Ejemplo de firma
-            </button>
+            <!-- Vista previa del informe generado (como imagen) -->
+            <img src="{{ route('informe.vista-previa.imagen', ['idOt' => $id]) }}" alt="Vista previa del informe"
+                class="w-full rounded-xl shadow-xl border border-gray-300 mt-6 mb-4">
 
             <!-- Título -->
-            <span class="text-lg font-semibold mb-4 badge bg-success">FIRMA DEL CLIENTE</span>
+            <span class="text-lg font-semibold mb-2 badge bg-success">FIRMA DEL CLIENTE</span>
 
             <!-- Canvas firma -->
-            <div class="w-full h-[300px] border-2 border-gray-300 rounded-lg relative">
+            <div class="w-full h-[300px] border-2 border-gray-300 rounded-lg relative mt-2">
                 <canvas id="signatureCanvasCliente" class="w-full h-full"></canvas>
             </div>
 
@@ -26,32 +25,13 @@
                 <button type="button" onclick="saveSignature()" class="btn btn-success">Guardar</button>
             </div>
 
-            <!-- Modal fondo -->
-            <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
-                <div class="flex items-start justify-center min-h-screen px-4" @click.self="toggle">
-                    <div x-show="open" x-transition x-transition.duration.300
-                        class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-sm bg-white shadow-lg">
+            <div class="mb-4">
 
-                        <!-- Header modal -->
-                        <div class="flex bg-[#fbfbfb] items-center justify-between px-4 py-2">
-                            <div class="font-bold text-sm text-gray-800">Ejemplo de firma</div>
-                            <button type="button" class="text-gray-400 hover:text-red-600 text-lg font-bold"
-                                @click="toggle">&times;</button>
-                        </div>
-
-                        <!-- Contenido modal -->
-                        <div class="p-4">
-                            <img src="{{ asset('assets/images/explicacion-firma.gif') }}" alt="GIF de firma"
-                                class="w-full rounded border border-gray-300 mb-3" />
-                            <p class="text-xs text-gray-600 text-center">
-                                Tu firma será usada exclusivamente en este documento técnico.
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
+
         </div>
     </div>
+
 
 
     <input type="hidden" id="ticketId" value="{{ $id }}">
@@ -63,17 +43,6 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
 
-
-    <script>
-        document.addEventListener("alpine:init", () => {
-            Alpine.data("modal", () => ({
-                open: false,
-                toggle() {
-                    this.open = !this.open;
-                },
-            }));
-        });
-    </script>
 
     <script>
         toastr.options = {
