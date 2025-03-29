@@ -139,6 +139,7 @@ class OrdenesTrabajoController extends Controller
 
 
 
+
         return view("tickets.ordenes-trabajo.smart-tv.create", compact(
             'clientesGenerales',
             'clientes',
