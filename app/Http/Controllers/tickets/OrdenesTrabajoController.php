@@ -170,7 +170,7 @@ class OrdenesTrabajoController extends Controller
                 'idModelo' => 'required|integer|exists:modelo,idModelo',
                 'serie' => 'required|string|max:255',
                 'fechaCompra' => 'required|date_format:Y-m-d',
-                'fecha_creacion' => 'required|date_format:Y-m-d',
+                'fecha_creacion' => 'required|date_format:Y-m-d H:i',
                 'fallaReportada' => 'required|string',
                 'linkubicacion' => 'required|string',
                 'lat' => 'nullable|string|max:255',
@@ -193,6 +193,10 @@ class OrdenesTrabajoController extends Controller
                 Log::info('Tienda creada', ['tienda' => $tienda]);
             }
 
+            // Obtener la fecha y hora como una instancia de Carbon
+            $fechaCreacion = \Carbon\Carbon::createFromFormat('Y-m-d H:i', $validatedData['fecha_creacion']);
+
+
             // Crear la nueva orden de trabajo
             $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['nroTicket'],
@@ -209,7 +213,7 @@ class OrdenesTrabajoController extends Controller
                 'lat' => $validatedData['lat'],
                 'lng' => $validatedData['lng'],
                 'idUsuario' => auth()->id(),
-                'fecha_creacion' => $validatedData['fecha_creacion'],
+                'fecha_creacion' => $fechaCreacion,  // Aseguramos que se guarda correctamente
                 'idTipotickets' => 1,
                 'tipoServicio' => 1,
             ]);

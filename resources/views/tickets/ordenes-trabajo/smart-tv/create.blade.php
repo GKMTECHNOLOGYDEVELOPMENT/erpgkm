@@ -137,13 +137,13 @@
                     <input id="fechaCompra" name="fechaCompra" type="date" class="form-input w-full"
                         placeholder="Seleccionar fecha">
                 </div>
+<!-- Fecha de fecha_creacion -->
+<div>
+    <label for="fechaTicket" class="block text-sm font-medium">Fecha de Ticket</label>
+    <input id="fechaTicket" name="fecha_creacion" type="datetime-local" class="form-input w-full"
+        placeholder="Seleccionar fecha y hora">
+</div>
 
-                <!-- Fecha de fecha_creacion -->
-                <div>
-                    <label for="fechaTicket" class="block text-sm font-medium">Fecha de Ticket</label>
-                    <input id="fechaTicket" name="fecha_creacion" type="date" class="form-input w-full"
-                        placeholder="Seleccionar fecha">
-                </div>
 
                 <!-- Marca -->
                 <div>
@@ -908,7 +908,7 @@
         // Validación en tiempo real para campos obligatorios
         const camposObligatorios = [
             'idCliente', 'idClienteGeneral',
-            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada'
+            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket'
         ];
 
         camposObligatorios.forEach(campo => {
