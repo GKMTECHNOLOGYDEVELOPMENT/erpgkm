@@ -93,8 +93,7 @@
             <div
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($tecnico1 === 'N/A')
-                    <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                    <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del
                     {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}</h3>
@@ -107,8 +106,7 @@
             <div
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($tipoRecojo1 === 'N/A' && $tipoEnvio1 === 'N/A')
-                    <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                    <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del
                     {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}</h3>
@@ -121,8 +119,7 @@
             <div
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($ejecutor === 'N/A')
-                    <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                    <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Ejecutor</h3>
                 <div><strong>Nombre:</strong> {{ $ejecutor }}</div>
@@ -135,34 +132,33 @@
                     <h3 class="font-semibold text-base border-b pb-1 mb-2">
                         Manejo del {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}
                     </h3>
-                    <div class="flex justify-between flex-wrap gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <div><strong>N° Guía:</strong> {{ $manejoEnvio1->numero_guia }}</div>
                         <div><strong>Agencia de Recepción:</strong> {{ $manejoEnvio1->agenciaRecepcion }}</div>
-                    </div>
-                    <div class="flex justify-between flex-wrap gap-4">
+
                         <div><strong>Agencia de Envío:</strong> {{ $manejoEnvio1->agenciaEnvio }}</div>
                         <div><strong>Clave:</strong> {{ $manejoEnvio1->clave }}</div>
-                    </div>
-                    <div class="flex justify-between flex-wrap gap-4">
+
                         <div><strong>Fecha de Envío:</strong>
                             {{ \Carbon\Carbon::parse($manejoEnvio1->fecha_envio)->format('d/m/Y H:i') }}</div>
                         <div><strong>Fecha Estimada de Llegada:</strong>
                             {{ \Carbon\Carbon::parse($manejoEnvio1->fecha_llegada_estimada)->format('d/m/Y H:i') }}
                         </div>
-                    </div>
-                    <div>
-                        <strong>Registrado por:</strong>
-                        {{ $usuarioEnvio1 ? "{$usuarioEnvio1->Nombre} {$usuarioEnvio1->apellidoPaterno}" : 'N/A' }}
+
+                        <div class="col-span-2">
+                            <strong>Registrado por:</strong>
+                            {{ $usuarioEnvio1 ? "{$usuarioEnvio1->Nombre} {$usuarioEnvio1->apellidoPaterno}" : 'N/A' }}
+                        </div>
                     </div>
                 </div>
             @endif
+
 
             {{-- Receptor --}}
             <div
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($receptorNombre === 'N/A' && $receptorDni === 'N/A')
-                    <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                    <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Datos del Receptor</h3>
                 <div><strong>Nombre:</strong> {{ $receptorNombre }}</div>
@@ -189,8 +185,7 @@
 
                         <div class="relative space-y-2 text-sm text-gray-700 dark:text-white">
                             @if ($imagenVacia)
-                                <span
-                                    class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                                <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                             @endif
 
                             <a data-fancybox="anexos1" href="data:image/jpeg;base64,{{ base64_encode($anexo->foto) }}"
@@ -226,8 +221,7 @@
                 <div
                     class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                     @if (!$tecnico2 || $correo2 == 'N/A' || $telefono2 == 'N/A')
-                        <span
-                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                        <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                     @endif
                     <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del
                         {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
@@ -240,8 +234,7 @@
                 <div
                     class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                     @if ($tipoRecojo2 == 'N/A' || $tipoEnvio2 == 'N/A')
-                        <span
-                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                        <span class="absolute top-2 right-2 badge bg-warning">Pendiente</span>
                     @endif
                     <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del
                         {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
@@ -257,42 +250,37 @@
                     <div><strong>2.</strong> Fernando</div>
                 </div>
 
-                <!-- Manejo Envío -->
                 @if ($manejoEnvio2)
                     <div
                         class="md:col-span-2 relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                         @if (!$manejoEnvio2->numero_guia || !$manejoEnvio2->clave || !$usuarioEnvio2)
-                            <span
-                                class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                            <span class="absolute top-2 right-2 badge bg-warning">Pendiente</span>
                         @endif
 
                         <h3 class="font-semibold text-base border-b pb-1 mb-2">Manejo del
                             {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
 
-                        <div class="flex justify-between flex-wrap gap-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <div><strong>N° Guía:</strong> {{ $manejoEnvio2->numero_guia }}</div>
                             <div><strong>Agencia de Recepción:</strong> {{ $manejoEnvio2->agenciaRecepcion }}</div>
-                        </div>
 
-                        <div class="flex justify-between flex-wrap gap-4">
                             <div><strong>Agencia de Envío:</strong> {{ $manejoEnvio2->agenciaEnvio }}</div>
                             <div><strong>Clave:</strong> {{ $manejoEnvio2->clave }}</div>
-                        </div>
 
-                        <div class="flex justify-between flex-wrap gap-4">
                             <div><strong>Fecha de Envío:</strong>
                                 {{ \Carbon\Carbon::parse($manejoEnvio2->fecha_envio)->format('d/m/Y H:i') }}</div>
                             <div><strong>Fecha Estimada de Llegada:</strong>
                                 {{ \Carbon\Carbon::parse($manejoEnvio2->fecha_llegada_estimada)->format('d/m/Y H:i') }}
                             </div>
-                        </div>
 
-                        <div>
-                            <strong>Registrado por:</strong>
-                            {{ $usuarioEnvio2 ? "{$usuarioEnvio2->Nombre} {$usuarioEnvio2->apellidoPaterno}" : 'N/A' }}
+                            <div class="col-span-2">
+                                <strong>Registrado por:</strong>
+                                {{ $usuarioEnvio2 ? "{$usuarioEnvio2->Nombre} {$usuarioEnvio2->apellidoPaterno}" : 'N/A' }}
+                            </div>
                         </div>
                     </div>
                 @endif
+
             </div>
 
 
@@ -316,8 +304,7 @@
                                         alt="Anexo de Retiro" class="object-contain w-full h-full" />
 
                                     @if (strlen($anexo->foto ?? '') <= 1)
-                                        <span
-                                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">
+                                        <span class="absolute top-2 right-2 badge bg-warning">
                                             Vacío
                                         </span>
                                     @endif
