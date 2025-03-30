@@ -5,26 +5,11 @@
 </span>
 
 <div class="flex gap-1 sm:gap-2 justify-center mt-2">
-    @if (!$existeFlujo4 && ($condicion || !$visitaExistente || $ultimaVisitaCondicion))
         <!-- Si no existe el flujo con idEstadflujo = 4, existe una condición para el idTickets y idVisitas, o no existe ninguna visita, mostrar el botón -->
-        <button id="crearCordinacionBtn"
-            class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
+        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
             Coordinación
         </button>
-    @else
-        <!-- Si no se cumple ninguna de las condiciones anteriores, ocultar el botón -->
-        <button id="crearCordinacionBtn"
-            class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base"
-            style="display: none;">
-            Coordinación
-        </button>
-    @endif
 </div>
-
-
-
-
-
 
 
 
@@ -32,8 +17,6 @@
 <div id="visitasContainer" class="mt-4">
     <div id="visitasList" class="space-y-4"></div>
 </div>
-
-
 
 
 
@@ -95,12 +78,10 @@
 </div>
 
 
-
-
 <div x-data="{
     openCondiciones: false,
     visitaId: null, // Agrega esta propiedad
-    latitud: null, // Variable para almacenar la latitud
+    latitud: null,  // Variable para almacenar la latitud
     longitud: null, // Variable para almacenar la longitud
     ubicacion: null, // Variable para almacenar la dirección
 
@@ -214,8 +195,10 @@
                 toastr.error('Hubo un error al guardar las condiciones.');
             });
     }
-}" class="mb-5" @set-visita-id.window="visitaId = $event.detail"
-    @toggle-modal-condiciones.window="openCondiciones = !openCondiciones" x-init="obtenerUbicacion()">
+}" class="mb-5"
+@set-visita-id.window="visitaId = $event.detail"
+@toggle-modal-condiciones.window="openCondiciones = !openCondiciones"
+x-init="obtenerUbicacion()">
     <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
             <div x-show="openCondiciones" x-transition:enter="transition ease-out duration-300 transform"
@@ -355,24 +338,15 @@
 
 
 
-
-
-
-
-
-
-
-
-
 <!-- Contenedor donde se agregarán las visitas -->
 <div id="cordinacionContainer" class="mt-5 flex flex-col space-y-4"></div>
 
 
 <!-- MODAL PARA CREAR VISITA USANDO ALPINE.JS -->
 <div x-data="{
-    open: false,
-    encargadoTipo: '',
-    necesitaApoyo: false,
+    open: false, 
+    encargadoTipo: '', 
+    necesitaApoyo: false, 
     imagePreview: null,
 
     // Función para previsualizar la imagen antes de subirla
@@ -384,7 +358,8 @@
             reader.readAsDataURL(file);
         }
     }
-}" class="mb-5" @toggle-modal.window="open = !open">
+}" 
+class="mb-5" @toggle-modal.window="open = !open">
 
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
@@ -392,7 +367,7 @@
                 class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
                 <!-- Header del Modal -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg"> Nueva Coordinación</h5>
+                    <h5 class="font-bold text-lg"> Nueva Coordinación Levantamiento Informacion</h5>
                     <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -424,35 +399,32 @@
                         <div class="w-full">
                             <label class="block text-sm font-medium mb-1">Rango de atención</label>
                             <div class="flex space-x-2">
-                                <input id="horaInicioInput" type="text" class="form-input w-1/2"
+                                <input id="horaInicioInput" type="text" name="Hora Inicio"class="form-input w-1/2"
                                     placeholder="Elige la hora de Inicio" required>
-                                <input id="horaFinInput" type="text" class="form-input w-1/2"
+                                <input id="horaFinInput" type="text" name="Hora Fin" class="form-input w-1/2"
                                     placeholder="Elige la hora de Fin" required>
                             </div>
                         </div>
 
-
-
+                        <!-- Encargado -->
                         <div>
                             <label for="encargado" class="block text-sm font-medium">Encargado</label>
-                            <select id="encargado" name="encargado" class="select2 w-full" style="display: none">
+                            <select id="encargado" name="encargado" class="select2 w-full" style="display: none"
+                                @change="encargadoTipo = $event.target.options[$event.target.selectedIndex].dataset.tipo">
                                 <option value="" disabled selected>Seleccionar Encargado</option>
                                 <!-- Aquí se itera sobre los usuarios -->
                                 @foreach ($encargado as $encargados)
                                     <option value="{{ $encargados->idUsuario }}"
-                                        data-tipo="{{ $encargados->idTipoUsuario }}"
-                                        class="{{ $encargados->idTipoUsuario == 1 ? 'tecnico' : 'chofer' }}">
+                                        data-tipo="{{ $encargados->idTipoUsuario }}">
                                         {{ $encargados->Nombre }} -
                                         @if ($encargados->idTipoUsuario == 1)
                                             TÉCNICO
-                                        @elseif($encargados->idTipoUsuario == 4)
-                                            CHOFER
-                                        @endif
+                                   
+                                        @endif 
                                     </option>
                                 @endforeach
                             </select>
                         </div>
-
 
                         <!-- Mostrar checkbox "¿Necesita Apoyo?" solo si el encargado es Técnico -->
                         <div x-show="encargadoTipo == 1" class="mt-4">
@@ -485,8 +457,7 @@
                         <!-- Campo para cargar la imagen -->
                         <div class="space-y-4 mt-2">
                             <label class="block text-sm font-medium">Subir Imagen</label>
-                            <input type="file" x-ref="imagen" id="imagenVisita" @change="previewImage"
-                                name="imagenVisita"
+                            <input type="file" x-ref="imagen" id="imagenVisita" @change="previewImage" name="imagenVisita"
                                 class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 
         file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
 
@@ -514,129 +485,120 @@
 </div>
 
 
-
-
-
-
-
-
-
-
-
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const modal = document.getElementById('imageModal');
-        const modalImage = document.getElementById('modalImage');
-        const modalTitle = document.getElementById('modalTitle'); // ✅ Nuevo elemento para el título
-        const closeModal = document.getElementById('closeModal');
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('modalTitle'); // ✅ Nuevo elemento para el título
+    const closeModal = document.getElementById('closeModal');
 
-        // ✅ Delegación de eventos para los botones "Ver Imagen"
-        document.body.addEventListener('click', function(event) {
-            const button = event.target.closest('button[id^="viewImageButton-"]');
-            if (button) {
-                const visitaId = button.dataset.id; // Extraer ID de la visita
-                const imageType = button.dataset.imageType; // Tipo de imagen
+    // ✅ Delegación de eventos para los botones "Ver Imagen"
+    document.body.addEventListener('click', function(event) {
+        const button = event.target.closest('button[id^="viewImageButton-"]');
+        if (button) {
+            const visitaId = button.dataset.id; // Extraer ID de la visita
+            const imageType = button.dataset.imageType; // Tipo de imagen
 
-                // ✅ Obtener la URL correcta según el tipo de imagen
-                if (imageType === "inicioServicio") {
-                    obtenerImagenInicioServicio(visitaId); // Función para "inicioServicio"
-                } else if (imageType === "finalServicio") {
-                    obtenerImagenFinalServicio(visitaId); // Función para "finalServicio"
-                } else {
-                    obtenerImagen(visitaId, imageType); // Función genérica para otras imágenes
-                }
-
-                // ✅ Cambiar el título del modal según el tipo de imagen
-                modalTitle.textContent = obtenerTituloFase(imageType);
-
-                // ✅ Mostrar el modal
-                modal.classList.remove('hidden');
+            // ✅ Obtener la URL correcta según el tipo de imagen
+            if (imageType === "inicioServicio") {
+                obtenerImagenInicioServicio(visitaId); // Función para "inicioServicio"
+            } else if (imageType === "finalServicio") {
+                obtenerImagenFinalServicio(visitaId); // Función para "finalServicio"
+            } else {
+                obtenerImagen(visitaId, imageType); // Función genérica para otras imágenes
             }
-        });
 
-        // ❌ Cerrar modal al hacer clic en el botón de cerrar
-        closeModal.addEventListener('click', () => {
-            modal.classList.add('hidden');
-        });
+            // ✅ Cambiar el título del modal según el tipo de imagen
+            modalTitle.textContent = obtenerTituloFase(imageType);
 
-        // ❌ Cerrar modal si se hace clic fuera de la imagen/modal
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                modal.classList.add('hidden');
-            }
-        });
-
-        // Función para obtener la imagen de inicio de servicio desde el servidor
-        function obtenerImagenInicioServicio(visitaId) {
-            // Realizar la solicitud AJAX al servidor para obtener la imagen de "inicio de servicio"
-            fetch(`/inicio-servicio-imagen/${visitaId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.imagen) {
-                        // Establecer la imagen en el modal
-                        modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
-                    } else {
-                        console.error('Imagen no encontrada.');
-                        modalImage.src = ''; // Limpiar la imagen si no se encuentra
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al obtener la imagen:', error);
-                });
-        }
-
-        // Función para obtener la imagen de final de servicio desde el servidor
-        function obtenerImagenFinalServicio(visitaId) {
-            // Realizar la solicitud AJAX al servidor para obtener la imagen de "final de servicio"
-            fetch(`/final-servicio-imagen/${visitaId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.imagen) {
-                        // Establecer la imagen en el modal
-                        modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
-                    } else {
-                        console.error('Imagen no encontrada.');
-                        modalImage.src = ''; // Limpiar la imagen si no se encuentra
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al obtener la imagen:', error);
-                });
-        }
-
-        // Función para obtener la imagen desde el servidor (caso genérico)
-        function obtenerImagen(visitaId, imageType) {
-            // Realizar la solicitud AJAX al servidor para obtener la imagen
-            fetch(`/imagen-apoyo/${visitaId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.imagen) {
-                        // Establecer la imagen en el modal
-                        modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
-                    } else {
-                        console.error('Imagen no encontrada.');
-                        modalImage.src = ''; // Limpiar la imagen si no se encuentra
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al obtener la imagen:', error);
-                });
-        }
-
-        // 🔄 Función para obtener el título del modal según la fase
-        function obtenerTituloFase(imageType) {
-            switch (imageType) {
-                case "visita":
-                    return "Imagen - Programación";
-                case "inicioServicio":
-                    return "Imagen - Llegada al Servicio";
-                case "finalServicio":
-                    return "Imagen - Final de Servicio"; // Título para la fase finalServicio
-                default:
-                    return "Imagen de la Visita";
-            }
+            // ✅ Mostrar el modal
+            modal.classList.remove('hidden');
         }
     });
+
+    // ❌ Cerrar modal al hacer clic en el botón de cerrar
+    closeModal.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    // ❌ Cerrar modal si se hace clic fuera de la imagen/modal
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+
+    // Función para obtener la imagen de inicio de servicio desde el servidor
+    function obtenerImagenInicioServicio(visitaId) {
+        // Realizar la solicitud AJAX al servidor para obtener la imagen de "inicio de servicio"
+        fetch(`/inicio-servicio-imagen/${visitaId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.imagen) {
+                    // Establecer la imagen en el modal
+                    modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
+                } else {
+                    console.error('Imagen no encontrada.');
+                    modalImage.src = ''; // Limpiar la imagen si no se encuentra
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener la imagen:', error);
+            });
+    }
+
+    // Función para obtener la imagen de final de servicio desde el servidor
+    function obtenerImagenFinalServicio(visitaId) {
+        // Realizar la solicitud AJAX al servidor para obtener la imagen de "final de servicio"
+        fetch(`/final-servicio-imagen/${visitaId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.imagen) {
+                    // Establecer la imagen en el modal
+                    modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
+                } else {
+                    console.error('Imagen no encontrada.');
+                    modalImage.src = ''; // Limpiar la imagen si no se encuentra
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener la imagen:', error);
+            });
+    }
+
+    // Función para obtener la imagen desde el servidor (caso genérico)
+    function obtenerImagen(visitaId, imageType) {
+        // Realizar la solicitud AJAX al servidor para obtener la imagen
+        fetch(`/imagen-apoyo/${visitaId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.imagen) {
+                    // Establecer la imagen en el modal
+                    modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
+                } else {
+                    console.error('Imagen no encontrada.');
+                    modalImage.src = ''; // Limpiar la imagen si no se encuentra
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener la imagen:', error);
+            });
+    }
+
+    // 🔄 Función para obtener el título del modal según la fase
+    function obtenerTituloFase(imageType) {
+        switch (imageType) {
+            case "visita":
+                return "Imagen - Programación";
+            case "inicioServicio":
+                return "Imagen - Llegada al Servicio";
+            case "finalServicio":
+                return "Imagen - Final de Servicio"; // Título para la fase finalServicio
+            default:
+                return "Imagen de la Visita";
+        }
+    }
+});
 
 
 
@@ -708,152 +670,111 @@
 
 
         guardarBtn.addEventListener("click", function(event) {
-            // Obtener los valores del formulario
-            const nombreVisita = document.getElementById('nombreVisitaInput').value;
-            const fechaVisita = document.getElementById('fechaVisitaInput').value;
-            const horaInicio = document.getElementById('horaInicioInput').value;
-            const horaFin = document.getElementById('horaFinInput').value;
-            const encargado = document.getElementById('encargado').value;
+    // Obtener los valores del formulario
+    const nombreVisita = document.getElementById('nombreVisitaInput').value;
+    const fechaVisita = document.getElementById('fechaVisitaInput').value;
+    const horaInicio = document.getElementById('horaInicioInput').value;
+    const horaFin = document.getElementById('horaFinInput').value;
+    const encargado = document.getElementById('encargado').value;
 
-            // Enviar 1 si el checkbox está marcado, 0 si no
-            const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
+    // Enviar 1 si el checkbox está marcado, 0 si no
+    const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
 
-            const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions)
-                .map(option => option.value);
-            const ticketId = '{{ $ticket->idTickets }}'; // El ID del ticket
+    const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions)
+        .map(option => option.value);
+    const ticketId = '{{ $ticket->idTickets }}'; // El ID del ticket
 
-            // Obtener la imagen seleccionada
-            const imagenVisita = document.getElementById('imagenVisita').files[
-            0]; // Obtener el primer archivo seleccionado
+    // Obtener la imagen seleccionada
+    const imagenVisita = document.getElementById('imagenVisita').files[0]; // Obtener el primer archivo seleccionado
 
-            // Verificar si los campos obligatorios están vacíos
-            if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
-                toastr.error("Por favor, complete todos los campos obligatorios.");
-                return; // Detener la ejecución si falta algún campo
-            }
+    // Verificar si los campos obligatorios están vacíos
+    if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
+        toastr.error("Por favor, complete todos los campos obligatorios.");
+        return; // Detener la ejecución si falta algún campo
+    }
 
-            // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
-            if (necesitaApoyo && tecnicosApoyo.length === 0) {
-                toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
-                return; // Detener la ejecución si no se seleccionaron técnicos
-            }
+    // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
+    if (necesitaApoyo && tecnicosApoyo.length === 0) {
+        toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
+        return; // Detener la ejecución si no se seleccionaron técnicos
+    }
 
-            // Convertir las horas de inicio y fin a formato Date
-            const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
-            const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
+    // Convertir las horas de inicio y fin a formato Date
+    const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
+    const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
 
-            // Crear objetos Date para la hora de inicio y hora de fin
-            const inicioDate = new Date();
-            inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
+    // Crear objetos Date para la hora de inicio y hora de fin
+    const inicioDate = new Date();
+    inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
 
-            const finDate = new Date();
-            finDate.setHours(horaFinHoras, horaFinMinutos, 0);
+    const finDate = new Date();
+    finDate.setHours(horaFinHoras, horaFinMinutos, 0);
 
-            // Validar si la hora de fin es menor o igual a la hora de inicio
-            if (finDate <= inicioDate) {
-                toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
-                return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
-            }
+    // Validar si la hora de fin es menor o igual a la hora de inicio
+    if (finDate <= inicioDate) {
+        toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
+        return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
+    }
 
-            // Crear un objeto FormData
-            const formData = new FormData();
+    // Crear un objeto FormData
+    const formData = new FormData();
 
-            // Añadir los datos al FormData
-            formData.append('nombre', nombreVisita);
-            formData.append('fecha_visita', fechaVisita);
-            formData.append('hora_inicio', horaInicio);
-            formData.append('hora_fin', horaFin);
-            formData.append('encargado', encargado);
-            formData.append('necesita_apoyo', necesitaApoyo);
-            formData.append('tecnicos_apoyo', tecnicosApoyo);
+    // Añadir los datos al FormData
+    formData.append('nombre', nombreVisita);
+    formData.append('fecha_visita', fechaVisita);
+    formData.append('hora_inicio', horaInicio);
+    formData.append('hora_fin', horaFin);
+    formData.append('encargado', encargado);
+    formData.append('necesita_apoyo', necesitaApoyo);
+    formData.append('tecnicos_apoyo', tecnicosApoyo);
 
-            // Si 'necesita_apoyo' está marcado, agregar técnicos de apoyo al FormData
-            if (necesitaApoyo && tecnicosApoyo.length > 0) {
-                tecnicosApoyo.forEach((tecnicoId) => {
-                    formData.append('tecnicos_apoyo[]',
-                    tecnicoId); // Asegúrate de enviar como array
-                });
-            }
-            formData.append('idTickets', ticketId);
-
-
-
-            // Si hay una imagen, agregarla directamente al FormData
-            if (imagenVisita) {
-                formData.append('imagenVisita',
-                imagenVisita); // Agregar el archivo de imagen directamente
-            }
-
-            // Realizar la solicitud AJAX
-            $.ajax({
-                url: '/guardar-visita',
-                method: 'POST',
-                data: formData,
-                contentType: false, // No enviar un tipo de contenido
-                processData: false, // No procesar los datos
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                        .getAttribute('content') // Añadir el token CSRF a los encabezados
-                },
-                success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message); // Muestra un mensaje de éxito
-                        window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
-                        location.reload(); // Recargar la página
-                    } else {
-                        toastr.error(response.message); // Mostrar mensaje de error
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Error al guardar visita:", error);
-                    toastr.error("Error al guardar la visita.");
-                }
-            });
-        });
-
-
+        // Si 'necesita_apoyo' está marcado, agregar técnicos de apoyo al FormData
+if (necesitaApoyo && tecnicosApoyo.length > 0) {
+    tecnicosApoyo.forEach((tecnicoId) => {
+        formData.append('tecnicos_apoyo[]', tecnicoId);  // Asegúrate de enviar como array
     });
-</script>
+}
+    formData.append('idTickets', ticketId);
 
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Inicializar Select2 para el select de técnicos de apoyo
-        $('.select2').select2({
-            placeholder: "Seleccionar Técnicos de Apoyo", // Puedes personalizar el texto del placeholder
-            allowClear: true // Permite limpiar la selección
-        });
 
-        // Mostrar/ocultar el contenedor y agregar/remover badges cuando los técnicos son seleccionados
-        $('#idTecnicoApoyo').on('change', function() {
-            const selectedTechnicians = $(this).val(); // Obtener los técnicos seleccionados
-            const container = $('#selected-items-container');
-            const listContainer = $('#selected-items-list');
+    // Si hay una imagen, agregarla directamente al FormData
+    if (imagenVisita) {
+        formData.append('imagenVisita', imagenVisita); // Agregar el archivo de imagen directamente
+    }
 
-            // Limpiar el contenedor antes de añadir nuevos badges
-            listContainer.empty();
-
-            // Si hay técnicos seleccionados, mostrar el contenedor
-            if (selectedTechnicians && selectedTechnicians.length > 0) {
-                container.removeClass('hidden'); // Mostrar el contenedor
-                selectedTechnicians.forEach(function(technicianId) {
-                    // Aquí se asume que cada técnico tiene un nombre
-                    const technicianName = $('#idTecnicoApoyo option[value="' + technicianId +
-                        '"]').text(); // Obtener nombre del técnico
-                    const badge =
-                        `<span class="bg-blue-500 text-white px-3 py-1 rounded-full">${technicianName}</span>`;
-                    listContainer.append(badge);
-                });
+    // Realizar la solicitud AJAX
+    $.ajax({
+        url: '/guardar-visita',
+        method: 'POST',
+        data: formData,
+        contentType: false,  // No enviar un tipo de contenido
+        processData: false,  // No procesar los datos
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')  // Añadir el token CSRF a los encabezados
+        },
+        success: function(response) {
+            if (response.success) {
+                toastr.success(response.message); // Muestra un mensaje de éxito
+                window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
+                location.reload(); // Recargar la página
             } else {
-                // Si no hay técnicos seleccionados, ocultar el contenedor
-                container.addClass('hidden');
+                toastr.error(response.message); // Mostrar mensaje de error
             }
-        });
+        },
+        error: function(xhr, status, error) {
+            console.error("Error al guardar visita:", error);
+            toastr.error("Error al guardar la visita.");
+        }
+    });
+});
+
+
     });
 </script>
+
 
 <script>
     var ticketId = {{ $ticketId }};
 </script>
-
-<script src="{{ asset('assets/js/tickets/smart/visitas.js') }}"></script>
+<script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script>

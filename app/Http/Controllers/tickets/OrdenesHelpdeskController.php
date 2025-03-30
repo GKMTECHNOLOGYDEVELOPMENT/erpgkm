@@ -24,6 +24,7 @@ use App\Exports\HelpdeskTicketExport;
 use App\Models\Articulo;
 use App\Models\SeleccionarVisita;
 use App\Models\Suministro;
+use App\Models\TicketFlujo;
 use App\Models\TipoEnvio;
 use App\Models\TipoRecojo;
 use App\Models\TransicionStatusTicket;
@@ -221,6 +222,170 @@ class OrdenesHelpdeskController extends Controller
     
 
 
+
+    public function editSoporte($id)
+    {
+        $usuario = Auth::user();
+        $rol = $usuario->rol->nombre ?? 'Sin Rol';
+
+        // Obtener la orden con relaciones
+        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
+            ->findOrFail($id);
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+
+        // Obtener el idTickets
+        $ticketId = $ticket->idTickets;
+        $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
+
+
+        // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
+        $ticket = DB::table('tickets')->where('idTickets', $id)->first();
+        // Obtener listas necesarias para el formulario
+        $clientes = Cliente::all();
+        $clientesGenerales = ClienteGeneral::all();
+        $estadosFlujo = EstadoFlujo::all();
+        $modelos = Modelo::all();
+        $tiendas = Tienda::all();
+        $marcas = Marca::all();
+        $usuarios = Usuario::all();
+        $tiposServicio = TipoServicio::all();
+
+        $encargado = Usuario::where('idTipoUsuario', 1)->get();
+         // Verificar si existe un flujo con idEstadflujo = 4
+         $flujo = TicketFlujo::where('idTicket', $ticketId)
+         ->where('idEstadflujo', 4)
+         ->first();
+        $existeFlujo4 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+
+
+          // Verificar que encontramos el ticket y que tiene un idTicketFlujo
+          if ($ticket) {
+            $idTicketFlujo = $ticket->idTicketFlujo;  // Obtener el idTicketFlujo del ticket
+
+            // Buscar en ticketflujo el idEstadflujo correspondiente al idTicketFlujo
+            $ticketFlujo = DB::table('ticketflujo')->where('idTicketFlujo', $idTicketFlujo)->first();
+
+            // Verifica que existe el ticketFlujo y su idEstadflujo
+            if ($ticketFlujo) {
+                $idEstadflujo = $ticketFlujo->idEstadflujo;  // Obtener el idEstadflujo del ticketflujo
+
+                // Si el idEstadflujo es 4, no mostrar ningún estado de flujo
+                if ($idEstadflujo == 4) {
+                    $estadosFlujo = collect();  // Asignar una colección vacía si es 4 (no mostrar estados)
+                } elseif ($idEstadflujo == 28) {
+                    // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 25)  // Solo obtener el estado con idEstadflujo 4
+                        ->get();
+                } elseif ($idEstadflujo == 25) {
+                    // Si el idEstadflujo es 2, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                    ->where('idEstadflujo', 27)  // Solo obtener el estado con idEstadflujo 4
+                    ->get();
+                } elseif ($idEstadflujo == 11) {
+                    // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->whereIn('idEstadflujo', [12, 13, 14, 15, 16, 17])  // Obtener los estados con idEstadflujo 3 y 4
+                        ->get();
+                } elseif ($idEstadflujo == 12) {
+                    // Si el id Estado flujo es 12 tiene que salir
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 18)
+                        ->get();
+                } elseif ($idEstadflujo == 18) {
+                    // Si el id Estado flujo es 12 tiene que salir
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 3)
+                        ->get();
+                } elseif ($idEstadflujo == 10) {
+                    // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 11)  // Solo obtener el estado con idEstadflujo 4
+                        ->get();
+                } elseif ($idEstadflujo == 1) {
+                    // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->whereIn('idEstadflujo', [3, 8])  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 9) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 8) {
+                    // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->whereIn('idEstadflujo', [3, 1])  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } else {
+                    // Si no tiene idEstadflujo = 1, 3, 8 o 9, verificar si es 6 o 7
+                    if (in_array($idEstadflujo, [6, 7])) {
+                        // Si tiene idEstadflujo 6 o 7, solo traer los estados con idEstadflujo 4
+                        $estadosFlujo = DB::table('estado_flujo')
+                            ->where('idEstadflujo', 4)  // Solo obtener el estado 4
+                            ->get();
+                    } else {
+                        // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
+                        $estadosFlujo = DB::table('estado_flujo')->get();
+                    }
+                }
+            }
+        }
+
+        $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
+
+        $visita = DB::table('visitas')
+        ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+        ->join('tickets', 'visitas.idTickets', '=', 'tickets.idTickets') // Unimos con la tabla tickets
+        ->where('visitas.idTickets', $ticketId)
+        ->select(
+            'usuarios.Nombre as usuarios_nombre',
+            'usuarios.apellidoPaterno as usuarios_apellidoPaterno',
+            'visitas.*',
+            'tickets.numero_ticket' // Seleccionamos el numero_ticket de la tabla tickets
+        )
+        ->first();
+
+        $visitaId = $visita ? $visita->idVisitas : null; // Si no hay visita, será null
+
+        
+        // Verificar si la visita seleccionada está registrada en la tabla seleccionarvisita
+        $visitaSeleccionada = DB::table('seleccionarvisita')
+            ->where('idTickets', $ticketId)
+            ->where('idVisitas', $visitaId)
+            ->exists(); // Devuelve true si la visita está seleccionada, false si no
+
+
+            
+        // Verificar si existe una transición en transicion_status_ticket con idEstadoots = 4
+        $transicionExistente = DB::table('transicion_status_ticket')
+        ->where('idTickets', $ticketId)
+        ->where('idVisitas', $visitaId)
+        ->where('idEstadoots', 4)
+        ->exists(); // Devuelve true si existe, false si no
+
+
+
+        return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
+            'orden',
+            'usuarios',
+            'tiposServicio',
+            'modelos',
+            'clientes',
+            'clientesGenerales',
+            'tiendas',
+            'ticketId',
+            'marcas',
+            'ticket',
+            'estadosFlujo',
+            'colorEstado',
+            'existeFlujo4',
+            'encargado',
+            'tecnicos_apoyo',
+            'visitaId',
+            'transicionExistente'
+        ));
+    }
 
 
 
@@ -707,44 +872,6 @@ class OrdenesHelpdeskController extends Controller
 
 
 
-    public function editSoporte($id)
-    {
-        $usuario = Auth::user();
-        $rol = $usuario->rol->nombre ?? 'Sin Rol';
-
-        // Obtener la orden con relaciones
-        $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'estadoflujo', 'usuario'])
-            ->findOrFail($id);
-        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-
-        // Obtener el idTickets
-        $ticketId = $ticket->idTickets;
-        $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
-
-        // Obtener listas necesarias para el formulario
-        $clientes = Cliente::all();
-        $clientesGenerales = ClienteGeneral::all();
-        $estadosFlujo = EstadoFlujo::all();
-        $modelos = Modelo::all();
-        $tiendas = Tienda::all();
-        $marcas = Marca::all();
-        $usuarios = Usuario::all();
-        $tiposServicio = TipoServicio::all();
-
-        return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
-            'orden',
-            'usuarios',
-            'tiposServicio',
-            'modelos',
-            'clientes',
-            'clientesGenerales',
-            'tiendas',
-            'marcas',
-            'estadosFlujo',
-            'colorEstado'
-        ));
-    }
-
 
 
     public function updateHelpdesk(Request $request, $id)
@@ -953,6 +1080,45 @@ class OrdenesHelpdeskController extends Controller
         return response()->json(['success' => true]);
     }
 
+
+    
+
+    public function actualizarSoporte(Request $request, $id)
+    {
+        // Log para ver los datos que se están recibiendo
+        Log::info('Datos recibidos para actualizar la orden:', $request->all());
+
+        // Validar los datos del formulario
+        $validated = $request->validate([
+            'idCliente' => 'required|exists:cliente,idCliente',
+            'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+            'idTienda' => 'required|exists:tienda,idTienda',
+            
+            'fallaReportada' => 'nullable|string',
+        ]);
+
+        // Encontrar la orden y actualizarla
+        $orden = Ticket::findOrFail($id); // Usamos findOrFail para asegurarnos que la orden existe
+
+        // Log para verificar que se encontró la orden
+        Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
+
+        // Actualizar los campos de la orden
+        $orden->idCliente = $request->idCliente;
+        $orden->idClienteGeneral = $request->idClienteGeneral;
+        $orden->idTienda = $request->idTienda;
+     
+        $orden->fallaReportada = $request->fallaReportada;
+
+        // Guardar los cambios
+        $orden->save();
+
+        // Log para confirmar que los cambios se guardaron
+        Log::info('Orden actualizada:', ['id' => $orden->id, 'nuevos_datos' => $orden->toArray()]);
+
+        // Responder con éxito
+        return response()->json(['success' => true]);
+    }
 
 
 
