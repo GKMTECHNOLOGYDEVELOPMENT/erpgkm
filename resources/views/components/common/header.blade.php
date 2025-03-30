@@ -1224,7 +1224,7 @@
                       // Ejecutar obtenerSolicitudes cada 5 segundos
             setInterval(() => {
                 this.obtenerSolicitudes();
-            }, 5000);  // 5000ms = 5 segundos
+            }, 35000);  // 5000ms = 5 segundos
             },
 
             notifications: [],

@@ -1,57 +1,19 @@
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
-<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
-    style="background-color: {{ $colorEstado }};">Detalles de los Estados</span>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 items-start">
-    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="md:col-span-1 mt-4">
-            <label for="estado" class="block text-sm font-medium">Estado</label>
-
-            <select id="estado" name="estado" class="selectize" onchange="actualizarColorEstado(this)"
-                style="display: none">
-                <option value="" disabled selected>Selecciona una opción</option>
-
-                @foreach ($estadosOTS as $index => $estado)
-                    <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}"
-                        {{ $index == 0 ? 'selected' : '' }}>
-                        {{ $estado->descripcion }}
-                    </option>
-                @endforeach
-            </select>
-
-        </div>
-
-        <div class="md:col-span-2">
-            <label for="justificacion" class="block text-sm font-medium">Justificación</label>
-            <textarea id="justificacion" name="justificacion" rows="3" class="form-input w-full"></textarea>
-        </div>
-    </div>
-
-    <div class="col-span-1 md:col-span-2 flex justify-end mt-2">
-        <button id="guardarEstado" class="btn btn-primary px-6 py-2">Guardar</button>
-    </div>
-</div>
-
-
-<style>
-    .hidden {
-        display: none;
-    }
-</style>
-
-
-<div id="cardFotos" class="hidden mt-6 p-5 rounded-lg">
+<!-- Sección de Fotos (se mantiene igual) -->
+<div id="cardFotos" class="mt-6 p-5 rounded-lg shadow-md">
     <span class="text-lg font-semibold mb-4 badge bg-success">Fotos</span>
 
+    <!-- Botón para abrir el modal -->
     <!-- Botón para abrir el modal -->
     <button id="abrirModalAgregarImagen" class="btn btn-primary mt-4" @click="$dispatch('toggle-modal-agregar-imagen')">
         Agregar Imagen
     </button>
-
-    <!-- Swiper Container -->
-    <div class="swiper w-full max-w-4x2 h-80 rounded-lg overflow-hidden mt-4" id="slider5">
+ <!-- Swiper Container -->
+ <div class="swiper w-full max-w-4x2 h-80 rounded-lg overflow-hidden mt-4" id="slider5">
         <div class="swiper-wrapper" id="swiperWrapper">
             <!-- Las imágenes se agregarán dinámicamente aquí -->
         </div>
@@ -130,6 +92,14 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+<!-- Incluir SignaturePad.js -->
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 
 
 <script>
@@ -370,100 +340,5 @@
 
         // ✅ Renderizar imágenes al cargar la página
         renderizarImagenes();
-    });
-</script>
-
-
-
-
-
-
-<script>
-    document.getElementById("guardarEstado").addEventListener("click", function() {
-        const estadoSelect = document.getElementById("estado");
-        const estadoId = estadoSelect.value;
-        const justificacion = document.getElementById("justificacion").value;
-
-        // Validar que se haya seleccionado un estado y se haya ingresado una justificación
-        if (!estadoId || !justificacion.trim()) {
-            toastr.error("Debe seleccionar un estado y escribir una justificación.");
-            return;
-        }
-
-        // Enviar los datos al servidor
-        fetch('/api/guardarEstado', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    idEstadoots: estadoId,
-                    justificacion: justificacion.trim(),
-                    idTickets: {{ $ticket->idTickets }} // Solo se pasa el ID del ticket
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    toastr.success("Estado guardado correctamente.");
-                } else {
-                    toastr.error("Error al guardar el estado.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                toastr.error("Hubo un error al guardar el estado.");
-            });
-    });
-</script>
-
-
-
-
-
-<script>
-  document.getElementById("estado").addEventListener("change", function() {
-    const estadoId = this.value;
-    const ticketId = {{ $ticket->idTickets }};
-    const visitaId = {{ $visitaId ?? 'null' }};
-
-    // Obtener la justificación del estado seleccionado
-    fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Mostrar la justificación en el textarea
-                document.getElementById("justificacion").value = data.justificacion || "";
-            } else {
-                toastr.error(data.message || "Error al obtener la justificación");
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            toastr.error("Error al obtener la justificación.");
-        });
-
-    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
-    if (estadoId == 5) {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "block"; // Mostrar el elemento
-
-            renderizarPrevisualizacion();
-        }
-    } else {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "none"; // Ocultar el elemento
-        }
-    }
-});
-
-    document.addEventListener("DOMContentLoaded", function() {
-        // Inicializar todos los select con la clase .selectize
-        document.querySelectorAll(".selectize").forEach(function(select) {
-            NiceSelect.bind(select);
-        });
     });
 </script>

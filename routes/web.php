@@ -385,6 +385,8 @@ Route::get('/informe/vista-previa-imagen/{idOt}', [OrdenesTrabajoController::cla
 
 Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 'actualizarHelpdesk'])->name('formActualizarOrdenHelpdesk');
 
+Route::put('actualizar-orden-soporte/{id}', [OrdenesHelpdeskController::class, 'actualizarSoporte'])->name('formActualizarOrdenHelpdesk');
+
 
 Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])
     ->name('guardar.firma.cliente');
@@ -395,6 +397,11 @@ Route::get('ordenes/smart/{id}/obtener-firma-cliente', [OrdenesTrabajoController
 
 
 Route::get('ordenes/smart/{id}/obtener-firma-tecnico', [OrdenesTrabajoController::class, 'obtenerFirmaTecnico'])
+    ->name('obtener.firma.tecnico')
+    ->middleware('auth');
+
+
+    Route::get('ordenes/helpdesk/soporte/{id}/obtener-firma-tecnico', [OrdenesHelpdeskController::class, 'obtenerFirmaTecnico'])
     ->name('obtener.firma.tecnico')
     ->middleware('auth');
 
