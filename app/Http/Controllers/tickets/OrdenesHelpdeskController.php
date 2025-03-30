@@ -992,28 +992,42 @@ class OrdenesHelpdeskController extends Controller
             'tiposervicio:idTipoServicio,nombre',
             'estado_ot:idEstadoots,descripcion,color',
             'marca:idMarca,nombre',
-            'modelo.categoria:idCategoria,nombre', // Cargar la categoría a través del modelo
-            'estadoflujo:idEstadflujo,descripcion,color' // Cargar toda la relación estadoflujo
+            'modelo.categoria:idCategoria,nombre',
+            'estadoflujo:idEstadflujo,descripcion,color',
+            'manejoEnvio:idmanejo_envio,idTickets,tipo'
+
         ]);
 
-        // 🔹 Filtrar por tipo de ticket (1 o 2), si no se proporciona, por defecto muestra ambos
         if ($request->has('tipoTicket') && in_array($request->tipoTicket, [1, 2])) {
             $ordenesQuery->where('idTipotickets', $request->tipoTicket);
         }
 
-        // 🔹 Filtro por marca (si es proporcionado)
         if ($request->has('marca') && $request->marca != '') {
             $ordenesQuery->where('idMarca', $request->marca);
         }
 
-        // 🔹 Filtro por cliente general (si es proporcionado)
         if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
             $ordenesQuery->where('idClienteGeneral', $request->clienteGeneral);
         }
 
         $ordenes = $ordenesQuery->paginate(10);
+
+        // ✅ Logs claros solo de manejo_envio
+        foreach ($ordenes->items() as $orden) {
+            if ($orden->manejoEnvio) {
+                Log::info("✅ Ticket {$orden->idTickets} tiene manejo_envio", [
+                    'tipo' => $orden->manejoEnvio->tipo,
+                    'idmanejo_envio' => $orden->manejoEnvio->idmanejo_envio ?? null
+                ]);
+            } else {
+                Log::warning("⚠️ Ticket {$orden->idTickets} SIN manejo_envio");
+            }
+        }
+
         return response()->json($ordenes);
     }
+
+
 
     public function validarTicket($nroTicket)
     {

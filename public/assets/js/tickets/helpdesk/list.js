@@ -75,8 +75,11 @@ document.addEventListener('alpine:init', () => {
                         this.isLoading = false; // 🔹 Oculta el preloader después de recibir datos
                     },
                     dataSrc: (json) => {
-                        console.log("👉 Datos recibidos del servidor:", json.data);
-                        console.log("🔍 manejoEnvio del primer registro:", json.data[0].manejoEnvio); // 🔥 esto es clave
+                        console.log("👉 Datos completos:", json);
+                        console.log("👉 Primer ticket:", json.data[0]);
+                        console.log("👉 ManejoEnvío primer ticket:", json.data[0].manejoEnvio);
+                        console.log("🔍 manejoEnvio del primer registro:", json.data[0].manejoEnvio);
+
                         this.ordenesData = json.data;
                         return json.data;
                     }
@@ -174,15 +177,17 @@ document.addEventListener('alpine:init', () => {
 
 
         getEditButton(data) {
-            console.log("Data en getEditButton:", data); // Verifica que manejoEnvio esté presente
-            const tieneEnvio = Array.isArray(data.manejoEnvio) && data.manejoEnvio.some(envio => envio.tipo === 1);
+            console.log("📦 Data completa:", data);
+            console.log("🚚 Manejo de envío:", data.manejo_envio);
+
+            const tieneEnvio = Array.isArray(data.manejo_envio) && data.manejo_envio.some(envio => envio.tipo === 1);
 
             const verEnvioBtn = tieneEnvio
                 ? `<a href="/envio/${data.idTickets}" class="ltr:ml-2 rtl:mr-2" x-tooltip="Ver Envío">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-blue-500 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 0l3-3m-3 3l3 3m6-8.25V6a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6v12a2.25 2.25 0 002.25 2.25h9.75A2.25 2.25 0 0018.75 18v-.75" />
-                </svg>
-            </a>`
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-blue-500 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 0l3-3m-3 3l3 3m6-8.25V6a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6v12a2.25 2.25 0 002.25 2.25h9.75A2.25 2.25 0 0018.75 18v-.75" />
+                        </svg>
+                   </a>`
                 : '';
 
             return `
@@ -196,6 +201,7 @@ document.addEventListener('alpine:init', () => {
                     ${verEnvioBtn}
                 </div>`;
         },
+
 
 
 

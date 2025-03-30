@@ -22,11 +22,12 @@ class ManejoEnvio extends Model
         'tipo'
     ];
 
-    // Relaciones
     public function ticket()
     {
         return $this->belongsTo(Ticket::class, 'idTickets', 'idTickets');
     }
+
+
 
     public function usuario()
     {

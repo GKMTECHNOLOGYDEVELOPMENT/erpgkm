@@ -229,6 +229,6 @@ class Ticket extends Model
 
     public function manejoEnvio()
     {
-        return $this->hasMany(ManejoEnvio::class, 'idTickets', 'idTickets');
+        return $this->hasOne(ManejoEnvio::class, 'idTickets', 'idTickets');
     }
 }
