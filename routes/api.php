@@ -129,3 +129,6 @@ Route::get('/cliente/{idCliente}', [ClientesController::class, 'obtenerCliente']
 
 // Ruta para obtener las tiendas asociadas a un cliente
 Route::get('/cliente/{idCliente}/tiendas', [ClientesController::class, 'obtenerTiendas']);
+
+Route::get('/obtenerJustificacionSoporte', [OrdenesHelpdeskController::class, 'obtenerJustificacionSoporte']);
+Route::post('/guardarEstadoSoporte', [OrdenesHelpdeskController::class, 'guardarEstadoSoporte']);

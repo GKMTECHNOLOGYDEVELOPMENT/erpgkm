@@ -166,7 +166,7 @@ class OrdenesHelpdeskController extends Controller
 
 
             // Definir el idEstadflujo basado en el valor de esEnvio
-            $idEstadflujo = $validatedData['esEnvio'] ? 28 : 1;
+            $idEstadflujo = $validatedData['esEnvio'] ? 30 : 1;
     
             // Crear el flujo de trabajo con el idEstadflujo correspondiente
             $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
@@ -280,13 +280,13 @@ class OrdenesHelpdeskController extends Controller
                 } elseif ($idEstadflujo == 25) {
                     // Si el idEstadflujo es 2, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                    ->where('idEstadflujo', 27)  // Solo obtener el estado con idEstadflujo 4
+                    ->whereIn('idEstadflujo', [27, 26])  // Obtener los estados con idEstadflujo 3 y 4
                     ->get();
-                } elseif ($idEstadflujo == 11) {
+                } elseif ($idEstadflujo == 26) {
                     // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [12, 13, 14, 15, 16, 17])  // Obtener los estados con idEstadflujo 3 y 4
-                        ->get();
+                    ->where('idEstadflujo', 27)  // Solo obtener el estado con idEstadflujo 4
+                    ->get();
                 } elseif ($idEstadflujo == 12) {
                     // Si el id Estado flujo es 12 tiene que salir
                     $estadosFlujo = DB::table('estado_flujo')
@@ -1409,6 +1409,132 @@ class OrdenesHelpdeskController extends Controller
     $clientes = Cliente::where('cliente_general_id', $idClienteGeneral)->get();
 
     return response()->json($clientes);
+}
+
+
+
+
+public function guardarEstadoSoporte(Request $request)
+{
+    // Validar los datos
+    $request->validate([
+        'idTickets' => 'required|integer|exists:tickets,idTickets',
+        'idEstadoots' => 'required|integer|exists:estado_ots,idEstadoots',
+        'justificacion' => 'nullable|string'
+    ]);
+
+    // Log de la entrada de datos
+    Log::info('Datos recibidos en guardarEstado: ', $request->all());
+
+    // Buscar el idVisitas en la tabla seleccionarvisita con base en el idTickets
+    $seleccionarVisita = DB::table('seleccionarvisita')
+        ->where('idTickets', $request->idTickets)
+        ->first();
+
+    // Verificar si encontramos un idVisitas
+    if ($seleccionarVisita) {
+        $idVisitas = $seleccionarVisita->idVisitas;
+        Log::info("Visita encontrada: idVisitas = $idVisitas");
+    } else {
+        // Si no se encuentra, podría devolver un error o enviar `null`
+        return response()->json(['success' => false, 'message' => 'No se encontró una visita asociada a este ticket.']);
+    }
+
+    // Buscar si ya existe un registro para este ticket, visita y estado
+    $transicion = DB::table('transicion_status_ticket')
+        ->where('idTickets', $request->idTickets)
+        ->where('idVisitas', $idVisitas)
+        ->where('idEstadoots', $request->idEstadoots)
+        ->first();
+
+    if ($transicion) {
+        // Si existe, actualizar la justificación
+        Log::info('Actualizando justificación para transicion: ', (array) $transicion);
+        DB::table('transicion_status_ticket')
+            ->where('idTransicionStatus', $transicion->idTransicionStatus)
+            ->update([
+                'justificacion' => $request->justificacion,
+                'fechaRegistro' => now()
+            ]);
+    } else {
+        // Si no existe, crear un nuevo registro
+        Log::info('Creando nuevo registro para la transicion de ticket');
+        DB::table('transicion_status_ticket')->insert([
+            'idTickets' => $request->idTickets,
+            'idVisitas' => $idVisitas,
+            'idEstadoots' => $request->idEstadoots,
+            'justificacion' => $request->justificacion,
+            'fechaRegistro' => now(),
+            'estado' => 1 // Estado activo
+        ]);
+    }
+
+    Log::info('Estado guardado correctamente.');
+
+    return response()->json(['success' => true, 'message' => 'Estado guardado correctamente.']);
+}
+
+public function obtenerJustificacionSoporte(Request $request)
+{
+    // Validar los parámetros
+    $request->validate([
+        'ticketId' => 'required|integer|exists:tickets,idTickets',
+        'estadoId' => 'required|integer|exists:estado_ots,idEstadoots'
+    ]);
+
+    // Log de la entrada de datos
+    Log::info('Datos recibidos en obtenerJustificacion: ', $request->all());
+
+    // Buscar el idVisitas en la tabla seleccionarvisita con base en el idTickets
+    $seleccionada = DB::table('seleccionarvisita')
+        ->where('idTickets', $request->ticketId)
+        ->first();  // Solo buscamos por ticketId
+
+    if ($seleccionada) {
+        // Log de la visita encontrada
+        Log::info('Visita seleccionada encontrada, idVisitas = ' . $seleccionada->idVisitas);
+
+        // Obtener los estados asociados a la visita
+        $estados = DB::table('estado_ots')
+            ->join('transicion_status_ticket', 'estado_ots.idEstadoots', '=', 'transicion_status_ticket.idEstadoots')
+            ->where('transicion_status_ticket.idTickets', $request->ticketId)
+            ->where('transicion_status_ticket.idVisitas', $seleccionada->idVisitas)
+            ->select('estado_ots.idEstadoots', 'estado_ots.descripcion') // Cambié 'nombre' por 'descripcion'
+            ->distinct()
+            ->get();
+
+        // Log de los estados obtenidos
+        Log::info('Estados obtenidos para la visita: ', $estados->toArray());
+
+        // Obtener la justificación de la transicion_status_ticket
+        $transicion = DB::table('transicion_status_ticket')
+            ->where('idTickets', $request->ticketId)
+            ->where('idVisitas', $seleccionada->idVisitas)
+            ->where('idEstadoots', $request->estadoId)
+            ->first();
+
+        if ($transicion) {
+            Log::info('Justificación encontrada: ' . $transicion->justificacion);
+            return response()->json([
+                'success' => true,
+                'justificacion' => $transicion->justificacion,
+                'estados' => $estados
+            ]);
+        } else {
+            Log::info('No hay justificación guardada para este estado');
+            return response()->json([
+                'success' => true,
+                'justificacion' => null,
+                'estados' => $estados
+            ]);
+        }
+    } else {
+        Log::info('No se encontró una visita seleccionada para este ticket.');
+        return response()->json([
+            'success' => false,
+            'message' => 'No se encontró una visita seleccionada para este ticket.'
+        ]);
+    }
 }
 
 }

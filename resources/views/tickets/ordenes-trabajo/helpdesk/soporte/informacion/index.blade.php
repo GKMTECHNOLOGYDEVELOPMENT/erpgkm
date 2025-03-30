@@ -414,7 +414,7 @@
         }
 
         // Enviar los datos al servidor
-        fetch('/api/guardarEstado', {
+        fetch('/api/guardarEstadoSoporte', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -444,7 +444,6 @@
 
 
 
-
 <script>
   document.getElementById("estado").addEventListener("change", function() {
     const estadoId = this.value;
@@ -455,7 +454,7 @@
     console.log("Estado seleccionado:", estadoId);
 
     // Obtener la justificación del estado seleccionado
-    fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
+    fetch(`/api/obtenerJustificacionSoporte?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
         .then(response => response.json())
         .then(data => {
             // Log de la respuesta del servidor
@@ -473,29 +472,14 @@
             console.error("Error:", error);
             toastr.error("Error al obtener la justificación.");
         });
+  });
 
-    // Verificar si el estado seleccionado es igual a 5
-    if (estadoId == 5) {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "block"; // Mostrar el elemento
-            console.log("Se ha mostrado el cardFotos");
-            renderizarPrevisualizacion();
-        }
-    } else {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "none"; // Ocultar el elemento
-            console.log("Se ha ocultado el cardFotos");
-        }
-    }
-});
-
-document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function() {
     // Inicializar todos los select con la clase .selectize
     document.querySelectorAll(".selectize").forEach(function(select) {
         NiceSelect.bind(select);
     });
     console.log("NiceSelect ha sido inicializado en los selects");
-});
+  });
 </script>
+
