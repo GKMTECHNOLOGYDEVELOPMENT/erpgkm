@@ -401,6 +401,11 @@ Route::get('ordenes/smart/{id}/obtener-firma-tecnico', [OrdenesTrabajoController
     ->middleware('auth');
 
 
+    Route::get('ordenes/helpdesk/soporte/{id}/obtener-firma-tecnico', [OrdenesHelpdeskController::class, 'obtenerFirmaTecnico'])
+    ->name('obtener.firma.tecnico')
+    ->middleware('auth');
+
+
 
 // routes/web.php
 

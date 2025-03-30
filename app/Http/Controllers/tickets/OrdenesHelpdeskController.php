@@ -237,6 +237,12 @@ class OrdenesHelpdeskController extends Controller
         $ticketId = $ticket->idTickets;
         $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
 
+        $estadosOTS = DB::table('estado_ots')
+        ->whereIn('idEstadoots', [2, 3, 4])
+        ->get();
+
+        $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario
+
 
         // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
         $ticket = DB::table('tickets')->where('idTickets', $id)->first();
@@ -249,6 +255,44 @@ class OrdenesHelpdeskController extends Controller
         $marcas = Marca::all();
         $usuarios = Usuario::all();
         $tiposServicio = TipoServicio::all();
+
+
+        $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario
+
+        // Consulta para obtener el idUsuario de la visita seleccionada para ese ticket
+        $idVisitaSeleccionada = DB::table('seleccionarvisita')
+            ->where('idTickets', $ticketId)  // Filtro por ticketId
+            ->value('idVisitas');  // Obtenemos el idVisitas de la visita seleccionada para ese ticket
+
+        Log::info('Visita seleccionada, idVisita: ' . $idVisitaSeleccionada); // Log de la visita seleccionada
+
+        // Si se encuentra una visita seleccionada
+        if ($idVisitaSeleccionada) {
+
+            // Obtener el idUsuario de la visita seleccionada
+            $idUsuario = DB::table('visitas')
+                ->where('idTickets', $ticketId)  // Filtro por ticketId
+                ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisita seleccionada
+                ->value('idUsuario');  // Obtenemos el idUsuario de esa visita
+
+            Log::info('idUsuario obtenido de la visita seleccionada: ' . $idUsuario); // Log de idUsuario
+
+            // Si encontramos un idUsuario, obtener el idTipoUsuario del usuario
+            if ($idUsuario) {
+                $tipoUsuario = DB::table('usuarios')
+                    ->where('idUsuario', $idUsuario)  // Filtro por idUsuario
+                    ->value('idTipoUsuario');  // Obtenemos el idTipoUsuario
+
+                Log::info('Tipo de usuario obtenido: ' . $tipoUsuario);  // Log del tipo de usuario
+            } else {
+                Log::warning('No se encontró un idUsuario para la visita seleccionada.'); // Log si no se encuentra el idUsuario
+            }
+        } else {
+            Log::warning('No se encontró una visita seleccionada para el ticket: ' . $ticketId); // Log si no se encuentra una visita seleccionada
+        }
+
+        // Puedes agregar un log final para revisar el valor de $tipoUsuario
+        Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
 
         $encargado = Usuario::where('idTipoUsuario', 1)->get();
          // Verificar si existe un flujo con idEstadflujo = 4
@@ -317,12 +361,50 @@ class OrdenesHelpdeskController extends Controller
                     $estadosFlujo = DB::table('estado_flujo')
                         ->whereIn('idEstadflujo', [3, 1])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
+
+                    } elseif ($idEstadflujo == 31) {
+                        // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+                        $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 24)  // Solo obtener el estado con idEstadflujo 3
+                            ->get();
+
+                        } elseif ($idEstadflujo == 24) {
+                            // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+                            $estadosFlujo = DB::table('estado_flujo')
+                            ->where('idEstadflujo', 29)  // Solo obtener el estado con idEstadflujo 3
+                                ->get();
+                            } elseif ($idEstadflujo == 29) {
+                                // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+                                $estadosFlujo = DB::table('estado_flujo')
+                                ->where('idEstadflujo', 32)  // Solo obtener el estado con idEstadflujo 3
+                                    ->get();
+
+                                } elseif ($idEstadflujo == 32) {
+                                    // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+                                    $estadosFlujo = DB::table('estado_flujo')
+                                    ->where('idEstadflujo', 27)  // Solo obtener el estado con idEstadflujo 3
+                                        ->get();
+
+                                    } elseif ($idEstadflujo == 27) {
+                                        // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+                                        $estadosFlujo = DB::table('estado_flujo')
+                                        ->where('idEstadflujo', 4)  // Solo obtener el estado con idEstadflujo 3
+                                            ->get();
+
+                                        } elseif ($idEstadflujo == 30) {
+                                            // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+                                            $estadosFlujo = DB::table('estado_flujo')
+                                            ->where('idEstadflujo', 28)  // Solo obtener el estado con idEstadflujo 3
+                                                ->get();
+        
+    
+
                 } else {
                     // Si no tiene idEstadflujo = 1, 3, 8 o 9, verificar si es 6 o 7
                     if (in_array($idEstadflujo, [6, 7])) {
                         // Si tiene idEstadflujo 6 o 7, solo traer los estados con idEstadflujo 4
                         $estadosFlujo = DB::table('estado_flujo')
-                            ->where('idEstadflujo', 4)  // Solo obtener el estado 4
+                        ->whereIn('idEstadflujo', [4, 31])  // Solo obtener el estado con idEstadflujo 3
                             ->get();
                     } else {
                         // Si no cumple ninguna de las condiciones anteriores, mostrar todos los estados
@@ -383,7 +465,11 @@ class OrdenesHelpdeskController extends Controller
             'encargado',
             'tecnicos_apoyo',
             'visitaId',
-            'transicionExistente'
+            'transicionExistente',
+            'estadosOTS',
+            'tipoUsuario',
+            'id',
+            'idVisitaSeleccionada'
         ));
     }
 
@@ -1416,6 +1502,8 @@ class OrdenesHelpdeskController extends Controller
 
 public function guardarEstadoSoporte(Request $request)
 {
+
+    try {
     // Validar los datos
     $request->validate([
         'idTickets' => 'required|integer|exists:tickets,idTickets',
@@ -1472,7 +1560,10 @@ public function guardarEstadoSoporte(Request $request)
     Log::info('Estado guardado correctamente.');
 
     return response()->json(['success' => true, 'message' => 'Estado guardado correctamente.']);
-}
+} catch (\Exception $e) {
+    Log::error('Error en guardarEstadoSoporte: ' . $e->getMessage());
+    return response()->json(['success' => false, 'message' => 'Hubo un error al guardar el estado.'], 500);
+}}
 
 public function obtenerJustificacionSoporte(Request $request)
 {
@@ -1536,5 +1627,49 @@ public function obtenerJustificacionSoporte(Request $request)
         ]);
     }
 }
+
+
+
+
+public function obtenerFirmaTecnico($id)
+{
+    // Obtener el idVisitas directamente con una consulta más eficiente
+    $idVisitas = DB::table('seleccionarvisita')
+        ->where('idTickets', $id) // Relacionamos el idTickets que hemos recibido
+        ->value('idVisitas'); // Obtenemos el idVisitas correspondiente
+
+    if (!$idVisitas) {
+        return response()->json(['error' => 'No se encontró la visita relacionada con este ticket'], 404);
+    }
+
+    // Obtener el idUsuario (técnico) de la tabla visitas
+    $idUsuario = DB::table('visitas')
+        ->where('idVisitas', $idVisitas)
+        ->value('idUsuario'); // Obtenemos el idUsuario (técnico) asociado con esta visita
+
+    if (!$idUsuario) {
+        return response()->json(['error' => 'No se encontró el técnico asociado a esta visita'], 404);
+    }
+
+    // Obtener la firma del técnico desde la tabla usuarios
+    $firmaTecnico = DB::table('usuarios')
+        ->where('idUsuario', $idUsuario)
+        ->value('firma'); // Obtenemos la firma en formato binario
+
+    // Verificar si la firma existe
+    if ($firmaTecnico) {
+        // Si la firma es un string base64, la usamos directamente
+        if (strpos($firmaTecnico, 'data:image/') !== false) {
+            return response()->json(['firma' => $firmaTecnico]);
+        }
+
+        // Si la firma no está en base64, la convertimos
+        $firmaTecnicoBase64 = base64_encode($firmaTecnico);
+        return response()->json(['firma' => "data:image/png;base64,$firmaTecnicoBase64"]);
+    }
+
+    return response()->json(['firma' => null], 404);
+}
+
 
 }

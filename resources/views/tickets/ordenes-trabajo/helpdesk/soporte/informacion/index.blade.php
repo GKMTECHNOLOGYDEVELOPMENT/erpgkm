@@ -100,12 +100,17 @@
         <div class="grid grid-cols-1 gap-4 mt-4">
             <!-- Select de Estado con Nice Select -->
             <div>
-                <label for="estado" class="block text-sm font-medium">Estado</label>
-                <select id="estado" name="estado" class="nice-select w-full mt-2">
-                    <option value="Diagnostico" selected>Diagnostico</option>
-                    <option value="Observaciones">Observaciones</option>
-                    <option value="Trabajo por realizar">Solución</option>
-                </select>
+                 <label for="estado" class="block text-sm font-medium">Estado</label>
+          
+            <select id="estado" name="estado" class="selectize"  style="display: none">
+            <option value="" disabled selected>Selecciona una opción</option>
+
+                @foreach ($estadosOTS as $index => $estado)
+                    <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}" {{ $index == 0 ? 'selected' : '' }}>
+                        {{ $estado->descripcion }}
+                    </option>
+                @endforeach
+            </select>
             </div>
 
             <!-- Textarea de Justificación -->
@@ -401,6 +406,7 @@
 
 
 
+
 <script>
     document.getElementById("guardarEstado").addEventListener("click", function() {
         const estadoSelect = document.getElementById("estado");
@@ -444,22 +450,17 @@
 
 
 
+
 <script>
   document.getElementById("estado").addEventListener("change", function() {
     const estadoId = this.value;
-    const ticketId = 51;
-    const visitaId = null;
-
-    // Log para ver el valor de estadoId cuando se cambia el estado
-    console.log("Estado seleccionado:", estadoId);
+    const ticketId = {{ $ticket->idTickets }};
+    const visitaId = {{ $visitaId ?? 'null' }};
 
     // Obtener la justificación del estado seleccionado
     fetch(`/api/obtenerJustificacionSoporte?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
         .then(response => response.json())
         .then(data => {
-            // Log de la respuesta del servidor
-            console.log("Respuesta del servidor:", data);
-
             if (data.success) {
                 // Mostrar la justificación en el textarea
                 document.getElementById("justificacion").value = data.justificacion || "";
@@ -468,18 +469,30 @@
             }
         })
         .catch(error => {
-            // Log del error en la llamada fetch
             console.error("Error:", error);
             toastr.error("Error al obtener la justificación.");
         });
-  });
 
-  document.addEventListener("DOMContentLoaded", function() {
-    // Inicializar todos los select con la clase .selectize
-    document.querySelectorAll(".selectize").forEach(function(select) {
-        NiceSelect.bind(select);
+    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
+    if (estadoId == 5) {
+        const cardFotos = document.getElementById("cardFotos");
+        if (cardFotos) {
+            cardFotos.style.display = "block"; // Mostrar el elemento
+
+            renderizarPrevisualizacion();
+        }
+    } else {
+        const cardFotos = document.getElementById("cardFotos");
+        if (cardFotos) {
+            cardFotos.style.display = "none"; // Ocultar el elemento
+        }
+    }
+});
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Inicializar todos los select con la clase .selectize
+        document.querySelectorAll(".selectize").forEach(function(select) {
+            NiceSelect.bind(select);
+        });
     });
-    console.log("NiceSelect ha sido inicializado en los selects");
-  });
 </script>
-
