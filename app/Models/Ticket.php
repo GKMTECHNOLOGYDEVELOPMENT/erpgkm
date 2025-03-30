@@ -73,6 +73,7 @@ class Ticket extends Model
 		'idMarca' => 'int',
 		'idModelo' => 'int',
 		'idTicketFlujo' => 'int',
+		'idEncargadoEnvio_Lima' => 'int',
 		'fechaCompra' => 'datetime'
 	];
 
@@ -91,6 +92,8 @@ class Ticket extends Model
 		'fallaReportada',
 		'linkubicacion',
 		'esRecojo',
+		'envio',
+		'idEncargadoEnvio_Provincia',
 		'direccion',
 		'idMarca',
 		'idModelo',

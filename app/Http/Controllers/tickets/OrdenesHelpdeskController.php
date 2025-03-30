@@ -24,6 +24,8 @@ use App\Exports\HelpdeskTicketExport;
 use App\Models\Articulo;
 use App\Models\SeleccionarVisita;
 use App\Models\Suministro;
+use App\Models\TipoEnvio;
+use App\Models\TipoRecojo;
 use App\Models\TransicionStatusTicket;
 use Spatie\Browsershot\Browsershot;
 
@@ -83,6 +85,8 @@ class OrdenesHelpdeskController extends Controller
         $tiposServicio = TipoServicio::all();
         $marcas = Marca::all();
         $modelos = Modelo::all();
+        $tiposEnvio= TipoEnvio::all();
+        $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
 
 
 
@@ -94,68 +98,107 @@ class OrdenesHelpdeskController extends Controller
             'usuarios',
             'tiposServicio',
             'marcas',
-            'modelos'
+            'modelos',
+            'tiposEnvio',
+            'tiposRecojo'
         ));
     }
-
-
 
 
     public function storehelpdesk(Request $request)
     {
         try {
             Log::debug('Datos recibidos en storehelpdesk:', $request->all());
-
+    
             // Validar los datos
             $validatedData = $request->validate([
                 'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
                 'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
                 'idCliente' => 'required|integer|exists:cliente,idCliente',
                 'idTienda' => 'required|integer|exists:tienda,idTienda',
-                // 'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
                 'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
                 'fallaReportada' => 'required|string|max:255',
+                'esEnvio' => 'nullable|boolean',  // Validamos si el campo 'esEnvio' está presente
+                'idTecnico' => 'nullable|integer|exists:usuarios,idUsuario',  // Validamos el ID del técnico
+                'tipoRecojo' => 'nullable|integer|exists:tiporecojo,idtipoRecojo', // Validar tipo de recojo
+                'tipoEnvio' => 'nullable|integer|exists:tipoenvio,idtipoenvio', // Validar tipo de envío
+                'nombreTecnicoEnvio' => 'nullable|array', 
+                'dniTecnicoEnvio' => 'nullable|array'
             ]);
-
+    
             Log::debug('Datos validados:', $validatedData);
-
+    
             // Guardar la orden de trabajo
             $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['numero_ticket'],
                 'idClienteGeneral' => $validatedData['idClienteGeneral'],
                 'idCliente' => $validatedData['idCliente'],
                 'idTienda' => $validatedData['idTienda'],
-                // 'idTecnico' => $validatedData['idTecnico'],
                 'tipoServicio' => $validatedData['tipoServicio'],
                 'idUsuario' => auth()->id(),
-
                 'fallaReportada' => $validatedData['fallaReportada'],
                 'fecha_creacion' => now(),
                 'idTipotickets' => 2,
+                'envio' => $validatedData['esEnvio'] ? 1 : 0,
+                'idEncargadoEnvio_Provincia' => $validatedData['idTecnico'] ?? NULL
             ]);
-
+    
             Log::debug('Orden de trabajo creada correctamente.');
 
-            // Crear el flujo de trabajo con idEstadflujo = 10 (estado para "entrega a laboratorio")
+
+                 // Si es un envío, almacenar los técnicos de recojo
+        if ($validatedData['esEnvio']) {
+            foreach ($validatedData['nombreTecnicoEnvio'] as $index => $nombre) {
+                $dni = $validatedData['dniTecnicoEnvio'][$index];
+                
+                // Guardar cada técnico de recojo
+                DB::table('ticket_receptor')->insert([
+                    'idTickets' => $ticket->idTickets,
+                    'nombre' => $nombre,
+                    'dni' => $dni,
+                ]);
+            }
+
+            Log::info('Datos de técnicos de recojo guardados correctamente');
+        }
+    
+
+
+            // Definir el idEstadflujo basado en el valor de esEnvio
+            $idEstadflujo = $validatedData['esEnvio'] ? 28 : 1;
+    
+            // Crear el flujo de trabajo con el idEstadflujo correspondiente
             $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
                 'idTicket' => $ticket->idTickets,
-                'idEstadflujo' => 1,  // Estado de flujo "entrega a laboratorio"
+                'idEstadflujo' => $idEstadflujo,  // Usar el valor de idEstadflujo basado en esEnvio
                 'idUsuario' => auth()->id(),
                 'fecha_creacion' => now(),
             ]);
-
+    
             Log::info('Flujo de trabajo guardado correctamente', [
                 'idTicket' => $ticket->idTickets,
                 'idTicketFlujo' => $ticketFlujoId
             ]);
-
+    
             // Actualizar el ticket con el idTicketFlujo generado
             $ticket->idTicketFlujo = $ticketFlujoId;
             $ticket->save();
-
-
+    
             Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
-
+    
+            // Verificar si es Envío y guardar en la tabla datos_envio
+            if ($validatedData['esEnvio']) {
+                // Insertar en la tabla datos_envio
+                DB::table('datos_envio')->insert([
+                    'idTickets' => $ticket->idTickets,
+                    'tipoRecojo' => $validatedData['tipoRecojo'], // tipo de recojo seleccionado
+                    'tipoEnvio' => $validatedData['tipoEnvio'], // tipo de envío seleccionado
+                    'idUsuario' => $validatedData['idTecnico'], // ID del técnico seleccionado
+                    'tipo' => 1
+                ]);
+                Log::info('Datos de envío guardados correctamente');
+            }
+    
             // 🔹 Redirigir según el tipo de servicio seleccionado
             if ($validatedData['tipoServicio'] == 2) {
                 return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
@@ -174,6 +217,8 @@ class OrdenesHelpdeskController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
+    
+    
 
 
 

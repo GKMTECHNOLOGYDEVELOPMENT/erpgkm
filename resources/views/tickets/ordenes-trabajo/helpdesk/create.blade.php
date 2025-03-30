@@ -56,27 +56,20 @@
                     </select>
                 </div>
 
-                <!-- Tienda -->
-                <div>
-                    <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                    <select id="idTienda" name="idTienda" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Tienda</option>
-                        @foreach ($tiendas as $tienda)
-                        <option value="{{ $tienda->idTienda }}">{{ $tienda->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+        
 
-                <!-- Técnico -->
-                <!-- <div>
-                    <label for="idTecnico" class="block text-sm font-medium">Técnico</label>
-                    <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display:none">
-                        <option value="" disabled selected>Seleccionar Técnico</option>
-                        @foreach ($usuarios as $usuario)
-                        <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
-                        @endforeach
-                    </select>
-                </div> -->
+                <!-- Tienda -->
+<div>
+    <label for="idTienda" class="block text-sm font-medium">Tienda</label>
+    <select id="idTienda" name="idTienda" class="select2 w-full">
+        <option value="" disabled selected>Seleccionar Tienda</option>
+        @foreach ($tiendas as $tienda)
+        <option value="{{ $tienda->idTienda }}" data-departamento="{{ $tienda->departamento }}">
+            {{ $tienda->nombre }}
+        </option>
+        @endforeach
+    </select>
+</div>
 
                 <!-- Tipo de Servicio -->
                 <div>
@@ -107,6 +100,143 @@
                         <span class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
                     </label>
                 </div>
+
+
+
+      <!-- Es Envío (inicialmente oculto) -->
+<div id="esEnvioContainer" style="display: none;">
+    <label class="block text-sm font-medium mb-2">¿Es Envio?</label>
+    <label class="w-12 h-6 relative inline-block">
+        <input type="hidden" name="esEnvio" value="0">
+        <input type="checkbox" id="esEnvio" name="esEnvio" value="1" class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+        <span class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+    </label>
+</div>
+
+<!-- Técnico (inicialmente oculto) -->
+<div id="tecnicoContainer" style="display: none;">
+    <label for="idTecnico" class="block text-sm font-medium">Técnico Envío</label>
+    <select id="idTecnico" name="idTecnico" class="select2 w-full">
+        <option value="" disabled selected>Seleccionar Técnico</option>
+        @foreach ($usuarios as $usuario)
+        <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
+        @endforeach
+    </select>
+
+  <!-- Tipo de Recojo -->
+<label for="tipoRecojo" class="block text-sm font-medium mt-4">Tipo de Recojo</label>
+<select id="tipoRecojo" name="tipoRecojo" class="select2 w-full">
+    <option value="" disabled selected>Seleccionar Tipo de Recojo</option>
+    @foreach ($tiposRecojo as $tipo)
+        <option value="{{ $tipo->idtipoRecojo }}">{{ $tipo->nombre }}</option>
+    @endforeach
+</select>
+
+
+   <!-- Tipo de Envío -->
+    <label for="tipoEnvio" class="block text-sm font-medium mt-4">Tipo de Envío</label>
+    <select id="tipoEnvio" name="tipoEnvio" class="select2 w-full">
+        <option value="" disabled selected>Seleccionar Tipo de Envío</option>
+        @foreach($tiposEnvio as $tipoEnvio)
+            <option value="{{ $tipoEnvio->idtipoenvio }}">{{ $tipoEnvio->nombre }}</option>
+        @endforeach
+    </select>
+
+</div>
+
+
+<!-- Datos del Técnico de Envío (inicialmente oculto) -->
+<div id="tecnicoDatosContainer" style="display: none;">
+    <div id="tecnicoFields">
+        <div class="tecnico-entry">
+            <label class="block text-sm font-medium">Nombre Técnico de Recojo</label>
+            <input type="text" name="nombreTecnicoEnvio[]" class="w-full border rounded p-2 mb-2" placeholder="Ingrese el nombre">
+
+            <label class="block text-sm font-medium">DNI Técnico de Recojo</label>
+            <input type="text" name="dniTecnicoEnvio[]" class="w-full border rounded p-2 mb-2" placeholder="Ingrese el DNI">
+        </div>
+    </div>
+
+    <!-- Botones para agregar o quitar técnicos -->
+    <button type="button" id="agregarTecnico" class="bg-blue-500 text-white px-4 py-2 rounded mt-2">Agregar Técnico</button>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const selectTienda = document.getElementById("idTienda");
+    const esEnvioContainer = document.getElementById("esEnvioContainer");
+    const esEnvioCheckbox = document.getElementById("esEnvio");
+    const tecnicoContainer = document.getElementById("tecnicoContainer");
+    const tecnicoDatosContainer = document.getElementById("tecnicoDatosContainer");
+    const tecnicoFields = document.getElementById("tecnicoFields");
+    const agregarTecnicoBtn = document.getElementById("agregarTecnico");
+
+    if (!selectTienda || !esEnvioContainer || !esEnvioCheckbox || !tecnicoContainer || !tecnicoDatosContainer) {
+        console.error("No se encontraron los elementos necesarios.");
+        return;
+    }
+
+    function verificarDepartamento() {
+        const selectedOption = selectTienda.options[selectTienda.selectedIndex];
+        const departamento = selectedOption.getAttribute("data-departamento");
+
+        if (departamento === "3926") {
+            esEnvioContainer.style.display = "none";
+            tecnicoContainer.style.display = "none";
+            tecnicoDatosContainer.style.display = "none";
+        } else {
+            esEnvioContainer.style.display = "block";
+        }
+    }
+
+    function verificarEsEnvio() {
+        if (esEnvioCheckbox.checked) {
+            tecnicoContainer.style.display = "block";
+            tecnicoDatosContainer.style.display = "block";
+        } else {
+            tecnicoContainer.style.display = "none";
+            tecnicoDatosContainer.style.display = "none";
+        }
+    }
+
+    function agregarTecnico() {
+        const tecnicoEntry = document.createElement("div");
+        tecnicoEntry.classList.add("tecnico-entry");
+
+        tecnicoEntry.innerHTML = `
+            <label class="block text-sm font-medium">Nombre Técnico de Recojo</label>
+            <input type="text" name="nombreTecnicoEnvio[]" class="w-full border rounded p-2 mb-2" placeholder="Ingrese el nombre">
+
+            <label class="block text-sm font-medium">DNI Técnico de Recojo</label>
+            <input type="text" name="dniTecnicoEnvio[]" class="w-full border rounded p-2 mb-2" placeholder="Ingrese el DNI">
+
+            <button type="button" class="eliminarTecnico bg-red-500 text-white px-3 py-1 rounded mt-2">Eliminar</button>
+        `;
+
+        tecnicoFields.appendChild(tecnicoEntry);
+
+        // Evento para eliminar el técnico
+        tecnicoEntry.querySelector(".eliminarTecnico").addEventListener("click", function () {
+            tecnicoEntry.remove();
+        });
+    }
+
+    // Mantener ocultos al inicio hasta que seleccione una tienda
+    esEnvioContainer.style.display = "none";
+    tecnicoContainer.style.display = "none";
+    tecnicoDatosContainer.style.display = "none";
+
+    // Eventos
+    selectTienda.addEventListener("change", verificarDepartamento);
+    esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
+    agregarTecnicoBtn.addEventListener("click", agregarTecnico);
+});
+</script>
+
+
+
+
+             
 
 
                 <!-- Botones -->
