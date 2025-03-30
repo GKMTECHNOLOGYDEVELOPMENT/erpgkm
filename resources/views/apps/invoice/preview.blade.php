@@ -1,4 +1,6 @@
 <x-layout.default>
+    <!-- Fancybox CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" />
 
 
     {{-- <div x-data="invoicePreview">
@@ -73,99 +75,275 @@
                 </svg>
                 Edit </a>
         </div> --}}
-        <div class="panel">
-            <div class="flex justify-between flex-wrap gap-4 px-4">
-                <div class="text-2xl font-semibold uppercase">DATOS DEL ENVIO</div>
-                <div class="shrink-0">
-                    <img src="/assets/images/auth/logogkm2.png" alt="image"
-                        class="w-40 ltr:ml-auto rtl:mr-auto" />
-                </div>
-            </div>
-            <div class="ltr:text-right rtl:text-left px-4">
-                <div class="space-y-1 mt-6 text-white-dark">
-                    <div>13 Tetrick Road, Cypress Gardens, Florida, 33884, US</div>
-                    <div>vristo@gmail.com</div>
-                    <div>+1 (070) 123-4567</div>
-                </div>
+    <div class="panel">
+        <!-- Encabezado -->
+        <div class="flex justify-between items-center flex-wrap gap-4 px-4 mb-4">
+            <h2 class="text-2xl font-bold uppercase text-gray-800 dark:text-white">
+                Datos del {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}
+            </h2>
+            <img src="/assets/images/auth/logogkm2.png" alt="GKM Logo" class="w-40 ltr:ml-auto rtl:mr-auto shrink-0" />
+        </div>
+
+        <hr class="border-gray-300 dark:border-[#1b2e4b] my-4">
+
+        <!-- Técnico, Info y Ejecutor -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+
+            {{-- Técnico --}}
+            <div
+                class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                @if ($tecnico1 === 'N/A')
+                    <span
+                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                @endif
+                <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del
+                    {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                <div><strong>Nombre:</strong> {{ $tecnico1 }}</div>
+                <div><strong>Correo:</strong> {{ $correo1 }}</div>
+                <div><strong>Teléfono:</strong> {{ $telefono1 }}</div>
             </div>
 
-            <hr class="border-[#e0e6ed] dark:border-[#1b2e4b] my-6">
-            <div class="flex justify-between lg:flex-row flex-col gap-6 flex-wrap">
-                <div class="flex-1">
-                    <div class="space-y-1 text-white-dark">
-                        <div>Issue For:</div>
-                        <div class="text-black dark:text-white font-semibold">John Doe</div>
-                        <div>405 Mulberry Rd. Mc Grady, NC, 28649</div>
-                        <div>redq@company.com</div>
-                        <div>(128) 666 070</div>
+            {{-- Info envío/recojo --}}
+            <div
+                class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                @if ($tipoRecojo1 === 'N/A' && $tipoEnvio1 === 'N/A')
+                    <span
+                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                @endif
+                <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del
+                    {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                <div><strong>ID Ticket:</strong> #{{ $ticketId }}</div>
+                <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo1 }}</div>
+                <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio1 }}</div>
+            </div>
+
+            {{-- Ejecutor --}}
+            <div
+                class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                @if ($ejecutor === 'N/A')
+                    <span
+                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                @endif
+                <h3 class="font-semibold text-base border-b pb-1 mb-2">Ejecutor</h3>
+                <div><strong>Nombre:</strong> {{ $ejecutor }}</div>
+            </div>
+
+            {{-- Manejo envío --}}
+            @if ($manejoEnvio1)
+                <div
+                    class="md:col-span-2 space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="font-semibold text-base border-b pb-1 mb-2">
+                        Manejo del {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}
+                    </h3>
+                    <div class="flex justify-between flex-wrap gap-4">
+                        <div><strong>N° Guía:</strong> {{ $manejoEnvio1->numero_guia }}</div>
+                        <div><strong>Agencia de Recepción:</strong> {{ $manejoEnvio1->agenciaRecepcion }}</div>
+                    </div>
+                    <div class="flex justify-between flex-wrap gap-4">
+                        <div><strong>Agencia de Envío:</strong> {{ $manejoEnvio1->agenciaEnvio }}</div>
+                        <div><strong>Clave:</strong> {{ $manejoEnvio1->clave }}</div>
+                    </div>
+                    <div class="flex justify-between flex-wrap gap-4">
+                        <div><strong>Fecha de Envío:</strong>
+                            {{ \Carbon\Carbon::parse($manejoEnvio1->fecha_envio)->format('d/m/Y H:i') }}</div>
+                        <div><strong>Fecha Estimada de Llegada:</strong>
+                            {{ \Carbon\Carbon::parse($manejoEnvio1->fecha_llegada_estimada)->format('d/m/Y H:i') }}
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Registrado por:</strong>
+                        {{ $usuarioEnvio1 ? "{$usuarioEnvio1->Nombre} {$usuarioEnvio1->apellidoPaterno}" : 'N/A' }}
                     </div>
                 </div>
-                <div class="flex justify-between sm:flex-row flex-col gap-6 lg:w-2/3">
-                    <div class="xl:1/3 lg:w-2/5 sm:w-1/2">
-                        <div class="flex items-center w-full justify-between mb-2">
-                            <div class="text-white-dark">Invoice :</div>
-                            <div>#8701</div>
+            @endif
+
+            {{-- Receptor --}}
+            <div
+                class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                @if ($receptorNombre === 'N/A' && $receptorDni === 'N/A')
+                    <span
+                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                @endif
+                <h3 class="font-semibold text-base border-b pb-1 mb-2">Datos del Receptor</h3>
+                <div><strong>Nombre:</strong> {{ $receptorNombre }}</div>
+                <div><strong>DNI:</strong> {{ $receptorDni }}</div>
+            </div>
+
+        </div>
+
+
+        @if ($anexos1 && count($anexos1) > 0)
+            <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
+            <div class="px-4">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Anexos de Retiro -
+                    {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}</h3>
+
+                <div
+                    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-h-[600px] overflow-y-auto pr-1">
+
+                    @foreach ($anexos1 as $index => $anexo)
+                        @php
+                            $imagenVacia = empty($anexo->foto);
+                            $fecha = \Carbon\Carbon::parse($anexo->fecha)->format('d/m/Y H:i');
+                        @endphp
+
+                        <div class="relative space-y-2 text-sm text-gray-700 dark:text-white">
+                            @if ($imagenVacia)
+                                <span
+                                    class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                            @endif
+
+                            <a data-fancybox="anexos1" href="data:image/jpeg;base64,{{ base64_encode($anexo->foto) }}"
+                                data-caption="Fecha: {{ $fecha }}"
+                                class="block w-full aspect-square border border-gray-300 rounded-lg overflow-hidden">
+                                <img src="data:image/jpeg;base64,{{ base64_encode($anexo->foto) }}"
+                                    alt="Anexo de Retiro"
+                                    class="object-contain w-full h-full {{ $imagenVacia ? 'opacity-30' : '' }}" />
+                            </a>
+
+                            <div>
+                                <strong>Fecha:</strong> {{ $fecha }}
+                            </div>
                         </div>
-                        <div class="flex items-center w-full justify-between mb-2">
-                            <div class="text-white-dark">Issue Date :</div>
-                            <div>13 Sep 2022</div>
-                        </div>
-                        <div class="flex items-center w-full justify-between mb-2">
-                            <div class="text-white-dark">Order ID :</div>
-                            <div>#OD-85794</div>
-                        </div>
-                        <div class="flex items-center w-full justify-between">
-                            <div class="text-white-dark">Shipment ID :</div>
-                            <div>#SHP-8594</div>
-                        </div>
-                    </div>
-                    <div class="xl:1/3 lg:w-2/5 sm:w-1/2">
-                        <div class="flex items-center w-full justify-between mb-2 ">
-                            <div class="text-white-dark">Bank Name:</div>
-                            <div class="whitespace-nowrap">Bank Of America</div>
-                        </div>
-                        <div class="flex items-center w-full justify-between mb-2">
-                            <div class="text-white-dark">Account Number:</div>
-                            <div>1234567890</div>
-                        </div>
-                        <div class="flex items-center w-full justify-between mb-2">
-                            <div class="text-white-dark">SWIFT Code:</div>
-                            <div>S58K796</div>
-                        </div>
-                        <div class="flex items-center w-full justify-between mb-2">
-                            <div class="text-white-dark">IBAN:</div>
-                            <div>L5698445485</div>
-                        </div>
-                        <div class="flex items-center w-full justify-between mb-2">
-                            <div class="text-white-dark">Country:</div>
-                            <div>United States</div>
-                        </div>
-                    </div>
+                    @endforeach
+
                 </div>
             </div>
-            <div class="table-responsive mt-6">
-                <table class="table-striped">
-                    <thead>
-                        <tr>
-                            <template x-for="item in columns" :key="item.key">
-                                <th :class="[item.class]" x-text="item.label"></th>
-                            </template>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="item in items" :key="item.id">
-                            <tr>
-                                <td x-text="item.id"></td>
-                                <td x-text="item.title"></td>
-                                <td x-text="item.quantity"></td>
-                                <td class="ltr:text-right rtl:text-left" x-text="`$${item.price}`"></td>
-                                <td class="ltr:text-right rtl:text-left" x-text="`$${item.amount}`"></td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
+        @endif
+
+
+
+        <!-- Segundo bloque tipo2 -->
+        @if ($tipo2)
+            <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
+            <div class="px-4 mb-4">
+                <h2 class="text-xl font-bold uppercase text-gray-800 dark:text-white">Datos del
+                    {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h2>
             </div>
-            {{-- <div class="grid sm:grid-cols-2 grid-cols-1 px-4 mt-6">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+                <!-- Técnico -->
+                <div
+                    class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    @if (!$tecnico2 || $correo2 == 'N/A' || $telefono2 == 'N/A')
+                        <span
+                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                    @endif
+                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del
+                        {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                    <div><strong>Nombre:</strong> {{ $tecnico2 }}</div>
+                    <div><strong>Correo:</strong> {{ $correo2 }}</div>
+                    <div><strong>Teléfono:</strong> {{ $telefono2 }}</div>
+                </div>
+
+                <!-- Info -->
+                <div
+                    class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    @if ($tipoRecojo2 == 'N/A' || $tipoEnvio2 == 'N/A')
+                        <span
+                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                    @endif
+                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del
+                        {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                    <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo2 }}</div>
+                    <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio2 }}</div>
+                </div>
+
+                <!-- Recogen Paquete -->
+                <div
+                    class="space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Recogen Paquete</h3>
+                    <div><strong>1.</strong> Gian Majuan</div>
+                    <div><strong>2.</strong> Fernando</div>
+                </div>
+
+                <!-- Manejo Envío -->
+                @if ($manejoEnvio2)
+                    <div
+                        class="md:col-span-2 relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        @if (!$manejoEnvio2->numero_guia || !$manejoEnvio2->clave || !$usuarioEnvio2)
+                            <span
+                                class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                        @endif
+
+                        <h3 class="font-semibold text-base border-b pb-1 mb-2">Manejo del
+                            {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
+
+                        <div class="flex justify-between flex-wrap gap-4">
+                            <div><strong>N° Guía:</strong> {{ $manejoEnvio2->numero_guia }}</div>
+                            <div><strong>Agencia de Recepción:</strong> {{ $manejoEnvio2->agenciaRecepcion }}</div>
+                        </div>
+
+                        <div class="flex justify-between flex-wrap gap-4">
+                            <div><strong>Agencia de Envío:</strong> {{ $manejoEnvio2->agenciaEnvio }}</div>
+                            <div><strong>Clave:</strong> {{ $manejoEnvio2->clave }}</div>
+                        </div>
+
+                        <div class="flex justify-between flex-wrap gap-4">
+                            <div><strong>Fecha de Envío:</strong>
+                                {{ \Carbon\Carbon::parse($manejoEnvio2->fecha_envio)->format('d/m/Y H:i') }}</div>
+                            <div><strong>Fecha Estimada de Llegada:</strong>
+                                {{ \Carbon\Carbon::parse($manejoEnvio2->fecha_llegada_estimada)->format('d/m/Y H:i') }}
+                            </div>
+                        </div>
+
+                        <div>
+                            <strong>Registrado por:</strong>
+                            {{ $usuarioEnvio2 ? "{$usuarioEnvio2->Nombre} {$usuarioEnvio2->apellidoPaterno}" : 'N/A' }}
+                        </div>
+                    </div>
+                @endif
+            </div>
+
+
+
+            <!-- Anexos tipo2 -->
+            @if ($anexos2 && count($anexos2) > 0)
+                <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
+                <div class="px-4">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                        Anexos de Retiro - {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}
+                    </h3>
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-h-[600px] overflow-y-auto pr-1">
+                        @foreach ($anexos2 as $index => $anexo)
+                            <div class="relative space-y-2 text-sm text-gray-700 dark:text-white">
+                                <a data-fancybox="anexos2"
+                                    href="data:image/jpeg;base64,{{ base64_encode($anexo->foto) }}"
+                                    data-caption="Fecha: {{ \Carbon\Carbon::parse($anexo->fecha)->format('d/m/Y H:i') }}"
+                                    class="block aspect-square w-full border border-gray-300 rounded-lg overflow-hidden">
+                                    <img src="data:image/jpeg;base64,{{ base64_encode($anexo->foto) }}"
+                                        alt="Anexo de Retiro" class="object-contain w-full h-full" />
+
+                                    @if (strlen($anexo->foto ?? '') <= 1)
+                                        <span
+                                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">
+                                            Vacío
+                                        </span>
+                                    @endif
+                                </a>
+                                <div>
+                                    <strong>Fecha:</strong>
+                                    {{ \Carbon\Carbon::parse($anexo->fecha)->format('d/m/Y H:i') }}
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
+        @endif
+    </div>
+
+    <!-- Fancybox JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
+
+
+
+
+
+
+    {{-- <div class="grid sm:grid-cols-2 grid-cols-1 px-4 mt-6">
                 <div></div>
                 <div class="ltr:text-right rtl:text-left space-y-2">
                     <div class="flex items-center">
@@ -190,9 +368,8 @@
                     </div>
                 </div>
             </div> --}}
-        </div>
-    </div>
-    <script>
+
+    {{-- <script>
         document.addEventListener("alpine:init", () => {
             Alpine.data('invoicePreview', () => ({
                 items: [{
@@ -253,5 +430,5 @@
                 }
             }));
         });
-    </script>
+    </script> --}}
 </x-layout.default>

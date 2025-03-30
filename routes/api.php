@@ -30,8 +30,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
-
-    
 });
 
 Route::get('/clientes', [ClientesController::class, 'getAll']);
@@ -44,6 +42,7 @@ Route::get('/marca', [MarcaController::class, 'getAll']);
 Route::get('/modelo', [ModelosController::class, 'getAll']);
 Route::get('/articulos', [ArticulosController::class, 'getAll']);
 Route::get('/ordenes', [OrdenesTrabajoController::class, 'getAll']);
+Route::get('/ordenes/helpdesk', [OrdenesHelpdeskController::class, 'getAll']);
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);

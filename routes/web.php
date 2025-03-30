@@ -194,9 +194,9 @@ Route::get('/apps/calendar', [CalendarController::class, 'index'])->name('apps.c
 // Route::view('/apps/calendar', 'apps.calendar');
 
 
-/// MODULO DE ALMACEN /// 
+/// MODULO DE ALMACEN ///
 
-// INICIO CATEGORIA /// 
+// INICIO CATEGORIA ///
 Route::prefix('categoria')->name('categorias.')->group(function () {
     Route::get('/', [CategoriaController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [CategoriaController::class, 'store'])->name('store'); // Guardar una nueva categoría
@@ -401,7 +401,7 @@ Route::get('ordenes/smart/{id}/obtener-firma-tecnico', [OrdenesTrabajoController
     ->middleware('auth');
 
 
-    Route::get('ordenes/helpdesk/soporte/{id}/obtener-firma-tecnico', [OrdenesHelpdeskController::class, 'obtenerFirmaTecnico'])
+Route::get('ordenes/helpdesk/soporte/{id}/obtener-firma-tecnico', [OrdenesHelpdeskController::class, 'obtenerFirmaTecnico'])
     ->name('obtener.firma.tecnico')
     ->middleware('auth');
 
@@ -530,7 +530,7 @@ Route::get('/clientes/{idClienteGeneral}', [OrdenesHelpdeskController::class, 'o
 
 
 Route::view('/apps/invoice/list', 'apps.invoice.list');
-Route::view('/apps/invoice/preview', 'apps.invoice.preview');
+Route::get('/apps/invoice/preview/{id}', [OrdenesHelpdeskController::class, 'verEnvio']);
 Route::view('/apps/invoice/add', 'apps.invoice.add');
 Route::view('/apps/invoice/edit', 'apps.invoice.edit');
 

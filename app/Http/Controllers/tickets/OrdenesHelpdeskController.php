@@ -984,7 +984,9 @@ class OrdenesHelpdeskController extends Controller
 
     public function getAll(Request $request)
     {
-        $ordenesQuery = Ticket::with([
+        Log::info("📥 Entrando al método getAll (HELPDESK)");
+
+        $query = Ticket::with([
             'tecnico:idUsuario,Nombre',
             'usuario:idUsuario,Nombre',
             'cliente:idCliente,nombre',
@@ -993,39 +995,222 @@ class OrdenesHelpdeskController extends Controller
             'estado_ot:idEstadoots,descripcion,color',
             'marca:idMarca,nombre',
             'modelo.categoria:idCategoria,nombre',
-            'estadoflujo:idEstadflujo,descripcion,color',
-            'manejoEnvio:idmanejo_envio,idTickets,tipo'
+            'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
+            'manejoEnvio:idmanejo_envio,idTickets,tipo',
+            'visitas' => function ($q) {
+                $q->select('idVisitas', 'idTickets', 'fecha_programada')
+                    ->orderBy('fecha_programada', 'desc')
+                    ->limit(1);
+            },
 
+            'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
+            'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
+            'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
+            'visitas.tecnico:idUsuario,Nombre',
+            'transicion_status_tickets' => function ($query) use ($request) {
+                if ($request->has('idVisita')) {
+                    $query->whereHas('seleccionarVisita', function ($q) use ($request) {
+                        $q->where('idVisitas', $request->idVisita);
+                    })->where('idEstadoots', 3);
+                }
+            }
         ]);
 
         if ($request->has('tipoTicket') && in_array($request->tipoTicket, [1, 2])) {
-            $ordenesQuery->where('idTipotickets', $request->tipoTicket);
+            $query->where('idTipotickets', $request->tipoTicket);
         }
 
         if ($request->has('marca') && $request->marca != '') {
-            $ordenesQuery->where('idMarca', $request->marca);
+            $query->where('idMarca', $request->marca);
         }
 
         if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
-            $ordenesQuery->where('idClienteGeneral', $request->clienteGeneral);
+            $query->where('idClienteGeneral', $request->clienteGeneral);
         }
 
-        $ordenes = $ordenesQuery->paginate(10);
+        if ($request->has('search') && !empty($request->input('search.value'))) {
+            $searchValue = trim($request->input('search.value'));
+            $formattedDate = false;
 
-        // ✅ Logs claros solo de manejo_envio
-        foreach ($ordenes->items() as $orden) {
-            if ($orden->manejoEnvio) {
-                Log::info("✅ Ticket {$orden->idTickets} tiene manejo_envio", [
-                    'tipo' => $orden->manejoEnvio->tipo,
-                    'idmanejo_envio' => $orden->manejoEnvio->idmanejo_envio ?? null
-                ]);
+            if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $searchValue)) {
+                try {
+                    $formattedDate = \Carbon\Carbon::createFromFormat('d/m/Y', $searchValue)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    $formattedDate = false;
+                }
+            }
+
+            $isEstadoFlujo = EstadoFlujo::whereRaw('BINARY descripcion = ?', [$searchValue])->exists();
+
+            if ($isEstadoFlujo) {
+                $query->whereHas('ticketflujo.estadoFlujo', function ($q) use ($searchValue) {
+                    $q->whereRaw('BINARY descripcion = ?', [$searchValue]);
+                });
+            } elseif ($formattedDate) {
+                $query->whereDate('fecha_creacion', $formattedDate);
             } else {
-                Log::warning("⚠️ Ticket {$orden->idTickets} SIN manejo_envio");
+                $query->where(function ($q) use ($searchValue) {
+                    $q->where('serie', $searchValue)
+                        ->orWhere('numero_ticket', $searchValue)
+                        ->orWhere('serie', 'LIKE', "%{$searchValue}%")
+                        ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
+                        ->orWhere('fecha_creacion', 'LIKE', "%{$searchValue}%")
+                        ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                        ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                        ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
+                        ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                        ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                        ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                        ->orWhereHas('visitas', fn($q) => $q->where('fecha_programada', 'LIKE', "%{$searchValue}%"));
+                });
+
+                $query->orderByRaw("
+                    CASE
+                        WHEN serie = ? THEN 1
+                        WHEN numero_ticket = ? THEN 2
+                        ELSE 3
+                    END
+                ", [$searchValue, $searchValue]);
             }
         }
 
-        return response()->json($ordenes);
+        $recordsTotal = Ticket::count();
+        $query->orderBy('idTickets', 'desc');
+        $recordsFiltered = (clone $query)->count();
+
+        $ordenes = $query->skip($request->input('start', 0))
+            ->take($request->input('length', 10))
+            ->get();
+
+        $ordenes = $ordenes->map(function ($item) {
+            $arr = json_decode(json_encode($item), true);
+            array_walk_recursive($arr, fn(&$v) => $v = is_string($v) ? mb_convert_encoding($v, 'UTF-8', 'UTF-8') : $v);
+            return $arr;
+        });
+
+        return response()->json([
+            "draw" => intval($request->input('draw')),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $ordenes
+        ]);
     }
+
+
+    public function verEnvio($id)
+    {
+        $envioTipo1 = DB::table('datos_envio')
+            ->where('idTickets', $id)
+            ->where('tipo', 1)
+            ->first();
+
+        $envioTipo2 = DB::table('datos_envio')
+            ->where('idTickets', $id)
+            ->where('tipo', 2)
+            ->first();
+
+        // Datos de tipo 1 (Envío)
+        $tipoRecojo1 = $envioTipo1
+            ? DB::table('tiporecojo')->where('idtipoRecojo', $envioTipo1->tipoRecojo)->first()
+            : null;
+
+        $tipoEnvio1 = $envioTipo1
+            ? DB::table('tipoenvio')->where('idtipoenvio', $envioTipo1->tipoEnvio)->first()
+            : null;
+
+        $manejoEnvio1 = DB::table('manejo_envio')
+            ->where('idTickets', $id)
+            ->where('tipo', 1)
+            ->first();
+
+        // Datos de manejo_envio tipo = 2
+        $manejoEnvio2 = DB::table('manejo_envio')
+            ->where('idTickets', $id)
+            ->where('tipo', 2)
+            ->first();
+
+        $usuarioEnvio1 = $manejoEnvio1
+            ? DB::table('usuarios')->where('idUsuario', $manejoEnvio1->idUsuario)->first()
+            : null;
+
+        // Usuario que registró el manejo_envio (recojo)
+        $usuarioEnvio2 = $manejoEnvio2
+            ? DB::table('usuarios')->where('idUsuario', $manejoEnvio2->idUsuario)->first()
+            : null;
+
+        $usuario1 = $envioTipo1
+            ? DB::table('usuarios')->where('idUsuario', $envioTipo1->idUsuario)->first()
+            : null;
+
+        // Datos de tipo 2 (Recojo)
+        $tipoRecojo2 = $envioTipo2
+            ? DB::table('tiporecojo')->where('idtipoRecojo', $envioTipo2->tipoRecojo)->first()
+            : null;
+
+        $tipoEnvio2 = $envioTipo2
+            ? DB::table('tipoenvio')->where('idtipoenvio', $envioTipo2->tipoEnvio)->first()
+            : null;
+
+        $usuario2 = $envioTipo2
+            ? DB::table('usuarios')->where('idUsuario', $envioTipo2->idUsuario)->first()
+            : null;
+
+        $receptor = DB::table('ticket_receptor')
+            ->where('idTickets', $id)
+            ->first();
+
+        $anexos1 = DB::table('anexo_retiro')
+            ->where('idTickets', $id)
+            ->where('tipo', 1)
+            ->get();
+
+        $anexos2 = DB::table('anexo_retiro')
+            ->where('idTickets', $id)
+            ->where('tipo', 2)
+            ->get();
+
+
+        $ticket = DB::table('tickets')->where('idTickets', $id)->first();
+
+        $ejecutor = $ticket
+            ? DB::table('usuarios')->where('idUsuario', $ticket->ejecutor)->first()
+            : null;
+
+        return view('apps.invoice.preview', [
+            'ticketId' => $id,
+
+            // Envío (tipo = 1)
+            'tipoRecojo1' => $tipoRecojo1->nombre ?? 'N/A',
+            'tipoEnvio1'  => $tipoEnvio1->nombre ?? 'N/A',
+            'tecnico1'    => $usuario1 ? "{$usuario1->Nombre} {$usuario1->apellidoPaterno}" : 'N/A',
+            'correo1'     => $usuario1->correo ?? 'N/A',
+            'telefono1'   => $usuario1->telefono ?? 'N/A',
+
+            // Recojo (tipo = 2)
+            'tipoRecojo2' => $tipoRecojo2->nombre ?? 'N/A',
+            'tipoEnvio2'  => $tipoEnvio2->nombre ?? 'N/A',
+            'tecnico2'    => $usuario2 ? "{$usuario2->Nombre} {$usuario2->apellidoPaterno}" : 'N/A',
+            'correo2'     => $usuario2->correo ?? 'N/A',
+            'telefono2'   => $usuario2->telefono ?? 'N/A',
+
+            'receptorNombre' => $receptor->nombre ?? 'N/A',
+            'receptorDni'    => $receptor->dni ?? 'N/A',
+            'anexos1' => $anexos1,
+            'anexos2' => $anexos2,
+
+            'ejecutor'       => $ejecutor ? "{$ejecutor->Nombre} {$ejecutor->apellidoPaterno}" : 'N/A',
+
+            // Tipo control
+            'tipo1' => $envioTipo1 ? 1 : ($envioTipo2 ? 2 : null),
+            'tipo2' => $envioTipo1 && $envioTipo2 ? 2 : null,
+            'manejoEnvio1' => $manejoEnvio1,
+            'manejoEnvio2' => $manejoEnvio2,
+            'usuarioEnvio1' => $usuarioEnvio1,
+            'usuarioEnvio2' => $usuarioEnvio2,
+
+        ]);
+    }
+
 
 
 
