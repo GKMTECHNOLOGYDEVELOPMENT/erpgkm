@@ -75,10 +75,12 @@ document.addEventListener('alpine:init', () => {
                         this.isLoading = false; // 🔹 Oculta el preloader después de recibir datos
                     },
                     dataSrc: (json) => {
-                        console.log("👉 Datos recibidos del servidor:", json.data); // 🔥 Esto te mostrará los registros devueltos
+                        console.log("👉 Datos recibidos del servidor:", json.data);
+                        console.log("🔍 manejoEnvio del primer registro:", json.data[0].manejoEnvio); // 🔥 esto es clave
                         this.ordenesData = json.data;
                         return json.data;
                     }
+
 
                 },
                 columns: [
@@ -172,16 +174,31 @@ document.addEventListener('alpine:init', () => {
 
 
         getEditButton(data) {
-            return `
-                <div class="flex justify-center items-center">
-                    <a href="/ordenes/helpdesk/${data.tipoServicio == 1 ? 'soporte' : 'levantamiento'}/${data.idTickets}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 block mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" />
-                    <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" />
+            console.log("Data en getEditButton:", data); // Verifica que manejoEnvio esté presente
+            const tieneEnvio = Array.isArray(data.manejoEnvio) && data.manejoEnvio.some(envio => envio.tipo === 1);
+
+            const verEnvioBtn = tieneEnvio
+                ? `<a href="/envio/${data.idTickets}" class="ltr:ml-2 rtl:mr-2" x-tooltip="Ver Envío">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-blue-500 hover:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 0l3-3m-3 3l3 3m6-8.25V6a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6v12a2.25 2.25 0 002.25 2.25h9.75A2.25 2.25 0 0018.75 18v-.75" />
                 </svg>
+            </a>`
+                : '';
+
+            return `
+                <div class="flex justify-center items-center space-x-2">
+                    <a href="/ordenes/helpdesk/${data.tipoServicio == 1 ? 'soporte' : 'levantamiento'}/${data.idTickets}/edit" class="ltr:mr-1 rtl:ml-1" x-tooltip="Editar">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-green-600 hover:text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" />
+                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" />
+                        </svg>
                     </a>
+                    ${verEnvioBtn}
                 </div>`;
         },
+
+
+
 
         getMoreButton(data) {
             return `

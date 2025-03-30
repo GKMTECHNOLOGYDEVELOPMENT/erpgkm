@@ -36,13 +36,13 @@ class OrdenesHelpdeskController extends Controller
     {
         // Obtener usuario autenticado y su rol
         $usuario = Auth::user();
-  
+
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
         // Obtener los datos necesarios
         $clientesGenerales = ClienteGeneral::all();
         $tiposServicio = TipoServicio::all();
-        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
+        $usuarios = Usuario::where('idTipoUsuario', 1)->get();
         $tiposTickets = Tipoticket::all();
         $clientes = Cliente::all();
         $tiendas = Tienda::all();
@@ -81,11 +81,11 @@ class OrdenesHelpdeskController extends Controller
         $clientesGenerales = ClienteGeneral::where('estado', 1)->get();
         $clientes = Cliente::where('estado', 1)->get();
         $tiendas = Tienda::all();
-        $usuarios = Usuario::where('idTipoUsuario', 4)->get();
+        $usuarios = Usuario::where('idTipoUsuario', 1)->get();
         $tiposServicio = TipoServicio::all();
         $marcas = Marca::all();
         $modelos = Modelo::all();
-        $tiposEnvio= TipoEnvio::all();
+        $tiposEnvio = TipoEnvio::all();
         $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
 
 
@@ -109,7 +109,7 @@ class OrdenesHelpdeskController extends Controller
     {
         try {
             Log::debug('Datos recibidos en storehelpdesk:', $request->all());
-    
+
             // Validar los datos
             $validatedData = $request->validate([
                 'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
@@ -122,12 +122,12 @@ class OrdenesHelpdeskController extends Controller
                 'idTecnico' => 'nullable|integer|exists:usuarios,idUsuario',  // Validamos el ID del técnico
                 'tipoRecojo' => 'nullable|integer|exists:tiporecojo,idtipoRecojo', // Validar tipo de recojo
                 'tipoEnvio' => 'nullable|integer|exists:tipoenvio,idtipoenvio', // Validar tipo de envío
-                'nombreTecnicoEnvio' => 'nullable|array', 
+                'nombreTecnicoEnvio' => 'nullable|array',
                 'dniTecnicoEnvio' => 'nullable|array'
             ]);
-    
+
             Log::debug('Datos validados:', $validatedData);
-    
+
             // Guardar la orden de trabajo
             $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['numero_ticket'],
@@ -142,31 +142,31 @@ class OrdenesHelpdeskController extends Controller
                 'envio' => $validatedData['esEnvio'] ? 1 : 0,
                 'idEncargadoEnvio_Provincia' => $validatedData['idTecnico'] ?? NULL
             ]);
-    
+
             Log::debug('Orden de trabajo creada correctamente.');
 
 
-                 // Si es un envío, almacenar los técnicos de recojo
-        if ($validatedData['esEnvio']) {
-            foreach ($validatedData['nombreTecnicoEnvio'] as $index => $nombre) {
-                $dni = $validatedData['dniTecnicoEnvio'][$index];
-                
-                // Guardar cada técnico de recojo
-                DB::table('ticket_receptor')->insert([
-                    'idTickets' => $ticket->idTickets,
-                    'nombre' => $nombre,
-                    'dni' => $dni,
-                ]);
+            // Si es un envío, almacenar los técnicos de recojo
+            if ($validatedData['esEnvio']) {
+                foreach ($validatedData['nombreTecnicoEnvio'] as $index => $nombre) {
+                    $dni = $validatedData['dniTecnicoEnvio'][$index];
+
+                    // Guardar cada técnico de recojo
+                    DB::table('ticket_receptor')->insert([
+                        'idTickets' => $ticket->idTickets,
+                        'nombre' => $nombre,
+                        'dni' => $dni,
+                    ]);
+                }
+
+                Log::info('Datos de técnicos de recojo guardados correctamente');
             }
 
-            Log::info('Datos de técnicos de recojo guardados correctamente');
-        }
-    
 
 
             // Definir el idEstadflujo basado en el valor de esEnvio
             $idEstadflujo = $validatedData['esEnvio'] ? 28 : 1;
-    
+
             // Crear el flujo de trabajo con el idEstadflujo correspondiente
             $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
                 'idTicket' => $ticket->idTickets,
@@ -174,18 +174,18 @@ class OrdenesHelpdeskController extends Controller
                 'idUsuario' => auth()->id(),
                 'fecha_creacion' => now(),
             ]);
-    
+
             Log::info('Flujo de trabajo guardado correctamente', [
                 'idTicket' => $ticket->idTickets,
                 'idTicketFlujo' => $ticketFlujoId
             ]);
-    
+
             // Actualizar el ticket con el idTicketFlujo generado
             $ticket->idTicketFlujo = $ticketFlujoId;
             $ticket->save();
-    
+
             Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
-    
+
             // Verificar si es Envío y guardar en la tabla datos_envio
             if ($validatedData['esEnvio']) {
                 // Insertar en la tabla datos_envio
@@ -198,7 +198,7 @@ class OrdenesHelpdeskController extends Controller
                 ]);
                 Log::info('Datos de envío guardados correctamente');
             }
-    
+
             // 🔹 Redirigir según el tipo de servicio seleccionado
             if ($validatedData['tipoServicio'] == 2) {
                 return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
@@ -217,8 +217,8 @@ class OrdenesHelpdeskController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
-    
-    
+
+
 
 
 
@@ -926,7 +926,7 @@ class OrdenesHelpdeskController extends Controller
             'idCliente' => 'required|exists:cliente,idCliente',
             'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
             'idTienda' => 'required|exists:tienda,idTienda',
-            
+
             'fallaReportada' => 'nullable|string',
         ]);
 
@@ -940,7 +940,7 @@ class OrdenesHelpdeskController extends Controller
         $orden->idCliente = $request->idCliente;
         $orden->idClienteGeneral = $request->idClienteGeneral;
         $orden->idTienda = $request->idTienda;
-     
+
         $orden->fallaReportada = $request->fallaReportada;
 
         // Guardar los cambios
@@ -1239,10 +1239,9 @@ class OrdenesHelpdeskController extends Controller
 
 
     public function obtenerClientes($idClienteGeneral)
-{
-    $clientes = Cliente::where('cliente_general_id', $idClienteGeneral)->get();
+    {
+        $clientes = Cliente::where('cliente_general_id', $idClienteGeneral)->get();
 
-    return response()->json($clientes);
-}
-
+        return response()->json($clientes);
+    }
 }
