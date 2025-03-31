@@ -244,19 +244,11 @@
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
                     </div>
                 </div>
-
-
-                <!-- Información adicional -->
-                <p class="mt-2">
-                    {{ $emitente->nome ?? 'GKM TECHNOLOGY S.A.C.' }} - AV. SANTA ELVIRA E URB. SAN ELÍAS, MZ. B LOTE 8,
-                    LOS OLIVOS - LIMA, TELF: 080080142
-                </p>
+                <br>
             </div>
+            
 
-
-
-
-            @if (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0))
+            @if (!$modoVistaPrevia && (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)))
                 <!-- Nueva página con el título ANEXOS -->
                 <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
                     <h2>ANEXOS</h2>

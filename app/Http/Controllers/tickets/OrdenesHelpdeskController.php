@@ -143,7 +143,6 @@ class OrdenesHelpdeskController extends Controller
                 'fecha_creacion' => now(),
                 'idTipotickets' => 2,
                 'envio' => $validatedData['esEnvio'] ? 1 : 0,
-                'idEncargadoEnvio_Provincia' => $validatedData['idTecnico'] ?? NULL
             ]);
 
             Log::debug('Orden de trabajo creada correctamente.');
