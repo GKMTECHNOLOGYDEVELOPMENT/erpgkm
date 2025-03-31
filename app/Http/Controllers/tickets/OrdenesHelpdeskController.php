@@ -22,6 +22,8 @@ use App\Models\Visita;
 use App\Models\ClienteClientegeneral;
 use App\Exports\HelpdeskTicketExport;
 use App\Models\Articulo;
+use App\Models\Categoria;
+use App\Models\Equipo;
 use App\Models\SeleccionarVisita;
 use App\Models\Suministro;
 use App\Models\TicketFlujo;
@@ -242,7 +244,7 @@ class OrdenesHelpdeskController extends Controller
             ->get();
 
         $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario
-
+        $categorias = Categoria::all();
 
         // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
         $ticket = DB::table('tickets')->where('idTickets', $id)->first();
@@ -461,9 +463,114 @@ class OrdenesHelpdeskController extends Controller
             'estadosOTS',
             'tipoUsuario',
             'id',
-            'idVisitaSeleccionada'
+            'idVisitaSeleccionada',
+            'categorias'
         ));
     }
+
+
+    public function guardarEquipo(Request $request)
+{
+    // Validar los datos recibidos
+    $request->validate([
+        'tipoProducto' => 'required|integer',
+        'marca' => 'required|integer',
+        'modelo' => 'required|integer',
+        'numeroSerie' => 'required|string|max:255',
+        'idTicket' => 'required|integer',
+        'idVisita' => 'required|integer',
+    ]);
+
+    // Crear un nuevo registro en la tabla equipos
+    $equipo = new Equipo();
+    $equipo->nserie = $request->numeroSerie;
+    $equipo->modalidad = 'Instalación'; // Si quieres asignar una modalidad específica
+    $equipo->idTickets = $request->idTicket;
+    $equipo->idModelo = $request->modelo;
+    $equipo->idMarca = $request->marca;
+    $equipo->idCategoria = $request->tipoProducto;
+    $equipo->idVisitas = $request->idVisita;
+    $equipo->save();
+
+    // Devolver la respuesta
+    return response()->json([
+        'success' => true,
+        'producto' => $equipo,
+        'marca' => Marca::find($request->marca),
+        'modelo' => Modelo::find($request->modelo),
+        'numeroSerie' => $request->numeroSerie
+    ]);
+}
+
+
+public function guardarEquipoRetirar(Request $request)
+{
+    // Validar los datos recibidos
+    $request->validate([
+        'tipoProducto' => 'required|integer',
+        'marca' => 'required|integer',
+        'modelo' => 'required|integer',
+        'numeroSerie' => 'required|string|max:255',
+        'idTicket' => 'required|integer',
+        'idVisita' => 'required|integer',
+    ]);
+
+    // Crear un nuevo registro en la tabla equipos
+    $equipo = new Equipo();
+    $equipo->nserie = $request->numeroSerie;
+    $equipo->modalidad = 'Retirar'; // Si quieres asignar una modalidad específica
+    $equipo->idTickets = $request->idTicket;
+    $equipo->idModelo = $request->modelo;
+    $equipo->idMarca = $request->marca;
+    $equipo->idCategoria = $request->tipoProducto;
+    $equipo->idVisitas = $request->idVisita;
+    $equipo->save();
+
+    // Devolver la respuesta
+    return response()->json([
+        'success' => true,
+        'producto' => $equipo,
+        'marca' => Marca::find($request->marca),
+        'modelo' => Modelo::find($request->modelo),
+        'numeroSerie' => $request->numeroSerie
+    ]);
+}
+
+
+public function obtenerProductosInstalados(Request $request)
+{
+    // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Instalación"
+    $productos = Equipo::where('idTickets', $request->idTicket)
+                        ->where('idVisitas', $request->idVisita)
+                        ->where('modalidad', 'Instalación')
+                        ->get();
+
+    // Retornar la respuesta como JSON
+    return response()->json($productos);
+}
+public function obtenerProductosRetirados(Request $request)
+{
+    // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Instalación"
+    $productos = Equipo::where('idTickets', $request->idTicket)
+                        ->where('idVisitas', $request->idVisita)
+                        ->where('modalidad', 'Retirar')
+                        ->get();
+
+    // Retornar la respuesta como JSON
+    return response()->json($productos);
+}
+
+
+
+    public function obtenerModelosPorCategoria($idCategoria)
+    {
+        // Obtener los modelos que pertenecen a la categoría seleccionada
+        $modelos = Modelo::where('idCategoria', $idCategoria)->get();
+    
+        // Devolver los modelos como respuesta JSON
+        return response()->json($modelos);
+    }
+    
 
 
 

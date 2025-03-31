@@ -52,6 +52,7 @@ use App\Exports\ModeloExport;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
+use App\Models\Marca;
 use App\Models\Modelo;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -535,6 +536,15 @@ Route::get('/apps/invoice/preview/{id}', [OrdenesHelpdeskController::class, 'ver
 Route::view('/apps/invoice/add', 'apps.invoice.add');
 Route::view('/apps/invoice/edit', 'apps.invoice.edit');
 
+
+
+Route::get('/modelos/categoria/{idCategoria}', [OrdenesHelpdeskController::class, 'obtenerModelosPorCategoria']);
+
+Route::post('/guardar-equipo', [OrdenesHelpdeskController::class, 'guardarEquipo'])->name('guardarEquipo');
+
+Route::get('/obtener-productos-instalados', [OrdenesHelpdeskController::class, 'obtenerProductosInstalados']);
+Route::post('/guardar-equipo-retirar', [OrdenesHelpdeskController::class, 'guardarEquipoRetirar']);
+Route::get('/obtener-productos-retirados', [OrdenesHelpdeskController::class, 'obtenerProductosRetirados']);
 
 
 Route::view('/components/tabs', 'ui-components.tabs');
