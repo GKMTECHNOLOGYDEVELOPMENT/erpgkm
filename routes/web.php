@@ -545,6 +545,8 @@ Route::post('/guardar-equipo', [OrdenesHelpdeskController::class, 'guardarEquipo
 Route::get('/obtener-productos-instalados', [OrdenesHelpdeskController::class, 'obtenerProductosInstalados']);
 Route::post('/guardar-equipo-retirar', [OrdenesHelpdeskController::class, 'guardarEquipoRetirar']);
 Route::get('/obtener-productos-retirados', [OrdenesHelpdeskController::class, 'obtenerProductosRetirados']);
+// Rutas en routes/web.php
+Route::delete('/eliminar-producto/{id}', [OrdenesHelpdeskController::class, 'eliminarProducto']);
 
 
 Route::view('/components/tabs', 'ui-components.tabs');

@@ -1969,6 +1969,23 @@ public function obtenerProductosRetirados(Request $request)
     }
 
 
+    public function eliminarProducto($id)
+{
+    // Buscar el producto por id
+    $producto = Equipo::find($id);
+
+    // Verificar si el producto existe
+    if ($producto) {
+        // Eliminar el producto
+        $producto->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+    return response()->json(['success' => false], 404);
+}
+
+
 
     
     public function guardarVisitaSoporte(Request $request)

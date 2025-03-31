@@ -95,7 +95,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
     <!-- Sección de Detalles de los Estados -->
     <div class="p-5 rounded-lg shadow-md">
-        <span class="text-lg font-semibold mb-4 badge bg-success">Detalles de los Estados</span>
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Detalles de los Estados</span>
 
         <div class="grid grid-cols-1 gap-4 mt-4">
             <!-- Select de Estado con Nice Select -->
@@ -227,6 +227,8 @@
                             <th class="px-4 py-2 text-center">Marca</th>
                             <th class="px-4 py-2 text-center">Modelo</th>
                             <th class="px-4 py-2 text-center">Nro. Serie</th>
+                            <th class="px-4 py-2 text-center">Accion</th>
+
                         </tr>
                     </thead>
                     <tbody id="tablaInstalar"></tbody>
@@ -308,6 +310,7 @@
                             <th class="px-4 py-2 text-center">Marca</th>
                             <th class="px-4 py-2 text-center">Modelo</th>
                             <th class="px-4 py-2 text-center">Nro. Serie</th>
+                            <th class="px-4 py-2 text-center">Accion</th>
                         </tr>
                     </thead>
                     <tbody id="tablaRetirar"></tbody>
@@ -380,51 +383,87 @@
 
 <script>
     // Al cargar la página, hacer una solicitud AJAX para obtener los productos instalados
-    $(document).ready(function() {
-        var ticketId = "{{ $ticketId }}";  // Asegúrate de que $ticketId esté disponible en el contexto
-        var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}";  // Asegúrate de que $idVisitaSeleccionada esté disponible
+$(document).ready(function() {
+    var ticketId = "{{ $ticketId }}";  // Asegúrate de que $ticketId esté disponible en el contexto
+    var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}";  // Asegúrate de que $idVisitaSeleccionada esté disponible
 
-        // Solicitar los productos instalados
-        $.ajax({
-            url: '/obtener-productos-instalados',  // Ruta del controlador que creamos
-            method: 'GET',
-            data: {
-                idTicket: ticketId,
-                idVisita: idVisitaSeleccionada,
-            },
-            success: function(response) {
-                // Limpiar la tabla
-                $('#tablaInstalar').empty();
+    // Solicitar los productos instalados
+    $.ajax({
+        url: '/obtener-productos-instalados',  // Ruta del controlador que creamos
+        method: 'GET',
+        data: {
+            idTicket: ticketId,
+            idVisita: idVisitaSeleccionada,
+        },
+        success: function(response) {
+            // Limpiar la tabla
+            $('#tablaInstalar').empty();
 
-                // Verificar si hay productos
-                if (response.length > 0) {
-                    // Recorrer los productos y agregarlos a la tabla
-                    response.forEach(function(producto) {
-                        var nuevoProducto = `
-                            <tr>
-                                <td class="text-center">${producto.idCategoria}</td> <!-- Mostrar el nombre del producto -->
-                                <td class="text-center">${producto.idMarca}</td> <!-- Mostrar la marca -->
-                                <td class="text-center">${producto.idModelo}</td> <!-- Mostrar el modelo -->
-                                <td class="text-center">${producto.nserie}</td> <!-- Mostrar el número de serie -->
-                            </tr>
-                        `;
-                        $('#tablaInstalar').append(nuevoProducto);
-                    });
-                } else {
-                    // Si no hay productos, mostrar un mensaje
-                    var noProductos = `
-                        <tr>
-                            <td colspan="4" class="text-center">No hay productos instalados para este ticket y visita.</td>
+            // Verificar si hay productos
+            if (response.length > 0) {
+                // Recorrer los productos y agregarlos a la tabla
+                response.forEach(function(producto) {
+                    var nuevoProducto = `
+                        <tr data-id="${producto.idEquipos}">
+                            <td class="text-center">${producto.idCategoria}</td> <!-- Mostrar el nombre del producto -->
+                            <td class="text-center">${producto.idMarca}</td> <!-- Mostrar la marca -->
+                            <td class="text-center">${producto.idModelo}</td> <!-- Mostrar el modelo -->
+                            <td class="text-center">${producto.nserie}</td> <!-- Mostrar el número de serie -->
+                            <td class="text-center">
+                                <button class="btn btn-danger btn-sm eliminarProducto">Eliminar</button>
+                            </td>
                         </tr>
                     `;
-                    $('#tablaInstalar').append(noProductos);
+                    $('#tablaInstalar').append(nuevoProducto);
+                });
+            } else {
+                // Si no hay productos, mostrar un mensaje
+                var noProductos = `
+                    <tr>
+                        <td colspan="5" class="text-center">No hay productos instalados para este ticket y visita.</td>
+                    </tr>
+                `;
+                $('#tablaInstalar').append(noProductos);
+            }
+        },
+        error: function(xhr) {
+            alert("Hubo un error al obtener los productos instalados.");
+        }
+    });
+});
+
+</script>
+
+<script>
+    // Manejador para el botón de eliminar producto
+$('#tablaInstalar').on('click', '.eliminarProducto', function() {
+    var fila = $(this).closest('tr');
+    var idEquipo = fila.data('id'); // Obtener el id del producto a eliminar
+
+    // Confirmar la eliminación
+    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+        // Hacer la solicitud AJAX para eliminar el producto
+        $.ajax({
+            url: '/eliminar-producto/' + idEquipo,  // Ruta al controlador para eliminar el producto
+            method: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}',  // Incluir el token CSRF
+            },
+            success: function(response) {
+                if (response.success) {
+                    fila.remove();  // Eliminar la fila de la tabla
+                    alert('Producto eliminado correctamente.');
+                } else {
+                    alert('Hubo un error al eliminar el producto.');
                 }
             },
             error: function(xhr) {
-                alert("Hubo un error al obtener los productos instalados.");
+                alert('Hubo un error al procesar la solicitud de eliminación.');
             }
         });
-    });
+    }
+});
+
 </script>
 
 
@@ -528,7 +567,7 @@ $('#guardarRetirar').click(function(e) {
 </script>
 
 <script>
-    // Al cargar la página, hacer una solicitud AJAX para obtener los productos retirados
+// Al cargar la página, hacer una solicitud AJAX para obtener los productos retirados
 $(document).ready(function() {
     var ticketId = "{{ $ticketId }}";  // Asegúrate de que $ticketId esté disponible en el contexto
     var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}";  // Asegúrate de que $idVisitaSeleccionada esté disponible
@@ -550,11 +589,14 @@ $(document).ready(function() {
                 // Recorrer los productos y agregarlos a la tabla
                 response.forEach(function(producto) {
                     var nuevoProducto = `
-                        <tr>
+                        <tr data-id="${producto.idEquipos}">
                             <td class="text-center">${producto.idCategoria}</td> <!-- Mostrar el nombre del producto -->
                             <td class="text-center">${producto.idMarca}</td> <!-- Mostrar la marca -->
                             <td class="text-center">${producto.idModelo}</td> <!-- Mostrar el modelo -->
                             <td class="text-center">${producto.nserie}</td> <!-- Mostrar el número de serie -->
+                            <td class="text-center">
+                                <button class="btn btn-danger btn-sm eliminarProducto">Eliminar</button>
+                            </td>
                         </tr>
                     `;
                     $('#tablaRetirar').append(nuevoProducto);
@@ -563,7 +605,7 @@ $(document).ready(function() {
                 // Si no hay productos, mostrar un mensaje
                 var noProductos = `
                     <tr>
-                        <td colspan="4" class="text-center">No hay productos retirados para este ticket y visita.</td>
+                        <td colspan="5" class="text-center">No hay productos retirados para este ticket y visita.</td>
                     </tr>
                 `;
                 $('#tablaRetirar').append(noProductos);
@@ -573,6 +615,39 @@ $(document).ready(function() {
             alert("Hubo un error al obtener los productos retirados.");
         }
     });
+});
+
+
+</script>
+
+<script>
+    // Manejador para el botón de eliminar producto
+$('#tablaRetirar').on('click', '.eliminarProducto', function() {
+    var fila = $(this).closest('tr');
+    var idEquipo = fila.data('id'); // Obtener el id del producto a eliminar
+
+    // Confirmar la eliminación
+    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+        // Hacer la solicitud AJAX para eliminar el producto
+        $.ajax({
+            url: '/eliminar-producto/' + idEquipo,  // Ruta al controlador para eliminar el producto
+            method: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}',  // Incluir el token CSRF
+            },
+            success: function(response) {
+                if (response.success) {
+                    fila.remove();  // Eliminar la fila de la tabla
+                    alert('Producto eliminado correctamente.');
+                } else {
+                    alert('Hubo un error al eliminar el producto.');
+                }
+            },
+            error: function(xhr) {
+                alert('Hubo un error al procesar la solicitud de eliminación.');
+            }
+        });
+    }
 });
 
 </script>
