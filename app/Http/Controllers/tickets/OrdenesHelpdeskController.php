@@ -582,16 +582,28 @@ public function obtenerProductosRetirados(Request $request)
 }
 
 
+public function obtenerMarcasPorCategoria($idCategoria)
+{
+    // Obtener las marcas que pertenecen a la categoría seleccionada
+    $marcas = Marca::where('estado', 1) // Aseguramos que solo las marcas activas sean seleccionables
+                   ->whereHas('modelos', function($query) use ($idCategoria) {
+                        $query->where('idCategoria', $idCategoria);
+                   })
+                   ->get();
 
-    public function obtenerModelosPorCategoria($idCategoria)
-    {
-        // Obtener los modelos que pertenecen a la categoría seleccionada
-        $modelos = Modelo::where('idCategoria', $idCategoria)->get();
-    
-        // Devolver los modelos como respuesta JSON
-        return response()->json($modelos);
-    }
-    
+    // Retornar las marcas como respuesta JSON
+    return response()->json($marcas);
+}
+
+public function obtenerModelosPorMarca($idMarca)
+{
+    // Obtener los modelos que pertenecen a la marca seleccionada
+    $modelos = Modelo::where('idMarca', $idMarca)->get();
+
+    // Retornar los modelos como respuesta JSON
+    return response()->json($modelos);
+}
+
 
 
 

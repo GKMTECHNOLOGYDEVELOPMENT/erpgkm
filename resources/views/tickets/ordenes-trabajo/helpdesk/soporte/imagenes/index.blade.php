@@ -5,7 +5,7 @@
 
 <!-- Sección de Fotos (se mantiene igual) -->
 <div id="cardFotos" class="mt-6 p-5 rounded-lg shadow-md">
-    <span class="text-lg font-semibold mb-4 badge bg-success">Fotos</span>
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Fotos</span>
 
     <!-- Botón para abrir el modal -->
     <!-- Botón para abrir el modal -->
