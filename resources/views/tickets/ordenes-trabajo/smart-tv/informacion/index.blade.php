@@ -132,6 +132,10 @@
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         /** -------------------------------
@@ -378,6 +382,10 @@
 
 
 
+
+
+
+
 <script>
     document.getElementById("guardarEstado").addEventListener("click", function() {
         const estadoSelect = document.getElementById("estado");
@@ -423,42 +431,41 @@
 
 
 <script>
-  document.getElementById("estado").addEventListener("change", function() {
-    const estadoId = this.value;
-    const ticketId = {{ $ticket->idTickets }};
-    const visitaId = {{ $visitaId ?? 'null' }};
+    document.getElementById("estado").addEventListener("change", function() {
+        const estadoId = this.value;
+        const ticketId = {{ $ticket->idTickets }};
+        const visitaId = {{ $visitaId ?? 'null' }};
 
-    // Obtener la justificación del estado seleccionado
-    fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Mostrar la justificación en el textarea
-                document.getElementById("justificacion").value = data.justificacion || "";
-            } else {
-                toastr.error(data.message || "Error al obtener la justificación");
+        // Obtener la justificación del estado seleccionado
+        fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar la justificación en el textarea
+                    document.getElementById("justificacion").value = data.justificacion || "";
+                } else {
+                    toastr.error(data.message || "Error al obtener la justificación");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                toastr.error("Error al obtener la justificación.");
+            });
+
+        // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
+        if (estadoId == 3) {
+            const cardFotos = document.getElementById("cardFotos");
+            if (cardFotos) {
+                cardFotos.style.display = "block"; // Mostrar el elemento
+
             }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            toastr.error("Error al obtener la justificación.");
-        });
-
-    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
-    if (estadoId == 5) {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "block"; // Mostrar el elemento
-
-            renderizarPrevisualizacion();
+        } else {
+            const cardFotos = document.getElementById("cardFotos");
+            if (cardFotos) {
+                cardFotos.style.display = "none"; // Ocultar el elemento
+            }
         }
-    } else {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "none"; // Ocultar el elemento
-        }
-    }
-});
+    });
 
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar todos los select con la clase .selectize
