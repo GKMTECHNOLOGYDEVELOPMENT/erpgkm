@@ -539,21 +539,43 @@ public function guardarEquipoRetirar(Request $request)
 public function obtenerProductosInstalados(Request $request)
 {
     // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Instalación"
-    $productos = Equipo::where('idTickets', $request->idTicket)
-                        ->where('idVisitas', $request->idVisita)
-                        ->where('modalidad', 'Instalación')
-                        ->get();
+    $productos = Equipo::select(
+            'equipos.idEquipos',
+            'equipos.nserie',
+            'categoria.nombre as categoria_nombre',
+            'marca.nombre as marca_nombre',
+            'modelo.nombre as modelo_nombre'
+        )
+        ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
+        ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
+        ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
+        ->where('equipos.idTickets', $request->idTicket)
+        ->where('equipos.idVisitas', $request->idVisita)
+        ->where('equipos.modalidad', 'Instalación')
+        ->get();
 
     // Retornar la respuesta como JSON
     return response()->json($productos);
 }
+
+
 public function obtenerProductosRetirados(Request $request)
 {
     // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Instalación"
-    $productos = Equipo::where('idTickets', $request->idTicket)
-                        ->where('idVisitas', $request->idVisita)
-                        ->where('modalidad', 'Retirar')
-                        ->get();
+    $productos = Equipo::select(
+            'equipos.idEquipos',
+            'equipos.nserie',
+            'categoria.nombre as categoria_nombre',
+            'marca.nombre as marca_nombre',
+            'modelo.nombre as modelo_nombre'
+        )
+        ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
+        ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
+        ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
+        ->where('equipos.idTickets', $request->idTicket)
+        ->where('equipos.idVisitas', $request->idVisita)
+        ->where('equipos.modalidad', 'Instalación')
+        ->get();
 
     // Retornar la respuesta como JSON
     return response()->json($productos);

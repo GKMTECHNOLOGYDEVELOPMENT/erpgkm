@@ -368,7 +368,10 @@
                         </tr>
                     `;
                     $('#tablaInstalar').append(nuevoProducto);
+             
+
                     alert("Producto instalado correctamente.");
+                    location.reload();
                 } else {
                     alert("Hubo un error al guardar el equipo.");
                 }
@@ -389,7 +392,7 @@ $(document).ready(function() {
 
     // Solicitar los productos instalados
     $.ajax({
-        url: '/obtener-productos-instalados',  // Ruta del controlador que creamos
+        url: '/obtener-productos-instalados',  // Ruta del controlador para obtener los productos instalados
         method: 'GET',
         data: {
             idTicket: ticketId,
@@ -405,9 +408,9 @@ $(document).ready(function() {
                 response.forEach(function(producto) {
                     var nuevoProducto = `
                         <tr data-id="${producto.idEquipos}">
-                            <td class="text-center">${producto.idCategoria}</td> <!-- Mostrar el nombre del producto -->
-                            <td class="text-center">${producto.idMarca}</td> <!-- Mostrar la marca -->
-                            <td class="text-center">${producto.idModelo}</td> <!-- Mostrar el modelo -->
+                            <td class="text-center">${producto.categoria_nombre}</td> <!-- Mostrar el nombre de la categoría -->
+                            <td class="text-center">${producto.marca_nombre}</td> <!-- Mostrar el nombre de la marca -->
+                            <td class="text-center">${producto.modelo_nombre}</td> <!-- Mostrar el nombre del modelo -->
                             <td class="text-center">${producto.nserie}</td> <!-- Mostrar el número de serie -->
                             <td class="text-center">
                                 <button class="btn btn-danger btn-sm eliminarProducto">Eliminar</button>
@@ -431,8 +434,8 @@ $(document).ready(function() {
         }
     });
 });
-
 </script>
+
 
 <script>
     // Manejador para el botón de eliminar producto
@@ -553,6 +556,7 @@ $('#guardarRetirar').click(function(e) {
                     </tr>
                 `;
                 $('#tablaRetirar').append(nuevoProducto);
+                location.reload();
                 alert("Producto retirado correctamente.");
             } else {
                 alert("Hubo un error al guardar el equipo.");
@@ -590,9 +594,9 @@ $(document).ready(function() {
                 response.forEach(function(producto) {
                     var nuevoProducto = `
                         <tr data-id="${producto.idEquipos}">
-                            <td class="text-center">${producto.idCategoria}</td> <!-- Mostrar el nombre del producto -->
-                            <td class="text-center">${producto.idMarca}</td> <!-- Mostrar la marca -->
-                            <td class="text-center">${producto.idModelo}</td> <!-- Mostrar el modelo -->
+                            <td class="text-center">${producto.categoria_nombre}</td> <!-- Mostrar el nombre de la categoría -->
+                            <td class="text-center">${producto.marca_nombre}</td> <!-- Mostrar el nombre de la marca -->
+                            <td class="text-center">${producto.modelo_nombre}</td> <!-- Mostrar el nombre del modelo -->
                             <td class="text-center">${producto.nserie}</td> <!-- Mostrar el número de serie -->
                             <td class="text-center">
                                 <button class="btn btn-danger btn-sm eliminarProducto">Eliminar</button>
