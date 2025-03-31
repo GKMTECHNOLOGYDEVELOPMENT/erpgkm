@@ -8,8 +8,9 @@
         <div class="w-full max-w-[360px] flex flex-col items-center" x-data="modal">
 
             <!-- Vista previa del informe generado (como imagen) -->
-            <img src="{{ route('informe.vista-previa.imagen', ['idOt' => $id]) }}" alt="Vista previa del informe"
-                class="w-full rounded-xl shadow-xl border border-gray-300 mt-6 mb-4">
+            <img src="{{ route('informe.vista-previa.imagen', ['idOt' => $id, 'idVisita' => $idVisitas]) }}"
+                alt="Vista previa del informe" class="w-full rounded-xl shadow-xl border border-gray-300 mt-6 mb-4">
+
 
             <!-- Título -->
             <span class="text-lg font-semibold mb-2 badge bg-success">FIRMA DEL CLIENTE</span>

@@ -3004,7 +3004,8 @@ class OrdenesTrabajoController extends Controller
             'firmaCliente' => $firmaCliente,
             'imagenesAnexos' => $imagenesAnexos,
             'imagenesFotosTickets' => $imagenesFotosTickets,
-            'marca' => $marca // ✅ <-- Aquí la agregas
+            'marca' => $marca, // ✅ <-- Aquí la agregas
+            'modoVistaPrevia' => false
         ])->render();
 
         // 🔹 GENERAR PDF EN MEMORIA CON BROWSERSHOT
@@ -3025,7 +3026,7 @@ class OrdenesTrabajoController extends Controller
     }
 
 
-    private function buildInformeHtml($idOt)
+    private function buildInformeHtml($idOt, $idVisita, $modoVistaPrevia = false )
     {
         $orden = Ticket::with([
             'cliente',
@@ -3040,10 +3041,8 @@ class OrdenesTrabajoController extends Controller
             'visitas.fotostickest'
         ])->findOrFail($idOt);
 
-        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
-        if (!$seleccionada) return '<h1>Visita no encontrada</h1>';
+        $idVisitasSeleccionada = $idVisita;
 
-        $idVisitasSeleccionada = $seleccionada->idVisitas;
         $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
             ->where('idVisitas', $idVisitasSeleccionada)
             ->whereNotNull('justificacion')
@@ -3125,18 +3124,18 @@ class OrdenesTrabajoController extends Controller
             'firmaCliente' => $firmaCliente,
             'imagenesAnexos' => $imagenesAnexos,
             'imagenesFotosTickets' => $imagenesFotosTickets,
-            'marca' => $marca
+            'marca' => $marca,
+            'modoVistaPrevia' => $modoVistaPrevia
         ])->render();
     }
 
-    public function vistaPreviaImagen($idOt)
+    public function vistaPreviaImagen($idOt,$idVisita)
     {
-        $html = $this->buildInformeHtml($idOt);
+        $html = $this->buildInformeHtml($idOt, $idVisita, true);
 
         return response(
             Browsershot::html($html)
-                ->windowSize(800, 1200)
-                ->fullPage()
+                ->windowSize(800, 1000)
                 ->noSandbox()
                 ->emulateMedia('screen')
                 ->waitUntilNetworkIdle()

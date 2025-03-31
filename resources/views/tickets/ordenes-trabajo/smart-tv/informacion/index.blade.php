@@ -86,7 +86,7 @@
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
             <div x-show="open" x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate_animated animate_zoomInUp">
 
                 <!-- Header del Modal -->
                 <div class="flex items-center justify-between bg-[#fbfbfb] dark:bg-[#121c2c] px-5 py-3">
@@ -130,6 +130,10 @@
         </div>
     </div>
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
 
 <script>
@@ -196,7 +200,7 @@
         });
 
         window.eliminarImagen = function(imagenId) {
-            fetch(`/api/eliminarImagen/${imagenId}`, {
+            fetch(/api/eliminarImagen/${imagenId}, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
@@ -222,7 +226,7 @@
         function renderizarImagenes() {
             swiperWrapper.innerHTML = ""; // Limpiar el swiper antes de agregar nuevas imágenes
 
-            fetch(`/api/imagenes/${ticketId}/${visitaId}`)
+            fetch(/api/imagenes/${ticketId}/${visitaId})
                 .then(response => response.json())
                 .then(data => {
                     if (data.imagenes) {
@@ -378,6 +382,10 @@
 
 
 
+
+
+
+
 <script>
     document.getElementById("guardarEstado").addEventListener("click", function() {
         const estadoSelect = document.getElementById("estado");
@@ -423,42 +431,41 @@
 
 
 <script>
-  document.getElementById("estado").addEventListener("change", function() {
-    const estadoId = this.value;
-    const ticketId = {{ $ticket->idTickets }};
-    const visitaId = {{ $visitaId ?? 'null' }};
+    document.getElementById("estado").addEventListener("change", function() {
+        const estadoId = this.value;
+        const ticketId = {{ $ticket->idTickets }};
+        const visitaId = {{ $visitaId ?? 'null' }};
 
-    // Obtener la justificación del estado seleccionado
-    fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Mostrar la justificación en el textarea
-                document.getElementById("justificacion").value = data.justificacion || "";
-            } else {
-                toastr.error(data.message || "Error al obtener la justificación");
+        // Obtener la justificación del estado seleccionado
+        fetch(/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar la justificación en el textarea
+                    document.getElementById("justificacion").value = data.justificacion || "";
+                } else {
+                    toastr.error(data.message || "Error al obtener la justificación");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                toastr.error("Error al obtener la justificación.");
+            });
+
+        // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
+        if (estadoId == 3) {
+            const cardFotos = document.getElementById("cardFotos");
+            if (cardFotos) {
+                cardFotos.style.display = "block"; // Mostrar el elemento
+
             }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            toastr.error("Error al obtener la justificación.");
-        });
-
-    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
-    if (estadoId == 5) {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "block"; // Mostrar el elemento
-
-            renderizarPrevisualizacion();
+        } else {
+            const cardFotos = document.getElementById("cardFotos");
+            if (cardFotos) {
+                cardFotos.style.display = "none"; // Ocultar el elemento
+            }
         }
-    } else {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "none"; // Ocultar el elemento
-        }
-    }
-});
+    });
 
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar todos los select con la clase .selectize

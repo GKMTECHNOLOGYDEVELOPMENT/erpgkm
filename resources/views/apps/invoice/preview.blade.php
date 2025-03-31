@@ -79,7 +79,7 @@
         <!-- Encabezado -->
         <div class="flex justify-between items-center flex-wrap gap-4 px-4 mb-4">
             <h2 class="text-2xl font-bold uppercase text-gray-800 dark:text-white">
-                Datos del {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}
+                Datos de Envio: {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}
             </h2>
             <img src="/assets/images/auth/logogkm2.png" alt="GKM Logo" class="w-40 ltr:ml-auto rtl:mr-auto shrink-0" />
         </div>
@@ -95,8 +95,8 @@
                 @if ($tecnico1 === 'N/A')
                     <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                 @endif
-                <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del
-                    {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio:
+                    {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
                 <div><strong>Nombre:</strong> {{ $tecnico1 }}</div>
                 <div><strong>Correo:</strong> {{ $correo1 }}</div>
                 <div><strong>Teléfono:</strong> {{ $telefono1 }}</div>
@@ -108,8 +108,8 @@
                 @if ($tipoRecojo1 === 'N/A' && $tipoEnvio1 === 'N/A')
                     <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                 @endif
-                <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del
-                    {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del Envio:
+                    {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
                 <div><strong>ID Ticket:</strong> #{{ $ticketId }}</div>
                 <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo1 }}</div>
                 <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio1 }}</div>
@@ -130,7 +130,7 @@
                 <div
                     class="md:col-span-2 space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                     <h3 class="font-semibold text-base border-b pb-1 mb-2">
-                        Manejo del {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}
+                        Manejo del Envio: {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}
                     </h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div><strong>N° Guía:</strong> {{ $manejoEnvio1->numero_guia }}</div>
@@ -172,7 +172,7 @@
             <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
             <div class="px-4">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Anexos de Retiro -
-                    {{ $tipo1 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                    {{ $tipo1 == 1 ? 'PROVINCA' : 'LIMA' }}</h3>
 
                 <div
                     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-h-[600px] overflow-y-auto pr-1">
@@ -212,8 +212,7 @@
         @if ($tipo2)
             <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
             <div class="px-4 mb-4">
-                <h2 class="text-xl font-bold uppercase text-gray-800 dark:text-white">Datos del
-                    {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h2>
+                <h2 class="text-xl font-bold uppercase text-gray-800 dark:text-white">Datos de Envio: {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
@@ -223,8 +222,8 @@
                     @if (!$tecnico2 || $correo2 == 'N/A' || $telefono2 == 'N/A')
                         <span class="absolute top-2 right-2 badge bg-warning ">Pendiente</span>
                     @endif
-                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del
-                        {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio: 
+                        {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
                     <div><strong>Nombre:</strong> {{ $tecnico2 }}</div>
                     <div><strong>Correo:</strong> {{ $correo2 }}</div>
                     <div><strong>Teléfono:</strong> {{ $telefono2 }}</div>
@@ -236,8 +235,8 @@
                     @if ($tipoRecojo2 == 'N/A' || $tipoEnvio2 == 'N/A')
                         <span class="absolute top-2 right-2 badge bg-warning">Pendiente</span>
                     @endif
-                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del
-                        {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del Envio
+                        {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
                     <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo2 }}</div>
                     <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio2 }}</div>
                 </div>
@@ -257,8 +256,8 @@
                             <span class="absolute top-2 right-2 badge bg-warning">Pendiente</span>
                         @endif
 
-                        <h3 class="font-semibold text-base border-b pb-1 mb-2">Manejo del
-                            {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}</h3>
+                        <h3 class="font-semibold text-base border-b pb-1 mb-2">Manejo del Envio:
+                            {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div><strong>N° Guía:</strong> {{ $manejoEnvio2->numero_guia }}</div>
@@ -290,7 +289,7 @@
                 <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
                 <div class="px-4">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-                        Anexos de Retiro - {{ $tipo2 == 1 ? 'Envío' : 'Recojo' }}
+                        Anexos de Retiro - {{ $tipo2 == 1 ? 'PROVINCA' : 'LIMA' }}</h3>
                     </h3>
                     <div
                         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-h-[600px] overflow-y-auto pr-1">

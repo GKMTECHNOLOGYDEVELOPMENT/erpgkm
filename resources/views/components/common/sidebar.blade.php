@@ -23,7 +23,7 @@
             </div>
             <ul class="perfect-scrollbar relative font-semibold space-y-0.5 h-[calc(100vh-80px)] overflow-y-auto overflow-x-hidden  p-4 py-0"
                 x-data="{ activeDropdown: null }">
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'dashboard' }"
                         @click="activeDropdown === 'dashboard' ? activeDropdown = null : activeDropdown = 'dashboard'">
                         <div class="flex items-center">
@@ -64,9 +64,9 @@
                             <a href="{{ route('commercial') }}">Comercial</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
-                <h2
+                {{-- <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
                     <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"
@@ -74,11 +74,11 @@
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                     <span>Apps GKM</span>
-                </h2>
+                </h2> --}}
 
                 <li class="nav-item">
                     <ul>
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{ route('apps.chat') }}" class="group">
                                 <div class="flex items-center">
 
@@ -95,8 +95,8 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Chat</span>
                                 </div>
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> --}}
+                        {{-- <li class="nav-item">
                             <a href="{{ route('apps.mailbox') }}" class="group">
                                 <div class="flex items-center">
 
@@ -119,8 +119,8 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Correo</span>
                                 </div>
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> --}}
+                        {{-- <li class="nav-item">
                             <a href="{{ route('apps.todolist') }}" class="group">
                                 <div class="flex items-center">
 
@@ -138,8 +138,8 @@
                                         Correo</span>
                                 </div>
                             </a>
-                        </li>
-                        <li class="nav-item">
+                        </li> --}}
+                        {{-- <li class="nav-item">
                             <a href="{{ route('apps.notes') }}" class="group">
                                 <div class="flex items-center">
 
@@ -162,7 +162,7 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Notas</span>
                                 </div>
                             </a>
-                        </li>
+                        </li> --}}
                         <!-- <li class="nav-item">
                             <a href="/apps/scrumboard" class="group">
                                 <div class="flex items-center">
@@ -184,7 +184,7 @@
                                 </div>
                             </a>
                         </li> -->
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{ route('apps.contacts') }}" class="group">
                                 <div class="flex items-center">
 
@@ -202,7 +202,7 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Contactos</span>
                                 </div>
                             </a>
-                        </li>
+                        </li> --}}
                         <!-- <li class="menu nav-item">
                             <button type="button" class="nav-link group"
                                 :class="{ 'active': activeDropdown === 'invoice' }"
@@ -246,7 +246,7 @@
                                 </li>
                             </ul>
                         </li> -->
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{ route('apps.calendar') }}" class="group">
                                 <div class="flex items-center">
 
@@ -263,7 +263,7 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Calendario</span>
                                 </div>
                             </a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </li>
 
@@ -277,7 +277,7 @@
                     <span>Administracion</span>
                 </h2>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'components' }"
                         @click="activeDropdown === 'components' ? activeDropdown = null : activeDropdown = 'components'">
@@ -351,7 +351,7 @@
                             <a href="/components/lightbox">Lightbox</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -367,7 +367,7 @@
 
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark "
-                                style="color: red">Asociados</span>
+                                >Asociados</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'asociados' }">
 
@@ -380,24 +380,24 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'asociados'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('administracion.cliente-general') }}" style="color: red">Cliente General</a>
+                            <a href="{{ route('administracion.cliente-general') }}" >Cliente General</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.tienda') }}" style="color: red">Tienda</a>
+                            <a href="{{ route('administracion.tienda') }}" >Tienda</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.cast') }}" style="color: red">Cast</a>
+                            <a href="{{ route('administracion.cast') }}" >Cast</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.clientes') }}" style="color: red">Clientes</a>
+                            <a href="{{ route('administracion.clientes') }}" >Clientes</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.proveedores') }}" style="color: red">Proveedores</a>
+                            <a href="{{ route('administracion.proveedores') }}" >Proveedores</a>
                         </li>
                     </ul>
                 </li>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'asistencias' }"
                         @click="activeDropdown === 'asistencias' ? activeDropdown = null : activeDropdown = 'asistencias'">
@@ -429,9 +429,9 @@
                             <a href="/components/accordions">Oficina</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'cotizaciones' }"
                         @click="activeDropdown === 'cotizaciones' ? activeDropdown = null : activeDropdown = 'cotizaciones'">
@@ -463,9 +463,9 @@
                             <a href="/components/accordions">Lista</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'elements' }"
                         @click="activeDropdown === 'elements' ? activeDropdown = null : activeDropdown = 'elements'">
@@ -547,9 +547,9 @@
                             <a href="/elements/typography">Typography</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="/charts" class="nav-link group">
                         <div class="flex items-center">
 
@@ -566,7 +566,7 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Charts</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
 
                 <li class="menu nav-item">
                     <a href="{{ route('usuario') }}" class="nav-link group">
@@ -588,7 +588,7 @@
                     </a>
                 </li>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="{{ route('administracion.compra') }}" class="nav-link group">
                         <div class="flex items-center">
 
@@ -601,9 +601,9 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Compras</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="/widgets" class="nav-link group">
                         <div class="flex items-center">
 
@@ -626,9 +626,9 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Widgets</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="/font-icons" class="nav-link group">
                         <div class="flex items-center">
 
@@ -646,9 +646,9 @@
                                 Icons</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="/dragndrop" class="nav-link group">
                         <div class="flex items-center">
 
@@ -675,7 +675,7 @@
                                 and Drop</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
 
 
                 <h2
@@ -688,7 +688,7 @@
                     <span>ALMACEN</span>
                 </h2>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="/tables" class="nav-link group">
                         <div class="flex items-center">
 
@@ -817,9 +817,9 @@
                             <a href="/datatables/column-chooser">Column Chooser</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'forms' }"
                         @click="activeDropdown === 'forms' ? activeDropdown = null : activeDropdown = 'forms'">
@@ -899,7 +899,7 @@
                             <a href="/forms/clipboard">Clipboard</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -922,7 +922,7 @@
                             </svg>
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark" style="color: red">Productos</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark" >Productos</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'productos' }">
 
@@ -935,16 +935,16 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('articulos.index') }}" style="color: red">Articulos</a>
+                            <a href="{{ route('articulos.index') }}" >Articulos</a>
                         </li>
                         <li>
-                            <a href="{{ route('modelos.index') }}" style="color: red">Modelos</a>
+                            <a href="{{ route('modelos.index') }}" >Modelos</a>
                         </li>
                         <li>
-                            <a href="{{ route('marcas.index') }}" style="color: red">Marcas</a>
+                            <a href="{{ route('marcas.index') }}" >Marcas</a>
                         </li>
                         <li>
-                            <a href="{{ route('categorias.index') }}" style="color: red">Categoria</a>
+                            <a href="{{ route('categorias.index') }}" >Categoria</a>
                         </li>
                     </ul>
                 </li>
@@ -974,7 +974,7 @@
 
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
-                                style="color: red">Ordenes de Trabajo</span>
+                                >Ordenes de Trabajo</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'users' }">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -986,22 +986,22 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('ordenes.smart') }}" style="color: red">Smart-Tv</a>
+                            <a href="{{ route('ordenes.smart') }}" >Smart-Tv</a>
                         </li>
                         <li>
                             <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
                         </li>
-                        <li>
+                        {{-- <li>
                             <a href="{{ route('ordenes.helpdesk') }}">Tec.Laboratorio</a>
                         </li>
 
                         <li>
                             <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
-                        </li>
+                        </li> --}}
                     </ul>
                 </li>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'pages' }"
                         @click="activeDropdown === 'pages' ? activeDropdown = null : activeDropdown = 'pages'">
@@ -1088,8 +1088,8 @@
                             <a href="/pages/maintenence" target="_blank">Maintanence</a>
                         </li>
                     </ul>
-                </li>
-                <li class="menu nav-item">
+                </li> --}}
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'authentication' }"
                         @click="activeDropdown === 'authentication' ? activeDropdown = null : activeDropdown = 'authentication'">
@@ -1152,7 +1152,7 @@
                             <a href="/auth/cover-password-reset" target="_blank">Recover ID Cover</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
@@ -1174,12 +1174,12 @@
                                     fill="currentColor" />
                             </svg>
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark" style="color: red">Configuración</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark" >Configuración</span>
                         </div>
                     </a>
                 </li>
 
-                <h2
+                {{-- <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
                     <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
@@ -1187,9 +1187,9 @@
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                     <span>SUPPORTS</span>
-                </h2>
+                </h2> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="https://vristo.sbthemes.com" target="_blank" class="nav-link group">
                         <div class="flex items-center">
 
@@ -1206,7 +1206,7 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Documentation</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
             </ul>
         </div>
     </nav>
