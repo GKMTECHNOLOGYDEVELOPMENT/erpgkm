@@ -294,6 +294,7 @@ Route::get('/tickets-por-serie/{serie}', [OrdenesTrabajoController::class, 'getT
 Route::post('/guardar-visita', [OrdenesTrabajoController::class, 'guardarVisita']);
 Route::get('/obtener-visitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 
+Route::post('/guardar-visita-soporte', [OrdenesHelpdeskController::class, 'guardarVisitaSoporte']);
 
 
 Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {

@@ -745,7 +745,7 @@ if (necesitaApoyo && tecnicosApoyo.length > 0) {
 
     // Realizar la solicitud AJAX
     $.ajax({
-        url: '/guardar-visita',
+        url: '/guardar-visita-soporte',
         method: 'POST',
         data: formData,
         contentType: false,  // No enviar un tipo de contenido
