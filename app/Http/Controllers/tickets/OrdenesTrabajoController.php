@@ -423,13 +423,13 @@ class OrdenesTrabajoController extends Controller
         // Filtrar los encargados según el color del estado
         if ($colorEstado == '#B5FA37') {
             // Si el colorEstado es #B5FA37, solo obtener los usuarios de tipo 1 (TÉCNICO)
-            $encargado = Usuario::where('idTipoUsuario', 5)->get();
+            $encargado = Usuario::where('idTipoUsuario', 4)->get();
         } elseif ($colorEstado == '#FBCACD') {
             // Si el colorEstado es #FBCACD, solo obtener los usuarios de tipo 5 (CHOFER)
             $encargado = Usuario::where('idTipoUsuario', 1)->get();
         } else {
             // Si no es ninguno de esos colores, traer ambos tipos (1 y 5)
-            $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
+            $encargado = Usuario::whereIn('idTipoUsuario', [1, 4])->get();
         }
 
 
@@ -687,7 +687,7 @@ class OrdenesTrabajoController extends Controller
             $estadosOTS = DB::table('estado_ots')
                             ->whereIn('idEstadoots', [1, 2, 3, 4])  // Filtrar solo por los estados 1, 2, 3
                             ->get();
-        } elseif ($tipoUsuario == 5) {
+        } elseif ($tipoUsuario == 4) {
             // Si el tipo de usuario es 5, obtener solo los estados con idEstadoots 1 o 2
             $estadosOTS = DB::table('estado_ots')
                             ->whereIn('idEstadoots', [1, 2, 3, 4, 7])  // Filtrar solo por los estados 1 y 2

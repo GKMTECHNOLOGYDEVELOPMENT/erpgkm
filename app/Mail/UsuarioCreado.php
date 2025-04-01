@@ -10,18 +10,27 @@ class UsuarioCreado extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $Nombre;
+    public $apellidoPaterno;
+    public $apellidoMaterno;
     public $usuario;
     public $clave;
 
     /**
      * Crear una nueva instancia de mensaje.
      *
+     * @param string $Nombre
+     * @param string $apellidoPaterno
+     * @param string $apellidoMaterno
      * @param string $usuario
      * @param string $clave
      * @return void
      */
-    public function __construct($usuario, $clave)
+    public function __construct($Nombre, $apellidoPaterno, $apellidoMaterno, $usuario, $clave)
     {
+        $this->Nombre = $Nombre;
+        $this->apellidoPaterno = $apellidoPaterno;
+        $this->apellidoMaterno = $apellidoMaterno;
         $this->usuario = $usuario;
         $this->clave = $clave;
     }

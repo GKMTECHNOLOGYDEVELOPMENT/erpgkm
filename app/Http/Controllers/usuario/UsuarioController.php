@@ -198,7 +198,14 @@ public function store(Request $request)
         Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
 
         // Enviar correo
-        Mail::to($request->correo)->send(new UsuarioCreado($usuario, $clave));
+// Enviar correo con todos los datos
+Mail::to($request->correo)->send(new UsuarioCreado(
+    $request->Nombre, 
+    $request->apellidoPaterno, 
+    $request->apellidoMaterno, 
+    $usuario, // El nombre de usuario generado automáticamente
+    $clave // La clave generada aleatoriamente
+));
         Log::info('Correo enviado al usuario.', ['correo' => $request->correo]);
 
         return response()->json([

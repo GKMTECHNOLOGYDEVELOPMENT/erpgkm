@@ -367,7 +367,7 @@
                 class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
                 <!-- Header del Modal -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg"> Nueva Coordinación Levantamiento Informacion</h5>
+                    <h5 class="font-bold text-lg"> Nueva Coordinación</h5>
                     <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -419,7 +419,7 @@
                                     {{ $encargados->Nombre }} -
                                     @if ($encargados->idTipoUsuario == 1)
                                     TÉCNICO
-                                    @elseif ($encargados->idTipoUsuario == 5)
+                                    @elseif ($encargados->idTipoUsuario == 4)
                                     CHOFER
                                     @endif
                                 </option>
