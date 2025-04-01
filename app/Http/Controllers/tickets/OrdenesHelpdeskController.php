@@ -1988,7 +1988,7 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-    private function buildInformeHelpdeskHtml($idOt, $idVisita, $modoVistaPrevia = false)
+    private function buildInformeHelpdeskHtml($idOt, $idVisita, $modoVistaPrevia = false, $tipo = 'levantamiento')
     {
         $orden = Ticket::with([
             'cliente',
@@ -2035,28 +2035,29 @@ class OrdenesHelpdeskController extends Controller
             ->where('idVisitas', $idVisita)
             ->get();
 
+        // 🔥 Equipos necesarios para SOPORTE
         $equipos = Equipo::with(['modelo', 'marca', 'categoria'])
             ->where('idTickets', $idOt)
             ->where('idVisitas', $idVisita)
             ->get();
 
-        $equiposInstalados = $equipos->where('modalidad', 'Instalación')->map(function ($equipo) {
+        $equiposInstalados = collect($equipos->where('modalidad', 'Instalación')->map(function ($equipo) {
             return [
                 'tipoProducto' => $equipo->categoria->nombre ?? 'Sin categoría',
                 'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
                 'marca' => $equipo->marca->nombre ?? 'Sin marca',
                 'nserie' => $equipo->nserie ?? 'Sin serie',
             ];
-        });
+        }));
 
-        $equiposRetirados = $equipos->where('modalidad', 'Retirar')->map(function ($equipo) {
+        $equiposRetirados = collect($equipos->where('modalidad', 'Retirar')->map(function ($equipo) {
             return [
                 'tipoProducto' => $equipo->categoria->nombre ?? 'Sin categoría',
                 'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
                 'marca' => $equipo->marca->nombre ?? 'Sin marca',
                 'nserie' => $equipo->nserie ?? 'Sin serie',
             ];
-        });
+        }));
 
         $visitas = collect();
         if ($visitaSeleccionada) {
@@ -2100,7 +2101,11 @@ class OrdenesHelpdeskController extends Controller
 
         $fechaCreacion = optional($visitaSeleccionada->fecha_inicio)->format('d/m/Y');
 
-        return view($idVisita, [
+        $vista = $tipo === 'soporte'
+            ? 'tickets.ordenes-trabajo.helpdesk.soporte.informe.pdf.index'
+            : 'tickets.ordenes-trabajo.helpdesk.levantamiento.informe.pdf.index';
+
+        return view($vista, [
             'orden' => $orden,
             'fechaCreacion' => $fechaCreacion,
             'producto' => $producto,
@@ -2119,14 +2124,18 @@ class OrdenesHelpdeskController extends Controller
         ])->render();
     }
 
-    public function vistaPreviaImagen($idOt, $idVisita)
+
+    public function vistaPreviaImagen($idOt, $idVisita, $tipo = 'levantamiento')
     {
         try {
-            $html = $this->buildInformeHelpdeskHtml($idOt, $idVisita, true);
+            Log::debug("Generando vista previa", ['idOt' => $idOt, 'idVisita' => $idVisita, 'tipo' => $tipo]);
+
+            $html = $this->buildInformeHelpdeskHtml($idOt, $idVisita, true, $tipo);
         } catch (\Exception $e) {
+            Log::error('Error al generar vista previa: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
-    
+
         return response(
             Browsershot::html($html)
                 ->windowSize(800, 1000)
@@ -2137,8 +2146,117 @@ class OrdenesHelpdeskController extends Controller
             200
         )->header('Content-Type', 'image/png');
     }
-    
-    
+
+
+    public function firmaclienteLeva($id, $idVisitas)
+    {
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+        $orden = $ticket;
+        $estadosOTS = DB::table('estado_ots')->get();
+        $ticketId = $ticket->idTickets;
+
+        $visita = DB::table('visitas')
+            ->where('idVisitas', $idVisitas)
+            ->where('idTickets', $id)
+            ->first();
+
+        if (!$visita) {
+            return view("pages.error404");
+        }
+
+        return view("tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.firmaClienteLeva", compact(
+            'ticket',
+            'orden',
+            'estadosOTS',
+            'ticketId',
+            'idVisitas',
+            'visita',
+            'id'
+        ));
+    }
+
+    public function firmaclienteSopo($id, $idVisitas)
+    {
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+        $orden = $ticket;
+        $estadosOTS = DB::table('estado_ots')->get();
+        $ticketId = $ticket->idTickets;
+
+        $visita = DB::table('visitas')
+            ->where('idVisitas', $idVisitas)
+            ->where('idTickets', $id)
+            ->first();
+
+        if (!$visita) {
+            return view("pages.error404");
+        }
+
+        return view("tickets.ordenes-trabajo.helpdesk.soporte.firmas.firmaClienteSopo", compact(
+            'ticket',
+            'orden',
+            'estadosOTS',
+            'ticketId',
+            'idVisitas',
+            'visita',
+            'id'
+        ));
+    }
+
+    public function guardarFirmaCliente(Request $request, $id, $idVisitas)
+    {
+        // Validar que la firma esté presente
+        $request->validate([
+            'firma' => 'required|string',
+        ]);
+
+        // Obtener el ticket
+        $ticket = Ticket::findOrFail($id);
+
+        // Verificar si la combinación idVisitas y idTickets existe en la tabla visitas
+        $visitaExistente = DB::table('visitas')
+            ->where('idVisitas', $idVisitas)
+            ->where('idTickets', $ticket->idTickets)
+            ->first();
+
+        // Si no existe una visita válida con esa combinación, retornar un error
+        if (!$visitaExistente) {
+            return response()->json(['message' => 'La combinación de idVisitas y idTickets no es válida.'], 400);
+        }
+
+        // Convertir la firma de base64 a binario
+        $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
+
+        // Verificar si ya existe una firma para este ticket y cliente
+        $firmaExistente = DB::table('firmas')
+            ->where('idTickets', $ticket->idTickets)
+            ->where('idCliente', $ticket->idCliente)
+            ->where('idVisitas', $idVisitas) // Verificamos si ya existe con el idVisitas actual
+            ->first();
+
+        // Si no existe una firma para este ticket y cliente con el idVisitas actual
+        if (!$firmaExistente) {
+            // Si el idVisitas es diferente, creamos una nueva firma
+            DB::table('firmas')->insert([
+                'firma_cliente' => $firmaCliente,
+                'idTickets' => $ticket->idTickets,
+                'idCliente' => $ticket->idCliente, // Asumiendo que el ticket tiene un idCliente
+                'idVisitas' => $idVisitas, // Guardamos el idVisitas
+            ]);
+
+            // Retornar una respuesta de éxito con mensaje de creación
+            return response()->json(['message' => 'Firma creada correctamente'], 201);
+        } else {
+            // Si ya existe una firma con el mismo idVisitas, actualizamos la firma
+            DB::table('firmas')
+                ->where('idFirmas', $firmaExistente->idFirmas) // Encontramos la firma existente
+                ->update([
+                    'firma_cliente' => $firmaCliente,
+                ]);
+
+            // Retornar una respuesta de éxito con mensaje de actualización
+            return response()->json(['message' => 'Firma actualizada correctamente'], 200);
+        }
+    }
 
     public function obtenerClientes($idClienteGeneral)
     {

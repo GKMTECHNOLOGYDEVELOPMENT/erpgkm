@@ -336,7 +336,18 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
     Route::get('smart/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
     Route::get('smart/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
-    Route::get('help/{id}/firmas/{idVisitas}/', [OrdenesTrabajoController::class, 'firmacliente'])->name('firmacliente');
+
+    // Firma cliente para levantamiento
+
+    // Vista previa del PDF en imagen (levantamiento)
+    Route::get('helpdesk/levantamiento/{idOt}/vista-previa-imagen/{idVisita}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])
+        ->name('helpdesk.levantamiento.vista-previa.imagen');
+
+    Route::get('helpdesk/soporte/{idOt}/vista-previa-imagen/{idVisita}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])->name('helpdesk.soporte.vista-previa.imagen');
+
+    Route::get('helpdesk/levantamiento/{id}/firmas/{idVisitas}', [OrdenesHelpdeskController::class, 'firmaclienteLeva'])->name('firmacliente.leva');
+
+    Route::get('helpdesk/soporte/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteSopo'])->name('firmacliente.sopo');
     Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
 
 
@@ -385,11 +396,17 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
 
 Route::get('/informe/vista-previa-imagen/{idOt}/{idVisita}', [OrdenesTrabajoController::class, 'vistaPreviaImagen'])->name('informe.vista-previa.imagen');
-Route::get('/helpdesk/informe/vista-previa-imagen/{idOt}/{idVisita}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])->name('helpdesk.informe.vista-previa.imagen');
+Route::get('/ordenes/helpdesk/soporte/{idOt}/vista-previa/{idVisita}/{tipo?}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])
+    ->name('ordenes.helpdesk.soporte.vista-previa.imagen');
 
 Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 'actualizarHelpdesk'])->name('formActualizarOrdenHelpdesk');
 
 Route::put('actualizar-orden-soporte/{id}', [OrdenesHelpdeskController::class, 'actualizarSoporte'])->name('formActualizarOrdenHelpdesk');
+
+Route::post('ordenes/helpdesk/levantamiento/{id}/guardar-firma/{idVisitas}', [OrdenesHelpdeskController::class, 'guardarFirmaCliente'])
+    ->name('helpdesk.levantamiento.guardar-firma');
+
+Route::post('ordenes/helpdesk/soporte/{id}/guardar-firma/{idVisitas}', [OrdenesHelpdeskController::class, 'guardarFirmaCliente']);
 
 
 Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])
