@@ -256,13 +256,6 @@
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
                     </div>
                 </div>
-
-
-                <!-- Información adicional -->
-                <p class="mt-2">
-                    {{ $emitente->nome ?? 'GKM TECHNOLOGY S.A.C.' }} - AV. SANTA ELVIRA E URB. SAN ELÍAS, MZ. B LOTE 8,
-                    LOS OLIVOS - LIMA, TELF: 080080142
-                </p>
             </div>
 
 

@@ -94,20 +94,20 @@
 
 <body class="text-gray-900">
     <div class="first-page-container">
-        <div class="container mx-auto bg-white p-2">
+        <div class="container mx-auto bg-white p-2 mb-4">
             <!-- ENCABEZADO -->
 
-            <div class="relative flex items-center pb-2 mb-4">
-                <!-- Logo a la izquierda -->
-                @if ($logoClienteGeneral)
-                    <div class="mb-4 text-center">
-                        <img src="{{ $logoClienteGeneral }}" alt="Logo Cliente" class="h-16 mx-auto object-contain">
-                    </div>
-                @endif
+            <div class="relative flex items-center justify-between pb-2">
+                <!-- Logo del cliente general a la izquierda -->
+                <div class="flex flex-col items-start gap-1">
+                    @if ($logoClienteGeneral)
+                        <img src="{{ $logoClienteGeneral }}" alt="Logo Cliente" class="h-16 object-contain"
+                            style="max-width: 140px;">
+                    @endif
+                </div>
 
-
-                <!-- Datos de la empresa centrados y más abajo -->
-                <div class="absolute left-1/2 transform -translate-x-1/2 text-center mt-4">
+                <!-- Datos de la empresa centrados -->
+                <div class="text-center absolute left-1/2 transform -translate-x-1/2 mt-4">
                     <h1 class="text-lg font-bold">INFORME TÉCNICO</h1>
                     <p class="text-md">RUC 20543618587</p>
                     <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
@@ -115,17 +115,16 @@
                     <p class="text-md">080080142</p>
                 </div>
 
-                <!-- Título y datos del ticket alineados -->
-                <div class="ml-auto text-right">
-
-                    <div class="text-xs leading-tight mt-1"> <!-- Contenedor con espaciado uniforme -->
+                <!-- Logo GKM + datos de ticket -->
+                <div class="flex flex-col items-end gap-1">
+                    <img src="{{ public_path('assets/images/auth/logogkm2.png') }}" class="h-16 object-contain">
+                    <div class="text-xs leading-tight mt-1">
                         <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
                         <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
                     </div>
                 </div>
-
-
             </div>
+
 
             <div class="flex justify-between mt-3">
                 <!-- Información del Cliente -->
@@ -219,14 +218,6 @@
                 </div>
             @endif
 
-
-
-
-
-
-
-
-
             <!-- FOOTER -->
             <div class="footer text-center text-gray-500 text-xs">
 
@@ -262,13 +253,6 @@
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
                     </div>
                 </div>
-
-
-                <!-- Información adicional -->
-                <p class="mt-2">
-                    {{ $emitente->nome ?? 'GKM TECHNOLOGY S.A.C.' }} - AV. SANTA ELVIRA E URB. SAN ELÍAS, MZ. B LOTE 8,
-                    LOS OLIVOS - LIMA, TELF: 080080142
-                </p>
             </div>
 
 
