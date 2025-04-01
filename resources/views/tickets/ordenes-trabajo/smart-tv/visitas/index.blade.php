@@ -419,7 +419,7 @@
                                     {{ $encargados->Nombre }} -
                                     @if ($encargados->idTipoUsuario == 1)
                                     TÉCNICO
-                                    @elseif ($encargados->idTipoUsuario == 5)
+                                    @elseif ($encargados->idTipoUsuario == 4)
                                     CHOFER
                                     @endif
                                 </option>
