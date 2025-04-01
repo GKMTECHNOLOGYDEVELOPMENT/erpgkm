@@ -367,7 +367,7 @@ class="mb-5" @toggle-modal.window="open = !open">
                 class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
                 <!-- Header del Modal -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg"> Nueva Coordinación Levantamiento Informacion</h5>
+                    <h5 class="font-bold text-lg"> Nueva Coordinación Soporte</h5>
                     <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -405,6 +405,20 @@ class="mb-5" @toggle-modal.window="open = !open">
                                     placeholder="Elige la hora de Fin" required>
                             </div>
                         </div>
+
+                        
+                   <!-- ¿Es Recojo? -->
+                   <div id="esRecojoContainer">
+                        <label class="block text-sm font-medium mb-2">¿Es Recojo?</label>
+                        <label class="w-12 h-6 relative inline-block">
+                            <input type="checkbox" id="esRecojo" name="esRecojo" value="1"
+                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                            <span
+                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300">
+                            </span>
+                        </label>
+                    </div>
+
 
                         <!-- Encargado -->
                         <div>
