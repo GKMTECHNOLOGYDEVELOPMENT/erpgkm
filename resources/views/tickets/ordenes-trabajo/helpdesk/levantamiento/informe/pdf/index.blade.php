@@ -258,7 +258,7 @@
 
 
 
-            @if (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0))
+            @if (!$modoVistaPrevia && (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)))
                 <!-- Nueva página con el título ANEXOS -->
                 <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
                     <h2>ANEXOS</h2>

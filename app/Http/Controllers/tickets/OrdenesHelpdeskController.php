@@ -1811,6 +1811,7 @@ class OrdenesHelpdeskController extends Controller
             'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
             'logoClienteGeneral' => $logoClienteGeneral,
             'suministros' => $suministros,
+            'modoVistaPrevia' => false
         ])->render();
 
         $pdfContent = Browsershot::html($html)
@@ -1966,7 +1967,8 @@ class OrdenesHelpdeskController extends Controller
             'suministros' => $suministros,
             'equiposInstalados' => $equiposInstalados,
             'equiposRetirados' => $equiposRetirados,
-            
+            'modoVistaPrevia' => false
+
 
         ])->render();
 
@@ -1986,7 +1988,157 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
+    private function buildInformeHelpdeskHtml($idOt, $idVisita, $modoVistaPrevia = false)
+    {
+        $orden = Ticket::with([
+            'cliente',
+            'clienteGeneral',
+            'tienda',
+            'tecnico',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot',
+            'visitas.tecnico',
+            'visitas.anexos_visitas',
+            'visitas.fotostickest'
+        ])->findOrFail($idOt);
 
+        $logoClienteGeneral = $orden->clienteGeneral && $orden->clienteGeneral->foto
+            ? 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto)
+            : null;
+
+        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
+        if (!$seleccionada) {
+            throw new \Exception('No se encontró una visita seleccionada.');
+        }
+
+        $idVisita = $seleccionada->idVisitas;
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisita)->first();
+
+        $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->whereNotNull('justificacion')
+            ->where('justificacion', '!=', '')
+            ->with('estado_ot')
+            ->get();
+
+        $producto = [
+            'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
+            'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
+            'modelo' => $orden->modelo->nombre ?? 'No especificado',
+            'serie' => $orden->serie ?? 'No especificado',
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+        ];
+
+        $suministros = Suministro::with('articulo.tipoArticulo', 'articulo.modelo.marca')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->get();
+
+        $equipos = Equipo::with(['modelo', 'marca', 'categoria'])
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->get();
+
+        $equiposInstalados = $equipos->where('modalidad', 'Instalación')->map(function ($equipo) {
+            return [
+                'tipoProducto' => $equipo->categoria->nombre ?? 'Sin categoría',
+                'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
+                'marca' => $equipo->marca->nombre ?? 'Sin marca',
+                'nserie' => $equipo->nserie ?? 'Sin serie',
+            ];
+        });
+
+        $equiposRetirados = $equipos->where('modalidad', 'Retirar')->map(function ($equipo) {
+            return [
+                'tipoProducto' => $equipo->categoria->nombre ?? 'Sin categoría',
+                'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
+                'marca' => $equipo->marca->nombre ?? 'Sin marca',
+                'nserie' => $equipo->nserie ?? 'Sin serie',
+            ];
+        });
+
+        $visitas = collect();
+        if ($visitaSeleccionada) {
+            $visitas = collect([[
+                'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                'fecha_programada' => optional($visitaSeleccionada->fecha_programada)->format('d/m/Y'),
+                'hora_inicio' => optional($visitaSeleccionada->fecha_inicio)->format('H:i'),
+                'hora_final' => optional($visitaSeleccionada->fecha_final)->format('H:i'),
+                'fecha_llegada' => optional($visitaSeleccionada->fecha_llegada)->format('d/m/Y H:i'),
+                'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? '') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
+                'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
+                'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+            ]]);
+        }
+
+        $firma = DB::table('firmas')->where('idTickets', $idOt)->where('idVisitas', $idVisita)->first();
+
+        $firmaCliente = $firma && $firma->firma_cliente
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            : null;
+
+        $firmaTecnico = $visitaSeleccionada && $visitaSeleccionada->tecnico && $visitaSeleccionada->tecnico->firma
+            ? 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma)
+            : null;
+
+        $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
+            return [
+                'foto_base64' => $anexo->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto)) : null,
+                'descripcion' => $anexo->descripcion
+            ];
+        });
+
+        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+            return [
+                'foto_base64' => $foto->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto)) : null,
+                'descripcion' => $foto->descripcion
+            ];
+        });
+
+        $fechaCreacion = optional($visitaSeleccionada->fecha_inicio)->format('d/m/Y');
+
+        return view($idVisita, [
+            'orden' => $orden,
+            'fechaCreacion' => $fechaCreacion,
+            'producto' => $producto,
+            'transicionesStatusOt' => $transicionesStatusOt,
+            'visitas' => $visitas,
+            'firmaTecnico' => $firmaTecnico,
+            'firmaCliente' => $firmaCliente,
+            'imagenesAnexos' => $imagenesAnexos,
+            'imagenesFotosTickets' => $imagenesFotosTickets,
+            'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
+            'logoClienteGeneral' => $logoClienteGeneral,
+            'suministros' => $suministros,
+            'equiposInstalados' => $equiposInstalados,
+            'equiposRetirados' => $equiposRetirados,
+            'modoVistaPrevia' => $modoVistaPrevia
+        ])->render();
+    }
+
+    public function vistaPreviaImagen($idOt, $idVisita)
+    {
+        try {
+            $html = $this->buildInformeHelpdeskHtml($idOt, $idVisita, true);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    
+        return response(
+            Browsershot::html($html)
+                ->windowSize(800, 1000)
+                ->noSandbox()
+                ->emulateMedia('screen')
+                ->waitUntilNetworkIdle()
+                ->screenshot(),
+            200
+        )->header('Content-Type', 'image/png');
+    }
+    
+    
 
     public function obtenerClientes($idClienteGeneral)
     {
