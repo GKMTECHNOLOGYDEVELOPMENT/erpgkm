@@ -239,7 +239,7 @@ class OrdenesHelpdeskController extends Controller
         $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
 
         $estadosOTS = DB::table('estado_ots')
-            ->whereIn('idEstadoots', [2, 3, 4])
+            ->whereIn('idEstadoots', [2, 3, 4, 6])
             ->get();
 
         $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario
