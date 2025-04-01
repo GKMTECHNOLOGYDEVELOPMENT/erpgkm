@@ -360,6 +360,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
         ->name('helpdesk.soporte.edit');
     Route::get('/helpdesk/pdf/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdf'])
         ->name('helpdesk.pdf.levantamiento');
+    Route::get('/helpdesk/pdf/soporte/{idOt}', [OrdenesHelpdeskController::class, 'generateSoportePdf'])->name('helpdesk.pdf.soporte');
 
 
 

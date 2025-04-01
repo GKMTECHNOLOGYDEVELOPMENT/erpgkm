@@ -228,6 +228,18 @@
                 <div x-show="tab === 'firmas'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.firmas.index')
                 </div>
+                <div x-show="tab === 'informe'">
+                    @include('tickets.ordenes-trabajo.helpdesk.soporte.informe.index')
+                    <div id="loadingSpinner"
+                        class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                            role="status">
+                            <span class="w-5 h-5 m-auto mb-10">
+                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             @endif
         </div>
     </div>

@@ -2847,6 +2847,13 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+    public function checkUpdates($idOt)
+    {
+        $ticket = Ticket::findOrFail($idOt);
+        return response()->json([
+            'ultimaActualizacion' => optional($ticket->updated_at)->toDateTimeString()
+        ]);
+    }
 
 
     public function generateInformePdf($idOt)
@@ -3026,7 +3033,7 @@ class OrdenesTrabajoController extends Controller
     }
 
 
-    private function buildInformeHtml($idOt, $idVisita, $modoVistaPrevia = false )
+    private function buildInformeHtml($idOt, $idVisita, $modoVistaPrevia = false)
     {
         $orden = Ticket::with([
             'cliente',
@@ -3129,7 +3136,7 @@ class OrdenesTrabajoController extends Controller
         ])->render();
     }
 
-    public function vistaPreviaImagen($idOt,$idVisita)
+    public function vistaPreviaImagen($idOt, $idVisita)
     {
         $html = $this->buildInformeHtml($idOt, $idVisita, true);
 
