@@ -126,7 +126,7 @@
             </div>
 
 
-            <div class="flex justify-between mt-3">
+            <div class="flex justify-between">
                 <!-- Información del Cliente -->
                 <div class="w-1/2">
                     <ul class="text-xs space-y-1">
