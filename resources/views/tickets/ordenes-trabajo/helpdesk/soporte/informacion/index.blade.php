@@ -100,17 +100,17 @@
         <div class="grid grid-cols-1 gap-4 mt-4">
             <!-- Select de Estado con Nice Select -->
             <div>
-                 <label for="estado" class="block text-sm font-medium">Estado</label>
-          
-            <select id="estado" name="estado"  style="display: none">
-            <option value="" disabled selected>Selecciona una opción</option>
+                <label for="estado" class="block text-sm font-medium">Estado</label>
 
-                @foreach ($estadosOTS as $index => $estado)
+                <select id="estado" name="estado" style="display: none">
+                    <option value="" disabled selected>Selecciona una opción</option>
+
+                    @foreach ($estadosOTS as $index => $estado)
                     <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}" {{ $index == 0 ? 'selected' : '' }}>
                         {{ $estado->descripcion }}
                     </option>
-                @endforeach
-            </select>
+                    @endforeach
+                </select>
             </div>
 
             <!-- Textarea de Justificación -->
@@ -129,7 +129,7 @@
 
     <!-- Sección de Herramientas -->
     <div class="p-5 rounded-lg shadow-md">
-        <span class="text-lg font-semibold mb-4 badge bg-success">Inventario</span>
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Inventario</span>
         <div class="flex justify-end mt-2">
             <button type="button" id="addHerramienta" class="btn btn-primary">+</button>
         </div>
@@ -160,53 +160,53 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Sección Instalar (estrecha en grandes, ocupa todo en medianas y chicas) -->
         <div class="lg:col-span-1 p-5 rounded-lg shadow-md">
-            <span class="text-lg font-semibold mb-4 badge bg-success mb-4">Instalar</span>
+            <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Instalar</span>
             <div class="grid grid-cols-1 gap-4">
 
-            <form method="POST" id="formInstalar">
-            @csrf    <!-- Categoría (Tipo Producto) -->
-    <div>
-    <label class="block text-sm font-medium">Tipo Producto</label>
-    <select id="tipoProductoInstalar" name="tipoProducto" class="nice-select w-full mt-2" style="display: none">
-        <option value="" disabled selected>Seleccionar Tipo de Producto</option>
-        @foreach ($categorias as $categoria)
-            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
-        @endforeach
-    </select>
-</div>
+                <form method="POST" id="formInstalar">
+                    @csrf <!-- Categoría (Tipo Producto) -->
+                    <div>
+                        <label class="block text-sm font-medium">Tipo Producto</label>
+                        <select id="tipoProductoInstalar" name="tipoProducto" >
+                            <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+                            @foreach ($categorias as $categoria)
+                            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-<!-- Marca -->
-<div>
-    <label class="block text-sm font-medium">Marca</label>
-    <select id="marcaInstalar" name="marca" class="nice-select w-full mt-2" style="display: none">
-        <option value="" disabled selected>Seleccionar Marca</option>
-        @foreach ($marcas as $marca)
-            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
-        @endforeach
-    </select>
-</div>
+                    <!-- Marca -->
+                    <div>
+                        <label class="block text-sm font-medium">Marca</label>
+                        <select id="marcaInstalar" name="marca">
+                            <option value="" disabled selected>Seleccionar Marca</option>
+                            @foreach ($marcas as $marca)
+                            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-<!-- Modelo -->
-<div>
-    <label class="block text-sm font-medium">Modelo</label>
-    <select id="modeloInstalar" name="modelo" style="display: none">
-        <option value="" disabled selected>Seleccionar Modelo</option>
-        <!-- Los modelos se llenarán dinámicamente con JavaScript -->
-    </select>
-</div>
+                    <!-- Modelo -->
+                    <div>
+                        <label class="block text-sm font-medium">Modelo</label>
+                        <select id="modeloInstalar" name="modelo" style="display: none">
+                            <option value="" disabled selected>Seleccionar Modelo</option>
+                            <!-- Los modelos se llenarán dinámicamente con JavaScript -->
+                        </select>
+                    </div>
 
 
-                <!-- Número de Serie -->
-                <div>
-                    <label class="block text-sm font-medium">Nro. de Serie</label>
-                    <input type="text" id="serieInstalar" class="form-input w-full mt-2"
-                        placeholder="Ingrese Nro. de Serie">
-                </div>
+                    <!-- Número de Serie -->
+                    <div>
+                        <label class="block text-sm font-medium">Nro. de Serie</label>
+                        <input type="text" id="serieInstalar" class="form-input w-full mt-2"
+                            placeholder="Ingrese Nro. de Serie">
+                    </div>
 
-                <!-- Botón Guardar -->
-                <div class="flex justify-end">
-                    <button id="guardarInstalar" class="btn btn-primary px-6 py-2">Guardar</button>
-                </div>
+                    <!-- Botón Guardar -->
+                    <div class="flex justify-end">
+                        <button id="guardarInstalar" class="btn btn-primary px-6 py-2">Guardar</button>
+                    </div>
 
                 </form>
 
@@ -242,62 +242,62 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <!-- Sección Retirar (estrecha en grandes, ocupa todo en medianas y chicas) -->
         <div class="lg:col-span-1 p-5 rounded-lg shadow-md">
-            <span class="text-lg font-semibold mb-4 badge bg-success mb-4">Retirar</span>
+            <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Retirar</span>
             <div class="grid grid-cols-1 gap-4">
                 <!-- Tipo Producto -->
-               <form method="POST" id="formRetirar">
-            @csrf    <!-- Categoría (Tipo Producto) -->
-    <div>
-    <label class="block text-sm font-medium">Tipo Producto</label>
-    <select id="tipoProductoRetirar" name="tipoProducto" class="nice-select w-full mt-2" style="display: none">
-        <option value="" disabled selected>Seleccionar Tipo de Producto</option>
-        @foreach ($categorias as $categoria)
-            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
-        @endforeach
-    </select>
-</div>
+                <form method="POST" id="formRetirar">
+                    @csrf <!-- Categoría (Tipo Producto) -->
+                    <div>
+                        <label class="block text-sm font-medium">Tipo Producto</label>
+                        <select id="tipoProductoRetirar" name="tipoProducto" class="mt-2" >
+                            <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+                            @foreach ($categorias as $categoria)
+                            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-<!-- Marca -->
-<div>
-    <label class="block text-sm font-medium">Marca</label>
-    <select id="marcaRetirar" name="marca" class="nice-select w-full mt-2" style="display: none">
-        <option value="" disabled selected>Seleccionar Marca</option>
-        @foreach ($marcas as $marca)
-            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
-        @endforeach
-    </select>
-</div>
+                    <!-- Marca -->
+                    <div>
+                        <label class="block text-sm font-medium">Marca</label>
+                        <select id="marcaRetirar" name="marca" class="mt-2" >
+                            <option value="" disabled selected>Seleccionar Marca</option>
+                            @foreach ($marcas as $marca)
+                            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
 
-<!-- Modelo -->
-<div>
-    <label class="block text-sm font-medium">Modelo</label>
-    <select id="modeloRetirar" name="modelo" style="display: none">
-        <option value="" disabled selected>Seleccionar Modelo</option>
-        <!-- Los modelos se llenarán dinámicamente con JavaScript -->
-    </select>
-</div>
+                    <!-- Modelo -->
+                    <div>
+                        <label class="block text-sm font-medium">Modelo</label>
+                        <select id="modeloRetirar" name="modelo" style="display: none">
+                            <option value="" disabled selected>Seleccionar Modelo</option>
+                            <!-- Los modelos se llenarán dinámicamente con JavaScript -->
+                        </select>
+                    </div>
 
 
-                <!-- Número de Serie -->
-                <div>
-                    <label class="block text-sm font-medium">Nro. de Serie</label>
-                    <input type="text" id="serieRetirar" class="form-input w-full mt-2"
-                        placeholder="Ingrese Nro. de Serie">
-                </div>
+                    <!-- Número de Serie -->
+                    <div>
+                        <label class="block text-sm font-medium">Nro. de Serie</label>
+                        <input type="text" id="serieRetirar" class="form-input w-full mt-2"
+                            placeholder="Ingrese Nro. de Serie">
+                    </div>
 
-                <!-- Botón Guardar -->
-                <div class="flex justify-end">
-                    <button id="guardarRetirar" class="btn btn-primary px-6 py-2">Guardar</button>
-                </div>
+                    <!-- Botón Guardar -->
+                    <div class="flex justify-end">
+                        <button id="guardarRetirar" class="btn btn-primary px-6 py-2">Guardar</button>
+                    </div>
 
-                
+
 
             </div>
         </div>
 
         </form>
 
-      
+
 
         <!-- Tabla de Productos - Retirar (más ancha en pantallas grandes) -->
         <div class="lg:col-span-2 p-5 rounded-lg shadow-md">
@@ -345,20 +345,20 @@
         formData.append('marca', marca);
         formData.append('modelo', modelo);
         formData.append('numeroSerie', serie);
-        formData.append('idTicket', ticketId);  // Asegúrate de enviar el ticketId
-        formData.append('idVisita', idVisitaSeleccionada);  // Asegúrate de enviar el idVisita
+        formData.append('idTicket', ticketId); // Asegúrate de enviar el ticketId
+        formData.append('idVisita', idVisitaSeleccionada); // Asegúrate de enviar el idVisita
         formData.append('_token', '{{ csrf_token() }}'); // Token CSRF para seguridad
 
         // Hacer la solicitud AJAX para guardar los datos
         $.ajax({
-            url: '/guardar-equipo',  // Ruta del controlador
+            url: '/guardar-equipo', // Ruta del controlador
             method: 'POST',
             data: formData,
-            processData: false,  // Para enviar datos binarios (imágenes, etc.)
-            contentType: false,  // Para evitar que jQuery cambie el tipo de contenido
+            processData: false, // Para enviar datos binarios (imágenes, etc.)
+            contentType: false, // Para evitar que jQuery cambie el tipo de contenido
             success: function(response) {
                 // Si el equipo se guarda correctamente, agregarlo a la tabla
-                if(response.success) {
+                if (response.success) {
                     var nuevoProducto = `
                         <tr>
                             <td class="text-center">${response.producto.tipoProducto}</td>
@@ -368,7 +368,7 @@
                         </tr>
                     `;
                     $('#tablaInstalar').append(nuevoProducto);
-             
+
 
                     alert("Producto instalado correctamente.");
                     location.reload();
@@ -386,27 +386,27 @@
 
 <script>
     // Al cargar la página, hacer una solicitud AJAX para obtener los productos instalados
-$(document).ready(function() {
-    var ticketId = "{{ $ticketId }}";  // Asegúrate de que $ticketId esté disponible en el contexto
-    var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}";  // Asegúrate de que $idVisitaSeleccionada esté disponible
+    $(document).ready(function() {
+        var ticketId = "{{ $ticketId }}"; // Asegúrate de que $ticketId esté disponible en el contexto
+        var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}"; // Asegúrate de que $idVisitaSeleccionada esté disponible
 
-    // Solicitar los productos instalados
-    $.ajax({
-        url: '/obtener-productos-instalados',  // Ruta del controlador para obtener los productos instalados
-        method: 'GET',
-        data: {
-            idTicket: ticketId,
-            idVisita: idVisitaSeleccionada,
-        },
-        success: function(response) {
-            // Limpiar la tabla
-            $('#tablaInstalar').empty();
+        // Solicitar los productos instalados
+        $.ajax({
+            url: '/obtener-productos-instalados', // Ruta del controlador para obtener los productos instalados
+            method: 'GET',
+            data: {
+                idTicket: ticketId,
+                idVisita: idVisitaSeleccionada,
+            },
+            success: function(response) {
+                // Limpiar la tabla
+                $('#tablaInstalar').empty();
 
-            // Verificar si hay productos
-            if (response.length > 0) {
-                // Recorrer los productos y agregarlos a la tabla
-                response.forEach(function(producto) {
-                    var nuevoProducto = `
+                // Verificar si hay productos
+                if (response.length > 0) {
+                    // Recorrer los productos y agregarlos a la tabla
+                    response.forEach(function(producto) {
+                        var nuevoProducto = `
                         <tr data-id="${producto.idEquipos}">
                             <td class="text-center">${producto.categoria_nombre}</td> <!-- Mostrar el nombre de la categoría -->
                             <td class="text-center">${producto.marca_nombre}</td> <!-- Mostrar el nombre de la marca -->
@@ -417,75 +417,127 @@ $(document).ready(function() {
                             </td>
                         </tr>
                     `;
-                    $('#tablaInstalar').append(nuevoProducto);
-                });
-            } else {
-                // Si no hay productos, mostrar un mensaje
-                var noProductos = `
+                        $('#tablaInstalar').append(nuevoProducto);
+                    });
+                } else {
+                    // Si no hay productos, mostrar un mensaje
+                    var noProductos = `
                     <tr>
                         <td colspan="5" class="text-center">No hay productos instalados para este ticket y visita.</td>
                     </tr>
                 `;
-                $('#tablaInstalar').append(noProductos);
+                    $('#tablaInstalar').append(noProductos);
+                }
+            },
+            error: function(xhr) {
+                alert("Hubo un error al obtener los productos instalados.");
             }
-        },
-        error: function(xhr) {
-            alert("Hubo un error al obtener los productos instalados.");
-        }
+        });
     });
-});
 </script>
 
 
 <script>
     // Manejador para el botón de eliminar producto
-$('#tablaInstalar').on('click', '.eliminarProducto', function() {
-    var fila = $(this).closest('tr');
-    var idEquipo = fila.data('id'); // Obtener el id del producto a eliminar
+    $('#tablaInstalar').on('click', '.eliminarProducto', function() {
+        var fila = $(this).closest('tr');
+        var idEquipo = fila.data('id'); // Obtener el id del producto a eliminar
 
-    // Confirmar la eliminación
-    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-        // Hacer la solicitud AJAX para eliminar el producto
-        $.ajax({
-            url: '/eliminar-producto/' + idEquipo,  // Ruta al controlador para eliminar el producto
-            method: 'DELETE',
-            data: {
-                _token: '{{ csrf_token() }}',  // Incluir el token CSRF
-            },
-            success: function(response) {
-                if (response.success) {
-                    fila.remove();  // Eliminar la fila de la tabla
-                    alert('Producto eliminado correctamente.');
-                } else {
-                    alert('Hubo un error al eliminar el producto.');
+        // Confirmar la eliminación
+        if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+            // Hacer la solicitud AJAX para eliminar el producto
+            $.ajax({
+                url: '/eliminar-producto/' + idEquipo, // Ruta al controlador para eliminar el producto
+                method: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}', // Incluir el token CSRF
+                },
+                success: function(response) {
+                    if (response.success) {
+                        fila.remove(); // Eliminar la fila de la tabla
+                        alert('Producto eliminado correctamente.');
+                    } else {
+                        alert('Hubo un error al eliminar el producto.');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Hubo un error al procesar la solicitud de eliminación.');
                 }
-            },
-            error: function(xhr) {
-                alert('Hubo un error al procesar la solicitud de eliminación.');
-            }
-        });
-    }
-});
-
+            });
+        }
+    });
 </script>
 
 
 <script>
+$(document).ready(function() {
+    // Inicializar Select2 para los selectores
+    $('#tipoProductoInstalar').select2({
+        placeholder: 'Seleccionar Tipo de Producto',
+        allowClear: true
+    });
+
+    $('#marcaInstalar').select2({
+        placeholder: 'Seleccionar Marca',
+        allowClear: true
+    });
+
+    $('#modeloInstalar').select2({
+        placeholder: 'Seleccionar Modelo',
+        allowClear: true
+    });
+
     // Cuando se selecciona una categoría
     $('#tipoProductoInstalar').change(function() {
         var idCategoria = $(this).val();
 
         // Si se seleccionó una categoría
-        if(idCategoria) {
-            // Hacer la solicitud AJAX para obtener los modelos por categoría
+        if (idCategoria) {
+            // Hacer la solicitud AJAX para obtener las marcas por categoría
             $.ajax({
-                url: '/modelos/categoria/' + idCategoria,  // Ruta definida en el controlador
+                url: '/marcas/categoria/' + idCategoria, // Ruta definida en el controlador
+                method: 'GET',
+                success: function(response) {
+                    // Limpiar el select de marcas
+                    $('#marcaInstalar').empty();
+                    $('#marcaInstalar').append('<option value="" disabled selected>Seleccionar Marca</option>');
+
+                    // Llenar el select de marcas con los datos recibidos
+                    response.forEach(function(marca) {
+                        $('#marcaInstalar').append('<option value="' + marca.idMarca + '">' + marca.nombre + '</option>');
+                    });
+
+                    // Mostrar el select de marcas
+                    $('#marcaInstalar').show();
+                    $('#marcaInstalar').trigger('change'); // Actualizar Select2 después de agregar opciones
+                },
+                error: function(xhr) {
+                    // Si ocurre un error, mostrar un mensaje
+                    alert('Hubo un error al cargar las marcas');
+                }
+            });
+        } else {
+            // Si no se seleccionó una categoría, esconder el select de marcas y modelos
+            $('#marcaInstalar').hide();
+            $('#modeloInstalar').hide();
+        }
+    });
+
+    // Cuando se selecciona una marca
+    $('#marcaInstalar').change(function() {
+        var idMarca = $(this).val();
+
+        // Si se seleccionó una marca
+        if (idMarca) {
+            // Hacer la solicitud AJAX para obtener los modelos por marca
+            $.ajax({
+                url: '/modelos/marca/' + idMarca, // Ruta definida en el controlador
                 method: 'GET',
                 success: function(response) {
                     // Limpiar el select de modelos
                     $('#modeloInstalar').empty();
                     $('#modeloInstalar').append('<option value="" disabled selected>Seleccionar Modelo</option>');
-                    
+
                     // Llenar el select de modelos con los datos recibidos
                     response.forEach(function(modelo) {
                         $('#modeloInstalar').append('<option value="' + modelo.idModelo + '">' + modelo.nombre + '</option>');
@@ -493,6 +545,7 @@ $('#tablaInstalar').on('click', '.eliminarProducto', function() {
 
                     // Mostrar el select de modelos
                     $('#modeloInstalar').show();
+                    $('#modeloInstalar').trigger('change'); // Actualizar Select2 después de agregar opciones
                 },
                 error: function(xhr) {
                     // Si ocurre un error, mostrar un mensaje
@@ -500,54 +553,57 @@ $('#tablaInstalar').on('click', '.eliminarProducto', function() {
                 }
             });
         } else {
-            // Si no se seleccionó una categoría, esconder el select de modelos
+            // Si no se seleccionó una marca, esconder el select de modelos
             $('#modeloInstalar').hide();
         }
     });
+});
+
+
 </script>
 
 
 
 <script>
     // Al hacer clic en el botón "Guardar" de la sección Retirar
-$('#guardarRetirar').click(function(e) {
-    e.preventDefault(); // Evita que el formulario se envíe de forma predeterminada
+    $('#guardarRetirar').click(function(e) {
+        e.preventDefault(); // Evita que el formulario se envíe de forma predeterminada
 
-    // Obtener los valores de los campos
-    var tipoProducto = $('#tipoProductoRetirar').val();
-    var marca = $('#marcaRetirar').val();
-    var modelo = $('#modeloRetirar').val();
-    var serie = $('#serieRetirar').val();
-    var ticketId = "{{ $ticketId }}"; // Usar el ticketId que ya está disponible en el contexto
-    var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}"; // Usar la variable idVisitaSeleccionada
+        // Obtener los valores de los campos
+        var tipoProducto = $('#tipoProductoRetirar').val();
+        var marca = $('#marcaRetirar').val();
+        var modelo = $('#modeloRetirar').val();
+        var serie = $('#serieRetirar').val();
+        var ticketId = "{{ $ticketId }}"; // Usar el ticketId que ya está disponible en el contexto
+        var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}"; // Usar la variable idVisitaSeleccionada
 
-    // Verificar que todos los campos estén completos
-    if (!tipoProducto || !marca || !modelo || !serie) {
-        alert("Por favor, complete todos los campos.");
-        return;
-    }
+        // Verificar que todos los campos estén completos
+        if (!tipoProducto || !marca || !modelo || !serie) {
+            alert("Por favor, complete todos los campos.");
+            return;
+        }
 
-    // Crear un objeto FormData para enviar todos los datos del formulario
-    var formData = new FormData();
-    formData.append('tipoProducto', tipoProducto);
-    formData.append('marca', marca);
-    formData.append('modelo', modelo);
-    formData.append('numeroSerie', serie);
-    formData.append('idTicket', ticketId);  // Asegúrate de enviar el ticketId
-    formData.append('idVisita', idVisitaSeleccionada);  // Asegúrate de enviar el idVisita
-    formData.append('_token', '{{ csrf_token() }}'); // Token CSRF para seguridad
+        // Crear un objeto FormData para enviar todos los datos del formulario
+        var formData = new FormData();
+        formData.append('tipoProducto', tipoProducto);
+        formData.append('marca', marca);
+        formData.append('modelo', modelo);
+        formData.append('numeroSerie', serie);
+        formData.append('idTicket', ticketId); // Asegúrate de enviar el ticketId
+        formData.append('idVisita', idVisitaSeleccionada); // Asegúrate de enviar el idVisita
+        formData.append('_token', '{{ csrf_token() }}'); // Token CSRF para seguridad
 
-    // Hacer la solicitud AJAX para guardar los datos
-    $.ajax({
-        url: '/guardar-equipo-retirar',  // Ruta del controlador para guardar el producto retirado
-        method: 'POST',
-        data: formData,
-        processData: false,  // Para enviar datos binarios (imágenes, etc.)
-        contentType: false,  // Para evitar que jQuery cambie el tipo de contenido
-        success: function(response) {
-            // Si el equipo se guarda correctamente, agregarlo a la tabla
-            if(response.success) {
-                var nuevoProducto = `
+        // Hacer la solicitud AJAX para guardar los datos
+        $.ajax({
+            url: '/guardar-equipo-retirar', // Ruta del controlador para guardar el producto retirado
+            method: 'POST',
+            data: formData,
+            processData: false, // Para enviar datos binarios (imágenes, etc.)
+            contentType: false, // Para evitar que jQuery cambie el tipo de contenido
+            success: function(response) {
+                // Si el equipo se guarda correctamente, agregarlo a la tabla
+                if (response.success) {
+                    var nuevoProducto = `
                     <tr>
                         <td class="text-center">${response.producto.tipoProducto}</td>
                         <td class="text-center">${response.producto.marca}</td>
@@ -555,44 +611,43 @@ $('#guardarRetirar').click(function(e) {
                         <td class="text-center">${response.producto.nserie}</td>
                     </tr>
                 `;
-                $('#tablaRetirar').append(nuevoProducto);
-                location.reload();
-                alert("Producto retirado correctamente.");
-            } else {
-                alert("Hubo un error al guardar el equipo.");
+                    $('#tablaRetirar').append(nuevoProducto);
+                    location.reload();
+                    alert("Producto retirado correctamente.");
+                } else {
+                    alert("Hubo un error al guardar el equipo.");
+                }
+            },
+            error: function(xhr) {
+                alert("Hubo un error al procesar la solicitud.");
             }
-        },
-        error: function(xhr) {
-            alert("Hubo un error al procesar la solicitud.");
-        }
+        });
     });
-});
-
 </script>
 
 <script>
-// Al cargar la página, hacer una solicitud AJAX para obtener los productos retirados
-$(document).ready(function() {
-    var ticketId = "{{ $ticketId }}";  // Asegúrate de que $ticketId esté disponible en el contexto
-    var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}";  // Asegúrate de que $idVisitaSeleccionada esté disponible
+    // Al cargar la página, hacer una solicitud AJAX para obtener los productos retirados
+    $(document).ready(function() {
+        var ticketId = "{{ $ticketId }}"; // Asegúrate de que $ticketId esté disponible en el contexto
+        var idVisitaSeleccionada = "{{ $idVisitaSeleccionada }}"; // Asegúrate de que $idVisitaSeleccionada esté disponible
 
-    // Solicitar los productos retirados
-    $.ajax({
-        url: '/obtener-productos-retirados',  // Ruta del controlador para obtener los productos retirados
-        method: 'GET',
-        data: {
-            idTicket: ticketId,
-            idVisita: idVisitaSeleccionada,
-        },
-        success: function(response) {
-            // Limpiar la tabla
-            $('#tablaRetirar').empty();
+        // Solicitar los productos retirados
+        $.ajax({
+            url: '/obtener-productos-retirados', // Ruta del controlador para obtener los productos retirados
+            method: 'GET',
+            data: {
+                idTicket: ticketId,
+                idVisita: idVisitaSeleccionada,
+            },
+            success: function(response) {
+                // Limpiar la tabla
+                $('#tablaRetirar').empty();
 
-            // Verificar si hay productos
-            if (response.length > 0) {
-                // Recorrer los productos y agregarlos a la tabla
-                response.forEach(function(producto) {
-                    var nuevoProducto = `
+                // Verificar si hay productos
+                if (response.length > 0) {
+                    // Recorrer los productos y agregarlos a la tabla
+                    response.forEach(function(producto) {
+                        var nuevoProducto = `
                         <tr data-id="${producto.idEquipos}">
                             <td class="text-center">${producto.categoria_nombre}</td> <!-- Mostrar el nombre de la categoría -->
                             <td class="text-center">${producto.marca_nombre}</td> <!-- Mostrar el nombre de la marca -->
@@ -603,93 +658,146 @@ $(document).ready(function() {
                             </td>
                         </tr>
                     `;
-                    $('#tablaRetirar').append(nuevoProducto);
-                });
-            } else {
-                // Si no hay productos, mostrar un mensaje
-                var noProductos = `
+                        $('#tablaRetirar').append(nuevoProducto);
+                    });
+                } else {
+                    // Si no hay productos, mostrar un mensaje
+                    var noProductos = `
                     <tr>
                         <td colspan="5" class="text-center">No hay productos retirados para este ticket y visita.</td>
                     </tr>
                 `;
-                $('#tablaRetirar').append(noProductos);
+                    $('#tablaRetirar').append(noProductos);
+                }
+            },
+            error: function(xhr) {
+                alert("Hubo un error al obtener los productos retirados.");
             }
-        },
-        error: function(xhr) {
-            alert("Hubo un error al obtener los productos retirados.");
-        }
+        });
     });
-});
-
-
 </script>
 
 <script>
     // Manejador para el botón de eliminar producto
-$('#tablaRetirar').on('click', '.eliminarProducto', function() {
-    var fila = $(this).closest('tr');
-    var idEquipo = fila.data('id'); // Obtener el id del producto a eliminar
+    $('#tablaRetirar').on('click', '.eliminarProducto', function() {
+        var fila = $(this).closest('tr');
+        var idEquipo = fila.data('id'); // Obtener el id del producto a eliminar
 
-    // Confirmar la eliminación
-    if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
-        // Hacer la solicitud AJAX para eliminar el producto
-        $.ajax({
-            url: '/eliminar-producto/' + idEquipo,  // Ruta al controlador para eliminar el producto
-            method: 'DELETE',
-            data: {
-                _token: '{{ csrf_token() }}',  // Incluir el token CSRF
-            },
-            success: function(response) {
-                if (response.success) {
-                    fila.remove();  // Eliminar la fila de la tabla
-                    alert('Producto eliminado correctamente.');
-                } else {
-                    alert('Hubo un error al eliminar el producto.');
+        // Confirmar la eliminación
+        if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+            // Hacer la solicitud AJAX para eliminar el producto
+            $.ajax({
+                url: '/eliminar-producto/' + idEquipo, // Ruta al controlador para eliminar el producto
+                method: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}', // Incluir el token CSRF
+                },
+                success: function(response) {
+                    if (response.success) {
+                        fila.remove(); // Eliminar la fila de la tabla
+                        alert('Producto eliminado correctamente.');
+                    } else {
+                        alert('Hubo un error al eliminar el producto.');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Hubo un error al procesar la solicitud de eliminación.');
                 }
-            },
-            error: function(xhr) {
-                alert('Hubo un error al procesar la solicitud de eliminación.');
-            }
-        });
-    }
-});
-
+            });
+        }
+    });
 </script>
 
 <script>
+$(document).ready(function() {
+    // Inicializar Select2 para los selectores de Retirar
+    $('#tipoProductoRetirar').select2({
+        placeholder: 'Seleccionar Tipo de Producto',
+        allowClear: true
+    });
+
+    $('#marcaRetirar').select2({
+        placeholder: 'Seleccionar Marca',
+        allowClear: true
+    });
+
+    $('#modeloRetirar').select2({
+        placeholder: 'Seleccionar Modelo',
+        allowClear: true
+    });
+
     // Cuando se selecciona una categoría en Retirar
-$('#tipoProductoRetirar').change(function() {
-    var idCategoria = $(this).val();
+    $('#tipoProductoRetirar').change(function() {
+        var idCategoria = $(this).val();
 
-    // Si se seleccionó una categoría
-    if(idCategoria) {
-        // Hacer la solicitud AJAX para obtener los modelos por categoría
-        $.ajax({
-            url: '/modelos/categoria/' + idCategoria,  // Ruta definida en el controlador
-            method: 'GET',
-            success: function(response) {
-                // Limpiar el select de modelos
-                $('#modeloRetirar').empty();
-                $('#modeloRetirar').append('<option value="" disabled selected>Seleccionar Modelo</option>');
-                
-                // Llenar el select de modelos con los datos recibidos
-                response.forEach(function(modelo) {
-                    $('#modeloRetirar').append('<option value="' + modelo.idModelo + '">' + modelo.nombre + '</option>');
-                });
+        // Si se seleccionó una categoría
+        if (idCategoria) {
+            // Hacer la solicitud AJAX para obtener las marcas por categoría
+            $.ajax({
+                url: '/marcas/categoria/' + idCategoria, // Ruta definida en el controlador
+                method: 'GET',
+                success: function(response) {
+                    // Limpiar el select de marcas
+                    $('#marcaRetirar').empty();
+                    $('#marcaRetirar').append('<option value="" disabled selected>Seleccionar Marca</option>');
 
-                // Mostrar el select de modelos
-                $('#modeloRetirar').show();
-            },
-            error: function(xhr) {
-                // Si ocurre un error, mostrar un mensaje
-                alert('Hubo un error al cargar los modelos');
-            }
-        });
-    } else {
-        // Si no se seleccionó una categoría, esconder el select de modelos
-        $('#modeloRetirar').hide();
-    }
+                    // Llenar el select de marcas con los datos recibidos
+                    response.forEach(function(marca) {
+                        $('#marcaRetirar').append('<option value="' + marca.idMarca + '">' + marca.nombre + '</option>');
+                    });
+
+                    // Mostrar el select de marcas
+                    $('#marcaRetirar').show();
+                    $('#marcaRetirar').trigger('change'); // Actualizar Select2 después de agregar opciones
+                },
+                error: function(xhr) {
+                    // Si ocurre un error, mostrar un mensaje
+                    alert('Hubo un error al cargar las marcas');
+                }
+            });
+        } else {
+            // Si no se seleccionó una categoría, esconder el select de marcas y modelos
+            $('#marcaRetirar').hide();
+            $('#modeloRetirar').hide();
+        }
+    });
+
+    // Cuando se selecciona una marca en Retirar
+    $('#marcaRetirar').change(function() {
+        var idMarca = $(this).val();
+
+        // Si se seleccionó una marca
+        if (idMarca) {
+            // Hacer la solicitud AJAX para obtener los modelos por marca
+            $.ajax({
+                url: '/modelos/marca/' + idMarca, // Ruta definida en el controlador
+                method: 'GET',
+                success: function(response) {
+                    // Limpiar el select de modelos
+                    $('#modeloRetirar').empty();
+                    $('#modeloRetirar').append('<option value="" disabled selected>Seleccionar Modelo</option>');
+
+                    // Llenar el select de modelos con los datos recibidos
+                    response.forEach(function(modelo) {
+                        $('#modeloRetirar').append('<option value="' + modelo.idModelo + '">' + modelo.nombre + '</option>');
+                    });
+
+                    // Mostrar el select de modelos
+                    $('#modeloRetirar').show();
+                    $('#modeloRetirar').trigger('change'); // Actualizar Select2 después de agregar opciones
+                },
+                error: function(xhr) {
+                    // Si ocurre un error, mostrar un mensaje
+                    alert('Hubo un error al cargar los modelos');
+                }
+            });
+        } else {
+            // Si no se seleccionó una marca, esconder el select de modelos
+            $('#modeloRetirar').hide();
+        }
+    });
 });
+
 
 </script>
 
@@ -814,7 +922,11 @@ $('#tipoProductoRetirar').change(function() {
                 body: JSON.stringify({
                     idEstadoots: estadoId,
                     justificacion: justificacion.trim(),
-                    idTickets: {{ $ticket->idTickets }} // Solo se pasa el ID del ticket
+                    idTickets: {
+                        {
+                            $ticket - > idTickets
+                        }
+                    } // Solo se pasa el ID del ticket
                 })
             })
             .then(response => response.json())
@@ -837,42 +949,50 @@ $('#tipoProductoRetirar').change(function() {
 
 
 <script>
-  document.getElementById("estado").addEventListener("change", function() {
-    const estadoId = this.value;
-    const ticketId = {{ $ticket->idTickets }};
-    const visitaId = {{ $visitaId ?? 'null' }};
-
-    // Obtener la justificación del estado seleccionado
-    fetch(`/api/obtenerJustificacionSoporte?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Mostrar la justificación en el textarea
-                document.getElementById("justificacion").value = data.justificacion || "";
-            } else {
-                toastr.error(data.message || "Error al obtener la justificación");
+    document.getElementById("estado").addEventListener("change", function() {
+        const estadoId = this.value;
+        const ticketId = {
+            {
+                $ticket - > idTickets
             }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            toastr.error("Error al obtener la justificación.");
-        });
+        };
+        const visitaId = {
+            {
+                $visitaId ?? 'null'
+            }
+        };
 
-    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
-    if (estadoId == 5) {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "block"; // Mostrar el elemento
+        // Obtener la justificación del estado seleccionado
+        fetch(`/api/obtenerJustificacionSoporte?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar la justificación en el textarea
+                    document.getElementById("justificacion").value = data.justificacion || "";
+                } else {
+                    toastr.error(data.message || "Error al obtener la justificación");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                toastr.error("Error al obtener la justificación.");
+            });
 
-            renderizarPrevisualizacion();
+        // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
+        if (estadoId == 5) {
+            const cardFotos = document.getElementById("cardFotos");
+            if (cardFotos) {
+                cardFotos.style.display = "block"; // Mostrar el elemento
+
+                renderizarPrevisualizacion();
+            }
+        } else {
+            const cardFotos = document.getElementById("cardFotos");
+            if (cardFotos) {
+                cardFotos.style.display = "none"; // Ocultar el elemento
+            }
         }
-    } else {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "none"; // Ocultar el elemento
-        }
-    }
-});
+    });
 
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar todos los select con la clase .selectize

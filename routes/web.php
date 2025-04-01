@@ -541,6 +541,11 @@ Route::view('/apps/invoice/edit', 'apps.invoice.edit');
 
 Route::get('/modelos/categoria/{idCategoria}', [OrdenesHelpdeskController::class, 'obtenerModelosPorCategoria']);
 
+
+Route::get('/marcas/categoria/{idCategoria}', [OrdenesHelpdeskController::class, 'obtenerMarcasPorCategoria']);
+Route::get('/modelos/marca/{idMarca}', [OrdenesHelpdeskController::class, 'obtenerModelosPorMarca']);
+
+
 Route::post('/guardar-equipo', [OrdenesHelpdeskController::class, 'guardarEquipo'])->name('guardarEquipo');
 
 Route::get('/obtener-productos-instalados', [OrdenesHelpdeskController::class, 'obtenerProductosInstalados']);
