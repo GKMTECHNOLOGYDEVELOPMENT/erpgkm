@@ -192,32 +192,58 @@
                 </div>
             @endif
 
-            @if ($suministros->isNotEmpty())
-                <div class="red-bg mt-4 text-left">Artículos Utilizados</div>
+            @if ($equiposInstalados->isNotEmpty())
+                <div class="red-bg mt-4">Equipos Instalados</div>
+                <div class="w-full mt-3 ml-10 max-w-[700px] space-y-2">
+                    <!-- Encabezados -->
+                    <div class="grid grid-cols-4 gap-4 text-[9px] font-semibold text-gray-700 uppercase">
+                        <div>Tipo Producto</div>
+                        <div>Modelo</div>
+                        <div>Marca</div>
+                        <div>Serie</div>
+                    </div>
 
-                <div class="space-y-2 text-xs mt-4">
-                    @foreach ($suministros as $item)
-                        <div class="flex justify-between border-b border-dashed border-gray-300 pb-1">
-                            <div class="w-1/4 font-semibold text-gray-800">
-                                {{ $item->articulo->nombre ?? 'Sin nombre' }}
-                            </div>
-                            <div class="w-1/4 text-gray-600 italic">
-                                {{ $item->articulo->tipoArticulo->nombre ?? 'Sin tipo' }}
-                            </div>
-                            <div class="w-1/5 text-gray-600">
-                                {{ $item->articulo->modelo->nombre ?? '' }}
-                            </div>
-                            <div class="w-1/5 text-gray-600">
-
-                                {{ $item->articulo->modelo->marca->nombre ?? '' }}
-                            </div>
-                            <div class="w-1/12 text-right font-bold text-gray-900">
-                                x{{ $item->cantidad }}
-                            </div>
+                    <!-- Contenido -->
+                    @foreach ($equiposInstalados as $equipo)
+                        <div class="grid grid-cols-4 gap-4 text-[8px] bg-gray-50 rounded-md px-3 py-1 shadow-sm">
+                            <div>{{ $equipo['tipoProducto'] }}</div>
+                            <div>{{ $equipo['modelo'] }}</div>
+                            <div>{{ $equipo['marca'] }}</div>
+                            <div>{{ $equipo['nserie'] }}</div>
                         </div>
                     @endforeach
                 </div>
             @endif
+
+            @if ($equiposRetirados->isNotEmpty())
+                <div class="red-bg mt-6">Equipos Retirados</div>
+                <div class="w-full mt-3 ml-10 max-w-[700px] space-y-2">
+                    <!-- Encabezados -->
+                    <div class="grid grid-cols-4 gap-4 text-[9px] font-semibold text-gray-700 uppercase">
+                        <div>Tipo Producto</div>
+                        <div>Modelo</div>
+                        <div>Marca</div>
+                        <div>Serie</div>
+                    </div>
+
+                    <!-- Contenido -->
+                    @foreach ($equiposRetirados as $equipo)
+                        <div class="grid grid-cols-4 gap-4 text-[8px] bg-gray-50 rounded-md px-3 py-1 shadow-sm">
+                            <div>{{ $equipo['tipoProducto'] }}</div>
+                            <div>{{ $equipo['modelo'] }}</div>
+                            <div>{{ $equipo['marca'] }}</div>
+                            <div>{{ $equipo['nserie'] }}</div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+
+
+
+
+
+
 
 
 

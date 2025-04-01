@@ -29,21 +29,40 @@ class Equipo extends Model
 	public $timestamps = false;
 
 	protected $casts = [
-		'marca' => 'int',
-		'modelo' => 'int',
-		'idTickets' => 'int'
+		'idMarca' => 'int',
+		'idModelo' => 'int',
+		'idCategoria' => 'int',
+		'idTickets' => 'int',
+		'idVisitas' => 'int'
 	];
-
+	
 	protected $fillable = [
-		'marca',
-		'modelo',
+		'idMarca',
+		'idModelo',
+		'idCategoria',
+		'idVisitas',
 		'nserie',
 		'modalidad',
 		'idTickets'
 	];
+	
 
 	public function ticket()
 	{
 		return $this->belongsTo(Ticket::class, 'idTickets');
+	}
+	public function modelo()
+	{
+		return $this->belongsTo(Modelo::class, 'idModelo', 'idModelo');
+	}
+
+	public function marca()
+	{
+		return $this->belongsTo(Marca::class, 'idMarca', 'idMarca');
+	}
+
+	public function categoria()
+	{
+		return $this->belongsTo(Categoria::class, 'idCategoria', 'idCategoria');
 	}
 }
