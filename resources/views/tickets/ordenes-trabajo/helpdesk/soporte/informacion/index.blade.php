@@ -100,17 +100,17 @@
         <div class="grid grid-cols-1 gap-4 mt-4">
             <!-- Select de Estado con Nice Select -->
             <div>
-                <label for="estado" class="block text-sm font-medium">Estado</label>
+                 <label for="estado" class="block text-sm font-medium">Estado</label>
+          
+            <select id="estado" name="estado"  style="display: none">
+            <option value="" disabled selected>Selecciona una opción</option>
 
-                <select id="estado" name="estado" style="display: none">
-                    <option value="" disabled selected>Selecciona una opción</option>
-
-                    @foreach ($estadosOTS as $index => $estado)
+                @foreach ($estadosOTS as $index => $estado)
                     <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}" {{ $index == 0 ? 'selected' : '' }}>
                         {{ $estado->descripcion }}
                     </option>
-                    @endforeach
-                </select>
+                @endforeach
+            </select>
             </div>
 
             <!-- Textarea de Justificación -->
@@ -129,7 +129,7 @@
 
     <!-- Sección de Herramientas -->
     <div class="p-5 rounded-lg shadow-md">
-        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Inventario</span>
+        <span class="text-lg font-semibold mb-4 badge bg-success">Inventario</span>
         <div class="flex justify-end mt-2">
             <button type="button" id="addHerramienta" class="btn btn-primary">+</button>
         </div>
@@ -160,53 +160,53 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Sección Instalar (estrecha en grandes, ocupa todo en medianas y chicas) -->
         <div class="lg:col-span-1 p-5 rounded-lg shadow-md">
-            <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Instalar</span>
+            <span class="text-lg font-semibold mb-4 badge bg-success mb-4">Instalar</span>
             <div class="grid grid-cols-1 gap-4">
 
-                <form method="POST" id="formInstalar">
-                    @csrf <!-- Categoría (Tipo Producto) -->
-                    <div>
-                        <label class="block text-sm font-medium">Tipo Producto</label>
-                        <select id="tipoProductoInstalar" name="tipoProducto" >
-                            <option value="" disabled selected>Seleccionar Tipo de Producto</option>
-                            @foreach ($categorias as $categoria)
-                            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+            <form method="POST" id="formInstalar">
+            @csrf    <!-- Categoría (Tipo Producto) -->
+    <div>
+    <label class="block text-sm font-medium">Tipo Producto</label>
+    <select id="tipoProductoInstalar" name="tipoProducto" >
+        <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+        @foreach ($categorias as $categoria)
+            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+        @endforeach
+    </select>
+</div>
 
-                    <!-- Marca -->
-                    <div>
-                        <label class="block text-sm font-medium">Marca</label>
-                        <select id="marcaInstalar" name="marca">
-                            <option value="" disabled selected>Seleccionar Marca</option>
-                            @foreach ($marcas as $marca)
-                            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+<!-- Marca -->
+<div>
+    <label class="block text-sm font-medium">Marca</label>
+    <select id="marcaInstalar" name="marca">
+        <option value="" disabled selected>Seleccionar Marca</option>
+        @foreach ($marcas as $marca)
+            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+        @endforeach
+    </select>
+</div>
 
-                    <!-- Modelo -->
-                    <div>
-                        <label class="block text-sm font-medium">Modelo</label>
-                        <select id="modeloInstalar" name="modelo" style="display: none">
-                            <option value="" disabled selected>Seleccionar Modelo</option>
-                            <!-- Los modelos se llenarán dinámicamente con JavaScript -->
-                        </select>
-                    </div>
+<!-- Modelo -->
+<div>
+    <label class="block text-sm font-medium">Modelo</label>
+    <select id="modeloInstalar" name="modelo" style="display: none">
+        <option value="" disabled selected>Seleccionar Modelo</option>
+        <!-- Los modelos se llenarán dinámicamente con JavaScript -->
+    </select>
+</div>
 
 
-                    <!-- Número de Serie -->
-                    <div>
-                        <label class="block text-sm font-medium">Nro. de Serie</label>
-                        <input type="text" id="serieInstalar" class="form-input w-full mt-2"
-                            placeholder="Ingrese Nro. de Serie">
-                    </div>
+                <!-- Número de Serie -->
+                <div>
+                    <label class="block text-sm font-medium">Nro. de Serie</label>
+                    <input type="text" id="serieInstalar" class="form-input w-full mt-2"
+                        placeholder="Ingrese Nro. de Serie">
+                </div>
 
-                    <!-- Botón Guardar -->
-                    <div class="flex justify-end">
-                        <button id="guardarInstalar" class="btn btn-primary px-6 py-2">Guardar</button>
-                    </div>
+                <!-- Botón Guardar -->
+                <div class="flex justify-end">
+                    <button id="guardarInstalar" class="btn btn-primary px-6 py-2">Guardar</button>
+                </div>
 
                 </form>
 
@@ -242,62 +242,62 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <!-- Sección Retirar (estrecha en grandes, ocupa todo en medianas y chicas) -->
         <div class="lg:col-span-1 p-5 rounded-lg shadow-md">
-            <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Retirar</span>
+            <span class="text-lg font-semibold mb-4 badge bg-success mb-4">Retirar</span>
             <div class="grid grid-cols-1 gap-4">
                 <!-- Tipo Producto -->
-                <form method="POST" id="formRetirar">
-                    @csrf <!-- Categoría (Tipo Producto) -->
-                    <div>
-                        <label class="block text-sm font-medium">Tipo Producto</label>
-                        <select id="tipoProductoRetirar" name="tipoProducto" class="mt-2" >
-                            <option value="" disabled selected>Seleccionar Tipo de Producto</option>
-                            @foreach ($categorias as $categoria)
-                            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+               <form method="POST" id="formRetirar">
+            @csrf    <!-- Categoría (Tipo Producto) -->
+    <div>
+    <label class="block text-sm font-medium">Tipo Producto</label>
+    <select id="tipoProductoRetirar" name="tipoProducto">
+        <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+        @foreach ($categorias as $categoria)
+            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+        @endforeach
+    </select>
+</div>
 
-                    <!-- Marca -->
-                    <div>
-                        <label class="block text-sm font-medium">Marca</label>
-                        <select id="marcaRetirar" name="marca" class="mt-2" >
-                            <option value="" disabled selected>Seleccionar Marca</option>
-                            @foreach ($marcas as $marca)
-                            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+<!-- Marca -->
+<div>
+    <label class="block text-sm font-medium">Marca</label>
+    <select id="marcaRetirar" name="marca">
+        <option value="" disabled selected>Seleccionar Marca</option>
+        @foreach ($marcas as $marca)
+            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+        @endforeach
+    </select>
+</div>
 
-                    <!-- Modelo -->
-                    <div>
-                        <label class="block text-sm font-medium">Modelo</label>
-                        <select id="modeloRetirar" name="modelo" style="display: none">
-                            <option value="" disabled selected>Seleccionar Modelo</option>
-                            <!-- Los modelos se llenarán dinámicamente con JavaScript -->
-                        </select>
-                    </div>
-
-
-                    <!-- Número de Serie -->
-                    <div>
-                        <label class="block text-sm font-medium">Nro. de Serie</label>
-                        <input type="text" id="serieRetirar" class="form-input w-full mt-2"
-                            placeholder="Ingrese Nro. de Serie">
-                    </div>
-
-                    <!-- Botón Guardar -->
-                    <div class="flex justify-end">
-                        <button id="guardarRetirar" class="btn btn-primary px-6 py-2">Guardar</button>
-                    </div>
+<!-- Modelo -->
+<div>
+    <label class="block text-sm font-medium">Modelo</label>
+    <select id="modeloRetirar" name="modelo" style="display: none">
+        <option value="" disabled selected>Seleccionar Modelo</option>
+        <!-- Los modelos se llenarán dinámicamente con JavaScript -->
+    </select>
+</div>
 
 
+                <!-- Número de Serie -->
+                <div>
+                    <label class="block text-sm font-medium">Nro. de Serie</label>
+                    <input type="text" id="serieRetirar" class="form-input w-full mt-2"
+                        placeholder="Ingrese Nro. de Serie">
+                </div>
+
+                <!-- Botón Guardar -->
+                <div class="flex justify-end">
+                    <button id="guardarRetirar" class="btn btn-primary px-6 py-2">Guardar</button>
+                </div>
+
+                
 
             </div>
         </div>
 
         </form>
 
-
+      
 
         <!-- Tabla de Productos - Retirar (más ancha en pantallas grandes) -->
         <div class="lg:col-span-2 p-5 rounded-lg shadow-md">
@@ -319,6 +319,7 @@
         </div>
     </div>
 </div>
+
 
 <script>
     // Al hacer clic en el botón "Guardar" de la sección Instalar
@@ -802,6 +803,7 @@ $(document).ready(function() {
 </script>
 
 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
@@ -922,11 +924,7 @@ $(document).ready(function() {
                 body: JSON.stringify({
                     idEstadoots: estadoId,
                     justificacion: justificacion.trim(),
-                    idTickets: {
-                        {
-                            $ticket - > idTickets
-                        }
-                    } // Solo se pasa el ID del ticket
+                    idTickets: {{ $ticket->idTickets }} // Solo se pasa el ID del ticket
                 })
             })
             .then(response => response.json())
@@ -949,50 +947,42 @@ $(document).ready(function() {
 
 
 <script>
-    document.getElementById("estado").addEventListener("change", function() {
-        const estadoId = this.value;
-        const ticketId = {
-            {
-                $ticket - > idTickets
-            }
-        };
-        const visitaId = {
-            {
-                $visitaId ?? 'null'
-            }
-        };
+  document.getElementById("estado").addEventListener("change", function() {
+    const estadoId = this.value;
+    const ticketId = {{ $ticket->idTickets }};
+    const visitaId = {{ $visitaId ?? 'null' }};
 
-        // Obtener la justificación del estado seleccionado
-        fetch(`/api/obtenerJustificacionSoporte?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Mostrar la justificación en el textarea
-                    document.getElementById("justificacion").value = data.justificacion || "";
-                } else {
-                    toastr.error(data.message || "Error al obtener la justificación");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                toastr.error("Error al obtener la justificación.");
-            });
-
-        // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
-        if (estadoId == 5) {
-            const cardFotos = document.getElementById("cardFotos");
-            if (cardFotos) {
-                cardFotos.style.display = "block"; // Mostrar el elemento
-
-                renderizarPrevisualizacion();
+    // Obtener la justificación del estado seleccionado
+    fetch(`/api/obtenerJustificacionSoporte?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar la justificación en el textarea
+                document.getElementById("justificacion").value = data.justificacion || "";
+            } else {
+                toastr.error(data.message || "Error al obtener la justificación");
             }
-        } else {
-            const cardFotos = document.getElementById("cardFotos");
-            if (cardFotos) {
-                cardFotos.style.display = "none"; // Ocultar el elemento
-            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            toastr.error("Error al obtener la justificación.");
+        });
+
+    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
+    if (estadoId == 5) {
+        const cardFotos = document.getElementById("cardFotos");
+        if (cardFotos) {
+            cardFotos.style.display = "block"; // Mostrar el elemento
+
+            renderizarPrevisualizacion();
         }
-    });
+    } else {
+        const cardFotos = document.getElementById("cardFotos");
+        if (cardFotos) {
+            cardFotos.style.display = "none"; // Ocultar el elemento
+        }
+    }
+});
 
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar todos los select con la clase .selectize

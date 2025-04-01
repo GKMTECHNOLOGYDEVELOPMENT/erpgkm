@@ -574,7 +574,7 @@ class OrdenesHelpdeskController extends Controller
             ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
             ->where('equipos.idTickets', $request->idTicket)
             ->where('equipos.idVisitas', $request->idVisita)
-            ->where('equipos.modalidad', 'Instalación')
+            ->where('equipos.modalidad', 'Retirar')
             ->get();
 
         // Retornar la respuesta como JSON
