@@ -36,56 +36,58 @@ public function create()
 }
 
     
-  // Método para almacenar la tienda
+ // Método para almacenar la tienda
 public function store(TiendasRequest $request)
 {
-      // Verificamos los datos que estamos recibiendo en la solicitud
-      Log::info('Datos del formulario:', $request->all());
-  
-      // Validamos que el cliente seleccionado exista
-      $cliente = Cliente::find($request->idCliente);
-  
-      if (!$cliente) {
-          Log::error('El cliente no fue encontrado.', ['idCliente' => $request->idCliente]);
-          return redirect()->back()->with('error', 'El cliente seleccionado no existe.');
-      }
-  
-      // Intentamos guardar la tienda y verificamos si el modelo se crea correctamente
-      try {
-          $tienda = Tienda::create([
-              'ruc' => $request->ruc,
-              'nombre' => $request->nombre,
-              'celular' => $request->celular,
-              'email' => $request->email,
-              'direccion' => $request->direccion,
-              'referencia' => $request->referencia,
-              'lat' => $request->lat,
-              'lng' => $request->lng,
-              'idCliente' => $request->idCliente, // Relación con cliente
-              'departamento' => $request->departamento,
-              'provincia' => $request->provincia,
-              'distrito' => $request->distrito,
-          ]);
-  
-          // Verificamos si la tienda fue guardada
-          Log::info('Tienda guardada exitosamente:', ['tienda' => $tienda]);
-  
-      } catch (\Exception $e) {
-          // En caso de error, logueamos el error
-          Log::error('Error al guardar la tienda:', [
-              'error' => $e->getMessage(),
-              'request_data' => $request->all()
-          ]);
-  
-          // Enviamos un mensaje de error al usuario
-          return redirect()->back()->with('error', 'Hubo un problema al guardar la tienda.');
-      }
-  
-      // Redirigimos a la lista de tiendas o donde desees
-      return redirect()->route('administracion.tienda')->with('success', 'Tienda guardada exitosamente');
-  }
+    // Verificamos los datos que estamos recibiendo en la solicitud
+    Log::info('Datos del formulario recibido en el store:', $request->all());
 
+    // Validamos que el cliente seleccionado exista
+    $cliente = Cliente::find($request->idCliente);
 
+    if (!$cliente) {
+        Log::error('El cliente no fue encontrado.', ['idCliente' => $request->idCliente]);
+        return redirect()->back()->with('error', 'El cliente seleccionado no existe.');
+    }
+
+    // Log el cliente encontrado
+    Log::info('Cliente encontrado:', ['cliente' => $cliente]);
+
+    // Intentamos guardar la tienda y verificamos si el modelo se crea correctamente
+    try {
+        $tienda = Tienda::create([
+            'ruc' => $request->ruc,
+            'nombre' => $request->nombre,
+            'celular' => $request->celular,
+            'email' => $request->email,
+            'direccion' => $request->direccion,
+            'referencia' => $request->referencia,
+            'lat' => $request->lat,
+            'lng' => $request->lng,
+            'idCliente' => $request->idCliente, // Relación con cliente
+            'departamento' => $request->departamento,
+            'provincia' => $request->provincia,
+            'distrito' => $request->distrito,
+        ]);
+
+        // Log después de guardar la tienda con los detalles
+        Log::info('Tienda guardada exitosamente:', ['tienda' => $tienda]);
+
+    } catch (\Exception $e) {
+        // En caso de error, logueamos el error
+        Log::error('Error al guardar la tienda:', [
+            'error' => $e->getMessage(),
+            'request_data' => $request->all()
+        ]);
+
+        // Enviamos un mensaje de error al usuario
+        return redirect()->back()->with('error', 'Hubo un problema al guardar la tienda.');
+    }
+
+    // Redirigimos a la lista de tiendas o donde desees
+    Log::info('Redirigiendo a la lista de tiendas después de guardar exitosamente.');
+    return redirect()->route('administracion.tienda')->with('success', 'Tienda guardada exitosamente');
+}
 
   
 
