@@ -155,15 +155,15 @@
 
             @if ($equiposInstalados->isNotEmpty())
                 <div class="red-bg mt-2">Equipos Instalados</div>
-                <div class="w-full space-y-2 text-xs">
+                <div class="w-full space-y-2 ">
                     @foreach ($equiposInstalados as $equipo)
-                        <div class="px-2 py-1">
-                            <div class="flex justify-between text-[10px] font-medium text-gray-800">
+                        <div class="text-xs py-1">
+                            <div class="flex justify-between">
                                 <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ $equipo['tipoProducto'] }}</p>
                                 <p><span class="font-bold">MARCA:</span> {{ $equipo['marca'] }}</p>
                                 <p><span class="font-bold">MODELO:</span> {{ $equipo['modelo'] }}</p>
                             </div>
-                            <div class="mt-1 text-[10px] text-gray-800">
+                            <div class="mt-1">
                                 <p><span class="font-bold">SERIE:</span> {{ $equipo['nserie'] }}</p>
                             </div>
                         </div>
@@ -174,15 +174,15 @@
 
             @if ($equiposRetirados->isNotEmpty())
             <div class="red-bg mt-2">Equipos Retirados</div>
-            <div class="w-full space-y-2 text-xs">
+            <div class="w-full space-y-2 ">
                 @foreach ($equiposRetirados as $equipo)
-                    <div class="px-2 py-1">
-                        <div class="flex justify-between text-[10px] font-medium text-gray-800">
+                    <div class="text-xs py-1">
+                        <div class="flex justify-between ">
                             <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ $equipo['tipoProducto'] }}</p>
                             <p><span class="font-bold">MARCA:</span> {{ $equipo['marca'] }}</p>
                             <p><span class="font-bold">MODELO:</span> {{ $equipo['modelo'] }}</p>
                         </div>
-                        <div class="mt-1 text-[10px] text-gray-800">
+                        <div class="mt-1">
                             <p><span class="font-bold">SERIE:</span> {{ $equipo['nserie'] }}</p>
                         </div>
                     </div>
