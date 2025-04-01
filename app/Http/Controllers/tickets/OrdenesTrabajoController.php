@@ -1350,7 +1350,7 @@ class OrdenesTrabajoController extends Controller
             $validatedData = $request->validate([
                 'nombre' => 'required|string|max:255',
                 'documento' => 'required|string|max:16|unique:cliente,documento',
-                'telefono' => 'nullable|string|max:9|unique:cliente,telefono',
+                'telefono' => 'nullable|string|max:255|unique:cliente,telefono',
                 'email' => 'nullable|email|max:255|unique:cliente,email',
                 'direccion' => 'required|string|max:255',
                 'departamento' => 'required|string|max:255',
