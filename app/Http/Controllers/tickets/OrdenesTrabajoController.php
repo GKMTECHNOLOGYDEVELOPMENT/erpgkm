@@ -348,7 +348,10 @@ class OrdenesTrabajoController extends Controller
         $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
 
         // Obtener los estados desde la tabla estado_ots
-        $estadosOTS = DB::table('estado_ots')->get();
+        // $estadosOTS = DB::table('estado_ots')->get();
+        // Verificar si la visita seleccionada tiene un tipo de usuario
+
+
         // Obtener el idTickets
         $ticketId = $ticket->idTickets;
 
@@ -420,13 +423,13 @@ class OrdenesTrabajoController extends Controller
         // Filtrar los encargados según el color del estado
         if ($colorEstado == '#B5FA37') {
             // Si el colorEstado es #B5FA37, solo obtener los usuarios de tipo 1 (TÉCNICO)
-            $encargado = Usuario::where('idTipoUsuario', 4)->get();
+            $encargado = Usuario::where('idTipoUsuario', 5)->get();
         } elseif ($colorEstado == '#FBCACD') {
             // Si el colorEstado es #FBCACD, solo obtener los usuarios de tipo 5 (CHOFER)
             $encargado = Usuario::where('idTipoUsuario', 1)->get();
         } else {
             // Si no es ninguno de esos colores, traer ambos tipos (1 y 5)
-            $encargado = Usuario::whereIn('idTipoUsuario', [1, 4])->get();
+            $encargado = Usuario::whereIn('idTipoUsuario', [1, 5])->get();
         }
 
 
@@ -678,6 +681,21 @@ class OrdenesTrabajoController extends Controller
         // Puedes agregar un log final para revisar el valor de $tipoUsuario
         Log::info('Valor final de tipoUsuario: ' . $tipoUsuario);
 
+
+        if ($tipoUsuario == 1) {
+            // Si el tipo de usuario es 4, obtener solo los estados con idEstadoots 1, 2, o 3
+            $estadosOTS = DB::table('estado_ots')
+                            ->whereIn('idEstadoots', [1, 2, 3, 4])  // Filtrar solo por los estados 1, 2, 3
+                            ->get();
+        } elseif ($tipoUsuario == 5) {
+            // Si el tipo de usuario es 5, obtener solo los estados con idEstadoots 1 o 2
+            $estadosOTS = DB::table('estado_ots')
+                            ->whereIn('idEstadoots', [1, 2, 3, 4, 7])  // Filtrar solo por los estados 1 y 2
+                            ->get();
+        } else {
+            // Si el tipo de usuario no es ni 4 ni 5, obtener todos los estados (o un filtro predeterminado)
+            $estadosOTS = DB::table('estado_ots')->get();  // Obtener todos los estados si no es tipo 4 ni 5
+        }
 
         // dd($tipoUsuario);  // Esto debería mostrar el valor de tipoUsuario
 
