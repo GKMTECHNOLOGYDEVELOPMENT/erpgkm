@@ -783,4 +783,4 @@
         }
     };
 </script>
-<script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script>
+<script src="{{ asset('assets/js/tickets/smart/visitas.js') }}"></script>
