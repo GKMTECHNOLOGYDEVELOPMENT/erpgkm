@@ -789,6 +789,15 @@ public function guardardatosenviosoporte(Request $request)
         // Puedes agregar un log final para revisar el valor de idVisita
         Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
 
+                     // Verificar si existe un flujo con idEstadflujo = 31
+                     $flujo = TicketFlujo::where('idTicket', $ticketId)
+                     ->where('idEstadflujo', 31)
+                     ->first();
+             
+                     // dd($flujo); // Verifica si devuelve el registro correcto
+             
+                      $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
@@ -811,7 +820,8 @@ public function guardardatosenviosoporte(Request $request)
             'id',
             'articulos',
             'idVisitaSeleccionada',
-            'idtipoServicio'
+            'idtipoServicio',
+            'existeFlujo31'
 
         ));
     }
