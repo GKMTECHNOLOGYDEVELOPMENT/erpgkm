@@ -78,19 +78,25 @@
                 readonly>
             </div>
 
-            <!-- Técnico
-            <div>
-                <label class="text-sm font-medium">Técnico</label>
-                <select id="idTecnico" name="idTecnico" class="select2 w-full" style="display: none">
-                    <option value="" disabled>Seleccionar Técnico</option>
-                    @foreach ($usuarios as $usuario)
-                        <option value="{{ $usuario->idUsuario }}"
-                            {{ $usuario->idUsuario == $orden->idTecnico ? 'selected' : '' }}>
-                            {{ $usuario->Nombre }}
-                        </option>
-                    @endforeach
-                </select>
-            </div> -->
+<!-- Ejecutar -->
+@if($existeFlujo25)
+    <div>
+        <label class="text-sm font-medium">Ejecutor</label>
+        <select id="ejecutor" name="ejecutor" class="select2 w-full"  style="display: none;">
+            <option value="" disabled>Seleccionar Ejecutador</option>
+            @foreach ($usuarios as $usuario)
+                <option value="{{ $usuario->idUsuario }}"
+                    {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
+                    {{ $usuario->Nombre }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+@endif
+
+
+
+
 
             <!-- Tipo de Servicio -->
             <div>
@@ -758,6 +764,8 @@
                 idClienteGeneral: $('#idClienteGeneral').val(),
                 idTienda: $('#idTienda').val(),
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
+                ejecutor: $('#ejecutor').val(), // Capturar el valor del ejecutor
+
             };
 
             // Mostrar los datos del formulario en la consola

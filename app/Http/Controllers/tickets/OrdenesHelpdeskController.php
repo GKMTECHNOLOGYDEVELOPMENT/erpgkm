@@ -259,6 +259,9 @@ class OrdenesHelpdeskController extends Controller
         $usuarios = Usuario::all();
         $tiposServicio = TipoServicio::all();
 
+        $ejecutor = Usuario::find($orden->ejecutor);
+
+
 
         $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario
 
@@ -442,6 +445,16 @@ class OrdenesHelpdeskController extends Controller
             ->exists(); // Devuelve true si existe, false si no
 
 
+        // Verificar si existe un flujo con idEstadflujo = 25
+        $flujo = TicketFlujo::where('idTicket', $ticketId)
+        ->where('idEstadflujo', 25)
+        ->first();
+
+        // dd($flujo); // Verifica si devuelve el registro correcto
+
+         $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+
+
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
@@ -465,7 +478,10 @@ class OrdenesHelpdeskController extends Controller
             'tipoUsuario',
             'id',
             'idVisitaSeleccionada',
-            'categorias'
+            'categorias',
+            'existeFlujo25',
+            'ejecutor' // Asegúrate de pasar la variable ejecutor
+
         ));
     }
 
@@ -1533,8 +1549,9 @@ class OrdenesHelpdeskController extends Controller
             'idCliente' => 'required|exists:cliente,idCliente',
             'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
             'idTienda' => 'required|exists:tienda,idTienda',
-
             'fallaReportada' => 'nullable|string',
+            'ejecutor' => 'nullable|exists:usuarios,idUsuario', // Validar que el ejecutor sea un usuario válido
+
         ]);
 
         // Encontrar la orden y actualizarla
@@ -1547,8 +1564,9 @@ class OrdenesHelpdeskController extends Controller
         $orden->idCliente = $request->idCliente;
         $orden->idClienteGeneral = $request->idClienteGeneral;
         $orden->idTienda = $request->idTienda;
-
         $orden->fallaReportada = $request->fallaReportada;
+        $orden->ejecutor = $request->ejecutor; // Actualizamos el ejecutor
+
 
         // Guardar los cambios
         $orden->save();
@@ -2838,13 +2856,13 @@ class OrdenesHelpdeskController extends Controller
 
 
         // Actualizar el campo 'ejecutor' en la tabla 'tickets' con el valor de 'encargado'
-        DB::table('tickets')
-            ->where('idTickets', $visita->idTickets) // Aseguramos de que estamos actualizando el ticket correcto
-            ->update([
-                'ejecutor' => $request->encargado, // Asignamos el id del encargado al campo 'ejecutor'
-            ]);
+        // DB::table('tickets')
+        //     ->where('idTickets', $visita->idTickets) // Aseguramos de que estamos actualizando el ticket correcto
+        //     ->update([
+        //         'ejecutor' => $request->encargado, // Asignamos el id del encargado al campo 'ejecutor'
+        //     ]);
 
-        Log::info('Campo ejecutor actualizado en la tabla tickets', ['idTickets' => $visita->idTickets, 'ejecutor' => $request->encargado]);
+        // Log::info('Campo ejecutor actualizado en la tabla tickets', ['idTickets' => $visita->idTickets, 'ejecutor' => $request->encargado]);
 
         // Manejar la imagen (si se subió)
         if ($request->hasFile('imagenVisita')) {
