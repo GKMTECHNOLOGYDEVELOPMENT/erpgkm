@@ -2083,6 +2083,9 @@ class OrdenesTrabajoController extends Controller
         // Log para verificar si se encontró el registro
         if ($registro) {
             Log::info('Registro encontrado para la visita ID: ' . $idVisitas);
+
+            $registro->makeHidden(['foto']);
+
             Log::info('Datos del registro: ', (array) $registro); // Loguea los datos del registro como array
             // Si ya existe el registro, devolverlo
             return response()->json($registro);
@@ -3302,6 +3305,21 @@ class OrdenesTrabajoController extends Controller
         // Retornar la imagen como base64
         return response()->json(['imagen' => base64_encode($imagen->foto)]);
     }
+
+
+    public function getImagenTipo2($idVisita)
+{
+    $imagen = DB::table('anexos_visitas')
+        ->where('idVisitas', $idVisita)
+        ->where('idTipovisita', 2)
+        ->first();
+
+    if (!$imagen) {
+        return response()->json(['error' => 'Imagen no encontrada'], 404);
+    }
+
+    return response()->json(['imagen' => base64_encode($imagen->foto)]);
+}
 
     // Método en el controlador CondicionesTicketController.php
     public function getImagenFinalServicio($idVisita)

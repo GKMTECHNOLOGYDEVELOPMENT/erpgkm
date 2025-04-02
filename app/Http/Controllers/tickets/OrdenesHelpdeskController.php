@@ -23,6 +23,7 @@ use App\Models\ClienteClientegeneral;
 use App\Exports\HelpdeskTicketExport;
 use App\Models\Articulo;
 use App\Models\Categoria;
+use App\Models\CondicionesTicket;
 use App\Models\Equipo;
 use App\Models\SeleccionarVisita;
 use App\Models\Suministro;
@@ -30,6 +31,7 @@ use App\Models\TicketFlujo;
 use App\Models\TipoEnvio;
 use App\Models\TipoRecojo;
 use App\Models\TransicionStatusTicket;
+use Illuminate\Support\Facades\Validator;
 use Spatie\Browsershot\Browsershot;
 
 class OrdenesHelpdeskController extends Controller
@@ -2470,6 +2472,7 @@ class OrdenesHelpdeskController extends Controller
             'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
             'encargado' => 'required|integer|exists:usuarios,idUsuario', // Validar que el encargado existe
             'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
+            'recojo' => 'nullable|in:0,1',  // Validar el valor de recojo
             'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
             'imagenVisita' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validar la imagen
         ]);
@@ -2526,6 +2529,7 @@ class OrdenesHelpdeskController extends Controller
 
         // Asignar 0 o 1 a "necesita_apoyo"
         $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
+        $visita->recojo = $request->recojo ?? 0;  // Asignar 0 si no se envió
 
         $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
 
@@ -2634,5 +2638,110 @@ class OrdenesHelpdeskController extends Controller
 
 
         return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
+    }
+
+
+
+    
+
+    public function guardarSoporte(Request $request)
+    {
+        // Validar los datos
+        $validator = Validator::make($request->all(), [
+            'idTickets' => 'required|integer',
+            'idVisitas' => 'required|integer',
+            'titular' => 'required|integer',
+            'nombre' => 'nullable|string|max:255',
+            'dni' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:255',
+            'servicio' => 'required|integer',
+            'motivo' => 'nullable|string',
+            'fecha_condicion' => 'required|date',
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
+            'ubicacion' => 'nullable|string|max:255',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validación para la imagen
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        // Obtener el nombre del usuario autenticado
+        $usuario = auth()->user();
+        $nombreUsuario = $usuario ? $usuario->Nombre : null;  // Accede al nombre del usuario desde la tabla 'usuarios'
+
+        // Guardar los datos en la base de datos
+        $data = $request->all();
+        $data['nombre_usuario'] = $nombreUsuario; // Añadir el nombre del usuario a los datos
+
+        // Si se ha cargado una imagen, la convertimos a binario
+        if ($request->hasFile('imagen')) {
+            $imagen = $request->file('imagen');
+            $imagenBinaria = file_get_contents($imagen->getRealPath());
+            $data['imagen'] = $imagenBinaria; // Asignamos la imagen binaria
+        }
+
+        // Guardar los datos de la condición
+        $condicion = CondicionesTicket::create($data);
+
+        // Insertar los datos en la tabla anexos_visitas
+        $anexoData = [
+            'idVisitas' => $request->idVisitas,
+            'lat' => $request->lat,          // Latitud obtenida
+            'lng' => $request->lng,          // Longitud obtenida
+            'ubicacion' => $request->ubicacion,  // Dirección obtenida
+            'foto' => null,                  // Foto (nula)
+            'descripcion' => 'Inicio de servicio', // Descripción predeterminada
+            'idTipovisita' => 4,             // idTipovisita siempre 4
+        ];
+
+        // Insertar en la tabla anexos_visitas
+        DB::table('anexos_visitas')->insert($anexoData);
+
+        // Actualizar la fecha_inicio en la tabla visitas
+        $fechaInicio = now();  // Fecha y hora actuales
+
+        // Actualizamos la tabla visitas con la fecha de inicio
+        DB::table('visitas')
+            ->where('idVisitas', $request->idVisitas)
+            ->update(['fecha_inicio' => $fechaInicio]);
+
+
+
+        // Si el servicio es igual a 1, creamos el ticketflujo y actualizamos el ticket
+        if ($request->servicio == 1) {
+            // Insertar en la tabla ticketflujo con idEstadflujo 14
+            $ticketflujo = DB::table('ticketflujo')->insertGetId([
+                'idTicket' => $request->idTickets,  // Usamos el idTickets de la solicitud
+                'idEstadflujo' => 9,               // Siempre 14 como estado
+                'idUsuario' => auth()->id(),
+                'fecha_creacion' => now(),          // Fecha actual
+            ]);
+
+            // Verificamos si la inserción fue exitosa
+            if (!$ticketflujo) {
+                return response()->json(['error' => 'Error al crear ticketflujo.'], 500);
+            }
+
+            // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
+            DB::table('tickets')
+                ->where('idTickets', $request->idTickets)
+                ->update(['idTicketFlujo' => $ticketflujo]);
+
+            // Verificamos si la actualización fue exitosa
+            if ($ticketflujo) {
+                Log::info('ticketflujo creado correctamente con idTicketFlujo: ' . $ticketflujo);
+            } else {
+                Log::error('Error al actualizar ticketflujo en tickets.');
+                return response()->json(['error' => 'Error al actualizar el ticketflujo.'], 500);
+            }
+        }
+
+        if ($condicion) {
+            return response()->json(['success' => true, 'message' => 'Condiciones guardadas correctamente.']);
+        } else {
+            return response()->json(['error' => 'Error al guardar las condiciones.'], 500);
+        }
     }
 }
