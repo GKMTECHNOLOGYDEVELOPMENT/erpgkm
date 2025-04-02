@@ -2360,7 +2360,6 @@ class OrdenesHelpdeskController extends Controller
         if ($visitaSeleccionada) {
             $visitas = collect([[
                 'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
-                'fecha_programada' => optional($visitaSeleccionada->fecha_programada)->format('d/m/Y'),
                 'hora_inicio' => optional($visitaSeleccionada->fecha_inicio)->format('H:i'),
                 'hora_final' => optional($visitaSeleccionada->fecha_final)->format('H:i'),
                 'fecha_llegada' => optional($visitaSeleccionada->fecha_llegada)->format('d/m/Y H:i'),
