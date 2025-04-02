@@ -465,7 +465,7 @@
                     </ul>
                 </li> --}}
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'elements' }"
                         @click="activeDropdown === 'elements' ? activeDropdown = null : activeDropdown = 'elements'">
@@ -547,7 +547,7 @@
                             <a href="/elements/typography">Typography</a>
                         </li>
                     </ul>
-                </li> --}}
+                </li>
 
                 {{-- <li class="menu nav-item">
                     <a href="/charts" class="nav-link group">

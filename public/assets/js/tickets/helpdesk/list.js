@@ -100,21 +100,33 @@ document.addEventListener('alpine:init', () => {
                             return "N/A";
                         }
                     },
+                    { title: 'TIENDA', data: "tienda.nombre", defaultContent: "N/A" },
                     { title: 'CATEGORIA', data: "modelo.categoria.nombre", defaultContent: "N/A" },
-                    { title: 'GENERAL', data: "clientegeneral.descripcion", defaultContent: "N/A" },
                     { title: 'MARCA', data: "marca.nombre", defaultContent: "N/A" },
                     { title: 'MODELO', data: "modelo.nombre", defaultContent: "N/A" },
                     { title: 'SERIE', data: "serie", defaultContent: "N/A" },
                     { title: 'CLIENTE', data: "cliente.nombre", defaultContent: "N/A" },
                     {
-                        title: 'DIRECCIÓN',
-                        data: "direccion",
-                        defaultContent: "N/A",
+                        title: 'TIPO TEXTO', // o puede no tener título
+                        data: "tipoServicio",
+                        visible: false, // 👈 oculta esta columna
                         render: function (data) {
-                            if (!data) return "N/A";
-                            return `<div style="white-space: normal; text-align: center;">${data.replace(/\n/g, "<br>")}</div>`;
+                            return data == 1 ? 'Soporte' : (data == 2 ? 'Levantamiento' : '');
                         }
                     },
+                    
+                    {
+                        title: 'SERVICIO',
+                        data: "tipoServicio",
+                        render: function (data) {
+                            if (data == 1) {
+                                return `<span class="badge bg-warning">S</span>`; // Soporte
+                            } else if (data == 2) {
+                                return `<span class="badge bg-dark">L</span>`; // Levantamiento
+                            }
+                            return '';
+                        }
+                    },                                     
                     { title: 'MÁS', data: null, orderable: false, render: this.getMoreButton }
                 ],
 

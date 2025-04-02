@@ -351,6 +351,13 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('helpdesk/soporte/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteSopo'])->name('firmacliente.sopo');
     Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
 
+    Route::get('helpdesk/levantamiento/{idOt}/pdf/{idVisita}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdfVisita'])
+    ->name('helpdesk.levantamiento.pdf');
+
+    Route::get('helpdesk/soporte/{idOt}/pdf/{idVisita}', [OrdenesHelpdeskController::class, 'generateSoportePdfVisita'])
+    ->name('helpdesk.soporte.pdf');
+
+
 
     // ✅ Ruta corregida para verificar actualizaciones
     Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
