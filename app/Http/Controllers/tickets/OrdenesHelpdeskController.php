@@ -1215,7 +1215,7 @@ class OrdenesHelpdeskController extends Controller
                         ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                         ->orWhereHas('visitas', fn($q) => $q->where('fecha_programada', 'LIKE', "%{$searchValue}%"))
                         ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%")) // ✅ Buscar por tienda
-                        ->orWhere(function($q) use ($searchValue) { // ✅ TipoServicio Parcial
+                        ->orWhere(function ($q) use ($searchValue) { // ✅ TipoServicio Parcial
                             if (stripos('soporte', $searchValue) !== false || strtolower($searchValue) == 's') {
                                 $q->orWhere('tipoServicio', 1);
                             }
@@ -1224,8 +1224,8 @@ class OrdenesHelpdeskController extends Controller
                             }
                         });
                 });
-                
-                
+
+
 
                 $query->orderByRaw("
                     CASE
@@ -2312,7 +2312,7 @@ class OrdenesHelpdeskController extends Controller
             : null;
 
 
-        $visitaSeleccionada = $idVisita;
+        $visitaSeleccionada = $orden->visitas->firstWhere('idVisitas', $idVisita);
 
         $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
             ->where('idVisitas', $idVisita)
@@ -2357,6 +2357,7 @@ class OrdenesHelpdeskController extends Controller
                 'nserie' => $equipo->nserie ?? 'Sin serie',
             ];
         }));
+
 
         $visitas = collect();
         if ($visitaSeleccionada) {
@@ -2938,7 +2939,7 @@ class OrdenesHelpdeskController extends Controller
 
 
 
-    
+
 
     public function guardarSoporte(Request $request)
     {
