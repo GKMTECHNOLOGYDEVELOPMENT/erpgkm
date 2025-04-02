@@ -160,6 +160,25 @@ function formatDate(dateString) {
                   <i class="fa-solid fa-route text-sm sm:text-base"></i> 
                   <span class="text-xs sm:text-sm">Iniciar Desplazamiento</span>
                 </button>
+
+
+                   <!-- Botón para ver imagen -->
+                      <button 
+                      class="flex items-center justify-center gap-2 
+                             px-2 py-1 sm:px-3 sm:py-1.5
+                             text-xs sm:text-sm md:text-base
+                             font-semibold rounded-full shadow-md 
+                             transition-all duration-200
+                             bg-info hover:bg-blue-700 focus:ring focus:ring-blue-300 
+                             text-white"
+                      id="viewImageButton-${visita.idVisitas}" 
+                      data-image-type="desplazamiento"
+                      data-id="${visita.idVisitas}"
+                      title="Ver imagen">
+                      <i class="fa-solid fa-image text-base md:text-lg"></i> 
+                  </button>
+
+
               </div>                   
             </div>
           `;
@@ -346,7 +365,7 @@ function formatDate(dateString) {
                           <!-- Verificar si el cliente es titular -->
                           ${visita.titular === 1 ?
                           `<label class="badge bg-danger text-white text-xs sm:text-sm md:text-base rounded-full shadow-md py-1 px-3 mx-auto">
-                                 El cliente es titular
+                                 Se atiende el servicio
                               </label>`
                           :
                           `${visita.titular === 0 ?

@@ -71,7 +71,7 @@ Route::post('/subirFoto', [OrdenesTrabajoController::class, 'guardarFoto']);
 Route::get('/verificarFoto/{idVisitas}', [OrdenesTrabajoController::class, 'verificarFotoExistente']);
 Route::get('/verificarRegistroAnexo/{idVisitas}', [OrdenesTrabajoController::class, 'verificarRegistroAnexo']);
 Route::post('/guardarCondiciones', [OrdenesTrabajoController::class, 'guardar']);
-
+Route::post('/guardarCondiciones/soporte', [OrdenesHelpdeskController::class, 'guardarSoporte']);
 // Route::get('/ticket/{ticketId}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
 
 Route::get('/clientegeneralfiltros', [ClienteGeneralController::class, 'clientegeneralFiltros']);

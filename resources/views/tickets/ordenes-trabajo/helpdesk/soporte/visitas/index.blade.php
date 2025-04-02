@@ -223,6 +223,8 @@ x-init="obtenerUbicacion()">
                 </div>
                 <div class="modal-scroll p-5 space-y-4">
                     <form>
+                    <div style="display: none !important;">
+
                         <!-- Se muestra solo si "No se atiende" NO está activado -->
                         <template x-if="!condiciones.noAtiende">
                             <div>
@@ -261,6 +263,10 @@ x-init="obtenerUbicacion()">
                                 </div>
                             </div>
                         </template>
+
+
+                        </div>
+
 
                         <!-- Switch "¿No se atiende el servicio?" -->
                         <div class="flex items-center justify-between mt-4">
@@ -312,6 +318,7 @@ x-init="obtenerUbicacion()">
         </div>
     </div>
 </div>
+
 
 
 <!-- Modal para visualizar la imagen -->
@@ -499,8 +506,7 @@ class="mb-5" @toggle-modal.window="open = !open">
 </div>
 
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
+<script>document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
     const modalTitle = document.getElementById('modalTitle'); // ✅ Nuevo elemento para el título
@@ -518,6 +524,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 obtenerImagenInicioServicio(visitaId); // Función para "inicioServicio"
             } else if (imageType === "finalServicio") {
                 obtenerImagenFinalServicio(visitaId); // Función para "finalServicio"
+            } else if (imageType === "desplazamiento") {
+                obtenerImagenDesplazamiento(visitaId); // Función para "desplazamiento"
             } else {
                 obtenerImagen(visitaId, imageType); // Función genérica para otras imágenes
             }
@@ -544,12 +552,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para obtener la imagen de inicio de servicio desde el servidor
     function obtenerImagenInicioServicio(visitaId) {
-        // Realizar la solicitud AJAX al servidor para obtener la imagen de "inicio de servicio"
         fetch(`/inicio-servicio-imagen/${visitaId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.imagen) {
-                    // Establecer la imagen en el modal
                     modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
                 } else {
                     console.error('Imagen no encontrada.');
@@ -563,12 +569,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para obtener la imagen de final de servicio desde el servidor
     function obtenerImagenFinalServicio(visitaId) {
-        // Realizar la solicitud AJAX al servidor para obtener la imagen de "final de servicio"
         fetch(`/final-servicio-imagen/${visitaId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.imagen) {
-                    // Establecer la imagen en el modal
+                    modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
+                } else {
+                    console.error('Imagen no encontrada.');
+                    modalImage.src = ''; // Limpiar la imagen si no se encuentra
+                }
+            })
+            .catch(error => {
+                console.error('Error al obtener la imagen:', error);
+            });
+    }
+
+    // Función para obtener la imagen de desplazamiento desde el servidor
+    function obtenerImagenDesplazamiento(visitaId) {
+        fetch(`/desplazamiento-imagen/${visitaId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.imagen) {
                     modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
                 } else {
                     console.error('Imagen no encontrada.');
@@ -582,12 +603,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Función para obtener la imagen desde el servidor (caso genérico)
     function obtenerImagen(visitaId, imageType) {
-        // Realizar la solicitud AJAX al servidor para obtener la imagen
         fetch(`/imagen-apoyo/${visitaId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.imagen) {
-                    // Establecer la imagen en el modal
                     modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
                 } else {
                     console.error('Imagen no encontrada.');
@@ -608,11 +627,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return "Imagen - Llegada al Servicio";
             case "finalServicio":
                 return "Imagen - Final de Servicio"; // Título para la fase finalServicio
+            case "desplazamiento":
+                return "Imagen - Desplazamiento"; // Título para la fase desplazamiento
             default:
                 return "Imagen de la Visita";
         }
     }
 });
+
 
 
 
@@ -693,6 +715,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Enviar 1 si el checkbox está marcado, 0 si no
     const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
+    const recojo = document.getElementById('esRecojo').checked ? 1 : 0; // Obtener el valor de recojo
+
 
     const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions)
         .map(option => option.value);
@@ -741,6 +765,8 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('encargado', encargado);
     formData.append('necesita_apoyo', necesitaApoyo);
     formData.append('tecnicos_apoyo', tecnicosApoyo);
+    formData.append('recojo', recojo);  // Agregar el valor de recojo
+
 
         // Si 'necesita_apoyo' está marcado, agregar técnicos de apoyo al FormData
 if (necesitaApoyo && tecnicosApoyo.length > 0) {

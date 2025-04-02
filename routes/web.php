@@ -309,6 +309,7 @@ Route::get('/ticket/{id}/historial-modificaciones', [OrdenesTrabajoController::c
 Route::get('/imagen-apoyo/{idVisita}', [OrdenesTrabajoController::class, 'getImagen'])->name('imagen-apoyo.get');
 Route::get('/inicio-servicio-imagen/{idVisita}', [OrdenesTrabajoController::class, 'getImagenInicioServicio'])->name('inicio-servicio-imagen.get');
 Route::get('/final-servicio-imagen/{idVisita}', [OrdenesTrabajoController::class, 'getImagenFinalServicio'])->name('final-servicio-imagen.get');
+Route::get('/desplazamiento-imagen/{idVisita}', [OrdenesTrabajoController::class, 'getImagenTipo2'])->name('desplazamiento-servicio-imagen.get');
 
 
 
