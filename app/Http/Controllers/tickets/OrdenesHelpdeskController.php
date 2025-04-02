@@ -455,6 +455,19 @@ class OrdenesHelpdeskController extends Controller
          $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
 
+                 // Verificar si existe un flujo con idEstadflujo = 31
+        $flujo = TicketFlujo::where('idTicket', $ticketId)
+        ->where('idEstadflujo', 31)
+        ->first();
+
+        // dd($flujo); // Verifica si devuelve el registro correcto
+
+         $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+
+         $tiposEnvio = TipoEnvio::all();
+         $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
+
+
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
@@ -480,8 +493,11 @@ class OrdenesHelpdeskController extends Controller
             'idVisitaSeleccionada',
             'categorias',
             'existeFlujo25',
-            'ejecutor' // Asegúrate de pasar la variable ejecutor
-
+            'ejecutor', // Asegúrate de pasar la variable ejecutor
+            'existeFlujo31',
+            'tiposEnvio',
+            'tiposRecojo'
+            
         ));
     }
 
@@ -518,6 +534,45 @@ class OrdenesHelpdeskController extends Controller
             'numeroSerie' => $request->numeroSerie
         ]);
     }
+
+
+// Función para guardar los datos de envío
+public function guardardatosenviosoporte(Request $request)
+{
+    // Validar los datos recibidos
+    $validator = Validator::make($request->all(), [
+        'idTecnico' => 'required|exists:usuarios,idUsuario',
+        'tipoRecojo' => 'required|exists:tiporecojo,idtipoRecojo',
+        'tipoEnvio' => 'required|exists:tipoenvio,idtipoenvio',
+        'ticketId' => 'required|exists:tickets,idTickets',
+    ]);
+
+    // Si la validación falla, devolver respuesta con errores
+    if ($validator->fails()) {
+        return response()->json(['success' => false, 'message' => 'Errores de validación', 'errors' => $validator->errors()]);
+    }
+
+    // Intentar insertar los datos en la tabla datos_envio
+    try {
+        // Usamos DB::insert() para insertar los datos directamente
+        DB::insert('
+            INSERT INTO datos_envio (idTickets, tipoRecojo, tipoEnvio, tipo, idUsuario) 
+            VALUES (?, ?, ?, ?, ?)
+        ', [
+            $request->ticketId,      // idTickets
+            $request->tipoRecojo,    // tipoRecojo
+            $request->tipoEnvio,     // tipoEnvio
+            2,                       // tipo (siempre es 2 según lo indicado)
+            $request->idTecnico      // idUsuario (el técnico de envío)
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Datos de envío guardados correctamente.']);
+    } catch (\Exception $e) {
+        // En caso de error al insertar
+        return response()->json(['success' => false, 'message' => 'Hubo un error al guardar los datos de envío.']);
+    }
+}
+
 
 
     public function guardarEquipoRetirar(Request $request)

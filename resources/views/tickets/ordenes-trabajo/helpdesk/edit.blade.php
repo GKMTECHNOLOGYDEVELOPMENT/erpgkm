@@ -119,6 +119,23 @@
                 </a>
             </li>
 
+ @if ($existeFlujo31)
+            <li>
+                <a href="javascript:;"
+                    class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
+                    :class="{ '!bg-success text-white': tab === 'retorno' }" @click="tab = 'retorno'">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M16 18l6-6-6-6M8 6L2 12l6 6M12 2L9 22" />
+                        <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    Retorno
+                </a>
+            </li>
+
+            @endif
+
             @if ($tipoServicio == 1)
                 <li>
                     <a href="javascript:;"
@@ -216,11 +233,15 @@
                 <div x-show="tab === 'detalle'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.detalle.index')
                 </div>
+          
                 <div x-show="tab === 'visitas'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.visitas.index')
                 </div>
                 <div x-show="tab === 'desarrollo'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.informacion.index')
+                </div>
+                <div x-show="tab === 'retorno'">
+                    @include('tickets.ordenes-trabajo.helpdesk.soporte.retorno.index')
                 </div>
                 <div x-show="tab === 'imagenes'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.imagenes.index')
