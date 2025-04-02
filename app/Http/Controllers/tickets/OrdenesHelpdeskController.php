@@ -1830,6 +1830,143 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
+    public function generateLevantamientoPdfVisita($idOt, $idVisita)
+    {
+        $orden = Ticket::with([
+            'cliente',
+            'clienteGeneral',
+            'tienda',
+            'tecnico',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot',
+            'visitas.tecnico',
+            'visitas.anexos_visitas',
+            'visitas.fotostickest'
+        ])->findOrFail($idOt);
+
+        // 🔹 Logo del cliente general
+        $logoClienteGeneral = null;
+        if ($orden->clienteGeneral && $orden->clienteGeneral->foto) {
+            $logoClienteGeneral = 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto);
+        }
+
+        $idVisitasSeleccionada = $idVisita;
+
+        $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->whereNotNull('justificacion')
+            ->where('justificacion', '!=', '')
+            ->with('estado_ot')
+            ->get();
+
+        $producto = [
+            'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
+            'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
+            'modelo' => $orden->modelo->nombre ?? 'No especificado',
+            'serie' => $orden->serie ?? 'No especificado',
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+        ];
+
+        $suministros = Suministro::with('articulo.tipoArticulo', 'articulo.modelo.marca')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->get();
+
+
+
+        $visitas = collect();
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+
+        if ($visitaSeleccionada) {
+            $visitas = collect([
+                [
+                    'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                    'fecha_programada' => $visitaSeleccionada->fecha_programada ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada)) : 'N/A',
+                    'hora_inicio' => $visitaSeleccionada->fecha_inicio ? date('H:i', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A',
+                    'hora_final' => $visitaSeleccionada->fecha_final ? date('H:i', strtotime($visitaSeleccionada->fecha_final)) : 'N/A',
+                    'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
+                    'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                    'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
+                    'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
+                    'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                    'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+                ]
+            ]);
+        }
+
+        $firma = DB::table('firmas')->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->first();
+
+        $firmaCliente = $firma && !empty($firma->firma_cliente)
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            : null;
+
+        $firmaTecnico = null;
+        if ($visitaSeleccionada && $visitaSeleccionada->tecnico && !empty($visitaSeleccionada->tecnico->firma)) {
+            $firmaTecnico = 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma);
+        }
+
+        $imagenesAnexos = [];
+        if ($visitaSeleccionada && $visitaSeleccionada->anexos_visitas) {
+            $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
+                return [
+                    'foto_base64' => !empty($anexo->foto)
+                        ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                        : null,
+                    'descripcion' => $anexo->descripcion
+                ];
+            });
+        }
+
+        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+            return [
+                'foto_base64' => !empty($foto->foto)
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                    : null,
+                'descripcion' => $foto->descripcion
+            ];
+        });
+
+        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+            : 'N/A';
+
+        $vistaPdf = 'tickets.ordenes-trabajo.helpdesk.levantamiento.informe.pdf.index';
+
+        $html = View($vistaPdf, [
+            'orden' => $orden,
+            'fechaCreacion' => $fechaCreacion,
+            'producto' => $producto,
+            'transicionesStatusOt' => $transicionesStatusOt,
+            'visitas' => $visitas,
+            'firmaTecnico' => $firmaTecnico,
+            'firmaCliente' => $firmaCliente,
+            'imagenesAnexos' => $imagenesAnexos,
+            'imagenesFotosTickets' => $imagenesFotosTickets,
+            'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
+            'logoClienteGeneral' => $logoClienteGeneral,
+            'suministros' => $suministros,
+            'modoVistaPrevia' => false
+        ])->render();
+
+        $pdfContent = Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->pdf();
+
+        return response($pdfContent)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="levantamiento_' . $idOt . '.pdf"');
+    }
+
+
     public function generateSoportePdf($idOt)
     {
         $orden = Ticket::with([
@@ -1856,6 +1993,159 @@ class OrdenesHelpdeskController extends Controller
 
         $idVisita = $seleccionada->idVisitas;
         $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisita)->first();
+
+        $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->whereNotNull('justificacion')
+            ->where('justificacion', '!=', '')
+            ->with('estado_ot')
+            ->get();
+
+        $producto = [
+            'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
+            'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
+            'modelo' => $orden->modelo->nombre ?? 'No especificado',
+            'serie' => $orden->serie ?? 'No especificado',
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+        ];
+
+        $suministros = Suministro::with('articulo.tipoArticulo', 'articulo.modelo.marca')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->get();
+
+        $equipos = Equipo::with(['modelo', 'marca', 'categoria'])
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->get();
+
+        Log::debug('Equipos cargados:', ['equipos' => $equipos]);
+
+        $equiposInstalados = $equipos->where('modalidad', 'Instalación')->map(function ($equipo) {
+            return [
+                'tipoProducto' => $equipo->categoria->nombre ?? 'Sin categoría',
+                'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
+                'marca' => $equipo->marca->nombre ?? 'Sin marca',
+                'nserie' => $equipo->nserie ?? 'Sin serie',
+            ];
+        });
+
+        $equiposRetirados = $equipos->where('modalidad', 'Retirar')->map(function ($equipo) {
+            return [
+                'tipoProducto' => $equipo->categoria->nombre ?? 'Sin categoría',
+                'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
+                'marca' => $equipo->marca->nombre ?? 'Sin marca',
+                'nserie' => $equipo->nserie ?? 'Sin serie',
+            ];
+        });
+
+
+
+        $visitas = collect();
+        if ($visitaSeleccionada) {
+            $visitas = collect([[
+                'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                'fecha_programada' => $visitaSeleccionada->fecha_programada ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada)) : 'N/A',
+                'hora_inicio' => $visitaSeleccionada->fecha_inicio ? date('H:i', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A',
+                'hora_final' => $visitaSeleccionada->fecha_final ? date('H:i', strtotime($visitaSeleccionada->fecha_final)) : 'N/A',
+                'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
+                'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
+                'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
+                'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+            ]]);
+        }
+
+        $firma = DB::table('firmas')->where('idTickets', $idOt)->where('idVisitas', $idVisita)->first();
+
+        $firmaCliente = $firma && $firma->firma_cliente
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            : null;
+
+        $firmaTecnico = $visitaSeleccionada && $visitaSeleccionada->tecnico && $visitaSeleccionada->tecnico->firma
+            ? 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma)
+            : null;
+
+        $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
+            return [
+                'foto_base64' => $anexo->foto
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                    : null,
+                'descripcion' => $anexo->descripcion
+            ];
+        });
+
+        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+            return [
+                'foto_base64' => $foto->foto
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                    : null,
+                'descripcion' => $foto->descripcion
+            ];
+        });
+
+        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+            : 'N/A';
+
+        $html = view('tickets.ordenes-trabajo.helpdesk.soporte.informe.pdf.index', [
+            'orden' => $orden,
+            'fechaCreacion' => $fechaCreacion,
+            'producto' => $producto,
+            'transicionesStatusOt' => $transicionesStatusOt,
+            'visitas' => $visitas,
+            'firmaTecnico' => $firmaTecnico,
+            'firmaCliente' => $firmaCliente,
+            'imagenesAnexos' => $imagenesAnexos,
+            'imagenesFotosTickets' => $imagenesFotosTickets,
+            'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
+            'logoClienteGeneral' => $logoClienteGeneral,
+            'suministros' => $suministros,
+            'equiposInstalados' => $equiposInstalados,
+            'equiposRetirados' => $equiposRetirados,
+            'modoVistaPrevia' => false
+
+
+        ])->render();
+
+        $pdf = Browsershot::html($html)
+            ->noSandbox()
+            ->showBackground()
+            ->format('A4')
+            ->fullPage()
+            ->waitUntilNetworkIdle()
+            ->setDelay(2000)
+            ->emulateMedia('screen')
+            ->pdf();
+
+        return response($pdf)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="soporte_' . $idOt . '.pdf"');
+    }
+
+    public function generateSoportePdfVisita($idOt, $idVisita)
+    {
+        $orden = Ticket::with([
+            'cliente',
+            'clienteGeneral',
+            'tienda',
+            'tecnico',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot',
+            'visitas.tecnico',
+            'visitas.anexos_visitas',
+            'visitas.fotostickest'
+        ])->findOrFail($idOt);
+
+        $logoClienteGeneral = $orden->clienteGeneral && $orden->clienteGeneral->foto
+            ? 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto)
+            : null;
+
+
+        $idVisitasSeleccionada = $idVisita;
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
 
         $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
             ->where('idVisitas', $idVisita)
