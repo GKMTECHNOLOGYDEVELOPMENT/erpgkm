@@ -1143,6 +1143,7 @@ class OrdenesHelpdeskController extends Controller
             'tiposervicio:idTipoServicio,nombre',
             'estado_ot:idEstadoots,descripcion,color',
             'marca:idMarca,nombre',
+            'tienda:idTienda,nombre',
             'modelo.categoria:idCategoria,nombre',
             'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
             'manejoEnvio:idmanejo_envio,idTickets,tipo',
@@ -1210,8 +1211,19 @@ class OrdenesHelpdeskController extends Controller
                         ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                         ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                         ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                        ->orWhereHas('visitas', fn($q) => $q->where('fecha_programada', 'LIKE', "%{$searchValue}%"));
+                        ->orWhereHas('visitas', fn($q) => $q->where('fecha_programada', 'LIKE', "%{$searchValue}%"))
+                        ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%")) // ✅ Buscar por tienda
+                        ->orWhere(function($q) use ($searchValue) { // ✅ TipoServicio Parcial
+                            if (stripos('soporte', $searchValue) !== false || strtolower($searchValue) == 's') {
+                                $q->orWhere('tipoServicio', 1);
+                            }
+                            if (stripos('levantamiento', $searchValue) !== false || strtolower($searchValue) == 'l') {
+                                $q->orWhere('tipoServicio', 2);
+                            }
+                        });
                 });
+                
+                
 
                 $query->orderByRaw("
                     CASE
@@ -2302,8 +2314,7 @@ class OrdenesHelpdeskController extends Controller
             throw new \Exception('No se encontró una visita seleccionada.');
         }
 
-        $idVisita = $seleccionada->idVisitas;
-        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisita)->first();
+        $visitaSeleccionada = $idVisita;
 
         $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
             ->where('idVisitas', $idVisita)

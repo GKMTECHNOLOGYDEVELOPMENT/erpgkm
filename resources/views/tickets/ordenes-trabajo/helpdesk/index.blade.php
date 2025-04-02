@@ -198,13 +198,14 @@
                             <th class="text-center px-4 py-2">N. TICKET</th>
                             <th class="text-center px-4 py-2">F. TICKET</th>
                             <th class="text-center px-4 py-2">F. VISITA</th>
+                            <th class="text-center px-4 py-2">TIENDA</th>
                             <th class="text-center px-4 py-2">CATEGORIA</th>
-                            <th class="text-center px-4 py-2">GENERAL</th>
                             <th class="text-center px-4 py-2">MARCA</th>
                             <th class="text-center px-4 py-2">MODELO</th>
                             <th class="text-center px-4 py-2">SERIE</th>
                             <th class="text-center px-4 py-2">CLIENTE</th>
-                            <th class="text-center px-4 py-2">DIRECCIÓN</th>
+                            <th class="text-center px-4 py-2">SERVICIO</th>
+                            <th class="text-center px-4 py-2">TIPO TEXTO</th>
                             <th class="text-center px-4 py-2">MÁS</th>
                         </tr>
                     </thead>
