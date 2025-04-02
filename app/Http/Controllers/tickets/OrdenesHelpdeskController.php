@@ -629,7 +629,7 @@ class OrdenesHelpdeskController extends Controller
         $rol = $usuario->rol->nombre ?? 'Sin Rol';
 
         $estadosOTS = DB::table('estado_ots')
-            ->whereIn('idEstadoots', [2, 4, 5])
+            ->whereIn('idEstadoots', [2, 4, 5, 6])
             ->get();
 
 
