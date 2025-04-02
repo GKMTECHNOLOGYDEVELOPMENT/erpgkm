@@ -2309,10 +2309,6 @@ class OrdenesHelpdeskController extends Controller
             ? 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto)
             : null;
 
-        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
-        if (!$seleccionada) {
-            throw new \Exception('No se encontró una visita seleccionada.');
-        }
 
         $visitaSeleccionada = $idVisita;
 
