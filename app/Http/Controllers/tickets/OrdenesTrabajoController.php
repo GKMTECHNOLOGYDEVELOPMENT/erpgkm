@@ -685,13 +685,13 @@ class OrdenesTrabajoController extends Controller
         if ($tipoUsuario == 1) {
             // Si el tipo de usuario es 4, obtener solo los estados con idEstadoots 1, 2, o 3
             $estadosOTS = DB::table('estado_ots')
-                            ->whereIn('idEstadoots', [1, 2, 3, 4])  // Filtrar solo por los estados 1, 2, 3
-                            ->get();
+                ->whereIn('idEstadoots', [1, 2, 3, 4])  // Filtrar solo por los estados 1, 2, 3
+                ->get();
         } elseif ($tipoUsuario == 4) {
             // Si el tipo de usuario es 5, obtener solo los estados con idEstadoots 1 o 2
             $estadosOTS = DB::table('estado_ots')
-                            ->whereIn('idEstadoots', [1, 2, 3, 4, 7])  // Filtrar solo por los estados 1 y 2
-                            ->get();
+                ->whereIn('idEstadoots', [1, 2, 3, 4, 7])  // Filtrar solo por los estados 1 y 2
+                ->get();
         } else {
             // Si el tipo de usuario no es ni 4 ni 5, obtener todos los estados (o un filtro predeterminado)
             $estadosOTS = DB::table('estado_ots')->get();  // Obtener todos los estados si no es tipo 4 ni 5
@@ -2838,6 +2838,7 @@ class OrdenesTrabajoController extends Controller
         $vistaPdf = ($tipoUsuario == 4)
             ? 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer'
             : 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
+        $marca = $orden->modelo->marca ?? null;
 
         $html = View($vistaPdf, [
             'orden' => $orden,
@@ -2848,7 +2849,9 @@ class OrdenesTrabajoController extends Controller
             'firmaTecnico' => $firmaTecnico,
             'firmaCliente' => $firmaCliente,
             'imagenesAnexos' => $imagenesAnexos,
-            'imagenesFotosTickets' => $imagenesFotosTickets
+            'imagenesFotosTickets' => $imagenesFotosTickets,
+            'marca' => $marca, // ✅ <-- Aquí la agregas
+            'modoVistaPrevia' => false
         ])->render();
 
         // 🔹 Generar PDF con Browsershot
@@ -3308,18 +3311,18 @@ class OrdenesTrabajoController extends Controller
 
 
     public function getImagenTipo2($idVisita)
-{
-    $imagen = DB::table('anexos_visitas')
-        ->where('idVisitas', $idVisita)
-        ->where('idTipovisita', 2)
-        ->first();
+    {
+        $imagen = DB::table('anexos_visitas')
+            ->where('idVisitas', $idVisita)
+            ->where('idTipovisita', 2)
+            ->first();
 
-    if (!$imagen) {
-        return response()->json(['error' => 'Imagen no encontrada'], 404);
+        if (!$imagen) {
+            return response()->json(['error' => 'Imagen no encontrada'], 404);
+        }
+
+        return response()->json(['imagen' => base64_encode($imagen->foto)]);
     }
-
-    return response()->json(['imagen' => base64_encode($imagen->foto)]);
-}
 
     // Método en el controlador CondicionesTicketController.php
     public function getImagenFinalServicio($idVisita)
