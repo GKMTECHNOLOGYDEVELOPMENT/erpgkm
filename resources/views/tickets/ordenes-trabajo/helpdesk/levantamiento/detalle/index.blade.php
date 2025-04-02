@@ -13,7 +13,8 @@
 <!-- Contenedor Alpine.js para el botón y el modal -->
 <div x-data="{ openModal: false }">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
-        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+        style="background-color: {{ $colorEstado }};">
             Orden de Trabajo N° {{ $orden->idTickets }}
         </span>
 
