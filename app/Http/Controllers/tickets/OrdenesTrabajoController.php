@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Spatie\Browsershot\Browsershot;
+use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
 // use Barryvdh\DomPDF\Facade as PDF;
@@ -1063,27 +1064,23 @@ class OrdenesTrabajoController extends Controller
             'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
             'visitas' => function ($query) {
                 $query->select('idVisitas', 'idTickets', 'fecha_programada')
-                    ->latest('fecha_programada') // 🔥 Trae solo la última visita programada
+                    ->latest('fecha_programada')
                     ->limit(1);
             },
-            'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',  // Relación con seleccionarVisita
-            'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario', // Relación con visita
-            'seleccionarVisita.visita.tecnico:idUsuario,Nombre', // Relación con usuario para obtener el nombre del usuario
+            'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
+            'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
+            'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
             'visitas:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
-            'visitas.tecnico:idUsuario,Nombre', // Relación con usuario para obtener el nombre del usuario asociado con visitas
-
-
+            'visitas.tecnico:idUsuario,Nombre',
             'transicion_status_tickets' => function ($query) use ($request) {
-                // Filtrar por la visita seleccionada
                 if ($request->has('idVisita')) {
                     $query->whereHas('seleccionarVisita', function ($subquery) use ($request) {
-                        $subquery->where('idVisitas', $request->idVisita); // Filtrar por idVisitas de la visita seleccionada
-                    })->where('idEstadoots', 3); // Filtrar por idEstadoots = 3
+                        $subquery->where('idVisitas', $request->idVisita);
+                    })->where('idEstadoots', 3);
                 }
             }
         ]);
 
-        // 🔹 FILTROS
         if ($request->has('tipoTicket') && in_array($request->tipoTicket, [1, 2])) {
             $query->where('idTipotickets', $request->tipoTicket);
         }
@@ -1096,85 +1093,82 @@ class OrdenesTrabajoController extends Controller
             $query->where('idClienteGeneral', $request->clienteGeneral);
         }
 
-        // 🔹 BÚSQUEDA GLOBAL (Prioriza Estado Flujo Exacto)
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $query->whereBetween('fecha_creacion', [
+                $request->startDate . ' 00:00:00',
+                $request->endDate . ' 23:59:59'
+            ]);
+        } elseif ($request->filled('startDate')) {
+            $query->where('fecha_creacion', '>=', $request->startDate . ' 00:00:00');
+        } elseif ($request->filled('endDate')) {
+            $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
+        }
+        
+
+
         if ($request->has('search') && !empty($request->input('search.value'))) {
-            $searchValue = trim($request->input('search.value')); // 🔥 Eliminar espacios en blanco
+            $searchValue = trim($request->input('search.value'));
+            $normalized = Str::lower(Str::ascii($searchValue));
 
-            // 🔥 Verificar si la búsqueda coincide con una fecha en formato d/m/Y
-            $formattedDate = false;
-            if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $searchValue)) {
-                try {
-                    $formattedDate = \Carbon\Carbon::createFromFormat('d/m/Y', $searchValue)->format('Y-m-d');
-                } catch (\Exception $e) {
-                    $formattedDate = false; // Si falla la conversión, ignorar
-                }
-            }
-
-            // 🔥 Verificar si la búsqueda coincide con un Estado Flujo exacto
-            $isEstadoFlujo = EstadoFlujo::whereRaw('BINARY descripcion = ?', [$searchValue])->exists();
-
-            if ($isEstadoFlujo) {
-                // 🔹 Si la búsqueda es un ESTADO FLUJO, filtrar solo por eso
-                $query->whereHas('ticketflujo', function ($q) use ($searchValue) {
-                    $q->whereHas('estadoFlujo', function ($q2) use ($searchValue) {
-                        $q2->whereRaw('BINARY descripcion = ?', [$searchValue]); // 🔥 Comparación exacta
+            $query->where(function ($q) use ($searchValue, $normalized) {
+                $q->where('serie', $searchValue)
+                    ->orWhere('numero_ticket', $searchValue)
+                    ->orWhere('serie', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
+                    ->orWhereRaw("DATE_FORMAT(fecha_creacion, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"])
+                    ->orWhereHas(
+                        'visitas',
+                        fn($q) =>
+                        $q->whereRaw("DATE_FORMAT(fecha_programada, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"])
+                    )
+                    ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                    ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas(
+                        'tecnico',
+                        fn($q) =>
+                        $q->where('Nombre', 'LIKE', "%{$searchValue}%")
+                    )
+                    // Buscar por técnico de la visita más reciente
+                    ->orWhereHas(
+                        'visitas.tecnico',
+                        fn($q) =>
+                        $q->where('Nombre', 'LIKE', "%{$searchValue}%")
+                    )
+                    ->orWhereHas('ticketflujo.estadoFlujo', function ($q) use ($normalized) {
+                        $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]);
+                    })
+                    ->orWhere(function ($q) use ($searchValue) {
+                        if (stripos('soporte', $searchValue) !== false || strtolower($searchValue) === 's') {
+                            $q->orWhere('tipoServicio', 1);
+                        }
+                        if (stripos('levantamiento', $searchValue) !== false || strtolower($searchValue) === 'l') {
+                            $q->orWhere('tipoServicio', 2);
+                        }
                     });
-                });
-            } elseif ($formattedDate) {
-                // 🔹 Si es una fecha válida, buscar en `fecha_creacion`
-                $query->whereDate('fecha_creacion', '=', $formattedDate);
-            } else {
-                // 🔹 Aplicar la búsqueda normal si NO es un estado flujo ni una fecha
-                $query->where(function ($q) use ($searchValue) {
-                    $q->where('serie', $searchValue) // 🔥 Prioriza coincidencias exactas en SERIE
-                        ->orWhere('numero_ticket', $searchValue) // 🔥 Prioriza coincidencias exactas en N. TICKET
-                        ->orWhere('serie', 'LIKE', "%{$searchValue}%") // 🔥 Luego busca coincidencias parciales en SERIE
-                        ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%") // 🔥 Luego busca coincidencias parciales en N. TICKET
-                        ->orWhere('fecha_creacion', 'LIKE', "%{$searchValue}%") // 🔥 Asegurar que se busque bien en fechas
-                        ->orWhereHas('modelo', function ($q) use ($searchValue) {
-                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
-                        })
-                        ->orWhereHas('modelo.categoria', function ($q) use ($searchValue) {
-                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
-                        })
-                        ->orWhereHas('clientegeneral', function ($q) use ($searchValue) {
-                            $q->where('descripcion', 'LIKE', "%{$searchValue}%");
-                        })
-                        ->orWhereHas('cliente', function ($q) use ($searchValue) {
-                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
-                        })
-                        ->orWhereHas('marca', function ($q) use ($searchValue) {
-                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
-                        })
-                        ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                        ->orWhereHas('visitas', function ($q) use ($searchValue) {
-                            $q->where('fecha_programada', 'LIKE', "%{$searchValue}%");
-                        });
-                });
-                // 🔹 Asegurar que los registros con coincidencia EXACTA en `serie` o `numero_ticket` aparezcan primero
-                $query->orderByRaw("
-        CASE
-            WHEN serie = ? THEN 1
-            WHEN numero_ticket = ? THEN 2
-            ELSE 3
-        END
-    ", [$searchValue, $searchValue]);
-            }
+            });
+
+            $query->orderByRaw("
+            CASE
+                WHEN serie = ? THEN 1
+                WHEN numero_ticket = ? THEN 2
+                ELSE 3
+            END
+        ", [$searchValue, $searchValue]);
         }
 
-
-        // 🔹 TOTAL DE REGISTROS
         $recordsTotal = Ticket::count();
         $query->orderBy('idTickets', 'desc');
-
-        // ✅ Clonamos la query justo ANTES de paginar
         $recordsFiltered = (clone $query)->count();
 
         $ordenes = $query->skip($request->input('start', 0))
             ->take($request->input('length', 10))
             ->get();
 
-        // 🔥 LIMPIA los datos para evitar UTF-8 mal formado
         $ordenes = $ordenes->map(function ($item) {
             $arr = json_decode(json_encode($item), true);
             array_walk_recursive($arr, function (&$v) {
@@ -1185,7 +1179,6 @@ class OrdenesTrabajoController extends Controller
             return $arr;
         });
 
-
         return response()->json([
             "draw" => intval($request->input('draw')),
             "recordsTotal" => $recordsTotal,
@@ -1193,7 +1186,6 @@ class OrdenesTrabajoController extends Controller
             "data" => $ordenes
         ]);
     }
-
 
 
 

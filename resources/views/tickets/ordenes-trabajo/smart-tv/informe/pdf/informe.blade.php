@@ -97,14 +97,16 @@
         <div class="container mx-auto bg-white p-2">
             <!-- ENCABEZADO -->
 
-            <div class="relative flex items-center pb-2 mb-4">
+            <div class="relative flex items-center">
                 <!-- Logo a la izquierda -->
-                <div class="flex-shrink-0">
-                    <img src="{{ public_path('assets/images/auth/logogkm2.png') }}" class="w-32">
+                <div class="flex-shrink-0 w-32 h-20 flex items-end justify-center">
+                    <img src="{{ public_path('assets/images/auth/logogkm2.png') }}" alt="Logo GKM"
+                        class="w-full h-full object-contain">
                 </div>
 
+
                 <!-- Datos de la empresa centrados y más abajo -->
-                <div class="absolute left-1/2 transform -translate-x-1/2 text-center mt-4">
+                <div class="absolute left-1/2 transform -translate-x-1/2 text-center">
                     <h1 class="text-lg font-bold">INFORME TÉCNICO</h1>
                     <p class="text-md">RUC 20543618587</p>
                     <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
@@ -114,8 +116,13 @@
 
                 <!-- Título y datos del ticket alineados -->
                 <div class="ml-auto text-right">
-
-                    <div class="text-xs leading-tight mt-1"> <!-- Contenedor con espaciado uniforme -->
+                    @if (!empty($marca->foto))
+                        <div class="w-32 h-20 flex items-center justify-center mt-4">
+                            <img src="data:image/jpeg;base64,{{ base64_encode($marca->foto) }}" alt="Logo Marca"
+                                class="w-full h-full object-cover">
+                        </div>
+                    @endif
+                    <div class="text-xs leading-tight mb-2"> <!-- Contenedor con espaciado uniforme -->
                         <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
                         <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
                     </div>
@@ -124,7 +131,7 @@
 
             </div>
 
-            <div class="flex justify-between mt-3">
+            <div class="flex justify-between ">
                 <!-- Información del Cliente -->
                 <div class="w-1/2">
                     <ul class="text-xs space-y-1">
@@ -226,6 +233,7 @@
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
                         <p class="text-xs">{{ $visita['tecnico'] }}</p>
+                        <p class="text-xs text-gray-500">DNI: {{ $visita['documento'] }}</p>
                     </div>
 
                     <!-- Firma del Cliente -->
@@ -242,11 +250,14 @@
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
+                        <p class="text-xs">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
+                        <p class="text-xs text-gray-500">DNI: {{ $orden->cliente->documento ?? 'No disponible' }}</p>
+
                     </div>
                 </div>
                 <br>
             </div>
-            
+
 
             @if (!$modoVistaPrevia && (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)))
                 <!-- Nueva página con el título ANEXOS -->

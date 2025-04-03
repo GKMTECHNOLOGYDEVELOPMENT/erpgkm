@@ -99,8 +99,6 @@
                     })" />
             </div>
             <!-- Filtrar por Cliente General -->
-            <!-- Filtrar por Cliente General -->
-            <!-- Filtrar por Cliente General -->
             <div x-init="fetch('/api/clientegeneralfiltros')
                 .then(response => response.json())
                 .then(data => {
@@ -125,15 +123,6 @@
                     </template>
                 </select>
             </div>
-
-
-
-
-
-
-
-
-
 
             <!-- Botones de Acción -->
             <div class="flex flex-wrap items-end gap-2">
@@ -169,22 +158,26 @@
                     </a>
                 </div>
 
-                <!-- Botón Refrescar -->
-                <button @click="startDate = ''; endDate = ''; marcaFilter = ''; fetchDataAndInitTable()"
-                    class="btn btn-secondary btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <!-- Flecha superior derecha -->
-                        <polyline points="23 4 23 10 17 10" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Flecha inferior izquierda -->
-                        <polyline points="1 20 1 14 7 14" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Línea curva superior -->
-                        <path d="M3.51 9a9 9 0 0114.36-3.36L23 10" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Línea curva inferior -->
-                        <path d="M20.49 15a9 9 0 01-14.36 3.36L1 14" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Botón Refrescar con tamaño uniforme -->
+                <button class="btn btn-secondary btn-sm"
+                    @click="
+                    startDate = '';
+                    endDate = '';
+                    marcaFilter = '';
+                    clienteGeneralFilter = '';
+                    document.getElementById('clienteGeneralFilter').value = '';
+                    NiceSelect.destroy(document.getElementById('clienteGeneralFilter'));
+                    NiceSelect.bind(document.getElementById('clienteGeneralFilter'));
+                    fetchDataAndInitTable()">
+                    <svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6 block mx-auto' fill='none'
+                        viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'>
+                        <polyline points='23 4 23 10 17 10' stroke-linecap='round' stroke-linejoin='round' />
+                        <polyline points='1 20 1 14 7 14' stroke-linecap='round' stroke-linejoin='round' />
+                        <path d='M3.51 9a9 9 0 0114.36-3.36L23 10' stroke-linecap='round' stroke-linejoin='round' />
+                        <path d='M20.49 15a9 9 0 01-14.36 3.36L1 14' stroke-linecap='round' stroke-linejoin='round' />
                     </svg>
-
                 </button>
+
             </div>
         </div>
 

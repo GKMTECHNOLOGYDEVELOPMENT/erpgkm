@@ -65,8 +65,11 @@ document.addEventListener('alpine:init', () => {
                     type: "GET",
                     data: (d) => {
                         d.tipoTicket = 1;
-                        d.clienteGeneral = this.clienteGeneralFilter; // 👈 Agregado
+                        d.clienteGeneral = this.clienteGeneralFilter;
+                        d.startDate = this.startDate;
+                        d.endDate = this.endDate;
                     },
+                    
 
                     beforeSend: () => {
                         this.isLoading = true; // 🔹 Muestra el preloader antes de la petición

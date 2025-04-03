@@ -1306,8 +1306,6 @@ public function guardardatosenviosoporte(Request $request)
                         });
                 });
 
-
-
                 $query->orderByRaw("
                     CASE
                         WHEN serie = ? THEN 1
@@ -2221,6 +2219,7 @@ public function guardardatosenviosoporte(Request $request)
             ->header('Content-Disposition', 'inline; filename="soporte_' . $idOt . '.pdf"');
     }
 
+
     public function generateSoportePdfVisita($idOt, $idVisita)
     {
         $orden = Ticket::with([
@@ -2240,9 +2239,13 @@ public function guardardatosenviosoporte(Request $request)
             ? 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto)
             : null;
 
+        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
+        if (!$seleccionada) {
+            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada.']);
+        }
 
-        $idVisitasSeleccionada = $idVisita;
-        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+        $idVisita = $idVisita;
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisita)->first();
 
         $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
             ->where('idVisitas', $idVisita)
@@ -2373,6 +2376,8 @@ public function guardardatosenviosoporte(Request $request)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="soporte_' . $idOt . '.pdf"');
     }
+    
+
 
 
     private function buildInformeHelpdeskHtml($idOt, $idVisita, $modoVistaPrevia = false, $tipo = 'levantamiento')

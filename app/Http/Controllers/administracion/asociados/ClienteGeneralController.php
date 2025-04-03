@@ -187,7 +187,7 @@ class ClienteGeneralController extends Controller
     public function clientegeneralFiltros()
     {
         $clientes = ClienteGeneral::select('idClienteGeneral', 'descripcion')
-            ->whereIn('descripcion', ['TCL', 'TPVV'])
+            ->whereIn('descripcion', ['TCL', 'TPV'])
             ->where('estado', 1)
             ->get();
 
