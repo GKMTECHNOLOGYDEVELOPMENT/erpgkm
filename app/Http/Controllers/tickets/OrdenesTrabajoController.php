@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
 
 // use Barryvdh\DomPDF\Facade as PDF;
 
@@ -1103,7 +1103,7 @@ class OrdenesTrabajoController extends Controller
         } elseif ($request->filled('endDate')) {
             $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
         }
-        
+
 
 
         if ($request->has('search') && !empty($request->input('search.value'))) {
@@ -2871,6 +2871,26 @@ class OrdenesTrabajoController extends Controller
         ]);
     }
 
+    public function procesarLogoMarca($imagenRaw)
+    {
+        $manager = new ImageManager(); // crear instancia
+    
+        $img = $manager->make($imagenRaw);
+    
+        // Redimensionar manteniendo proporciones, sin deformar
+        $img->resize(256, 160, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+        
+        $canvas = $manager->canvas(256, 160, '#FFFFFF');
+        
+        $canvas->insert($img, 'center');
+    
+        return 'data:image/png;base64,' . base64_encode($canvas->encode('png'));
+    }
+    
+    
 
     public function generateInformePdf($idOt)
     {
@@ -2915,7 +2935,13 @@ class OrdenesTrabajoController extends Controller
             'serie' => $orden->serie ?? 'No especificado',
             'fallaReportada' => $orden->fallaReportada ?? 'No especificado' // 🔹 Agregamos la falla reportada
         ];
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
+        $marca->logo_base64 = null;
+
+        if ($marca && !empty($marca->foto)) {
+            $marca->logo_base64 = $this->procesarLogoMarca($marca->foto);
+        }
 
 
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
@@ -3027,7 +3053,8 @@ class OrdenesTrabajoController extends Controller
             'firmaCliente' => $firmaCliente,
             'imagenesAnexos' => $imagenesAnexos,
             'imagenesFotosTickets' => $imagenesFotosTickets,
-            'marca' => $marca, // ✅ <-- Aquí la agregas
+            'marca' => $marca,
+            'logoGKM' => $logoGKM,
             'modoVistaPrevia' => false
         ])->render();
 
@@ -3045,7 +3072,7 @@ class OrdenesTrabajoController extends Controller
         // 🔹 RETORNAR PDF SIN GUARDARLO EN STORAGE
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="informe_' . $idOt . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="' . $orden->numero_ticket . '.pdf"');
     }
 
 

@@ -97,65 +97,60 @@
         <div class="container mx-auto bg-white p-2">
             <!-- ENCABEZADO -->
 
-            <div class="relative flex items-center">
-                <!-- Logo a la izquierda -->
-                <div class="flex-shrink-0 w-32 h-20 flex items-end justify-center">
-                    <img src="{{ public_path('assets/images/auth/logogkm2.png') }}" alt="Logo GKM"
-                        class="w-full h-full object-contain">
+            <!-- ENCABEZADO: LOGOS Y DATOS CENTRADOS -->
+            <div class="relative flex items-center justify-between pb-2">
+                <!-- Logo GKM -->
+                <div class="w-32 h-20 flex items-center justify-center">
+                    <img src="{{ $logoGKM }}" alt="Logo GKM" class="w-full h-full object-contain">
                 </div>
 
-
-                <!-- Datos de la empresa centrados y más abajo -->
-                <div class="absolute left-1/2 transform -translate-x-1/2 text-center">
+                <!-- Datos empresa -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 text-center mt-4">
                     <h1 class="text-lg font-bold">INFORME TÉCNICO</h1>
                     <p class="text-md">RUC 20543618587</p>
-                    <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
                     <p class="text-md">CONSULTAS@GKMTECHNOLOGY.COM.PE</p>
-                    <p class="text-md">080080142</p>
+                    <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
+                   
                 </div>
 
-                <!-- Título y datos del ticket alineados -->
-                <div class="ml-auto text-right">
-                    @if (!empty($marca->foto))
-                        <div class="w-32 h-20 flex items-center justify-center mt-4">
-                            <img src="data:image/jpeg;base64,{{ base64_encode($marca->foto) }}" alt="Logo Marca"
-                                class="w-full h-full object-cover">
-                        </div>
-                    @endif
-                    <div class="text-xs leading-tight mb-2"> <!-- Contenedor con espaciado uniforme -->
-                        <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
-                        <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
-                    </div>
+                <!-- Logo Marca -->
+                <div class="w-32 h-20 flex items-center justify-center">
+                    <img src="{{ $marca->logo_base64 }}" alt="Logo Marca" class="w-full h-full object-contain pt-1">
                 </div>
-
-
             </div>
 
-            <div class="flex justify-between ">
+            <!-- INFO CLIENTE Y TÉCNICO + TICKET -->
+            <div class="flex justify-between mt-6">
                 <!-- Información del Cliente -->
                 <div class="w-1/2">
                     <ul class="text-xs space-y-1">
                         <li><span class="font-bold">CLIENTE:</span> {{ $orden->cliente->nombre ?? 'No asignado' }}</li>
                         <li><span class="font-bold">DNI/RUC:</span> {{ $orden->cliente->documento ?? 'No disponible' }}
                         </li>
+                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}</li>
                     </ul>
                 </div>
 
-                <!-- Información del Técnico -->
+                <!-- Información del Técnico + Ticket -->
                 <div class="w-1/2 text-right">
-                    <h2 class="text-xs font-bold mb-1 text-gray-700">TÉCNICO / RESPONSABLE</h2>
+                    <div class="text-xs leading-tight">
+                        <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
+                        <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
+                    </div>
+                    <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
-                        <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ $visita['tecnico'] }}</p>
+                        <p class="text-xs"><span class="font-bold">NOMBRE: </span> {{ $visita['tecnico'] }}</p>
+                        <p class="text-xs"><span class="font-bold">TELÉFONO: </span>080080142</p>
                     @endforeach
                 </div>
             </div>
 
             <!-- 🔹 Dirección en toda la fila -->
-            <div class="w-full mt-4">
+            {{-- <div class="w-full mt-4">
                 <p class="text-xs"><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}
                 </p>
-            </div>
-
+            </div> --}}
+            <hr class="my-4 border-0">
             @if (!empty($producto))
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
@@ -220,10 +215,10 @@
                 <div class="flex justify-between mt-6 page-break-inside-avoid">
                     <!-- Firma del Técnico -->
                     <div class="w-1/2 text-center">
-                        <div class="inline-block mb-2 h-20 flex justify-center items-center">
+                        <div class="inline-block mb-1 h-24 flex justify-center items-end">
                             @if ($firmaTecnico)
                                 <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                                    class="h-20 max-w-[150px] mx-auto object-contain">
+                                    class="h-20 max-w-[150px] mx-auto object-contain -mt-4">
                             @else
                                 <div class="h-full flex items-center justify-center w-[150px]">
                                     <p class="text-xs text-gray-500">N/A</p>
@@ -238,10 +233,10 @@
 
                     <!-- Firma del Cliente -->
                     <div class="w-1/2 text-center">
-                        <div class="inline-block mb-2 h-20 flex justify-center items-center">
+                        <div class="inline-block mb-1 h-24 flex justify-center items-end">
                             @if ($firmaCliente)
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                                    class="h-20 max-w-[150px] mx-auto object-contain">
+                                    class="h-20 max-w-[150px] mx-auto object-contain -mt-4">
                             @else
                                 <div class="h-full flex items-center justify-center w-[150px]">
                                     <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
