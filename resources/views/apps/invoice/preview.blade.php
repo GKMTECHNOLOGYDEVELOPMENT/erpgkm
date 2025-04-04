@@ -93,7 +93,7 @@
             <div
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($tecnico1 === 'N/A')
-                <span class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
+                <span class="badge bg-warning">Pendiente</span>
 
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio:
