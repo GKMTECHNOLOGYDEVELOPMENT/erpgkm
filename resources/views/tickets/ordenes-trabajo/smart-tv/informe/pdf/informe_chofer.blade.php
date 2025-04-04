@@ -16,8 +16,7 @@
         .red-bg {
             background-color: #A9240E !important;
             color: white !important;
-            text-align: left !important;
-            padding: 6px 10px !important;
+            padding: 6px 6px !important;
             /* Agrega un poco de espacio a la derecha e izquierda */
             font-size: 12px !important;
             font-weight: bold !important;
@@ -97,56 +96,47 @@
         <div class="container mx-auto bg-white p-2">
             <!-- ENCABEZADO -->
 
-            <div class="relative flex items-center pb-2 mb-4">
-                <!-- Logo a la izquierda -->
-                <div class="flex-shrink-0">
-                    <img src="{{ public_path('assets/images/auth/logogkm2.png') }}" class="w-32">
+            <!-- ENCABEZADO: LOGOS Y DATOS CENTRADOS -->
+            <div class="relative flex items-center justify-between pb-2">
+                <!-- Logo GKM -->
+                <div class="w-32 h-20 flex items-center justify-center">
+                    <img src="{{ $logoGKM }}" alt="Logo GKM" class="w-full h-full object-contain">
                 </div>
 
-                <!-- Datos de la empresa centrados y más abajo -->
+                <!-- Datos empresa -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 text-center mt-4">
                     <h1 class="text-lg font-bold">TRASLADO DE EQUIPO</h1>
                     <p class="text-md">RUC 20543618587</p>
-                    <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
                     <p class="text-md">CONSULTAS@GKMTECHNOLOGY.COM.PE</p>
+                    <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
                     <p class="text-md">080080142</p>
                 </div>
 
-                <!-- Título y datos del ticket alineados con logo de marca -->
-                <div class="ml-auto text-right">
-                    @if (!empty($marca->foto))
-                        <div class="mt-4">
-                            <img src="data:image/jpeg;base64,{{ base64_encode($marca->foto) }}" alt="Logo Marca"
-                                class="w-24 h-12 object-contain mb-1 mx-auto">
-                        </div>
-                    @endif
-
-
-                    <div class="text-xs leading-tight mt-3">
-                        <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
-                        <p>FECHA DE RETIRO: <span class="font-bold">{{ $fechaCreacion }}</span></p>
-                    </div>
+                <!-- Logo Marca -->
+                <div class="w-32 h-20 flex items-center justify-center">
+                    <img src="{{ $marca->logo_base64 }}" alt="Logo Marca" class="w-full h-full object-contain pt-1">
                 </div>
-
-
-
             </div>
 
-            <div class="flex justify-between mt-3">
+            <!-- INFO CLIENTE Y TRANSPORTISTA -->
+            <div class="flex justify-between mt-6">
                 <!-- Información del Cliente -->
                 <div class="w-1/2">
                     <ul class="text-xs space-y-1">
                         <li><span class="font-bold">CLIENTE:</span> {{ $orden->cliente->nombre ?? 'No asignado' }}</li>
                         <li><span class="font-bold">DNI/RUC:</span> {{ $orden->cliente->documento ?? 'No disponible' }}
                         </li>
-                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}
-                        </li>
+                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}</li>
                     </ul>
                 </div>
 
-                <!-- Información del Técnico alineado -->
+                <!-- Información del Técnico + Ticket -->
                 <div class="w-1/2 text-right text-xs">
-                    <h2 class="font-bold mb-1 text-gray-700">TRANSPORTISTA / RESPONSABLE</h2>
+                    <div class="text-xs leading-tight">
+                        <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
+                        <p>FECHA DE RETIRO: <span class="font-bold">{{ $fechaCreacion }}</span></p>
+                    </div>
+                    <h2 class="font-bold mb-1 text-gray-700 mt-2">TRANSPORTISTA / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
                         <div class="grid grid-cols-2 gap-y-1 justify-end text-right">
                             <p><span class="font-bold">NOMBRE:</span> {{ $visita['tecnico'] }}</p>
@@ -156,10 +146,10 @@
                         </div>
                     @endforeach
                 </div>
-
-
-
             </div>
+
+
+
 
 
             @if (!empty($producto))
@@ -221,14 +211,13 @@
 
             <!-- FOOTER -->
             <div class="footer text-center text-gray-500 text-xs">
-
                 <div class="flex justify-between mt-6 page-break-inside-avoid">
-                    <!-- Firma del Técnico -->
+                    <!-- Firma del Transportista -->
                     <div class="w-1/2 text-center">
-                        <div class="inline-block mb-2 h-20 flex justify-center items-center">
+                        <div class="inline-block mb-1 h-24 flex justify-center items-end">
                             @if ($firmaTecnico)
                                 <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                                    class="h-20 max-w-[150px] mx-auto object-contain">
+                                    class="h-20 max-w-[150px] mx-auto object-contain -mt-4">
                             @else
                                 <div class="h-full flex items-center justify-center w-[150px]">
                                     <p class="text-xs text-gray-500">N/A</p>
@@ -238,14 +227,15 @@
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL TRANSPORTISTA</p>
                         <p class="text-xs">{{ $visita['tecnico'] }}</p>
+                        <p class="text-xs text-gray-500">DNI: {{ $visita['documento'] }}</p>
                     </div>
 
                     <!-- Firma del Cliente -->
                     <div class="w-1/2 text-center">
-                        <div class="inline-block mb-2 h-20 flex justify-center items-center">
+                        <div class="inline-block mb-1 h-24 flex justify-center items-end">
                             @if ($firmaCliente)
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                                    class="h-20 max-w-[150px] mx-auto object-contain">
+                                    class="h-20 max-w-[150px] mx-auto object-contain -mt-4">
                             @else
                                 <div class="h-full flex items-center justify-center w-[150px]">
                                     <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
@@ -254,9 +244,13 @@
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
+                        <p class="text-xs">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
+                        <p class="text-xs text-gray-500">DNI: {{ $orden->cliente->documento ?? 'No disponible' }}</p>
                     </div>
                 </div>
+                <br>
             </div>
+
 
 
 

@@ -16,8 +16,7 @@
         .red-bg {
             background-color: #A9240E !important;
             color: white !important;
-            text-align: left !important;
-            padding: 6px 10px !important;
+            padding: 6px 6px !important;
             /* Agrega un poco de espacio a la derecha e izquierda */
             font-size: 12px !important;
             font-weight: bold !important;
@@ -98,58 +97,56 @@
             <!-- ENCABEZADO -->
 
             <div class="relative flex items-center justify-between pb-2">
-                <!-- Logo del cliente general a la izquierda -->
-                <div class="flex flex-col items-start gap-1">
+                <!-- Logo Cliente General a la izquierda -->
+                <div class="w-32 h-20 flex items-center justify-center">
                     @if ($logoClienteGeneral)
-                        <img src="{{ $logoClienteGeneral }}" alt="Logo Cliente" class="h-16 object-contain"
-                            style="max-width: 140px;">
+                        <img src="{{ $logoClienteGeneral }}" alt="Logo Cliente" class="w-full h-full object-contain">
                     @endif
                 </div>
 
-                <!-- Datos de la empresa centrados -->
-                <div class="text-center absolute left-1/2 transform -translate-x-1/2 mt-4">
+                <!-- Datos empresa centrado -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 text-center mt-4">
                     <h1 class="text-lg font-bold">INFORME TÉCNICO</h1>
                     <p class="text-md">RUC 20543618587</p>
-                    <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
                     <p class="text-md">CONSULTAS@GKMTECHNOLOGY.COM.PE</p>
-                    <p class="text-md">080080142</p>
+                    <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
                 </div>
 
-                <!-- Logo GKM + datos de ticket -->
-                <div class="flex flex-col items-end gap-1">
-                    <img src="{{ public_path('assets/images/auth/logogkm2.png') }}" class="h-16 object-contain">
-                    <div class="text-xs leading-tight mt-1">
-                        <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
-                        <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
-                    </div>
+                <!-- Logo GKM a la derecha -->
+                <div class="w-32 h-20 flex items-center justify-center">
+                    <img src="{{ public_path('assets/images/auth/logogkm2.png') }}" alt="Logo GKM"
+                        class="w-full h-full object-contain">
                 </div>
             </div>
 
-
-            <div class="flex justify-between">
+            <!-- INFORMACIÓN GENERAL -->
+            <div class="flex justify-between mt-6">
                 <!-- Información del Cliente -->
                 <div class="w-1/2">
                     <ul class="text-xs space-y-1">
                         <li><span class="font-bold">CLIENTE:</span> {{ $orden->cliente->nombre ?? 'No asignado' }}</li>
                         <li><span class="font-bold">DNI/RUC:</span> {{ $orden->cliente->documento ?? 'No disponible' }}
                         </li>
+                        <li><span class="font-bold">TIENDA:</span> {{ $orden->tienda->nombre ?? 'No disponible' }}</li>
+                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->tienda->direccion ?? 'No registrada' }}</li>
                     </ul>
                 </div>
 
-                <!-- Información del Técnico -->
+                <!-- Técnico + Ticket -->
                 <div class="w-1/2 text-right">
-                    <h2 class="text-xs font-bold mb-1 text-gray-700">TÉCNICO / RESPONSABLE</h2>
+                    <div class="text-xs leading-tight">
+                        <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
+                        <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
+                    </div>
+                    <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
                         <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ $visita['tecnico'] }}</p>
+                        <p class="text-xs"><span class="font-bold">TELÉFONO: </span>080080142</p>
                     @endforeach
                 </div>
             </div>
 
-            <!-- 🔹 Dirección en toda la fila -->
-            <div class="w-full mt-4">
-                <p class="text-xs"><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}
-                </p>
-            </div>
+
 
             @if (!empty($producto['fallaReportada']))
                 <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
@@ -220,14 +217,13 @@
 
             <!-- FOOTER -->
             <div class="footer text-center text-gray-500 text-xs">
-
                 <div class="flex justify-between mt-6 page-break-inside-avoid">
-                    <!-- Firma Técnico -->
+                    <!-- Firma del Técnico -->
                     <div class="w-1/2 text-center flex flex-col items-center">
-                        <div class="h-20 flex items-center justify-center mb-2">
+                        <div class="h-24 flex items-end justify-center mb-1">
                             @if ($firmaTecnico)
                                 <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                                    class="h-20 max-w-[150px] object-contain">
+                                    class="h-20 max-w-[150px] object-contain -mt-4">
                             @else
                                 <span class="text-xs text-gray-500">N/A</span>
                             @endif
@@ -237,25 +233,28 @@
                         <p class="text-xs text-gray-600 uppercase tracking-wide">
                             {{ $visita['tecnico'] ?? 'NOMBRE NO DISPONIBLE' }}
                         </p>
+                        <p class="text-xs text-gray-500">DNI: {{ $visita['documento'] ?? 'N/A' }}</p>
                     </div>
 
-                    <!-- Firma Cliente -->
+                    <!-- Firma del Cliente -->
                     <div class="w-1/2 text-center flex flex-col items-center">
-                        <div class="h-20 flex items-center justify-center mb-2">
+                        <div class="h-24 flex items-end justify-center mb-1">
                             @if ($firmaCliente)
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                                    class="h-20 max-w-[150px] object-contain">
+                                    class="h-20 max-w-[150px] object-contain -mt-4">
                             @else
                                 <span class="text-xs text-gray-500 font-bold">Cliente no firmó</span>
                             @endif
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
+                        <p class="text-xs text-gray-600 uppercase tracking-wide">
+                            {{ $orden->cliente->nombre ?? 'N/A' }}
+                        </p>
+                        <p class="text-xs text-gray-500">DNI: {{ $orden->cliente->documento ?? 'No disponible' }}</p>
                     </div>
                 </div>
             </div>
-
-
 
 
             @if (!$modoVistaPrevia && (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)))

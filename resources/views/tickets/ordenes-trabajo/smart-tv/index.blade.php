@@ -99,7 +99,7 @@
                     })" />
             </div>
             <!-- Filtrar por Cliente General -->
-            <div x-init="fetch('/api/clientegeneralfiltros')
+            <div x-init="fetch('/api/clientegeneralfiltros/1')
                 .then(response => response.json())
                 .then(data => {
                     clienteGenerales = data;
@@ -115,8 +115,7 @@
                     class="form-select w-full text-white-dark" placeholder="Todos los clientes generales"
                     @change="
             $root.isLoading = true; // 🔥 Activa el preloader general
-            $dispatch('cliente-general-cambio', $event.target.value)
-        ">
+            $dispatch('cliente-general-cambio', $event.target.value)">
                     <option value="">Todos los clientes generales</option>
                     <template x-for="cliente in clienteGenerales" :key="cliente.idClienteGeneral">
                         <option :value="cliente.idClienteGeneral" x-text="cliente.descripcion"></option>

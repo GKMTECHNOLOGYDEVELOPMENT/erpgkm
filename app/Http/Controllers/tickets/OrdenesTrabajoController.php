@@ -2755,6 +2755,14 @@ class OrdenesTrabajoController extends Controller
             'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
         ];
 
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+        $marca = $orden->modelo->marca ?? null;
+        $marca->logo_base64 = null;
+
+        if ($marca && !empty($marca->foto)) {
+            $marca->logo_base64 = $this->procesarLogoMarca($marca->foto);
+        }
+
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
         $visitas = collect();
         $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
@@ -2842,7 +2850,8 @@ class OrdenesTrabajoController extends Controller
             'firmaCliente' => $firmaCliente,
             'imagenesAnexos' => $imagenesAnexos,
             'imagenesFotosTickets' => $imagenesFotosTickets,
-            'marca' => $marca, // ✅ <-- Aquí la agregas
+            'marca' => $marca,
+            'logoGKM' => $logoGKM,
             'modoVistaPrevia' => false
         ])->render();
 
@@ -2859,7 +2868,7 @@ class OrdenesTrabajoController extends Controller
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="informe_' . $idOt . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -2938,10 +2947,11 @@ class OrdenesTrabajoController extends Controller
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
         $marca->logo_base64 = null;
-
+        
         if ($marca && !empty($marca->foto)) {
             $marca->logo_base64 = $this->procesarLogoMarca($marca->foto);
         }
+        
 
 
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
@@ -3107,7 +3117,13 @@ class OrdenesTrabajoController extends Controller
             'serie' => $orden->serie ?? 'No especificado',
             'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
         ];
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
+        $marca->logo_base64 = null;
+
+        if ($marca && !empty($marca->foto)) {
+            $marca->logo_base64 = $this->procesarLogoMarca($marca->foto);
+        }
 
         $visitas = collect();
         $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
@@ -3175,6 +3191,7 @@ class OrdenesTrabajoController extends Controller
             'imagenesAnexos' => $imagenesAnexos,
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'marca' => $marca,
+            'logoGKM' => $logoGKM,
             'modoVistaPrevia' => $modoVistaPrevia
         ])->render();
     }

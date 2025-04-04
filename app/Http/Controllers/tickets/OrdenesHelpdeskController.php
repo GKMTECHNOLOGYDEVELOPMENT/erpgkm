@@ -33,6 +33,8 @@ use App\Models\TipoRecojo;
 use App\Models\TransicionStatusTicket;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Browsershot\Browsershot;
+use Intervention\Image\ImageManager;
+use Illuminate\Support\Str;
 
 class OrdenesHelpdeskController extends Controller
 {
@@ -447,25 +449,25 @@ class OrdenesHelpdeskController extends Controller
 
         // Verificar si existe un flujo con idEstadflujo = 25
         $flujo = TicketFlujo::where('idTicket', $ticketId)
-        ->where('idEstadflujo', 25)
-        ->first();
+            ->where('idEstadflujo', 25)
+            ->first();
 
         // dd($flujo); // Verifica si devuelve el registro correcto
 
-         $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+        $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
 
-                 // Verificar si existe un flujo con idEstadflujo = 31
+        // Verificar si existe un flujo con idEstadflujo = 31
         $flujo = TicketFlujo::where('idTicket', $ticketId)
-        ->where('idEstadflujo', 31)
-        ->first();
+            ->where('idEstadflujo', 31)
+            ->first();
 
         // dd($flujo); // Verifica si devuelve el registro correcto
 
-         $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+        $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
-         $tiposEnvio = TipoEnvio::all();
-         $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
+        $tiposEnvio = TipoEnvio::all();
+        $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
 
 
 
@@ -497,7 +499,7 @@ class OrdenesHelpdeskController extends Controller
             'existeFlujo31',
             'tiposEnvio',
             'tiposRecojo'
-            
+
         ));
     }
 
@@ -536,42 +538,42 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-// Función para guardar los datos de envío
-public function guardardatosenviosoporte(Request $request)
-{
-    // Validar los datos recibidos
-    $validator = Validator::make($request->all(), [
-        'idTecnico' => 'required|exists:usuarios,idUsuario',
-        'tipoRecojo' => 'required|exists:tiporecojo,idtipoRecojo',
-        'tipoEnvio' => 'required|exists:tipoenvio,idtipoenvio',
-        'ticketId' => 'required|exists:tickets,idTickets',
-    ]);
+    // Función para guardar los datos de envío
+    public function guardardatosenviosoporte(Request $request)
+    {
+        // Validar los datos recibidos
+        $validator = Validator::make($request->all(), [
+            'idTecnico' => 'required|exists:usuarios,idUsuario',
+            'tipoRecojo' => 'required|exists:tiporecojo,idtipoRecojo',
+            'tipoEnvio' => 'required|exists:tipoenvio,idtipoenvio',
+            'ticketId' => 'required|exists:tickets,idTickets',
+        ]);
 
-    // Si la validación falla, devolver respuesta con errores
-    if ($validator->fails()) {
-        return response()->json(['success' => false, 'message' => 'Errores de validación', 'errors' => $validator->errors()]);
-    }
+        // Si la validación falla, devolver respuesta con errores
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Errores de validación', 'errors' => $validator->errors()]);
+        }
 
-    // Intentar insertar los datos en la tabla datos_envio
-    try {
-        // Usamos DB::insert() para insertar los datos directamente
-        DB::insert('
+        // Intentar insertar los datos en la tabla datos_envio
+        try {
+            // Usamos DB::insert() para insertar los datos directamente
+            DB::insert('
             INSERT INTO datos_envio (idTickets, tipoRecojo, tipoEnvio, tipo, idUsuario) 
             VALUES (?, ?, ?, ?, ?)
         ', [
-            $request->ticketId,      // idTickets
-            $request->tipoRecojo,    // tipoRecojo
-            $request->tipoEnvio,     // tipoEnvio
-            2,                       // tipo (siempre es 2 según lo indicado)
-            $request->idTecnico      // idUsuario (el técnico de envío)
-        ]);
+                $request->ticketId,      // idTickets
+                $request->tipoRecojo,    // tipoRecojo
+                $request->tipoEnvio,     // tipoEnvio
+                2,                       // tipo (siempre es 2 según lo indicado)
+                $request->idTecnico      // idUsuario (el técnico de envío)
+            ]);
 
-        return response()->json(['success' => true, 'message' => 'Datos de envío guardados correctamente.']);
-    } catch (\Exception $e) {
-        // En caso de error al insertar
-        return response()->json(['success' => false, 'message' => 'Hubo un error al guardar los datos de envío.']);
+            return response()->json(['success' => true, 'message' => 'Datos de envío guardados correctamente.']);
+        } catch (\Exception $e) {
+            // En caso de error al insertar
+            return response()->json(['success' => false, 'message' => 'Hubo un error al guardar los datos de envío.']);
+        }
     }
-}
 
 
 
@@ -789,14 +791,14 @@ public function guardardatosenviosoporte(Request $request)
         // Puedes agregar un log final para revisar el valor de idVisita
         Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
 
-                     // Verificar si existe un flujo con idEstadflujo = 31
-                     $flujo = TicketFlujo::where('idTicket', $ticketId)
-                     ->where('idEstadflujo', 31)
-                     ->first();
-             
-                     // dd($flujo); // Verifica si devuelve el registro correcto
-             
-                      $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+        // Verificar si existe un flujo con idEstadflujo = 31
+        $flujo = TicketFlujo::where('idTicket', $ticketId)
+            ->where('idEstadflujo', 31)
+            ->first();
+
+        // dd($flujo); // Verifica si devuelve el registro correcto
+
+        $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
@@ -1261,60 +1263,62 @@ public function guardardatosenviosoporte(Request $request)
             $query->where('idClienteGeneral', $request->clienteGeneral);
         }
 
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $query->whereBetween('fecha_creacion', [
+                $request->startDate . ' 00:00:00',
+                $request->endDate . ' 23:59:59'
+            ]);
+        } elseif ($request->filled('startDate')) {
+            $query->where('fecha_creacion', '>=', $request->startDate . ' 00:00:00');
+        } elseif ($request->filled('endDate')) {
+            $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
+        }
+
+
         if ($request->has('search') && !empty($request->input('search.value'))) {
             $searchValue = trim($request->input('search.value'));
-            $formattedDate = false;
+            $normalized = Str::lower(Str::ascii($searchValue));
 
-            if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $searchValue)) {
-                try {
-                    $formattedDate = \Carbon\Carbon::createFromFormat('d/m/Y', $searchValue)->format('Y-m-d');
-                } catch (\Exception $e) {
-                    $formattedDate = false;
-                }
-            }
+            $query->where(function ($q) use ($searchValue, $normalized) {
+                $q->where('serie', $searchValue)
+                    ->orWhere('numero_ticket', $searchValue)
+                    ->orWhere('serie', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
+                    ->orWhereRaw("DATE_FORMAT(fecha_creacion, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"])
+                    ->orWhereHas('visitas', function ($q) use ($searchValue) {
+                        $q->whereRaw("DATE_FORMAT(fecha_programada, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"]);
+                    })
+                    ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                    ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('ticketflujo.estadoFlujo', function ($q) use ($normalized) {
+                        $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]);
+                    })
+                    ->orWhere(function ($q) use ($searchValue) {
+                        if (stripos('soporte', $searchValue) !== false || strtolower($searchValue) === 's') {
+                            $q->orWhere('tipoServicio', 1);
+                        }
+                        if (stripos('levantamiento', $searchValue) !== false || strtolower($searchValue) === 'l') {
+                            $q->orWhere('tipoServicio', 2);
+                        }
+                    });
+            });
 
-            $isEstadoFlujo = EstadoFlujo::whereRaw('BINARY descripcion = ?', [$searchValue])->exists();
-
-            if ($isEstadoFlujo) {
-                $query->whereHas('ticketflujo.estadoFlujo', function ($q) use ($searchValue) {
-                    $q->whereRaw('BINARY descripcion = ?', [$searchValue]);
-                });
-            } elseif ($formattedDate) {
-                $query->whereDate('fecha_creacion', $formattedDate);
-            } else {
-                $query->where(function ($q) use ($searchValue) {
-                    $q->where('serie', $searchValue)
-                        ->orWhere('numero_ticket', $searchValue)
-                        ->orWhere('serie', 'LIKE', "%{$searchValue}%")
-                        ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
-                        ->orWhere('fecha_creacion', 'LIKE', "%{$searchValue}%")
-                        ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                        ->orWhereHas('visitas', fn($q) => $q->where('fecha_programada', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%")) // ✅ Buscar por tienda
-                        ->orWhere(function ($q) use ($searchValue) { // ✅ TipoServicio Parcial
-                            if (stripos('soporte', $searchValue) !== false || strtolower($searchValue) == 's') {
-                                $q->orWhere('tipoServicio', 1);
-                            }
-                            if (stripos('levantamiento', $searchValue) !== false || strtolower($searchValue) == 'l') {
-                                $q->orWhere('tipoServicio', 2);
-                            }
-                        });
-                });
-
-                $query->orderByRaw("
-                    CASE
-                        WHEN serie = ? THEN 1
-                        WHEN numero_ticket = ? THEN 2
-                        ELSE 3
-                    END
-                ", [$searchValue, $searchValue]);
-            }
+            $query->orderByRaw("
+                CASE
+                    WHEN serie = ? THEN 1
+                    WHEN numero_ticket = ? THEN 2
+                    ELSE 3
+                END
+            ", [$searchValue, $searchValue]);
         }
+
 
         $recordsTotal = Ticket::count();
         $query->orderBy('idTickets', 'desc');
@@ -1783,6 +1787,26 @@ public function guardardatosenviosoporte(Request $request)
         return "data:image/{$optimizedType};base64," . base64_encode($compressedImage);
     }
 
+
+    public function procesarLogoMarca($imagenRaw)
+    {
+        $manager = new ImageManager(); // crear instancia
+
+        $img = $manager->make($imagenRaw);
+
+        // Redimensionar manteniendo proporciones, sin deformar
+        $img->resize(256, 160, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+
+        $canvas = $manager->canvas(256, 160, '#FFFFFF');
+
+        $canvas->insert($img, 'center');
+
+        return 'data:image/png;base64,' . base64_encode($canvas->encode('png'));
+    }
+
     public function generateLevantamientoPdf($idOt)
     {
         $orden = Ticket::with([
@@ -1798,10 +1822,11 @@ public function guardardatosenviosoporte(Request $request)
             'visitas.fotostickest'
         ])->findOrFail($idOt);
 
-        // 🔹 Logo del cliente general
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+
         $logoClienteGeneral = null;
-        if ($orden->clienteGeneral && $orden->clienteGeneral->foto) {
-            $logoClienteGeneral = 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto);
+        if ($orden->clienteGeneral && !empty($orden->clienteGeneral->foto)) {
+            $logoClienteGeneral = $this->procesarLogoMarca($orden->clienteGeneral->foto);
         }
 
         $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
@@ -1905,6 +1930,7 @@ public function guardardatosenviosoporte(Request $request)
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
             'logoClienteGeneral' => $logoClienteGeneral,
+            'logoGKM' => $logoGKM,
             'suministros' => $suministros,
             'modoVistaPrevia' => false
         ])->render();
@@ -1921,7 +1947,7 @@ public function guardardatosenviosoporte(Request $request)
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="levantamiento_' . $idOt . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -1940,10 +1966,11 @@ public function guardardatosenviosoporte(Request $request)
             'visitas.fotostickest'
         ])->findOrFail($idOt);
 
-        // 🔹 Logo del cliente general
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+
         $logoClienteGeneral = null;
-        if ($orden->clienteGeneral && $orden->clienteGeneral->foto) {
-            $logoClienteGeneral = 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto);
+        if ($orden->clienteGeneral && !empty($orden->clienteGeneral->foto)) {
+            $logoClienteGeneral = $this->procesarLogoMarca($orden->clienteGeneral->foto);
         }
 
         $idVisitasSeleccionada = $idVisita;
@@ -2042,6 +2069,7 @@ public function guardardatosenviosoporte(Request $request)
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
             'logoClienteGeneral' => $logoClienteGeneral,
+            'logoGKM' => $logoGKM,
             'suministros' => $suministros,
             'modoVistaPrevia' => false
         ])->render();
@@ -2058,7 +2086,7 @@ public function guardardatosenviosoporte(Request $request)
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="levantamiento_' . $idOt . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -2077,9 +2105,13 @@ public function guardardatosenviosoporte(Request $request)
             'visitas.fotostickest'
         ])->findOrFail($idOt);
 
-        $logoClienteGeneral = $orden->clienteGeneral && $orden->clienteGeneral->foto
-            ? 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto)
-            : null;
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+
+        $logoClienteGeneral = null;
+        if ($orden->clienteGeneral && !empty($orden->clienteGeneral->foto)) {
+            $logoClienteGeneral = $this->procesarLogoMarca($orden->clienteGeneral->foto);
+        }
+
 
         $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
         if (!$seleccionada) {
@@ -2196,6 +2228,7 @@ public function guardardatosenviosoporte(Request $request)
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
             'logoClienteGeneral' => $logoClienteGeneral,
+            'logoGKM' => $logoGKM,
             'suministros' => $suministros,
             'equiposInstalados' => $equiposInstalados,
             'equiposRetirados' => $equiposRetirados,
@@ -2216,7 +2249,7 @@ public function guardardatosenviosoporte(Request $request)
 
         return response($pdf)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="soporte_' . $idOt . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -2235,9 +2268,12 @@ public function guardardatosenviosoporte(Request $request)
             'visitas.fotostickest'
         ])->findOrFail($idOt);
 
-        $logoClienteGeneral = $orden->clienteGeneral && $orden->clienteGeneral->foto
-            ? 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto)
-            : null;
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+
+        $logoClienteGeneral = null;
+        if ($orden->clienteGeneral && !empty($orden->clienteGeneral->foto)) {
+            $logoClienteGeneral = $this->procesarLogoMarca($orden->clienteGeneral->foto);
+        }
 
         $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
         if (!$seleccionada) {
@@ -2354,6 +2390,7 @@ public function guardardatosenviosoporte(Request $request)
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
             'logoClienteGeneral' => $logoClienteGeneral,
+            'logoGKM' => $logoGKM,
             'suministros' => $suministros,
             'equiposInstalados' => $equiposInstalados,
             'equiposRetirados' => $equiposRetirados,
@@ -2374,9 +2411,9 @@ public function guardardatosenviosoporte(Request $request)
 
         return response($pdf)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="soporte_' . $idOt . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="' . $orden->numero_ticket . '.pdf"');
     }
-    
+
 
 
 
@@ -2395,10 +2432,12 @@ public function guardardatosenviosoporte(Request $request)
             'visitas.fotostickest'
         ])->findOrFail($idOt);
 
-        $logoClienteGeneral = $orden->clienteGeneral && $orden->clienteGeneral->foto
-            ? 'data:image/png;base64,' . base64_encode($orden->clienteGeneral->foto)
-            : null;
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
 
+        $logoClienteGeneral = null;
+        if ($orden->clienteGeneral && !empty($orden->clienteGeneral->foto)) {
+            $logoClienteGeneral = $this->procesarLogoMarca($orden->clienteGeneral->foto);
+        }
 
         $visitaSeleccionada = $orden->visitas->firstWhere('idVisitas', $idVisita);
 
@@ -2504,6 +2543,7 @@ public function guardardatosenviosoporte(Request $request)
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
             'logoClienteGeneral' => $logoClienteGeneral,
+            'logoGKM' => $logoGKM,
             'suministros' => $suministros,
             'equiposInstalados' => $equiposInstalados,
             'equiposRetirados' => $equiposRetirados,
