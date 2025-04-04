@@ -369,69 +369,71 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-
-
-
-
-
     $(document).ready(function () {
         console.log("🔹 DOM completamente cargado");
-
+    
         // Elementos
         const clienteSelect = $("#idCliente");
         const tiendaSelectContainer = $("#selectTiendaContainer"); // Contenedor del select de tiendas
         const tiendaSelect = $("#idTienda"); // Select de tiendas
-        const tiendaInput = $("#nombreTiendaInput"); // Input de tienda
-
+    
         // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
         tiendaSelect.removeAttr("class style").addClass("form-input w-full");
-
-        // Ocultar select de tiendas e input al inicio
+    
+        // Ocultar select de tiendas al inicio
         tiendaSelectContainer.hide();
-        tiendaInput.hide();
+    
         // 🔹 Escuchar cambios en el select de cliente
         clienteSelect.on("change", function () {
             let clienteId = clienteSelect.val();
-
+    
             if (!clienteId) {
                 console.warn("⚠️ No se ha seleccionado un cliente.");
                 return;
             }
-
+    
             console.log(`🔍 Cliente seleccionado: ${clienteId}`);
-
-            // Llamar a la API para verificar si el cliente es tienda
+    
+            // Llamar a la API para obtener los datos del cliente y su tipo de documento
             $.get(`/api/cliente/${clienteId}`, function (data) {
                 console.log("📌 Datos del cliente:", data);
-
-                // 👉 Establecer dirección automáticamente
+    
+                // Establecer dirección automáticamente
                 $("#direccion").val(data.direccion || "");
-
-                if (data.esTienda === "SI" || data.esTienda === 1) {
-                    console.log("🏪 Cliente es tienda, cargando tiendas...");
-                    mostrarSelectTiendas(clienteId);
+    
+                // Verificamos el tipo de documento del cliente
+                if (data.idTipoDocumento == 8) {
+                    // Si el cliente tiene idTipoDocumento == 2, traer todas las tiendas
+                    console.log("🌍 Cliente con idTipoDocumento == 2, cargando todas las tiendas...");
+                    mostrarSelectTiendas(clienteId, true); // True para todas las tiendas
                 } else {
-                    console.log("📝 Cliente NO es tienda, mostrando input.");
-                    ocultarSelectTiendas();
+                    // Si el cliente tiene idTipoDocumento == 1, traer solo las tiendas relacionadas
+                    console.log("🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas...");
+                    mostrarSelectTiendas(clienteId, false); // False para tiendas relacionadas
                 }
+    
             }).fail(function () {
                 console.error("❌ Error al obtener los datos del cliente.");
             });
         });
-
-
-        function mostrarSelectTiendas(clienteId) {
+    
+        // Función para mostrar el select de tiendas
+        function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
             tiendaSelectContainer.show();
-            tiendaSelect.hide();
-            tiendaInput.hide();
-
-            // 🔹 Limpiar y resetear el select
+            tiendaSelect.show();
+    
+            // Limpiar y resetear el select
             tiendaSelect.empty().append('<option value="">Seleccionar Tienda</option>');
-
-            // 🔹 Llamar a la API para obtener las tiendas del cliente
-            $.get(`/api/cliente/${clienteId}/tiendas`, function (data) {
+    
+            // Si cargarTodasTiendas es verdadero, obtenemos todas las tiendas
+            const urlTiendas = cargarTodasTiendas 
+                ? `/api/tiendas`  // Obtener todas las tiendas
+                : `/api/cliente/${clienteId}/tiendas`; // Obtener solo las tiendas relacionadas con el cliente
+    
+            // Realizamos la solicitud para obtener las tiendas
+            $.get(urlTiendas, function (data) {
                 console.log("🏪 Tiendas obtenidas:", data);
-
+    
                 if (data.length > 0) {
                     data.forEach(tienda => {
                         tiendaSelect.append(`<option value="${tienda.idTienda}">${tienda.nombre}</option>`);
@@ -441,24 +443,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.warn("⚠️ No hay tiendas registradas para este cliente.");
                 }
             }).fail(function () {
-                console.error("❌ Error al obtener tiendas del cliente.");
+                console.error("❌ Error al obtener tiendas.");
             }).always(function () {
                 tiendaSelect.show(); // ✅ Mostramos el select después de cargar los datos
             });
         }
-
-        // ✅ Función para ocultar el select de tiendas y mostrar el input de texto
-        function ocultarSelectTiendas() {
-            tiendaSelectContainer.hide();
-            tiendaSelect.hide();
-            tiendaInput.show();
-        }
-
+    
         // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
         if (clienteSelect.val()) {
             clienteSelect.trigger("change");
         }
     });
+    
+    
+
+
+
 
 
     // Evento para cuando se selecciona un cliente

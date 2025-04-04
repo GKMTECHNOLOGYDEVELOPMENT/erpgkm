@@ -118,9 +118,7 @@
                         </select>
                     </div>
 
-                    <!-- Input para escribir el nombre de la tienda (si el cliente NO es tienda) -->
-                    <input type="text" id="nombreTiendaInput" name="nombreTienda" class="form-input w-full hidden"
-                        placeholder="Ingrese el nombre de la tienda">
+                  
                 </div>
 
 

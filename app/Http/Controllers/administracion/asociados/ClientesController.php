@@ -215,45 +215,48 @@ class ClientesController extends Controller
 
         return response()->json($clientesGenerales);
     }
-
     public function obtenerCliente($idCliente)
     {
         $cliente = Cliente::find($idCliente);
-
+    
         if (!$cliente) {
             return response()->json(['error' => 'Cliente no encontrado'], 404);
         }
-
+    
         return response()->json([
             'idCliente' => $cliente->idCliente,
             'nombre' => $cliente->nombre,
             'documento' => $cliente->documento,
             'direccion' => $cliente->direccion, // 👈 AÑADIDO
+            'idTipoDocumento' => $cliente->idTipoDocumento, // Asegúrate de devolver el idTipoDocumento
             'esTienda' => $cliente->esTienda == 1 ? "SI" : "NO", // Convertimos el 1 en "SI" y 0 en "NO"
         ]);
     }
+    
 
     /**
      * Obtener las tiendas asociadas a un cliente si es tienda
      */
     public function obtenerTiendas($idCliente)
-    {
-        // Verificamos si el cliente es tienda
-        $cliente = Cliente::find($idCliente);
+{
+    $cliente = Cliente::find($idCliente);
 
-        if (!$cliente) {
-            return response()->json(['error' => 'Cliente no encontrado'], 404);
-        }
-
-        if ($cliente->esTienda != 1) {
-            return response()->json(['error' => 'El cliente no es una tienda'], 400);
-        }
-
-        // Obtener las tiendas relacionadas a ese cliente
-        $tiendas = Tienda::where('idCliente', $idCliente)->get();
-
-        return response()->json($tiendas);
+    if (!$cliente) {
+        return response()->json(['error' => 'Cliente no encontrado'], 404);
     }
+
+    // Si el cliente tiene idTipoDocumento 2, traer todas las tiendas
+    if ($cliente->idTipoDocumento == 8) {
+        // Obtener todas las tiendas
+        $tiendas = Tienda::all();
+    } else {
+        // Si el cliente tiene idTipoDocumento 1, traer solo las tiendas relacionadas
+        $tiendas = Tienda::where('idCliente', $idCliente)->get();
+    }
+
+    return response()->json($tiendas);
+}
+
 
     // Método para agregar cliente general
     public function agregarClienteGeneral($idCliente, $idClienteGeneral)
