@@ -16,8 +16,7 @@
         .red-bg {
             background-color: #A9240E !important;
             color: white !important;
-            text-align: left !important;
-            padding: 6px 10px !important;
+            padding: 6px 6px !important;
             /* Agrega un poco de espacio a la derecha e izquierda */
             font-size: 12px !important;
             font-weight: bold !important;

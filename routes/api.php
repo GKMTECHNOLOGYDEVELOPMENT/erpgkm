@@ -74,7 +74,7 @@ Route::post('/guardarCondiciones', [OrdenesTrabajoController::class, 'guardar'])
 Route::post('/guardarCondiciones/soporte', [OrdenesHelpdeskController::class, 'guardarSoporte']);
 // Route::get('/ticket/{ticketId}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
 
-Route::get('/clientegeneralfiltros', [ClienteGeneralController::class, 'clientegeneralFiltros']);
+Route::get('/clientegeneralfiltros/{tipo}', [ClienteGeneralController::class, 'clientegeneralFiltros']);
 Route::post('/guardarEstado', [OrdenesTrabajoController::class, 'guardarEstado']);
 Route::get('/obtenerJustificacion', [OrdenesTrabajoController::class, 'obtenerJustificacion']);
 Route::post('/guardarImagenes', [OrdenesTrabajoController::class, 'guardarImagenes']);

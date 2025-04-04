@@ -93,8 +93,8 @@
             <div
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($tecnico1 === 'N/A')
-                    <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                <span class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
+
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio:
                     {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
@@ -108,11 +108,13 @@
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($tipoRecojo1 === 'N/A' && $tipoEnvio1 === 'N/A')
                     <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                        class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del Envio:
                     {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
-                <div><strong>ID Ticket:</strong> #{{ $ticketId }}</div>
+                {{-- <div><strong>ID Ticket:</strong> #{{ $ticketId }}</div> --}}
+                <div><strong>Orden de Trabajo</strong> #{{ $ticketId }}</div>
+                <div><strong>N° Ticket:</strong> {{ $numero_ticket }}</div>
                 <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo1 }}</div>
                 <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio1 }}</div>
             </div>
@@ -122,7 +124,7 @@
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($ejecutor === 'N/A')
                     <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                        class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Ejecutor</h3>
                 <div><strong>Nombre:</strong> {{ $ejecutor }}</div>
@@ -162,7 +164,7 @@
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($receptorNombre === 'N/A' && $receptorDni === 'N/A')
                     <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                        class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Datos del Receptor</h3>
                 <div><strong>Nombre:</strong> {{ $receptorNombre }}</div>
@@ -190,7 +192,7 @@
                         <div class="relative space-y-2 text-sm text-gray-700 dark:text-white">
                             @if ($imagenVacia)
                                 <span
-                                    class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                                    class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
                             @endif
 
                             <a data-fancybox="anexos1" href="data:image/jpeg;base64,{{ base64_encode($anexo->foto) }}"
@@ -217,7 +219,8 @@
         @if ($tipo2)
             <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
             <div class="px-4 mb-4">
-                <h2 class="text-xl font-bold uppercase text-gray-800 dark:text-white">Datos de Envio: {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}
+                <h2 class="text-xl font-bold uppercase text-gray-800 dark:text-white">Datos de Envio:
+                    {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
@@ -226,9 +229,9 @@
                     class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                     @if (!$tecnico2 || $correo2 == 'N/A' || $telefono2 == 'N/A')
                         <span
-                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                            class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
                     @endif
-                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio: 
+                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio:
                         {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
                     <div><strong>Nombre:</strong> {{ $tecnico2 }}</div>
                     <div><strong>Correo:</strong> {{ $correo2 }}</div>
@@ -240,10 +243,12 @@
                     class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                     @if ($tipoRecojo2 == 'N/A' || $tipoEnvio2 == 'N/A')
                         <span
-                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                            class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
                     @endif
                     <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del Envio
                         {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
+                    <div><strong>Orden de Trabajo</strong> #{{ $ticketId }}</div>
+                    <div><strong>N° Ticket:</strong> {{ $numero_ticket }}</div>
                     <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo2 }}</div>
                     <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio2 }}</div>
                 </div>
@@ -262,7 +267,7 @@
                         class="md:col-span-2 relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                         @if (!$manejoEnvio2->numero_guia || !$manejoEnvio2->clave || !$usuarioEnvio2)
                             <span
-                                class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
+                                class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
                         @endif
 
                         <h3 class="font-semibold text-base border-b pb-1 mb-2">Manejo del Envio:
@@ -316,8 +321,8 @@
 
                                     @if (strlen($anexo->foto ?? '') <= 1)
                                         <span
-                                            class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">
-                                            Vacío
+                                            class="badge bg-warning absolute top-2 right-2 shadow">
+                                            Pendiente
                                         </span>
                                     @endif
                                 </a>

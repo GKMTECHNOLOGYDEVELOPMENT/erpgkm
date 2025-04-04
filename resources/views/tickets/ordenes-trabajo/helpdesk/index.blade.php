@@ -85,6 +85,7 @@
                         }
                     })" />
             </div>
+
             <!-- Fecha de Fin -->
             <div>
                 <label for="endDate" class="block text-sm font-medium text-gray-700">Fecha Fin</label>
@@ -99,27 +100,44 @@
             </div>
 
             <!-- Filtrar por Cliente General -->
-            <div x-data="{ clienteGenerales: [], clienteGeneralFilter: '' }" x-init="fetch('/api/clientegenerales')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Datos de clientes generales:', data); // Añadir log para inspeccionar los datos
-                    clienteGenerales = data;
-                    $nextTick(() => { new NiceSelect(document.getElementById('clienteGeneralFilter')); });
-                })
-                .catch(error => console.error('Error al cargar clientes generales:', error))">
-                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente
-                    General</label>
-                <select id="clienteGeneralFilter" x-model="clienteGeneralFilter"
-                    class="form-select w-full text-white-dark" @change="fetchDataAndInitTable()">
+            <div x-data="{
+                clienteGenerales: [],
+                init() {
+                    fetch('/api/clientegeneralfiltros/2')
+                        .then(response => response.json())
+                        .then(data => {
+                            this.clienteGenerales = data;
+            
+                            // Espera a que Alpine renderice los <option>
+                                this.$nextTick(() => {
+                                    setTimeout(() => {
+                                        const selectEl = document.getElementById('clienteGeneralFilter');
+                                        if (selectEl) {
+                                            NiceSelect.destroy(selectEl);
+                                            NiceSelect.bind(selectEl);
+                                        }
+                                    }, 10); // Delay ligero para asegurar DOM completo
+                                });
+                                
+                        });
+                }
+            }">
+                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">
+                    Filtrar por Cliente General
+                </label>
+                <select id="clienteGeneralFilter" x-model="$root.clienteGeneralFilter"
+                    class="form-select w-full text-white-dark"
+                    @change="
+                        $root.isLoading = true;
+                        $dispatch('cliente-general-cambio', $event.target.value)">
                     <option value="">Todos los clientes generales</option>
                     <template x-for="cliente in clienteGenerales" :key="cliente.idClienteGeneral">
                         <option :value="cliente.idClienteGeneral" x-text="cliente.descripcion"></option>
                     </template>
                 </select>
             </div>
-
-
-
+            
+            
 
             <!-- Botones de Acción -->
             <div class="flex flex-wrap items-end gap-2">
@@ -127,53 +145,50 @@
                 <a href="{{ route('ordenes.createhelpdesk') }}" class="btn btn-primary btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <!-- Línea vertical -->
                         <line x1="12" y1="6" x2="12" y2="18" stroke-linecap="round" />
-                        <!-- Línea horizontal -->
                         <line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round" />
                     </svg>
                 </a>
-
 
                 <!-- Botón Exportar (Excel) -->
                 <div x-data="{ open: false }" class="relative">
                     <a href="{{ route('ordenes.export.helpdesk.excel') }}" class="btn btn-success btn-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" viewBox="0 0 24 24"
                             fill="currentColor">
-                            <!-- Fondo del ícono de Excel -->
                             <path
                                 d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2H6Z"
                                 fill="#107C41" />
-                            <!-- Parte superior de la hoja de Excel -->
                             <path d="M14 2V8H20" fill="#0B5E30" />
-                            <!-- Letra X de Excel -->
                             <path d="M9 13L15 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
                             <path d="M15 13L9 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" />
                         </svg>
-
                     </a>
                 </div>
 
                 <!-- Botón Refrescar -->
-                <button @click="startDate = ''; endDate = ''; marcaFilter = ''; fetchDataAndInitTable()"
-                    class="btn btn-secondary btn-sm">
+                <button class="btn btn-secondary btn-sm"
+                    @click="
+                startDate = '';
+                endDate = '';
+                marcaFilter = '';
+                clienteGeneralFilter = '';
+                document.getElementById('clienteGeneralFilter').value = '';
+                NiceSelect.destroy(document.getElementById('clienteGeneralFilter'));
+                NiceSelect.bind(document.getElementById('clienteGeneralFilter'));
+                fetchDataAndInitTable()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <!-- Flecha superior derecha -->
                         <polyline points="23 4 23 10 17 10" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Flecha inferior izquierda -->
                         <polyline points="1 20 1 14 7 14" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Línea curva superior -->
                         <path d="M3.51 9a9 9 0 0114.36-3.36L23 10" stroke-linecap="round" stroke-linejoin="round" />
-                        <!-- Línea curva inferior -->
                         <path d="M20.49 15a9 9 0 01-14.36 3.36L1 14" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-
                 </button>
             </div>
         </div>
+
 
         <!-- Tabla y Paginación -->
         <div class="panel mt-6">

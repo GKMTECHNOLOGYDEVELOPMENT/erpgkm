@@ -65,8 +65,11 @@ document.addEventListener('alpine:init', () => {
                     type: "GET",
                     data: (d) => {
                         d.tipoTicket = 2;
-                        d.clienteGeneral = this.clienteGeneralFilter; // 👈 Agregado
+                        d.clienteGeneral = this.clienteGeneralFilter;
+                        d.startDate = this.startDate;
+                        d.endDate = this.endDate;
                     },
+                    
 
                     beforeSend: () => {
                         this.isLoading = true; // 🔹 Muestra el preloader antes de la petición
@@ -120,13 +123,27 @@ document.addEventListener('alpine:init', () => {
                         data: "tipoServicio",
                         render: function (data) {
                             if (data == 1) {
-                                return `<span class="badge bg-warning">S</span>`; // Soporte
+                                // 🔧 Soporte: SVG con letra S
+                                return `
+                                    <span x-tooltip="Soporte" class="inline-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
+                                            <text x="6" y="16" font-size="14"  font-family="Arial, sans-serif" font-weight="bold">S</text>
+                                        </svg>
+                                    </span>`;
                             } else if (data == 2) {
-                                return `<span class="badge bg-dark">L</span>`; // Levantamiento
+                                // 📍 Levantamiento: SVG con letra L
+                                return `
+                                    <span x-tooltip="Levantamiento" class="inline-block">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
+                                            <text x="6" y="16" font-size="14"  font-family="Arial, sans-serif" font-weight="bold">L</text>
+                                        </svg>
+                                    </span>`;
                             }
                             return '';
                         }
-                    },                                     
+                        
+                    },
+                                                      
                     { title: 'MÁS', data: null, orderable: false, render: this.getMoreButton }
                 ],
 

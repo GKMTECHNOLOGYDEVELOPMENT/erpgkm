@@ -184,16 +184,24 @@ class ClienteGeneralController extends Controller
             return response()->json(['success' => false, 'message' => 'Error al eliminar la relación']);
         }
     }
-    public function clientegeneralFiltros()
+    public function clientegeneralFiltros($tipo)
     {
         $clientes = ClienteGeneral::select('idClienteGeneral', 'descripcion')
-            ->whereIn('descripcion', ['TCL', 'TPV'])
-            ->where('estado', 1)
-            ->get();
-
-        return response()->json($clientes)->header('Content-Type', 'application/json; charset=utf-8');
+            ->where('estado', 1);
+    
+        if ($tipo == 1) {
+            $clientes->whereIn('descripcion', ['TCL', 'TPV']);
+        } elseif ($tipo == 2) {
+            $clientes->where('descripcion', 'NGR');
+        } else {
+            return response()->json([]); // Si no es 1 o 2, devuelve vacío
+        }
+    
+        return response()->json($clientes->get())
+            ->header('Content-Type', 'application/json; charset=utf-8');
     }
-
+    
+    
 
     public function marcasAsociadas($idClienteGeneral)
     {
