@@ -93,8 +93,8 @@
             <div
                 class="relative space-y-2 text-sm text-gray-700 dark:text-white p-4 rounded-xl shadow-sm border border-gray-200">
                 @if ($tecnico1 === 'N/A')
-                    <span
-                        class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full shadow">Pendiente</span>
+                <span class="badge bg-warning absolute top-2 right-2 shadow">Pendiente</span>
+
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio:
                     {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
@@ -113,7 +113,7 @@
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del Envio:
                     {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
                 {{-- <div><strong>ID Ticket:</strong> #{{ $ticketId }}</div> --}}
-                <div><strong>Orden de Trabajo</strong></div>
+                <div><strong>Orden de Trabajo</strong> #{{ $ticketId }}</div>
                 <div><strong>N° Ticket:</strong> {{ $numero_ticket }}</div>
                 <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo1 }}</div>
                 <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio1 }}</div>
@@ -247,7 +247,7 @@
                     @endif
                     <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del Envio
                         {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
-                    <div><strong>Orden de Trabajo</strong></div>
+                    <div><strong>Orden de Trabajo</strong> #{{ $ticketId }}</div>
                     <div><strong>N° Ticket:</strong> {{ $numero_ticket }}</div>
                     <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo2 }}</div>
                     <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio2 }}</div>
