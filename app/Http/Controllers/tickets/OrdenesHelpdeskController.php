@@ -1424,6 +1424,7 @@ class OrdenesHelpdeskController extends Controller
 
         return view('apps.invoice.preview', [
             'ticketId' => $id,
+            'numero_ticket' => $ticket->numero_ticket ?? 'N/A',
 
             // Envío (tipo = 1)
             'tipoRecojo1' => $tipoRecojo1->nombre ?? 'N/A',

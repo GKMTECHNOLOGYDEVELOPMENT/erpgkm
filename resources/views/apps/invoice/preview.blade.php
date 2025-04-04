@@ -112,7 +112,9 @@
                 @endif
                 <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del Envio:
                     {{ $tipo1 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
-                <div><strong>ID Ticket:</strong> #{{ $ticketId }}</div>
+                {{-- <div><strong>ID Ticket:</strong> #{{ $ticketId }}</div> --}}
+                <div><strong>Orden de Trabajo</strong></div>
+                <div><strong>N° Ticket:</strong> {{ $numero_ticket }}</div>
                 <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo1 }}</div>
                 <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio1 }}</div>
             </div>
@@ -217,7 +219,8 @@
         @if ($tipo2)
             <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
             <div class="px-4 mb-4">
-                <h2 class="text-xl font-bold uppercase text-gray-800 dark:text-white">Datos de Envio: {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}
+                <h2 class="text-xl font-bold uppercase text-gray-800 dark:text-white">Datos de Envio:
+                    {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
@@ -228,7 +231,7 @@
                         <span
                             class="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full z-10">Pendiente</span>
                     @endif
-                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio: 
+                    <h3 class="font-semibold text-base border-b pb-1 mb-2">Técnico del Envio:
                         {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
                     <div><strong>Nombre:</strong> {{ $tecnico2 }}</div>
                     <div><strong>Correo:</strong> {{ $correo2 }}</div>
@@ -244,6 +247,8 @@
                     @endif
                     <h3 class="font-semibold text-base border-b pb-1 mb-2">Información del Envio
                         {{ $tipo2 == 1 ? 'LIMA A PROVINCIA' : 'PROVINCIA A LIMA' }}</h3>
+                    <div><strong>Orden de Trabajo</strong></div>
+                    <div><strong>N° Ticket:</strong> {{ $numero_ticket }}</div>
                     <div><strong>Tipo de Recojo:</strong> {{ $tipoRecojo2 }}</div>
                     <div><strong>Tipo de Envío:</strong> {{ $tipoEnvio2 }}</div>
                 </div>
