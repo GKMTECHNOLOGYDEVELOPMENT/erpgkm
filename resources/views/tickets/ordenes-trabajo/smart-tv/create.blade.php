@@ -1089,6 +1089,10 @@
         });
     </script>
 
+
+
+
+
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <script src="{{ asset('assets/js/tickets/smart/configuraciones.js') }}"></script>
     {{-- <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script> --}}

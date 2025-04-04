@@ -35,17 +35,17 @@ public function create()
     return view('administracion.asociados.tienda.create', compact('clientes', 'departamentos'));
 }
 
-    
- // Método para almacenar la tienda
 public function store(TiendasRequest $request)
 {
-    // Verificamos los datos que estamos recibiendo en la solicitud
+    // Log de los datos del formulario recibido
     Log::info('Datos del formulario recibido en el store:', $request->all());
 
     // Validamos que el cliente seleccionado exista
+    Log::info('Verificando si el cliente existe en la base de datos.', ['idCliente' => $request->idCliente]);
     $cliente = Cliente::find($request->idCliente);
 
     if (!$cliente) {
+        // Log si el cliente no fue encontrado
         Log::error('El cliente no fue encontrado.', ['idCliente' => $request->idCliente]);
         return redirect()->back()->with('error', 'El cliente seleccionado no existe.');
     }
@@ -55,6 +55,8 @@ public function store(TiendasRequest $request)
 
     // Intentamos guardar la tienda y verificamos si el modelo se crea correctamente
     try {
+        Log::info('Intentando guardar la tienda con los siguientes datos:', $request->only(['ruc', 'nombre', 'celular', 'email', 'direccion']));
+
         $tienda = Tienda::create([
             'ruc' => $request->ruc,
             'nombre' => $request->nombre,
@@ -77,6 +79,7 @@ public function store(TiendasRequest $request)
         // En caso de error, logueamos el error
         Log::error('Error al guardar la tienda:', [
             'error' => $e->getMessage(),
+            'stack_trace' => $e->getTraceAsString(),  // Log del stack trace para depuración
             'request_data' => $request->all()
         ]);
 
@@ -84,11 +87,10 @@ public function store(TiendasRequest $request)
         return redirect()->back()->with('error', 'Hubo un problema al guardar la tienda.');
     }
 
-    // Redirigimos a la lista de tiendas o donde desees
+    // Log final antes de redirigir
     Log::info('Redirigiendo a la lista de tiendas después de guardar exitosamente.');
     return redirect()->route('administracion.tienda')->with('success', 'Tienda guardada exitosamente');
 }
-
   
 
 

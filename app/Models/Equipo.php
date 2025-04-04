@@ -32,6 +32,7 @@ class Equipo extends Model
 		'idMarca' => 'int',
 		'idModelo' => 'int',
 		'idCategoria' => 'int',
+		
 		'idTickets' => 'int',
 		'idVisitas' => 'int'
 	];
@@ -42,6 +43,7 @@ class Equipo extends Model
 		'idCategoria',
 		'idVisitas',
 		'nserie',
+		'observaciones',
 		'modalidad',
 		'idTickets'
 	];

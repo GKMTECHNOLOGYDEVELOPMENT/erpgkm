@@ -26,16 +26,6 @@
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Tienda</h2>
 
-        <!-- Mostrar alertas de éxito o error -->
-        @if (session('success'))
-            <div class="alert alert-success mb-4">
-                <strong>Éxito!</strong> {{ session('success') }}
-            </div>
-        @elseif (session('error'))
-            <div class="alert alert-danger mb-4">
-                <strong>Error!</strong> {{ session('error') }}
-            </div>
-        @endif
         <!-- Formulario -->
         <div class="p-5">
             <form id="tiendaForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
@@ -62,9 +52,9 @@
                 <div>
                     <label for="email" class="block text-sm font-medium">Email</label>
                     <input id="email" type="email" class="form-input w-full" placeholder="Ingrese el email"
-                        name="email" required
-                        title="Por favor, ingresa un correo electrónico válido. Ejemplo: usuario@dominio.com">
-                    <div id="email-error" class="text-red-500 text-sm" style="display: none;"></div>
+                        name="email" 
+                     >
+                    <!-- <div id="email-error" class="text-red-500 text-sm" style="display: none;"></div> -->
 
                 </div>
 
@@ -90,9 +80,8 @@
                 <div>
                     <label for="celular" class="block text-sm font-medium">Celular</label>
                     <input id="celular" type="text" class="form-input w-full" placeholder="Ingrese el celular"
-                        name="celular" required pattern="^\d{8,}$"
-                        title="El número de celular debe contener solo números y ser mayor a 7 dígitos">
-                    <div id="celular-error" class="text-red-500 text-sm" style="display: none;"></div>
+                        name="celular">
+                    <!-- <div id="celular-error" class="text-red-500 text-sm" style="display: none;"></div> -->
                 </div>
 
 
@@ -374,7 +363,7 @@
 
                 // Definir los campos a validar
                 const camposRequeridos = [
-                    '#ruc', '#nombre', '#email', '#celular', '#referencia', '#dirrecion',
+                    '#ruc', '#nombre',  '#referencia', '#dirrecion',
                     '#departamento', '#provincia', '#distrito', '#cliente', '#idCliente'
                 ];
 
@@ -416,39 +405,6 @@
                 checkEmptyFields(); // Revalidar campos vacíos cada vez que cambie la selección
             });
 
-            // Interceptar el envío del formulario
-            $('#tiendaForm').submit(function(event) {
-                console.log(
-                    "Formulario a enviar..."); // Log para indicar que estamos interceptando el envío
-                checkEmptyFields(); // Verificar si hay campos vacíos antes de enviar
-
-                if (!formValid) {
-                    event.preventDefault(); // Evitar el envío del formulario
-                    console.log(
-                        "Formulario no válido, se ha bloqueado el envío"
-                    ); // Log para ver que el formulario no es válido
-
-                    // Crear el div de la alerta
-                    var alertDiv = $('<div>', {
-                        class: 'flex items-center p-3.5 rounded text-warning bg-warning-light dark:bg-warning-dark-light'
-                    }).html(`
-            <span class="ltr:pr-2 rtl:pl-2">
-                <strong class="ltr:mr-1 rtl:ml-1">Warning!</strong>
-                Hay campos vacíos o repetidos. Por favor, corrija los errores y vuelva a intentarlo.
-            </span>
-            <button type="button" class="ltr:ml-auto rtl:mr-auto hover:opacity-80" onclick="this.parentElement.remove();">
-                <svg> ... </svg>
-            </button>
-        `);
-
-                    // Insertar el div de la alerta en el DOM (por ejemplo, al principio del formulario)
-                    $('#tiendaForm').before(alertDiv);
-
-                } else {
-                    console.log(
-                        "Formulario válido, se enviará"); // Log para ver que el formulario es válido
-                }
-            });
 
 
             // Validar RUC en tiempo real
@@ -518,85 +474,7 @@
                     }
                 });
             });
-            // Validar Email en tiempo real
-            $('#email').on('input', function() {
-                let email = $(this).val();
-                console.log("Verificando Email: " + email); // Log para ver el valor del email
-
-                // Verificar si el correo tiene un formato válido
-                let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                if (!emailPattern.test(email)) {
-                    $('#email').addClass('border-red-500');
-                    $('#email-error').text('Por favor ingrese un correo válido').show();
-                    formValid = false;
-                    return;
-                } else {
-                    $('#email').removeClass('border-red-500');
-                    $('#email-error').hide();
-                }
-
-                $.post('{{ route('validar.email') }}', {
-                    email: email,
-                    _token: '{{ csrf_token() }}'
-                }, function(response) {
-                    console.log("Respuesta Email: ",
-                        response); // Log para ver la respuesta del servidor
-                    if (response.exists) {
-                        $('#email').addClass('border-red-500');
-                        $('#email-error').text('El correo electrónico ya está registrado').show();
-                        formValid = false; // Desactivar el envío del formulario
-                    } else {
-                        $('#email').removeClass('border-red-500');
-                        $('#email-error').hide();
-                        checkEmptyFields(); // Revalidar campos vacíos
-                    }
-                });
-            });
-            // Validar Celular en tiempo real
-            $('#celular').on('input', function() {
-                let celular = $(this).val();
-                console.log("Verificando Celular: " + celular); // Log para ver el valor del celular
-
-                // Verificar si el celular contiene solo números
-                if (/[^0-9]/.test(celular)) {
-                    $('#celular').addClass('border-red-500');
-                    $('#celular-error').text('El celular solo debe contener números').show();
-                    formValid = false;
-                    return;
-                } else {
-                    $('#celular').removeClass('border-red-500');
-                    $('#celular-error').hide();
-                }
-
-                // Verificar que el celular tenga más de 8 dígitos
-                if (celular.length < 9) { // Esto asegura que el celular tenga al menos 9 dígitos
-                    $('#celular').addClass('border-red-500');
-                    $('#celular-error').text('El celular debe tener al menos 9 dígitos').show();
-                    formValid = false;
-                    return;
-                } else {
-                    $('#celular').removeClass('border-red-500');
-                    $('#celular-error').hide();
-                }
-
-
-                $.post('{{ route('validar.celular') }}', {
-                    celular: celular,
-                    _token: '{{ csrf_token() }}'
-                }, function(response) {
-                    console.log("Respuesta Celular: ",
-                        response); // Log para ver la respuesta del servidor
-                    if (response.exists) {
-                        $('#celular').addClass('border-red-500');
-                        $('#celular-error').text('El celular ya está registrado').show();
-                        formValid = false; // Desactivar el envío del formulario
-                    } else {
-                        $('#celular').removeClass('border-red-500');
-                        $('#celular-error').hide();
-                        checkEmptyFields(); // Revalidar campos vacíos
-                    }
-                });
-            });
+         
         });
     </script>
 

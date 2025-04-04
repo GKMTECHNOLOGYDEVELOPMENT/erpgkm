@@ -10,11 +10,91 @@
 <!-- Estilos adicionales para el log -->
 
 
-<!-- 📌 Encabezado de la Orden -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
-    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">
-        Orden de Trabajo N° {{ $orden->idTickets }}
-    </span>
+<!-- Contenedor Alpine.js para el botón y el modal -->
+<div x-data="{ openModal: false }">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+            style="background-color: {{ $colorEstado }};">
+            Orden de Trabajo N° {{ $orden->idTickets }}
+        </span>
+
+        <!-- Botón flotante responsive -->
+        <button id="botonFlotante"
+            class="bg-dark text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all duration-200
+            text-xs sm:text-sm md:text-base flex items-center justify-center gap-1 sm:gap-2 w-full sm:w-auto"
+            @click="openModal = true">
+            <i class="fa-solid fa-clock-rotate-left text-sm sm:text-base md:text-lg"></i>
+            <span class="sm:inline"></span>
+        </button>
+    </div>
+
+
+    <!-- Fondo oscuro cuando el modal está abierto -->
+    <div x-show="openModal" class="fixed inset-0 bg-[black]/60 z-40 transition-opacity duration-300"
+        @click="openModal = false">
+    </div>
+
+    <!-- Modal deslizable desde la derecha -->
+    <div x-show="openModal" x-transition:enter="transition ease-in-out duration-300 transform"
+        x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
+        x-transition:leave="transition ease-in-out duration-300 transform"
+        x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
+        class="fixed top-0 right-0 w-80 sm:w-[600px] md:w-[700px] lg:w-[800px] h-full bg-white dark:bg-gray-900 shadow-lg z-50 p-6 flex flex-col rounded-l-lg">
+
+        <!-- Encabezado del modal -->
+        <div class="flex justify-between items-center border-b pb-3 border-gray-300 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
+            <button @click="openModal = false"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Contenido del modal con tabla -->
+        <div class="mt-4 overflow-y-auto">
+            <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
+                <thead class="bg-gray-100 dark:bg-gray-800">
+                    <tr>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Campo</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Valor Antiguo</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Valor Nuevo</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Fecha de Modificación</th>
+                        <th
+                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
+                            Usuario</th>
+                    </tr>
+                </thead>
+                <tbody id="historialModificaciones">
+                    <!-- Preload visible mientras se cargan los datos -->
+                    <tr id="preload" style="display: none;">
+                        <td colspan="5" class="text-center text-gray-900 dark:text-gray-200">
+                            <span class="w-5 h-5 m-auto mb-10">
+                                <span
+                                    class="animate-ping inline-flex h-full w-full rounded-full bg-info dark:bg-blue-500"></span>
+                            </span>
+                            Cargando datos...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Contenedor de paginación -->
+        <div class="flex justify-center mt-4">
+            <ul id="pagination" class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
+                <!-- Los botones de paginación se generarán dinámicamente -->
+            </ul>
+        </div>
+    </div>
+
 </div>
 
 <!-- 🛠️ Formulario de Detalles -->
@@ -180,6 +260,164 @@
 
 
 </div>
+
+
+
+
+<script>
+    // Suponiendo que tienes un ID de ticket disponible en tu página
+    const ticketId = '{{ $id }}'; // Error aquí, ya que ticketId ya fue declarado en PHP
+
+    function obtenerLabelsFormulario() {
+        const labels = {
+            horaInicioInput: 'Hora Inicio',
+            horaFinInput: 'Hora Fin',
+            fechaVisitaInput: 'Fecha Visita',
+            nombreVisitaInput: 'Nombre de la Visita',
+            // Podés seguir agregando más si querés personalizar más campos
+        };
+
+        document.querySelectorAll("form label").forEach(label => {
+            const input = label.nextElementSibling || label.parentElement.querySelector(
+                'input, select, textarea');
+            if (input) {
+                const name = input.getAttribute("name") || input.getAttribute("id");
+                if (name && !labels[name]) {
+                    labels[name] = label.textContent.trim(); // fallback si no está en el diccionario
+                }
+            }
+        });
+
+        return labels;
+    }
+
+
+    window.addEventListener('toggle-modal', function() {
+        obtenerLabelsFormulario(); // 🔹 Asegurar que los labels se capturen antes de cargar el historial
+        cargarHistorialModificaciones(ticketId);
+    });
+
+    // Variables globales para paginación
+    let historialCompleto = [];
+    let paginaActual = 1;
+    const registrosPorPagina = 10;
+    // Función para cargar el historial con paginación
+    function cargarHistorialModificaciones(ticketId) {
+        const labels = obtenerLabelsFormulario(); // Obtener los labels del formulario
+
+        $.ajax({
+            url: `/ticket/${ticketId}/historial-modificaciones`,
+            method: 'GET',
+            success: function(response) {
+                console.log(response);
+                historialCompleto = response; // Guardar el historial completo
+                paginaActual = 1; // Reiniciar a la primera página
+                mostrarPagina(labels); // Mostrar la primera página
+            },
+            error: function(xhr, status, error) {
+                console.error("Error al cargar el historial de modificaciones", error);
+            }
+        });
+    }
+
+    // Función para mostrar una página específica
+    function mostrarPagina(labels) {
+        const tbody = document.getElementById('historialModificaciones');
+        tbody.innerHTML = '';
+
+        const inicio = (paginaActual - 1) * registrosPorPagina;
+        const fin = inicio + registrosPorPagina;
+        const paginaDatos = historialCompleto.slice(inicio, fin);
+
+        paginaDatos.forEach(modificacion => {
+            const tr = document.createElement('tr');
+
+            // Usar el label en lugar del nombre del campo
+            const campoLabel = labels[modificacion.campo] || modificacion.campo;
+
+            tr.innerHTML = `
+            <td class="border border-gray-300 px-4 py-2 text-sm">${campoLabel}</td>
+            <td class="border border-gray-300 px-4 py-2 text-sm">${modificacion.valor_antiguo ?? '—'}</td>
+            <td class="border border-gray-300 px-4 py-2 text-sm">${modificacion.valor_nuevo ?? '—'}</td>
+            <td class="border border-gray-300 px-4 py-2 text-sm">${modificacion.fecha_modificacion}</td>
+            <td class="border border-gray-300 px-4 py-2 text-sm">${modificacion.usuario}</td>
+        `;
+
+            tbody.appendChild(tr);
+        });
+
+        actualizarPaginacion();
+    }
+
+    // Función para actualizar la paginación dinámica con botones numerados
+    function actualizarPaginacion() {
+        const totalPaginas = Math.ceil(historialCompleto.length / registrosPorPagina);
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = '';
+
+        // Botón "Anterior"
+        const prevButton = document.createElement('li');
+        prevButton.innerHTML = `
+        <button id="prevPage" class="flex justify-center font-semibold p-2 rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" ${paginaActual === 1 ? 'disabled' : ''}>
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+    `;
+        paginationContainer.appendChild(prevButton);
+
+        // Números de páginas
+        for (let i = 1; i <= totalPaginas; i++) {
+            const pageButton = document.createElement('li');
+            pageButton.innerHTML = `
+            <button data-page="${i}" class="flex justify-center font-semibold px-3.5 py-2 rounded-full transition ${paginaActual === i ? 'bg-primary text-white' : 'bg-white-light text-dark hover:text-white hover:bg-primary'} dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary">
+                ${i}
+            </button>
+        `;
+            paginationContainer.appendChild(pageButton);
+        }
+
+        // Botón "Siguiente"
+        const nextButton = document.createElement('li');
+        nextButton.innerHTML = `
+        <button id="nextPage" class="flex justify-center font-semibold p-2 rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" ${paginaActual === totalPaginas ? 'disabled' : ''}>
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    `;
+        paginationContainer.appendChild(nextButton);
+
+        // Eventos de paginación
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarPagina(obtenerLabelsFormulario());
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarPagina(obtenerLabelsFormulario());
+            }
+        });
+
+        // Evento para los números de página
+        document.querySelectorAll('[data-page]').forEach(button => {
+            button.addEventListener('click', (event) => {
+                paginaActual = parseInt(event.target.getAttribute('data-page'));
+                mostrarPagina(obtenerLabelsFormulario());
+            });
+        });
+    }
+    document.getElementById('botonFlotante').addEventListener('click', function() {
+        // Mostrar el preload cuando se haga clic en el botón
+        const tbody = document.getElementById('historialModificaciones');
+        const preload = document.getElementById('preload');
+        preload.style.display = 'table-row'; // Mostrar el preload
+
+        // Llamar la función que carga las modificaciones
+        cargarHistorialModificaciones(ticketId, tbody, preload);
+    });
+</script>
+
 
 
 
