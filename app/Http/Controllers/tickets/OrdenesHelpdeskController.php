@@ -28,6 +28,7 @@ use App\Models\Equipo;
 use App\Models\SeleccionarVisita;
 use App\Models\Suministro;
 use App\Models\TicketFlujo;
+use App\Models\Tipodocumento;
 use App\Models\TipoEnvio;
 use App\Models\TipoRecojo;
 use App\Models\TransicionStatusTicket;
@@ -94,6 +95,10 @@ class OrdenesHelpdeskController extends Controller
         $modelos = Modelo::all();
         $tiposEnvio = TipoEnvio::all();
         $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
+        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+        $categorias = Categoria::all();
+
+        $tiposDocumento = Tipodocumento::all();
 
 
 
@@ -104,10 +109,13 @@ class OrdenesHelpdeskController extends Controller
             'tiendas',
             'usuarios',
             'tiposServicio',
+            'departamentos',
             'marcas',
+            'categorias',
             'modelos',
             'tiposEnvio',
-            'tiposRecojo'
+            'tiposRecojo',
+            'tiposDocumento'
         ));
     }
 
@@ -512,6 +520,7 @@ class OrdenesHelpdeskController extends Controller
             'marca' => 'required|integer',
             'modelo' => 'required|integer',
             'numeroSerie' => 'required|string|max:255',
+            'observaciones' => 'required|string|max:255',
             'idTicket' => 'required|integer',
             'idVisita' => 'required|integer',
         ]);
@@ -523,6 +532,7 @@ class OrdenesHelpdeskController extends Controller
         $equipo->idTickets = $request->idTicket;
         $equipo->idModelo = $request->modelo;
         $equipo->idMarca = $request->marca;
+        $equipo->observaciones = $request->observaciones;
         $equipo->idCategoria = $request->tipoProducto;
         $equipo->idVisitas = $request->idVisita;
         $equipo->save();
@@ -585,6 +595,7 @@ class OrdenesHelpdeskController extends Controller
             'marca' => 'required|integer',
             'modelo' => 'required|integer',
             'numeroSerie' => 'required|string|max:255',
+            'observaciones' => 'required|string|max:255',
             'idTicket' => 'required|integer',
             'idVisita' => 'required|integer',
         ]);
@@ -596,6 +607,7 @@ class OrdenesHelpdeskController extends Controller
         $equipo->idTickets = $request->idTicket;
         $equipo->idModelo = $request->modelo;
         $equipo->idMarca = $request->marca;
+        $equipo->observaciones = $request->observaciones;
         $equipo->idCategoria = $request->tipoProducto;
         $equipo->idVisitas = $request->idVisita;
         $equipo->save();
@@ -2274,11 +2286,6 @@ class OrdenesHelpdeskController extends Controller
         $logoClienteGeneral = null;
         if ($orden->clienteGeneral && !empty($orden->clienteGeneral->foto)) {
             $logoClienteGeneral = $this->procesarLogoMarca($orden->clienteGeneral->foto);
-        }
-
-        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
-        if (!$seleccionada) {
-            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada.']);
         }
 
         $idVisita = $idVisita;

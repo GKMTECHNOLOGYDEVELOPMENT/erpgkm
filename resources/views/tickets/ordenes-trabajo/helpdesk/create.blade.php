@@ -39,11 +39,8 @@
                 <!-- Cliente General -->
                 <div>
                     <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display: none;">
-                        <option value="" disabled selected>Seleccionar Cliente General</option>
-                        @foreach ($clientesGenerales as $cliente)
-                            <option value="{{ $cliente->idClienteGeneral }}">{{ $cliente->descripcion }}</option>
-                        @endforeach
+                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full ">
+                        <option value="" selected>Seleccionar Cliente General</option>
                     </select>
                 </div>
 
@@ -58,18 +55,13 @@
 
 
 
-                <!-- Tienda -->
-                <div>
-                    <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                    <select id="idTienda" name="idTienda" class="select2 w-full" style="display: none">
-                        <option value="" disabled selected>Seleccionar Tienda</option>
-                        @foreach ($tiendas as $tienda)
-                            <option value="{{ $tienda->idTienda }}" data-departamento="{{ $tienda->departamento }}">
-                                {{ $tienda->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                 <!-- Select para tiendas (solo si el cliente es tienda) -->
+                 <div id="selectTiendaContainer">
+                 <label for="idTienda" class="block text-sm font-medium">Tienda</label>
+                        <select id="idTienda" name="idTienda" class="form-input w-full ">
+                            <option value="">Seleccionar Tienda</option>
+                        </select>
+                    </div>
 
                 <!-- Tipo de Servicio -->
                 <div>
@@ -95,7 +87,7 @@
                 <!-- Switches en 2 columnas -->
                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- ¿Es Recojo? -->
-                    <div id="esRecojoContainer" class="hidden">
+                    <!-- <div id="esRecojoContainer" class="hidden">
                         <label class="block text-sm font-medium mb-2">¿Es Recojo?</label>
                         <label class="w-12 h-6 relative inline-block">
                             <input type="checkbox" id="esRecojo" name="esRecojo"
@@ -104,7 +96,7 @@
                                 class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300">
                             </span>
                         </label>
-                    </div>
+                    </div> -->
 
                     <!-- ¿Es Envío? -->
                     <div id="esEnvioContainer" style="display: none;">
@@ -309,26 +301,26 @@
                 });
             });
 
-            // Lógica para mostrar el checkbox si el tipo de servicio es "SOPORTE ON SITE"
-            const selectTipoServicio = document.getElementById("tipoServicio");
-            const esRecojoContainer = document.getElementById("esRecojoContainer");
+            // // Lógica para mostrar el checkbox si el tipo de servicio es "SOPORTE ON SITE"
+            // const selectTipoServicio = document.getElementById("tipoServicio");
+            // const esRecojoContainer = document.getElementById("esRecojoContainer");
 
-            function verificarTipoServicio() {
-                const tipoSeleccionado = selectTipoServicio.options[selectTipoServicio.selectedIndex];
-                const nombreTipo = tipoSeleccionado ? tipoSeleccionado.dataset.nombre : "";
+            // function verificarTipoServicio() {
+            //     const tipoSeleccionado = selectTipoServicio.options[selectTipoServicio.selectedIndex];
+            //     const nombreTipo = tipoSeleccionado ? tipoSeleccionado.dataset.nombre : "";
 
-                if (nombreTipo === "SOPORTE ON SITE") {
-                    esRecojoContainer.classList.remove("hidden");
-                } else {
-                    esRecojoContainer.classList.add("hidden");
-                }
-            }
+            //     if (nombreTipo === "SOPORTE ON SITE") {
+            //         esRecojoContainer.classList.remove("hidden");
+            //     } else {
+            //         esRecojoContainer.classList.add("hidden");
+            //     }
+            // }
 
-            // Evento de cambio en el select
-            selectTipoServicio.addEventListener("change", verificarTipoServicio);
+            // // Evento de cambio en el select
+            // selectTipoServicio.addEventListener("change", verificarTipoServicio);
 
-            // Verificar al cargar la página
-            verificarTipoServicio();
+            // // Verificar al cargar la página
+            // verificarTipoServicio();
 
 
 
@@ -554,6 +546,202 @@
         });
     </script>
 
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
+    let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
+    // let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
+
+
+
+
+
+    // console.log(cargarClientesGenerales);
+// Función para cargar los clientes
+function cargarClientes() {
+    fetch('/clientesdatoscliente')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('idCliente'); // Aquí aún usas 'idCliente' para obtener el select
+
+            // Puedes agregar un 'name' también, si lo deseas:
+            select.setAttribute('name', 'idCliente');  // Aquí le asignas el 'name' que quieres
+
+            // Vaciar y llenar el select con las opciones
+            select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
+            data.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.idCliente;
+                option.textContent = `${cliente.nombre} - ${cliente.documento}`;
+                option.dataset.tienda = cliente.esTienda;
+                option.dataset.direccion = cliente.direccion; // <--- AÑADIDO
+                select.appendChild(option);
+            });
+
+            // Si ya existe una instancia previa de nice-select, la destruye
+            if (select.niceSelectInstance) {
+                select.niceSelectInstance.destroy();
+            }
+
+            // Inicializa nice-select y guarda la instancia en el select
+            select.niceSelectInstance = NiceSelect.bind(select, {
+                searchable: true
+            });
+
+            // Mostrar el select después de cargar los datos
+            select.style.display = 'block'; // O 'inline-block' según tu diseño
+        })
+        .catch(error => console.error('Error al cargar clientes:', error));
+}
+
+// Ocultar el select de clientes inicialmente
+let selectCliente = document.getElementById('idCliente');
+selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
+
+// Cargar los clientes solo si no se han cargado previamente
+if (!clientesCargados) {
+    cargarClientes();
+    clientesCargados = true;
+}
+
+
+
+
+
+
+    
+    $(document).ready(function () {
+        console.log("🔹 DOM completamente cargado");
+    
+        // Elementos
+        const clienteSelect = $("#idCliente");
+        const tiendaSelectContainer = $("#selectTiendaContainer"); // Contenedor del select de tiendas
+        const tiendaSelect = $("#idTienda"); // Select de tiendas
+    
+        // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
+        tiendaSelect.removeAttr("class style").addClass("form-input w-full");
+    
+        // Ocultar select de tiendas al inicio
+        tiendaSelectContainer.hide();
+    
+        // 🔹 Escuchar cambios en el select de cliente
+        clienteSelect.on("change", function () {
+            let clienteId = clienteSelect.val();
+    
+            if (!clienteId) {
+                console.warn("⚠️ No se ha seleccionado un cliente.");
+                return;
+            }
+    
+            console.log(`🔍 Cliente seleccionado: ${clienteId}`);
+    
+            // Llamar a la API para obtener los datos del cliente y su tipo de documento
+            $.get(`/api/cliente/${clienteId}`, function (data) {
+                console.log("📌 Datos del cliente:", data);
+    
+                // Establecer dirección automáticamente
+                $("#direccion").val(data.direccion || "");
+    
+                // Verificamos el tipo de documento del cliente
+                if (data.idTipoDocumento == 8) {
+                    // Si el cliente tiene idTipoDocumento == 2, traer todas las tiendas
+                    console.log("🌍 Cliente con idTipoDocumento == 2, cargando todas las tiendas...");
+                    mostrarSelectTiendas(clienteId, true); // True para todas las tiendas
+                } else {
+                    // Si el cliente tiene idTipoDocumento == 1, traer solo las tiendas relacionadas
+                    console.log("🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas...");
+                    mostrarSelectTiendas(clienteId, false); // False para tiendas relacionadas
+                }
+    
+            }).fail(function () {
+                console.error("❌ Error al obtener los datos del cliente.");
+            });
+        });
+    
+        // Función para mostrar el select de tiendas
+        function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
+            tiendaSelectContainer.show();
+            tiendaSelect.show();
+    
+            // Limpiar y resetear el select
+            tiendaSelect.empty().append('<option value="">Seleccionar Tienda</option>');
+    
+            // Si cargarTodasTiendas es verdadero, obtenemos todas las tiendas
+            const urlTiendas = cargarTodasTiendas 
+                ? `/api/tiendas`  // Obtener todas las tiendas
+                : `/api/cliente/${clienteId}/tiendas`; // Obtener solo las tiendas relacionadas con el cliente
+    
+            // Realizamos la solicitud para obtener las tiendas
+            $.get(urlTiendas, function (data) {
+                console.log("🏪 Tiendas obtenidas:", data);
+    
+                if (data.length > 0) {
+                    data.forEach(tienda => {
+                        tiendaSelect.append(`<option value="${tienda.idTienda}">${tienda.nombre}</option>`);
+                    });
+                } else {
+                    tiendaSelect.append('<option value="">No hay tiendas registradas</option>');
+                    console.warn("⚠️ No hay tiendas registradas para este cliente.");
+                }
+            }).fail(function () {
+                console.error("❌ Error al obtener tiendas.");
+            }).always(function () {
+                tiendaSelect.show(); // ✅ Mostramos el select después de cargar los datos
+            });
+        }
+    
+        // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
+        if (clienteSelect.val()) {
+            clienteSelect.trigger("change");
+        }
+    });
+    
+    
+
+
+
+
+
+    // Evento para cuando se selecciona un cliente
+    document.getElementById('idCliente').addEventListener('change', function () {
+        let clienteId = this.value;
+        if (clienteId) {
+            console.log('Cliente seleccionado:', clienteId); // Verificar si el cliente es seleccionado
+            fetch(`/clientes-generales/${clienteId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let select = document.getElementById('idClienteGeneral');
+                    select.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
+
+                    // Verificar si se recibió algún dato
+                    console.log('Clientes generales:', data); // Verifica que se reciban los clientes generales
+
+                    // Llenar el select con los clientes generales
+                    data.forEach(clienteGeneral => {
+                        let option = document.createElement('option');
+                        option.value = clienteGeneral.idClienteGeneral;
+                        option.textContent = clienteGeneral.descripcion;
+                        select.appendChild(option);
+                    });
+
+                    // Si hay solo un cliente general, lo seleccionamos automáticamente
+                    if (data.length === 1) {
+                        select.value = data[0].idClienteGeneral; // Seleccionar automáticamente el único cliente
+                    }
+
+                    // No inicializamos NiceSelect en el select de Cliente General
+                    // Simplemente utilizamos el select estándar
+                })
+                .catch(error => console.error('Error al cargar clientes generales:', error));
+        } else {
+            // Limpiar el select si no hay cliente seleccionado
+            document.getElementById('idClienteGeneral').innerHTML =
+                '<option value="" selected>Seleccionar Cliente General</option>';
+        }
+    });
+});
+</script>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
