@@ -411,7 +411,7 @@ public function config(Request $request, $id)
 {
     // Validación de los campos
     $request->validate([
-        'sueldoPorHora' => 'required|numeric',
+        'sueldoPorHora' => 'required|numeric|min:0', // Asegura que el sueldoPorHora sea >= 0
         'idSucursal' => 'integer|exists:sucursal,idSucursal',
         'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',
         'idSexo' => 'required|integer|exists:sexo,idSexo',
