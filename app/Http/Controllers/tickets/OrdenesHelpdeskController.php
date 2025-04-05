@@ -2288,11 +2288,6 @@ class OrdenesHelpdeskController extends Controller
             $logoClienteGeneral = $this->procesarLogoMarca($orden->clienteGeneral->foto);
         }
 
-        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
-        if (!$seleccionada) {
-            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada.']);
-        }
-
         $idVisita = $idVisita;
         $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisita)->first();
 
