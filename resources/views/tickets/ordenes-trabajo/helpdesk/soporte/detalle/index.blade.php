@@ -10,12 +10,77 @@
 <!-- Estilos adicionales para el log -->
 
 
-<!-- 📌 Encabezado de la Orden -->
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
-    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">
+<!-- 📌 Encabezado de la Orden + Botón Historial -->
+<div x-data="{ openModal: false }"
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+        style="background-color: {{ $colorEstado }};">
         Orden de Trabajo N° {{ $orden->idTickets }}
     </span>
+
+    <!-- Botón Flotante -->
+    <button id="botonFlotante"
+        class="bg-dark text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all duration-200
+                   text-xs sm:text-sm md:text-base flex items-center justify-center gap-1 sm:gap-2 w-full sm:w-auto"
+        @click="openModal = true">
+        <i class="fa-solid fa-clock-rotate-left text-sm sm:text-base md:text-lg"></i>
+    </button>
+
+    <!-- Fondo oscuro -->
+    <div x-show="openModal" class="fixed inset-0 bg-[black]/60 z-40 transition-opacity duration-300"
+        @click="openModal = false"></div>
+
+    <!-- Modal lateral -->
+    <div x-show="openModal" x-transition:enter="transition ease-in-out duration-300 transform"
+        x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
+        x-transition:leave="transition ease-in-out duration-300 transform"
+        x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
+        class="fixed top-0 right-0 w-80 sm:w-[600px] md:w-[700px] lg:w-[800px] h-full bg-white dark:bg-gray-900 shadow-lg z-50 p-6 flex flex-col rounded-l-lg">
+
+        <!-- Encabezado del modal -->
+        <div class="flex justify-between items-center border-b pb-3 border-gray-300 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
+            <button @click="openModal = false"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Contenido del modal -->
+        <div class="mt-4 overflow-y-auto">
+            <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
+                <thead class="bg-gray-100 dark:bg-gray-800">
+                    <tr>
+                        <th class="border px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">Campo</th>
+                        <th class="border px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">Valor
+                            Antiguo</th>
+                        <th class="border px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">Valor Nuevo
+                        </th>
+                        <th class="border px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">Fecha</th>
+                        <th class="border px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">Usuario</th>
+                    </tr>
+                </thead>
+                <tbody id="historialModificaciones">
+                    <tr id="preload" style="display: none;">
+                        <td colspan="5" class="text-center text-gray-900 dark:text-gray-200">
+                            <span class="w-5 h-5 m-auto mb-10">
+                                <span
+                                    class="animate-ping inline-flex h-full w-full rounded-full bg-info dark:bg-blue-500"></span>
+                            </span>
+                            Cargando datos...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="flex justify-center mt-4">
+            <ul id="pagination" class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4"></ul>
+        </div>
+    </div>
 </div>
+
 
 <!-- 🛠️ Formulario de Detalles -->
 <div class="p-6 mt-4">
@@ -75,24 +140,24 @@
             <div>
                 <label class="text-sm font-medium">Dirrecion</label>
                 <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->direccion }}"
-                readonly>
+                    readonly>
             </div>
 
-<!-- Ejecutar -->
-@if($existeFlujo25)
-    <div>
-        <label class="text-sm font-medium">Ejecutor</label>
-        <select id="ejecutor" name="ejecutor" class="select2 w-full"  style="display: none;">
-            <option value="" disabled>Seleccionar Ejecutador</option>
-            @foreach ($usuarios as $usuario)
-                <option value="{{ $usuario->idUsuario }}"
-                    {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
-                    {{ $usuario->Nombre }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-@endif
+            <!-- Ejecutar -->
+            @if ($existeFlujo25)
+                <div>
+                    <label class="text-sm font-medium">Ejecutor</label>
+                    <select id="ejecutor" name="ejecutor" class="select2 w-full" style="display: none;">
+                        <option value="" disabled>Seleccionar Ejecutador</option>
+                        @foreach ($usuarios as $usuario)
+                            <option value="{{ $usuario->idUsuario }}"
+                                {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
+                                {{ $usuario->Nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
 
 
 
@@ -132,7 +197,8 @@
 
 <!-- Nueva Card: Historial de Estados -->
 <div id="estadosCard" class="mt-4 p-4">
-    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Historial de Estados</span>
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+        style="background-color: {{ $colorEstado }};">Historial de Estados</span>
     <!-- Tabla con scroll horizontal -->
     <div class="overflow-x-auto mt-4">
         <table class="min-w-[600px] border-collapse">
@@ -780,7 +846,7 @@
                 }
             }
 
-          
+
 
             // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -796,7 +862,8 @@
 
             // Enviar datos por AJAX
             $.ajax({
-                url: '/actualizar-orden-soporte/' + idOrden, // Pasar el id de la orden en la URL
+                url: '/actualizar-orden-soporte/' +
+                    idOrden, // Pasar el id de la orden en la URL
                 method: 'PUT', // Usar PUT para la actualización
                 data: formData,
                 headers: {
@@ -817,5 +884,111 @@
                 }
             });
         });
+    });
+</script>
+<script>
+    const ticketId = '{{ $orden->idTickets }}';
+    let historialCompleto = [];
+    let paginaActual = 1;
+    const registrosPorPagina = 10;
+
+    function obtenerLabelsFormulario() {
+        const labels = {};
+        document.querySelectorAll("form label").forEach(label => {
+            const input = label.nextElementSibling;
+            if (input) {
+                const name = input.getAttribute("name") || input.getAttribute("id");
+                if (name) labels[name] = label.textContent.trim();
+            }
+        });
+        return labels;
+    }
+
+    function cargarHistorialModificaciones(ticketId) {
+        const labels = obtenerLabelsFormulario();
+        $.ajax({
+            url: `/ticket/${ticketId}/historial-modificaciones`,
+            method: 'GET',
+            success: function(response) {
+                historialCompleto = response;
+                paginaActual = 1;
+                mostrarPagina(labels);
+            },
+            error: function(xhr, status, error) {
+                console.error("Error al cargar historial:", error);
+            }
+        });
+    }
+
+    function mostrarPagina(labels) {
+        const tbody = document.getElementById('historialModificaciones');
+        tbody.innerHTML = '';
+        const inicio = (paginaActual - 1) * registrosPorPagina;
+        const fin = inicio + registrosPorPagina;
+        const paginaDatos = historialCompleto.slice(inicio, fin);
+
+        paginaDatos.forEach(mod => {
+            const campoLabel = labels[mod.campo] || mod.campo;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="border px-4 py-2 text-sm">${campoLabel}</td>
+                <td class="border px-4 py-2 text-sm">${mod.valor_antiguo ?? '—'}</td>
+                <td class="border px-4 py-2 text-sm">${mod.valor_nuevo ?? '—'}</td>
+                <td class="border px-4 py-2 text-sm">${mod.fecha_modificacion}</td>
+                <td class="border px-4 py-2 text-sm">${mod.usuario}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        actualizarPaginacion();
+    }
+
+    function actualizarPaginacion() {
+        const totalPaginas = Math.ceil(historialCompleto.length / registrosPorPagina);
+        const container = document.getElementById('pagination');
+        container.innerHTML = '';
+
+        const prev = document.createElement('li');
+        prev.innerHTML =
+            `<button id="prevPage" class="p-2 rounded bg-white-light text-dark hover:bg-primary hover:text-white dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" ${paginaActual === 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>`;
+        container.appendChild(prev);
+
+        for (let i = 1; i <= totalPaginas; i++) {
+            const pageBtn = document.createElement('li');
+            pageBtn.innerHTML =
+                `<button data-page="${i}" class="px-3.5 py-2 rounded-full font-semibold ${paginaActual === i ? 'bg-primary text-white' : 'bg-white-light text-dark hover:bg-primary hover:text-white'} dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary">${i}</button>`;
+            container.appendChild(pageBtn);
+        }
+
+        const next = document.createElement('li');
+        next.innerHTML =
+            `<button id="nextPage" class="p-2 rounded bg-white-light text-dark hover:bg-primary hover:text-white dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" ${paginaActual === totalPaginas ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button>`;
+        container.appendChild(next);
+
+        document.getElementById('prevPage')?.addEventListener('click', () => {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarPagina(obtenerLabelsFormulario());
+            }
+        });
+
+        document.getElementById('nextPage')?.addEventListener('click', () => {
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarPagina(obtenerLabelsFormulario());
+            }
+        });
+
+        document.querySelectorAll('[data-page]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                paginaActual = parseInt(e.target.getAttribute('data-page'));
+                mostrarPagina(obtenerLabelsFormulario());
+            });
+        });
+    }
+
+    document.getElementById('botonFlotante')?.addEventListener('click', function() {
+        document.getElementById('preload').style.display = 'table-row';
+        cargarHistorialModificaciones(ticketId);
     });
 </script>

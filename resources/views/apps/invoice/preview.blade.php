@@ -178,7 +178,7 @@
             <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
             <div class="px-4">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Anexos de Retiro -
-                    {{ $tipo1 == 1 ? 'PROVINCA' : 'LIMA' }}</h3>
+                    {{ $tipo1 == 1 ? 'PROVINCIA' : 'LIMA' }}</h3>
 
                 <div
                     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-h-[600px] overflow-y-auto pr-1">
@@ -306,7 +306,7 @@
                 <hr class="border-gray-300 dark:border-[#1b2e4b] my-6">
                 <div class="px-4">
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-                        Anexos de Retiro - {{ $tipo2 == 1 ? 'PROVINCA' : 'LIMA' }}</h3>
+                        Anexos de Retiro - {{ $tipo2 == 1 ? 'PROVINCIA' : 'LIMA' }}</h3>
                     </h3>
                     <div
                         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-h-[600px] overflow-y-auto pr-1">

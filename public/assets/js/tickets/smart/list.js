@@ -36,9 +36,36 @@ document.addEventListener('alpine:init', () => {
                     word-wrap: break-word;
                     max-width: 1500px;
                 }
+        
+                /* Ajusta fuente y paddings */
+                #myTable1_wrapper {
+                    font-size: 13px;
+                    width: 100%;
+                }
+        
+                #myTable1 {
+                    table-layout: auto !important;
+                    width: 100% !important;
+                }
+        
+                #myTable1 th, #myTable1 td {
+                    padding: 6px 10px !important;
+                }
+        
+                /* Evita el encogimiento innecesario de columnas */
+                #myTable1 th {
+                    white-space: nowrap;
+                }
+        
+                /* Opcional: define un ancho mínimo para columnas importantes */
+                #myTable1 td:nth-child(3),
+                #myTable1 th:nth-child(3) {
+                    min-width: 120px;
+                }
             `;
             document.head.appendChild(style);
         },
+        
 
         fetchMarcas() {
             fetch('/api/marcas')
@@ -86,7 +113,7 @@ document.addEventListener('alpine:init', () => {
                 },
                 columns: [
                     { title: 'ID', data: "idTickets" }, // 👈 NUEVA COLUMNA
-                    { title: 'EDITAR', data: null, orderable: false, render: this.getEditButton },
+                    { title: 'ACCIONES', data: null, orderable: false, render: this.getEditButton },
                     { title: 'N. TICKET', data: "numero_ticket", defaultContent: "N/A" },
                     { title: 'F. TICKET', data: "fecha_creacion", defaultContent: "N/A", render: formatDate },
                     {
@@ -215,7 +242,7 @@ document.addEventListener('alpine:init', () => {
 
                     newRow.find('td').attr("style", `background-color: ${estadoColor} !important; color: black !important;`);
                     newRow.find('td').html(`
-                <div class="p-2 text-sm">
+                <div class="p-2" style="font-size: 13px;">
                     <ul>
                     <li><strong>SOLUCIÓN:</strong> <span class="solucion-text">${justificacion}</span></li>
                         <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
