@@ -349,6 +349,50 @@ x-init="obtenerUbicacion()">
 <div id="cordinacionContainer" class="mt-5 flex flex-col space-y-4"></div>
 
 
+
+<!-- Modal de Detalles -->
+<div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-80">
+  <div class="modal-content bg-white rounded-lg shadow-lg w-full sm:w-3/4 md:w-1/3 p-4 overflow-auto">
+    <!-- Cabecera del Modal -->
+    <div class="modal-header flex justify-between items-center mb-4 border-b pb-2">
+      <h2 id="detalleNombre" class="text-xl font-semibold text-gray-800"></h2>
+      <button id="closeModalButton" class="text-gray-500 hover:text-gray-700 text-xl">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Cuerpo del Modal -->
+    <div class="modal-body space-y-4">
+      <div class="grid grid-cols-1 gap-4">
+        <div>
+          <h3 class="font-semibold text-sm text-gray-700 mb-1">Fecha Inicio:</h3>
+          <input type="datetime-local" id="detalleFechaInicioHora" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+        </div>
+        <div>
+          <h3 class="font-semibold text-sm text-gray-700 mb-1">Fecha Fin:</h3>
+          <input type="datetime-local" id="detalleFechaFinalHora" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+        </div>
+        <div>
+          <h3 class="font-semibold text-sm text-gray-700 mb-1">Técnico:</h3>
+          <!-- Cambiar de un input a un select -->
+          <select id="detalleUsuario" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+            <!-- Las opciones se agregarán dinámicamente con JS -->
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pie del Modal -->
+    <div class="modal-footer flex justify-end mt-4 border-t pt-4">
+      <button id="closeModalButtonFooter" class="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Cerrar</button>
+      <button id="actualizarButton" class="btn btn-success bg-green-600 text-white hover:bg-green-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Actualizar</button>
+    </div>
+  </div>
+</div>
+
+
+
+
 <!-- MODAL PARA CREAR VISITA USANDO ALPINE.JS -->
 <div x-data="{
     open: false, 

@@ -580,6 +580,75 @@ public function config(Request $request, $id)
         return response()->json($usuarios);
     }
     
+
+    public function getUsuariostecnico()
+    {
+        Log::debug('Iniciando la obtención de usuarios con relaciones');
+    
+        // Filtramos los usuarios por tipoUsuario, tipoArea y estado
+        $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])
+            ->where('estado', 1) // Estado activo
+            ->where('idTipoUsuario', 1) // Tipo de usuario igual a 1
+            ->where('idTipoArea', 4) // Tipo de área igual a 4
+            ->get()
+            ->map(function ($usuario) {
+                return [
+                    'idUsuario' => $usuario->idUsuario,
+                    'Nombre' => $usuario->Nombre,
+                    'apellidoPaterno' => $usuario->apellidoPaterno,
+                    'telefono' => $usuario->telefono ?? 'N/A',
+                    'correo' => $usuario->correo ?? 'N/A',
+                    'documento' => $usuario->documento ?? 'N/A',
+                    'estado' => $usuario->estado,
+                    'tipoDocumento' => $usuario->tipoDocumento ? $usuario->tipoDocumento->nombre : 'N/A',
+                    'tipoUsuario' => $usuario->tipoUsuario ? $usuario->tipoUsuario->nombre : 'N/A',
+                    'rol' => $usuario->rol ? $usuario->rol->nombre : 'N/A',
+                    'tipoArea' => $usuario->tipoArea ? $usuario->tipoArea->nombre : 'N/A',
+                    'avatar' => !empty($usuario->avatar) ? 'data:image/png;base64,' . base64_encode($usuario->avatar) : null,
+                    'tieneFirma' => !empty($usuario->firma), // 🔥 Solo enviamos `true` o `false`
+                ];
+            });
+    
+        Log::debug('Usuarios obtenidos con relaciones:', ['usuarios' => $usuarios]);
+    
+        return response()->json($usuarios);
+    }
+    
+    
+
+    
+    public function getUsuariostecnicohelp()
+    {
+        Log::debug('Iniciando la obtención de usuarios con relaciones');
+    
+        // Filtramos los usuarios por tipoUsuario, tipoArea y estado
+        $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])
+            ->where('estado', 1) // Estado activo
+            ->where('idTipoUsuario', 1) // Tipo de usuario igual a 1
+            ->where('idTipoArea', 3) // Tipo de área igual a 4
+            ->get()
+            ->map(function ($usuario) {
+                return [
+                    'idUsuario' => $usuario->idUsuario,
+                    'Nombre' => $usuario->Nombre,
+                    'apellidoPaterno' => $usuario->apellidoPaterno,
+                    'telefono' => $usuario->telefono ?? 'N/A',
+                    'correo' => $usuario->correo ?? 'N/A',
+                    'documento' => $usuario->documento ?? 'N/A',
+                    'estado' => $usuario->estado,
+                    'tipoDocumento' => $usuario->tipoDocumento ? $usuario->tipoDocumento->nombre : 'N/A',
+                    'tipoUsuario' => $usuario->tipoUsuario ? $usuario->tipoUsuario->nombre : 'N/A',
+                    'rol' => $usuario->rol ? $usuario->rol->nombre : 'N/A',
+                    'tipoArea' => $usuario->tipoArea ? $usuario->tipoArea->nombre : 'N/A',
+                    'avatar' => !empty($usuario->avatar) ? 'data:image/png;base64,' . base64_encode($usuario->avatar) : null,
+                    'tieneFirma' => !empty($usuario->firma), // 🔥 Solo enviamos `true` o `false`
+                ];
+            });
+    
+        Log::debug('Usuarios obtenidos con relaciones:', ['usuarios' => $usuarios]);
+    
+        return response()->json($usuarios);
+    }
     
     
     

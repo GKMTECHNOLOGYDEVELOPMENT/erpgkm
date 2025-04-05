@@ -22,26 +22,22 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const fechaFinal = formatDate(visita.fecha_final_hora);
         const nombreTecnico = visita.nombre_tecnico || 'Nombre del Técnico'; // Nombre del técnico
         const nombre_visita = visita.nombre_visita || 'Nombre de la visita';
-// Obtener el tipoServicio de la visita
-const tipoServicio = visita.tipoServicio;
+        const tipoServicio = visita.tipoServicio;
     
-// Hacer el console.log para ver el tipoServicio
-console.log("Tipo de servicio:", tipoServicio);
+        // Hacer el console.log para ver el tipoServicio
+        console.log("Tipo de servicio:", tipoServicio);
 
-            // Lógica para personalizar el texto según idTipoUsuario
-            let tipoResponsable = '';
-            if (visita.idTipoUsuario === 5) {
-              tipoResponsable = 'Chofer responsable'; // Para idTipoUsuario = 5
-            } else if (visita.idTipoUsuario === 1) {
-              tipoResponsable = 'Técnico responsable'; // Para idTipoUsuario = 1
-            }
-
-
-            
+        let tipoResponsable = '';
+        if (visita.idTipoUsuario === 5) {
+          tipoResponsable = 'Chofer responsable'; // Para idTipoUsuario = 5
+        } else if (visita.idTipoUsuario === 1) {
+          tipoResponsable = 'Técnico responsable'; // Para idTipoUsuario = 1
+        }
 
         // CARD PRINCIPAL QUE ENVUELVE TODO
         const cardContainer = document.createElement('div');
         cardContainer.className = 'rounded-lg shadow-xl p-6 w-full sm:max-w-4xl mx-auto mt-6';
+
         // 📌 Botón para ocultar/mostrar la card
         const toggleCardButton = document.createElement('button');
         toggleCardButton.className = 'px-4 py-2 mb-2 bg-gray-300 text-gray-800 rounded-lg shadow hover:bg-gray-400 transition font-semibold w-full flex justify-between items-center';
@@ -50,14 +46,12 @@ console.log("Tipo de servicio:", tipoServicio);
         // 📌 Evento para ocultar/mostrar la card
         toggleCardButton.addEventListener('click', function () {
           cardContainer.classList.toggle('hidden');
-
           if (cardContainer.classList.contains('hidden')) {
             toggleCardButton.innerHTML = `<span>Mostrar ${nombre_visita}</span> <i class="fa-solid fa-chevron-down"></i>`;
           } else {
             toggleCardButton.innerHTML = `<span>Ocultar ${nombre_visita}</span> <i class="fa-solid fa-chevron-up"></i>`;
           }
         });
-        // Agregar el botón ANTES de `cardContainer` para que quede fuera del bloque
         visitasList.appendChild(toggleCardButton);
 
         // Header de la Card (Nombre de la Visita + Botón Seleccionar)
@@ -66,14 +60,11 @@ console.log("Tipo de servicio:", tipoServicio);
 
         const visitaTitle = document.createElement('h2');
         visitaTitle.className = 'text-lg font-bold text-primary';
-        // Nombre de la Visita con el Técnico al costado (Aplicando badge-outline-primary a todo)
         visitaTitle.innerHTML = `
         <span class="badge badge-outline-primary text-lg font-semibold px-3 py-1 rounded-lg shadow-md block text-center sm:text-left break-words w-full">
         ${nombre_visita} <br class="hidden sm:block"> ${tipoResponsable}: ${nombreTecnico}
     </span>
 `;
-
-
 
         const selectButton = document.createElement('button');
         selectButton.className = 'btn btn-warning w-full sm:w-auto seleccionarVisitaButton';
@@ -81,17 +72,14 @@ console.log("Tipo de servicio:", tipoServicio);
         selectButton.setAttribute('data-id-visita', visita.idVisita);
         selectButton.setAttribute('data-nombre-visita', nombre_visita);
         selectButton.textContent = 'Seleccionar Visita';
-        // Obtener el ID de la visita
+
         const idVisita = visita.idVisita;
-
-
 
         // Realizar la consulta al backend para verificar si la visita ha sido seleccionada
         fetch(`/api/visita-seleccionada/${idVisita}`)
           .then(response => response.json())
           .then(data => {
             if (data.seleccionada) {
-              // Si la visita está seleccionada, cambiar el color del botón y el texto
               selectButton.classList.remove('btn-warning');
               selectButton.classList.add('btn-danger');
               selectButton.textContent = 'Visita Seleccionada';
@@ -114,88 +102,28 @@ console.log("Tipo de servicio:", tipoServicio);
         visitaCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#e3e7fc]';
         visitaCard.innerHTML = `
           <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-            <!-- Encabezados -->
             <div class="grid grid-cols-1 sm:grid-cols-2 text-center gap-2">
               <div class="flex flex-col items-center">
                 <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
-<span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-  ${visita.tipoServicio === 7 ? 'Fecha de Aprobación' : 'Fecha de Programación'}
-</span>
+                <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                  ${visita.tipoServicio === 7 ? 'Fecha de Aprobación' : 'Fecha de Programación'}
+                </span>
               </div>
               <div class="flex flex-col items-center">
                 <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fecha</span>
                 <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">${fechaInicio} - ${fechaFinal}</span>
               </div>
             </div>
-            
+
             <!-- Botón para ver imagen -->
             <div class="flex justify-center mt-2">
-    <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-        id="viewImageButton-${visita.idVisitas}" 
-        data-image-type="visita"
-        data-id="${visita.idVisitas}"
-        title="Ver imagen"
-        style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
-  <i class="fa-solid fa-image text-sm sm:text-base"></i> 
-</button>
-
-            </div>                   
-          </div>
-        `;
-
-
-
-
-        
-     
-
-        // Tarjeta de Técnico en Desplazamiento con el botón de "like"
-        const tecnicoCard = document.createElement('div');
-        tecnicoCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#deeffd]';
-        tecnicoCard.innerHTML = `
-          <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
-            <!-- Encabezados y Contenido Responsivo -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
-              <div class="flex flex-col items-center">
-                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
-  <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-          ${tipoServicio === 7 ? 'En Llegada' : 'En Desplazamiento'}
-        </span>              </div>
-             <div class="flex flex-col items-center">
-        <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
-        <!-- Mostrar la ubicación -->
-      <span id="ubicacion-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-  <!-- Aquí verificamos si tipoServicio es igual a 7, si es así, mostrar "GKM TECHNOLOGY" -->
-  ${visita.tipoServicio === 7 ? 'GKM TECHNOLOGY' :
-    (visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2) 
-    ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2).ubicacion 
-    : 'Ubicación no disponible')}
-</span>
-
-      </div>
-              <div class="flex flex-col items-center">
-<span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-  ${visita.tipoServicio === 7 ? 'Solicitud' : 'Fecha'}
-</span>
-${visita.tipoServicio === 7 ? 
-  `<span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Aprobada</span>` : 
-  `<span id="fechaDesplazamiento-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
-    ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
-  </span>`
-}
-
-
-                
-              </div>
-            </div>
-        
-            <!-- Botón de acción -->
-            <div class="flex justify-center mt-2">
-              <button class="badge bg-info text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                      id="likeButton-${visita.idVisitas}"         style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
-
-                <i class="fa-solid fa-route text-sm sm:text-base"></i> 
-                <span class="text-xs sm:text-sm">Iniciar Desplazamiento</span>
+              <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                  id="viewImageButton-${visita.idVisitas}" 
+                  data-image-type="visita"
+                  data-id="${visita.idVisitas}"
+                  title="Ver imagen"
+                  style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
+                <i class="fa-solid fa-image text-sm sm:text-base"></i>
               </button>
             </div>                   
           </div>
@@ -204,35 +132,185 @@ ${visita.tipoServicio === 7 ?
 
 
 
+// Función para formatear fechas
+function formatDatos(dateString) {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return '';
+  }
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Botón de Detalles
+const detailsButton = document.createElement('button');
+detailsButton.className = 'btn btn-info w-full sm:w-auto mt-2 sm:mt-0';
+detailsButton.textContent = 'Ver Detalles';
+
+detailsButton.addEventListener('click', function () {
+  console.log('Botón "Ver Detalles" clickeado');
+
+  // Rellenar los detalles del modal con valores dinámicos
+  document.getElementById('detalleNombre').innerText = nombre_visita;
+
+  // Actualizando los campos de fecha
+  document.getElementById('detalleFechaInicioHora').value = visita.fecha_inicio_hora ? formatDatos(visita.fecha_inicio_hora) : '';
+  document.getElementById('detalleFechaFinalHora').value = visita.fecha_final_hora ? formatDatos(visita.fecha_final_hora) : '';
+
+  // Obtener la lista de técnicos y cargarlos en el select
+  fetch('/api/usuarios/tecnico') // Ajusta esta ruta a tu API
+    .then(response => response.json())
+    .then(usuarios => {
+      const select = document.getElementById('detalleUsuario');
+      select.innerHTML = ''; // Limpiar las opciones anteriores
+
+      // Crear una opción para cada usuario
+      usuarios.forEach(usuario => {
+        const option = document.createElement('option');
+        option.value = usuario.idUsuario;
+        option.textContent = `${usuario.Nombre} ${usuario.apellidoPaterno}`;
+        select.appendChild(option);
+      });
+
+      // Seleccionar el técnico actual de la visita
+      select.value = visita.idUsuario; // Asigna el usuario que ya está asociado a la visita
+    })
+    .catch(error => console.error('Error al obtener usuarios:', error));
+
+     // Guardar el idVisitas en el modal o en el botón de actualizar
+  const actualizarButton = document.getElementById('actualizarButton');
+  actualizarButton.setAttribute('data-id', visita.idVisitas); // Guarda el ID de la visita en un atributo data
+
+  // Mostrar el modal
+  document.getElementById('modalDetallesVisita').classList.remove('hidden');
+});
+
+// Evento para cerrar el modal
+document.getElementById('closeModalButton').addEventListener('click', function() {
+  document.getElementById('modalDetallesVisita').classList.add('hidden');
+});
+
+document.getElementById('closeModalButtonFooter').addEventListener('click', function() {
+  document.getElementById('modalDetallesVisita').classList.add('hidden');
+});
+
+document.getElementById('actualizarButton').addEventListener('click', function() {
+  const actualizarButton = document.getElementById('actualizarButton');
+  const idVisita = actualizarButton.getAttribute('data-id'); // Obtener el ID de la visita del atributo 'data-id'
+  
+  const fechaInicio = document.getElementById('detalleFechaInicioHora').value;
+  const fechaFinal = document.getElementById('detalleFechaFinalHora').value;
+  const idUsuario = document.getElementById('detalleUsuario').value;
+
+  // Validar si los campos son correctos
+  if (!fechaInicio || !fechaFinal || !idUsuario) {
+    alert('Por favor complete todos los campos.');
+    return;
+  }
+
+  // Realizar la petición PUT para actualizar la visita con el id específico
+  fetch(`/api/actualizar/visitas/${idVisita}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      fecha_inicio_hora: fechaInicio,
+      fecha_final_hora: fechaFinal,
+      idUsuario: idUsuario,
+    }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Si la respuesta es exitosa, cerrar el modal y actualizar la vista
+        alert('Visita actualizada exitosamente!');
+
+        location.reload();
+        document.getElementById('modalDetallesVisita').classList.add('hidden');
+        // Aquí puedes actualizar la tarjeta de la visita en la interfaz si es necesario
+      } else {
+        alert('Hubo un error al actualizar la visita.');
+      }
+    })
+    .catch(error => {
+      console.error('Error al actualizar la visita:', error);
+      alert('Hubo un error al actualizar la visita.');
+    });
+});
+
+// Agregar el botón Detalles debajo de la información de la visita
+visitaCard.appendChild(detailsButton);
 
 
-        // Agregar ambas tarjetas dentro del contenedor en la misma fila
+
+
+
+
+
+        const tecnicoCard = document.createElement('div');
+        tecnicoCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#deeffd]';
+        tecnicoCard.innerHTML = `
+          <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
+              <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Fase</span>
+                <span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                  ${tipoServicio === 7 ? 'En Llegada' : 'En Desplazamiento'}
+                </span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Ubicación</span>
+                <span id="ubicacion-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                  ${visita.tipoServicio === 7 ? 'GKM TECHNOLOGY' :
+                    (visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2) 
+                    ? visita.anexos_visitas.find(anexo => anexo.idTipovisita === 2).ubicacion 
+                    : 'Ubicación no disponible')}
+                </span>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="badge bg-dark text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                  ${visita.tipoServicio === 7 ? 'Solicitud' : 'Fecha'}
+                </span>
+                ${visita.tipoServicio === 7 ? 
+                  `<span class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">Aprobada</span>` : 
+                  `<span id="fechaDesplazamiento-${visita.idVisitas}" class="badge bg-info text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">
+                    ${visita.fechas_desplazamiento ? formatDate(visita.fechas_desplazamiento) : 'Sin fecha de desplazamiento'}
+                  </span>`}
+              </div>
+            </div>
+        
+            <div class="flex justify-center mt-2">
+              <button class="badge bg-info text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                      id="likeButton-${visita.idVisitas}" style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
+                <i class="fa-solid fa-route text-sm sm:text-base"></i>
+                <span class="text-xs sm:text-sm">Iniciar Desplazamiento</span>
+              </button>
+            </div>                   
+          </div>
+        `;
+
         rowContainer.appendChild(visitaCard);
-
-
         rowContainer.appendChild(tecnicoCard);
 
-        // Agregar la fila completa al contenedor de visitas
-        // Agregar la fila completa dentro del contenedor principal
         cardContainer.appendChild(rowContainer);
-
-        // Finalmente, agregar toda la card de la visita a la lista
         visitasList.appendChild(cardContainer);
-
-
 
         document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
           button.addEventListener('click', function () {
-            const idTicket = this.getAttribute('data-id-ticket'); // ID del ticket
-            const idVisita = this.getAttribute('data-id-visita'); // ID de la visita
-            const nombreVisita = this.getAttribute('data-nombre-visita'); // Nombre de la visita
+            const idTicket = this.getAttribute('data-id-ticket');
+            const idVisita = this.getAttribute('data-id-visita');
+            const nombreVisita = this.getAttribute('data-nombre-visita');
 
-            // Llamada al backend para guardar la visita seleccionada
             fetch('/api/seleccionar-visita', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF Token si estás usando Blade en Laravel
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
               },
               body: JSON.stringify({
                 idTickets: idTicket,
@@ -243,12 +321,9 @@ ${visita.tipoServicio === 7 ?
               .then(response => response.json())
               .then(data => {
                 if (data.success) {
-
-                  // toastr.success("Actualizada correctamente");
                   location.reload();
-                  // toastr.success(data.message, 'Esta es la ultima');  // Muestra el mensaje de éxito
                 } else {
-                  toastr.error(data.message);  // Muestra el mensaje de error
+                  toastr.error(data.message);
                 }
               })
               .catch(error => {
@@ -257,6 +332,8 @@ ${visita.tipoServicio === 7 ?
               });
           });
         });
+
+
 
 
 

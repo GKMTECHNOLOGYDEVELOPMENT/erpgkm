@@ -122,6 +122,124 @@ function formatDate(dateString) {
               </div>                   
             </div>
           `;
+
+
+          
+
+// Función para formatear fechas
+function formatDatos(dateString) {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return '';
+  }
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// Botón de Detalles
+const detailsButton = document.createElement('button');
+detailsButton.className = 'btn btn-info w-full sm:w-auto mt-2 sm:mt-0';
+detailsButton.textContent = 'Ver Detalles';
+
+detailsButton.addEventListener('click', function () {
+  console.log('Botón "Ver Detalles" clickeado');
+
+  // Rellenar los detalles del modal con valores dinámicos
+  document.getElementById('detalleNombre').innerText = nombre_visita;
+
+  // Actualizando los campos de fecha
+  document.getElementById('detalleFechaInicioHora').value = visita.fecha_inicio_hora ? formatDatos(visita.fecha_inicio_hora) : '';
+  document.getElementById('detalleFechaFinalHora').value = visita.fecha_final_hora ? formatDatos(visita.fecha_final_hora) : '';
+
+  // Obtener la lista de técnicos y cargarlos en el select
+  fetch('/api/usuarios/tecnico') // Ajusta esta ruta a tu API
+    .then(response => response.json())
+    .then(usuarios => {
+      const select = document.getElementById('detalleUsuario');
+      select.innerHTML = ''; // Limpiar las opciones anteriores
+
+      // Crear una opción para cada usuario
+      usuarios.forEach(usuario => {
+        const option = document.createElement('option');
+        option.value = usuario.idUsuario;
+        option.textContent = `${usuario.Nombre} ${usuario.apellidoPaterno}`;
+        select.appendChild(option);
+      });
+
+      // Seleccionar el técnico actual de la visita
+      select.value = visita.idUsuario; // Asigna el usuario que ya está asociado a la visita
+    })
+    .catch(error => console.error('Error al obtener usuarios:', error));
+
+     // Guardar el idVisitas en el modal o en el botón de actualizar
+  const actualizarButton = document.getElementById('actualizarButton');
+  actualizarButton.setAttribute('data-id', visita.idVisitas); // Guarda el ID de la visita en un atributo data
+
+  // Mostrar el modal
+  document.getElementById('modalDetallesVisita').classList.remove('hidden');
+});
+
+// Evento para cerrar el modal
+document.getElementById('closeModalButton').addEventListener('click', function() {
+  document.getElementById('modalDetallesVisita').classList.add('hidden');
+});
+
+document.getElementById('closeModalButtonFooter').addEventListener('click', function() {
+  document.getElementById('modalDetallesVisita').classList.add('hidden');
+});
+
+document.getElementById('actualizarButton').addEventListener('click', function() {
+  const actualizarButton = document.getElementById('actualizarButton');
+  const idVisita = actualizarButton.getAttribute('data-id'); // Obtener el ID de la visita del atributo 'data-id'
+  
+  const fechaInicio = document.getElementById('detalleFechaInicioHora').value;
+  const fechaFinal = document.getElementById('detalleFechaFinalHora').value;
+  const idUsuario = document.getElementById('detalleUsuario').value;
+
+  // Validar si los campos son correctos
+  if (!fechaInicio || !fechaFinal || !idUsuario) {
+    alert('Por favor complete todos los campos.');
+    return;
+  }
+
+  // Realizar la petición PUT para actualizar la visita con el id específico
+  fetch(`/api/actualizar/visitas/${idVisita}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      fecha_inicio_hora: fechaInicio,
+      fecha_final_hora: fechaFinal,
+      idUsuario: idUsuario,
+    }),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        // Si la respuesta es exitosa, cerrar el modal y actualizar la vista
+        alert('Visita actualizada exitosamente!');
+
+        location.reload();
+        document.getElementById('modalDetallesVisita').classList.add('hidden');
+        // Aquí puedes actualizar la tarjeta de la visita en la interfaz si es necesario
+      } else {
+        alert('Hubo un error al actualizar la visita.');
+      }
+    })
+    .catch(error => {
+      console.error('Error al actualizar la visita:', error);
+      alert('Hubo un error al actualizar la visita.');
+    });
+});
+
+// Agregar el botón Detalles debajo de la información de la visita
+visitaCard.appendChild(detailsButton);
+
   
   
   

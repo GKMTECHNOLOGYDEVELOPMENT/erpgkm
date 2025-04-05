@@ -104,7 +104,8 @@ Route::get('/suministros/{idseleccionvisita}', [OrdenesHelpdeskController::class
 
 Route::get('/usuarios', [UsuarioController::class, 'getUsuarios']);
 
-
+Route::get('/usuarios/tecnico', [UsuarioController::class, 'getUsuariostecnico']);
+Route::get('/usuarios/tecnico/help', [UsuarioController::class, 'getUsuariostecnicohelp']);
 Route::patch('/usuarios/{id}/estado', [UsuarioController::class, 'cambiarEstado']);
 
 
@@ -131,3 +132,5 @@ Route::get('/cliente/{idCliente}/tiendas', [ClientesController::class, 'obtenerT
 
 Route::get('/obtenerJustificacionSoporte', [OrdenesHelpdeskController::class, 'obtenerJustificacionSoporte']);
 Route::post('/guardarEstadoSoporte', [OrdenesHelpdeskController::class, 'guardarEstadoSoporte']);
+
+Route::put('actualizar/visitas/{id}', [OrdenesTrabajoController::class, 'updatevisita']);

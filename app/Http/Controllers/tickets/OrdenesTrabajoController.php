@@ -2036,6 +2036,33 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+    public function updatevisita(Request $request, $id)
+{
+    // Validar los datos
+    $validated = $request->validate([
+        'fecha_inicio_hora' => 'required|date',
+        'fecha_final_hora' => 'required|date',
+        'idUsuario' => 'required|exists:usuarios,idUsuario',
+    ]);
+
+    // Buscar la visita
+    $visita = Visita::find($id);
+
+    if (!$visita) {
+        return response()->json(['success' => false, 'message' => 'Visita no encontrada'], 404);
+    }
+
+    // Actualizar los datos de la visita
+    $visita->fecha_inicio_hora = $request->fecha_inicio_hora;
+    $visita->fecha_final_hora = $request->fecha_final_hora;
+    $visita->idUsuario = $request->idUsuario;
+    $visita->save();
+
+    return response()->json(['success' => true, 'message' => 'Visita actualizada exitosamente']);
+}
+
+
+
 
     // public function verificarRegistroAnexo($idVisitas)
     // {
