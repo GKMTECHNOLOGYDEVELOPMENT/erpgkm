@@ -115,6 +115,12 @@
                 <!-- Técnico, Recojo, Envío en 2 columnas (2 arriba, 1 abajo) -->
                 <div id="tecnicoContainer" style="display: none;"
                     class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Agencia -->
+                    <div>
+                                <label class="block text-sm font-medium">Corruir</label>
+                                <input type="text" name="agencia" class="form-input w-full"
+                                    placeholder="Ingrese el Agencia">
+                            </div>
                     <!-- Técnico -->
                     <div>
                         <label for="idTecnico" class="block text-sm font-medium">Técnico Envío</label>

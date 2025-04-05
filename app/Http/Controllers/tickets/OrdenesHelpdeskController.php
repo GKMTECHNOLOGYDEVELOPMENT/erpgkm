@@ -138,7 +138,8 @@ class OrdenesHelpdeskController extends Controller
                 'tipoRecojo' => 'nullable|integer|exists:tiporecojo,idtipoRecojo', // Validar tipo de recojo
                 'tipoEnvio' => 'nullable|integer|exists:tipoenvio,idtipoenvio', // Validar tipo de envío
                 'nombreTecnicoEnvio' => 'nullable|array',
-                'dniTecnicoEnvio' => 'nullable|array'
+                'dniTecnicoEnvio' => 'nullable|array',
+                'agencia' => 'required|string|max:255',
             ]);
 
             Log::debug('Datos validados:', $validatedData);
@@ -208,6 +209,7 @@ class OrdenesHelpdeskController extends Controller
                     'tipoRecojo' => $validatedData['tipoRecojo'], // tipo de recojo seleccionado
                     'tipoEnvio' => $validatedData['tipoEnvio'], // tipo de envío seleccionado
                     'idUsuario' => $validatedData['idTecnico'], // ID del técnico seleccionado
+                    'agencia' => $validatedData['agencia'],
                     'tipo' => 1
                 ]);
                 Log::info('Datos de envío guardados correctamente');
