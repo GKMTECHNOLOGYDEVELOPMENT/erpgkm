@@ -27,8 +27,8 @@ class TiendasRequest extends FormRequest
         return [
             'nombre' => 'required|string|max:255',
             'ruc' => 'required|string|max:255', // Asumiendo que RUC tiene una longitud fija de 11 caracteres
-            'celular' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
+            'celular' => 'nullable|string|max:255', // Cambiado de 'required' a 'nullable'
+            'email' => 'nullable|email|max:255', // Email ya es nullable, no se cambia
             'direccion' => 'nullable|string|max:255',
             'provincia' => 'nullable|string|max:255',
             'distrito' => 'nullable|string|max:255',
