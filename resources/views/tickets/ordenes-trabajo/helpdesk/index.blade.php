@@ -109,16 +109,16 @@
                             this.clienteGenerales = data;
             
                             // Espera a que Alpine renderice los <option>
-                                this.$nextTick(() => {
-                                    setTimeout(() => {
-                                        const selectEl = document.getElementById('clienteGeneralFilter');
-                                        if (selectEl) {
-                                            NiceSelect.destroy(selectEl);
-                                            NiceSelect.bind(selectEl);
-                                        }
-                                    }, 10); // Delay ligero para asegurar DOM completo
-                                });
-                                
+                            this.$nextTick(() => {
+                                setTimeout(() => {
+                                    const selectEl = document.getElementById('clienteGeneralFilter');
+                                    if (selectEl) {
+                                        NiceSelect.destroy(selectEl);
+                                        NiceSelect.bind(selectEl);
+                                    }
+                                }, 10); // Delay ligero para asegurar DOM completo
+                            });
+            
                         });
                 }
             }">
@@ -136,8 +136,8 @@
                     </template>
                 </select>
             </div>
-            
-            
+
+
 
             <!-- Botones de Acción -->
             <div class="flex flex-wrap items-end gap-2">
@@ -205,29 +205,27 @@
 
 
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
-                <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
-                    <thead>
-                        <tr>
-                            <th class="text-center px-4 py-2">ID</th>
-                            <th class="text-center px-4 py-2">EDITAR</th>
-                            <th class="text-center px-4 py-2">N. TICKET</th>
-                            <th class="text-center px-4 py-2">F. TICKET</th>
-                            <th class="text-center px-4 py-2">F. VISITA</th>
-                            <th class="text-center px-4 py-2">TIENDA</th>
-                            <th class="text-center px-4 py-2">CATEGORIA</th>
-                            <th class="text-center px-4 py-2">MARCA</th>
-                            <th class="text-center px-4 py-2">MODELO</th>
-                            <th class="text-center px-4 py-2">SERIE</th>
-                            <th class="text-center px-4 py-2">CLIENTE</th>
-                            <th class="text-center px-4 py-2">SERVICIO</th>
-                            <th class="text-center px-4 py-2">TIPO TEXTO</th>
-                            <th class="text-center px-4 py-2">MÁS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Los datos se llenarán dinámicamente -->
-                    </tbody>
-                </table>
+                <div id="tabla-wrapper" style="w-full overflow-x: auto;">
+                    <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
+                        <thead>
+                            <tr>
+                                <th class="text-center px-4 py-2">ACCIONES</th>
+                                <th class="text-center px-4 py-2">ID</th>
+                                <th class="text-center px-4 py-2">N. TICKET</th>
+                                <th class="text-center px-4 py-2">F. TICKET</th>
+                                <th class="text-center px-4 py-2">F. VISITA</th>
+                                <th class="text-center px-4 py-2">CLIENTE</th>
+                                <th class="text-center px-4 py-2">TIENDA</th>
+                                <th style="display: none;">TIPO TEXTO</th>
+                                <th class="text-center px-4 py-2">TIPO SERVICIO</th>
+                                <th class="text-center px-4 py-2">MÁS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los datos se llenarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <!-- Paginación -->
             <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>
