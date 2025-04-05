@@ -406,11 +406,12 @@ public function update(Request $request, $id)
     return response()->json(['success' => 'Datos actualizados correctamente']);
 }
 
+
 public function config(Request $request, $id)
 {
     // Validación de los campos
     $request->validate([
-        'sueldoPorHora' => 'required|numeric|min:0', // Asegura que el sueldoPorHora sea >= 0
+        'sueldoPorHora' => 'required|numeric',
         'idSucursal' => 'integer|exists:sucursal,idSucursal',
         'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',
         'idSexo' => 'required|integer|exists:sexo,idSexo',
@@ -419,8 +420,6 @@ public function config(Request $request, $id)
     ]);
 
     Log::info('Validación completada', ['request_data' => $request->all()]);
-
-   
 
     // Obtener el usuario
     $usuario = Usuario::findOrFail($id);
@@ -435,6 +434,8 @@ public function config(Request $request, $id)
     $usuario->idTipoArea = $request->idTipoArea;
 
     Log::info('Campos del usuario actualizados', ['usuario_data' => $usuario->toArray()]);
+
+    
 
     // Guardar los cambios
     $usuario->save();

@@ -223,55 +223,45 @@ $(document).ready(function() {
         </form>
 
         <script>
-    $(document).ready(function() {
-        $('#config-form').on('submit', function(event) {
-            event.preventDefault(); // Prevenir la recarga de la página
+            $(document).ready(function() {
+                $('#config-form').on('submit', function(event) {
+                    event.preventDefault(); // Prevenir la recarga de la página
 
-            // Obtener el valor de "sueldoPorHora"
-            var sueldoPorHora = $('#sueldoPorHora').val();
+                    var formData = $(this).serialize(); // Usamos serialize para enviar los datos como JSON
 
-            // Validación para que "sueldoPorHora" no sea -1 ni 0
-            if (sueldoPorHora == -1 || sueldoPorHora == 0) {
-                toastr.error('El sueldo por hora no puede ser -1 ni 0');
-                return; // Detener el envío si la validación falla
-            }
-
-            var formData = $(this).serialize(); // Usamos serialize para enviar los datos como JSON
-
-            $.ajax({
-                url: '{{ route('usuario.config', $usuario->idUsuario) }}',
-                type: 'PUT',
-                data: formData,
-                success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        // Aquí puedes actualizar los datos en el DOM si lo deseas
-                        // Ejemplo: actualizar los valores en los campos de entrada
-                        $('#sueldoPorHora').val(response.usuario.sueldoPorHora);
-                        $('#idSucursal').val(response.usuario.idSucursal);
-                        $('#idTipoUsuario').val(response.usuario.idTipoUsuario);
-                        $('#idSexo').val(response.usuario.idSexo);
-                        $('#idRol').val(response.usuario.idRol);
-                        $('#idTipoArea').val(response.usuario.idTipoArea);
-                    }
-                },
-                error: function(xhr) {
-                    // Si hay errores, manejamos la respuesta de error
-                    var errors = xhr.responseJSON.errors;
-                    if (errors) {
-                        // Mostrar los errores en el frontend
-                        for (var field in errors) {
-                            toastr.error(errors[field].join(", "));
+                    $.ajax({
+                        url: '{{ route('usuario.config', $usuario->idUsuario) }}',
+                        type: 'PUT',
+                        data: formData,
+                        success: function(response) {
+                            if (response.success) {
+                                toastr.success(response.message);
+                                // Aquí puedes actualizar los datos en el DOM si lo deseas
+                                // Ejemplo: actualizar los valores en los campos de entrada
+                                $('#sueldoPorHora').val(response.usuario.sueldoPorHora);
+                                $('#idSucursal').val(response.usuario.idSucursal);
+                                $('#idTipoUsuario').val(response.usuario.idTipoUsuario);
+                                $('#idSexo').val(response.usuario.idSexo);
+                                $('#idRol').val(response.usuario.idRol);
+                                $('#idTipoArea').val(response.usuario.idTipoArea);
+                            }
+                        },
+                        error: function(xhr) {
+                            // Si hay errores, manejamos la respuesta de error
+                            var errors = xhr.responseJSON.errors;
+                            if (errors) {
+                                // Mostrar los errores en el frontend
+                                for (var field in errors) {
+                                    toastr.error(errors[field].join(", "));
+                                }
+                            } else {
+                                toastr.error('Hubo un error al intentar actualizar los datos');
+                            }
                         }
-                    } else {
-                        toastr.error('Hubo un error al intentar actualizar los datos');
-                    }
-                }
+                    });
+                });
             });
-        });
-    });
-</script>
-
+        </script>
 
 
 

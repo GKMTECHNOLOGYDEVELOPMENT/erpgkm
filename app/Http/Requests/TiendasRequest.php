@@ -27,8 +27,8 @@ class TiendasRequest extends FormRequest
         return [
             'nombre' => 'required|string|max:255',
             'ruc' => 'required|string|max:255', // Asumiendo que RUC tiene una longitud fija de 11 caracteres
-            'celular' => 'string|max:255',
-            'email' => 'string|max:255',
+            'celular' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
             'direccion' => 'nullable|string|max:255',
             'provincia' => 'nullable|string|max:255',
             'distrito' => 'nullable|string|max:255',
@@ -51,8 +51,8 @@ class TiendasRequest extends FormRequest
             'nombre.required' => 'Debe ingresar el nombre de la tienda.',
             'ruc.required' => 'Debe ingresar el RUC de la tienda.',
             'ruc.size' => 'El RUC debe tener 11 caracteres.',
-            // 'celular.required' => 'Debe ingresar el número de celular de la tienda.',
-            // 'email.email' => 'Debe ingresar un correo electrónico válido.',
+            'celular.required' => 'Debe ingresar el número de celular de la tienda.',
+            'email.email' => 'Debe ingresar un correo electrónico válido.',
             'idCliente.required' => 'Debe seleccionar un cliente.',
             'idCliente.exists' => 'El cliente seleccionado no existe.',
             'lat.size' => 'La latitud debe tener una longitud de 18 caracteres.',
