@@ -198,59 +198,80 @@
 
 
                 <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        const selectTienda = document.getElementById("idTienda");
-                        const esEnvioContainer = document.getElementById("esEnvioContainer");
-                        const esEnvioCheckbox = document.getElementById("esEnvio");
-                        const tecnicoContainer = document.getElementById("tecnicoContainer");
-                        const tecnicoDatosContainer = document.getElementById("tecnicoDatosContainer");
-                        const tecnicoFields = document.getElementById("tecnicoFields");
-                        const agregarTecnicoBtn = document.getElementById("agregarTecnico");
-                        const eliminarTecnicoBtn = document.getElementById("eliminarUltimoTecnico");
+ document.addEventListener("DOMContentLoaded", function() {
+    const selectTienda = document.getElementById("idTienda");
+    const esEnvioContainer = document.getElementById("esEnvioContainer");
+    const esEnvioCheckbox = document.getElementById("esEnvio");
+    const selectTipoServicio = document.getElementById("tipoServicio"); // Selección de tipo de servicio
+    const tecnicoContainer = document.getElementById("tecnicoContainer");
+    const tecnicoDatosContainer = document.getElementById("tecnicoDatosContainer");
+    const tecnicoFields = document.getElementById("tecnicoFields");
+    const agregarTecnicoBtn = document.getElementById("agregarTecnico");
+    const eliminarTecnicoBtn = document.getElementById("eliminarUltimoTecnico");
 
-                        if (!selectTienda || !esEnvioContainer || !esEnvioCheckbox || !tecnicoContainer || !
-                            tecnicoDatosContainer) {
-                            console.error("No se encontraron los elementos necesarios.");
-                            return;
-                        }
+    if (!selectTienda || !esEnvioContainer || !esEnvioCheckbox || !tecnicoContainer || !tecnicoDatosContainer || !selectTipoServicio) {
+        console.error("No se encontraron los elementos necesarios.");
+        return;
+    }
 
-                        function verificarDepartamento() {
-                            const selectedOption = selectTienda.options[selectTienda.selectedIndex];
-                            const departamento = selectedOption.getAttribute("data-departamento");
+    function verificarDepartamento() {
+        const selectedOption = selectTienda.options[selectTienda.selectedIndex];
+        const departamento = selectedOption.getAttribute("data-departamento");
+        console.log("Departamento seleccionado:", departamento); // Debugging: Ver departamento seleccionado
 
-                            if (departamento === "3926") {
-                                esEnvioContainer.style.display = "none";
-                                tecnicoContainer.style.display = "none";
-                                tecnicoDatosContainer.style.display = "none";
-                            } else {
-                                esEnvioContainer.style.display = "block";
-                            }
-                        }
+        if (departamento === "3926") {
+            console.log("Departamento es 3926. Ocultando esEnvioContainer y tecnicoContainer.");
+            esEnvioContainer.style.display = "none";
+            tecnicoContainer.style.display = "none";
+            tecnicoDatosContainer.style.display = "none";
+        } else {
+            console.log("Departamento diferente a 3926. Verificando Tipo de Servicio.");
+            verificarTipoServicio(); // Verificar también el tipo de servicio
+        }
+    }
 
-                        function verificarEsEnvio() {
-                            if (esEnvioCheckbox.checked) {
-                                tecnicoContainer.style.display = "block";
-                                tecnicoDatosContainer.style.display = "block";
-                            } else {
-                                tecnicoContainer.style.display = "none";
-                                tecnicoDatosContainer.style.display = "none";
-                            }
-                        }
+    function verificarTipoServicio() {
+        const selectedTipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex];
+        const tipoServicio = selectedTipoServicio ? selectedTipoServicio.value : null;
+        console.log("Tipo de Servicio seleccionado:", tipoServicio); // Debugging: Ver tipo de servicio seleccionado
 
-                        function actualizarBotonEliminar() {
-                            const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
-                            if (tecnicos.length > 1) {
-                                eliminarTecnicoBtn.classList.remove("hidden");
-                            } else {
-                                eliminarTecnicoBtn.classList.add("hidden");
-                            }
-                        }
+        // Si el tipo de servicio es 2, ocultamos el contenedor de "esEnvio"
+        if (tipoServicio == "2") {
+            console.log("Tipo de servicio es 2. Ocultando esEnvioContainer.");
+            esEnvioContainer.style.display = "none";
+        } else {
+            console.log("Tipo de servicio no es 2. Mostrando esEnvioContainer.");
+            esEnvioContainer.style.display = "block";
+        }
+    }
 
-                        function agregarTecnico() {
-                            const tecnicoEntry = document.createElement("div");
-                            tecnicoEntry.classList.add("tecnico-entry", "grid", "grid-cols-1", "md:grid-cols-2", "gap-4");
+    function verificarEsEnvio() {
+        console.log("Verificando si es envío:", esEnvioCheckbox.checked); // Debugging: Ver estado del checkbox
+        if (esEnvioCheckbox.checked) {
+            tecnicoContainer.style.display = "block";
+            tecnicoDatosContainer.style.display = "block";
+        } else {
+            tecnicoContainer.style.display = "none";
+            tecnicoDatosContainer.style.display = "none";
+        }
+    }
 
-                            tecnicoEntry.innerHTML = `
+    function actualizarBotonEliminar() {
+        const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
+        console.log("Número de técnicos:", tecnicos.length); // Debugging: Ver número de técnicos
+        if (tecnicos.length > 1) {
+            eliminarTecnicoBtn.classList.remove("hidden");
+        } else {
+            eliminarTecnicoBtn.classList.add("hidden");
+        }
+    }
+
+    function agregarTecnico() {
+        console.log("Agregando un nuevo técnico"); // Debugging: Cuando se agrega un nuevo técnico
+        const tecnicoEntry = document.createElement("div");
+        tecnicoEntry.classList.add("tecnico-entry", "grid", "grid-cols-1", "md:grid-cols-2", "gap-4");
+
+        tecnicoEntry.innerHTML = `
             <div>
                 <label class="block text-sm font-medium">Nombre Técnico de Recojo</label>
                 <input type="text" name="nombreTecnicoEnvio[]" class="form-input w-full" placeholder="Ingrese el nombre">
@@ -261,31 +282,40 @@
             </div>
         `;
 
-                            tecnicoFields.appendChild(tecnicoEntry);
-                            actualizarBotonEliminar();
-                        }
+        tecnicoFields.appendChild(tecnicoEntry);
+        actualizarBotonEliminar();
+    }
 
-                        function eliminarUltimoTecnico() {
-                            const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
-                            if (tecnicos.length > 1) {
-                                tecnicos[tecnicos.length - 1].remove();
-                                actualizarBotonEliminar();
-                            }
-                        }
+    function eliminarUltimoTecnico() {
+        const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
+        console.log("Eliminando el último técnico. Técnicos actuales:", tecnicos.length); // Debugging: Ver número de técnicos antes de eliminar
+        if (tecnicos.length > 1) {
+            tecnicos[tecnicos.length - 1].remove();
+            actualizarBotonEliminar();
+        }
+    }
 
-                        // Mantener ocultos al inicio hasta que seleccione una tienda
-                        esEnvioContainer.style.display = "none";
-                        tecnicoContainer.style.display = "none";
-                        tecnicoDatosContainer.style.display = "none";
+    // Mantener ocultos al inicio hasta que seleccione una tienda
+    esEnvioContainer.style.display = "none";
+    tecnicoContainer.style.display = "none";
+    tecnicoDatosContainer.style.display = "none";
 
-                        // Eventos
-                        selectTienda.addEventListener("change", verificarDepartamento);
-                        esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
-                        agregarTecnicoBtn.addEventListener("click", agregarTecnico);
-                        eliminarTecnicoBtn.addEventListener("click", eliminarUltimoTecnico);
+    // Eventos
+    selectTienda.addEventListener("change", function() {
+        console.log("Cambiando tienda."); // Debugging: Ver cuando se cambia la tienda
+        verificarDepartamento();
+    });
+    selectTipoServicio.addEventListener("change", function() {
+        console.log("Cambiando tipo de servicio."); // Debugging: Ver cuando se cambia el tipo de servicio
+        verificarTipoServicio();
+    });
+    esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
+    agregarTecnicoBtn.addEventListener("click", agregarTecnico);
+    eliminarTecnicoBtn.addEventListener("click", eliminarUltimoTecnico);
 
-                        actualizarBotonEliminar(); // Inicializa visibilidad del botón eliminar
-                    });
+    actualizarBotonEliminar(); // Inicializa visibilidad del botón eliminar
+});
+
                 </script>
 
 

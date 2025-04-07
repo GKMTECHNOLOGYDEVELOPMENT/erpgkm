@@ -536,41 +536,7 @@ $ultimaVisitaConEstado1 = false;
     }
 
 
-    public function guardarEquipo(Request $request)
-    {
-        // Validar los datos recibidos
-        $request->validate([
-            'tipoProducto' => 'required|integer',
-            'marca' => 'required|integer',
-            'modelo' => 'required|integer',
-            'numeroSerie' => 'required|string|max:255',
-            'observaciones' => 'required|string|max:255',
-            'idTicket' => 'required|integer',
-            'idVisita' => 'required|integer',
-        ]);
-
-        // Crear un nuevo registro en la tabla equipos
-        $equipo = new Equipo();
-        $equipo->nserie = $request->numeroSerie;
-        $equipo->modalidad = 'Instalación'; // Si quieres asignar una modalidad específica
-        $equipo->idTickets = $request->idTicket;
-        $equipo->idModelo = $request->modelo;
-        $equipo->idMarca = $request->marca;
-        $equipo->observaciones = $request->observaciones;
-        $equipo->idCategoria = $request->tipoProducto;
-        $equipo->idVisitas = $request->idVisita;
-        $equipo->save();
-
-        // Devolver la respuesta
-        return response()->json([
-            'success' => true,
-            'producto' => $equipo,
-            'marca' => Marca::find($request->marca),
-            'modelo' => Modelo::find($request->modelo),
-            'numeroSerie' => $request->numeroSerie
-        ]);
-    }
-
+   
 
     // Función para guardar los datos de envío
     public function guardardatosenviosoporte(Request $request)
@@ -610,6 +576,50 @@ $ultimaVisitaConEstado1 = false;
     }
 
 
+    public function guardarEquipo(Request $request)
+{
+    // Validar los datos recibidos
+    $request->validate([
+        'tipoProducto' => 'required|integer',
+        'marca' => 'required|integer',
+        'modelo' => 'required|integer',
+        'numeroSerie' => 'required|string|max:255',
+        'idTicket' => 'required|integer',
+        'idVisita' => 'required|integer',
+        'observaciones' => 'nullable|string', // Validar observaciones (opcional)
+    ]);
+
+    // Crear un nuevo registro en la tabla equipos
+    $equipo = new Equipo();
+    $equipo->nserie = $request->numeroSerie;
+    $equipo->modalidad = 'Instalación'; // Si quieres asignar una modalidad específica
+    $equipo->idTickets = $request->idTicket;
+    $equipo->idModelo = $request->modelo;
+    $equipo->idMarca = $request->marca;
+    $equipo->idCategoria = $request->tipoProducto;
+    $equipo->idVisitas = $request->idVisita;
+    $equipo->observaciones = $request->observaciones; // Guardar observaciones
+    $equipo->save();
+
+    // Obtener la marca y ocultar la foto
+    $marca = Marca::find($request->marca);
+    $marca->makeHidden(['foto']); // Excluir la foto de la respuesta
+
+    // Devolver la respuesta
+    return response()->json([
+        'success' => true,
+        'producto' => $equipo,
+        'marca' => $marca, // Devolver la marca sin la foto
+        'modelo' => Modelo::find($request->modelo),
+        'numeroSerie' => $request->numeroSerie,
+        'observaciones' => $equipo->observaciones // Incluir observaciones en la respuesta
+    ]);
+}
+
+    
+
+
+
 
     public function guardarEquipoRetirar(Request $request)
     {
@@ -619,33 +629,38 @@ $ultimaVisitaConEstado1 = false;
             'marca' => 'required|integer',
             'modelo' => 'required|integer',
             'numeroSerie' => 'required|string|max:255',
-            'observaciones' => 'required|string|max:255',
+            'observaciones' => 'nullable|string|max:255', // Añadir validación para observaciones
             'idTicket' => 'required|integer',
             'idVisita' => 'required|integer',
         ]);
-
+    
         // Crear un nuevo registro en la tabla equipos
         $equipo = new Equipo();
         $equipo->nserie = $request->numeroSerie;
-        $equipo->modalidad = 'Retirar'; // Si quieres asignar una modalidad específica
+        $equipo->modalidad = 'Retirar'; // Asignar modalidad de "Retirar"
         $equipo->idTickets = $request->idTicket;
         $equipo->idModelo = $request->modelo;
         $equipo->idMarca = $request->marca;
-        $equipo->observaciones = $request->observaciones;
         $equipo->idCategoria = $request->tipoProducto;
         $equipo->idVisitas = $request->idVisita;
+        $equipo->observaciones = $request->observaciones; // Guardar las observaciones
         $equipo->save();
 
+         // Obtener la marca y ocultar la foto
+    $marca = Marca::find($request->marca);
+    $marca->makeHidden(['foto']); // Excluir la foto de la respuesta
+    
         // Devolver la respuesta
         return response()->json([
             'success' => true,
             'producto' => $equipo,
-            'marca' => Marca::find($request->marca),
+            'marca' => $marca, // Devolver la marca sin la foto
             'modelo' => Modelo::find($request->modelo),
-            'numeroSerie' => $request->numeroSerie
+            'numeroSerie' => $request->numeroSerie,
+            'observaciones' => $equipo->observaciones, // Incluir observaciones en la respuesta
         ]);
     }
-
+    
 
     public function obtenerProductosInstalados(Request $request)
     {
@@ -655,7 +670,8 @@ $ultimaVisitaConEstado1 = false;
             'equipos.nserie',
             'categoria.nombre as categoria_nombre',
             'marca.nombre as marca_nombre',
-            'modelo.nombre as modelo_nombre'
+            'modelo.nombre as modelo_nombre',
+            'equipos.observaciones' // Agregar observaciones a la selección
         )
             ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
             ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
@@ -664,21 +680,23 @@ $ultimaVisitaConEstado1 = false;
             ->where('equipos.idVisitas', $request->idVisita)
             ->where('equipos.modalidad', 'Instalación')
             ->get();
-
+    
         // Retornar la respuesta como JSON
         return response()->json($productos);
     }
+    
 
 
     public function obtenerProductosRetirados(Request $request)
     {
-        // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Instalación"
+        // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Retirar"
         $productos = Equipo::select(
             'equipos.idEquipos',
             'equipos.nserie',
             'categoria.nombre as categoria_nombre',
             'marca.nombre as marca_nombre',
-            'modelo.nombre as modelo_nombre'
+            'modelo.nombre as modelo_nombre',
+            'equipos.observaciones' // Añadir las observaciones a la consulta
         )
             ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
             ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
@@ -687,12 +705,11 @@ $ultimaVisitaConEstado1 = false;
             ->where('equipos.idVisitas', $request->idVisita)
             ->where('equipos.modalidad', 'Retirar')
             ->get();
-
+    
         // Retornar la respuesta como JSON
         return response()->json($productos);
     }
-
-
+    
     public function obtenerMarcasPorCategoria($idCategoria)
     {
         // Obtener las marcas que pertenecen a la categoría seleccionada
@@ -700,11 +717,16 @@ $ultimaVisitaConEstado1 = false;
             ->whereHas('modelos', function ($query) use ($idCategoria) {
                 $query->where('idCategoria', $idCategoria);
             })
-            ->get();
-
+            ->get(); // Trae todas las columnas
+    
+        // Excluir el campo 'foto' de la respuesta utilizando makeHidden
+        $marcas->makeHidden(['foto']);
+    
         // Retornar las marcas como respuesta JSON
         return response()->json($marcas);
     }
+    
+
 
     public function obtenerModelosPorMarca($idMarca)
     {
