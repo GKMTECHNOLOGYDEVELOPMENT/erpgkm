@@ -194,7 +194,7 @@
                 </a>
             </li>
 
-            @if ($existeFlujo31)
+            @if ($existeFlujo25)
             <li>
                 <a href="{{ url('/apps/invoice/preview/' . $ticket->idTickets) }}"
                     target="_blank"

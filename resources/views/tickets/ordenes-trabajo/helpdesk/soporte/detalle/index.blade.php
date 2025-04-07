@@ -138,7 +138,7 @@
                 </select>
             </div>
             <div>
-                <label class="text-sm font-medium">Dirrecion</label>
+                <label class="text-sm font-medium">Direción</label>
                 <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->direccion }}"
                     readonly>
             </div>
