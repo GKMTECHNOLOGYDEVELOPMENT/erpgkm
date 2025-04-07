@@ -2656,20 +2656,35 @@ $ultimaVisitaConEstado1 = false;
 
     public function firmaclienteLeva($id, $idVisitas)
     {
+        // Obtener el ticket
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
         $orden = $ticket;
         $estadosOTS = DB::table('estado_ots')->get();
         $ticketId = $ticket->idTickets;
-
+    
+        // Verificar si ya existe una firma para el ticket y la visita
+        $firmaExistente = DB::table('firmas')
+            ->where('idTickets', $id)
+            ->where('idVisitas', $idVisitas)
+            ->first(); // Verificamos si ya existe una firma para esa visita y ticket
+    
+        // Si ya existe una firma, redirigimos a la página de error 404
+        if ($firmaExistente) {
+            return view("pages.error404"); // Mostrar error 404 si ya existe la firma
+        }
+    
+        // Obtener la visita usando idVisitas
         $visita = DB::table('visitas')
             ->where('idVisitas', $idVisitas)
-            ->where('idTickets', $id)
+            ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
             ->first();
-
+    
+        // Verificamos que la visita exista, si no, devolver algún mensaje de error
         if (!$visita) {
-            return view("pages.error404");
+            return view("pages.error404"); // Redirigimos a error 404 si la visita no existe
         }
-
+    
+        // Pasamos todos los datos a la vista
         return view("tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.firmaClienteLeva", compact(
             'ticket',
             'orden',
@@ -2680,23 +2695,39 @@ $ultimaVisitaConEstado1 = false;
             'id'
         ));
     }
+    
 
     public function firmaclienteSopo($id, $idVisitas)
     {
+        // Obtener el ticket
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
         $orden = $ticket;
         $estadosOTS = DB::table('estado_ots')->get();
         $ticketId = $ticket->idTickets;
-
+    
+        // Verificar si ya existe una firma para el ticket y la visita
+        $firmaExistente = DB::table('firmas')
+            ->where('idTickets', $id)
+            ->where('idVisitas', $idVisitas)
+            ->first(); // Verificamos si ya existe una firma para esa visita y ticket
+    
+        // Si ya existe una firma, redirigimos a la página de error 404
+        if ($firmaExistente) {
+            return view("pages.error404"); // Mostrar error 404 si ya existe la firma
+        }
+    
+        // Obtener la visita usando idVisitas
         $visita = DB::table('visitas')
             ->where('idVisitas', $idVisitas)
-            ->where('idTickets', $id)
+            ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
             ->first();
-
+    
+        // Verificamos que la visita exista, si no, devolver algún mensaje de error
         if (!$visita) {
-            return view("pages.error404");
+            return view("pages.error404"); // Redirigimos a error 404 si la visita no existe
         }
-
+    
+        // Pasamos todos los datos a la vista
         return view("tickets.ordenes-trabajo.helpdesk.soporte.firmas.firmaClienteSopo", compact(
             'ticket',
             'orden',
@@ -2707,62 +2738,59 @@ $ultimaVisitaConEstado1 = false;
             'id'
         ));
     }
+    
 
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
-    {
-        // Validar que la firma esté presente
-        $request->validate([
-            'firma' => 'required|string',
-        ]);
+{
+    // Validar que la firma esté presente
+    $request->validate([
+        'firma' => 'required|string',
+    ]);
 
-        // Obtener el ticket
-        $ticket = Ticket::findOrFail($id);
+    // Obtener el ticket
+    $ticket = Ticket::findOrFail($id);
 
-        // Verificar si la combinación idVisitas y idTickets existe en la tabla visitas
-        $visitaExistente = DB::table('visitas')
-            ->where('idVisitas', $idVisitas)
-            ->where('idTickets', $ticket->idTickets)
-            ->first();
+    // Verificar si la combinación idVisitas y idTickets existe en la tabla visitas
+    $visitaExistente = DB::table('visitas')
+        ->where('idVisitas', $idVisitas)
+        ->where('idTickets', $ticket->idTickets)
+        ->first();
 
-        // Si no existe una visita válida con esa combinación, retornar un error
-        if (!$visitaExistente) {
-            return response()->json(['message' => 'La combinación de idVisitas y idTickets no es válida.'], 400);
-        }
-
-        // Convertir la firma de base64 a binario
-        $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
-
-        // Verificar si ya existe una firma para este ticket y cliente
-        $firmaExistente = DB::table('firmas')
-            ->where('idTickets', $ticket->idTickets)
-            ->where('idCliente', $ticket->idCliente)
-            ->where('idVisitas', $idVisitas) // Verificamos si ya existe con el idVisitas actual
-            ->first();
-
-        // Si no existe una firma para este ticket y cliente con el idVisitas actual
-        if (!$firmaExistente) {
-            // Si el idVisitas es diferente, creamos una nueva firma
-            DB::table('firmas')->insert([
-                'firma_cliente' => $firmaCliente,
-                'idTickets' => $ticket->idTickets,
-                'idCliente' => $ticket->idCliente, // Asumiendo que el ticket tiene un idCliente
-                'idVisitas' => $idVisitas, // Guardamos el idVisitas
-            ]);
-
-            // Retornar una respuesta de éxito con mensaje de creación
-            return response()->json(['message' => 'Firma creada correctamente'], 201);
-        } else {
-            // Si ya existe una firma con el mismo idVisitas, actualizamos la firma
-            DB::table('firmas')
-                ->where('idFirmas', $firmaExistente->idFirmas) // Encontramos la firma existente
-                ->update([
-                    'firma_cliente' => $firmaCliente,
-                ]);
-
-            // Retornar una respuesta de éxito con mensaje de actualización
-            return response()->json(['message' => 'Firma actualizada correctamente'], 200);
-        }
+    // Si no existe una visita válida con esa combinación, retornar un error
+    if (!$visitaExistente) {
+        return response()->json(['message' => 'La combinación de idVisitas y idTickets no es válida.'], 400);
     }
+
+    // Convertir la firma de base64 a binario
+    $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
+
+    // Verificar si ya existe una firma para este ticket, cliente y visita
+    $firmaExistente = DB::table('firmas')
+        ->where('idTickets', $ticket->idTickets)
+        ->where('idCliente', $ticket->idCliente)
+        ->where('idVisitas', $idVisitas) // Verificamos si ya existe con el idVisitas actual
+        ->first();
+
+    // Si ya existe una firma para este ticket, cliente y visita, no permitir la creación ni actualización
+    if ($firmaExistente) {
+        return response()->json(['message' => 'Ya existe una firma para este ticket, cliente y visita.'], 400);
+    }
+
+    // Si no existe una firma para este ticket, cliente y visita, creamos una nueva firma
+    DB::table('firmas')->insert([
+        'firma_cliente' => $firmaCliente,
+        'idTickets' => $ticket->idTickets,
+        'idCliente' => $ticket->idCliente, // Asumiendo que el ticket tiene un idCliente
+        'idVisitas' => $idVisitas, // Guardamos el idVisitas
+    ]);
+
+    // Retornar una respuesta de éxito con mensaje de creación
+    return response()->json(['message' => 'Firma creada correctamente'], 201);
+}
+
+
+
+
 
     public function obtenerClientes($idClienteGeneral)
     {

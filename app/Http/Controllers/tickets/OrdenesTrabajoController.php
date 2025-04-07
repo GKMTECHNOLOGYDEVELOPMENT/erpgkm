@@ -348,6 +348,16 @@ class OrdenesTrabajoController extends Controller
         // Obtener el estado de flujo y el color del ticket
         $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
 
+
+        // Obtener el cliente correspondiente
+$cliente = $orden->cliente;  // Asumimos que 'cliente' está relacionado con el Ticket.
+
+// Verificar si el cliente tiene la propiedad 'tienda' y si es igual a 1 o 0
+$esTiendacliente = ($cliente && isset($cliente->esTienda) && $cliente->esTienda == 1) ? 1 : 0;
+Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacliente: {$esTiendacliente}");
+
+
+
         // Obtener los estados desde la tabla estado_ots
         // $estadosOTS = DB::table('estado_ots')->get();
         // Verificar si la visita seleccionada tiene un tipo de usuario
@@ -798,6 +808,7 @@ if ($ultimaVisita) {
             'tipoServicio',  // Pasamos el tipoServicio a la vista
             'idtipoServicio',
             'ultimaVisitaConEstado1',
+            'esTiendacliente'
 
 
         ));
@@ -851,41 +862,50 @@ if ($ultimaVisita) {
     }
 
 
-
     public function firmacliente($id, $idVisitas)
     {
-        // $usuario = Auth::user();
-        // $rol = $usuario->rol->nombre ?? 'Sin Rol';
         // Obtener el ticket
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+        
         // Obtener los estados de OTS
         $estadosOTS = DB::table('estado_ots')->get();
         $ticketId = $ticket->idTickets;
+    
+        // Verificar si ya existe una firma para el ticket y la visita
+        $firmaExistente = DB::table('firmas')
+            ->where('idTickets', $id)
+            ->where('idVisitas', $idVisitas)
+            ->first(); // Verificamos si ya existe una firma para esa visita y ticket
+    
+        // Si ya existe una firma, redirigimos a la página de error 404
+        if ($firmaExistente) {
+            return view("pages.error404"); // Mostrar error 404 si ya existe la firma
+        }
+    
         // Obtener la visita usando idVisitas
-        // Verificar que la visita corresponda al ticket
         $visita = DB::table('visitas')
             ->where('idVisitas', $idVisitas)
             ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
             ->first();
-
+    
         // Verificamos que la visita exista, si no, devolver algún mensaje de error
         if (!$visita) {
-            return view("pages.error404");
+            return view("pages.error404"); // Redirigimos a error 404 si la visita no existe
         }
+    
         // Pasamos todos los datos a la vista
         return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
             'ticket',
             'orden',
-
             'estadosOTS',
             'ticketId',
             'idVisitas', // Asegúrate de pasar idVisitas aquí
             'visita', // El objeto visita completo
-            'id',
-            'idVisitas' // Pasamos también el id del ticket
+            'id'
         ));
     }
+    
 
 
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
@@ -1602,6 +1622,8 @@ if ($ultimaVisita) {
             'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
             'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
             'imagenVisita' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validar la imagen
+            'nombreclientetienda' => 'nullable|string|max:255',
+            'celularclientetienda' => 'nullable|string|max:255',
         ]);
 
         Log::info('Datos validados correctamente');
@@ -1649,8 +1671,13 @@ if ($ultimaVisita) {
         $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
         $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
         $visita->tipoServicio = $tipoServicio; // O el valor correspondiente que quieras
+       
 
         $visita->idUsuario = $request->encargado;
+
+        // Asignar los valores de nombreclientetienda y celularclientetienda
+$visita->nombreclientetienda = $request->nombreclientetienda;
+$visita->celularclientetienda = $request->celularclientetienda;
 
         Log::info('Creando la visita', ['visita' => $visita]);
 
@@ -3642,4 +3669,34 @@ public function updatevisita(Request $request, $id)
             return "Hace $diffInDays días";
         }
     }
+
+    public function obtenerTecnicosDeApoyo($idVisitas, $idTicket)
+    {
+        $tecnicos = DB::table('ticketapoyo')
+            ->join('usuarios', 'ticketapoyo.idTecnico', '=', 'usuarios.idUsuario')
+            ->where('ticketapoyo.idVisita', $idVisitas)
+            ->where('ticketapoyo.idTicket', $idTicket)
+            ->select('ticketapoyo.idTicketApoyo', 'usuarios.idUsuario', 'usuarios.Nombre', 'usuarios.apellidoPaterno') // Selecciona idTicketApoyo
+            ->get();
+    
+        return response()->json($tecnicos);
+    }
+    
+    
+
+    public function eliminar($idTicketApoyo)
+    {
+        $tecnicoApoyo = TicketApoyo::find($idTicketApoyo);
+    
+        if (!$tecnicoApoyo) {
+            return response()->json(['success' => false, 'message' => 'Técnico de apoyo no encontrado.'], 404);
+        }
+    
+        // Eliminar técnico de apoyo
+        $tecnicoApoyo->delete();
+    
+        return response()->json(['success' => true, 'message' => 'Técnico de apoyo eliminado correctamente.']);
+    }
+    
+
 }

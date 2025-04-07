@@ -65,7 +65,9 @@ class Visita extends Model
 		'idTecnico', 
 		'idUsuario',
 		'tipoServicio',// Añadimos fecha_final_hora
-		'recojo'
+		'recojo',
+		'nombreclientetienda',
+		'celularclientetienda'
 	];
 
 	public function ticket()

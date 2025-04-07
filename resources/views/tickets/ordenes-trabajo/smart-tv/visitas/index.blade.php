@@ -67,6 +67,14 @@
                     <!-- Opciones con JS -->
                 </select>
             </div>
+
+            <!-- Técnicos de apoyo -->
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnicos de Apoyo:</h3>
+                <ul id="detalleTecnicosApoyo" class="list-none space-y-2">
+                    <!-- Técnicos de apoyo se cargarán aquí -->
+                </ul>
+            </div>
         </div>
 
         <!-- Pie del Modal -->
@@ -77,6 +85,7 @@
 
     </div>
 </div>
+
 
 
 
@@ -409,6 +418,7 @@
     encargadoTipo: '', 
     necesitaApoyo: false, 
     imagePreview: null,
+    
 
     // Función para previsualizar la imagen antes de subirla
     previewImage(event) {
@@ -466,6 +476,20 @@
                                     placeholder="Elige la hora de Fin" required>
                             </div>
                         </div>
+
+                        @if($esTiendacliente == 1)
+                            <div class="space-y-4 mt-2">
+                                <div>
+                                    <label class="block text-sm font-medium">Nombre cliente tienda</label>
+                                    <input type="text" name="nombreclientetienda" class="form-input w-full" placeholder="Nombre del Cliente (Opcional)">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium">Celular cliente tienda</label>
+                                    <input type="text" name="celularclientetienda" class="form-input w-full" placeholder="Celular del Cliente (Opcional)">
+                                </div>
+                            </div>
+                        @endif
+
 
                         <!-- Encargado -->
                         <div>

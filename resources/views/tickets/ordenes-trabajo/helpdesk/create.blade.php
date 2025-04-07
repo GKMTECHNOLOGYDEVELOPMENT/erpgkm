@@ -398,6 +398,9 @@
                 const idTienda = document.getElementById("idTienda").value;
                 const fallaReportada = document.getElementById("fallaReportada").value.trim();
 
+                console.log("Valor del idCliente seleccionado:", idCliente);  // Verifica el valor aquí
+
+
                 // Verificar si algún campo está vacío
                 if (!numeroTicket) {
                     isValid = false; // Si está vacío, no se puede enviar el formulario
@@ -589,16 +592,13 @@
     let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
     // let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
 
-
-
-
-
-    // console.log(cargarClientesGenerales);
 // Función para cargar los clientes
 function cargarClientes() {
     fetch('/clientesdatoscliente')
         .then(response => response.json())
         .then(data => {
+            console.log("🚀 Datos de clientes recibidos:", data); // Aquí estamos haciendo el log de los datos recibidos
+
             const select = document.getElementById('idCliente'); // Aquí aún usas 'idCliente' para obtener el select
 
             // Puedes agregar un 'name' también, si lo deseas:
@@ -607,6 +607,8 @@ function cargarClientes() {
             // Vaciar y llenar el select con las opciones
             select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
             data.forEach(cliente => {
+                console.log(`Cliente: ${cliente.nombre} - ${cliente.documento}`); // Mostrar el cliente en el log
+
                 const option = document.createElement('option');
                 option.value = cliente.idCliente;
                 option.textContent = `${cliente.nombre} - ${cliente.documento}`;
@@ -628,8 +630,28 @@ function cargarClientes() {
             // Mostrar el select después de cargar los datos
             select.style.display = 'block'; // O 'inline-block' según tu diseño
         })
-        .catch(error => console.error('Error al cargar clientes:', error));
+        .catch(error => {
+            console.error('Error al cargar clientes:', error);
+        });
 }
+
+// Función para obtener el cliente seleccionado
+function obtenerClienteSeleccionado() {
+    const select = document.getElementById('idCliente');
+    const idClienteSeleccionado = select.value; // Esto obtendrá el idCliente seleccionado
+    console.log(`Cliente seleccionado: ${idClienteSeleccionado}`); // Ver el valor seleccionado
+
+    if (idClienteSeleccionado) {
+        // Aquí puedes hacer algo con el idClienteSeleccionado
+        // Ejemplo: Hacer un fetch para obtener más detalles de ese cliente
+        console.log(`Detalles del cliente con ID: ${idClienteSeleccionado}`);
+    } else {
+        console.log('No se ha seleccionado ningún cliente');
+    }
+}
+
+// Evento de cambio en el select
+document.getElementById('idCliente').addEventListener('change', obtenerClienteSeleccionado);
 
 // Ocultar el select de clientes inicialmente
 let selectCliente = document.getElementById('idCliente');
@@ -640,6 +662,7 @@ if (!clientesCargados) {
     cargarClientes();
     clientesCargados = true;
 }
+
 
 
 
@@ -714,8 +737,12 @@ if (!clientesCargados) {
     
                 if (data.length > 0) {
                     data.forEach(tienda => {
-                        tiendaSelect.append(`<option value="${tienda.idTienda}">${tienda.nombre}</option>`);
-                    });
+ // Agregar cada tienda con su departamento
+ tiendaSelect.append(`
+                <option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">
+                    ${tienda.nombre}
+                </option>
+            `);                    });
                 } else {
                     tiendaSelect.append('<option value="">No hay tiendas registradas</option>');
                     console.warn("⚠️ No hay tiendas registradas para este cliente.");
@@ -742,6 +769,9 @@ if (!clientesCargados) {
     // Evento para cuando se selecciona un cliente
     document.getElementById('idCliente').addEventListener('change', function () {
         let clienteId = this.value;
+
+        console.log('Cliente seleccionado:', clienteId); 
+
         if (clienteId) {
             console.log('Cliente seleccionado:', clienteId); // Verificar si el cliente es seleccionado
             fetch(`/clientes-generales/${clienteId}`)
@@ -775,6 +805,9 @@ if (!clientesCargados) {
             document.getElementById('idClienteGeneral').innerHTML =
                 '<option value="" selected>Seleccionar Cliente General</option>';
         }
+
+        console.log("Valor final del idCliente:", this.value);
+
     });
 });
 </script>

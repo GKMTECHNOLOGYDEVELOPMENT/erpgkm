@@ -186,6 +186,70 @@ detailsButton.addEventListener('click', function () {
     })
     .catch(error => console.error('Error al obtener usuarios:', error));
 
+    
+// Obtener los técnicos de apoyo para la visita y ticket
+fetch(`/api/ticketapoyo/${visita.idVisitas}/${visita.idTickets}`)
+  .then(response => response.json())
+  .then(tecnicosApoyo => {
+    const listaTecnicos = document.getElementById('detalleTecnicosApoyo');
+    listaTecnicos.innerHTML = ''; // Limpiar la lista antes de agregar los técnicos
+
+    // Crear un item de lista para cada técnico de apoyo
+    tecnicosApoyo.forEach(tecnico => {
+      const listItem = document.createElement('li');
+      listItem.classList.add('px-2', 'py-1', 'border', 'rounded-lg', 'text-gray-700', 'cursor-pointer');
+      listItem.textContent = `${tecnico.Nombre} ${tecnico.apellidoPaterno}`;
+
+      // Crear botón de eliminar
+      const removeButton = document.createElement('button');
+      removeButton.textContent = 'Eliminar';
+      removeButton.classList.add('ml-2', 'text-red-500', 'hover:text-red-700', 'text-xs');
+
+      // Evento para eliminar el técnico de apoyo
+      removeButton.addEventListener('click', function () {
+        if (confirm(`¿Estás seguro de eliminar a ${tecnico.Nombre} ${tecnico.apellidoPaterno}?`)) {
+          // Llamar a la API para eliminar el técnico de apoyo usando el idTicketApoyo
+
+             // Llamar a la API para eliminar el técnico de apoyo usando el idTicketApoyo
+             const idTicketApoyo = tecnico.idTicketApoyo; // Aquí obtenemos el idTicketApoyo de cada técnico
+          
+             // Asegúrate de que `idTicketApoyo` esté presente
+             console.log('Eliminando técnico con idTicketApoyo:', idTicketApoyo);
+             
+          fetch(`/api/eliminar/tecnicoapoyo/${tecnico.idTicketApoyo}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Si la eliminación fue exitosa, eliminar el técnico de la lista
+                listItem.remove();
+                alert('Técnico de apoyo eliminado correctamente');
+              } else {
+                alert('Hubo un error al eliminar el técnico de apoyo.');
+              }
+            })
+            .catch(error => {
+              console.error('Error al eliminar técnico de apoyo:', error);
+              alert('Ocurrió un problema al eliminar el técnico de apoyo.');
+            });
+        }
+      });
+
+      // Agregar el botón de eliminar al listItem
+      listItem.appendChild(removeButton);
+
+      // Agregar el técnico a la lista
+      listaTecnicos.appendChild(listItem);
+    });
+  })
+  .catch(error => console.error('Error al obtener técnicos de apoyo:', error));
+
+
+
      // Guardar el idVisitas en el modal o en el botón de actualizar
   const actualizarButton = document.getElementById('actualizarButton');
   actualizarButton.setAttribute('data-id', visita.idVisitas); // Guarda el ID de la visita en un atributo data
