@@ -21,41 +21,41 @@
 </div>
 
 
-<!-- Modal de Detalles -->
-<div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-90">
-    <div class="modal-content bg-white rounded-lg shadow-lg w-1/2 p-4 max-h-[80vh] overflow-y-auto">
+<!-- Modal de Detalles con nuevo estilo y cierre al hacer clic fuera -->
+<div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-[999] flex items-start justify-center bg-[black]/60 overflow-y-auto"
+     onclick="if(event.target === this) this.classList.add('hidden')">
+    <div class="modal-content panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-xl bg-white shadow-lg">
+        
         <!-- Cabecera del Modal -->
-        <div class="modal-header flex justify-between items-center mb-4 border-b pb-2">
-            <h2 id="detalleNombre" class="text-xl font-semibold text-gray-800"></h2>
+        <div class="flex items-center justify-between px-5 py-3 border-b">
+            <h2 id="detalleNombre" class="font-bold text-lg text-gray-800 dark:text-white"></h2>
             <button id="closeModalButton" class="text-gray-500 hover:text-gray-700 text-xl">
                 <i class="fa-solid fa-times"></i>
             </button>
         </div>
 
         <!-- Cuerpo del Modal -->
-        <div class="modal-body space-y-4">
-            <div class="grid grid-cols-1 gap-4">
-                <div>
-                    <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Inicio:</h3>
-                    <input type="datetime-local" id="detalleFechaInicioHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-600">
-                </div>
-                <div>
-                    <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Fin:</h3>
-                    <input type="datetime-local" id="detalleFechaFinalHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-600">
-                </div>
-                <div>
-                    <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnico:</h3>
-                    <select id="detalleUsuario" class="form-input w-full px-2 py-1 border rounded-lg text-gray-600">
-                        <!-- Las opciones se agregarán dinámicamente con JS -->
-                    </select>
-                </div>
+        <div class="p-5 max-h-[70vh] overflow-y-auto space-y-4">
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Inicio:</h3>
+                <input type="text" id="detalleFechaInicioHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+            </div>
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Fin:</h3>
+                <input type="text" id="detalleFechaFinalHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+            </div>
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnico:</h3>
+                <select id="detalleUsuario" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                    <!-- Opciones con JS -->
+                </select>
             </div>
         </div>
 
         <!-- Pie del Modal -->
-        <div class="modal-footer flex justify-end mt-4 border-t pt-4">
-            <button id="closeModalButtonFooter" class="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200 mr-2">Cerrar</button>
-            <button id="actualizarButton" class="btn btn-success bg-green-600 text-white hover:bg-green-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Actualizar</button>
+        <div class="flex justify-end items-center px-5 py-3 border-t ">
+            <button id="closeModalButtonFooter" class="btn btn-outline-danger">Cerrar</button>
+            <button id="actualizarButton" class="btn btn-primary ltr:ml-4 rtl:mr-4">Actualizar</button>
         </div>
 
     </div>
@@ -63,16 +63,8 @@
 
 
 
-
-
-
-
-
-
-
-
 <!-- Modal de Detalles de Visita -->
-<div x-data="{ openDetallesVisita: false }"
+{{-- <div x-data="{ openDetallesVisita: false }"
     @toggle-modal-detalles-visita.window="openDetallesVisita = !openDetallesVisita; console.log('openDetallesVisita cambiado:', openDetallesVisita)">
 
 
@@ -127,7 +119,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
 
 <div x-data="{
@@ -676,6 +668,18 @@
             dateFormat: "H:i",
             time_24hr: true,
             locale: "es"
+        });
+
+        flatpickr("#detalleFechaInicioHora", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+        });
+
+        flatpickr("#detalleFechaFinalHora", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
         });
 
 

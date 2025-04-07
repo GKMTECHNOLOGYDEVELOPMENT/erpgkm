@@ -149,7 +149,12 @@ function formatDatos(dateString) {
 // Botón de Detalles
 const detailsButton = document.createElement('button');
 detailsButton.className = 'btn btn-info w-full sm:w-auto mt-2 sm:mt-0';
-detailsButton.textContent = 'Ver Detalles';
+detailsButton.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4l3 2m5-2a9 9 0 11-3.1-6.9M16 3v4h4" />
+  </svg>
+`;
 
 detailsButton.addEventListener('click', function () {
   console.log('Botón "Ver Detalles" clickeado');
