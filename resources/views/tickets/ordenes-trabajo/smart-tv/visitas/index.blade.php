@@ -4,12 +4,29 @@
     Coordinación
 </span>
 
-<div class="flex gap-1 sm:gap-2 justify-center mt-2">
+<div class="flex gap-1 sm:gap-2 justify-center mt-2" id="botonCoordinacionContainer">
     <!-- Si no existe el flujo con idEstadflujo = 4, existe una condición para el idTickets y idVisitas, o no existe ninguna visita, mostrar el botón -->
     <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
         Coordinación
     </button>
 </div>
+
+<script>
+    // Pasamos el valor de 'ultimaVisitaConEstado1' desde Laravel a JavaScript
+    var ultimaVisitaConEstado1 = @json($ultimaVisitaConEstado1);
+
+    console.log("Valor de ultimaVisitaConEstado1:", ultimaVisitaConEstado1);
+
+    // Verificar si 'ultimaVisitaConEstado1' es falso
+    if (!ultimaVisitaConEstado1) {
+        // Si es falso (es 0 o null), ocultamos el botón
+        document.getElementById('botonCoordinacionContainer').style.display = 'none';
+    }
+    else {
+        // Si la última visita tiene estado 1 o si no hay visitas, mostramos el botón
+        document.getElementById('botonCoordinacionContainer').style.display = 'flex';
+    }
+</script>
 
 
 

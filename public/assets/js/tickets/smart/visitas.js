@@ -218,34 +218,36 @@ document.getElementById('actualizarButton').addEventListener('click', function()
   }
 
   // Realizar la petición PUT para actualizar la visita con el id específico
-  fetch(`/api/actualizar/visitas/${idVisita}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      fecha_inicio_hora: fechaInicio,
-      fecha_final_hora: fechaFinal,
-      idUsuario: idUsuario,
-    }),
+fetch(`/api/actualizar/visitas/${idVisita}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    fecha_inicio_hora: fechaInicio,
+    fecha_final_hora: fechaFinal,
+    idUsuario: idUsuario,
+  }),
+})
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Si la respuesta es exitosa, cerrar el modal y actualizar la vista
+      alert('Visita actualizada exitosamente!');
+      location.reload();
+      document.getElementById('modalDetallesVisita').classList.add('hidden');
+      // Aquí puedes actualizar la tarjeta de la visita en la interfaz si es necesario
+    } else {
+      // Mostrar el mensaje de error recibido desde el servidor
+      alert(data.message || 'Hubo un error al actualizar la visita.');
+    }
   })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Si la respuesta es exitosa, cerrar el modal y actualizar la vista
-        alert('Visita actualizada exitosamente!');
+  .catch(error => {
+    // En caso de que haya un error en la petición, mostrarlo
+    console.error('Error:', error);
+    alert('Ocurrió un problema al realizar la actualización.');
+  });
 
-        location.reload();
-        document.getElementById('modalDetallesVisita').classList.add('hidden');
-        // Aquí puedes actualizar la tarjeta de la visita en la interfaz si es necesario
-      } else {
-        alert('Hubo un error al actualizar la visita.');
-      }
-    })
-    .catch(error => {
-      console.error('Error al actualizar la visita:', error);
-      alert('Hubo un error al actualizar la visita.');
-    });
 });
 
 // Agregar el botón Detalles debajo de la información de la visita

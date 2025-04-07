@@ -732,6 +732,25 @@ class OrdenesTrabajoController extends Controller
 
 
 
+// Obtener la última visita para un ticket
+$ultimaVisita = DB::table('visitas')
+    ->where('idTickets', $ticketId)  // Filtrar por el id del ticket
+    ->orderBy('idVisitas', 'desc')  // Ordenar por idVisitas (asumido como incremental)
+    ->first();  // Obtener solo la última visita
+
+// Verificar si la última visita tiene 'estadovisita' igual a 1 o null/0
+if ($ultimaVisita) {
+    if ($ultimaVisita->estadovisita == 1) {
+        // La última visita tiene 'estadovisita' igual a 1
+        $ultimaVisitaConEstado1 = true;
+    } elseif ($ultimaVisita->estadovisita === null || $ultimaVisita->estadovisita == 0) {
+        // La última visita tiene 'estadovisita' igual a null o 0
+        $ultimaVisitaConEstado1 = false;
+    }
+} else {
+    // No se encontraron visitas para este ticket
+    $ultimaVisitaConEstado1 = true;  // Aquí cambiamos a true para que el botón se muestre si no hay visitas.
+}
 
 
 
@@ -777,7 +796,9 @@ class OrdenesTrabajoController extends Controller
             'tipoUsuario',
             'idVisitaSeleccionada',
             'tipoServicio',  // Pasamos el tipoServicio a la vista
-            'idtipoServicio'
+            'idtipoServicio',
+            'ultimaVisitaConEstado1',
+
 
         ));
     }
@@ -2036,7 +2057,7 @@ class OrdenesTrabajoController extends Controller
     }
 
 
-    public function updatevisita(Request $request, $id)
+public function updatevisita(Request $request, $id)
 {
     // Validar los datos
     $validated = $request->validate([
@@ -2050,6 +2071,17 @@ class OrdenesTrabajoController extends Controller
 
     if (!$visita) {
         return response()->json(['success' => false, 'message' => 'Visita no encontrada'], 404);
+    }
+
+    // Verificar si ya existe un anexo con idTipovisita = 2 (en ejecución)
+    $anexoEnEjecucion = DB::table('anexos_visitas')
+        ->where('idVisitas', $id)
+        ->where('idTipovisita', 2)
+        ->exists();
+
+    if ($anexoEnEjecucion) {
+        // Si existe un anexo con idTipovisita = 2, devolver un error
+        return response()->json(['success' => false, 'message' => 'Esta visita está en ejecución, no se puede actualizar'], 400);
     }
 
     // Actualizar los datos de la visita
@@ -2180,6 +2212,11 @@ class OrdenesTrabajoController extends Controller
         DB::table('visitas')
             ->where('idVisitas', $request->idVisitas)
             ->update(['fecha_inicio' => $fechaInicio]);
+
+            // Actualizar el campo estadovisita a 1 en la tabla visitas
+    DB::table('visitas')
+    ->where('idVisitas', $request->idVisitas)
+    ->update(['estadovisita' => 1]); // Esto actualiza la variable estadovisita a 1
 
 
 
