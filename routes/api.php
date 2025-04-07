@@ -134,3 +134,7 @@ Route::get('/obtenerJustificacionSoporte', [OrdenesHelpdeskController::class, 'o
 Route::post('/guardarEstadoSoporte', [OrdenesHelpdeskController::class, 'guardarEstadoSoporte']);
 
 Route::put('actualizar/visitas/{id}', [OrdenesTrabajoController::class, 'updatevisita']);
+Route::get('/ticketapoyo/{idVisitas}/{idTicket}', [OrdenesTrabajoController::class, 'obtenerTecnicosDeApoyo']);
+// Ruta para eliminar un técnico de apoyo
+Route::delete('eliminar/tecnicoapoyo/{idTicketApoyo}', [OrdenesTrabajoController::class, 'eliminar']);
+

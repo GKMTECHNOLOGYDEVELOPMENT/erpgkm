@@ -125,7 +125,6 @@ function formatDate(dateString) {
 
 
           
-
 // Función para formatear fechas
 function formatDatos(dateString) {
   const date = new Date(dateString);
@@ -143,7 +142,12 @@ function formatDatos(dateString) {
 // Botón de Detalles
 const detailsButton = document.createElement('button');
 detailsButton.className = 'btn btn-info w-full sm:w-auto mt-2 sm:mt-0';
-detailsButton.textContent = 'Ver Detalles';
+detailsButton.innerHTML = `
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 8v4l3 2m5-2a9 9 0 11-3.1-6.9M16 3v4h4" />
+  </svg>
+`;
 
 detailsButton.addEventListener('click', function () {
   console.log('Botón "Ver Detalles" clickeado');
@@ -207,34 +211,36 @@ document.getElementById('actualizarButton').addEventListener('click', function()
   }
 
   // Realizar la petición PUT para actualizar la visita con el id específico
-  fetch(`/api/actualizar/visitas/${idVisita}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      fecha_inicio_hora: fechaInicio,
-      fecha_final_hora: fechaFinal,
-      idUsuario: idUsuario,
-    }),
+fetch(`/api/actualizar/visitas/${idVisita}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    fecha_inicio_hora: fechaInicio,
+    fecha_final_hora: fechaFinal,
+    idUsuario: idUsuario,
+  }),
+})
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      // Si la respuesta es exitosa, cerrar el modal y actualizar la vista
+      alert('Visita actualizada exitosamente!');
+      location.reload();
+      document.getElementById('modalDetallesVisita').classList.add('hidden');
+      // Aquí puedes actualizar la tarjeta de la visita en la interfaz si es necesario
+    } else {
+      // Mostrar el mensaje de error recibido desde el servidor
+      alert(data.message || 'Hubo un error al actualizar la visita.');
+    }
   })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Si la respuesta es exitosa, cerrar el modal y actualizar la vista
-        alert('Visita actualizada exitosamente!');
+  .catch(error => {
+    // En caso de que haya un error en la petición, mostrarlo
+    console.error('Error:', error);
+    alert('Ocurrió un problema al realizar la actualización.');
+  });
 
-        location.reload();
-        document.getElementById('modalDetallesVisita').classList.add('hidden');
-        // Aquí puedes actualizar la tarjeta de la visita en la interfaz si es necesario
-      } else {
-        alert('Hubo un error al actualizar la visita.');
-      }
-    })
-    .catch(error => {
-      console.error('Error al actualizar la visita:', error);
-      alert('Hubo un error al actualizar la visita.');
-    });
 });
 
 // Agregar el botón Detalles debajo de la información de la visita

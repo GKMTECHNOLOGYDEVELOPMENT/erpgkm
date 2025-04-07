@@ -480,6 +480,26 @@ class OrdenesHelpdeskController extends Controller
         $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
 
 
+                // Obtener la última visita para un ticket
+$ultimaVisita = DB::table('visitas')
+->where('idTickets', $ticketId)  // Filtrar por el id del ticket
+->orderBy('idVisitas', 'desc')  // Ordenar por idVisitas (asumido como incremental)
+->first();  // Obtener solo la última visita
+
+// Verificar si la última visita tiene 'estadovisita' igual a 1 o null/0
+if ($ultimaVisita) {
+if ($ultimaVisita->estadovisita == 1) {
+    // La última visita tiene 'estadovisita' igual a 1
+    $ultimaVisitaConEstado1 = true;
+} elseif ($ultimaVisita->estadovisita === null || $ultimaVisita->estadovisita == 0) {
+    // La última visita tiene 'estadovisita' igual a null o 0
+    $ultimaVisitaConEstado1 = false;
+}
+} else {
+// No se encontraron visitas para este ticket
+$ultimaVisitaConEstado1 = false;
+}
+
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
@@ -508,47 +528,15 @@ class OrdenesHelpdeskController extends Controller
             'ejecutor', // Asegúrate de pasar la variable ejecutor
             'existeFlujo31',
             'tiposEnvio',
-            'tiposRecojo'
+            'tiposRecojo',
+            'ultimaVisitaConEstado1',
+
 
         ));
     }
 
 
-    public function guardarEquipo(Request $request)
-    {
-        // Validar los datos recibidos
-        $request->validate([
-            'tipoProducto' => 'required|integer',
-            'marca' => 'required|integer',
-            'modelo' => 'required|integer',
-            'numeroSerie' => 'required|string|max:255',
-            'observaciones' => 'required|string|max:255',
-            'idTicket' => 'required|integer',
-            'idVisita' => 'required|integer',
-        ]);
-
-        // Crear un nuevo registro en la tabla equipos
-        $equipo = new Equipo();
-        $equipo->nserie = $request->numeroSerie;
-        $equipo->modalidad = 'Instalación'; // Si quieres asignar una modalidad específica
-        $equipo->idTickets = $request->idTicket;
-        $equipo->idModelo = $request->modelo;
-        $equipo->idMarca = $request->marca;
-        $equipo->observaciones = $request->observaciones;
-        $equipo->idCategoria = $request->tipoProducto;
-        $equipo->idVisitas = $request->idVisita;
-        $equipo->save();
-
-        // Devolver la respuesta
-        return response()->json([
-            'success' => true,
-            'producto' => $equipo,
-            'marca' => Marca::find($request->marca),
-            'modelo' => Modelo::find($request->modelo),
-            'numeroSerie' => $request->numeroSerie
-        ]);
-    }
-
+   
 
     // Función para guardar los datos de envío
     public function guardardatosenviosoporte(Request $request)
@@ -588,6 +576,50 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
+    public function guardarEquipo(Request $request)
+{
+    // Validar los datos recibidos
+    $request->validate([
+        'tipoProducto' => 'required|integer',
+        'marca' => 'required|integer',
+        'modelo' => 'required|integer',
+        'numeroSerie' => 'required|string|max:255',
+        'idTicket' => 'required|integer',
+        'idVisita' => 'required|integer',
+        'observaciones' => 'nullable|string', // Validar observaciones (opcional)
+    ]);
+
+    // Crear un nuevo registro en la tabla equipos
+    $equipo = new Equipo();
+    $equipo->nserie = $request->numeroSerie;
+    $equipo->modalidad = 'Instalación'; // Si quieres asignar una modalidad específica
+    $equipo->idTickets = $request->idTicket;
+    $equipo->idModelo = $request->modelo;
+    $equipo->idMarca = $request->marca;
+    $equipo->idCategoria = $request->tipoProducto;
+    $equipo->idVisitas = $request->idVisita;
+    $equipo->observaciones = $request->observaciones; // Guardar observaciones
+    $equipo->save();
+
+    // Obtener la marca y ocultar la foto
+    $marca = Marca::find($request->marca);
+    $marca->makeHidden(['foto']); // Excluir la foto de la respuesta
+
+    // Devolver la respuesta
+    return response()->json([
+        'success' => true,
+        'producto' => $equipo,
+        'marca' => $marca, // Devolver la marca sin la foto
+        'modelo' => Modelo::find($request->modelo),
+        'numeroSerie' => $request->numeroSerie,
+        'observaciones' => $equipo->observaciones // Incluir observaciones en la respuesta
+    ]);
+}
+
+    
+
+
+
 
     public function guardarEquipoRetirar(Request $request)
     {
@@ -597,33 +629,38 @@ class OrdenesHelpdeskController extends Controller
             'marca' => 'required|integer',
             'modelo' => 'required|integer',
             'numeroSerie' => 'required|string|max:255',
-            'observaciones' => 'required|string|max:255',
+            'observaciones' => 'nullable|string|max:255', // Añadir validación para observaciones
             'idTicket' => 'required|integer',
             'idVisita' => 'required|integer',
         ]);
-
+    
         // Crear un nuevo registro en la tabla equipos
         $equipo = new Equipo();
         $equipo->nserie = $request->numeroSerie;
-        $equipo->modalidad = 'Retirar'; // Si quieres asignar una modalidad específica
+        $equipo->modalidad = 'Retirar'; // Asignar modalidad de "Retirar"
         $equipo->idTickets = $request->idTicket;
         $equipo->idModelo = $request->modelo;
         $equipo->idMarca = $request->marca;
-        $equipo->observaciones = $request->observaciones;
         $equipo->idCategoria = $request->tipoProducto;
         $equipo->idVisitas = $request->idVisita;
+        $equipo->observaciones = $request->observaciones; // Guardar las observaciones
         $equipo->save();
 
+         // Obtener la marca y ocultar la foto
+    $marca = Marca::find($request->marca);
+    $marca->makeHidden(['foto']); // Excluir la foto de la respuesta
+    
         // Devolver la respuesta
         return response()->json([
             'success' => true,
             'producto' => $equipo,
-            'marca' => Marca::find($request->marca),
+            'marca' => $marca, // Devolver la marca sin la foto
             'modelo' => Modelo::find($request->modelo),
-            'numeroSerie' => $request->numeroSerie
+            'numeroSerie' => $request->numeroSerie,
+            'observaciones' => $equipo->observaciones, // Incluir observaciones en la respuesta
         ]);
     }
-
+    
 
     public function obtenerProductosInstalados(Request $request)
     {
@@ -633,7 +670,8 @@ class OrdenesHelpdeskController extends Controller
             'equipos.nserie',
             'categoria.nombre as categoria_nombre',
             'marca.nombre as marca_nombre',
-            'modelo.nombre as modelo_nombre'
+            'modelo.nombre as modelo_nombre',
+            'equipos.observaciones' // Agregar observaciones a la selección
         )
             ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
             ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
@@ -642,21 +680,23 @@ class OrdenesHelpdeskController extends Controller
             ->where('equipos.idVisitas', $request->idVisita)
             ->where('equipos.modalidad', 'Instalación')
             ->get();
-
+    
         // Retornar la respuesta como JSON
         return response()->json($productos);
     }
+    
 
 
     public function obtenerProductosRetirados(Request $request)
     {
-        // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Instalación"
+        // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Retirar"
         $productos = Equipo::select(
             'equipos.idEquipos',
             'equipos.nserie',
             'categoria.nombre as categoria_nombre',
             'marca.nombre as marca_nombre',
-            'modelo.nombre as modelo_nombre'
+            'modelo.nombre as modelo_nombre',
+            'equipos.observaciones' // Añadir las observaciones a la consulta
         )
             ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
             ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
@@ -665,12 +705,11 @@ class OrdenesHelpdeskController extends Controller
             ->where('equipos.idVisitas', $request->idVisita)
             ->where('equipos.modalidad', 'Retirar')
             ->get();
-
+    
         // Retornar la respuesta como JSON
         return response()->json($productos);
     }
-
-
+    
     public function obtenerMarcasPorCategoria($idCategoria)
     {
         // Obtener las marcas que pertenecen a la categoría seleccionada
@@ -678,11 +717,16 @@ class OrdenesHelpdeskController extends Controller
             ->whereHas('modelos', function ($query) use ($idCategoria) {
                 $query->where('idCategoria', $idCategoria);
             })
-            ->get();
-
+            ->get(); // Trae todas las columnas
+    
+        // Excluir el campo 'foto' de la respuesta utilizando makeHidden
+        $marcas->makeHidden(['foto']);
+    
         // Retornar las marcas como respuesta JSON
         return response()->json($marcas);
     }
+    
+
 
     public function obtenerModelosPorMarca($idMarca)
     {
@@ -815,6 +859,29 @@ class OrdenesHelpdeskController extends Controller
         $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
 
+
+        
+        // Obtener la última visita para un ticket
+$ultimaVisita = DB::table('visitas')
+->where('idTickets', $ticketId)  // Filtrar por el id del ticket
+->orderBy('idVisitas', 'desc')  // Ordenar por idVisitas (asumido como incremental)
+->first();  // Obtener solo la última visita
+
+// Verificar si la última visita tiene 'estadovisita' igual a 1 o null/0
+if ($ultimaVisita) {
+if ($ultimaVisita->estadovisita == 1) {
+    // La última visita tiene 'estadovisita' igual a 1
+    $ultimaVisitaConEstado1 = true;
+} elseif ($ultimaVisita->estadovisita === null || $ultimaVisita->estadovisita == 0) {
+    // La última visita tiene 'estadovisita' igual a null o 0
+    $ultimaVisitaConEstado1 = false;
+}
+} else {
+// No se encontraron visitas para este ticket
+$ultimaVisitaConEstado1 = false;
+}
+
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
@@ -837,7 +904,9 @@ class OrdenesHelpdeskController extends Controller
             'articulos',
             'idVisitaSeleccionada',
             'idtipoServicio',
-            'existeFlujo31'
+            'existeFlujo31',
+            'ultimaVisitaConEstado1',
+
 
         ));
     }
@@ -2587,20 +2656,35 @@ class OrdenesHelpdeskController extends Controller
 
     public function firmaclienteLeva($id, $idVisitas)
     {
+        // Obtener el ticket
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
         $orden = $ticket;
         $estadosOTS = DB::table('estado_ots')->get();
         $ticketId = $ticket->idTickets;
-
+    
+        // Verificar si ya existe una firma para el ticket y la visita
+        $firmaExistente = DB::table('firmas')
+            ->where('idTickets', $id)
+            ->where('idVisitas', $idVisitas)
+            ->first(); // Verificamos si ya existe una firma para esa visita y ticket
+    
+        // Si ya existe una firma, redirigimos a la página de error 404
+        if ($firmaExistente) {
+            return view("pages.error404"); // Mostrar error 404 si ya existe la firma
+        }
+    
+        // Obtener la visita usando idVisitas
         $visita = DB::table('visitas')
             ->where('idVisitas', $idVisitas)
-            ->where('idTickets', $id)
+            ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
             ->first();
-
+    
+        // Verificamos que la visita exista, si no, devolver algún mensaje de error
         if (!$visita) {
-            return view("pages.error404");
+            return view("pages.error404"); // Redirigimos a error 404 si la visita no existe
         }
-
+    
+        // Pasamos todos los datos a la vista
         return view("tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.firmaClienteLeva", compact(
             'ticket',
             'orden',
@@ -2611,23 +2695,39 @@ class OrdenesHelpdeskController extends Controller
             'id'
         ));
     }
+    
 
     public function firmaclienteSopo($id, $idVisitas)
     {
+        // Obtener el ticket
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
         $orden = $ticket;
         $estadosOTS = DB::table('estado_ots')->get();
         $ticketId = $ticket->idTickets;
-
+    
+        // Verificar si ya existe una firma para el ticket y la visita
+        $firmaExistente = DB::table('firmas')
+            ->where('idTickets', $id)
+            ->where('idVisitas', $idVisitas)
+            ->first(); // Verificamos si ya existe una firma para esa visita y ticket
+    
+        // Si ya existe una firma, redirigimos a la página de error 404
+        if ($firmaExistente) {
+            return view("pages.error404"); // Mostrar error 404 si ya existe la firma
+        }
+    
+        // Obtener la visita usando idVisitas
         $visita = DB::table('visitas')
             ->where('idVisitas', $idVisitas)
-            ->where('idTickets', $id)
+            ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
             ->first();
-
+    
+        // Verificamos que la visita exista, si no, devolver algún mensaje de error
         if (!$visita) {
-            return view("pages.error404");
+            return view("pages.error404"); // Redirigimos a error 404 si la visita no existe
         }
-
+    
+        // Pasamos todos los datos a la vista
         return view("tickets.ordenes-trabajo.helpdesk.soporte.firmas.firmaClienteSopo", compact(
             'ticket',
             'orden',
@@ -2638,62 +2738,59 @@ class OrdenesHelpdeskController extends Controller
             'id'
         ));
     }
+    
 
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
-    {
-        // Validar que la firma esté presente
-        $request->validate([
-            'firma' => 'required|string',
-        ]);
+{
+    // Validar que la firma esté presente
+    $request->validate([
+        'firma' => 'required|string',
+    ]);
 
-        // Obtener el ticket
-        $ticket = Ticket::findOrFail($id);
+    // Obtener el ticket
+    $ticket = Ticket::findOrFail($id);
 
-        // Verificar si la combinación idVisitas y idTickets existe en la tabla visitas
-        $visitaExistente = DB::table('visitas')
-            ->where('idVisitas', $idVisitas)
-            ->where('idTickets', $ticket->idTickets)
-            ->first();
+    // Verificar si la combinación idVisitas y idTickets existe en la tabla visitas
+    $visitaExistente = DB::table('visitas')
+        ->where('idVisitas', $idVisitas)
+        ->where('idTickets', $ticket->idTickets)
+        ->first();
 
-        // Si no existe una visita válida con esa combinación, retornar un error
-        if (!$visitaExistente) {
-            return response()->json(['message' => 'La combinación de idVisitas y idTickets no es válida.'], 400);
-        }
-
-        // Convertir la firma de base64 a binario
-        $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
-
-        // Verificar si ya existe una firma para este ticket y cliente
-        $firmaExistente = DB::table('firmas')
-            ->where('idTickets', $ticket->idTickets)
-            ->where('idCliente', $ticket->idCliente)
-            ->where('idVisitas', $idVisitas) // Verificamos si ya existe con el idVisitas actual
-            ->first();
-
-        // Si no existe una firma para este ticket y cliente con el idVisitas actual
-        if (!$firmaExistente) {
-            // Si el idVisitas es diferente, creamos una nueva firma
-            DB::table('firmas')->insert([
-                'firma_cliente' => $firmaCliente,
-                'idTickets' => $ticket->idTickets,
-                'idCliente' => $ticket->idCliente, // Asumiendo que el ticket tiene un idCliente
-                'idVisitas' => $idVisitas, // Guardamos el idVisitas
-            ]);
-
-            // Retornar una respuesta de éxito con mensaje de creación
-            return response()->json(['message' => 'Firma creada correctamente'], 201);
-        } else {
-            // Si ya existe una firma con el mismo idVisitas, actualizamos la firma
-            DB::table('firmas')
-                ->where('idFirmas', $firmaExistente->idFirmas) // Encontramos la firma existente
-                ->update([
-                    'firma_cliente' => $firmaCliente,
-                ]);
-
-            // Retornar una respuesta de éxito con mensaje de actualización
-            return response()->json(['message' => 'Firma actualizada correctamente'], 200);
-        }
+    // Si no existe una visita válida con esa combinación, retornar un error
+    if (!$visitaExistente) {
+        return response()->json(['message' => 'La combinación de idVisitas y idTickets no es válida.'], 400);
     }
+
+    // Convertir la firma de base64 a binario
+    $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
+
+    // Verificar si ya existe una firma para este ticket, cliente y visita
+    $firmaExistente = DB::table('firmas')
+        ->where('idTickets', $ticket->idTickets)
+        ->where('idCliente', $ticket->idCliente)
+        ->where('idVisitas', $idVisitas) // Verificamos si ya existe con el idVisitas actual
+        ->first();
+
+    // Si ya existe una firma para este ticket, cliente y visita, no permitir la creación ni actualización
+    if ($firmaExistente) {
+        return response()->json(['message' => 'Ya existe una firma para este ticket, cliente y visita.'], 400);
+    }
+
+    // Si no existe una firma para este ticket, cliente y visita, creamos una nueva firma
+    DB::table('firmas')->insert([
+        'firma_cliente' => $firmaCliente,
+        'idTickets' => $ticket->idTickets,
+        'idCliente' => $ticket->idCliente, // Asumiendo que el ticket tiene un idCliente
+        'idVisitas' => $idVisitas, // Guardamos el idVisitas
+    ]);
+
+    // Retornar una respuesta de éxito con mensaje de creación
+    return response()->json(['message' => 'Firma creada correctamente'], 201);
+}
+
+
+
+
 
     public function obtenerClientes($idClienteGeneral)
     {

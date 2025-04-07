@@ -256,6 +256,8 @@ public function destroy($id)
         'message' => 'Tienda eliminada con éxito'
     ], 200);
 }
+
+
 public function getAll()
 {
     // Obtén todos los datos de la tabla tienda
@@ -271,6 +273,8 @@ public function getAll()
             'email'      => $tienda->email,
             'direccion'  => $tienda->direccion,
             'referencia' => $tienda->referencia,
+            'departamento' => $tienda->departamento,  // Agregar el departamento
+
         ];
     });
 
