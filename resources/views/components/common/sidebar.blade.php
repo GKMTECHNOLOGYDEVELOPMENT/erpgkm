@@ -819,7 +819,7 @@
                     </ul>
                 </li> --}}
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'forms' }"
                         @click="activeDropdown === 'forms' ? activeDropdown = null : activeDropdown = 'forms'">
@@ -899,7 +899,7 @@
                             <a href="/forms/clipboard">Clipboard</a>
                         </li>
                     </ul>
-                </li> --}}
+                </li>
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
