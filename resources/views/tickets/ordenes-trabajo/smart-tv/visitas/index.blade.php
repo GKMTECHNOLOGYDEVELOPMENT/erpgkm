@@ -450,7 +450,7 @@
                 </div>
                 <div class="modal-scroll">
                     <!-- Formulario -->
-                    <form class="p-5 space-y-4" enctype="multipart/form-data">
+                    <form class="p-5 space-y-4" enctype="multipart/form-data" >
                         <!-- Nombre de la visita -->
                         <div class="flex space-x-2">
                             <div class="w-1/2">
@@ -481,11 +481,11 @@
                             <div class="space-y-4 mt-2">
                                 <div>
                                     <label class="block text-sm font-medium">Nombre cliente tienda</label>
-                                    <input type="text" name="nombreclientetienda" class="form-input w-full" placeholder="Nombre del Cliente (Opcional)">
+                                    <input type="text" id="nombreclientetienda" name="nombreclientetienda" class="form-input w-full" placeholder="Nombre del Cliente (Opcional)">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium">Celular cliente tienda</label>
-                                    <input type="text" name="celularclientetienda" class="form-input w-full" placeholder="Celular del Cliente (Opcional)">
+                                    <input type="text" id="celularclientetienda" name="celularclientetienda" class="form-input w-full" placeholder="Celular del Cliente (Opcional)">
                                 </div>
                             </div>
                         @endif
@@ -786,6 +786,22 @@
             // Obtener la imagen seleccionada
             const imagenVisita = document.getElementById('imagenVisita').files[0]; // Obtener el primer archivo seleccionado
 
+            let nombreClienteTienda = '';
+            let celularClienteTienda = '';
+
+                // Verificar si los campos adicionales existen en el DOM y obtener sus valores
+            const nombreClienteTiendaElement = document.getElementById('nombreclientetienda');
+            const celularClienteTiendaElement = document.getElementById('celularclientetienda');
+
+            if (nombreClienteTiendaElement) {
+                nombreClienteTienda = nombreClienteTiendaElement.value;
+            }
+            if (celularClienteTiendaElement) {
+                celularClienteTienda = celularClienteTiendaElement.value;
+    }
+
+
+
             // Verificar si los campos obligatorios están vacíos
             if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
                 toastr.error("Por favor, complete todos los campos obligatorios.");
@@ -833,6 +849,16 @@
                     formData.append('tecnicos_apoyo[]', tecnicoId); // Asegúrate de enviar como array
                 });
             }
+
+             // Agregar los campos opcionales de cliente tienda si están presentes
+    if (nombreClienteTienda) {
+        formData.append('nombreclientetienda', nombreClienteTienda);
+    }
+    if (celularClienteTienda) {
+        formData.append('celularclientetienda', celularClienteTienda);
+    }
+
+
             formData.append('idTickets', ticketId);
 
 

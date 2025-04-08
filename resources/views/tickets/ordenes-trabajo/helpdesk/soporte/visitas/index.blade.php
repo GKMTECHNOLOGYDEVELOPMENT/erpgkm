@@ -29,6 +29,47 @@
 
 
 
+<!-- Modal de Detalles con nuevo estilo y cierre al hacer clic fuera -->
+<div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-[999] flex items-start justify-center bg-[black]/60 overflow-y-auto"
+     onclick="if(event.target === this) this.classList.add('hidden')">
+    <div class="modal-content panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-xl bg-white shadow-lg">
+        
+        <!-- Cabecera del Modal -->
+        <div class="flex items-center justify-between px-5 py-3 border-b">
+            <h2 id="detalleNombre" class="font-bold text-lg text-gray-800 dark:text-white"></h2>
+            <button id="closeModalButton" class="text-gray-500 hover:text-gray-700 text-xl">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Cuerpo del Modal -->
+        <div class="p-5 max-h-[70vh] overflow-y-auto space-y-4">
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Inicio:</h3>
+                <input type="text" id="detalleFechaInicioHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+            </div>
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Fin:</h3>
+                <input type="text" id="detalleFechaFinalHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+            </div>
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnico:</h3>
+                <select id="detalleUsuario" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                    <!-- Opciones con JS -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Pie del Modal -->
+        <div class="flex justify-end items-center px-5 py-3 border-t ">
+            <button id="closeModalButtonFooter" class="btn btn-outline-danger">Cerrar</button>
+            <button id="actualizarButton" class="btn btn-primary ltr:ml-4 rtl:mr-4">Actualizar</button>
+        </div>
+
+    </div>
+</div>
+
+
 
 
 <div id="visitasContainer" class="mt-4">

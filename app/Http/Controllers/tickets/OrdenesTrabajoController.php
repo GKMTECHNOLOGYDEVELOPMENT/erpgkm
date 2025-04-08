@@ -1622,8 +1622,8 @@ if ($ultimaVisita) {
             'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
             'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
             'imagenVisita' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validar la imagen
-            'nombreclientetienda' => 'nullable|string|max:255',
-            'celularclientetienda' => 'nullable|string|max:255',
+            'nombreclientetienda' => 'nullable|string|max:255', // Validación para el nombre del cliente
+            'celularclientetienda' => 'nullable|string|max:255', // Validación para el celular del cliente
         ]);
 
         Log::info('Datos validados correctamente');
@@ -1666,29 +1666,25 @@ if ($ultimaVisita) {
 
         // Crear la nueva visita
         $visita = new Visita();
-        $visita->nombre = $request->nombre;
-        $visita->fecha_programada = $request->fecha_visita;
-        $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
-        $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
-        $visita->tipoServicio = $tipoServicio; // O el valor correspondiente que quieras
-       
+    $visita->nombre = $request->nombre;
+    $visita->fecha_programada = $request->fecha_visita;
+    $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
+    $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
+    $visita->tipoServicio = $tipoServicio; // O el valor correspondiente que quieras
+    $visita->idUsuario = $request->encargado;
 
-        $visita->idUsuario = $request->encargado;
+    // Aquí guardamos los nuevos campos
+    $visita->nombreclientetienda = $request->nombreclientetienda;
+    $visita->celularclientetienda = $request->celularclientetienda;
 
-        // Asignar los valores de nombreclientetienda y celularclientetienda
-$visita->nombreclientetienda = $request->nombreclientetienda;
-$visita->celularclientetienda = $request->celularclientetienda;
+    Log::info('Creando la visita', ['visita' => $visita]);
 
-        Log::info('Creando la visita', ['visita' => $visita]);
+    // Asignar 0 o 1 a "necesita_apoyo"
+    $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
+    $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
 
-        // Asignar 0 o 1 a "necesita_apoyo"
-        $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
-
-        $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
-
-        // Guardar la visita
-        $visita->save();
-
+    // Guardar la visita
+    $visita->save();
         Log::info('Visita guardada con éxito', ['visita_id' => $visita->idVisitas]);
 
         // Manejar la imagen (si se subió)
