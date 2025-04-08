@@ -131,7 +131,8 @@
 
     <!-- Sección de Herramientas -->
     <div class="p-5 rounded-lg shadow-md">
-        <span class="text-lg font-semibold mb-4 badge bg-success">Inventario</span>
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge"
+            style="background-color: {{ $colorEstado }};">Inventario</span>
         <div class="flex justify-end mt-2">
             <button type="button" id="addHerramienta" class="btn btn-primary">+</button>
         </div>
@@ -162,7 +163,8 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Sección Instalar -->
         <div class="lg:col-span-1 p-6 rounded-2xl shadow-md bg-white dark:bg-slate-800 space-y-6">
-            <span class="text-lg font-semibold badge bg-success text-white px-3 py-1">Instalar</span>
+            <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge"
+            style="background-color: {{ $colorEstado }};">Instalar</span>
 
             <form method="POST" id="formInstalar" class="space-y-4">
                 @csrf
@@ -244,7 +246,8 @@
     <!-- Sección Retirar -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div class="lg:col-span-1 p-6 rounded-2xl shadow-md bg-white dark:bg-slate-800 space-y-6">
-            <span class="text-lg font-semibold badge bg-success text-white px-3 py-1">Retirar</span>
+            <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge"
+            style="background-color: {{ $colorEstado }};">Retirar</span>
 
             <form method="POST" id="formRetirar" class="space-y-4">
                 @csrf
