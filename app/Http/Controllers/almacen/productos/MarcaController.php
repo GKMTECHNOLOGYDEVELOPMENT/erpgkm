@@ -216,18 +216,20 @@ class MarcaController extends Controller
     }
 
 
-    // Dentro del controlador
-
-public function getMarcasByClienteGeneral($idClienteGeneral)
-{
-    // Obtener las marcas relacionadas con el cliente general
-    $marcas = MarcaClienteGeneral::where('idClienteGeneral', $idClienteGeneral)
-                                  ->with('marca') // Asumiendo que tienes una relación en el modelo
-                                  ->get()
-                                  ->pluck('marca'); // Opción para obtener solo las marcas, dependiendo de tu estructura
-
-    return response()->json($marcas);
-}
-
+    public function getMarcasByClienteGeneral($idClienteGeneral)
+    {
+        // Obtener las marcas relacionadas con el cliente general
+        $marcas = MarcaClienteGeneral::where('idClienteGeneral', $idClienteGeneral)
+                                      ->with(['marca' => function($query) {
+                                          // Excluir el campo 'foto' al obtener los datos de la relación 'marca'
+                                          $query->get()->each->makeHidden('foto'); // Ocultar el campo 'foto'
+                                      }])
+                                      ->get()
+                                      ->pluck('marca'); // Obtener solo las marcas
+    
+        return response()->json($marcas);
+    }
+    
+    
     
 }

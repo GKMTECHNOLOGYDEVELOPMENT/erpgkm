@@ -360,13 +360,13 @@
                     value="{{ \Carbon\Carbon::parse($orden->fechaCreacion)->format('Y-m-d H:i') }}" readonly>
             </div>
 
-
-
             <!-- Falla Reportada -->
             <div class="md:col-span-2">
                 <label class="text-sm font-medium">Falla Reportada</label>
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
+
+        
 
             <!-- Botón de Guardar -->
             <div class="md:col-span-2 flex justify-end space-x-4">

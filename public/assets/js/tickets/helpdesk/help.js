@@ -160,7 +160,7 @@ detailsButton.addEventListener('click', function () {
   document.getElementById('detalleFechaFinalHora').value = visita.fecha_final_hora ? formatDatos(visita.fecha_final_hora) : '';
 
   // Obtener la lista de técnicos y cargarlos en el select
-  fetch('/api/usuarios/tecnico') // Ajusta esta ruta a tu API
+  fetch('/api/usuarios/tecnico/help') // Ajusta esta ruta a tu API
     .then(response => response.json())
     .then(usuarios => {
       const select = document.getElementById('detalleUsuario');
