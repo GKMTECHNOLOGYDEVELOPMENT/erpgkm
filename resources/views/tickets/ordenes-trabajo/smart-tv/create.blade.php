@@ -116,10 +116,10 @@
                         <select id="idTienda" name="idTienda" style="display: none;">
                             <option value="">Seleccionar Tienda</option>
                         </select>
-                                   
+
                     </div>
 
-                  
+
                 </div>
 
 
@@ -136,12 +136,12 @@
                     <input id="fechaCompra" name="fechaCompra" type="date" class="form-input w-full"
                         placeholder="Seleccionar fecha">
                 </div>
-<!-- Fecha de fecha_creacion -->
-<div>
-    <label for="fechaTicket" class="block text-sm font-medium">Fecha de Ticket</label>
-    <input id="fechaTicket" name="fecha_creacion" type="datetime-local" class="form-input w-full"
-        placeholder="Seleccionar fecha y hora">
-</div>
+                <!-- Fecha de fecha_creacion -->
+                <div>
+                    <label for="fechaTicket" class="block text-sm font-medium">Fecha de Ticket</label>
+                    <input id="fechaTicket" name="fecha_creacion" type="datetime-local" class="form-input w-full"
+                        placeholder="Seleccionar fecha y hora">
+                </div>
 
 
                 <!-- Marca -->
@@ -907,7 +907,7 @@
         // Validación en tiempo real para campos obligatorios
         const camposObligatorios = [
             'idCliente', 'idClienteGeneral',
-            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket','linkubicacion'
+            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket', 'linkubicacion'
         ];
 
         camposObligatorios.forEach(campo => {
