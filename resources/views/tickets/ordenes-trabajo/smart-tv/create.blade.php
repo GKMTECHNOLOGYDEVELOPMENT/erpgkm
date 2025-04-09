@@ -113,9 +113,10 @@
 
                     <!-- Select para tiendas (solo si el cliente es tienda) -->
                     <div id="selectTiendaContainer">
-                        <select id="idTienda" name="idTienda" class="form-input w-full" >
+                        <select id="idTienda" name="idTienda" style="display: none;">
                             <option value="">Seleccionar Tienda</option>
                         </select>
+                                   
                     </div>
 
                   
