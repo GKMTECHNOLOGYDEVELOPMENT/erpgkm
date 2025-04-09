@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(response => response.json())
                 .then(data => {
                     let select = document.getElementById('idClienteGeneral');
-                    select.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
+                    select.innerHTML = '<option value="" selected>Seleccionar Cliente General wa</option>'; // Limpiar
 
                     // Verificar si se recibió algún dato
                     console.log('Clientes generales:', data); // Verifica que se reciban los clientes generales
@@ -505,6 +505,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Si hay solo un cliente general, lo seleccionamos automáticamente
                     if (data.length === 1) {
                         select.value = data[0].idClienteGeneral; // Seleccionar automáticamente el único cliente
+                        cargarMarcasPorClienteGeneral(data[0].idClienteGeneral); // Ejecutar la función automáticamente
+
                     }
 
                     // No inicializamos NiceSelect en el select de Cliente General
@@ -514,7 +516,8 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             // Limpiar el select si no hay cliente seleccionado
             document.getElementById('idClienteGeneral').innerHTML =
-                '<option value="" selected>Seleccionar Cliente General</option>';
+                '<option value="" selected>Seleccionar Cliente General wa</option>';
+
         }
     });
 
