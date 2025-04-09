@@ -11,7 +11,7 @@
     </button>
 </div>
 
-<script>
+{{-- <script>
     // Pasamos el valor de 'ultimaVisitaConEstado1' desde Laravel a JavaScript
     var ultimaVisitaConEstado1 = @json($ultimaVisitaConEstado1);
 
@@ -24,7 +24,7 @@
         // Si ya hay una visita con estado válido, ocultamos el botón
         document.getElementById('botonCoordinacionContainer').style.display = 'none';
     }
-</script>
+</script> --}}
 
 
 
