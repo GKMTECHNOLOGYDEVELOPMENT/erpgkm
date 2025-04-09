@@ -41,9 +41,12 @@
 
 <input type="hidden" id="visitaId" value="{{ $idVisitaSeleccionada }}">
 
+<input type="hidden" id="idvisita" value="{{ $idVisitaSeleccionada }}">
 
-<!-- Verificar el valor de tipoServicio -->
-@if ($idtipoServicio != 7)
+
+
+<!-- Verificar si la visita está activa (estadovisita no es 1) -->
+@if ($estadovisita != 1 && $idtipoServicio != 7)
     <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         @if ($idtipoServicio == 1)
             <!-- Mostrar estos botones solo si idtipoServicio es 1 -->
@@ -228,6 +231,8 @@
     function actualizarEstado(estado) {
         const ticketId = document.getElementById('ticketId').value; // Obtener el ID del ticket
         console.log("Actualizando estado para el ticket ID:", ticketId, "Estado:", estado);
+        const idVisita = document.getElementById('idvisita').value; // Obtener el valor del idvisita
+        // console.log('visita:', IdVisita);
 
         fetch(`/tickets/${ticketId}/actualizar-estado`, {
                 method: 'POST',
@@ -236,7 +241,8 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({
-                    estado: estado // Enviar el estado a actualizar
+                    estado: estado,
+                    idVisita: idVisita // Enviar el idVisita                    // Enviar el estado a actualizar
                 })
             })
             .then(response => response.json())

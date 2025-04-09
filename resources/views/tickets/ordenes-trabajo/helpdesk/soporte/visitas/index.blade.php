@@ -17,23 +17,26 @@
 
     console.log("Valor de ultimaVisitaConEstado1:", ultimaVisitaConEstado1);
 
-    // Si no existe visita o la última visita tiene estado 0 o null, mostramos el botón
-    if (ultimaVisitaConEstado1 === null || ultimaVisitaConEstado1 === 0) {
-        document.getElementById('botonCoordinacionContainer').style.display = 'flex'; // Mostrar el botón
-    } else {
-        // Si ya hay una visita con estado válido, ocultamos el botón
+    // Verificar si 'ultimaVisitaConEstado1' es falso
+    if (!ultimaVisitaConEstado1) {
+        // Si es falso (es 0 o null), ocultamos el botón
         document.getElementById('botonCoordinacionContainer').style.display = 'none';
+    }
+    else {
+        // Si la última visita tiene estado 1 o si no hay visitas, mostramos el botón
+        document.getElementById('botonCoordinacionContainer').style.display = 'flex';
     }
 </script>
 
 
 
 
+
 <!-- Modal de Detalles con nuevo estilo y cierre al hacer clic fuera -->
 <div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-[999] flex items-start justify-center bg-[black]/60 overflow-y-auto"
-     onclick="if(event.target === this) this.classList.add('hidden')">
+    onclick="if(event.target === this) this.classList.add('hidden')">
     <div class="modal-content panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-xl bg-white shadow-lg">
-        
+
         <!-- Cabecera del Modal -->
         <div class="flex items-center justify-between px-5 py-3 border-b">
             <h2 id="detalleNombre" class="font-bold text-lg text-gray-800 dark:text-white"></h2>
@@ -57,6 +60,23 @@
                 <select id="detalleUsuario" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
                     <!-- Opciones con JS -->
                 </select>
+            </div>
+
+            <!-- Técnicos de apoyo -->
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnicos de Apoyo:</h3>
+                <ul id="detalleTecnicosApoyo" class="list-none space-y-2">
+                    <!-- Técnicos de apoyo se cargarán aquí -->
+                </ul>
+
+                <!-- Agregar técnico de apoyo -->
+                <div class="mt-4">
+                    <label for="detalleTecnicoApoyo" class="font-semibold text-sm text-gray-600 mb-1">Agregar Técnico de Apoyo:</label>
+                    <select id="detalleTecnicoApoyo" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                        <!-- Opciones con JS -->
+                    </select>
+                    <button id="addTecnicoApoyoButton" class="btn btn-success mt-2 w-full">Agregar</button>
+                </div>
             </div>
         </div>
 
@@ -254,9 +274,9 @@
             });
     }
 }" class="mb-5"
-@set-visita-id.window="visitaId = $event.detail"
-@toggle-modal-condiciones.window="openCondiciones = !openCondiciones"
-x-init="obtenerUbicacion()">
+    @set-visita-id.window="visitaId = $event.detail"
+    @toggle-modal-condiciones.window="openCondiciones = !openCondiciones"
+    x-init="obtenerUbicacion()">
     <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
             <div x-show="openCondiciones" x-transition:enter="transition ease-out duration-300 transform"
@@ -281,46 +301,46 @@ x-init="obtenerUbicacion()">
                 </div>
                 <div class="modal-scroll p-5 space-y-4">
                     <form>
-                    <div style="display: none !important;">
+                        <div style="display: none !important;">
 
-                        <!-- Se muestra solo si "No se atiende" NO está activado -->
-                        <template x-if="!condiciones.noAtiende">
-                            <div>
-                                <!-- Switch "¿Es titular?" -->
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm font-medium">¿Es titular?</span>
-                                    <label class="w-12 h-6 relative">
-                                        <input type="checkbox" x-model="condiciones.esTitular"
-                                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-                                            id="esTitularSwitch" />
-                                        <span
-                                            class="outline_checkbox bg-icon border-2 border-[#ebedf2] dark:border-white-dark block h-full rounded-full
+                            <!-- Se muestra solo si "No se atiende" NO está activado -->
+                            <template x-if="!condiciones.noAtiende">
+                                <div>
+                                    <!-- Switch "¿Es titular?" -->
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium">¿Es titular?</span>
+                                        <label class="w-12 h-6 relative">
+                                            <input type="checkbox" x-model="condiciones.esTitular"
+                                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                                id="esTitularSwitch" />
+                                            <span
+                                                class="outline_checkbox bg-icon border-2 border-[#ebedf2] dark:border-white-dark block h-full rounded-full
                                              before:absolute before:left-1 before:bg-[#ebedf2] dark:before:bg-white-dark before:bottom-1 before:w-4 before:h-4
                                              before:rounded-full before:bg-[url(/assets/images/close.svg)] before:bg-no-repeat before:bg-center
                                              peer-checked:before:left-7 peer-checked:before:bg-[url(/assets/images/checked.svg)]
                                              peer-checked:border-primary peer-checked:before:bg-primary before:transition-all before:duration-300"></span>
-                                    </label>
+                                        </label>
+                                    </div>
+                                    <!-- Si no es titular, mostrar campos para Nombre, DNI y Teléfono -->
+                                    <div x-show="!condiciones.esTitular" class="space-y-3 mt-2">
+                                        <div>
+                                            <label class="block text-sm font-medium">Nombre</label>
+                                            <input type="text" x-model="condiciones.titularNoEsTitular.nombre"
+                                                class="form-input w-full">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium">DNI</label>
+                                            <input type="text" x-model="condiciones.titularNoEsTitular.dni"
+                                                class="form-input w-full">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium">Teléfono</label>
+                                            <input type="text" x-model="condiciones.titularNoEsTitular.telefono"
+                                                class="form-input w-full">
+                                        </div>
+                                    </div>
                                 </div>
-                                <!-- Si no es titular, mostrar campos para Nombre, DNI y Teléfono -->
-                                <div x-show="!condiciones.esTitular" class="space-y-3 mt-2">
-                                    <div>
-                                        <label class="block text-sm font-medium">Nombre</label>
-                                        <input type="text" x-model="condiciones.titularNoEsTitular.nombre"
-                                            class="form-input w-full">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium">DNI</label>
-                                        <input type="text" x-model="condiciones.titularNoEsTitular.dni"
-                                            class="form-input w-full">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium">Teléfono</label>
-                                        <input type="text" x-model="condiciones.titularNoEsTitular.telefono"
-                                            class="form-input w-full">
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
+                            </template>
 
 
                         </div>
@@ -410,42 +430,42 @@ x-init="obtenerUbicacion()">
 
 <!-- Modal de Detalles -->
 <div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-80">
-  <div class="modal-content bg-white rounded-lg shadow-lg w-full sm:w-3/4 md:w-1/3 p-4 overflow-auto">
-    <!-- Cabecera del Modal -->
-    <div class="modal-header flex justify-between items-center mb-4 border-b pb-2">
-      <h2 id="detalleNombre" class="text-xl font-semibold text-gray-800"></h2>
-      <button id="closeModalButton" class="text-gray-500 hover:text-gray-700 text-xl">
-        <i class="fa-solid fa-times"></i>
-      </button>
-    </div>
+    <div class="modal-content bg-white rounded-lg shadow-lg w-full sm:w-3/4 md:w-1/3 p-4 overflow-auto">
+        <!-- Cabecera del Modal -->
+        <div class="modal-header flex justify-between items-center mb-4 border-b pb-2">
+            <h2 id="detalleNombre" class="text-xl font-semibold text-gray-800"></h2>
+            <button id="closeModalButton" class="text-gray-500 hover:text-gray-700 text-xl">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
 
-    <!-- Cuerpo del Modal -->
-    <div class="modal-body space-y-4">
-      <div class="grid grid-cols-1 gap-4">
-        <div>
-          <h3 class="font-semibold text-sm text-gray-700 mb-1">Fecha Inicio:</h3>
-          <input type="datetime-local" id="detalleFechaInicioHora" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+        <!-- Cuerpo del Modal -->
+        <div class="modal-body space-y-4">
+            <div class="grid grid-cols-1 gap-4">
+                <div>
+                    <h3 class="font-semibold text-sm text-gray-700 mb-1">Fecha Inicio:</h3>
+                    <input type="datetime-local" id="detalleFechaInicioHora" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm text-gray-700 mb-1">Fecha Fin:</h3>
+                    <input type="datetime-local" id="detalleFechaFinalHora" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm text-gray-700 mb-1">Técnico:</h3>
+                    <!-- Cambiar de un input a un select -->
+                    <select id="detalleUsuario" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+                        <!-- Las opciones se agregarán dinámicamente con JS -->
+                    </select>
+                </div>
+            </div>
         </div>
-        <div>
-          <h3 class="font-semibold text-sm text-gray-700 mb-1">Fecha Fin:</h3>
-          <input type="datetime-local" id="detalleFechaFinalHora" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
-        </div>
-        <div>
-          <h3 class="font-semibold text-sm text-gray-700 mb-1">Técnico:</h3>
-          <!-- Cambiar de un input a un select -->
-          <select id="detalleUsuario" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
-            <!-- Las opciones se agregarán dinámicamente con JS -->
-          </select>
-        </div>
-      </div>
-    </div>
 
-    <!-- Pie del Modal -->
-    <div class="modal-footer flex justify-end mt-4 border-t pt-4">
-      <button id="closeModalButtonFooter" class="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Cerrar</button>
-      <button id="actualizarButton" class="btn btn-success bg-green-600 text-white hover:bg-green-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Actualizar</button>
+        <!-- Pie del Modal -->
+        <div class="modal-footer flex justify-end mt-4 border-t pt-4">
+            <button id="closeModalButtonFooter" class="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Cerrar</button>
+            <button id="actualizarButton" class="btn btn-success bg-green-600 text-white hover:bg-green-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Actualizar</button>
+        </div>
     </div>
-  </div>
 </div>
 
 
@@ -467,8 +487,8 @@ x-init="obtenerUbicacion()">
             reader.readAsDataURL(file);
         }
     }
-}" 
-class="mb-5" @toggle-modal.window="open = !open">
+}"
+    class="mb-5" @toggle-modal.window="open = !open">
 
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
@@ -508,25 +528,25 @@ class="mb-5" @toggle-modal.window="open = !open">
                         <div class="w-full">
                             <label class="block text-sm font-medium mb-1">Rango de atención</label>
                             <div class="flex space-x-2">
-                                <input id="horaInicioInput" type="text" name="Hora Inicio"class="form-input w-1/2"
+                                <input id="horaInicioInput" type="text" name="Hora Inicio" class="form-input w-1/2"
                                     placeholder="Elige la hora de Inicio" required>
                                 <input id="horaFinInput" type="text" name="Hora Fin" class="form-input w-1/2"
                                     placeholder="Elige la hora de Fin" required>
                             </div>
                         </div>
 
-                        
-                   <!-- ¿Es Recojo? -->
-                   <div id="esRecojoContainer">
-                        <label class="block text-sm font-medium mb-2">¿Es Recojo?</label>
-                        <label class="w-12 h-6 relative inline-block">
-                            <input type="checkbox" id="esRecojo" name="esRecojo" value="1"
-                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                            <span
-                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300">
-                            </span>
-                        </label>
-                    </div>
+
+                        <!-- ¿Es Recojo? -->
+                        <div id="esRecojoContainer">
+                            <label class="block text-sm font-medium mb-2">¿Es Recojo?</label>
+                            <label class="w-12 h-6 relative inline-block">
+                                <input type="checkbox" id="esRecojo" name="esRecojo" value="1"
+                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                                <span
+                                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300">
+                                </span>
+                            </label>
+                        </div>
 
 
                         <!-- Encargado -->
@@ -537,14 +557,14 @@ class="mb-5" @toggle-modal.window="open = !open">
                                 <option value="" disabled selected>Seleccionar Encargado</option>
                                 <!-- Aquí se itera sobre los usuarios -->
                                 @foreach ($encargado as $encargados)
-                                    <option value="{{ $encargados->idUsuario }}"
-                                        data-tipo="{{ $encargados->idTipoUsuario }}">
-                                        {{ $encargados->Nombre }} -
-                                        @if ($encargados->idTipoUsuario == 1)
-                                            TÉCNICO
-                                   
-                                        @endif 
-                                    </option>
+                                <option value="{{ $encargados->idUsuario }}"
+                                    data-tipo="{{ $encargados->idTipoUsuario }}">
+                                    {{ $encargados->Nombre }} -
+                                    @if ($encargados->idTipoUsuario == 1)
+                                    TÉCNICO
+
+                                    @endif
+                                </option>
                                 @endforeach
                             </select>
                         </div>
@@ -566,7 +586,7 @@ class="mb-5" @toggle-modal.window="open = !open">
                                 style="display: none;" placeholder="Seleccionar Técnicos de Apoyo">
                                 <!-- Aquí iteramos sobre los técnicos -->
                                 @foreach ($tecnicos_apoyo as $tecnico)
-                                    <option value="{{ $tecnico->idUsuario }}">{{ $tecnico->Nombre }}</option>
+                                <option value="{{ $tecnico->idUsuario }}">{{ $tecnico->Nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -608,134 +628,135 @@ class="mb-5" @toggle-modal.window="open = !open">
 </div>
 
 
-<script>document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
-    const modalTitle = document.getElementById('modalTitle'); // ✅ Nuevo elemento para el título
-    const closeModal = document.getElementById('closeModal');
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalTitle'); // ✅ Nuevo elemento para el título
+        const closeModal = document.getElementById('closeModal');
 
-    // ✅ Delegación de eventos para los botones "Ver Imagen"
-    document.body.addEventListener('click', function(event) {
-        const button = event.target.closest('button[id^="viewImageButton-"]');
-        if (button) {
-            const visitaId = button.dataset.id; // Extraer ID de la visita
-            const imageType = button.dataset.imageType; // Tipo de imagen
+        // ✅ Delegación de eventos para los botones "Ver Imagen"
+        document.body.addEventListener('click', function(event) {
+            const button = event.target.closest('button[id^="viewImageButton-"]');
+            if (button) {
+                const visitaId = button.dataset.id; // Extraer ID de la visita
+                const imageType = button.dataset.imageType; // Tipo de imagen
 
-            // ✅ Obtener la URL correcta según el tipo de imagen
-            if (imageType === "inicioServicio") {
-                obtenerImagenInicioServicio(visitaId); // Función para "inicioServicio"
-            } else if (imageType === "finalServicio") {
-                obtenerImagenFinalServicio(visitaId); // Función para "finalServicio"
-            } else if (imageType === "desplazamiento") {
-                obtenerImagenDesplazamiento(visitaId); // Función para "desplazamiento"
-            } else {
-                obtenerImagen(visitaId, imageType); // Función genérica para otras imágenes
+                // ✅ Obtener la URL correcta según el tipo de imagen
+                if (imageType === "inicioServicio") {
+                    obtenerImagenInicioServicio(visitaId); // Función para "inicioServicio"
+                } else if (imageType === "finalServicio") {
+                    obtenerImagenFinalServicio(visitaId); // Función para "finalServicio"
+                } else if (imageType === "desplazamiento") {
+                    obtenerImagenDesplazamiento(visitaId); // Función para "desplazamiento"
+                } else {
+                    obtenerImagen(visitaId, imageType); // Función genérica para otras imágenes
+                }
+
+                // ✅ Cambiar el título del modal según el tipo de imagen
+                modalTitle.textContent = obtenerTituloFase(imageType);
+
+                // ✅ Mostrar el modal
+                modal.classList.remove('hidden');
             }
+        });
 
-            // ✅ Cambiar el título del modal según el tipo de imagen
-            modalTitle.textContent = obtenerTituloFase(imageType);
-
-            // ✅ Mostrar el modal
-            modal.classList.remove('hidden');
-        }
-    });
-
-    // ❌ Cerrar modal al hacer clic en el botón de cerrar
-    closeModal.addEventListener('click', () => {
-        modal.classList.add('hidden');
-    });
-
-    // ❌ Cerrar modal si se hace clic fuera de la imagen/modal
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) {
+        // ❌ Cerrar modal al hacer clic en el botón de cerrar
+        closeModal.addEventListener('click', () => {
             modal.classList.add('hidden');
+        });
+
+        // ❌ Cerrar modal si se hace clic fuera de la imagen/modal
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        // Función para obtener la imagen de inicio de servicio desde el servidor
+        function obtenerImagenInicioServicio(visitaId) {
+            fetch(`/inicio-servicio-imagen/${visitaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.imagen) {
+                        modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
+                    } else {
+                        console.error('Imagen no encontrada.');
+                        modalImage.src = ''; // Limpiar la imagen si no se encuentra
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener la imagen:', error);
+                });
+        }
+
+        // Función para obtener la imagen de final de servicio desde el servidor
+        function obtenerImagenFinalServicio(visitaId) {
+            fetch(`/final-servicio-imagen/${visitaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.imagen) {
+                        modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
+                    } else {
+                        console.error('Imagen no encontrada.');
+                        modalImage.src = ''; // Limpiar la imagen si no se encuentra
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener la imagen:', error);
+                });
+        }
+
+        // Función para obtener la imagen de desplazamiento desde el servidor
+        function obtenerImagenDesplazamiento(visitaId) {
+            fetch(`/desplazamiento-imagen/${visitaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.imagen) {
+                        modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
+                    } else {
+                        console.error('Imagen no encontrada.');
+                        modalImage.src = ''; // Limpiar la imagen si no se encuentra
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener la imagen:', error);
+                });
+        }
+
+        // Función para obtener la imagen desde el servidor (caso genérico)
+        function obtenerImagen(visitaId, imageType) {
+            fetch(`/imagen-apoyo/${visitaId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.imagen) {
+                        modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
+                    } else {
+                        console.error('Imagen no encontrada.');
+                        modalImage.src = ''; // Limpiar la imagen si no se encuentra
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener la imagen:', error);
+                });
+        }
+
+        // 🔄 Función para obtener el título del modal según la fase
+        function obtenerTituloFase(imageType) {
+            switch (imageType) {
+                case "visita":
+                    return "Imagen - Programación";
+                case "inicioServicio":
+                    return "Imagen - Llegada al Servicio";
+                case "finalServicio":
+                    return "Imagen - Final de Servicio"; // Título para la fase finalServicio
+                case "desplazamiento":
+                    return "Imagen - Desplazamiento"; // Título para la fase desplazamiento
+                default:
+                    return "Imagen de la Visita";
+            }
         }
     });
-
-    // Función para obtener la imagen de inicio de servicio desde el servidor
-    function obtenerImagenInicioServicio(visitaId) {
-        fetch(`/inicio-servicio-imagen/${visitaId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.imagen) {
-                    modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
-                } else {
-                    console.error('Imagen no encontrada.');
-                    modalImage.src = ''; // Limpiar la imagen si no se encuentra
-                }
-            })
-            .catch(error => {
-                console.error('Error al obtener la imagen:', error);
-            });
-    }
-
-    // Función para obtener la imagen de final de servicio desde el servidor
-    function obtenerImagenFinalServicio(visitaId) {
-        fetch(`/final-servicio-imagen/${visitaId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.imagen) {
-                    modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
-                } else {
-                    console.error('Imagen no encontrada.');
-                    modalImage.src = ''; // Limpiar la imagen si no se encuentra
-                }
-            })
-            .catch(error => {
-                console.error('Error al obtener la imagen:', error);
-            });
-    }
-
-    // Función para obtener la imagen de desplazamiento desde el servidor
-    function obtenerImagenDesplazamiento(visitaId) {
-        fetch(`/desplazamiento-imagen/${visitaId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.imagen) {
-                    modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
-                } else {
-                    console.error('Imagen no encontrada.');
-                    modalImage.src = ''; // Limpiar la imagen si no se encuentra
-                }
-            })
-            .catch(error => {
-                console.error('Error al obtener la imagen:', error);
-            });
-    }
-
-    // Función para obtener la imagen desde el servidor (caso genérico)
-    function obtenerImagen(visitaId, imageType) {
-        fetch(`/imagen-apoyo/${visitaId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.imagen) {
-                    modalImage.src = `data:image/jpeg;base64,${data.imagen}`;
-                } else {
-                    console.error('Imagen no encontrada.');
-                    modalImage.src = ''; // Limpiar la imagen si no se encuentra
-                }
-            })
-            .catch(error => {
-                console.error('Error al obtener la imagen:', error);
-            });
-    }
-
-    // 🔄 Función para obtener el título del modal según la fase
-    function obtenerTituloFase(imageType) {
-        switch (imageType) {
-            case "visita":
-                return "Imagen - Programación";
-            case "inicioServicio":
-                return "Imagen - Llegada al Servicio";
-            case "finalServicio":
-                return "Imagen - Final de Servicio"; // Título para la fase finalServicio
-            case "desplazamiento":
-                return "Imagen - Desplazamiento"; // Título para la fase desplazamiento
-            default:
-                return "Imagen de la Visita";
-        }
-    }
-});
 
 
 
@@ -760,6 +781,18 @@ class="mb-5" @toggle-modal.window="open = !open">
             dateFormat: "H:i",
             time_24hr: true,
             locale: "es"
+        });
+        
+        flatpickr("#detalleFechaInicioHora", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+        });
+
+        flatpickr("#detalleFechaFinalHora", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
         });
 
 
@@ -808,108 +841,108 @@ class="mb-5" @toggle-modal.window="open = !open">
 
 
         guardarBtn.addEventListener("click", function(event) {
-    // Obtener los valores del formulario
-    const nombreVisita = document.getElementById('nombreVisitaInput').value;
-    const fechaVisita = document.getElementById('fechaVisitaInput').value;
-    const horaInicio = document.getElementById('horaInicioInput').value;
-    const horaFin = document.getElementById('horaFinInput').value;
-    const encargado = document.getElementById('encargado').value;
+            // Obtener los valores del formulario
+            const nombreVisita = document.getElementById('nombreVisitaInput').value;
+            const fechaVisita = document.getElementById('fechaVisitaInput').value;
+            const horaInicio = document.getElementById('horaInicioInput').value;
+            const horaFin = document.getElementById('horaFinInput').value;
+            const encargado = document.getElementById('encargado').value;
 
-    // Enviar 1 si el checkbox está marcado, 0 si no
-    const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
-    const recojo = document.getElementById('esRecojo').checked ? 1 : 0; // Obtener el valor de recojo
-
-
-    const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions)
-        .map(option => option.value);
-    const ticketId = '{{ $ticket->idTickets }}'; // El ID del ticket
-
-    // Obtener la imagen seleccionada
-    const imagenVisita = document.getElementById('imagenVisita').files[0]; // Obtener el primer archivo seleccionado
-
-    // Verificar si los campos obligatorios están vacíos
-    if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
-        toastr.error("Por favor, complete todos los campos obligatorios.");
-        return; // Detener la ejecución si falta algún campo
-    }
-
-    // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
-    if (necesitaApoyo && tecnicosApoyo.length === 0) {
-        toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
-        return; // Detener la ejecución si no se seleccionaron técnicos
-    }
-
-    // Convertir las horas de inicio y fin a formato Date
-    const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
-    const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
-
-    // Crear objetos Date para la hora de inicio y hora de fin
-    const inicioDate = new Date();
-    inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
-
-    const finDate = new Date();
-    finDate.setHours(horaFinHoras, horaFinMinutos, 0);
-
-    // Validar si la hora de fin es menor o igual a la hora de inicio
-    if (finDate <= inicioDate) {
-        toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
-        return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
-    }
-
-    // Crear un objeto FormData
-    const formData = new FormData();
-
-    // Añadir los datos al FormData
-    formData.append('nombre', nombreVisita);
-    formData.append('fecha_visita', fechaVisita);
-    formData.append('hora_inicio', horaInicio);
-    formData.append('hora_fin', horaFin);
-    formData.append('encargado', encargado);
-    formData.append('necesita_apoyo', necesitaApoyo);
-    formData.append('tecnicos_apoyo', tecnicosApoyo);
-    formData.append('recojo', recojo);  // Agregar el valor de recojo
+            // Enviar 1 si el checkbox está marcado, 0 si no
+            const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
+            const recojo = document.getElementById('esRecojo').checked ? 1 : 0; // Obtener el valor de recojo
 
 
-        // Si 'necesita_apoyo' está marcado, agregar técnicos de apoyo al FormData
-if (necesitaApoyo && tecnicosApoyo.length > 0) {
-    tecnicosApoyo.forEach((tecnicoId) => {
-        formData.append('tecnicos_apoyo[]', tecnicoId);  // Asegúrate de enviar como array
-    });
-}
-    formData.append('idTickets', ticketId);
+            const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions)
+                .map(option => option.value);
+            const ticketId = '{{ $ticket->idTickets }}'; // El ID del ticket
 
+            // Obtener la imagen seleccionada
+            const imagenVisita = document.getElementById('imagenVisita').files[0]; // Obtener el primer archivo seleccionado
 
-
-    // Si hay una imagen, agregarla directamente al FormData
-    if (imagenVisita) {
-        formData.append('imagenVisita', imagenVisita); // Agregar el archivo de imagen directamente
-    }
-
-    // Realizar la solicitud AJAX
-    $.ajax({
-        url: '/guardar-visita-soporte',
-        method: 'POST',
-        data: formData,
-        contentType: false,  // No enviar un tipo de contenido
-        processData: false,  // No procesar los datos
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')  // Añadir el token CSRF a los encabezados
-        },
-        success: function(response) {
-            if (response.success) {
-                toastr.success(response.message); // Muestra un mensaje de éxito
-                window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
-                location.reload(); // Recargar la página
-            } else {
-                toastr.error(response.message); // Mostrar mensaje de error
+            // Verificar si los campos obligatorios están vacíos
+            if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
+                toastr.error("Por favor, complete todos los campos obligatorios.");
+                return; // Detener la ejecución si falta algún campo
             }
-        },
-        error: function(xhr, status, error) {
-            console.error("Error al guardar visita:", error);
-            toastr.error("Error al guardar la visita.");
-        }
-    });
-});
+
+            // Validar si "Necesita Apoyo" está marcado y no se han seleccionado técnicos
+            if (necesitaApoyo && tecnicosApoyo.length === 0) {
+                toastr.error("Por favor, seleccione al menos un técnico de apoyo.");
+                return; // Detener la ejecución si no se seleccionaron técnicos
+            }
+
+            // Convertir las horas de inicio y fin a formato Date
+            const [horaInicioHoras, horaInicioMinutos] = horaInicio.split(':').map(Number);
+            const [horaFinHoras, horaFinMinutos] = horaFin.split(':').map(Number);
+
+            // Crear objetos Date para la hora de inicio y hora de fin
+            const inicioDate = new Date();
+            inicioDate.setHours(horaInicioHoras, horaInicioMinutos, 0);
+
+            const finDate = new Date();
+            finDate.setHours(horaFinHoras, horaFinMinutos, 0);
+
+            // Validar si la hora de fin es menor o igual a la hora de inicio
+            if (finDate <= inicioDate) {
+                toastr.error("La hora de fin no puede ser menor o igual a la hora de inicio.");
+                return; // Detener la ejecución si la hora de fin es menor o igual a la hora de inicio
+            }
+
+            // Crear un objeto FormData
+            const formData = new FormData();
+
+            // Añadir los datos al FormData
+            formData.append('nombre', nombreVisita);
+            formData.append('fecha_visita', fechaVisita);
+            formData.append('hora_inicio', horaInicio);
+            formData.append('hora_fin', horaFin);
+            formData.append('encargado', encargado);
+            formData.append('necesita_apoyo', necesitaApoyo);
+            formData.append('tecnicos_apoyo', tecnicosApoyo);
+            formData.append('recojo', recojo); // Agregar el valor de recojo
+
+
+            // Si 'necesita_apoyo' está marcado, agregar técnicos de apoyo al FormData
+            if (necesitaApoyo && tecnicosApoyo.length > 0) {
+                tecnicosApoyo.forEach((tecnicoId) => {
+                    formData.append('tecnicos_apoyo[]', tecnicoId); // Asegúrate de enviar como array
+                });
+            }
+            formData.append('idTickets', ticketId);
+
+
+
+            // Si hay una imagen, agregarla directamente al FormData
+            if (imagenVisita) {
+                formData.append('imagenVisita', imagenVisita); // Agregar el archivo de imagen directamente
+            }
+
+            // Realizar la solicitud AJAX
+            $.ajax({
+                url: '/guardar-visita-soporte',
+                method: 'POST',
+                data: formData,
+                contentType: false, // No enviar un tipo de contenido
+                processData: false, // No procesar los datos
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Añadir el token CSRF a los encabezados
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message); // Muestra un mensaje de éxito
+                        window.dispatchEvent(new Event('toggle-modal')); // Cerrar el modal
+                        location.reload(); // Recargar la página
+                    } else {
+                        toastr.error(response.message); // Mostrar mensaje de error
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error al guardar visita:", error);
+                    toastr.error("Error al guardar la visita.");
+                }
+            });
+        });
 
 
     });
@@ -917,6 +950,10 @@ if (necesitaApoyo && tecnicosApoyo.length > 0) {
 
 
 <script>
-    var ticketId = {{ $ticketId }};
+    var ticketId = {
+        {
+            $ticketId
+        }
+    };
 </script>
 <script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script>
