@@ -10,8 +10,7 @@
         Coordinación
     </button>
 </div>
-
-{{-- <script>
+<script>
     // Pasamos el valor de 'ultimaVisitaConEstado1' desde Laravel a JavaScript
     var ultimaVisitaConEstado1 = @json($ultimaVisitaConEstado1);
 
@@ -22,7 +21,11 @@
         // Si es falso (es 0 o null), ocultamos el botón
         document.getElementById('botonCoordinacionContainer').style.display = 'none';
     }
-</script> --}}
+    else {
+        // Si la última visita tiene estado 1 o si no hay visitas, mostramos el botón
+        document.getElementById('botonCoordinacionContainer').style.display = 'flex';
+    }
+</script>
 
 
 
