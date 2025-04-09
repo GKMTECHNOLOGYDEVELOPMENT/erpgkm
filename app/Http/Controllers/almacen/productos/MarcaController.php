@@ -220,12 +220,13 @@ class MarcaController extends Controller
     {
         // Obtener las marcas relacionadas con el cliente general
         $marcas = MarcaClienteGeneral::where('idClienteGeneral', $idClienteGeneral)
-                                      ->with(['marca' => function($query) {
-                                          // Excluir el campo 'foto' al obtener los datos de la relación 'marca'
-                                          $query->get()->each->makeHidden('foto'); // Ocultar el campo 'foto'
-                                      }])
+                                      ->with(['marca'])  // Cargar la relación 'marca' normalmente
                                       ->get()
-                                      ->pluck('marca'); // Obtener solo las marcas
+                                      ->map(function($marcaCliente) {
+                                          // Aquí accedemos al modelo 'marca' y ocultamos el campo 'foto'
+                                          $marcaCliente->marca->makeHidden('foto');
+                                          return $marcaCliente->marca;
+                                      });
     
         return response()->json($marcas);
     }

@@ -510,6 +510,13 @@ Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacli
                     $estadosFlujo = DB::table('estado_flujo')
                         ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
                         ->get();
+
+                    } elseif ($idEstadflujo == 14) {
+                        // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                        $estadosFlujo = DB::table('estado_flujo')
+                            ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                            ->get();
+
                 } elseif ($idEstadflujo == 8) {
                     // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
