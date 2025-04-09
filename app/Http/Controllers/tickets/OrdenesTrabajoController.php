@@ -478,7 +478,7 @@ Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacli
                 } elseif ($idEstadflujo == 2) {
                     // Si el idEstadflujo es 2, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3, 10])  // Obtener los estados con idEstadflujo 3 y 4
+                        ->whereIn('idEstadflujo', [3, 10, 7])  // Obtener los estados con idEstadflujo 3 y 4
                         ->get();
                 } elseif ($idEstadflujo == 11) {
                     // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
@@ -493,8 +493,8 @@ Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacli
                 } elseif ($idEstadflujo == 18) {
                     // Si el id Estado flujo es 12 tiene que salir
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->where('idEstadflujo', 3)
-                        ->get();
+                    ->whereIn('idEstadflujo', [3, 2])  // Solo obtener el estado con idEstadflujo 3
+                    ->get();
                 } elseif ($idEstadflujo == 10) {
                     // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
                     $estadosFlujo = DB::table('estado_flujo')
@@ -514,8 +514,61 @@ Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacli
                     } elseif ($idEstadflujo == 14) {
                         // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                         $estadosFlujo = DB::table('estado_flujo')
-                            ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
+                            ->where('idEstadflujo', 19)  // Solo obtener el estado con idEstadflujo 3
                             ->get();
+
+                        } elseif ($idEstadflujo == 19) {
+                            // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                            $estadosFlujo = DB::table('estado_flujo')
+                                ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
+                                ->get();
+
+                            } elseif ($idEstadflujo == 15) {
+                                // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                                $estadosFlujo = DB::table('estado_flujo')
+                                    ->where('idEstadflujo', 20)  // Solo obtener el estado con idEstadflujo 3
+                                    ->get();
+
+                                    
+                            } elseif ($idEstadflujo == 20) {
+                                // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                                $estadosFlujo = DB::table('estado_flujo')
+                                    ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
+                                    ->get();
+
+
+
+
+                                } elseif ($idEstadflujo == 16) {
+                                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                                    $estadosFlujo = DB::table('estado_flujo')
+                                        ->where('idEstadflujo', 21)  // Solo obtener el estado con idEstadflujo 3
+                                        ->get();
+
+                                    } elseif ($idEstadflujo == 21) {
+                                        // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                                        $estadosFlujo = DB::table('estado_flujo')
+                                            ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
+                                            ->get();
+
+
+                                        } elseif ($idEstadflujo == 17) {
+                                            // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                                            $estadosFlujo = DB::table('estado_flujo')
+                                                ->where('idEstadflujo', 22)  // Solo obtener el estado con idEstadflujo 3
+                                                ->get();
+
+
+                                            } elseif ($idEstadflujo == 22) {
+                                                // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                                                $estadosFlujo = DB::table('estado_flujo')
+                                                    ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
+                                                    ->get();
+    
+
+                              
+
+                           
 
                 } elseif ($idEstadflujo == 8) {
                     // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
