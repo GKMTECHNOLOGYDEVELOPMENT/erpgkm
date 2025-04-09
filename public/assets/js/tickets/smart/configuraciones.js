@@ -517,6 +517,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Si hay solo un cliente general, lo seleccionamos automáticamente
                     if (data.length === 1) {
                         select.value = data[0].idClienteGeneral; // Seleccionar automáticamente el único cliente
+                        cargarMarcasPorClienteGeneral(data[0].idClienteGeneral); // Ejecutar la función automáticamente
                     }
 
                     // No inicializamos NiceSelect en el select de Cliente General
