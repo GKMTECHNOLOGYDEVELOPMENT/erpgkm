@@ -899,6 +899,12 @@ $ultimaVisitaConEstado1 = true;  // Aquí cambiamos a true para que el botón se
 
 $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
+// Obtener el valor de estadovisita para la visita seleccionada
+$estadovisita = DB::table('visitas')
+->where('idTickets', $ticketId)  // Filtro por ticketId
+->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisitas seleccionada
+->value('estadovisita');  // Obtenemos el valor de estadovisita
+Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
 
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
@@ -925,7 +931,8 @@ $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, 
             'idtipoServicio',
             'existeFlujo31',
             'ultimaVisitaConEstado1',
-            'existeFlujo25'
+            'existeFlujo25',
+            'estadovisita'
 
 
         ));

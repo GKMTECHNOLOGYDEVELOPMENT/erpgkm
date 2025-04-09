@@ -520,6 +520,8 @@ Route::post('/validar/emailproveedores', [ProveedoresController::class, 'validar
 Route::post('/validar/celularproveedores', [ProveedoresController::class, 'validarTelefonoProveedores'])->name('validar.telefonoproveedores');
 Route::post('/validar/nombreproveedores', [ProveedoresController::class, 'validarNombreProveedores'])->name('validar.nombreproveedores');
 
+Route::post('/guardarCondiciones', [OrdenesTrabajoController::class, 'guardar'])->middleware('auth');
+Route::post('/guardarCondiciones/soporte', [OrdenesHelpdeskController::class, 'guardarSoporte'])->middleware('auth');
 
 
 
