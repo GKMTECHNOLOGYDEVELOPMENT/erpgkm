@@ -75,7 +75,22 @@
                     <!-- Técnicos de apoyo se cargarán aquí -->
                 </ul>
             </div>
-        </div>
+            
+
+             <!-- Datos de cliente -->
+             <div id="clienteTiendaContainer" class="hidden">
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Cliente Tienda:</h3>
+                <input type="text" id="detalleClienteTienda" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                </div>
+
+                <div id="celularClienteContainer" class="hidden">
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Celular Cliente Tienda:</h3>
+                <input type="text" id="detalleCelularClienteTienda" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                </div>
+    
+            </div>
+
+
 
         <!-- Pie del Modal -->
         <div class="flex justify-end items-center px-5 py-3 border-t ">

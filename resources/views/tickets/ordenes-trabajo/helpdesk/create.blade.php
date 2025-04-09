@@ -58,7 +58,7 @@
                  <!-- Select para tiendas (solo si el cliente es tienda) -->
                  <div id="selectTiendaContainer">
                  <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                        <select id="idTienda" name="idTienda" class="form-input w-full ">
+                        <select id="idTienda" name="idTienda" class="form-input w-full">
                             <option value="">Seleccionar Tienda</option>
                         </select>
                     </div>
@@ -670,95 +670,102 @@ if (!clientesCargados) {
 
 
     
-    $(document).ready(function () {
-        console.log("🔹 DOM completamente cargado");
-    
-        // Elementos
-        const clienteSelect = $("#idCliente");
-        const tiendaSelectContainer = $("#selectTiendaContainer"); // Contenedor del select de tiendas
-        const tiendaSelect = $("#idTienda"); // Select de tiendas
-    
-        // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
-        tiendaSelect.removeAttr("class style").addClass("form-input w-full");
-    
-        // Ocultar select de tiendas al inicio
-        tiendaSelectContainer.hide();
-    
-        // 🔹 Escuchar cambios en el select de cliente
-        clienteSelect.on("change", function () {
-            let clienteId = clienteSelect.val();
-    
-            if (!clienteId) {
-                console.warn("⚠️ No se ha seleccionado un cliente.");
-                return;
+$(document).ready(function () {
+    console.log("🔹 DOM completamente cargado");
+
+    // Elementos
+    const clienteSelect = $("#idCliente");
+    const tiendaSelectContainer = $("#selectTiendaContainer"); // Contenedor del select de tiendas
+    const tiendaSelect = $("#idTienda"); // Select de tiendas
+
+    // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
+    tiendaSelect.removeAttr("class style").addClass("form-input w-full");
+
+    // Ocultar select de tiendas al inicio
+    tiendaSelectContainer.hide();
+
+    // 🔹 Escuchar cambios en el select de cliente
+    clienteSelect.on("change", function () {
+        let clienteId = clienteSelect.val();
+
+        if (!clienteId) {
+            console.warn("⚠️ No se ha seleccionado un cliente.");
+            return;
+        }
+
+        console.log(`🔍 Cliente seleccionado: ${clienteId}`);
+
+        // Llamar a la API para obtener los datos del cliente y su tipo de documento
+        $.get(`/api/cliente/${clienteId}`, function (data) {
+            console.log("📌 Datos del cliente:", data);
+
+            // Establecer dirección automáticamente
+            $("#direccion").val(data.direccion || "");
+
+            // Verificamos el tipo de documento del cliente
+            if (data.idTipoDocumento == 8) {
+                // Si el cliente tiene idTipoDocumento == 2, traer todas las tiendas
+                console.log("🌍 Cliente con idTipoDocumento == 2, cargando todas las tiendas...");
+                mostrarSelectTiendas(clienteId, true); // True para todas las tiendas
+            } else {
+                // Si el cliente tiene idTipoDocumento == 1, traer solo las tiendas relacionadas
+                console.log("🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas...");
+                mostrarSelectTiendas(clienteId, false); // False para tiendas relacionadas
             }
-    
-            console.log(`🔍 Cliente seleccionado: ${clienteId}`);
-    
-            // Llamar a la API para obtener los datos del cliente y su tipo de documento
-            $.get(`/api/cliente/${clienteId}`, function (data) {
-                console.log("📌 Datos del cliente:", data);
-    
-                // Establecer dirección automáticamente
-                $("#direccion").val(data.direccion || "");
-    
-                // Verificamos el tipo de documento del cliente
-                if (data.idTipoDocumento == 8) {
-                    // Si el cliente tiene idTipoDocumento == 2, traer todas las tiendas
-                    console.log("🌍 Cliente con idTipoDocumento == 2, cargando todas las tiendas...");
-                    mostrarSelectTiendas(clienteId, true); // True para todas las tiendas
-                } else {
-                    // Si el cliente tiene idTipoDocumento == 1, traer solo las tiendas relacionadas
-                    console.log("🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas...");
-                    mostrarSelectTiendas(clienteId, false); // False para tiendas relacionadas
-                }
-    
-            }).fail(function () {
-                console.error("❌ Error al obtener los datos del cliente.");
-            });
+
+        }).fail(function () {
+            console.error("❌ Error al obtener los datos del cliente.");
         });
-    
-        // Función para mostrar el select de tiendas
-        function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
-            tiendaSelectContainer.show();
-            tiendaSelect.show();
-    
-            // Limpiar y resetear el select
-            tiendaSelect.empty().append('<option value="">Seleccionar Tienda</option>');
-    
-            // Si cargarTodasTiendas es verdadero, obtenemos todas las tiendas
-            const urlTiendas = cargarTodasTiendas 
-                ? `/api/tiendas`  // Obtener todas las tiendas
-                : `/api/cliente/${clienteId}/tiendas`; // Obtener solo las tiendas relacionadas con el cliente
-    
-            // Realizamos la solicitud para obtener las tiendas
-            $.get(urlTiendas, function (data) {
-                console.log("🏪 Tiendas obtenidas:", data);
-    
-                if (data.length > 0) {
-                    data.forEach(tienda => {
- // Agregar cada tienda con su departamento
- tiendaSelect.append(`
-                <option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">
-                    ${tienda.nombre}
-                </option>
-            `);                    });
-                } else {
-                    tiendaSelect.append('<option value="">No hay tiendas registradas</option>');
-                    console.warn("⚠️ No hay tiendas registradas para este cliente.");
-                }
-            }).fail(function () {
-                console.error("❌ Error al obtener tiendas.");
-            }).always(function () {
-                tiendaSelect.show(); // ✅ Mostramos el select después de cargar los datos
-            });
-        }
-    
-        // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
-        if (clienteSelect.val()) {
-            clienteSelect.trigger("change");
-        }
     });
+
+    // Función para mostrar el select de tiendas
+    function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
+        tiendaSelectContainer.show();
+        tiendaSelect.show();
+
+        // Limpiar y resetear el select
+        tiendaSelect.empty().append('<option value="">Seleccionar Tienda</option>');
+
+        // Si cargarTodasTiendas es verdadero, obtenemos todas las tiendas
+        const urlTiendas = cargarTodasTiendas 
+            ? `/api/tiendas`  // Obtener todas las tiendas
+            : `/api/cliente/${clienteId}/tiendas`; // Obtener solo las tiendas relacionadas con el cliente
+
+        // Realizamos la solicitud para obtener las tiendas
+        $.get(urlTiendas, function (data) {
+            console.log("🏪 Tiendas obtenidas:", data);
+
+            if (data.length > 0) {
+                data.forEach(tienda => {
+                    tiendaSelect.append(`
+                        <option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">
+                            ${tienda.nombre}
+                        </option>
+                    `);
+                });
+            } else {
+                tiendaSelect.append('<option value="">No hay tiendas registradas</option>');
+                console.warn("⚠️ No hay tiendas registradas para este cliente.");
+            }
+
+            // Inicializar el select con Nice Select y habilitar la búsqueda
+            var options = {
+                searchable: true
+            };
+            NiceSelect.bind(document.getElementById("idTienda"), options);
+        }).fail(function () {
+            console.error("❌ Error al obtener tiendas.");
+        }).always(function () {
+            tiendaSelect.show(); // ✅ Mostramos el select después de cargar los datos
+        });
+    }
+
+    // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
+    if (clienteSelect.val()) {
+        clienteSelect.trigger("change");
+    }
+});
+
     
     
 

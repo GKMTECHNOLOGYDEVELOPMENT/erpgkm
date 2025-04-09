@@ -166,6 +166,33 @@ detailsButton.addEventListener('click', function () {
   document.getElementById('detalleFechaInicioHora').value = visita.fecha_inicio_hora ? formatDatos(visita.fecha_inicio_hora) : '';
   document.getElementById('detalleFechaFinalHora').value = visita.fecha_final_hora ? formatDatos(visita.fecha_final_hora) : '';
 
+  if (visita.nombreclientetienda) {
+    const clienteTiendaContainer = document.getElementById('clienteTiendaContainer');
+    if (clienteTiendaContainer) {
+      document.getElementById('detalleClienteTienda').value = visita.nombreclientetienda;
+      clienteTiendaContainer.classList.remove('hidden'); // Mostrar el contenedor
+    }
+  } else {
+    const clienteTiendaContainer = document.getElementById('clienteTiendaContainer');
+    if (clienteTiendaContainer) {
+      clienteTiendaContainer.classList.add('hidden'); // Ocultar el contenedor
+    }
+  }
+  
+  if (visita.celularclientetienda) {
+    const celularClienteContainer = document.getElementById('celularClienteContainer');
+    if (celularClienteContainer) {
+      document.getElementById('detalleCelularClienteTienda').value = visita.celularclientetienda;
+      celularClienteContainer.classList.remove('hidden'); // Mostrar el contenedor
+    }
+  } else {
+    const celularClienteContainer = document.getElementById('celularClienteContainer');
+    if (celularClienteContainer) {
+      celularClienteContainer.classList.add('hidden'); // Ocultar el contenedor
+    }
+  }
+  
+
   // Obtener la lista de técnicos y cargarlos en el select
   fetch('/api/usuarios/tecnico') // Ajusta esta ruta a tu API
     .then(response => response.json())
@@ -274,25 +301,41 @@ document.getElementById('actualizarButton').addEventListener('click', function()
   const fechaInicio = document.getElementById('detalleFechaInicioHora').value;
   const fechaFinal = document.getElementById('detalleFechaFinalHora').value;
   const idUsuario = document.getElementById('detalleUsuario').value;
+  
+  // Obtener los valores de los campos opcionales
+  const nombreCliente = document.getElementById('detalleClienteTienda').value;
+  const celularCliente = document.getElementById('detalleCelularClienteTienda').value;
 
-  // Validar si los campos son correctos
+  // Validar si los campos obligatorios son correctos
   if (!fechaInicio || !fechaFinal || !idUsuario) {
-    alert('Por favor complete todos los campos.');
+    alert('Por favor complete todos los campos obligatorios.');
     return;
   }
 
-  // Realizar la petición PUT para actualizar la visita con el id específico
-fetch(`/api/actualizar/visitas/${idVisita}`, {
-  method: 'PUT',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
+  // Crear un objeto de datos con los campos que tienen valores
+  const dataToUpdate = {
     fecha_inicio_hora: fechaInicio,
     fecha_final_hora: fechaFinal,
-    idUsuario: idUsuario,
-  }),
-})
+    idUsuario: idUsuario
+  };
+
+  // Si los campos opcionales tienen valores, agregarlos al objeto
+  if (nombreCliente) {
+    dataToUpdate.nombreclientetienda = nombreCliente;
+  }
+
+  if (celularCliente) {
+    dataToUpdate.celularclientetienda = celularCliente;
+  }
+
+  // Realizar la petición PUT para actualizar la visita con el id específico
+  fetch(`/api/actualizar/visitas/${idVisita}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(dataToUpdate), // Usar solo los campos con datos
+  })
   .then(response => response.json())
   .then(data => {
     if (data.success) {
@@ -311,8 +354,8 @@ fetch(`/api/actualizar/visitas/${idVisita}`, {
     console.error('Error:', error);
     alert('Ocurrió un problema al realizar la actualización.');
   });
-
 });
+
 
 // Agregar el botón Detalles debajo de la información de la visita
 visitaCard.appendChild(detailsButton);

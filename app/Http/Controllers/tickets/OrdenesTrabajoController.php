@@ -2080,41 +2080,52 @@ if ($ultimaVisita) {
     }
 
 
-public function updatevisita(Request $request, $id)
-{
-    // Validar los datos
-    $validated = $request->validate([
-        'fecha_inicio_hora' => 'required|date',
-        'fecha_final_hora' => 'required|date',
-        'idUsuario' => 'required|exists:usuarios,idUsuario',
-    ]);
-
-    // Buscar la visita
-    $visita = Visita::find($id);
-
-    if (!$visita) {
-        return response()->json(['success' => false, 'message' => 'Visita no encontrada'], 404);
+    public function updatevisita(Request $request, $id)
+    {
+        // Validar los datos obligatorios
+        $validated = $request->validate([
+            'fecha_inicio_hora' => 'required|date',
+            'fecha_final_hora' => 'required|date',
+            'idUsuario' => 'required|exists:usuarios,idUsuario',
+        ]);
+    
+        // Buscar la visita
+        $visita = Visita::find($id);
+    
+        if (!$visita) {
+            return response()->json(['success' => false, 'message' => 'Visita no encontrada'], 404);
+        }
+    
+        // Verificar si ya existe un anexo con idTipovisita = 2 (en ejecución)
+        $anexoEnEjecucion = DB::table('anexos_visitas')
+            ->where('idVisitas', $id)
+            ->where('idTipovisita', 2)
+            ->exists();
+    
+        if ($anexoEnEjecucion) {
+            // Si existe un anexo con idTipovisita = 2, devolver un error
+            return response()->json(['success' => false, 'message' => 'Esta visita está en ejecución, no se puede actualizar'], 400);
+        }
+    
+        // Actualizar los datos de la visita
+        $visita->fecha_inicio_hora = $request->fecha_inicio_hora;
+        $visita->fecha_final_hora = $request->fecha_final_hora;
+        $visita->idUsuario = $request->idUsuario;
+    
+        // Actualizar los campos opcionales si existen
+        if ($request->has('nombreclientetienda')) {
+            $visita->nombreclientetienda = $request->nombreclientetienda;
+        }
+    
+        if ($request->has('celularclientetienda')) {
+            $visita->celularclientetienda = $request->celularclientetienda;
+        }
+    
+        $visita->save();
+    
+        return response()->json(['success' => true, 'message' => 'Visita actualizada exitosamente']);
     }
-
-    // Verificar si ya existe un anexo con idTipovisita = 2 (en ejecución)
-    $anexoEnEjecucion = DB::table('anexos_visitas')
-        ->where('idVisitas', $id)
-        ->where('idTipovisita', 2)
-        ->exists();
-
-    if ($anexoEnEjecucion) {
-        // Si existe un anexo con idTipovisita = 2, devolver un error
-        return response()->json(['success' => false, 'message' => 'Esta visita está en ejecución, no se puede actualizar'], 400);
-    }
-
-    // Actualizar los datos de la visita
-    $visita->fecha_inicio_hora = $request->fecha_inicio_hora;
-    $visita->fecha_final_hora = $request->fecha_final_hora;
-    $visita->idUsuario = $request->idUsuario;
-    $visita->save();
-
-    return response()->json(['success' => true, 'message' => 'Visita actualizada exitosamente']);
-}
+    
 
 
 
