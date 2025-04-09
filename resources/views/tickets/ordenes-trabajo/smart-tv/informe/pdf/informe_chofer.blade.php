@@ -139,7 +139,7 @@
                     <h2 class="font-bold mb-1 text-gray-700 mt-2">TRANSPORTISTA / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
                         <div class="grid grid-cols-2 gap-y-1 justify-end text-right">
-                            <p><span class="font-bold">NOMBRE:</span> {{ $visita['tecnico'] }}</p>
+                            <p><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}</p>
                             <p><span class="font-bold">TELÉFONO:</span> {{ $visita['telefono'] }}</p>
                             <p><span class="font-bold">DNI:</span> {{ $visita['documento'] }}</p>
                             <p><span class="font-bold">PLACA:</span> {{ $visita['vehiculo_placa'] }}</p>
@@ -156,12 +156,13 @@
                 <div class="red-bg mt-4 text-left">Datos de Retiro del Equipo</div>
                 <div class="w-full text-xs mt-2">
                     <div class="flex justify-between">
-                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ $producto['categoria'] }}</p>
-                        <p><span class="font-bold">MARCA:</span> {{ $producto['marca'] }}</p>
-                        <p><span class="font-bold">MODELO:</span> {{ $producto['modelo'] }}</p>
+                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ strtoupper($producto['categoria']) }}
+                        </p>
+                        <p><span class="font-bold">MARCA:</span> {{ strtoupper($producto['marca']) }}</p>
+                        <p><span class="font-bold">MODELO:</span> {{ strtoupper($producto['modelo']) }}</p>
                     </div>
                     <div class="mt-2">
-                        <p><span class="font-bold">SERIE:</span> {{ $producto['serie'] }}</p>
+                        <p><span class="font-bold">SERIE:</span> {{ strtoupper($producto['serie']) }}</p>
                     </div>
                 </div>
             @endif
@@ -194,12 +195,12 @@
                     @foreach ($transicionesStatusOt as $transicion)
                         <!-- Nombre del Estado con fondo rojo -->
                         <div class="red-bg px-3 py-2 rounded-md">
-                            {{ $transicion->estado_ot->descripcion ?? 'Sin Estado' }}
+                            {{ strtoupper($transicion->estado_ot->descripcion ?? 'Sin Estado') }}
                         </div>
 
                         <!-- Justificación debajo del estado -->
                         <div class="w-full text-xs">
-                            <p class="text-xs text-gray-700">{{ $transicion->justificacion }}</p>
+                            <p class="text-xs text-gray-700">{{ strtoupper($transicion->justificacion) }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -226,8 +227,10 @@
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL TRANSPORTISTA</p>
-                        <p class="text-xs">{{ $visita['tecnico'] }}</p>
-                        <p class="text-xs text-gray-500">DNI: {{ $visita['documento'] }}</p>
+                        <p class="text-xs uppercase">{{ $visita['tecnico'] }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
+                        </p>
                     </div>
 
                     <!-- Firma del Cliente -->
@@ -244,8 +247,11 @@
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                        <p class="text-xs">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
-                        <p class="text-xs text-gray-500">DNI: {{ $orden->cliente->documento ?? 'No disponible' }}</p>
+                        <p class="text-xs uppercase">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ $orden->cliente->tipodocumento->nombre ?? 'Documento' }}:
+                            {{ $orden->cliente->documento ?? 'No disponible' }}
+                        </p>
                     </div>
                 </div>
                 <br>

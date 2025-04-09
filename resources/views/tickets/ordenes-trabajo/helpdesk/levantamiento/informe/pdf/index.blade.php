@@ -128,7 +128,8 @@
                         <li><span class="font-bold">DNI/RUC:</span> {{ $orden->cliente->documento ?? 'No disponible' }}
                         </li>
                         <li><span class="font-bold">TIENDA:</span> {{ $orden->tienda->nombre ?? 'No disponible' }}</li>
-                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->tienda->direccion ?? 'No registrada' }}</li>
+                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->tienda->direccion ?? 'No registrada' }}
+                        </li>
                     </ul>
                 </div>
 
@@ -140,7 +141,8 @@
                     </div>
                     <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
-                        <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ $visita['tecnico'] }}</p>
+                        <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}
+                        </p>
                         <p class="text-xs"><span class="font-bold">TELÉFONO: </span>080080142</p>
                     @endforeach
                 </div>
@@ -177,15 +179,16 @@
                     @foreach ($transicionesStatusOt as $transicion)
                         <!-- Nombre del Estado con fondo rojo -->
                         <div class="red-bg px-3 py-2 rounded-md">
-                            {{ $transicion->estado_ot->descripcion ?? 'Sin Estado' }}
+                            {{ strtoupper($transicion->estado_ot->descripcion ?? 'Sin Estado') }}
                         </div>
 
                         <!-- Justificación debajo del estado -->
                         <div class="w-full text-xs">
-                            <p class="text-xs text-gray-700">{{ $transicion->justificacion }}</p>
+                            <p class="text-xs text-gray-700">{{ strtoupper($transicion->justificacion) }}</p>
                         </div>
                     @endforeach
                 </div>
+
             @endif
 
             @if ($suministros->isNotEmpty())
@@ -233,7 +236,9 @@
                         <p class="text-xs text-gray-600 uppercase tracking-wide">
                             {{ $visita['tecnico'] ?? 'NOMBRE NO DISPONIBLE' }}
                         </p>
-                        <p class="text-xs text-gray-500">DNI: {{ $visita['documento'] ?? 'N/A' }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
+                        </p>
                     </div>
 
                     <!-- Firma del Cliente -->
@@ -251,7 +256,10 @@
                         <p class="text-xs text-gray-600 uppercase tracking-wide">
                             {{ $orden->cliente->nombre ?? 'N/A' }}
                         </p>
-                        <p class="text-xs text-gray-500">DNI: {{ $orden->cliente->documento ?? 'No disponible' }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ $orden->cliente->tipodocumento->nombre ?? 'Documento' }}:
+                            {{ $orden->cliente->documento ?? 'No disponible' }}
+                        </p>
                     </div>
                 </div>
             </div>
