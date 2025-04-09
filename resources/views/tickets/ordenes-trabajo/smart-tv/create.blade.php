@@ -113,7 +113,7 @@
 
                     <!-- Select para tiendas (solo si el cliente es tienda) -->
                     <div id="selectTiendaContainer">
-                        <select id="idTienda" name="idTienda" class="form-input w-full ">
+                        <select id="idTienda" name="idTienda" class="form-input w-full" >
                             <option value="">Seleccionar Tienda</option>
                         </select>
                     </div>
@@ -906,7 +906,7 @@
         // Validación en tiempo real para campos obligatorios
         const camposObligatorios = [
             'idCliente', 'idClienteGeneral',
-            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket'
+            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket','linkubicacion'
         ];
 
         camposObligatorios.forEach(campo => {

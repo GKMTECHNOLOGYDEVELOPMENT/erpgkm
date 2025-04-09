@@ -138,3 +138,8 @@ Route::get('/ticketapoyo/{idVisitas}/{idTicket}', [OrdenesTrabajoController::cla
 // Ruta para eliminar un técnico de apoyo
 Route::delete('eliminar/tecnicoapoyo/{idTicketApoyo}', [OrdenesTrabajoController::class, 'eliminar']);
 
+// routes/web.php o routes/api.php
+
+Route::post('/agregar/tecnicoapoyo', [OrdenesTrabajoController::class, 'agregarTecnicoApoyo']);
+// routes/web.php o routes/api.php
+

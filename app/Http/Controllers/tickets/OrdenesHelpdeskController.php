@@ -480,28 +480,33 @@ class OrdenesHelpdeskController extends Controller
          $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
 
 
+// Obtener la última visita para un ticket
+$ultimaVisita = DB::table('visitas')
+    ->where('idTickets', $ticketId)  // Filtrar por el id del ticket
+    ->orderBy('idVisitas', 'desc')  // Ordenar por idVisitas (asumido como incremental)
+    ->first();  // Obtener solo la última visita
 
-     // Obtener la última visita para un ticket
-     $ultimaVisita = DB::table('visitas')
-     ->where('idTickets', $ticketId)  // Filtrar por el id del ticket
-     ->orderBy('idVisitas', 'desc')  // Ordenar por idVisitas (asumido como incremental)
-     ->first();  // Obtener solo la última visita
-     
-     // Verificar si la última visita tiene 'estadovisita' igual a 1 o null/0
-     if ($ultimaVisita) {
-     if ($ultimaVisita->estadovisita == 1) {
-         // La última visita tiene 'estadovisita' igual a 1
-         $ultimaVisitaConEstado1 = true;
-     } elseif ($ultimaVisita->estadovisita === null || $ultimaVisita->estadovisita == 0) {
-         // La última visita tiene 'estadovisita' igual a null o 0
-         $ultimaVisitaConEstado1 = false;
-     }
-     } else {
-     // No se encontraron visitas para este ticket
-     $ultimaVisitaConEstado1 = true;  // Aquí cambiamos a true para que el botón se muestre si no hay visitas.
-     }
-     
+// Verificar si la última visita tiene 'estadovisita' igual a 1 o null/0
+if ($ultimaVisita) {
+    if ($ultimaVisita->estadovisita == 1) {
+        // La última visita tiene 'estadovisita' igual a 1
+        $ultimaVisitaConEstado1 = true;
+    } elseif ($ultimaVisita->estadovisita === null || $ultimaVisita->estadovisita == 0) {
+        // La última visita tiene 'estadovisita' igual a null o 0
+        $ultimaVisitaConEstado1 = false;
+    }
+} else {
+    // No se encontraron visitas para este ticket
+    $ultimaVisitaConEstado1 = true;  // Aquí cambiamos a true para que el botón se muestre si no hay visitas.
+}
 
+
+        // Obtener el valor de estadovisita para la visita seleccionada
+        $estadovisita = DB::table('visitas')
+        ->where('idTickets', $ticketId)  // Filtro por ticketId
+        ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisitas seleccionada
+        ->value('estadovisita');  // Obtenemos el valor de estadovisita
+        Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
@@ -532,7 +537,9 @@ class OrdenesHelpdeskController extends Controller
             'tiposEnvio',
             'tiposRecojo',
             'ultimaVisitaConEstado1',
-            
+            'estadovisita'
+
+
         ));
     }
 
@@ -861,8 +868,9 @@ class OrdenesHelpdeskController extends Controller
 
 
 
-             
-     // Obtener la última visita para un ticket
+        
+ 
+// Obtener la última visita para un ticket
 $ultimaVisita = DB::table('visitas')
 ->where('idTickets', $ticketId)  // Filtrar por el id del ticket
 ->orderBy('idVisitas', 'desc')  // Ordenar por idVisitas (asumido como incremental)
@@ -881,6 +889,16 @@ if ($ultimaVisita->estadovisita == 1) {
 // No se encontraron visitas para este ticket
 $ultimaVisitaConEstado1 = true;  // Aquí cambiamos a true para que el botón se muestre si no hay visitas.
 }
+
+   // Verificar si existe un flujo con idEstadflujo = 25
+   $flujo = TicketFlujo::where('idTicket', $ticketId)
+   ->where('idEstadflujo', 25)
+   ->first();
+
+// dd($flujo); // Verifica si devuelve el registro correcto
+
+$existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+
 
 
 

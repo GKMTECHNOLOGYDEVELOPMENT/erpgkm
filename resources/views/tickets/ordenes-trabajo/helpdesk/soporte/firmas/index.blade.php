@@ -41,8 +41,12 @@
 
 <input type="hidden" id="visitaId" value="{{ $idVisitaSeleccionada }}">
 
+<input type="hidden" id="idvisita" value="{{ $idVisitaSeleccionada }}">
+
+
 
 <!-- Verificar el valor de tipoServicio -->
+@if ($estadovisita != 1)
 
     <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
    
@@ -54,6 +58,8 @@
 
     
     </div>
+    @endif
+
 
 
 
@@ -207,6 +213,8 @@
     function actualizarEstado(estado) {
         const ticketId = document.getElementById('ticketId').value; // Obtener el ID del ticket
         console.log("Actualizando estado para el ticket ID:", ticketId, "Estado:", estado);
+        const idVisita = document.getElementById('idvisita').value; // Obtener el valor del idvisita
+        // console.log('visita:', IdVisita);
 
         fetch(`/tickets/${ticketId}/actualizar-estado`, {
                 method: 'POST',
@@ -215,7 +223,8 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({
-                    estado: estado // Enviar el estado a actualizar
+                    estado: estado,
+                    idVisita: idVisita // Enviar el idVisita                    // Enviar el estado a actualizar
                 })
             })
             .then(response => response.json())
@@ -232,6 +241,7 @@
                 toastr.error('Hubo un error al actualizar el estado.');
             });
     }
+
 
     // Funciones para los botones
     function finalizarServicio() {

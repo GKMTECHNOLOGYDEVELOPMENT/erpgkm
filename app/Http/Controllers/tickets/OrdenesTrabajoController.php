@@ -740,6 +740,14 @@ Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacli
         Log::info('Valor final de tipoServicio: ' . $idtipoServicio);
 
 
+        // Obtener el valor de estadovisita para la visita seleccionada
+$estadovisita = DB::table('visitas')
+->where('idTickets', $ticketId)  // Filtro por ticketId
+->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisitas seleccionada
+->value('estadovisita');  // Obtenemos el valor de estadovisita
+Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
+
+
 
 
 // Obtener la última visita para un ticket
@@ -808,7 +816,8 @@ if ($ultimaVisita) {
             'tipoServicio',  // Pasamos el tipoServicio a la vista
             'idtipoServicio',
             'ultimaVisitaConEstado1',
-            'esTiendacliente'
+            'esTiendacliente',
+            'estadovisita'
 
 
         ));
@@ -2079,7 +2088,6 @@ if ($ultimaVisita) {
         }
     }
 
-
     public function updatevisita(Request $request, $id)
     {
         // Validar los datos obligatorios
@@ -2107,6 +2115,14 @@ if ($ultimaVisita) {
             return response()->json(['success' => false, 'message' => 'Esta visita está en ejecución, no se puede actualizar'], 400);
         }
     
+        // Verificar si la hora final es menor que la hora de inicio
+        $fechaInicio = strtotime($request->fecha_inicio_hora);
+        $fechaFinal = strtotime($request->fecha_final_hora);
+    
+        if ($fechaFinal < $fechaInicio) {
+            return response()->json(['success' => false, 'message' => 'La hora final no puede ser menor a la hora de inicio.'], 400);
+        }
+    
         // Actualizar los datos de la visita
         $visita->fecha_inicio_hora = $request->fecha_inicio_hora;
         $visita->fecha_final_hora = $request->fecha_final_hora;
@@ -2125,6 +2141,52 @@ if ($ultimaVisita) {
     
         return response()->json(['success' => true, 'message' => 'Visita actualizada exitosamente']);
     }
+    
+
+
+    public function agregarTecnicoApoyo(Request $request)
+    {
+        // Verificar si ya existe un anexo con idTipovisita = 2 (en ejecución)
+        $anexoEnEjecucion = DB::table('anexos_visitas')
+            ->where('idVisitas', $request->idVisita)  // Usamos $request->idVisita para verificar el anexo
+            ->where('idTipovisita', 2)  // idTipovisita = 2 indica que está en ejecución
+            ->exists();
+    
+        if ($anexoEnEjecucion) {
+            // Si existe un anexo con idTipovisita = 2, devolver un error
+            return response()->json(['success' => false, 'message' => 'Esta visita está en ejecución, no se puede agregar un técnico de apoyo'], 400);
+        }
+    
+        // Validar los datos
+        $validated = $request->validate([
+            'idVisita' => 'required|exists:visitas,idVisitas',
+            'idTecnico' => 'required|exists:usuarios,idUsuario',
+            'idTickets' => 'required|exists:visitas,idTickets',  // Validamos que idTickets exista
+        ]);
+    
+        // Verificar si el técnico ya está asignado a esa visita y ticket
+        $tecnicoExistente = DB::table('ticketapoyo')
+            ->where('idVisita', $request->idVisita)
+            ->where('idTicket', $request->idTickets)
+            ->where('idTecnico', $request->idTecnico)
+            ->exists();
+    
+        if ($tecnicoExistente) {
+            // Si ya existe el mismo técnico para esa visita y ticket, devolver un error
+            return response()->json(['success' => false, 'message' => 'Este técnico ya está asignado a esta visita y ticket'], 400);
+        }
+    
+        // Insertar el técnico de apoyo
+        DB::table('ticketapoyo')->insert([
+            'idVisita' => $request->idVisita,
+            'idTecnico' => $request->idTecnico,
+            'idTicket' => $request->idTickets, // si tienes el idTicket disponible
+        ]);
+    
+        return response()->json(['success' => true, 'message' => 'Técnico de apoyo agregado correctamente']);
+    }
+    
+
     
 
 
@@ -2248,9 +2310,9 @@ if ($ultimaVisita) {
             ->update(['fecha_inicio' => $fechaInicio]);
 
             // Actualizar el campo estadovisita a 1 en la tabla visitas
-    DB::table('visitas')
-    ->where('idVisitas', $request->idVisitas)
-    ->update(['estadovisita' => 1]); // Esto actualiza la variable estadovisita a 1
+    // DB::table('visitas')
+    // ->where('idVisitas', $request->idVisitas)
+    // ->update(['estadovisita' => 1]); // Esto actualiza la variable estadovisita a 1
 
 
 
@@ -3315,34 +3377,34 @@ if ($ultimaVisita) {
 
 
 
-
-    // Método para actualizar el estado del ticket
     public function actualizarEstado(Request $request, $idTicket)
     {
         // Validamos el estado recibido (un número entero)
         $validated = $request->validate([
-            'estado' => 'required|integer',  // Aseguramos que el estado es un número entero
+            'estado' => 'required|integer',
+            'idVisita' => 'required|integer' // Aseguramos que el idVisita es un número entero
+            // Aseguramos que el estado es un número entero
         ]);
-
+    
         Log::info("Estado recibido: " . $validated['estado']);
-
+    
         // Verificamos si el estado es uno de los valores válidos
         $estadosValidos = [7, 8, 6, 5]; // Estos son los estados válidos: finalizar, coordinar recojo, fuera de garantía, pendiente repuestos
-
+    
         if (!in_array($validated['estado'], $estadosValidos)) {
             Log::error("Estado inválido recibido: " . $validated['estado']);
             return response()->json(['success' => false, 'message' => 'Estado inválido'], 400);
         }
-
+    
         // Verificamos si el ticket existe
         $ticket = Ticket::find($idTicket);
         if (!$ticket) {
             Log::error("Ticket no encontrado con ID: " . $idTicket);
             return response()->json(['success' => false, 'message' => 'Ticket no encontrado'], 404);
         }
-
+    
         Log::info("Ticket encontrado: " . $ticket->idTickets);
-
+    
         // Insertar en la tabla ticketflujo usando insertGetId
         $ticketflujo = DB::table('ticketflujo')->insertGetId([
             'idTicket' => $idTicket,            // Asociamos el ticket
@@ -3350,30 +3412,41 @@ if ($ultimaVisita) {
             'idUsuario' => auth()->id(),        // ID del usuario que realiza la acción (por ejemplo, el usuario autenticado)
             'fecha_creacion' => now(),          // Fecha actual
         ]);
-
+    
         // Verificar si el ID se generó correctamente
         if (!$ticketflujo) {
             Log::error('El idTicketFlujo no se generó correctamente');
             return response()->json(['success' => false, 'message' => 'El idTicketFlujo no se generó correctamente'], 500);
         }
-
+    
         Log::info('TicketFlujo creado con ID: ' . $ticketflujo);
-
+    
         // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
         $updated = DB::table('tickets')
             ->where('idTickets', $idTicket)
             ->update(['idTicketFlujo' => $ticketflujo]);
-
-        // Verificar si la actualización fue exitosa
-        if ($updated) {
-            Log::info("Ticket actualizado correctamente con idTicketFlujo: " . $ticketflujo);
-            return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente']);
+    
+            if ($updated) {
+                Log::info("Ticket actualizado correctamente con idTicketFlujo: " . $ticketflujo);
+        
+                // Actualizar el campo estadovisita en la tabla visitas a 1 usando el idVisita recibido
+                $updateVisita = DB::table('visitas')
+                    ->where('idVisitas', $validated['idVisita'])  // Usamos el idVisita recibido
+                    ->update(['estadovisita' => 1]);
+        
+                if ($updateVisita) {
+                    Log::info("Visita actualizada correctamente con estadovisita = 1");
+                } else {
+                    Log::error("No se pudo actualizar el estadovisita para la visita con idVisitas: " . $validated['idVisita']);
+                }
+        
+                return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente']);
         } else {
             Log::error("Hubo un error al actualizar el idTicketFlujo en la tabla tickets.");
             return response()->json(['success' => false, 'message' => 'Hubo un error al actualizar el ticket'], 500);
         }
     }
-
+    
 
 
     public function guardarEstadoflujo(Request $request)

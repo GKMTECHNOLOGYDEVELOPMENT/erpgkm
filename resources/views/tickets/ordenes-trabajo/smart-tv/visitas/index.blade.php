@@ -41,7 +41,7 @@
 <!-- Modal de Detalles con nuevo estilo y cierre al hacer clic fuera -->
 <div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-[999] flex items-start justify-center bg-[black]/60 overflow-y-auto"
      onclick="if(event.target === this) this.classList.add('hidden')">
-    <div class="modal-content panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-xl bg-white shadow-lg">
+    <div class="modal-content panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl bg-white shadow-lg">
         
         <!-- Cabecera del Modal -->
         <div class="flex items-center justify-between px-5 py-3 border-b">
@@ -52,7 +52,7 @@
         </div>
 
         <!-- Cuerpo del Modal -->
-        <div class="p-5 max-h-[70vh] overflow-y-auto space-y-4">
+        <div class="p-5 max-h-[70vh] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Inicio:</h3>
                 <input type="text" id="detalleFechaInicioHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
@@ -69,37 +69,43 @@
             </div>
 
             <!-- Técnicos de apoyo -->
-            <div>
+            <div class="sm:col-span-2">
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnicos de Apoyo:</h3>
                 <ul id="detalleTecnicosApoyo" class="list-none space-y-2">
                     <!-- Técnicos de apoyo se cargarán aquí -->
                 </ul>
-            </div>
-            
 
-             <!-- Datos de cliente -->
-             <div id="clienteTiendaContainer" class="hidden">
+                <!-- Agregar técnico de apoyo -->
+                <div class="mt-4">
+                    <label for="detalleTecnicoApoyo" class="font-semibold text-sm text-gray-600 mb-1">Agregar Técnico de Apoyo:</label>
+                    <select id="detalleTecnicoApoyo" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                        <!-- Opciones con JS -->
+                    </select>
+                    <button id="addTecnicoApoyoButton" class="btn btn-success mt-2 w-full">Agregar</button>
+                </div>
+            </div>
+
+            <!-- Datos de cliente -->
+            <div id="clienteTiendaContainer" class="hidden sm:col-span-2">
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Cliente Tienda:</h3>
                 <input type="text" id="detalleClienteTienda" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
-                </div>
-
-                <div id="celularClienteContainer" class="hidden">
-                <h3 class="font-semibold text-sm text-gray-600 mb-1">Celular Cliente Tienda:</h3>
-                <input type="text" id="detalleCelularClienteTienda" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
-                </div>
-    
             </div>
 
-
+            <div id="celularClienteContainer" class="hidden sm:col-span-2">
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Celular Cliente Tienda:</h3>
+                <input type="text" id="detalleCelularClienteTienda" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+            </div>
+        </div>
 
         <!-- Pie del Modal -->
-        <div class="flex justify-end items-center px-5 py-3 border-t ">
+        <div class="flex justify-end items-center px-5 py-3 border-t">
             <button id="closeModalButtonFooter" class="btn btn-outline-danger">Cerrar</button>
             <button id="actualizarButton" class="btn btn-primary ltr:ml-4 rtl:mr-4">Actualizar</button>
         </div>
 
     </div>
 </div>
+
 
 
 

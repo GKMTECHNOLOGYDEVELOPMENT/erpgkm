@@ -214,45 +214,56 @@ detailsButton.addEventListener('click', function () {
     .catch(error => console.error('Error al obtener usuarios:', error));
 
     
-// Obtener los técnicos de apoyo para la visita y ticket
-fetch(`/api/ticketapoyo/${visita.idVisitas}/${visita.idTickets}`)
-  .then(response => response.json())
-  .then(tecnicosApoyo => {
-    const listaTecnicos = document.getElementById('detalleTecnicosApoyo');
-    listaTecnicos.innerHTML = ''; // Limpiar la lista antes de agregar los técnicos
+// Función para cargar los técnicos de apoyo disponibles
+function loadTecnicosDeApoyo() {
+  fetch('/api/usuarios/tecnico') // Ajusta esta ruta a tu API
+    .then(response => response.json())
+    .then(usuarios => {
+      const select = document.getElementById('detalleTecnicoApoyo');
+      select.innerHTML = ''; // Limpiar las opciones anteriores
 
-    // Crear un item de lista para cada técnico de apoyo
-    tecnicosApoyo.forEach(tecnico => {
-      const listItem = document.createElement('li');
-      listItem.classList.add('px-2', 'py-1', 'border', 'rounded-lg', 'text-gray-700', 'cursor-pointer');
-      listItem.textContent = `${tecnico.Nombre} ${tecnico.apellidoPaterno}`;
+      // Crear una opción para cada usuario
+      usuarios.forEach(usuario => {
+        const option = document.createElement('option');
+        option.value = usuario.idUsuario;
+        option.textContent = `${usuario.Nombre} ${usuario.apellidoPaterno}`;
+        select.appendChild(option);
+      });
+    })
+    .catch(error => console.error('Error al obtener usuarios:', error));
+}
 
-      // Crear botón de eliminar
-      const removeButton = document.createElement('button');
-      removeButton.textContent = 'Eliminar';
-      removeButton.classList.add('ml-2', 'text-red-500', 'hover:text-red-700', 'text-xs');
+// Función para cargar los técnicos de apoyo asociados a la visita
+function loadTecnicosAsociados() {
+  fetch(`/api/ticketapoyo/${visita.idVisitas}/${visita.idTickets}`)
+    .then(response => response.json())
+    .then(tecnicosApoyo => {
+      const listaTecnicos = document.getElementById('detalleTecnicosApoyo');
+      listaTecnicos.innerHTML = ''; // Limpiar la lista antes de agregar los técnicos
 
-      // Evento para eliminar el técnico de apoyo
-      removeButton.addEventListener('click', function () {
-        if (confirm(`¿Estás seguro de eliminar a ${tecnico.Nombre} ${tecnico.apellidoPaterno}?`)) {
-          // Llamar a la API para eliminar el técnico de apoyo usando el idTicketApoyo
+      // Crear un item de lista para cada técnico de apoyo
+      tecnicosApoyo.forEach(tecnico => {
+        const listItem = document.createElement('li');
+        listItem.classList.add('px-2', 'py-1', 'border', 'rounded-lg', 'text-gray-700', 'cursor-pointer');
+        listItem.textContent = `${tecnico.Nombre} ${tecnico.apellidoPaterno}`;
 
-             // Llamar a la API para eliminar el técnico de apoyo usando el idTicketApoyo
-             const idTicketApoyo = tecnico.idTicketApoyo; // Aquí obtenemos el idTicketApoyo de cada técnico
-          
-             // Asegúrate de que `idTicketApoyo` esté presente
-             console.log('Eliminando técnico con idTicketApoyo:', idTicketApoyo);
-             
-          fetch(`/api/eliminar/tecnicoapoyo/${tecnico.idTicketApoyo}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          })
+        // Crear botón de eliminar
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Eliminar';
+        removeButton.classList.add('ml-2', 'text-red-500', 'hover:text-red-700', 'text-xs');
+
+        // Evento para eliminar el técnico de apoyo
+        removeButton.addEventListener('click', function () {
+          if (confirm(`¿Estás seguro de eliminar a ${tecnico.Nombre} ${tecnico.apellidoPaterno}?`)) {
+            fetch(`/api/eliminar/tecnicoapoyo/${tecnico.idTicketApoyo}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            })
             .then(response => response.json())
             .then(data => {
               if (data.success) {
-                // Si la eliminación fue exitosa, eliminar el técnico de la lista
                 listItem.remove();
                 alert('Técnico de apoyo eliminado correctamente');
               } else {
@@ -263,17 +274,54 @@ fetch(`/api/ticketapoyo/${visita.idVisitas}/${visita.idTickets}`)
               console.error('Error al eliminar técnico de apoyo:', error);
               alert('Ocurrió un problema al eliminar el técnico de apoyo.');
             });
-        }
+          }
+        });
+
+        listItem.appendChild(removeButton);
+        listaTecnicos.appendChild(listItem);
       });
+    })
+    .catch(error => console.error('Error al obtener técnicos de apoyo:', error));
+}
 
-      // Agregar el botón de eliminar al listItem
-      listItem.appendChild(removeButton);
+// Evento para agregar un nuevo técnico de apoyo
+document.getElementById('addTecnicoApoyoButton').addEventListener('click', function() {
+  const tecnicoId = document.getElementById('detalleTecnicoApoyo').value;
+  
+  if (!tecnicoId) {
+    alert('Por favor, selecciona un técnico de apoyo.');
+    return;
+  }
 
-      // Agregar el técnico a la lista
-      listaTecnicos.appendChild(listItem);
-    });
+  fetch('/api/agregar/tecnicoapoyo', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      idVisita: visita.idVisitas,
+      idTecnico: tecnicoId,
+      idTickets: visita.idTickets, // Pasamos el idTickets aquí
+    }),
   })
-  .catch(error => console.error('Error al obtener técnicos de apoyo:', error));
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Técnico de apoyo agregado correctamente');
+      loadTecnicosAsociados(); // Recargar la lista de técnicos de apoyo
+    } else {
+      alert(data.message || 'Hubo un error al actualizar la visita.');
+    }
+  })
+  .catch(error => {
+    console.error('Error al agregar técnico de apoyo:', error);
+    alert('Ocurrió un problema al agregar el técnico de apoyo.');
+  });
+});
+
+// Cargar técnicos disponibles y los ya asociados
+loadTecnicosDeApoyo();
+loadTecnicosAsociados();
 
 
 
