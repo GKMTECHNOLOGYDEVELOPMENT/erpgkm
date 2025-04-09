@@ -109,7 +109,7 @@
                     <p class="text-md">RUC 20543618587</p>
                     <p class="text-md">CONSULTAS@GKMTECHNOLOGY.COM.PE</p>
                     <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
-                   
+
                 </div>
 
                 <!-- Logo Marca -->
@@ -138,7 +138,8 @@
                     </div>
                     <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
-                        <p class="text-xs"><span class="font-bold">NOMBRE: </span> {{ $visita['tecnico'] }}</p>
+                        <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}
+                        </p>
                         <p class="text-xs"><span class="font-bold">TELÉFONO: </span>080080142</p>
                     @endforeach
                 </div>
@@ -154,12 +155,12 @@
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
                     <div class="flex justify-between">
-                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ $producto['categoria'] }}</p>
-                        <p><span class="font-bold">MARCA:</span> {{ $producto['marca'] }}</p>
-                        <p><span class="font-bold">MODELO:</span> {{ $producto['modelo'] }}</p>
+                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ strtoupper($producto['categoria']) }}</p>
+                        <p><span class="font-bold">MARCA:</span> {{ strtoupper($producto['marca']) }}</p>
+                        <p><span class="font-bold">MODELO:</span> {{ strtoupper($producto['modelo']) }}</p>
                     </div>
                     <div class="mt-2">
-                        <p><span class="font-bold">SERIE:</span> {{ $producto['serie'] }}</p>
+                        <p><span class="font-bold">SERIE:</span> {{ strtoupper($producto['serie']) }}</p>
                     </div>
                 </div>
             @endif
@@ -193,15 +194,16 @@
                     @foreach ($transicionesStatusOt as $transicion)
                         <!-- Nombre del Estado con fondo rojo -->
                         <div class="red-bg px-3 py-2 rounded-md">
-                            {{ $transicion->estado_ot->descripcion ?? 'Sin Estado' }}
+                            {{ strtoupper($transicion->estado_ot->descripcion ?? 'Sin Estado') }}
                         </div>
 
                         <!-- Justificación debajo del estado -->
                         <div class="w-full text-xs">
-                            <p class="text-xs text-gray-700">{{ $transicion->justificacion }}</p>
+                            <p class="text-xs text-gray-700">{{ strtoupper($transicion->justificacion) }}</p>
                         </div>
                     @endforeach
                 </div>
+
             @endif
 
 
@@ -226,8 +228,10 @@
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
-                        <p class="text-xs">{{ $visita['tecnico'] }}</p>
-                        <p class="text-xs text-gray-500">DNI: {{ $visita['documento'] }}</p>
+                        <p class="text-xs uppercase">{{ $visita['tecnico'] }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
+                        </p>
                     </div>
 
                     <!-- Firma del Cliente -->
@@ -244,16 +248,25 @@
                         </div>
                         <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                         <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                        <p class="text-xs">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
-                        <p class="text-xs text-gray-500">DNI: {{ $orden->cliente->documento ?? 'No disponible' }}</p>
-
+                        <p class="text-xs uppercase">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ $orden->cliente->tipodocumento->nombre ?? 'Documento' }}:
+                            {{ $orden->cliente->documento ?? 'No disponible' }}
+                        </p>
                     </div>
                 </div>
                 <br>
             </div>
 
-
-            @if (!$modoVistaPrevia && (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)))
+            @php
+                $hayFotosDeVisita =
+                    !empty($imagenesAnexos) &&
+                    collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+                $hayFotosDeTickets =
+                    !empty($imagenesFotosTickets) &&
+                    collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+            @endphp
+            @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
                 <!-- Nueva página con el título ANEXOS -->
                 <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
                     <h2>ANEXOS</h2>
@@ -262,7 +275,6 @@
                 <div class="mt-4">
                     @php
                         $contador = 0;
-                        $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
                     @endphp
 
                     <!-- Primero las imágenes de la visita -->

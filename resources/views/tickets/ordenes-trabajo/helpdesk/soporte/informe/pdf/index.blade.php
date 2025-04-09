@@ -129,7 +129,8 @@
                         </li>
                         <li><span class="font-bold">TIENDA:</span> {{ $orden->tienda->nombre ?? 'No disponible' }}
                         </li>
-                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->tienda->direccion ?? 'No registrada' }}</li>
+                        <li><span class="font-bold">DIRECCIÓN:</span> {{ $orden->tienda->direccion ?? 'No registrada' }}
+                        </li>
                     </ul>
                 </div>
 
@@ -141,7 +142,9 @@
                     </div>
                     <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
-                        <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ $visita['tecnico'] }}</p>
+                        <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}
+                        </p>
+
                         <p class="text-xs"><span class="font-bold">TELÉFONO: </span>080080142</p>
                     @endforeach
                 </div>
@@ -150,40 +153,41 @@
 
             @if ($equiposInstalados->isNotEmpty())
                 <div class="red-bg mt-2">Equipos Instalados</div>
-                <div class="w-full space-y-2 ">
+                <div class="w-full space-y-1">
                     @foreach ($equiposInstalados as $equipo)
                         <div class="text-xs py-1">
-                            <div class="flex justify-between">
-                                <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ $equipo['tipoProducto'] }}</p>
-                                <p><span class="font-bold">MARCA:</span> {{ $equipo['marca'] }}</p>
-                                <p><span class="font-bold">MODELO:</span> {{ $equipo['modelo'] }}</p>
-                            </div>
-                            <div class="mt-1">
-                                <p><span class="font-bold">SERIE:</span> {{ $equipo['nserie'] }}</p>
+                            <div class="flex flex-wrap justify-between gap-x-4">
+                                <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
+                                <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
+                                <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
+                                <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
+                                <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span>
+                                    {{ strtoupper($equipo['observacion']) }}</p>
                             </div>
                         </div>
                     @endforeach
                 </div>
             @endif
-
 
             @if ($equiposRetirados->isNotEmpty())
                 <div class="red-bg mt-2">Equipos Retirados</div>
-                <div class="w-full space-y-2 ">
+                <div class="w-full space-y-1">
                     @foreach ($equiposRetirados as $equipo)
                         <div class="text-xs py-1">
-                            <div class="flex justify-between ">
-                                <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ $equipo['tipoProducto'] }}</p>
-                                <p><span class="font-bold">MARCA:</span> {{ $equipo['marca'] }}</p>
-                                <p><span class="font-bold">MODELO:</span> {{ $equipo['modelo'] }}</p>
-                            </div>
-                            <div class="mt-1">
-                                <p><span class="font-bold">SERIE:</span> {{ $equipo['nserie'] }}</p>
+                            <div class="flex flex-wrap justify-between gap-x-4">
+                                <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
+                                <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
+                                <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
+                                <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
+                                <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span>
+                                    {{ strtoupper($equipo['observacion']) }}</p>
                             </div>
                         </div>
                     @endforeach
                 </div>
             @endif
+
+
 
 
 
@@ -245,7 +249,9 @@
                         <p class="text-xs text-gray-600 uppercase tracking-wide">
                             {{ $visita['tecnico'] ?? 'NOMBRE NO DISPONIBLE' }}
                         </p>
-                        <p class="text-xs text-gray-500">DNI: {{ $visita['documento'] ?? 'N/A' }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
+                        </p>
                     </div>
 
                     <!-- Firma del Cliente -->
@@ -263,7 +269,10 @@
                         <p class="text-xs text-gray-600 uppercase tracking-wide">
                             {{ $orden->cliente->nombre ?? 'N/A' }}
                         </p>
-                        <p class="text-xs text-gray-500">DNI: {{ $orden->cliente->documento ?? 'No disponible' }}</p>
+                        <p class="text-xs text-gray-500">
+                            {{ $orden->cliente->tipodocumento->nombre ?? 'Documento' }}:
+                            {{ $orden->cliente->documento ?? 'No disponible' }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -289,15 +298,13 @@
                         @foreach ($imagenesAnexos as $anexo)
                             @if (!empty($anexo['foto_base64']))
                                 @if ($contador % 2 == 0)
-                                    <!-- Primera hoja SIN SALTO DE PÁGINA -->
-                                    <div class="flex flex-col items-center">
-                                    @else
-                                        <!-- A partir de la segunda hoja, forzamos un salto de página -->
-                                        <div class="flex flex-col items-center" style="page-break-before: always;">
+                                    <!-- Abrir contenedor para 2 imágenes por página -->
+                                    <div class="flex flex-col items-center"
+                                        @if ($contador > 0) style="page-break-before: always;" @endif>
                                 @endif
 
                                 <!-- Imagen centrada -->
-                                <div class="img-container">
+                                <div class="img-container mb-6">
                                     <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                 </div>
 
@@ -308,35 +315,33 @@
 
                                 @php $contador++; @endphp
 
-                                @if ($contador % 2 == 0)
-                </div>
+                                @if ($contador % 2 == 0 || $loop->last)
+                </div> <!-- Cierra grupo de 2 imágenes -->
             @endif
             @endif
             @endforeach
             @endif
 
-            <!-- Luego las imágenes de los tickets anexos, sin saltar a nueva hoja si no hay imágenes de visita -->
+            <!-- Luego las imágenes de los tickets anexos -->
             @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
                 @foreach ($imagenesFotosTickets as $fotoTicket)
                     @if (!empty($fotoTicket['foto_base64']))
-                        @if ($contador % 2 == 0 || !$hayFotosDeVisita)
+                        @if ($contador % 2 == 0)
                             <div class="flex flex-col items-center"
-                                @if ($contador % 2 == 0 && $hayFotosDeVisita) style="page-break-before: always;" @endif>
+                                @if ($contador > 0) style="page-break-before: always;" @endif>
                         @endif
 
-                        <!-- Imagen centrada -->
                         <div class="img-container">
                             <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
                         </div>
 
-                        <!-- Descripción centrada -->
                         <p class="text-sm text-center text-gray-700 font-semibold mt-2">
                             {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
                         </p>
 
                         @php $contador++; @endphp
 
-                        @if ($contador % 2 == 0 || !$hayFotosDeVisita)
+                        @if ($contador % 2 == 0 || $loop->last)
         </div>
         @endif
         @endif
@@ -344,6 +349,7 @@
         @endif
     </div>
     @endif
+
 
 
 

@@ -459,25 +459,25 @@ class OrdenesHelpdeskController extends Controller
 
         // Verificar si existe un flujo con idEstadflujo = 25
         $flujo = TicketFlujo::where('idTicket', $ticketId)
-            ->where('idEstadflujo', 25)
-            ->first();
+        ->where('idEstadflujo', 25)
+        ->first();
 
         // dd($flujo); // Verifica si devuelve el registro correcto
 
-        $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+         $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
 
-        // Verificar si existe un flujo con idEstadflujo = 31
+                 // Verificar si existe un flujo con idEstadflujo = 31
         $flujo = TicketFlujo::where('idTicket', $ticketId)
-            ->where('idEstadflujo', 31)
-            ->first();
+        ->where('idEstadflujo', 31)
+        ->first();
 
         // dd($flujo); // Verifica si devuelve el registro correcto
 
-        $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+         $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
-        $tiposEnvio = TipoEnvio::all();
-        $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
+         $tiposEnvio = TipoEnvio::all();
+         $tiposRecojo = TipoRecojo::all();  // Recuperar todos los registros de la tabla
 
 
 // Obtener la última visita para un ticket
@@ -857,14 +857,14 @@ if ($ultimaVisita) {
         // Puedes agregar un log final para revisar el valor de idVisita
         Log::info('Valor final de idVisita: ' . $idVisitaSeleccionada);
 
-        // Verificar si existe un flujo con idEstadflujo = 31
-        $flujo = TicketFlujo::where('idTicket', $ticketId)
-            ->where('idEstadflujo', 31)
-            ->first();
-
-        // dd($flujo); // Verifica si devuelve el registro correcto
-
-        $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+                     // Verificar si existe un flujo con idEstadflujo = 31
+                     $flujo = TicketFlujo::where('idTicket', $ticketId)
+                     ->where('idEstadflujo', 31)
+                     ->first();
+             
+                     // dd($flujo); // Verifica si devuelve el registro correcto
+             
+                      $existeFlujo31 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
 
 
@@ -907,6 +907,20 @@ $estadovisita = DB::table('visitas')
 Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
 
 
+
+
+
+                          // Verificar si existe un flujo con idEstadflujo = 31
+                          $flujo = TicketFlujo::where('idTicket', $ticketId)
+                          ->where('idEstadflujo', 25)
+                          ->first();
+                  
+                          // dd($flujo); // Verifica si devuelve el registro correcto
+                  
+                           $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
+     
+     
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
@@ -934,10 +948,8 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
             'existeFlujo25',
             'estadovisita'
 
-
         ));
     }
-
 
 
 
@@ -1921,16 +1933,16 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
     public function generateLevantamientoPdf($idOt)
     {
         $orden = Ticket::with([
-            'cliente',
+            'cliente.tipodocumento',
             'clienteGeneral',
+            'tecnico.tipodocumento',
             'tienda',
-            'tecnico',
             'marca',
             'modelo.categoria',
             'transicion_status_tickets.estado_ot',
-            'visitas.tecnico',
+            'visitas.tecnico.tipodocumento',
             'visitas.anexos_visitas',
-            'visitas.fotostickest'
+            'visitas.fotostickest',
         ])->findOrFail($idOt);
 
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
@@ -1984,6 +1996,7 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
                     'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
                     'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
                     'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                    'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
                     'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
                 ]
             ]);
@@ -2065,16 +2078,16 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
     public function generateLevantamientoPdfVisita($idOt, $idVisita)
     {
         $orden = Ticket::with([
-            'cliente',
+            'cliente.tipodocumento',
             'clienteGeneral',
+            'tecnico.tipodocumento',
             'tienda',
-            'tecnico',
             'marca',
             'modelo.categoria',
             'transicion_status_tickets.estado_ot',
-            'visitas.tecnico',
+            'visitas.tecnico.tipodocumento',
             'visitas.anexos_visitas',
-            'visitas.fotostickest'
+            'visitas.fotostickest',
         ])->findOrFail($idOt);
 
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
@@ -2123,6 +2136,7 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
                     'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
                     'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
                     'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                    'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
                     'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
                 ]
             ]);
@@ -2204,16 +2218,16 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
     public function generateSoportePdf($idOt)
     {
         $orden = Ticket::with([
-            'cliente',
+            'cliente.tipodocumento',
             'clienteGeneral',
+            'tecnico.tipodocumento',
             'tienda',
-            'tecnico',
             'marca',
             'modelo.categoria',
             'transicion_status_tickets.estado_ot',
-            'visitas.tecnico',
+            'visitas.tecnico.tipodocumento',
             'visitas.anexos_visitas',
-            'visitas.fotostickest'
+            'visitas.fotostickest',
         ])->findOrFail($idOt);
 
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
@@ -2265,6 +2279,7 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
                 'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
                 'marca' => $equipo->marca->nombre ?? 'Sin marca',
                 'nserie' => $equipo->nserie ?? 'Sin serie',
+                'observacion'  => $equipo->observaciones ?? 'Sin observación', // ✅ aquí
             ];
         });
 
@@ -2274,6 +2289,7 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
                 'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
                 'marca' => $equipo->marca->nombre ?? 'Sin marca',
                 'nserie' => $equipo->nserie ?? 'Sin serie',
+                'observacion'  => $equipo->observaciones ?? 'Sin observación', // ✅ aquí
             ];
         });
 
@@ -2291,6 +2307,7 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
                 'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
                 'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
                 'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
                 'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
             ]]);
         }
@@ -2367,16 +2384,16 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
     public function generateSoportePdfVisita($idOt, $idVisita)
     {
         $orden = Ticket::with([
-            'cliente',
+            'cliente.tipodocumento',
             'clienteGeneral',
+            'tecnico.tipodocumento',
             'tienda',
-            'tecnico',
             'marca',
             'modelo.categoria',
             'transicion_status_tickets.estado_ot',
-            'visitas.tecnico',
+            'visitas.tecnico.tipodocumento',
             'visitas.anexos_visitas',
-            'visitas.fotostickest'
+            'visitas.fotostickest',
         ])->findOrFail($idOt);
 
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
@@ -2448,6 +2465,7 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
                 'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
                 'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
                 'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
                 'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
             ]]);
         }

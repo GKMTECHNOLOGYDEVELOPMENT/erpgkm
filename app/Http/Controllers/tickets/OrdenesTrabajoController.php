@@ -2874,14 +2874,14 @@ if ($ultimaVisita) {
     public function generateInformePdfVisita($idOt, $idVisita)
     {
         $orden = Ticket::with([
-            'cliente',
+            'cliente.tipodocumento',
             'clienteGeneral',
+            'tecnico.tipodocumento',
             'tienda',
-            'tecnico',
             'marca',
             'modelo.categoria',
             'transicion_status_tickets.estado_ot',
-            'visitas.tecnico',
+            'visitas.tecnico.tipodocumento',
             'visitas.anexos_visitas',
             'visitas.fotostickest'
         ])->findOrFail($idOt);
@@ -2937,6 +2937,8 @@ if ($ultimaVisita) {
                     'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
                     'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
                     'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
+                    'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                    'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
                     'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado')
                 ]
             ]);
@@ -3064,14 +3066,14 @@ if ($ultimaVisita) {
     public function generateInformePdf($idOt)
     {
         $orden = Ticket::with([
-            'cliente',
+            'cliente.tipodocumento',
             'clienteGeneral',
+            'tecnico.tipodocumento',
             'tienda',
-            'tecnico',
             'marca',
             'modelo.categoria',
             'transicion_status_tickets.estado_ot',
-            'visitas.tecnico',
+            'visitas.tecnico.tipodocumento',
             'visitas.anexos_visitas',
             'visitas.fotostickest'
         ])->findOrFail($idOt);
@@ -3133,6 +3135,7 @@ if ($ultimaVisita) {
                         'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
                         'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
                         'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                        'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
                         'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
 
 

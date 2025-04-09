@@ -371,36 +371,36 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $(document).ready(function () {
         console.log("🔹 DOM completamente cargado");
-    
+
         // Elementos
         const clienteSelect = $("#idCliente");
         const tiendaSelectContainer = $("#selectTiendaContainer"); // Contenedor del select de tiendas
         const tiendaSelect = $("#idTienda"); // Select de tiendas
-    
+
         // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
         tiendaSelect.removeAttr("class style").addClass("form-input w-full");
-    
+
         // Ocultar select de tiendas al inicio
         tiendaSelectContainer.hide();
-    
+
         // 🔹 Escuchar cambios en el select de cliente
         clienteSelect.on("change", function () {
             let clienteId = clienteSelect.val();
-    
+
             if (!clienteId) {
                 console.warn("⚠️ No se ha seleccionado un cliente.");
                 return;
             }
-    
+
             console.log(`🔍 Cliente seleccionado: ${clienteId}`);
-    
+
             // Llamar a la API para obtener los datos del cliente y su tipo de documento
             $.get(`/api/cliente/${clienteId}`, function (data) {
                 console.log("📌 Datos del cliente:", data);
-    
+
                 // Establecer dirección automáticamente
                 $("#direccion").val(data.direccion || "");
-    
+
                 // Verificamos el tipo de documento del cliente
                 if (data.idTipoDocumento == 8) {
                     // Si el cliente tiene idTipoDocumento == 2, traer todas las tiendas
@@ -411,51 +411,70 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.log("🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas...");
                     mostrarSelectTiendas(clienteId, false); // False para tiendas relacionadas
                 }
-    
+
             }).fail(function () {
                 console.error("❌ Error al obtener los datos del cliente.");
             });
         });
-    
+
         // Función para mostrar el select de tiendas
         function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
             tiendaSelectContainer.show();
             tiendaSelect.show();
-    
+
             // Limpiar y resetear el select
-            tiendaSelect.empty().append('<option value="">Seleccionar Tienda</option>');
-    
-            // Si cargarTodasTiendas es verdadero, obtenemos todas las tiendas
-            const urlTiendas = cargarTodasTiendas 
-                ? `/api/tiendas`  // Obtener todas las tiendas
-                : `/api/cliente/${clienteId}/tiendas`; // Obtener solo las tiendas relacionadas con el cliente
-    
-            // Realizamos la solicitud para obtener las tiendas
+            tiendaSelect.empty().append('<option value="" selected disabled>Seleccionar Tienda</option>');
+
+            const urlTiendas = cargarTodasTiendas
+                ? `/api/tiendas`
+                : `/api/cliente/${clienteId}/tiendas`;
+
             $.get(urlTiendas, function (data) {
                 console.log("🏪 Tiendas obtenidas:", data);
-    
+
                 if (data.length > 0) {
                     data.forEach(tienda => {
                         tiendaSelect.append(`<option value="${tienda.idTienda}">${tienda.nombre}</option>`);
                     });
                 } else {
                     tiendaSelect.append('<option value="">No hay tiendas registradas</option>');
-                    console.warn("⚠️ No hay tiendas registradas para este cliente.");
                 }
             }).fail(function () {
                 console.error("❌ Error al obtener tiendas.");
             }).always(function () {
-                tiendaSelect.show(); // ✅ Mostramos el select después de cargar los datos
+                // ✅ Destruye el anterior (si hay), lo oculta y lo reemplaza por el nice-select
+                if (window.NiceSelect) {
+                    tiendaSelect.next(".nice-select").remove(); // Quitar el viejo si existe
+                    tiendaSelect.show(); // Necesario para que NiceSelect lo vea
+                    NiceSelect.bind(tiendaSelect[0], { searchable: true });
+                    tiendaSelect.hide(); // 🔥 Ocultar el original para evitar doble visualización
+                    // ✨ Estilo específico solo para este select
+                    setTimeout(() => {
+                        const nice = tiendaSelect.next(".nice-select");
+                        nice.css({
+                            'line-height': '2.2rem !important',
+                            'height': '2.4rem',
+                            'padding-top': '0.2rem',
+                            'padding-bottom': '0.2rem'
+                        });
+                        nice.find('.current').css({
+                            'line-height': '2.2rem !important',
+                            'padding-top': '0 !important',
+                            'padding-bottom': '0 !important'
+                        });
+                    }, 50);
+                }
             });
+
         }
-    
+
         // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
         if (clienteSelect.val()) {
             clienteSelect.trigger("change");
         }
     });
-    
-    
+
+
 
 
 

@@ -36,14 +36,6 @@
 
                 </div>
 
-                <!-- Cliente General -->
-                <div>
-                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full ">
-                        <option value="" selected>Seleccionar Cliente General</option>
-                    </select>
-                </div>
-
                 <!-- Cliente -->
                 <div>
                     <label for="idCliente" class="block text-sm font-medium">Cliente</label>
@@ -53,15 +45,22 @@
                     </select>
                 </div>
 
+                <!-- Cliente General -->
+                <div>
+                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full ">
+                        <option value="" selected>Seleccionar Cliente General</option>
+                    </select>
+                </div>
 
 
-                 <!-- Select para tiendas (solo si el cliente es tienda) -->
-                 <div id="selectTiendaContainer">
-                 <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                        <select id="idTienda" name="idTienda" class="form-input w-full">
-                            <option value="">Seleccionar Tienda</option>
-                        </select>
-                    </div>
+                <!-- Select para tiendas (solo si el cliente es tienda) -->
+                <div id="selectTiendaContainer">
+                    <label for="idTienda" class="block text-sm font-medium">Tienda</label>
+                    <select id="idTienda" name="idTienda" class="form-input w-full">
+                        <option value="">Seleccionar Tienda</option>
+                    </select>
+                </div>
 
                 <!-- Tipo de Servicio -->
                 <div>
@@ -117,10 +116,9 @@
                     class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Agencia -->
                     <div>
-                                <label class="block text-sm font-medium">Corruir</label>
-                                <input type="text" name="agencia" class="form-input w-full"
-                                    placeholder="Ingrese el Agencia">
-                            </div>
+                        <label class="block text-sm font-medium">Corruir</label>
+                        <input type="text" name="agencia" class="form-input w-full" placeholder="Ingrese el Agencia">
+                    </div>
                     <!-- Técnico -->
                     <div>
                         <label for="idTecnico" class="block text-sm font-medium">Técnico Envío</label>
@@ -198,80 +196,83 @@
 
 
                 <script>
- document.addEventListener("DOMContentLoaded", function() {
-    const selectTienda = document.getElementById("idTienda");
-    const esEnvioContainer = document.getElementById("esEnvioContainer");
-    const esEnvioCheckbox = document.getElementById("esEnvio");
-    const selectTipoServicio = document.getElementById("tipoServicio"); // Selección de tipo de servicio
-    const tecnicoContainer = document.getElementById("tecnicoContainer");
-    const tecnicoDatosContainer = document.getElementById("tecnicoDatosContainer");
-    const tecnicoFields = document.getElementById("tecnicoFields");
-    const agregarTecnicoBtn = document.getElementById("agregarTecnico");
-    const eliminarTecnicoBtn = document.getElementById("eliminarUltimoTecnico");
+                    document.addEventListener("DOMContentLoaded", function() {
+                        const selectTienda = document.getElementById("idTienda");
+                        const esEnvioContainer = document.getElementById("esEnvioContainer");
+                        const esEnvioCheckbox = document.getElementById("esEnvio");
+                        const selectTipoServicio = document.getElementById("tipoServicio"); // Selección de tipo de servicio
+                        const tecnicoContainer = document.getElementById("tecnicoContainer");
+                        const tecnicoDatosContainer = document.getElementById("tecnicoDatosContainer");
+                        const tecnicoFields = document.getElementById("tecnicoFields");
+                        const agregarTecnicoBtn = document.getElementById("agregarTecnico");
+                        const eliminarTecnicoBtn = document.getElementById("eliminarUltimoTecnico");
 
-    if (!selectTienda || !esEnvioContainer || !esEnvioCheckbox || !tecnicoContainer || !tecnicoDatosContainer || !selectTipoServicio) {
-        console.error("No se encontraron los elementos necesarios.");
-        return;
-    }
+                        if (!selectTienda || !esEnvioContainer || !esEnvioCheckbox || !tecnicoContainer || !
+                            tecnicoDatosContainer || !selectTipoServicio) {
+                            console.error("No se encontraron los elementos necesarios.");
+                            return;
+                        }
 
-    function verificarDepartamento() {
-        const selectedOption = selectTienda.options[selectTienda.selectedIndex];
-        const departamento = selectedOption.getAttribute("data-departamento");
-        console.log("Departamento seleccionado:", departamento); // Debugging: Ver departamento seleccionado
+                        function verificarDepartamento() {
+                            const selectedOption = selectTienda.options[selectTienda.selectedIndex];
+                            const departamento = selectedOption.getAttribute("data-departamento");
+                            console.log("Departamento seleccionado:", departamento); // Debugging: Ver departamento seleccionado
 
-        if (departamento === "3926") {
-            console.log("Departamento es 3926. Ocultando esEnvioContainer y tecnicoContainer.");
-            esEnvioContainer.style.display = "none";
-            tecnicoContainer.style.display = "none";
-            tecnicoDatosContainer.style.display = "none";
-        } else {
-            console.log("Departamento diferente a 3926. Verificando Tipo de Servicio.");
-            verificarTipoServicio(); // Verificar también el tipo de servicio
-        }
-    }
+                            if (departamento === "3926") {
+                                console.log("Departamento es 3926. Ocultando esEnvioContainer y tecnicoContainer.");
+                                esEnvioContainer.style.display = "none";
+                                tecnicoContainer.style.display = "none";
+                                tecnicoDatosContainer.style.display = "none";
+                            } else {
+                                console.log("Departamento diferente a 3926. Verificando Tipo de Servicio.");
+                                verificarTipoServicio(); // Verificar también el tipo de servicio
+                            }
+                        }
 
-    function verificarTipoServicio() {
-        const selectedTipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex];
-        const tipoServicio = selectedTipoServicio ? selectedTipoServicio.value : null;
-        console.log("Tipo de Servicio seleccionado:", tipoServicio); // Debugging: Ver tipo de servicio seleccionado
+                        function verificarTipoServicio() {
+                            const selectedTipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex];
+                            const tipoServicio = selectedTipoServicio ? selectedTipoServicio.value : null;
+                            console.log("Tipo de Servicio seleccionado:",
+                                tipoServicio); // Debugging: Ver tipo de servicio seleccionado
 
-        // Si el tipo de servicio es 2, ocultamos el contenedor de "esEnvio"
-        if (tipoServicio == "2") {
-            console.log("Tipo de servicio es 2. Ocultando esEnvioContainer.");
-            esEnvioContainer.style.display = "none";
-        } else {
-            console.log("Tipo de servicio no es 2. Mostrando esEnvioContainer.");
-            esEnvioContainer.style.display = "block";
-        }
-    }
+                            // Si el tipo de servicio es 2, ocultamos el contenedor de "esEnvio"
+                            if (tipoServicio == "2") {
+                                console.log("Tipo de servicio es 2. Ocultando esEnvioContainer.");
+                                esEnvioContainer.style.display = "none";
+                            } else {
+                                console.log("Tipo de servicio no es 2. Mostrando esEnvioContainer.");
+                                esEnvioContainer.style.display = "block";
+                            }
+                        }
 
-    function verificarEsEnvio() {
-        console.log("Verificando si es envío:", esEnvioCheckbox.checked); // Debugging: Ver estado del checkbox
-        if (esEnvioCheckbox.checked) {
-            tecnicoContainer.style.display = "block";
-            tecnicoDatosContainer.style.display = "block";
-        } else {
-            tecnicoContainer.style.display = "none";
-            tecnicoDatosContainer.style.display = "none";
-        }
-    }
+                        function verificarEsEnvio() {
+                            console.log("Verificando si es envío:", esEnvioCheckbox
+                                .checked); // Debugging: Ver estado del checkbox
+                            if (esEnvioCheckbox.checked) {
+                                tecnicoContainer.style.display = "block";
+                                tecnicoDatosContainer.style.display = "block";
+                            } else {
+                                tecnicoContainer.style.display = "none";
+                                tecnicoDatosContainer.style.display = "none";
+                            }
+                        }
 
-    function actualizarBotonEliminar() {
-        const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
-        console.log("Número de técnicos:", tecnicos.length); // Debugging: Ver número de técnicos
-        if (tecnicos.length > 1) {
-            eliminarTecnicoBtn.classList.remove("hidden");
-        } else {
-            eliminarTecnicoBtn.classList.add("hidden");
-        }
-    }
+                        function actualizarBotonEliminar() {
+                            const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
+                            console.log("Número de técnicos:", tecnicos.length); // Debugging: Ver número de técnicos
+                            if (tecnicos.length > 1) {
+                                eliminarTecnicoBtn.classList.remove("hidden");
+                            } else {
+                                eliminarTecnicoBtn.classList.add("hidden");
+                            }
+                        }
 
-    function agregarTecnico() {
-        console.log("Agregando un nuevo técnico"); // Debugging: Cuando se agrega un nuevo técnico
-        const tecnicoEntry = document.createElement("div");
-        tecnicoEntry.classList.add("tecnico-entry", "grid", "grid-cols-1", "md:grid-cols-2", "gap-4");
+                        function agregarTecnico() {
+                            console.log("Agregando un nuevo técnico"); // Debugging: Cuando se agrega un nuevo técnico
+                            const tecnicoEntry = document.createElement("div");
+                            tecnicoEntry.classList.add("tecnico-entry", "grid", "grid-cols-1", "md:grid-cols-2", "gap-4");
 
-        tecnicoEntry.innerHTML = `
+                            tecnicoEntry.innerHTML = `
             <div>
                 <label class="block text-sm font-medium">Nombre Técnico de Recojo</label>
                 <input type="text" name="nombreTecnicoEnvio[]" class="form-input w-full" placeholder="Ingrese el nombre">
@@ -282,40 +283,41 @@
             </div>
         `;
 
-        tecnicoFields.appendChild(tecnicoEntry);
-        actualizarBotonEliminar();
-    }
+                            tecnicoFields.appendChild(tecnicoEntry);
+                            actualizarBotonEliminar();
+                        }
 
-    function eliminarUltimoTecnico() {
-        const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
-        console.log("Eliminando el último técnico. Técnicos actuales:", tecnicos.length); // Debugging: Ver número de técnicos antes de eliminar
-        if (tecnicos.length > 1) {
-            tecnicos[tecnicos.length - 1].remove();
-            actualizarBotonEliminar();
-        }
-    }
+                        function eliminarUltimoTecnico() {
+                            const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
+                            console.log("Eliminando el último técnico. Técnicos actuales:", tecnicos
+                                .length); // Debugging: Ver número de técnicos antes de eliminar
+                            if (tecnicos.length > 1) {
+                                tecnicos[tecnicos.length - 1].remove();
+                                actualizarBotonEliminar();
+                            }
+                        }
 
-    // Mantener ocultos al inicio hasta que seleccione una tienda
-    esEnvioContainer.style.display = "none";
-    tecnicoContainer.style.display = "none";
-    tecnicoDatosContainer.style.display = "none";
+                        // Mantener ocultos al inicio hasta que seleccione una tienda
+                        esEnvioContainer.style.display = "none";
+                        tecnicoContainer.style.display = "none";
+                        tecnicoDatosContainer.style.display = "none";
 
-    // Eventos
-    selectTienda.addEventListener("change", function() {
-        console.log("Cambiando tienda."); // Debugging: Ver cuando se cambia la tienda
-        verificarDepartamento();
-    });
-    selectTipoServicio.addEventListener("change", function() {
-        console.log("Cambiando tipo de servicio."); // Debugging: Ver cuando se cambia el tipo de servicio
-        verificarTipoServicio();
-    });
-    esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
-    agregarTecnicoBtn.addEventListener("click", agregarTecnico);
-    eliminarTecnicoBtn.addEventListener("click", eliminarUltimoTecnico);
+                        // Eventos
+                        selectTienda.addEventListener("change", function() {
+                            console.log("Cambiando tienda."); // Debugging: Ver cuando se cambia la tienda
+                            verificarDepartamento();
+                        });
+                        selectTipoServicio.addEventListener("change", function() {
+                            console.log(
+                                "Cambiando tipo de servicio."); // Debugging: Ver cuando se cambia el tipo de servicio
+                            verificarTipoServicio();
+                        });
+                        esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
+                        agregarTecnicoBtn.addEventListener("click", agregarTecnico);
+                        eliminarTecnicoBtn.addEventListener("click", eliminarUltimoTecnico);
 
-    actualizarBotonEliminar(); // Inicializa visibilidad del botón eliminar
-});
-
+                        actualizarBotonEliminar(); // Inicializa visibilidad del botón eliminar
+                    });
                 </script>
 
 
@@ -398,7 +400,7 @@
                 const idTienda = document.getElementById("idTienda").value;
                 const fallaReportada = document.getElementById("fallaReportada").value.trim();
 
-                console.log("Valor del idCliente seleccionado:", idCliente);  // Verifica el valor aquí
+                console.log("Valor del idCliente seleccionado:", idCliente); // Verifica el valor aquí
 
 
                 // Verificar si algún campo está vacío
@@ -586,238 +588,285 @@
     </script>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-    let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
-    let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
-    // let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
+            let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
+            // let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
 
-// Función para cargar los clientes
-function cargarClientes() {
-    fetch('/clientesdatoscliente')
-        .then(response => response.json())
-        .then(data => {
-            console.log("🚀 Datos de clientes recibidos:", data); // Aquí estamos haciendo el log de los datos recibidos
+            // Función para cargar los clientes
+            function cargarClientes() {
+                fetch('/clientesdatoscliente')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("🚀 Datos de clientes recibidos:",
+                            data); // Aquí estamos haciendo el log de los datos recibidos
 
-            const select = document.getElementById('idCliente'); // Aquí aún usas 'idCliente' para obtener el select
+                        const select = document.getElementById(
+                            'idCliente'); // Aquí aún usas 'idCliente' para obtener el select
 
-            // Puedes agregar un 'name' también, si lo deseas:
-            select.setAttribute('name', 'idCliente');  // Aquí le asignas el 'name' que quieres
+                        // Puedes agregar un 'name' también, si lo deseas:
+                        select.setAttribute('name', 'idCliente'); // Aquí le asignas el 'name' que quieres
 
-            // Vaciar y llenar el select con las opciones
-            select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
-            data.forEach(cliente => {
-                console.log(`Cliente: ${cliente.nombre} - ${cliente.documento}`); // Mostrar el cliente en el log
+                        // Vaciar y llenar el select con las opciones
+                        select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
+                        data.forEach(cliente => {
+                            console.log(
+                                `Cliente: ${cliente.nombre} - ${cliente.documento}`
+                            ); // Mostrar el cliente en el log
 
-                const option = document.createElement('option');
-                option.value = cliente.idCliente;
-                option.textContent = `${cliente.nombre} - ${cliente.documento}`;
-                option.dataset.tienda = cliente.esTienda;
-                option.dataset.direccion = cliente.direccion; // <--- AÑADIDO
-                select.appendChild(option);
-            });
+                            const option = document.createElement('option');
+                            option.value = cliente.idCliente;
+                            option.textContent = `${cliente.nombre} - ${cliente.documento}`;
+                            option.dataset.tienda = cliente.esTienda;
+                            option.dataset.direccion = cliente.direccion; // <--- AÑADIDO
+                            select.appendChild(option);
+                        });
 
-            // Si ya existe una instancia previa de nice-select, la destruye
-            if (select.niceSelectInstance) {
-                select.niceSelectInstance.destroy();
-            }
+                        // Si ya existe una instancia previa de nice-select, la destruye
+                        if (select.niceSelectInstance) {
+                            select.niceSelectInstance.destroy();
+                        }
 
-            // Inicializa nice-select y guarda la instancia en el select
-            select.niceSelectInstance = NiceSelect.bind(select, {
-                searchable: true
-            });
+                        // Inicializa nice-select y guarda la instancia en el select
+                        select.niceSelectInstance = NiceSelect.bind(select, {
+                            searchable: true
+                        });
 
-            // Mostrar el select después de cargar los datos
-            select.style.display = 'block'; // O 'inline-block' según tu diseño
-        })
-        .catch(error => {
-            console.error('Error al cargar clientes:', error);
-        });
-}
-
-// Función para obtener el cliente seleccionado
-function obtenerClienteSeleccionado() {
-    const select = document.getElementById('idCliente');
-    const idClienteSeleccionado = select.value; // Esto obtendrá el idCliente seleccionado
-    console.log(`Cliente seleccionado: ${idClienteSeleccionado}`); // Ver el valor seleccionado
-
-    if (idClienteSeleccionado) {
-        // Aquí puedes hacer algo con el idClienteSeleccionado
-        // Ejemplo: Hacer un fetch para obtener más detalles de ese cliente
-        console.log(`Detalles del cliente con ID: ${idClienteSeleccionado}`);
-    } else {
-        console.log('No se ha seleccionado ningún cliente');
-    }
-}
-
-// Evento de cambio en el select
-document.getElementById('idCliente').addEventListener('change', obtenerClienteSeleccionado);
-
-// Ocultar el select de clientes inicialmente
-let selectCliente = document.getElementById('idCliente');
-selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
-
-// Cargar los clientes solo si no se han cargado previamente
-if (!clientesCargados) {
-    cargarClientes();
-    clientesCargados = true;
-}
-
-
-
-
-
-
-
-    
-$(document).ready(function () {
-    console.log("🔹 DOM completamente cargado");
-
-    // Elementos
-    const clienteSelect = $("#idCliente");
-    const tiendaSelectContainer = $("#selectTiendaContainer"); // Contenedor del select de tiendas
-    const tiendaSelect = $("#idTienda"); // Select de tiendas
-
-    // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
-    tiendaSelect.removeAttr("class style").addClass("form-input w-full");
-
-    // Ocultar select de tiendas al inicio
-    tiendaSelectContainer.hide();
-
-    // 🔹 Escuchar cambios en el select de cliente
-    clienteSelect.on("change", function () {
-        let clienteId = clienteSelect.val();
-
-        if (!clienteId) {
-            console.warn("⚠️ No se ha seleccionado un cliente.");
-            return;
-        }
-
-        console.log(`🔍 Cliente seleccionado: ${clienteId}`);
-
-        // Llamar a la API para obtener los datos del cliente y su tipo de documento
-        $.get(`/api/cliente/${clienteId}`, function (data) {
-            console.log("📌 Datos del cliente:", data);
-
-            // Establecer dirección automáticamente
-            $("#direccion").val(data.direccion || "");
-
-            // Verificamos el tipo de documento del cliente
-            if (data.idTipoDocumento == 8) {
-                // Si el cliente tiene idTipoDocumento == 2, traer todas las tiendas
-                console.log("🌍 Cliente con idTipoDocumento == 2, cargando todas las tiendas...");
-                mostrarSelectTiendas(clienteId, true); // True para todas las tiendas
-            } else {
-                // Si el cliente tiene idTipoDocumento == 1, traer solo las tiendas relacionadas
-                console.log("🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas...");
-                mostrarSelectTiendas(clienteId, false); // False para tiendas relacionadas
-            }
-
-        }).fail(function () {
-            console.error("❌ Error al obtener los datos del cliente.");
-        });
-    });
-
-    // Función para mostrar el select de tiendas
-    function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
-        tiendaSelectContainer.show();
-        tiendaSelect.show();
-
-        // Limpiar y resetear el select
-        tiendaSelect.empty().append('<option value="">Seleccionar Tienda</option>');
-
-        // Si cargarTodasTiendas es verdadero, obtenemos todas las tiendas
-        const urlTiendas = cargarTodasTiendas 
-            ? `/api/tiendas`  // Obtener todas las tiendas
-            : `/api/cliente/${clienteId}/tiendas`; // Obtener solo las tiendas relacionadas con el cliente
-
-        // Realizamos la solicitud para obtener las tiendas
-        $.get(urlTiendas, function (data) {
-            console.log("🏪 Tiendas obtenidas:", data);
-
-            if (data.length > 0) {
-                data.forEach(tienda => {
-                    tiendaSelect.append(`
-                        <option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">
-                            ${tienda.nombre}
-                        </option>
-                    `);
-                });
-            } else {
-                tiendaSelect.append('<option value="">No hay tiendas registradas</option>');
-                console.warn("⚠️ No hay tiendas registradas para este cliente.");
-            }
-
-            // Inicializar el select con Nice Select y habilitar la búsqueda
-            var options = {
-                searchable: true
-            };
-            NiceSelect.bind(document.getElementById("idTienda"), options);
-        }).fail(function () {
-            console.error("❌ Error al obtener tiendas.");
-        }).always(function () {
-            tiendaSelect.show(); // ✅ Mostramos el select después de cargar los datos
-        });
-    }
-
-    // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
-    if (clienteSelect.val()) {
-        clienteSelect.trigger("change");
-    }
-});
-
-    
-    
-
-
-
-
-
-    // Evento para cuando se selecciona un cliente
-    document.getElementById('idCliente').addEventListener('change', function () {
-        let clienteId = this.value;
-
-        console.log('Cliente seleccionado:', clienteId); 
-
-        if (clienteId) {
-            console.log('Cliente seleccionado:', clienteId); // Verificar si el cliente es seleccionado
-            fetch(`/clientes-generales/${clienteId}`)
-                .then(response => response.json())
-                .then(data => {
-                    let select = document.getElementById('idClienteGeneral');
-                    select.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
-
-                    // Verificar si se recibió algún dato
-                    console.log('Clientes generales:', data); // Verifica que se reciban los clientes generales
-
-                    // Llenar el select con los clientes generales
-                    data.forEach(clienteGeneral => {
-                        let option = document.createElement('option');
-                        option.value = clienteGeneral.idClienteGeneral;
-                        option.textContent = clienteGeneral.descripcion;
-                        select.appendChild(option);
+                        // Mostrar el select después de cargar los datos
+                        select.style.display = 'block'; // O 'inline-block' según tu diseño
+                        // ✅ Estilo para alinear verticalmente el texto
+                        setTimeout(() => {
+                            const nice = $(select).next(".nice-select");
+                            nice.css({
+                                'line-height': '2.2rem !important',
+                                'height': '2.4rem',
+                                'padding-top': '0.2rem',
+                                'padding-bottom': '0.2rem'
+                            });
+                            nice.find('.current').css({
+                                'line-height': '2.2rem !important',
+                                'padding-top': '0 !important',
+                                'padding-bottom': '0 !important'
+                            });
+                        }, 50);
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar clientes:', error);
                     });
+            }
 
-                    // Si hay solo un cliente general, lo seleccionamos automáticamente
-                    if (data.length === 1) {
-                        select.value = data[0].idClienteGeneral; // Seleccionar automáticamente el único cliente
+            // Función para obtener el cliente seleccionado
+            function obtenerClienteSeleccionado() {
+                const select = document.getElementById('idCliente');
+                const idClienteSeleccionado = select.value; // Esto obtendrá el idCliente seleccionado
+                console.log(`Cliente seleccionado: ${idClienteSeleccionado}`); // Ver el valor seleccionado
+
+                if (idClienteSeleccionado) {
+                    // Aquí puedes hacer algo con el idClienteSeleccionado
+                    // Ejemplo: Hacer un fetch para obtener más detalles de ese cliente
+                    console.log(`Detalles del cliente con ID: ${idClienteSeleccionado}`);
+                } else {
+                    console.log('No se ha seleccionado ningún cliente');
+                }
+            }
+
+            // Evento de cambio en el select
+            document.getElementById('idCliente').addEventListener('change', obtenerClienteSeleccionado);
+
+            // Ocultar el select de clientes inicialmente
+            let selectCliente = document.getElementById('idCliente');
+            selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
+
+            // Cargar los clientes solo si no se han cargado previamente
+            if (!clientesCargados) {
+                cargarClientes();
+                clientesCargados = true;
+            }
+
+
+
+
+
+
+
+
+            $(document).ready(function() {
+                console.log("🔹 DOM completamente cargado");
+
+                // Elementos
+                const clienteSelect = $("#idCliente");
+                const tiendaSelectContainer = $(
+                    "#selectTiendaContainer"); // Contenedor del select de tiendas
+                const tiendaSelect = $("#idTienda"); // Select de tiendas
+
+                // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
+                tiendaSelect.removeAttr("class style").addClass("form-input w-full");
+
+                // Ocultar select de tiendas al inicio
+                tiendaSelectContainer.hide();
+
+                // 🔹 Escuchar cambios en el select de cliente
+                clienteSelect.on("change", function() {
+                    let clienteId = clienteSelect.val();
+
+                    if (!clienteId) {
+                        console.warn("⚠️ No se ha seleccionado un cliente.");
+                        return;
                     }
 
-                    // No inicializamos NiceSelect en el select de Cliente General
-                    // Simplemente utilizamos el select estándar
-                })
-                .catch(error => console.error('Error al cargar clientes generales:', error));
-        } else {
-            // Limpiar el select si no hay cliente seleccionado
-            document.getElementById('idClienteGeneral').innerHTML =
-                '<option value="" selected>Seleccionar Cliente General</option>';
-        }
+                    console.log(`🔍 Cliente seleccionado: ${clienteId}`);
 
-        console.log("Valor final del idCliente:", this.value);
+                    // Llamar a la API para obtener los datos del cliente y su tipo de documento
+                    $.get(`/api/cliente/${clienteId}`, function(data) {
+                        console.log("📌 Datos del cliente:", data);
 
-    });
-});
-</script>
+                        // Establecer dirección automáticamente
+                        $("#direccion").val(data.direccion || "");
+
+                        // Verificamos el tipo de documento del cliente
+                        if (data.idTipoDocumento == 8) {
+                            // Si el cliente tiene idTipoDocumento == 2, traer todas las tiendas
+                            console.log(
+                                "🌍 Cliente con idTipoDocumento == 2, cargando todas las tiendas..."
+                            );
+                            mostrarSelectTiendas(clienteId,
+                                true); // True para todas las tiendas
+                        } else {
+                            // Si el cliente tiene idTipoDocumento == 1, traer solo las tiendas relacionadas
+                            console.log(
+                                "🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas..."
+                            );
+                            mostrarSelectTiendas(clienteId,
+                                false); // False para tiendas relacionadas
+                        }
+
+                    }).fail(function() {
+                        console.error("❌ Error al obtener los datos del cliente.");
+                    });
+                });
+
+                // Función para mostrar el select de tiendas
+                function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
+                    tiendaSelectContainer.show();
+                    tiendaSelect.show();
+
+                    tiendaSelect.empty().append(
+                        '<option value="" selected disabled>Seleccionar Tienda</option>');
+
+                    const urlTiendas = cargarTodasTiendas ?
+                        `/api/tiendas` :
+                        `/api/cliente/${clienteId}/tiendas`;
+
+                    $.get(urlTiendas, function(data) {
+                        console.log("🏪 Tiendas obtenidas:", data);
+
+                        if (data.length > 0) {
+                            data.forEach(tienda => {
+                                tiendaSelect.append(`
+                    <option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">
+                        ${tienda.nombre}
+                    </option>
+                `);
+                            });
+                        } else {
+                            tiendaSelect.append(
+                                '<option value="">No hay tiendas registradas</option>');
+                        }
+
+                        // Reemplazar el Nice Select anterior si existe
+                        tiendaSelect.next(".nice-select").remove();
+                        tiendaSelect.show(); // Mostrar original para inicializar
+
+                        // Inicializar Nice Select 2 con buscador
+                        NiceSelect.bind(tiendaSelect[0], {
+                            searchable: true
+                        });
+                        tiendaSelect.hide(); // Ocultar el original
+
+                        // Aplicar estilos solo al nice-select de tienda
+                        setTimeout(() => {
+                            const nice = tiendaSelect.next(".nice-select");
+                            nice.css({
+                                'height': '2.5rem',
+                                'padding': '0 0.75rem',
+                                'line-height': '2.5rem'
+                            });
+                            nice.find('.current').css({
+                                'line-height': '2.5rem',
+                                'padding': '0 !important'
+                            });
+                        }, 50);
+
+                    }).fail(function() {
+                        console.error("❌ Error al obtener tiendas.");
+                    });
+                }
+
+
+
+                // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
+                if (clienteSelect.val()) {
+                    clienteSelect.trigger("change");
+                }
+            });
+
+
+
+
+
+
+
+
+            // Evento para cuando se selecciona un cliente
+            document.getElementById('idCliente').addEventListener('change', function() {
+                let clienteId = this.value;
+
+                console.log('Cliente seleccionado:', clienteId);
+
+                if (clienteId) {
+                    console.log('Cliente seleccionado:',
+                        clienteId); // Verificar si el cliente es seleccionado
+                    fetch(`/clientes-generales/${clienteId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let select = document.getElementById('idClienteGeneral');
+                            select.innerHTML =
+                                '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
+
+                            // Verificar si se recibió algún dato
+                            console.log('Clientes generales:',
+                                data); // Verifica que se reciban los clientes generales
+
+                            // Llenar el select con los clientes generales
+                            data.forEach(clienteGeneral => {
+                                let option = document.createElement('option');
+                                option.value = clienteGeneral.idClienteGeneral;
+                                option.textContent = clienteGeneral.descripcion;
+                                select.appendChild(option);
+                            });
+
+                            // Si hay solo un cliente general, lo seleccionamos automáticamente
+                            if (data.length === 1) {
+                                select.value = data[0]
+                                    .idClienteGeneral; // Seleccionar automáticamente el único cliente
+                            }
+
+                            // No inicializamos NiceSelect en el select de Cliente General
+                            // Simplemente utilizamos el select estándar
+                        })
+                        .catch(error => console.error('Error al cargar clientes generales:', error));
+                } else {
+                    // Limpiar el select si no hay cliente seleccionado
+                    document.getElementById('idClienteGeneral').innerHTML =
+                        '<option value="" selected>Seleccionar Cliente General</option>';
+                }
+
+                console.log("Valor final del idCliente:", this.value);
+
+            });
+        });
+    </script>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>

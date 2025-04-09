@@ -357,7 +357,8 @@
             <div>
                 <label class="text-sm font-medium">Fecha de Creación</label>
                 <input id="fechaCreacion" name="fechaCreacion" type="text" class="form-input w-full"
-                    value="{{ \Carbon\Carbon::parse($orden->fechaCreacion)->format('Y-m-d H:i') }}" readonly>
+                value="{{ \Carbon\Carbon::parse($orden->fecha_creacion)->format('Y-m-d H:i') }}" readonly>
+            
             </div>
 
             <!-- Falla Reportada -->

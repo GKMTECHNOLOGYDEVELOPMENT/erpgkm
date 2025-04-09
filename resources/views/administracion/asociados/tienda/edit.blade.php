@@ -56,9 +56,10 @@
                 </div>
                 <!-- Cliente -->
                 <div>
-                    <label for="departamento" class="block text-sm font-medium">Cliente </label>
-                    <select id="idCliente" name="idCliente" class="select2 w-full" style="display: none" required>
-                        <option value="" disabled selected>Seleccionar Cliente</option>
+                    <label for="idCliente" class="block text-sm font-medium">Cliente</label>
+                    <select id="idCliente" name="idCliente" class="select2 w-full" required style="display: none">
+                        <option value="" disabled {{ old('idCliente', $tienda->idCliente) ? '' : 'selected' }}>
+                            Seleccionar Cliente</option>
                         @foreach ($clientes as $cliente)
                             <option value="{{ $cliente->idCliente }}"
                                 {{ old('idCliente', $tienda->idCliente) == $cliente->idCliente ? 'selected' : '' }}>
@@ -67,10 +68,8 @@
                         @endforeach
                     </select>
                     <div id="idCliente-error" class="text-red-500 text-sm" style="display: none;"></div>
-                    <!-- @error('idCliente')
-    <div class="text-red-500 text-sm">{{ $message }}</div>
-@enderror -->
                 </div>
+
                 <!-- Celular -->
                 <div>
                     <label for="celular" class="block text-sm font-medium">Celular</label>
@@ -86,14 +85,7 @@
                         name="email" required value="{{ old('email', $tienda->email) }}">
                     <div id="email-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
-                <!-- Referencia -->
-                <div class="md:col-span-2">
-                    <label for="referencia" class="block text-sm font-medium">Link de Ubicación</label>
-                    <input id="referencia" type="text" class="form-input w-full"
-                        placeholder="Ingrese el link de Google Maps" name="referencia">
 
-                    <div id="referencia-error" class="text-red-500 text-sm" style="display: none;"></div>
-                </div>
                 <!-- Departamento -->
                 <div>
                     <label for="departamento" class="block text-sm font-medium">Departamento</label>
@@ -151,6 +143,15 @@
                         <span for="estado"
                             class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
                     </div>
+                </div>
+                <!-- Referencia -->
+                <div class="md:col-span-2">
+                    <label for="referencia" class="block text-sm font-medium">Link de Ubicación</label>
+                    <input id="referencia" type="text" class="form-input w-full"
+                        placeholder="Ingrese el link de Google Maps" name="referencia"
+                        value="{{ old('referencia', $tienda->referencia) }}">
+
+                    <div id="referencia-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
                 <!-- Latitud -->
                 <div>
