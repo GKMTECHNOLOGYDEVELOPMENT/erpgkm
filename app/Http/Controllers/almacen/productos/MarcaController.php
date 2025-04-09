@@ -21,52 +21,52 @@ class MarcaController extends Controller
 
 
     public function store(Request $request)
-{
-    try {
-        // Validar los datos del formulario
-        $validatedData = $request->validate([
-            'nombre' => 'required|string|max:255|unique:marca,nombre',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validación para la foto
-        ]);
+    {
+        try {
+            // Validar los datos del formulario
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255|unique:marca,nombre',
+                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validación para la foto
+            ]);
 
-        // Datos básicos de la marca con estado siempre en 1
-        $dataMarca = [
-            'nombre' => $validatedData['nombre'],
-            'estado' => 1, // Estado siempre será 1
-        ];
+            // Datos básicos de la marca con estado siempre en 1
+            $dataMarca = [
+                'nombre' => $validatedData['nombre'],
+                'estado' => 1, // Estado siempre será 1
+            ];
 
-        // Guardar la marca en la base de datos (sin la foto por ahora)
-        Log::info('Insertando marca:', $dataMarca);
-        $marca = Marca::create($dataMarca);
+            // Guardar la marca en la base de datos (sin la foto por ahora)
+            Log::info('Insertando marca:', $dataMarca);
+            $marca = Marca::create($dataMarca);
 
-        // Si se subió una foto
-        if ($request->hasFile('foto')) {
-            // Obtener el contenido binario de la imagen
-            $binaryImage = file_get_contents($request->file('foto')->getRealPath());
+            // Si se subió una foto
+            if ($request->hasFile('foto')) {
+                // Obtener el contenido binario de la imagen
+                $binaryImage = file_get_contents($request->file('foto')->getRealPath());
 
-            // Actualizar la marca con la imagen en formato binario
-            DB::table('marca')
-                ->where('idMarca', $marca->idMarca)
-                ->update(['foto' => $binaryImage]);
+                // Actualizar la marca con la imagen en formato binario
+                DB::table('marca')
+                    ->where('idMarca', $marca->idMarca)
+                    ->update(['foto' => $binaryImage]);
 
-            Log::info('Imagen guardada como longblob en la base de datos.');
+                Log::info('Imagen guardada como longblob en la base de datos.');
+            }
+
+            // Responder con JSON
+            return response()->json([
+                'success' => true,
+                'message' => 'Marca agregada correctamente',
+                'data' => $marca,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al guardar la marca: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al guardar la marca.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Responder con JSON
-        return response()->json([
-            'success' => true,
-            'message' => 'Marca agregada correctamente',
-            'data' => $marca,
-        ]);
-    } catch (\Exception $e) {
-        Log::error('Error al guardar la marca: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Ocurrió un error al guardar la marca.',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
 
 
     public function guardarMarcaSmart(Request $request)
@@ -76,17 +76,17 @@ class MarcaController extends Controller
             $validatedData = $request->validate([
                 'nombre' => 'required|string|max:255',
             ]);
-    
+
             // Datos básicos de la marca con estado siempre en 1
             $dataMarca = [
                 'nombre' => $validatedData['nombre'],
                 'estado' => 1, // Estado siempre será 1
             ];
-    
+
             // Guardar la marca en la base de datos
             Log::info('Insertando marca:', $dataMarca);
             Marca::create($dataMarca);
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Marca agregada correctamente',
@@ -101,7 +101,7 @@ class MarcaController extends Controller
             ], 500);
         }
     }
-    
+
 
     public function edit($id)
     {
@@ -117,30 +117,30 @@ class MarcaController extends Controller
                 'estado' => 'nullable|boolean',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // validar imagen
             ]);
-    
+
             $marca = Marca::findOrFail($id);
             Log::info("Actualizando marca con ID: $id");
-    
+
             $marca->update([
                 'nombre' => $validatedData['nombre'],
                 'estado' => $request->has('estado') ? 1 : 0,
             ]);
-    
+
             if ($request->hasFile('foto')) {
                 $imagenBinaria = file_get_contents($request->file('foto')->getRealPath());
-    
+
                 \DB::table('marca')
                     ->where('idMarca', $marca->idMarca)
                     ->update(['foto' => $imagenBinaria]);
             }
-    
+
             return redirect()->route('marcas.index')->with('success', 'Marca actualizada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al actualizar la marca: ' . $e->getMessage());
             return redirect()->route('marcas.index')->with('error', 'Ocurrió un error al actualizar la marca.');
         }
     }
-    
+
 
     public function destroy($id)
     {
@@ -177,23 +177,23 @@ class MarcaController extends Controller
     }
 
     public function getAll()
-{
-    $marcas = Marca::all();
+    {
+        $marcas = Marca::all();
 
-    $marcasData = $marcas->map(function ($marca) {
-        // Obtener la foto de la marca como una cadena base64
-        $foto = $marca->foto ? 'data:image/jpeg;base64,' . base64_encode($marca->foto) : null;
+        $marcasData = $marcas->map(function ($marca) {
+            // Obtener la foto de la marca como una cadena base64
+            $foto = $marca->foto ? 'data:image/jpeg;base64,' . base64_encode($marca->foto) : null;
 
-        return [
-            'idMarca' => $marca->idMarca,
-            'nombre' => $marca->nombre,
-            'estado' => $marca->estado ? 'Activo' : 'Inactivo',
-            'foto' => $foto, // Añadir la foto en base64
-        ];
-    });
+            return [
+                'idMarca' => $marca->idMarca,
+                'nombre' => $marca->nombre,
+                'estado' => $marca->estado ? 'Activo' : 'Inactivo',
+                'foto' => $foto, // Añadir la foto en base64
+            ];
+        });
 
-    return response()->json($marcasData);
-}
+        return response()->json($marcasData);
+    }
 
     public function checkNombre(Request $request)
     {
@@ -208,10 +208,10 @@ class MarcaController extends Controller
     {
         // Obtenemos las marcas activas
         $marcas = Marca::where('estado', 1)->get();
-    
+
         // Ocultamos el campo 'foto'
         $marcas->makeHidden('foto');
-    
+
         return response()->json($marcas); // Devolvemos los datos en formato JSON
     }
 
@@ -220,17 +220,14 @@ class MarcaController extends Controller
     {
         // Obtener las marcas relacionadas con el cliente general
         $marcas = MarcaClienteGeneral::where('idClienteGeneral', $idClienteGeneral)
-                                      ->with(['marca'])  // Cargar la relación 'marca' normalmente
-                                      ->get()
-                                      ->map(function($marcaCliente) {
-                                          // Aquí accedemos al modelo 'marca' y ocultamos el campo 'foto'
-                                          $marcaCliente->marca->makeHidden('foto');
-                                          return $marcaCliente->marca;
-                                      });
-    
+            ->with(['marca'])  // Cargar la relación 'marca' normalmente
+            ->get()
+            ->map(function ($marcaCliente) {
+                // Aquí accedemos al modelo 'marca' y ocultamos el campo 'foto'
+                $marcaCliente->marca->makeHidden('foto');
+                return $marcaCliente->marca;
+            });
+
         return response()->json($marcas);
     }
-    
-    
-    
 }
