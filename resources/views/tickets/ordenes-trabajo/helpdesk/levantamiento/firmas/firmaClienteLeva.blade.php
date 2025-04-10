@@ -110,7 +110,6 @@
         function clearSignature() {
             if (signaturePadCliente) signaturePadCliente.clear();
         }
-
         function saveSignature() {
     if (!signaturePadCliente || signaturePadCliente.isEmpty()) {
         return toastr.error("Por favor, realiza la firma primero.");
@@ -139,6 +138,12 @@
         return toastr.error("Por favor, ingresa el número de documento.");
     }
 
+    // Validación de tipo de documento y número
+    const numeroDocValido = validarNumeroDocumento(tipoDocumento, numeroDocumento);
+    if (!numeroDocValido) {
+        return toastr.error("El número de documento no es válido según el tipo seleccionado.");
+    }
+
     fetch(`/ordenes/helpdesk/levantamiento/${ticketId}/guardar-firma/${visitaId}`, {
         method: 'POST',
         headers: {
@@ -160,6 +165,31 @@
         console.error(err);
         toastr.error('Error al guardar la firma.');
     });
+}
+
+// Función para validar el número de documento según el tipo
+function validarNumeroDocumento(tipo, numero) {
+    // Asegurarse de que solo contenga números
+    const regexSoloNumeros = /^[0-9]+$/;
+
+    if (!regexSoloNumeros.test(numero)) {
+        return false;
+    }
+
+    switch (tipo) {
+        case "DNI":
+            // El DNI debe tener exactamente 8 dígitos
+            return numero.length === 8;
+        case "Carné de Extranjería":
+        case "Pasaporte":
+            // Carné de Extranjería y Pasaporte deben tener entre 20 y 22 dígitos
+            return numero.length >= 20 && numero.length <= 22;
+        case "RUC":
+            // El RUC debe tener exactamente 11 dígitos
+            return numero.length === 11;
+        default:
+            return true; // Para otros documentos no aplicamos validación extra
+    }
 }
 
 

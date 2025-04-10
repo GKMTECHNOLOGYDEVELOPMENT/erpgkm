@@ -9,40 +9,35 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <!-- Botón para abrir el modal de crear visita -->
 
-<!-- Técnico, Recojo, Envío en 2 columnas (2 arriba, 1 abajo) -->
 <div id="tecnicoContainer" style="display: block;" class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
     <form id="retorno" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST">
         <!-- Técnico -->
         <div>
             <label for="idTecnico" class="block text-sm font-medium">Técnico Envío</label>
-            <select id="idTecnico" name="idTecnico" class="select2 w-full mb-2" style="display: none">
-                <option value="" disabled selected>Seleccionar Técnico</option>
-                @foreach ($usuarios as $usuario)
-                    <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
-                @endforeach
+            <select id="idTecnico" name="idTecnico" >
+                <!-- <option value="" disabled selected>Cargando técnicos...</option> -->
             </select>
         </div>
 
         <!-- Tipo de Recojo -->
         <div>
             <label for="tipoRecojo" class="block text-sm font-medium">Tipo de Recojo</label>
-            <select id="tipoRecojo" name="tipoRecojo" class="select2 w-full mb-2" style="display: none">
-                <option value="" disabled selected>Seleccionar Tipo de Recojo</option>
-                @foreach ($tiposRecojo as $tipo)
-                    <option value="{{ $tipo->idtipoRecojo }}">{{ $tipo->nombre }}</option>
-                @endforeach
+            <select id="tipoRecojo" name="tipoRecojo" >
+                <!-- <option value="" disabled selected>Cargando tipos de recojos...</option> -->
             </select>
         </div>
 
-        <!-- Tipo de Envío (en una fila aparte ocupando 2 columnas) -->
+        <!-- Tipo de Envío -->
         <div class="md:col-span-2">
             <label for="tipoEnvio" class="block text-sm font-medium">Tipo de Envío</label>
-            <select id="tipoEnvio" name="tipoEnvio" class="select2 w-full mb-2" style="display: none">
-                <option value="" disabled selected>Seleccionar Tipo de Envío</option>
-                @foreach ($tiposEnvio as $tipoEnvio)
-                    <option value="{{ $tipoEnvio->idtipoenvio }}">{{ $tipoEnvio->nombre }}</option>
-                @endforeach
+            <select id="tipoEnvio" name="tipoEnvio" >
             </select>
+        </div>
+
+        <!-- Agencia -->
+        <div class="md:col-span-2">
+            <label for="agencia" class="block text-sm font-medium">Agencia</label>
+            <input type="text" id="agencia" name="agencia" class="form-input w-full" readonly>
         </div>
 
         <div class="md:col-span-2 flex justify-end mt-4">
@@ -51,55 +46,117 @@
         </div>
     </form>
 </div>
-
 <script>
-    // Asegúrate que ticketId esté correctamente definido
-    var ticketId = {{ $ticketId }};
+$(document).ready(function() {
+    const ticketId = {{ $ticketId }};
+    let datosEnvio = null;
 
-    $(document).ready(function() {
-        // Cambié el selector a #guardarBtnfalla como indicaste
-        $('#guardarBtnfalla').on('click', function(e) {
-            e.preventDefault(); // Prevenir que se recargue la página
-
-            var formData = {
-                idTecnico: $('#idTecnico').val(),
-                tipoRecojo: $('#tipoRecojo').val(),
-                tipoEnvio: $('#tipoEnvio').val(),
-                ticketId: ticketId // Asegúrate que ticketId está definido en tu vista
-            };
-
-            // Verificar si algún campo obligatorio está vacío
-            for (var key in formData) {
-                if (formData[key] === '' || formData[key] === null) {
-                    toastr.error('Por favor, complete todos los campos.');
-                    return;
-                }
+    // Función para cargar los datos de envío
+    async function cargarDatosEnvio() {
+        try {
+            const response = await fetch(`/api/datos-envio/${ticketId}?tipo=2`);
+            if (!response.ok) throw new Error('Error al cargar datos');
+            
+            datosEnvio = await response.json();
+            
+            if (datosEnvio) {
+                console.log('Datos de envío cargados:', datosEnvio);
+                // Actualizar campos con los datos recibidos
+                if (datosEnvio.idUsuario) $('#idTecnico').val(datosEnvio.idUsuario);
+                if (datosEnvio.tipoRecojo) $('#tipoRecojo').val(datosEnvio.tipoRecojo);
+                if (datosEnvio.tipoEnvio) $('#tipoEnvio').val(datosEnvio.tipoEnvio);
+                if (datosEnvio.agencia) $('#agencia').val(datosEnvio.agencia);
             }
+        } catch (error) {
+            console.error('Error al cargar datos de envío:', error);
+        }
+    }
 
-            // Obtener el token CSRF
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-            // Enviar la solicitud AJAX
-            $.ajax({
-                url: '/guardar-datos-envio', // Asegúrate de que esta ruta exista
-                method: 'POST',
-                data: formData,
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                    } else {
-                        toastr.error(response.message);
-                    }
-                },
-                error: function(xhr, status, error) {
-                    toastr.error('Hubo un error al guardar los datos de envío.');
-                }
+    // Función para cargar opciones de select
+    async function cargarOpcionesSelect(url, selectId, valueField, textField) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Error al cargar opciones');
+            
+            const data = await response.json();
+            const select = $(`#${selectId}`);
+            
+            // Limpiar y agregar opción por defecto
+            select.empty().append('<option value="" disabled selected>Seleccionar...</option>');
+            
+            // Agregar opciones
+            data.forEach(item => {
+                select.append(new Option(item[textField], item[valueField]));
             });
-        });
+            
+            console.log(`Opciones cargadas para ${selectId}:`, data);
+        } catch (error) {
+            console.error(`Error al cargar opciones para ${selectId}:`, error);
+            $(`#${selectId}`).empty().append('<option value="" disabled selected>Error al cargar opciones</option>');
+        }
+    }
+
+    // Cargar todos los datos al iniciar
+    async function inicializar() {
+        // Cargar opciones en paralelo
+        await Promise.all([
+            cargarOpcionesSelect('/api/usuarios-tecnicos', 'idTecnico', 'idUsuario', 'Nombre'),
+            cargarOpcionesSelect('/api/tipos-recojo', 'tipoRecojo', 'idtipoRecojo', 'nombre'),
+            cargarOpcionesSelect('/api/tipos-envio', 'tipoEnvio', 'idtipoenvio', 'nombre'),
+            cargarDatosEnvio()
+        ]);
+        
+        // Inicializar select2 después de cargar las opciones
+        $('.select2').select2();
+    }
+
+    // Manejar el guardado de datos
+    $('#guardarBtnfalla').on('click', async function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            idTickets: ticketId,
+            idUsuario: $('#idTecnico').val(),
+            tipoRecojo: $('#tipoRecojo').val(),
+            tipoEnvio: $('#tipoEnvio').val(),
+            tipo: 2,
+            agencia: $('#agencia').val() || 'Por definir'
+        };
+
+        // Validación
+        if (!formData.idUsuario || !formData.tipoRecojo || !formData.tipoEnvio) {
+            toastr.error('Por favor, complete todos los campos obligatorios.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/guardar-datos-envio', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                toastr.success(result.message);
+                // Actualizar datos locales
+                datosEnvio = result.data || formData;
+            } else {
+                toastr.error(result.message || 'Error al guardar los datos');
+            }
+        } catch (error) {
+            console.error('Error al guardar:', error);
+            toastr.error('Error de conexión al guardar los datos');
+        }
     });
+
+    // Inicializar la página
+    inicializar();
+});
 </script>
 
 
@@ -107,4 +164,4 @@
 
 
 
-<script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script>
+<!-- <script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script> -->
