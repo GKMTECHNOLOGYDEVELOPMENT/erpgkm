@@ -350,11 +350,11 @@ class OrdenesTrabajoController extends Controller
 
 
         // Obtener el cliente correspondiente
-$cliente = $orden->cliente;  // Asumimos que 'cliente' está relacionado con el Ticket.
+        $cliente = $orden->cliente;  // Asumimos que 'cliente' está relacionado con el Ticket.
 
-// Verificar si el cliente tiene la propiedad 'tienda' y si es igual a 1 o 0
-$esTiendacliente = ($cliente && isset($cliente->esTienda) && $cliente->esTienda == 1) ? 1 : 0;
-Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacliente: {$esTiendacliente}");
+        // Verificar si el cliente tiene la propiedad 'tienda' y si es igual a 1 o 0
+        $esTiendacliente = ($cliente && isset($cliente->esTienda) && $cliente->esTienda == 1) ? 1 : 0;
+        Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacliente: {$esTiendacliente}");
 
 
 
@@ -493,8 +493,8 @@ Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacli
                 } elseif ($idEstadflujo == 18) {
                     // Si el id Estado flujo es 12 tiene que salir
                     $estadosFlujo = DB::table('estado_flujo')
-                    ->whereIn('idEstadflujo', [3, 2])  // Solo obtener el estado con idEstadflujo 3
-                    ->get();
+                        ->whereIn('idEstadflujo', [3, 2])  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
                 } elseif ($idEstadflujo == 10) {
                     // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
                     $estadosFlujo = DB::table('estado_flujo')
@@ -510,66 +510,46 @@ Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacli
                     $estadosFlujo = DB::table('estado_flujo')
                         ->where('idEstadflujo', 3)  // Solo obtener el estado con idEstadflujo 3
                         ->get();
-
-                    } elseif ($idEstadflujo == 14) {
-                        // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                        $estadosFlujo = DB::table('estado_flujo')
-                            ->where('idEstadflujo', 19)  // Solo obtener el estado con idEstadflujo 3
-                            ->get();
-
-                        } elseif ($idEstadflujo == 19) {
-                            // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                            $estadosFlujo = DB::table('estado_flujo')
-                                ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
-                                ->get();
-
-                            } elseif ($idEstadflujo == 15) {
-                                // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                                $estadosFlujo = DB::table('estado_flujo')
-                                    ->where('idEstadflujo', 20)  // Solo obtener el estado con idEstadflujo 3
-                                    ->get();
-
-                                    
-                            } elseif ($idEstadflujo == 20) {
-                                // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                                $estadosFlujo = DB::table('estado_flujo')
-                                    ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
-                                    ->get();
-
-
-
-
-                                } elseif ($idEstadflujo == 16) {
-                                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                                    $estadosFlujo = DB::table('estado_flujo')
-                                        ->where('idEstadflujo', 21)  // Solo obtener el estado con idEstadflujo 3
-                                        ->get();
-
-                                    } elseif ($idEstadflujo == 21) {
-                                        // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                                        $estadosFlujo = DB::table('estado_flujo')
-                                            ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
-                                            ->get();
-
-
-                                        } elseif ($idEstadflujo == 17) {
-                                            // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                                            $estadosFlujo = DB::table('estado_flujo')
-                                                ->where('idEstadflujo', 22)  // Solo obtener el estado con idEstadflujo 3
-                                                ->get();
-
-
-                                            } elseif ($idEstadflujo == 22) {
-                                                // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
-                                                $estadosFlujo = DB::table('estado_flujo')
-                                                    ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
-                                                    ->get();
-    
-
-                              
-
-                           
-
+                } elseif ($idEstadflujo == 14) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 19)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 19) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 15) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 20)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 20) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 16) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 21)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 21) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 17) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 22)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
+                } elseif ($idEstadflujo == 22) {
+                    // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->where('idEstadflujo', 18)  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
                 } elseif ($idEstadflujo == 8) {
                     // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
@@ -801,34 +781,34 @@ Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacli
 
 
         // Obtener el valor de estadovisita para la visita seleccionada
-$estadovisita = DB::table('visitas')
-->where('idTickets', $ticketId)  // Filtro por ticketId
-->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisitas seleccionada
-->value('estadovisita');  // Obtenemos el valor de estadovisita
-Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
+        $estadovisita = DB::table('visitas')
+            ->where('idTickets', $ticketId)  // Filtro por ticketId
+            ->where('idVisitas', $idVisitaSeleccionada)  // Filtro por idVisitas seleccionada
+            ->value('estadovisita');  // Obtenemos el valor de estadovisita
+        Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
 
 
 
 
-// Obtener la última visita para un ticket
-$ultimaVisita = DB::table('visitas')
-    ->where('idTickets', $ticketId)  // Filtrar por el id del ticket
-    ->orderBy('idVisitas', 'desc')  // Ordenar por idVisitas (asumido como incremental)
-    ->first();  // Obtener solo la última visita
+        // Obtener la última visita para un ticket
+        $ultimaVisita = DB::table('visitas')
+            ->where('idTickets', $ticketId)  // Filtrar por el id del ticket
+            ->orderBy('idVisitas', 'desc')  // Ordenar por idVisitas (asumido como incremental)
+            ->first();  // Obtener solo la última visita
 
-// Verificar si la última visita tiene 'estadovisita' igual a 1 o null/0
-if ($ultimaVisita) {
-    if ($ultimaVisita->estadovisita == 1) {
-        // La última visita tiene 'estadovisita' igual a 1
-        $ultimaVisitaConEstado1 = true;
-    } elseif ($ultimaVisita->estadovisita === null || $ultimaVisita->estadovisita == 0) {
-        // La última visita tiene 'estadovisita' igual a null o 0
-        $ultimaVisitaConEstado1 = false;
-    }
-} else {
-    // No se encontraron visitas para este ticket
-    $ultimaVisitaConEstado1 = true;  // Aquí cambiamos a true para que el botón se muestre si no hay visitas.
-}
+        // Verificar si la última visita tiene 'estadovisita' igual a 1 o null/0
+        if ($ultimaVisita) {
+            if ($ultimaVisita->estadovisita == 1) {
+                // La última visita tiene 'estadovisita' igual a 1
+                $ultimaVisitaConEstado1 = true;
+            } elseif ($ultimaVisita->estadovisita === null || $ultimaVisita->estadovisita == 0) {
+                // La última visita tiene 'estadovisita' igual a null o 0
+                $ultimaVisitaConEstado1 = false;
+            }
+        } else {
+            // No se encontraron visitas para este ticket
+            $ultimaVisitaConEstado1 = true;  // Aquí cambiamos a true para que el botón se muestre si no hay visitas.
+        }
 
 
 
@@ -936,33 +916,33 @@ if ($ultimaVisita) {
         // Obtener el ticket
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-        
+
         // Obtener los estados de OTS
         $estadosOTS = DB::table('estado_ots')->get();
         $ticketId = $ticket->idTickets;
-    
+
         // Verificar si ya existe una firma para el ticket y la visita
         $firmaExistente = DB::table('firmas')
             ->where('idTickets', $id)
             ->where('idVisitas', $idVisitas)
             ->first(); // Verificamos si ya existe una firma para esa visita y ticket
-    
+
         // Si ya existe una firma, redirigimos a la página de error 404
         if ($firmaExistente) {
             return view("pages.error404"); // Mostrar error 404 si ya existe la firma
         }
-    
+
         // Obtener la visita usando idVisitas
         $visita = DB::table('visitas')
             ->where('idVisitas', $idVisitas)
             ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
             ->first();
-    
+
         // Verificamos que la visita exista, si no, devolver algún mensaje de error
         if (!$visita) {
             return view("pages.error404"); // Redirigimos a error 404 si la visita no existe
         }
-    
+
         // Pasamos todos los datos a la vista
         return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
             'ticket',
@@ -974,7 +954,7 @@ if ($ultimaVisita) {
             'id'
         ));
     }
-    
+
 
 
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
@@ -1735,25 +1715,25 @@ if ($ultimaVisita) {
 
         // Crear la nueva visita
         $visita = new Visita();
-    $visita->nombre = $request->nombre;
-    $visita->fecha_programada = $request->fecha_visita;
-    $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
-    $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
-    $visita->tipoServicio = $tipoServicio; // O el valor correspondiente que quieras
-    $visita->idUsuario = $request->encargado;
+        $visita->nombre = $request->nombre;
+        $visita->fecha_programada = $request->fecha_visita;
+        $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
+        $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
+        $visita->tipoServicio = $tipoServicio; // O el valor correspondiente que quieras
+        $visita->idUsuario = $request->encargado;
 
-    // Aquí guardamos los nuevos campos
-    $visita->nombreclientetienda = $request->nombreclientetienda;
-    $visita->celularclientetienda = $request->celularclientetienda;
+        // Aquí guardamos los nuevos campos
+        $visita->nombreclientetienda = $request->nombreclientetienda;
+        $visita->celularclientetienda = $request->celularclientetienda;
 
-    Log::info('Creando la visita', ['visita' => $visita]);
+        Log::info('Creando la visita', ['visita' => $visita]);
 
-    // Asignar 0 o 1 a "necesita_apoyo"
-    $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
-    $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
+        // Asignar 0 o 1 a "necesita_apoyo"
+        $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
+        $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
 
-    // Guardar la visita
-    $visita->save();
+        // Guardar la visita
+        $visita->save();
         Log::info('Visita guardada con éxito', ['visita_id' => $visita->idVisitas]);
 
         // Manejar la imagen (si se subió)
@@ -2156,52 +2136,52 @@ if ($ultimaVisita) {
             'fecha_final_hora' => 'required|date',
             'idUsuario' => 'required|exists:usuarios,idUsuario',
         ]);
-    
+
         // Buscar la visita
         $visita = Visita::find($id);
-    
+
         if (!$visita) {
             return response()->json(['success' => false, 'message' => 'Visita no encontrada'], 404);
         }
-    
+
         // Verificar si ya existe un anexo con idTipovisita = 2 (en ejecución)
         $anexoEnEjecucion = DB::table('anexos_visitas')
             ->where('idVisitas', $id)
             ->where('idTipovisita', 2)
             ->exists();
-    
+
         if ($anexoEnEjecucion) {
             // Si existe un anexo con idTipovisita = 2, devolver un error
             return response()->json(['success' => false, 'message' => 'Esta visita está en ejecución, no se puede actualizar'], 400);
         }
-    
+
         // Verificar si la hora final es menor que la hora de inicio
         $fechaInicio = strtotime($request->fecha_inicio_hora);
         $fechaFinal = strtotime($request->fecha_final_hora);
-    
+
         if ($fechaFinal < $fechaInicio) {
             return response()->json(['success' => false, 'message' => 'La hora final no puede ser menor a la hora de inicio.'], 400);
         }
-    
+
         // Actualizar los datos de la visita
         $visita->fecha_inicio_hora = $request->fecha_inicio_hora;
         $visita->fecha_final_hora = $request->fecha_final_hora;
         $visita->idUsuario = $request->idUsuario;
-    
+
         // Actualizar los campos opcionales si existen
         if ($request->has('nombreclientetienda')) {
             $visita->nombreclientetienda = $request->nombreclientetienda;
         }
-    
+
         if ($request->has('celularclientetienda')) {
             $visita->celularclientetienda = $request->celularclientetienda;
         }
-    
+
         $visita->save();
-    
+
         return response()->json(['success' => true, 'message' => 'Visita actualizada exitosamente']);
     }
-    
+
 
 
     public function agregarTecnicoApoyo(Request $request)
@@ -2211,43 +2191,43 @@ if ($ultimaVisita) {
             ->where('idVisitas', $request->idVisita)  // Usamos $request->idVisita para verificar el anexo
             ->where('idTipovisita', 2)  // idTipovisita = 2 indica que está en ejecución
             ->exists();
-    
+
         if ($anexoEnEjecucion) {
             // Si existe un anexo con idTipovisita = 2, devolver un error
             return response()->json(['success' => false, 'message' => 'Esta visita está en ejecución, no se puede agregar un técnico de apoyo'], 400);
         }
-    
+
         // Validar los datos
         $validated = $request->validate([
             'idVisita' => 'required|exists:visitas,idVisitas',
             'idTecnico' => 'required|exists:usuarios,idUsuario',
             'idTickets' => 'required|exists:visitas,idTickets',  // Validamos que idTickets exista
         ]);
-    
+
         // Verificar si el técnico ya está asignado a esa visita y ticket
         $tecnicoExistente = DB::table('ticketapoyo')
             ->where('idVisita', $request->idVisita)
             ->where('idTicket', $request->idTickets)
             ->where('idTecnico', $request->idTecnico)
             ->exists();
-    
+
         if ($tecnicoExistente) {
             // Si ya existe el mismo técnico para esa visita y ticket, devolver un error
             return response()->json(['success' => false, 'message' => 'Este técnico ya está asignado a esta visita y ticket'], 400);
         }
-    
+
         // Insertar el técnico de apoyo
         DB::table('ticketapoyo')->insert([
             'idVisita' => $request->idVisita,
             'idTecnico' => $request->idTecnico,
             'idTicket' => $request->idTickets, // si tienes el idTicket disponible
         ]);
-    
+
         return response()->json(['success' => true, 'message' => 'Técnico de apoyo agregado correctamente']);
     }
-    
 
-    
+
+
 
 
 
@@ -2369,10 +2349,10 @@ if ($ultimaVisita) {
             ->where('idVisitas', $request->idVisitas)
             ->update(['fecha_inicio' => $fechaInicio]);
 
-            // Actualizar el campo estadovisita a 1 en la tabla visitas
-    // DB::table('visitas')
-    // ->where('idVisitas', $request->idVisitas)
-    // ->update(['estadovisita' => 1]); // Esto actualiza la variable estadovisita a 1
+        // Actualizar el campo estadovisita a 1 en la tabla visitas
+        // DB::table('visitas')
+        // ->where('idVisitas', $request->idVisitas)
+        // ->update(['estadovisita' => 1]); // Esto actualiza la variable estadovisita a 1
 
 
 
@@ -3105,23 +3085,23 @@ if ($ultimaVisita) {
     public function procesarLogoMarca($imagenRaw)
     {
         $manager = new ImageManager(); // crear instancia
-    
+
         $img = $manager->make($imagenRaw);
-    
+
         // Redimensionar manteniendo proporciones, sin deformar
         $img->resize(256, 160, function ($constraint) {
             $constraint->aspectRatio();
             $constraint->upsize();
         });
-        
+
         $canvas = $manager->canvas(256, 160, '#FFFFFF');
-        
+
         $canvas->insert($img, 'center');
-    
+
         return 'data:image/png;base64,' . base64_encode($canvas->encode('png'));
     }
-    
-    
+
+
 
     public function generateInformePdf($idOt)
     {
@@ -3169,11 +3149,11 @@ if ($ultimaVisita) {
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
         $marca->logo_base64 = null;
-        
+
         if ($marca && !empty($marca->foto)) {
             $marca->logo_base64 = $this->procesarLogoMarca($marca->foto);
         }
-        
+
 
 
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
@@ -3445,26 +3425,26 @@ if ($ultimaVisita) {
             'idVisita' => 'required|integer' // Aseguramos que el idVisita es un número entero
             // Aseguramos que el estado es un número entero
         ]);
-    
+
         Log::info("Estado recibido: " . $validated['estado']);
-    
+
         // Verificamos si el estado es uno de los valores válidos
         $estadosValidos = [7, 8, 6, 5]; // Estos son los estados válidos: finalizar, coordinar recojo, fuera de garantía, pendiente repuestos
-    
+
         if (!in_array($validated['estado'], $estadosValidos)) {
             Log::error("Estado inválido recibido: " . $validated['estado']);
             return response()->json(['success' => false, 'message' => 'Estado inválido'], 400);
         }
-    
+
         // Verificamos si el ticket existe
         $ticket = Ticket::find($idTicket);
         if (!$ticket) {
             Log::error("Ticket no encontrado con ID: " . $idTicket);
             return response()->json(['success' => false, 'message' => 'Ticket no encontrado'], 404);
         }
-    
+
         Log::info("Ticket encontrado: " . $ticket->idTickets);
-    
+
         // Insertar en la tabla ticketflujo usando insertGetId
         $ticketflujo = DB::table('ticketflujo')->insertGetId([
             'idTicket' => $idTicket,            // Asociamos el ticket
@@ -3472,41 +3452,41 @@ if ($ultimaVisita) {
             'idUsuario' => auth()->id(),        // ID del usuario que realiza la acción (por ejemplo, el usuario autenticado)
             'fecha_creacion' => now(),          // Fecha actual
         ]);
-    
+
         // Verificar si el ID se generó correctamente
         if (!$ticketflujo) {
             Log::error('El idTicketFlujo no se generó correctamente');
             return response()->json(['success' => false, 'message' => 'El idTicketFlujo no se generó correctamente'], 500);
         }
-    
+
         Log::info('TicketFlujo creado con ID: ' . $ticketflujo);
-    
+
         // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
         $updated = DB::table('tickets')
             ->where('idTickets', $idTicket)
             ->update(['idTicketFlujo' => $ticketflujo]);
-    
-            if ($updated) {
-                Log::info("Ticket actualizado correctamente con idTicketFlujo: " . $ticketflujo);
-        
-                // Actualizar el campo estadovisita en la tabla visitas a 1 usando el idVisita recibido
-                $updateVisita = DB::table('visitas')
-                    ->where('idVisitas', $validated['idVisita'])  // Usamos el idVisita recibido
-                    ->update(['estadovisita' => 1]);
-        
-                if ($updateVisita) {
-                    Log::info("Visita actualizada correctamente con estadovisita = 1");
-                } else {
-                    Log::error("No se pudo actualizar el estadovisita para la visita con idVisitas: " . $validated['idVisita']);
-                }
-        
-                return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente']);
+
+        if ($updated) {
+            Log::info("Ticket actualizado correctamente con idTicketFlujo: " . $ticketflujo);
+
+            // Actualizar el campo estadovisita en la tabla visitas a 1 usando el idVisita recibido
+            $updateVisita = DB::table('visitas')
+                ->where('idVisitas', $validated['idVisita'])  // Usamos el idVisita recibido
+                ->update(['estadovisita' => 1]);
+
+            if ($updateVisita) {
+                Log::info("Visita actualizada correctamente con estadovisita = 1");
+            } else {
+                Log::error("No se pudo actualizar el estadovisita para la visita con idVisitas: " . $validated['idVisita']);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente']);
         } else {
             Log::error("Hubo un error al actualizar el idTicketFlujo en la tabla tickets.");
             return response()->json(['success' => false, 'message' => 'Hubo un error al actualizar el ticket'], 500);
         }
     }
-    
+
 
 
     public function guardarEstadoflujo(Request $request)
@@ -3821,25 +3801,23 @@ if ($ultimaVisita) {
             ->where('ticketapoyo.idTicket', $idTicket)
             ->select('ticketapoyo.idTicketApoyo', 'usuarios.idUsuario', 'usuarios.Nombre', 'usuarios.apellidoPaterno') // Selecciona idTicketApoyo
             ->get();
-    
+
         return response()->json($tecnicos);
     }
-    
-    
+
+
 
     public function eliminar($idTicketApoyo)
     {
         $tecnicoApoyo = TicketApoyo::find($idTicketApoyo);
-    
+
         if (!$tecnicoApoyo) {
             return response()->json(['success' => false, 'message' => 'Técnico de apoyo no encontrado.'], 404);
         }
-    
+
         // Eliminar técnico de apoyo
         $tecnicoApoyo->delete();
-    
+
         return response()->json(['success' => true, 'message' => 'Técnico de apoyo eliminado correctamente.']);
     }
-    
-
 }

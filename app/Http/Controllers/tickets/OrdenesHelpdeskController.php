@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Validator;
 use Spatie\Browsershot\Browsershot;
 use Intervention\Image\ImageManager;
 use Illuminate\Support\Str;
+use App\Exports\OrdenesHelpdeskExport;
 
 class OrdenesHelpdeskController extends Controller
 {
@@ -2913,6 +2914,12 @@ class OrdenesHelpdeskController extends Controller
             return response()->json(['success' => false, 'message' => 'Hubo un error al guardar el estado.'], 500);
         }
     }
+
+    public function exportToExcel()
+    {
+        return Excel::download(new OrdenesHelpdeskExport, 'ordenes_helpdesk.xlsx');
+    }
+
 
     public function obtenerJustificacionSoporte(Request $request)
     {

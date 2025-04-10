@@ -352,10 +352,13 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
 
     Route::get('helpdesk/levantamiento/{idOt}/pdf/{idVisita}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdfVisita'])
-    ->name('helpdesk.levantamiento.pdf');
+        ->name('helpdesk.levantamiento.pdf');
 
     Route::get('helpdesk/soporte/{idOt}/pdf/{idVisita}', [OrdenesHelpdeskController::class, 'generateSoportePdfVisita'])
-    ->name('helpdesk.soporte.pdf');
+        ->name('helpdesk.soporte.pdf');
+
+    Route::get('/helpdesk/export-excel', [OrdenesHelpdeskController::class, 'exportToExcel'])->name('ordenes.export.helpdesk.excel');
+
 
 
 
@@ -435,7 +438,7 @@ Route::get('ordenes/helpdesk/soporte/{id}/obtener-firma-tecnico', [OrdenesHelpde
     ->middleware('auth');
 
 
-    Route::post('/guardar-datos-envio', [OrdenesHelpdeskController::class, 'guardardatosenviosoporte']);
+Route::post('/guardar-datos-envio', [OrdenesHelpdeskController::class, 'guardardatosenviosoporte']);
 
 // routes/web.php
 
