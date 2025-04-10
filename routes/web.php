@@ -438,7 +438,7 @@ Route::get('ordenes/helpdesk/soporte/{id}/obtener-firma-tecnico', [OrdenesHelpde
     ->middleware('auth');
 
 
-Route::post('/guardar-datos-envio', [OrdenesHelpdeskController::class, 'guardardatosenviosoporte']);
+// Route::post('/guardar-datos-envio', [OrdenesHelpdeskController::class, 'guardardatosenviosoporte']);
 
 // routes/web.php
 

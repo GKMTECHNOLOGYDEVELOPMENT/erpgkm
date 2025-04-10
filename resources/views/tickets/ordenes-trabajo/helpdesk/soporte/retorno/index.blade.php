@@ -11,34 +11,37 @@
 
 <div id="tecnicoContainer" style="display: block;" class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
     <form id="retorno" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST">
-        <!-- Técnico -->
-        <div>
-            <label for="idTecnico" class="block text-sm font-medium">Técnico Envío</label>
-            <select id="idTecnico" name="idTecnico" >
-                <!-- <option value="" disabled selected>Cargando técnicos...</option> -->
-            </select>
-        </div>
+    <div class="form-group">
+    <label for="idTecnico" class="form-label">Técnico Envío</label>
+    <div class="custom-select">
+        <select id="idTecnico" name="idTecnico" class="form-select">
+            <option value="" disabled selected>Cargando técnicos...</option>
+        </select>
+    </div>
+</div>
 
-        <!-- Tipo de Recojo -->
-        <div>
-            <label for="tipoRecojo" class="block text-sm font-medium">Tipo de Recojo</label>
-            <select id="tipoRecojo" name="tipoRecojo" >
-                <!-- <option value="" disabled selected>Cargando tipos de recojos...</option> -->
-            </select>
-        </div>
+<div class="form-group">
+    <label for="tipoRecojo" class="form-label">Tipo de Recojo</label>
+    <div class="custom-select">
+        <select id="tipoRecojo" name="tipoRecojo" class="form-select">
+            <option value="" disabled selected>Cargando tipos de recojos...</option>
+        </select>
+    </div>
+</div>
 
-        <!-- Tipo de Envío -->
-        <div class="md:col-span-2">
-            <label for="tipoEnvio" class="block text-sm font-medium">Tipo de Envío</label>
-            <select id="tipoEnvio" name="tipoEnvio" >
-            </select>
-        </div>
+<div class="form-group">
+    <label for="tipoEnvio" class="form-label">Tipo de Envío</label>
+    <div class="custom-select">
+        <select id="tipoEnvio" name="tipoEnvio" class="form-select">
+            <option value="" disabled selected>Cargando tipos de envíos...</option>
+        </select>
+    </div>
+</div>
 
-        <!-- Agencia -->
-        <div class="md:col-span-2">
-            <label for="agencia" class="block text-sm font-medium">Agencia</label>
-            <input type="text" id="agencia" name="agencia" class="form-input w-full" readonly>
-        </div>
+<div class="form-group">
+    <label for="agencia" class="form-label">Agencia</label>
+    <input type="text" id="agencia" name="agencia" class="form-input" readonly>
+</div>
 
         <div class="md:col-span-2 flex justify-end mt-4">
             <a href="{{ route('ordenes.index') }}" class="btn btn-outline-danger">Cancelar</a>
@@ -46,6 +49,9 @@
         </div>
     </form>
 </div>
+
+
+
 <script>
 $(document).ready(function() {
     const ticketId = {{ $ticketId }};
@@ -106,8 +112,7 @@ $(document).ready(function() {
             cargarDatosEnvio()
         ]);
         
-        // Inicializar select2 después de cargar las opciones
-        $('.select2').select2();
+        // Ya no se inicializa select2 aquí
     }
 
     // Manejar el guardado de datos
@@ -158,10 +163,3 @@ $(document).ready(function() {
     inicializar();
 });
 </script>
-
-
-
-
-
-
-<!-- <script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script> -->
