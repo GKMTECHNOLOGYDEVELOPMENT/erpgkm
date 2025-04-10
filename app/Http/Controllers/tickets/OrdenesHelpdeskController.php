@@ -1331,11 +1331,6 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-    public function exportHelpdeskToExcel()
-    {
-        return Excel::download(new HelpdeskTicketExport(), 'helpdesk_tickets.xlsx');
-    }
-
     public function getAll(Request $request)
     {
         Log::info("📥 Entrando al método getAll (HELPDESK)");
@@ -2915,10 +2910,11 @@ class OrdenesHelpdeskController extends Controller
         }
     }
 
-    public function exportToExcel()
+    public function exportHelpdeskToExcel()
     {
         return Excel::download(new OrdenesHelpdeskExport, 'ordenes_helpdesk.xlsx');
     }
+    
 
 
     public function obtenerJustificacionSoporte(Request $request)

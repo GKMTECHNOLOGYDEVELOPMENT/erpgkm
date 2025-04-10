@@ -357,7 +357,8 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('helpdesk/soporte/{idOt}/pdf/{idVisita}', [OrdenesHelpdeskController::class, 'generateSoportePdfVisita'])
         ->name('helpdesk.soporte.pdf');
 
-    Route::get('/helpdesk/export-excel', [OrdenesHelpdeskController::class, 'exportToExcel'])->name('ordenes.export.helpdesk.excel');
+    Route::get('/helpdesk/export-excel', [OrdenesHelpdeskController::class, 'exportHelpdeskToExcel'])->name('ordenes.export.helpdesk.excel');
+
 
 
 
