@@ -118,8 +118,6 @@ class OrdenesHelpdeskController extends Controller
             'tiposDocumento'
         ));
     }
-
-
     public function storehelpdesk(Request $request)
     {
         try {
@@ -139,7 +137,7 @@ class OrdenesHelpdeskController extends Controller
                 'tipoEnvio' => 'nullable|integer|exists:tipoenvio,idtipoenvio', // Validar tipo de envío
                 'nombreTecnicoEnvio' => 'nullable|array',
                 'dniTecnicoEnvio' => 'nullable|array',
-                'agencia' => 'required|string|max:255',
+                'agencia' => 'nullable|string|max:255',
             ]);
 
             Log::debug('Datos validados:', $validatedData);

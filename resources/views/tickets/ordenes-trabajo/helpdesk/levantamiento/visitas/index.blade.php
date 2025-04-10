@@ -98,6 +98,9 @@
     </div>
 </div>
 
+
+
+
 <!-- Modal de Detalles de Visita -->
 <div x-data="{ openDetallesVisita: false }" class="mb-5"
     @toggle-modal-detalles-visita.window="openDetallesVisita = !openDetallesVisita">
