@@ -250,7 +250,7 @@
         }
 
         // Enviar los datos al servidor
-        fetch('/api/guardarCondiciones', {
+        fetch('/guardarCondiciones', {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}' // Agrega el token CSRF

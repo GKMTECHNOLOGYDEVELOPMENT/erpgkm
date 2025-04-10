@@ -1,7 +1,5 @@
 <?php
 
-// App/Exports/OrdenesHelpdeskExport.php
-
 namespace App\Exports;
 
 use App\Models\Ticket;
@@ -30,7 +28,9 @@ class OrdenesHelpdeskExport implements
             'modelo.categoria',
             'clientegeneral',
             'cliente',
-            'ticketflujo.estadoflujo',
+            'tienda',
+            'tiposervicio',
+            'ticketflujo.estadoFlujo',
             'transicion_status_tickets',
             'seleccionarVisita.visita.tecnico',
             'tecnico'
@@ -42,26 +42,23 @@ class OrdenesHelpdeskExport implements
     public function map($ticket): array
     {
         $justificacion = optional($ticket->transicion_status_tickets->first())->justificacion ?? 'N/A';
-        $estado = optional(optional($ticket->ticketflujo)->estadoflujo)->descripcion ?? 'N/A';
-        $color = optional(optional($ticket->ticketflujo)->estadoflujo)->color ?? 'N/A';
+        $estado = optional(optional($ticket->ticketflujo)->estadoFlujo)->descripcion ?? 'N/A';
+        $color = optional(optional($ticket->ticketflujo)->estadoFlujo)->color ?? 'N/A';
         $tecnico = optional(optional(optional($ticket->seleccionarVisita)->visita)->tecnico)->Nombre ?? optional($ticket->tecnico)->Nombre ?? 'N/A';
         $fecha_visita = optional(optional(optional($ticket->seleccionarVisita)->visita))->fecha_programada ?? 'N/A';
-        $serie = is_numeric($ticket->serie) ? (int) $ticket->serie : ($ticket->serie ?? 'N/A');
 
         return [
-            $ticket->numero_ticket ?? 'N/A',
-            $ticket->fecha_creacion ?? 'N/A',
-            $fecha_visita,
-            optional(optional($ticket->modelo)->categoria)->nombre ?? 'N/A',
-            optional($ticket->clientegeneral)->descripcion ?? 'N/A',
-            optional($ticket->modelo)->nombre ?? 'N/A',
-            $serie,
-            optional($ticket->cliente)->nombre ?? 'N/A',
-            $ticket->direccion ?? 'N/A',
-            $justificacion,
-            $estado,
-            $tecnico,
-            $color
+            $ticket->idTickets ?? 'N/A', // A - OT
+            $ticket->numero_ticket ?? 'N/A', // B
+            $ticket->fecha_creacion ?? 'N/A', // C
+            $fecha_visita, // D
+            optional($ticket->cliente)->nombre ?? 'N/A', // E
+            optional($ticket->tienda)->nombre ?? 'N/A', // F
+            optional($ticket->tiposervicio)->nombre ?? 'N/A', // G
+            $justificacion, // H
+            $estado, // I
+            $tecnico, // J
+            $color // K (oculta)
         ];
     }
 
@@ -72,28 +69,35 @@ class OrdenesHelpdeskExport implements
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->mergeCells('A1:M1');
+        $sheet->mergeCells('A1:K1');
         $sheet->setCellValue('A1', 'REPORTE TICKETS DE HELPDESK');
-        $sheet->getStyle('A1:M1')->applyFromArray([
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        $sheet->getStyle('A1:K1')->applyFromArray([
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER
+            ],
             'font' => ['bold' => true, 'size' => 14],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFFF00']],
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
         ]);
 
-        $sheet->getStyle('A2:M2')->applyFromArray([
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+        $sheet->getStyle('A2:K2')->applyFromArray([
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true
+            ],
             'font' => ['bold' => true],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFFF00']],
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
         ]);
 
-        foreach (range('A', 'M') as $col) {
+        foreach (range('A', 'K') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        $sheet->getStyle('G')->getNumberFormat()->setFormatCode('0');
-        $sheet->setAutoFilter('A2:M2');
+        $sheet->getStyle('A')->getNumberFormat()->setFormatCode('0'); // OT numérico
+        $sheet->setAutoFilter('A2:K2');
     }
 
     public function registerEvents(): array
@@ -103,41 +107,44 @@ class OrdenesHelpdeskExport implements
                 $sheet = $event->sheet->getDelegate();
 
                 $headers = [
-                    'N. TICKET',
-                    'F. TICKET',
-                    'F. VISITA',
-                    'CATEGORÍA',
-                    'GENERAL',
-                    'MODELO',
-                    'SERIE',
-                    'CLIENTE',
-                    'DIRECCIÓN',
-                    'SOLUCIÓN',
-                    'ESTADO FLUJO',
-                    'TÉCNICO',
-                    'COLOR'
+                    'OT', 'N. TICKET', 'F. TICKET', 'F. VISITA',
+                    'CLIENTE', 'TIENDA', 'TIPO SERVICIO', 'SOLUCIÓN',
+                    'ESTADO FLUJO', 'TÉCNICO', 'COLOR'
                 ];
 
-                foreach ($headers as $i => $text) {
-                    $sheet->setCellValue(chr(65 + $i) . '2', $text);
+                foreach ($headers as $index => $header) {
+                    $cell = chr(65 + $index) . '2';
+                    $sheet->setCellValue($cell, $header);
                 }
 
                 $max = $sheet->getHighestRow();
-                $sheet->getStyle("A3:M{$max}")->applyFromArray([
-                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
-                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+                $sheet->getStyle("A3:K{$max}")->applyFromArray([
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical'   => Alignment::VERTICAL_CENTER,
+                        'wrapText'   => true,
+                    ],
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color'       => ['rgb' => '000000'],
+                        ],
+                    ],
                 ]);
 
                 for ($i = 3; $i <= $max; $i++) {
-                    $color = $sheet->getCell("M{$i}")->getValue();
+                    $color = $sheet->getCell("K{$i}")->getValue(); // K = COLOR
                     if ($color && $color !== 'N/A') {
-                        $sheet->getStyle("A{$i}:L{$i}")->applyFromArray([
-                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => ltrim($color, '#')]]
+                        $sheet->getStyle("A{$i}:J{$i}")->applyFromArray([
+                            'fill' => [
+                                'fillType' => Fill::FILL_SOLID,
+                                'startColor' => ['rgb' => ltrim($color, '#')],
+                            ],
                         ]);
                     }
                 }
 
-                $sheet->getColumnDimension('M')->setVisible(false);
+                $sheet->getColumnDimension('K')->setVisible(false); // Ocultar columna color
             }
         ];
     }
