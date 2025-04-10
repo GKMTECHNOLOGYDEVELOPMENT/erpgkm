@@ -545,8 +545,6 @@ if ($ultimaVisita) {
 
 
    
-
-    // Función para guardar los datos de envío
     public function guardardatosenviosoporte(Request $request)
     {
         // Validar los datos recibidos
@@ -555,34 +553,35 @@ if ($ultimaVisita) {
             'tipoRecojo' => 'required|exists:tiporecojo,idtipoRecojo',
             'tipoEnvio' => 'required|exists:tipoenvio,idtipoenvio',
             'ticketId' => 'required|exists:tickets,idTickets',
+            'agencia' => 'required|string|max:255', // Validación para agencia
         ]);
-
+    
         // Si la validación falla, devolver respuesta con errores
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => 'Errores de validación', 'errors' => $validator->errors()]);
         }
-
+    
         // Intentar insertar los datos en la tabla datos_envio
         try {
             // Usamos DB::insert() para insertar los datos directamente
             DB::insert('
-            INSERT INTO datos_envio (idTickets, tipoRecojo, tipoEnvio, tipo, idUsuario) 
-            VALUES (?, ?, ?, ?, ?)
-        ', [
+                INSERT INTO datos_envio (idTickets, tipoRecojo, tipoEnvio, tipo, idUsuario, agencia) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ', [
                 $request->ticketId,      // idTickets
                 $request->tipoRecojo,    // tipoRecojo
                 $request->tipoEnvio,     // tipoEnvio
                 2,                       // tipo (siempre es 2 según lo indicado)
-                $request->idTecnico      // idUsuario (el técnico de envío)
+                $request->idTecnico,     // idUsuario (el técnico de envío)
+                $request->agencia        // agencia
             ]);
-
+    
             return response()->json(['success' => true, 'message' => 'Datos de envío guardados correctamente.']);
         } catch (\Exception $e) {
             // En caso de error al insertar
             return response()->json(['success' => false, 'message' => 'Hubo un error al guardar los datos de envío.']);
         }
     }
-
 
     public function guardarEquipo(Request $request)
 {
