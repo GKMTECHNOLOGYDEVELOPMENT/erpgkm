@@ -9,8 +9,8 @@
 
             <!-- Vista previa del informe generado (como imagen) -->
             <img src="{{ route('ordenes.helpdesk.soporte.vista-previa.imagen', ['idOt' => $id, 'idVisita' => $idVisitas, 'tipo' => 'soporte']) }}"
-            alt="Vista previa del informe" class="w-full rounded-xl shadow-xl border border-gray-300 mt-6 mb-4">
-       
+                alt="Vista previa del informe" class="w-full rounded-xl shadow-xl border border-gray-300 mt-6 mb-4">
+
 
 
             <!-- Título -->
@@ -20,6 +20,33 @@
             <div class="w-full h-[300px] border-2 border-gray-300 rounded-lg relative mt-2">
                 <canvas id="signatureCanvasCliente" class="w-full h-full"></canvas>
             </div>
+
+            <!-- Tipo de documento -->
+            <select
+                id="tipoDocumento"
+                class="form-control w-full mt-2 mb-2 border border-gray-300 rounded px-3 py-2">
+                <option value="">Seleccione tipo de documento</option>
+                <option value="DNI">DNI</option>
+                <option value="Carné de Extranjería">Carné de Extranjería</option>
+                <option value="Pasaporte">Pasaporte</option>
+                <option value="RUC">RUC</option>
+                <option value="Otros">Otros</option>
+            </select>
+
+            <!-- Número de documento -->
+            <input
+                type="text"
+                id="numeroDocumento"
+                class="form-control w-full mb-3 border border-gray-300 rounded px-3 py-2"
+                placeholder="Número de documento">
+
+            <!-- Campo para el nombre del encargado -->
+            <input
+                type="text"
+                id="nombreEncargado"
+                class="form-control w-full mt-2 mb-3 border border-gray-300 rounded px-3 py-2"
+                placeholder="Nombre del encargado">
+
 
             <!-- Botones -->
             <div class="flex space-x-3 mt-4">
@@ -85,37 +112,57 @@
         }
 
         function saveSignature() {
-            if (!signaturePadCliente || signaturePadCliente.isEmpty()) {
-                return toastr.error("Por favor, realiza la firma primero.");
-            }
+    if (!signaturePadCliente || signaturePadCliente.isEmpty()) {
+        return toastr.error("Por favor, realiza la firma primero.");
+    }
 
-            const firma = signaturePadCliente.toDataURL();
-            const ticketId = document.getElementById('ticketId').value;
-            const visitaId = document.getElementById('visitaId').value;
+    const firma = signaturePadCliente.toDataURL();
+    const ticketId = document.getElementById('ticketId').value;
+    const visitaId = document.getElementById('visitaId').value;
+    const nombreEncargado = document.getElementById('nombreEncargado').value;
+    const tipoDocumento = document.getElementById('tipoDocumento').value;
+    const numeroDocumento = document.getElementById('numeroDocumento').value;
 
-            if (!visitaId) {
-                return toastr.error("No se encontró la visita asociada.");
-            }
+    if (!visitaId) {
+        return toastr.error("No se encontró la visita asociada.");
+    }
 
-            fetch(`/ordenes/helpdesk/soporte/${ticketId}/guardar-firma/${visitaId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        firma
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    toastr.success(data.message);
-                })
-                .catch(err => {
-                    console.error(err);
-                    toastr.error('Error al guardar la firma.');
-                });
-        }
+    if (!nombreEncargado.trim()) {
+        return toastr.error("Por favor, ingresa el nombre del encargado.");
+    }
+
+    if (!tipoDocumento.trim()) {
+        return toastr.error("Por favor, selecciona el tipo de documento.");
+    }
+
+    if (!numeroDocumento.trim()) {
+        return toastr.error("Por favor, ingresa el número de documento.");
+    }
+
+    fetch(`/ordenes/helpdesk/soporte/${ticketId}/guardar-firma/${visitaId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            firma,
+            nombreEncargado,
+            tipoDocumento,
+            documento: numeroDocumento
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        toastr.success(data.message);
+    })
+    .catch(err => {
+        console.error(err);
+        toastr.error('Error al guardar la firma.');
+    });
+}
+
+
 
         document.addEventListener("DOMContentLoaded", () => {
             initializeSignature("signatureCanvasCliente");

@@ -2786,52 +2786,50 @@ Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadov
     
 
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
-{
-    // Validar que la firma esté presente
-    $request->validate([
-        'firma' => 'required|string',
-    ]);
-
-    // Obtener el ticket
-    $ticket = Ticket::findOrFail($id);
-
-    // Verificar si la combinación idVisitas y idTickets existe en la tabla visitas
-    $visitaExistente = DB::table('visitas')
-        ->where('idVisitas', $idVisitas)
-        ->where('idTickets', $ticket->idTickets)
-        ->first();
-
-    // Si no existe una visita válida con esa combinación, retornar un error
-    if (!$visitaExistente) {
-        return response()->json(['message' => 'La combinación de idVisitas y idTickets no es válida.'], 400);
+    {
+        $request->validate([
+            'firma' => 'required|string',
+            'nombreEncargado' => 'nullable|string|max:255',
+            'tipoDocumento' => 'nullable|string|max:255',
+            'documento' => 'nullable|string|max:255',
+        ]);
+    
+        $ticket = Ticket::findOrFail($id);
+    
+        $visitaExistente = DB::table('visitas')
+            ->where('idVisitas', $idVisitas)
+            ->where('idTickets', $ticket->idTickets)
+            ->first();
+    
+        if (!$visitaExistente) {
+            return response()->json(['message' => 'La combinación de idVisitas y idTickets no es válida.'], 400);
+        }
+    
+        $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
+    
+        $firmaExistente = DB::table('firmas')
+            ->where('idTickets', $ticket->idTickets)
+            ->where('idCliente', $ticket->idCliente)
+            ->where('idVisitas', $idVisitas)
+            ->first();
+    
+        if ($firmaExistente) {
+            return response()->json(['message' => 'Ya existe una firma para este ticket, cliente y visita.'], 400);
+        }
+    
+        DB::table('firmas')->insert([
+            'firma_cliente' => $firmaCliente,
+            'idTickets' => $ticket->idTickets,
+            'idCliente' => $ticket->idCliente,
+            'idVisitas' => $idVisitas,
+            'nombreencargado' => $request->nombreEncargado,
+            'tipodocumento' => $request->tipoDocumento,
+            'documento' => $request->documento,
+        ]);
+    
+        return response()->json(['message' => 'Firma creada correctamente'], 201);
     }
-
-    // Convertir la firma de base64 a binario
-    $firmaCliente = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $request->firma));
-
-    // Verificar si ya existe una firma para este ticket, cliente y visita
-    $firmaExistente = DB::table('firmas')
-        ->where('idTickets', $ticket->idTickets)
-        ->where('idCliente', $ticket->idCliente)
-        ->where('idVisitas', $idVisitas) // Verificamos si ya existe con el idVisitas actual
-        ->first();
-
-    // Si ya existe una firma para este ticket, cliente y visita, no permitir la creación ni actualización
-    if ($firmaExistente) {
-        return response()->json(['message' => 'Ya existe una firma para este ticket, cliente y visita.'], 400);
-    }
-
-    // Si no existe una firma para este ticket, cliente y visita, creamos una nueva firma
-    DB::table('firmas')->insert([
-        'firma_cliente' => $firmaCliente,
-        'idTickets' => $ticket->idTickets,
-        'idCliente' => $ticket->idCliente, // Asumiendo que el ticket tiene un idCliente
-        'idVisitas' => $idVisitas, // Guardamos el idVisitas
-    ]);
-
-    // Retornar una respuesta de éxito con mensaje de creación
-    return response()->json(['message' => 'Firma creada correctamente'], 201);
-}
+    
 
 
 
