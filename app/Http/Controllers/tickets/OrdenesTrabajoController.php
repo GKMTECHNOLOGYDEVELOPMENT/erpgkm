@@ -814,6 +814,9 @@ class OrdenesTrabajoController extends Controller
 
 
 
+
+
+
         // Pasamos los datos a la vista
         return view("tickets.ordenes-trabajo.smart-tv.edit", compact(
             'ticket',
@@ -857,7 +860,11 @@ class OrdenesTrabajoController extends Controller
             'idtipoServicio',
             'ultimaVisitaConEstado1',
             'esTiendacliente',
-            'estadovisita'
+            'estadovisita',
+            'datosEnvio',
+            'tiposRecojo',
+            'tiposEnvio',
+            'usuarios'
 
 
         ));

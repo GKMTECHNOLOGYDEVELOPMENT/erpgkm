@@ -15,6 +15,7 @@ use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\CuentasBancarias;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -139,5 +140,63 @@ Route::delete('eliminar/tecnicoapoyo/{idTicketApoyo}', [OrdenesTrabajoController
 // routes/web.php o routes/api.php
 
 Route::post('/agregar/tecnicoapoyo', [OrdenesTrabajoController::class, 'agregarTecnicoApoyo']);
-// routes/web.php o routes/api.php
 
+Route::get('/datos-envio/{ticketId}', function ($ticketId) {
+    $tipo = request('tipo', 2); // Por defecto tipo 2 como pediste
+    
+    $datos = DB::table('datos_envio')
+        ->where('idTickets', $ticketId)
+        ->where('tipo', $tipo)
+        ->first();
+
+    return response()->json($datos);
+});
+
+Route::get('/usuarios-tecnicos', function () {
+    $usuarios = DB::table('usuarios')
+        ->where('idTipoArea', 6) // Ajusta según tu necesidad
+        ->select('idUsuario', 'Nombre')
+        ->get();
+
+    return response()->json($usuarios);
+});
+
+Route::get('/tipos-recojo', function () {
+    $tipos = DB::table('tiporecojo')->get();
+    return response()->json($tipos);
+});
+
+Route::get('/tipos-envio', function () {
+    $tipos = DB::table('tipoenvio')->get();
+    return response()->json($tipos);
+});
+
+Route::post('/guardar-datos-envio', function (Request $request) {
+    try {
+        $datos = $request->all();
+        
+        $existente = DB::table('datos_envio')
+            ->where('idTickets', $datos['idTickets'])
+            ->where('tipo', $datos['tipo'])
+            ->first();
+
+        if ($existente) {
+            DB::table('datos_envio')
+                ->where('idDatos_envio', $existente->idDatos_envio)
+                ->update($datos);
+        } else {
+            DB::table('datos_envio')->insert($datos);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Datos guardados correctamente',
+            'data' => $datos
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ], 500);
+    }
+});
