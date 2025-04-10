@@ -453,7 +453,6 @@
                 'idCliente',
                 'tipoServicio',
                 'fallaReportada',
-                // 'idTecnico',
                 'idTienda'
             ];
 

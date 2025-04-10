@@ -907,7 +907,7 @@
         // Validación en tiempo real para campos obligatorios
         const camposObligatorios = [
             'idCliente', 'idClienteGeneral',
-            'direccion', 'fechaCompra', 'idMarca', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket', 'linkubicacion'
+            'direccion', 'fechaCompra', 'idMarca', 'idTienda', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket', 'linkubicacion'
         ];
 
         camposObligatorios.forEach(campo => {
@@ -993,15 +993,18 @@
             let errorFound = false;
             let errorMessages = []; // Para almacenar los mensajes de error
 
-            // Validar todos los campos obligatorios antes de enviar
             camposObligatorios.forEach(campo => {
-                const input = document.getElementById(campo);
-                if (input.value.trim() === "") {
-                    errorFound = true;
-                    validateCampo(input); // Ejecuta la validación en caso de que falte contenido
-                    errorMessages.push(`El campo ${input.id} está vacío. Por favor, complete el campo.`);
-                }
-            });
+    const input = document.getElementById(campo);
+    const label = document.querySelector(`label[for="${campo}"]`);
+    const nombreCampo = label ? label.innerText.trim() : campo;
+
+    if (input.value.trim() === "") {
+        errorFound = true;
+        validateCampo(input); // Ejecuta la validación visual
+        errorMessages.push(`El campo "${nombreCampo}" está vacío. Por favor, complete el campo.`);
+    }
+});
+
 
             // Validación específica para nroTicket (si está vacío o con error)
             const nroTicketInput = document.getElementById('nroTicket');

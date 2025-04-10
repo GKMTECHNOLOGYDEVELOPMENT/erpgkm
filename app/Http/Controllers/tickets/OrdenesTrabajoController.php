@@ -166,7 +166,7 @@ class OrdenesTrabajoController extends Controller
                 'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
                 'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
                 'idCliente' => 'required|integer|exists:cliente,idCliente',
-                'idTienda' => 'nullable|integer|exists:tienda,idTienda', // Permitir que idTienda sea nullable
+                'idTienda' => 'required|integer|exists:tienda,idTienda', // Permitir que idTienda sea nullable
                 'direccion' => 'required|string|max:255',
                 'idMarca' => 'required|integer|exists:marca,idMarca',
                 'idModelo' => 'required|integer|exists:modelo,idModelo',
