@@ -213,37 +213,64 @@
                             return;
                         }
 
-                        function verificarDepartamento() {
-                            const selectedOption = selectTienda.options[selectTienda.selectedIndex];
-                            const departamento = selectedOption.getAttribute("data-departamento");
-                            console.log("Departamento seleccionado:", departamento); // Debugging: Ver departamento seleccionado
+                        // function verificarDepartamento() {
+                        //     const selectedOption = selectTienda.options[selectTienda.selectedIndex];
+                        //     const departamento = selectedOption.getAttribute("data-departamento");
+                        //     console.log("Departamento seleccionado:", departamento); // Debugging: Ver departamento seleccionado
 
-                            if (departamento === "3926") {
-                                console.log("Departamento es 3926. Ocultando esEnvioContainer y tecnicoContainer.");
-                                esEnvioContainer.style.display = "none";
-                                tecnicoContainer.style.display = "none";
-                                tecnicoDatosContainer.style.display = "none";
-                            } else {
-                                console.log("Departamento diferente a 3926. Verificando Tipo de Servicio.");
-                                verificarTipoServicio(); // Verificar también el tipo de servicio
-                            }
-                        }
+                        //     if (departamento === "3926") {
+                        //         console.log("Departamento es 3926. Ocultando esEnvioContainer y tecnicoContainer.");
+                        //         esEnvioContainer.style.display = "none";
+                        //         tecnicoContainer.style.display = "none";
+                        //         tecnicoDatosContainer.style.display = "none";
+                        //     } else {
+                        //         console.log("Departamento diferente a 3926. Verificando Tipo de Servicio.");
+                        //         verificarTipoServicio(); // Verificar también el tipo de servicio
+                        //     }
+                        // }
 
-                        function verificarTipoServicio() {
-                            const selectedTipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex];
-                            const tipoServicio = selectedTipoServicio ? selectedTipoServicio.value : null;
-                            console.log("Tipo de Servicio seleccionado:",
-                                tipoServicio); // Debugging: Ver tipo de servicio seleccionado
+                        // function verificarTipoServicio() {
+                        //     const selectedTipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex];
+                        //     const tipoServicio = selectedTipoServicio ? selectedTipoServicio.value : null;
+                        //     console.log("Tipo de Servicio seleccionado:",
+                        //         tipoServicio); // Debugging: Ver tipo de servicio seleccionado
 
-                            // Si el tipo de servicio es 2, ocultamos el contenedor de "esEnvio"
-                            if (tipoServicio == "2") {
-                                console.log("Tipo de servicio es 2. Ocultando esEnvioContainer.");
-                                esEnvioContainer.style.display = "none";
-                            } else {
-                                console.log("Tipo de servicio no es 2. Mostrando esEnvioContainer.");
-                                esEnvioContainer.style.display = "block";
-                            }
-                        }
+                        //     // Si el tipo de servicio es 2, ocultamos el contenedor de "esEnvio"
+                        //     if (tipoServicio == "2") {
+                        //         console.log("Tipo de servicio es 2. Ocultando esEnvioContainer.");
+                        //         esEnvioContainer.style.display = "none";
+                        //     } else {
+                        //         console.log("Tipo de servicio no es 2. Mostrando esEnvioContainer.");
+                        //         esEnvioContainer.style.display = "block";
+                        //     }
+                        // }
+
+
+                        function verificarEnvioContainer() {
+    const selectedDepartamento = selectTienda.options[selectTienda.selectedIndex]?.getAttribute("data-departamento");
+    const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
+
+    console.log("Departamento:", selectedDepartamento, "| Tipo de Servicio:", tipoServicio);
+
+    // Convertir a número por si vienen como string
+    const dep = parseInt(selectedDepartamento);
+    const tipo = parseInt(tipoServicio);
+
+    // Condiciones según tu lógica
+    if (
+        (dep === 3926 && tipo === 1) ||    // Si es 3926 y tipo 1 => ocultar
+        (dep === 3926 && tipo === 2) ||    // Si es 3926 y tipo 2 => ocultar
+        (dep !== 3926 && tipo === 2)       // Si es diferente a 3926 y tipo 2 => ocultar
+    ) {
+        esEnvioContainer.style.display = "none";
+        console.log("❌ Ocultando esEnvioContainer");
+    } else if (dep !== 3926 && tipo === 1) { // Si es diferente a 3926 y tipo 1 => mostrar
+        esEnvioContainer.style.display = "block";
+        console.log("✅ Mostrando esEnvioContainer");
+    }
+}
+
+
 
                         function verificarEsEnvio() {
                             console.log("Verificando si es envío:", esEnvioCheckbox
@@ -305,12 +332,12 @@
                         // Eventos
                         selectTienda.addEventListener("change", function() {
                             console.log("Cambiando tienda."); // Debugging: Ver cuando se cambia la tienda
-                            verificarDepartamento();
+                            verificarEnvioContainer();
                         });
                         selectTipoServicio.addEventListener("change", function() {
                             console.log(
                                 "Cambiando tipo de servicio."); // Debugging: Ver cuando se cambia el tipo de servicio
-                            verificarTipoServicio();
+                                verificarEnvioContainer();
                         });
                         esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
                         agregarTecnicoBtn.addEventListener("click", agregarTecnico);

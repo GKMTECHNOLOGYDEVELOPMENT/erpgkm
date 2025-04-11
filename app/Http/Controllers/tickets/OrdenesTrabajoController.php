@@ -2363,34 +2363,47 @@ class OrdenesTrabajoController extends Controller
 
 
 
-        // Si el servicio es igual a 1, creamos el ticketflujo y actualizamos el ticket
-        if ($request->servicio == 1) {
-            // Insertar en la tabla ticketflujo con idEstadflujo 14
-            $ticketflujo = DB::table('ticketflujo')->insertGetId([
-                'idTicket' => $request->idTickets,  // Usamos el idTickets de la solicitud
-                'idEstadflujo' => 9,               // Siempre 14 como estado
-                'idUsuario' => auth()->id(),
-                'fecha_creacion' => now(),          // Fecha actual
-            ]);
+ // Si el servicio es igual a 1, creamos el ticketflujo y actualizamos el ticket
+if ($request->servicio == 1) {
+    // Insertar en la tabla ticketflujo con idEstadflujo 9
+    $ticketflujo = DB::table('ticketflujo')->insertGetId([
+        'idTicket' => $request->idTickets,  // Usamos el idTickets de la solicitud
+        'idEstadflujo' => 9,               // Siempre 9 como estado (o el estado que corresponda)
+        'idUsuario' => auth()->id(),
+        'fecha_creacion' => now(),          // Fecha actual
+    ]);
 
-            // Verificamos si la inserción fue exitosa
-            if (!$ticketflujo) {
-                return response()->json(['error' => 'Error al crear ticketflujo.'], 500);
-            }
+    // Verificamos si la inserción fue exitosa
+    if (!$ticketflujo) {
+        return response()->json(['error' => 'Error al crear ticketflujo.'], 500);
+    }
 
-            // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
-            DB::table('tickets')
-                ->where('idTickets', $request->idTickets)
-                ->update(['idTicketFlujo' => $ticketflujo]);
+    // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
+    DB::table('tickets')
+        ->where('idTickets', $request->idTickets)
+        ->update(['idTicketFlujo' => $ticketflujo]);
 
-            // Verificamos si la actualización fue exitosa
-            if ($ticketflujo) {
-                Log::info('ticketflujo creado correctamente con idTicketFlujo: ' . $ticketflujo);
-            } else {
-                Log::error('Error al actualizar ticketflujo en tickets.');
-                return response()->json(['error' => 'Error al actualizar el ticketflujo.'], 500);
-            }
-        }
+    // Verificamos si la actualización fue exitosa
+    if ($ticketflujo) {
+        Log::info('ticketflujo creado correctamente con idTicketFlujo: ' . $ticketflujo);
+    } else {
+        Log::error('Error al actualizar ticketflujo en tickets.');
+        return response()->json(['error' => 'Error al actualizar el ticketflujo.'], 500);
+    }
+
+    // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
+    $actualizarVisita = DB::table('visitas')
+        ->where('idVisitas', $request->idVisitas)
+        ->update(['estadovisita' => 1]);  // Esto actualiza la variable estadovisita a 1
+
+    // Verificamos si la actualización de visita fue exitosa
+    if (!$actualizarVisita) {
+        return response()->json(['error' => 'Error al actualizar estadovisita.'], 500);
+    } else {
+        Log::info('estado visita actualizado correctamente a 1 para idVisitas: ' . $request->idVisitas);
+    }
+}
+
 
         if ($condicion) {
             return response()->json(['success' => true, 'message' => 'Condiciones guardadas correctamente.']);
