@@ -397,39 +397,23 @@
                     </ul>
                 </li>
 
-                {{-- <li class="menu nav-item">
-                    <button type="button" class="nav-link group"
-                        :class="{ 'active': activeDropdown === 'asistencias' }"
-                        @click="activeDropdown === 'asistencias' ? activeDropdown = null : activeDropdown = 'asistencias'">
+                <li class="menu nav-item">
+                    <a href="{{ route('asistencia.index') }}" class="nav-link group">
                         <div class="flex items-center">
-
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6 group-hover:!text-primary">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M3.75 3.75h5.25v5.25H3.75V3.75zM14.25 3.75h6v6h-6V3.75zM3.75 14.25h5.25v6H3.75v-6zM14.25 14.25h2.25v2.25h-2.25v2.25h2.25v2.25h2.25v-2.25h2.25v-2.25h-2.25v-2.25h-2.25z" />
                             </svg>
-
+                
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Asistencias</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                Asistencias
+                            </span>
                         </div>
-                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'asistencias' }">
-
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                    </button>
-                    <ul x-cloak x-show="activeDropdown === 'asistencias'" x-collapse class="sub-menu text-gray-500">
-                        <li>
-                            <a href="/components/tabs">Técnico</a>
-                        </li>
-                        <li>
-                            <a href="/components/accordions">Oficina</a>
-                        </li>
-                    </ul>
-                </li> --}}
+                    </a>
+                </li>
+                
 
                 {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -688,7 +672,7 @@
                     <span>ALMACEN</span>
                 </h2>
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <a href="/tables" class="nav-link group">
                         <div class="flex items-center">
 
@@ -817,7 +801,7 @@
                             <a href="/datatables/column-chooser">Column Chooser</a>
                         </li>
                     </ul>
-                </li> --}}
+                </li>
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"

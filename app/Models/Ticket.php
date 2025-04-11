@@ -113,10 +113,10 @@ class Ticket extends Model
         return $this->belongsTo(EstadoOt::class, 'idEstadoots');
     }
 
-    // public function estadoflujo()
-    // {
-    //     return $this->belongsTo(EstadoFlujo::class, 'idEstadflujo');
-    // }
+    public function estadoflujo()
+    {
+        return $this->belongsTo(EstadoFlujo::class, 'idEstadflujo');
+    }
 
     public function cliente()
     {

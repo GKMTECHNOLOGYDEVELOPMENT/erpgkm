@@ -14,11 +14,10 @@ use App\Http\Controllers\dashboard\ComercialController;
 use App\Http\Controllers\dashboard\TicketsController;
 use App\Http\Controllers\administracion\UsuariosController;
 use App\Http\Controllers\administracion\CompraController;
-use App\Http\Controllers\administracion\asistencias\OficinaController;
-use App\Http\Controllers\administracion\asistencias\TecnicoController;
+use App\Http\Controllers\administracion\asistencias\AsistenciaController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\ModelosController;
-use App\Http\Controllers\almacen\productos\TipoArticuloController;
+use App\Http\Controllers\almacen\productos\TipoArticuloController;  
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\CategoriasController;
 use App\Http\Controllers\configuracion\ConfiguracionController;
@@ -161,6 +160,10 @@ Route::get('/exportar-clientes', function () {
 })->name('clientes.exportExcel');
 Route::get('/reporte-clientes', [ClientesController::class, 'exportAllPDF'])->name('reporte.clientes');
 
+//Ruta para Administracion Asistencia
+
+Route::get('/asistencia', [AsistenciaController::class, 'index'])->name('asistencia.index');
+Route::get('/asistencia/listado', [AsistenciaController::class, 'getAsistencias'])->name('asistencia.listado');
 
 //Ruta para Administracion Proveedores
 Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
