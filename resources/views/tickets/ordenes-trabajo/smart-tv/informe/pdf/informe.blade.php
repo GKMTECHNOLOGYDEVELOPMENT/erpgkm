@@ -297,7 +297,7 @@
                     @if ($firmaTecnico)
                         <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
                             class="w-[90%] h-20 mx-auto object-contain"
-                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
+                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -20px; position: relative;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
                             <p class="text-xs text-gray-500">N/A</p>
@@ -320,7 +320,7 @@
                     @if ($firmaCliente)
                         <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                             class="w-[90%] h-20 mx-auto object-contain absolute"
-                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
+                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -20px; position: relative;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
                             <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
