@@ -77,10 +77,6 @@
 
 
         .footer {
-            position: absolute;
-            bottom: 40px;
-            /* Lo sube un poco */
-            left: 0;
             width: 100%;
             padding: 6px 10px !important;
             /* Reducir espacio */
@@ -107,8 +103,9 @@
                 <div class="absolute left-1/2 transform -translate-x-1/2 text-center mt-4">
                     <h1 class="text-lg font-bold">INFORME TÉCNICO</h1>
                     <p class="text-md">RUC 20543618587</p>
-                    <p class="text-md">CONSULTAS@GKMTECHNOLOGY.COM.PE</p>
                     <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
+                    <p class="text-md">CONSULTAS@GKMTECHNOLOGY.COM.PE</p>
+                    <p class="text-md">080080142</p>
 
                 </div>
 
@@ -140,7 +137,6 @@
                     @foreach ($visitas as $visita)
                         <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}
                         </p>
-                        <p class="text-xs"><span class="font-bold">TELÉFONO: </span>080080142</p>
                     @endforeach
                 </div>
             </div>
@@ -210,53 +206,7 @@
 
 
 
-            <!-- FOOTER -->
-            <div class="footer text-center text-gray-500 text-xs">
 
-                <div class="flex justify-between mt-6 page-break-inside-avoid">
-                    <!-- Firma del Técnico -->
-                    <div class="w-1/2 text-center">
-                        <div class="inline-block mb-1 h-24 flex justify-center items-end">
-                            @if ($firmaTecnico)
-                                <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                                    class="h-20 max-w-[150px] mx-auto object-contain -mt-4">
-                            @else
-                                <div class="h-full flex items-center justify-center w-[150px]">
-                                    <p class="text-xs text-gray-500">N/A</p>
-                                </div>
-                            @endif
-                        </div>
-                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
-                        <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
-                        <p class="text-xs uppercase">{{ $visita['tecnico'] }}</p>
-                        <p class="text-xs text-gray-500">
-                            {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
-                        </p>
-                    </div>
-
-                    <!-- Firma del Cliente -->
-                    <div class="w-1/2 text-center">
-                        <div class="inline-block mb-1 h-24 flex justify-center items-end">
-                            @if ($firmaCliente)
-                                <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                                    class="h-20 max-w-[150px] mx-auto object-contain -mt-4">
-                            @else
-                                <div class="h-full flex items-center justify-center w-[150px]">
-                                    <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
-                                </div>
-                            @endif
-                        </div>
-                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
-                        <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                        <p class="text-xs uppercase">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
-                        <p class="text-xs text-gray-500">
-                            {{ $orden->cliente->tipodocumento->nombre ?? 'Documento' }}:
-                            {{ $orden->cliente->documento ?? 'No disponible' }}
-                        </p>
-                    </div>
-                </div>
-                <br>
-            </div>
 
             @php
                 $hayFotosDeVisita =
@@ -337,10 +287,57 @@
         @endif
     </div>
     @endif
-
-
-
     </div>
+
+        <!-- FOOTER -->
+    <div class="footer text-center text-gray-500 text-xs">
+
+        <div class="flex justify-between mt-6 page-break-inside-avoid">
+            <!-- Firma del Técnico -->
+            <div class="w-1/2 text-center">
+                <div class="inline-block mb-1 h-24 flex justify-center items-end">
+                    @if ($firmaTecnico)
+                        <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
+                            class="w-[90%] h-20 mx-auto object-contain relative -mb-4">
+                    @else
+                        <div class="h-full flex items-center justify-center w-full">
+                            <p class="text-xs text-gray-500">N/A</p>
+                        </div>
+                    @endif
+                </div>
+                <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
+                <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
+                <p class="text-xs uppercase">{{ $visita['tecnico'] }}</p>
+                <p class="text-xs text-gray-500">
+                    {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
+                </p>
+            </div>
+
+            <!-- Firma del Cliente -->
+            <div class="w-1/2 text-center">
+                <div class="inline-block mb-1 h-24 flex justify-center items-end">
+                    @if ($firmaCliente)
+                        <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
+                            class="w-[90%] h-20 mx-auto object-contain relative -mb-4">
+                    @else
+                        <div class="h-full flex items-center justify-center w-full">
+                            <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
+                        </div>
+                    @endif
+                </div>
+                <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
+                <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
+                <p class="text-xs uppercase">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
+                <p class="text-xs text-gray-500">
+                    {{ $orden->cliente->tipodocumento->nombre ?? 'Documento' }}:
+                    {{ $orden->cliente->documento ?? 'No disponible' }}
+                </p>
+            </div>
+        </div>
+        <br>
+    </div>
+
+
 </body>
 
 </html>

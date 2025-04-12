@@ -41,7 +41,13 @@
                         // Verifica si el lienzo ya tiene una instancia de SignaturePad
                         if (signatureCanvas && !signatureCanvas.signaturePadInstance) {
                             // Crea una nueva instancia de SignaturePad y la guarda en el lienzo
-                            signatureCanvas.signaturePadInstance = new SignaturePad(signatureCanvas);
+                            // Crea una nueva instancia de SignaturePad y la guarda en el lienzo
+                            signatureCanvas.signaturePadInstance = new SignaturePad(signatureCanvas, {
+                                minWidth: 0.5, // Grosor mínimo del trazo (más fino)
+                                maxWidth: 1.2, // Grosor máximo del trazo (controlado)
+                                penColor: 'black' // Color del trazo
+                            });
+
 
                             // Botón para limpiar la firma
                             document.getElementById('clear-btn').addEventListener('click', () => {
@@ -469,30 +475,30 @@
                 <div class="mb-5">
                     <form>
                         <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-    <label for="banco">Banco</label>
-    <select id="banco" class="form-select text-white-dark">
-        <option selected>Seleccione una Opción</option>
-        <option value="1">Banco de Crédito del Perú</option>
-        <option value="2">BBVA Perú</option>
-        <option value="3">Scotiabank Perú</option>
-        <option value="4">Interbank</option>
-        <option value="5">Banco de la Nación</option>
-        <option value="6">Banco de Comercio</option>
-        <option value="7">Banco Interamericano de Finanzas (BanBif)</option>
-        <option value="8">Banco Pichincha</option>
-        <option value="9">Citibank Perú</option>
-        <option value="10">MiBanco</option>
-        <option value="11">Banco GNB Perú</option>
-        <option value="12">Banco Falabella</option>
-        <option value="13">Banco Ripley</option>
-        <option value="14">Banco Santander Perú</option>
-        <option value="15">Alfin Banco</option>
-        <option value="16">Bank of China</option>
-        <option value="17">Bci Perú</option>
-        <option value="18">ICBC Perú Bank</option>
-    </select>
-</div>
+                            <div>
+                                <label for="banco">Banco</label>
+                                <select id="banco" class="form-select text-white-dark">
+                                    <option selected>Seleccione una Opción</option>
+                                    <option value="1">Banco de Crédito del Perú</option>
+                                    <option value="2">BBVA Perú</option>
+                                    <option value="3">Scotiabank Perú</option>
+                                    <option value="4">Interbank</option>
+                                    <option value="5">Banco de la Nación</option>
+                                    <option value="6">Banco de Comercio</option>
+                                    <option value="7">Banco Interamericano de Finanzas (BanBif)</option>
+                                    <option value="8">Banco Pichincha</option>
+                                    <option value="9">Citibank Perú</option>
+                                    <option value="10">MiBanco</option>
+                                    <option value="11">Banco GNB Perú</option>
+                                    <option value="12">Banco Falabella</option>
+                                    <option value="13">Banco Ripley</option>
+                                    <option value="14">Banco Santander Perú</option>
+                                    <option value="15">Alfin Banco</option>
+                                    <option value="16">Bank of China</option>
+                                    <option value="17">Bci Perú</option>
+                                    <option value="18">ICBC Perú Bank</option>
+                                </select>
+                            </div>
 
                             <div>
                                 <label for="payBrand">Tipo de Cuenta Bancaria</label>
@@ -502,7 +508,7 @@
                                     <option value="2">Número de cuenta</option>
                                 </select>
                             </div>
-                 
+
                             <div>
                                 <label for="payNumber">Numero de cuenta</label>
                                 <input id="payNumber" type="text" placeholder="Número de cuenta"
@@ -512,77 +518,76 @@
                         <button type="button" class="btn btn-primary" id="saveBtn">Guardar</button>
                     </form>
 
-<script>
- document.getElementById('payBrand').addEventListener('change', function() {
-    const tipoCuenta = this.value;
-    const numeroCuentaInput = document.getElementById('payNumber');
-    
-    // Limpiar campo de número de cuenta antes de validar
-    numeroCuentaInput.value = '';
-    numeroCuentaInput.removeAttribute('maxlength');
-    numeroCuentaInput.setAttribute('placeholder', 'Numero de cuenta');
-    
-    // Establecer el número máximo de dígitos en el campo según el tipo de cuenta
-    if (tipoCuenta == "1") {
-        // Si es Número interbancario, se establece 20 dígitos
-        numeroCuentaInput.setAttribute('maxlength', '20');
-        numeroCuentaInput.setAttribute('placeholder', 'Numero interbancario (20 digitos)');
-    } else if (tipoCuenta == "2") {
-        // Si es Número de cuenta, se establece entre 13 a 24 dígitos
-        numeroCuentaInput.setAttribute('maxlength', '24');
-        numeroCuentaInput.setAttribute('placeholder', 'Numero de cuenta (13-24 digitos)');
-    }
-});
+                    <script>
+                        document.getElementById('payBrand').addEventListener('change', function() {
+                            const tipoCuenta = this.value;
+                            const numeroCuentaInput = document.getElementById('payNumber');
 
-document.getElementById('saveBtn').addEventListener('click', function() {
-    const tipoCuenta = document.getElementById('payBrand').value;
-    const numeroCuenta = document.getElementById('payNumber').value;
+                            // Limpiar campo de número de cuenta antes de validar
+                            numeroCuentaInput.value = '';
+                            numeroCuentaInput.removeAttribute('maxlength');
+                            numeroCuentaInput.setAttribute('placeholder', 'Numero de cuenta');
 
-    // Validación según el tipo de cuenta
-    if (tipoCuenta == "1" && numeroCuenta.length !== 20) {
-        toastr.error('El número interbancario debe tener exactamente 20 dígitos.');
-        return;
-    }
+                            // Establecer el número máximo de dígitos en el campo según el tipo de cuenta
+                            if (tipoCuenta == "1") {
+                                // Si es Número interbancario, se establece 20 dígitos
+                                numeroCuentaInput.setAttribute('maxlength', '20');
+                                numeroCuentaInput.setAttribute('placeholder', 'Numero interbancario (20 digitos)');
+                            } else if (tipoCuenta == "2") {
+                                // Si es Número de cuenta, se establece entre 13 a 24 dígitos
+                                numeroCuentaInput.setAttribute('maxlength', '24');
+                                numeroCuentaInput.setAttribute('placeholder', 'Numero de cuenta (13-24 digitos)');
+                            }
+                        });
 
-    if (tipoCuenta == "2" && (numeroCuenta.length < 13 || numeroCuenta.length > 24)) {
-        toastr.error('El número de cuenta debe tener entre 13 y 24 dígitos.');
-        return;
-    }
+                        document.getElementById('saveBtn').addEventListener('click', function() {
+                            const tipoCuenta = document.getElementById('payBrand').value;
+                            const numeroCuenta = document.getElementById('payNumber').value;
 
-    if (tipoCuenta && numeroCuenta) {
-        const usuarioId = @json($usuario->idUsuario);
+                            // Validación según el tipo de cuenta
+                            if (tipoCuenta == "1" && numeroCuenta.length !== 20) {
+                                toastr.error('El número interbancario debe tener exactamente 20 dígitos.');
+                                return;
+                            }
 
-        fetch('/api/guardar-cuenta', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            },
-            body: JSON.stringify({
-                tipoCuenta: tipoCuenta,
-                numeroCuenta: numeroCuenta,
-                usuarioId: usuarioId,
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                toastr.success('Cuenta bancaria guardada con éxito');
-            } else {
-                toastr.error('Hubo un error al guardar la cuenta bancaria');
-            }
-        })
-        .catch(error => {
-            console.error('Error al guardar la cuenta:', error);
-            toastr.error('Error al guardar la cuenta bancaria');
-        });
-    } else {
-        toastr.error('Por favor, complete todos los campos');
-    }
-});
+                            if (tipoCuenta == "2" && (numeroCuenta.length < 13 || numeroCuenta.length > 24)) {
+                                toastr.error('El número de cuenta debe tener entre 13 y 24 dígitos.');
+                                return;
+                            }
 
+                            if (tipoCuenta && numeroCuenta) {
+                                const usuarioId = @json($usuario->idUsuario);
 
-</script>
+                                fetch('/api/guardar-cuenta', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                                'content'),
+                                        },
+                                        body: JSON.stringify({
+                                            tipoCuenta: tipoCuenta,
+                                            numeroCuenta: numeroCuenta,
+                                            usuarioId: usuarioId,
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            toastr.success('Cuenta bancaria guardada con éxito');
+                                        } else {
+                                            toastr.error('Hubo un error al guardar la cuenta bancaria');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error al guardar la cuenta:', error);
+                                        toastr.error('Error al guardar la cuenta bancaria');
+                                    });
+                            } else {
+                                toastr.error('Por favor, complete todos los campos');
+                            }
+                        });
+                    </script>
                 </div>
             </div>
             <!-- Contenedor donde se mostrará el número guardado -->
@@ -825,4 +830,3 @@ document.getElementById('saveBtn').addEventListener('click', function() {
         reader.readAsDataURL(event.target.files[0]);
     }
 </script>
-

@@ -40,7 +40,7 @@
     @endif
 
 
-    
+
 
     <div class="mb-5" x-data="{
         tab: 'detalle',
@@ -72,7 +72,7 @@
                     <span>Editar OT</span>
                 </li>
             </ul>
-               
+
         </div>
         <!-- Contenedor de Tabs Responsivo -->
         <div class="overflow-x-auto">
@@ -89,7 +89,7 @@
                         Ticket
                     </a>
                 </li>
-                <li >
+                <li>
                     <a href="javascript:;"
                         class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
                         :class="{ '!bg-success text-white': tab === 'visitas' }" @click="tab = 'visitas'">
@@ -107,71 +107,63 @@
 
 
 
-    
-               
-@if($visitaExistente)
-          
-        <li>
-            <a href="javascript:;"
-                class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
-                :class="{ '!bg-success text-white': tab === 'desarrollo' }" @click="tab = 'desarrollo'">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M16 18l6-6-6-6M8 6L2 12l6 6M12 2L9 22" />
-                    <circle cx="12" cy="12" r="3" />
-                </svg>
-                Desarrollo 
-            </a>
-        </li>
-
-      
 
 
-        <li>
-            <a href="javascript:;"
-                class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
-                :class="{ '!bg-success text-white': tab === 'firmas' }" @click="tab = 'firmas'">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M16.5 3L21 7.5M3 21l9-9M15 6l6 6M3 21h6l9-9-6-6-9 9v6z" />
-                </svg>
-                Firmas
-            </a>
-        </li>
-
-        
-
-
-  
-    <li>
-        <a href="javascript:;"
-            class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
-            :class="{ '!bg-success text-white': tab === 'informe' }"
-            @click="tab = 'informe'; $nextTick(() => cargarPdf())">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v16H4V4zM8 10h8M8 14h4" />
-            </svg>
-            Informe
-        </a>
-    </li>
-
-
- 
-  
+                @if ($visitaExistente)
+                    <li>
+                        <a href="javascript:;"
+                            class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
+                            :class="{ '!bg-success text-white': tab === 'desarrollo' }" @click="tab = 'desarrollo'">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16 18l6-6-6-6M8 6L2 12l6 6M12 2L9 22" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            Desarrollo
+                        </a>
+                    </li>
 
 
 
 
-    @endif
+                    <li>
+                        <a href="javascript:;"
+                            class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
+                            :class="{ '!bg-success text-white': tab === 'firmas' }" @click="tab = 'firmas'">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16.5 3L21 7.5M3 21l9-9M15 6l6 6M3 21h6l9-9-6-6-9 9v6z" />
+                            </svg>
+                            Firmas
+                        </a>
+                    </li>
 
 
 
 
 
-    </ul>
+                    <li>
+                        <a href="javascript:;"
+                            class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
+                            :class="{ '!bg-success text-white': tab === 'informe' }"
+                            @click="tab = 'informe'; $nextTick(() => cargarPdf())">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 4h16v16H4V4zM8 10h8M8 14h4" />
+                            </svg>
+                            Informe
+                        </a>
+                    </li>
+                @endif
+
+
+
+
+
+            </ul>
 
 
 

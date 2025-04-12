@@ -861,10 +861,6 @@ class OrdenesTrabajoController extends Controller
             'ultimaVisitaConEstado1',
             'esTiendacliente',
             'estadovisita',
-            'datosEnvio',
-            'tiposRecojo',
-            'tiposEnvio',
-            'usuarios'
 
 
         ));
