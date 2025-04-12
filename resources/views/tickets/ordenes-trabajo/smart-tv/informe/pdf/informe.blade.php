@@ -150,16 +150,15 @@
             @if (!empty($producto))
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
-                    <div class="flex justify-between">
+                    <div class="flex justify-between flex-wrap gap-4">
                         <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ strtoupper($producto['categoria']) }}</p>
                         <p><span class="font-bold">MARCA:</span> {{ strtoupper($producto['marca']) }}</p>
                         <p><span class="font-bold">MODELO:</span> {{ strtoupper($producto['modelo']) }}</p>
-                    </div>
-                    <div class="mt-2">
                         <p><span class="font-bold">SERIE:</span> {{ strtoupper($producto['serie']) }}</p>
                     </div>
                 </div>
             @endif
+
 
             @if (!empty($producto['fallaReportada']))
                 <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
@@ -289,36 +288,39 @@
     @endif
     </div>
 
-        <!-- FOOTER -->
+    <!-- FOOTER -->
     <div class="footer text-center text-gray-500 text-xs">
-
         <div class="flex justify-between mt-6 page-break-inside-avoid">
             <!-- Firma del Técnico -->
             <div class="w-1/2 text-center">
                 <div class="inline-block mb-1 h-24 flex justify-center items-end">
                     @if ($firmaTecnico)
                         <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                            class="w-[90%] h-20 mx-auto object-contain relative -mb-4">
+                            class="w-[90%] h-20 mx-auto object-contain"
+                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
                             <p class="text-xs text-gray-500">N/A</p>
                         </div>
                     @endif
                 </div>
-                <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
-                <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
+                <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-0">
+                <!-- 🔁 mb-0 para que no empuje hacia abajo -->
+                <p class="text-xs font-semibold text-gray-700 mt-1">FIRMA DEL TÉCNICO</p>
                 <p class="text-xs uppercase">{{ $visita['tecnico'] }}</p>
                 <p class="text-xs text-gray-500">
                     {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
                 </p>
             </div>
 
+
             <!-- Firma del Cliente -->
             <div class="w-1/2 text-center">
                 <div class="inline-block mb-1 h-24 flex justify-center items-end">
                     @if ($firmaCliente)
                         <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                            class="w-[90%] h-20 mx-auto object-contain relative -mb-4">
+                            class="w-[90%] h-20 mx-auto object-contain absolute"
+                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
                             <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
