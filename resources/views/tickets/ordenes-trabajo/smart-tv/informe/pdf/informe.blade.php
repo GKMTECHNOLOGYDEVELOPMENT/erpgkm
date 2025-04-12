@@ -221,7 +221,7 @@
                     <h2>ANEXOS</h2>
                 </div>
 
-                <div class="mt-4">
+                <div class="mt-6">
                     @php
                         $contador = 0;
                     @endphp
@@ -239,12 +239,12 @@
                                 @endif
 
                                 <!-- Imagen centrada -->
-                                <div class="img-container">
+                                <div class="img-container mt-4">
                                     <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                 </div>
 
                                 <!-- Descripción centrada -->
-                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                <p class="text-sm text-center text-gray-700 font-semibold mt-4">
                                     IMAGEN DE LA VISITA
                                 </p>
 
@@ -272,7 +272,7 @@
                         </div>
 
                         <!-- Descripción centrada -->
-                        <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                        <p class="text-sm text-center text-gray-700 font-semibold mt-4">
                             {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
                         </p>
 
@@ -288,16 +288,34 @@
     @endif
     </div>
 
-    <!-- FOOTER -->
+    {{-- 🔍 Lógica para saber si la última imagen fue sola en la hoja --}}
+    @php
+        $mostrarFirmasEnMismaHoja = false;
+
+        if (!$modoVistaPrevia && $hayFotosDeTickets) {
+            $imagenesTicketsFiltradas = collect($imagenesFotosTickets)->filter(fn($f) => !empty($f['foto_base64']))->values();
+
+            if ($imagenesTicketsFiltradas->isNotEmpty()) {
+                $mostrarFirmasEnMismaHoja = $contador % 2 !== 0;
+            }
+        }
+    @endphp
+
+    {{-- 🔻 Forzar salto de página solo si la firma no debe ir en la misma hoja --}}
+    @if (!$mostrarFirmasEnMismaHoja)
+        <div style="page-break-before: always;"></div>
+    @endif
+
+    <!-- FOOTER: FIRMAS -->
     <div class="footer text-center text-gray-500 text-xs">
-        <div class="flex justify-between mt-6 page-break-inside-avoid">
+        <div class="flex justify-between mt-6">
             <!-- Firma del Técnico -->
             <div class="w-1/2 text-center">
                 <div class="inline-block mb-1 h-24 flex justify-center items-end">
                     @if ($firmaTecnico)
                         <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
                             class="w-[90%] h-20 mx-auto object-contain"
-                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -20px; position: relative;">
+                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -30px; position: relative;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
                             <p class="text-xs text-gray-500">N/A</p>
@@ -305,7 +323,6 @@
                     @endif
                 </div>
                 <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-0">
-                <!-- 🔁 mb-0 para que no empuje hacia abajo -->
                 <p class="text-xs font-semibold text-gray-700 mt-1">FIRMA DEL TÉCNICO</p>
                 <p class="text-xs uppercase">{{ $visita['tecnico'] }}</p>
                 <p class="text-xs text-gray-500">
@@ -313,14 +330,13 @@
                 </p>
             </div>
 
-
             <!-- Firma del Cliente -->
             <div class="w-1/2 text-center">
                 <div class="inline-block mb-1 h-24 flex justify-center items-end">
                     @if ($firmaCliente)
                         <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                            class="w-[90%] h-20 mx-auto object-contain absolute"
-                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -30px; position: relative;">
+                            class="w-[90%] h-20 mx-auto object-contain"
+                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
                             <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
