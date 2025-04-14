@@ -168,6 +168,14 @@
                 </div>
             @endif
 
+            @if (!empty($motivoCondicion))
+            <!-- Sección de Motivo de Condición (igual a Falla Reportada) -->
+            <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
+            <div class="w-full text-xs mt-3">
+                <p>{{ $motivoCondicion }}</p>
+            </div>
+            @endif
+
 
             @if ($transicionesStatusOt->isNotEmpty())
                 @php
@@ -207,85 +215,79 @@
 
 
 
-            @php
-                $hayFotosDeVisita =
-                    !empty($imagenesAnexos) &&
-                    collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
-                $hayFotosDeTickets =
-                    !empty($imagenesFotosTickets) &&
-                    collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
-            @endphp
-            @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
-                <!-- Nueva página con el título ANEXOS -->
-                <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
-                    <h2>ANEXOS</h2>
-                </div>
-
-                <div class="mt-6">
-                    @php
-                        $contador = 0;
-                    @endphp
-
-                    <!-- Primero las imágenes de la visita -->
-                    @if ($hayFotosDeVisita)
-                        @foreach ($imagenesAnexos as $anexo)
-                            @if (!empty($anexo['foto_base64']))
-                                @if ($contador % 2 == 0)
-                                    <!-- Primera hoja SIN SALTO DE PÁGINA -->
-                                    <div class="flex flex-col items-center">
-                                    @else
-                                        <!-- A partir de la segunda hoja, forzamos un salto de página -->
-                                        <div class="flex flex-col items-center" style="page-break-before: always;">
-                                @endif
-
-                                <!-- Imagen centrada -->
-                                <div class="img-container mt-4">
-                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
+        @php
+            $hayFotosDeVisita =
+                !empty($imagenesAnexos) &&
+                collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+        
+            $hayFotosDeTickets =
+                !empty($imagenesFotosTickets) &&
+                collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+        @endphp
+        
+        @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
+            <!-- Nueva página con el título ANEXOS -->
+            <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
+                <h2>ANEXOS</h2>
+            </div>
+        
+            <div class="mt-4">
+                @php $contador = 0; @endphp
+        
+                {{-- Imágenes de la visita (anexos + condiciones) --}}
+                @if ($hayFotosDeVisita)
+                    @foreach ($imagenesAnexos as $anexo)
+                        @if (!empty($anexo['foto_base64']))
+                            @if ($contador % 2 == 0)
+                                <div class="flex flex-col items-center"
+                                    @if ($contador > 0) style="page-break-before: always;" @endif>
+                            @endif
+        
+                            <div class="img-container mb-6">
+                                <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
+                            </div>
+        
+                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                IMAGEN DE LA VISITA
+                            </p>
+        
+                            @php $contador++; @endphp
+        
+                            @if ($contador % 2 == 0 || $loop->last)
                                 </div>
-
-                                <!-- Descripción centrada -->
-                                <p class="text-sm text-center text-gray-700 font-semibold mt-4">
-                                    IMAGEN DE LA VISITA
-                                </p>
-
-                                @php $contador++; @endphp
-
-                                @if ($contador % 2 == 0)
-                </div>
-            @endif
-            @endif
-            @endforeach
-            @endif
-
-            <!-- Luego las imágenes de los tickets anexos, sin saltar a nueva hoja si no hay imágenes de visita -->
-            @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
-                @foreach ($imagenesFotosTickets as $fotoTicket)
-                    @if (!empty($fotoTicket['foto_base64']))
-                        @if ($contador % 2 == 0 || !$hayFotosDeVisita)
-                            <div class="flex flex-col items-center"
-                                @if ($contador % 2 == 0 && $hayFotosDeVisita) style="page-break-before: always;" @endif>
+                            @endif
                         @endif
-
-                        <!-- Imagen centrada -->
-                        <div class="img-container">
-                            <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
-                        </div>
-
-                        <!-- Descripción centrada -->
-                        <p class="text-sm text-center text-gray-700 font-semibold mt-4">
-                            {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
-                        </p>
-
-                        @php $contador++; @endphp
-
-                        @if ($contador % 2 == 0 || !$hayFotosDeVisita)
-        </div>
+                    @endforeach
+                @endif
+        
+                {{-- Imágenes de fotos ticket --}}
+                @if ($hayFotosDeTickets)
+                    @foreach ($imagenesFotosTickets as $fotoTicket)
+                        @if (!empty($fotoTicket['foto_base64']))
+                            @if ($contador % 2 == 0)
+                                <div class="flex flex-col items-center"
+                                    @if ($contador > 0) style="page-break-before: always;" @endif>
+                            @endif
+        
+                            <div class="img-container mb-6">
+                                <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del ticket">
+                            </div>
+        
+                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
+                            </p>
+        
+                            @php $contador++; @endphp
+        
+                            @if ($contador % 2 == 0 || $loop->last)
+                                </div>
+                            @endif
+                        @endif
+                    @endforeach
+                @endif
+            </div>
         @endif
-        @endif
-        @endforeach
-        @endif
-    </div>
-    @endif
+        
     </div>
 
     {{-- 🔍 Lógica para saber si la última imagen fue sola en la hoja --}}

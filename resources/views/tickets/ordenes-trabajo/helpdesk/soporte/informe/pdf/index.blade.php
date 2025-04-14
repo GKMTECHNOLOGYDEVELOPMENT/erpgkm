@@ -199,6 +199,15 @@
                 </div>
             @endif
 
+            @if (!empty($motivoCondicion))
+                <!-- Sección de Motivo de Condición (igual a Falla Reportada) -->
+                <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
+                <div class="w-full text-xs mt-3">
+                    <p>{{ $motivoCondicion }}</p>
+                </div>
+            @endif
+
+
 
             @if ($transicionesStatusOt->isNotEmpty())
                 @php
@@ -239,7 +248,8 @@
                         <div class="h-24 flex items-end justify-center mb-1">
                             @if ($firmaTecnico)
                                 <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                                    class="h-20 max-w-[150px] object-contain -mt-4">
+                                    class="w-[90%] h-20 mx-auto object-contain"
+                                    style="transform: scale(1.5); transform-origin: bottom center; bottom: -30px; position: relative;">
                             @else
                                 <span class="text-xs text-gray-500">N/A</span>
                             @endif
@@ -259,7 +269,8 @@
                         <div class="h-24 flex items-end justify-center mb-1">
                             @if ($firmaCliente)
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                                    class="h-20 max-w-[150px] object-contain -mt-4">
+                                    class="w-[90%] h-20 mx-auto object-contain"
+                                    style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
                             @else
                                 <span class="text-xs text-gray-500 font-bold">Cliente no firmó</span>
                             @endif
@@ -293,7 +304,7 @@
                         $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
                     @endphp
 
-                    <!-- Primero las imágenes de la visita -->
+                    <!-- Primero las imágenes de la visita (incluye condiciones también) -->
                     @if ($hayFotosDeVisita)
                         @foreach ($imagenesAnexos as $anexo)
                             @if (!empty($anexo['foto_base64']))
@@ -308,7 +319,7 @@
                                     <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                 </div>
 
-                                <!-- Descripción centrada -->
+                                <!-- Descripción fija -->
                                 <p class="text-sm text-center text-gray-700 font-semibold mt-2">
                                     IMAGEN DE LA VISITA
                                 </p>
@@ -321,6 +332,7 @@
             @endif
             @endforeach
             @endif
+
 
             <!-- Luego las imágenes de los tickets anexos -->
             @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)

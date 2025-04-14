@@ -158,6 +158,14 @@
                 </div>
             @endif
 
+            @if (!empty($motivoCondicion))
+                <!-- Sección de Motivo de Condición (igual a Falla Reportada) -->
+                <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
+                <div class="w-full text-xs mt-3">
+                    <p>{{ $motivoCondicion }}</p>
+                </div>
+            @endif
+
 
             @if ($transicionesStatusOt->isNotEmpty())
                 @php
@@ -226,7 +234,8 @@
                         <div class="h-24 flex items-end justify-center mb-1">
                             @if ($firmaTecnico)
                                 <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                                    class="h-20 max-w-[150px] object-contain -mt-4">
+                                    class="w-[90%] h-20 mx-auto object-contain"
+                                    style="transform: scale(1.5); transform-origin: bottom center; bottom: -30px; position: relative;">
                             @else
                                 <span class="text-xs text-gray-500">N/A</span>
                             @endif
@@ -246,7 +255,8 @@
                         <div class="h-24 flex items-end justify-center mb-1">
                             @if ($firmaCliente)
                                 <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                                    class="h-20 max-w-[150px] object-contain -mt-4">
+                                    class="w-[90%] h-20 mx-auto object-contain"
+                                    style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
                             @else
                                 <span class="text-xs text-gray-500 font-bold">Cliente no firmó</span>
                             @endif
@@ -277,32 +287,30 @@
                         $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
                     @endphp
 
-                    <!-- Primero las imágenes de la visita -->
+                    <!-- Primero las imágenes de la visita (incluye condiciones también) -->
                     @if ($hayFotosDeVisita)
                         @foreach ($imagenesAnexos as $anexo)
                             @if (!empty($anexo['foto_base64']))
                                 @if ($contador % 2 == 0)
-                                    <!-- Primera hoja SIN SALTO DE PÁGINA -->
-                                    <div class="flex flex-col items-center">
-                                    @else
-                                        <!-- A partir de la segunda hoja, forzamos un salto de página -->
-                                        <div class="flex flex-col items-center" style="page-break-before: always;">
+                                    <!-- Abrir contenedor para 2 imágenes por página -->
+                                    <div class="flex flex-col items-center"
+                                        @if ($contador > 0) style="page-break-before: always;" @endif>
                                 @endif
 
                                 <!-- Imagen centrada -->
-                                <div class="img-container">
+                                <div class="img-container mb-6">
                                     <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                 </div>
 
-                                <!-- Descripción centrada -->
+                                <!-- Descripción fija -->
                                 <p class="text-sm text-center text-gray-700 font-semibold mt-2">
                                     IMAGEN DE LA VISITA
                                 </p>
 
                                 @php $contador++; @endphp
 
-                                @if ($contador % 2 == 0)
-                </div>
+                                @if ($contador % 2 == 0 || $loop->last)
+                </div> <!-- Cierra grupo de 2 imágenes -->
             @endif
             @endif
             @endforeach

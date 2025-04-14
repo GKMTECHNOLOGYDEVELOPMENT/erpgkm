@@ -2359,46 +2359,46 @@ class OrdenesTrabajoController extends Controller
 
 
 
- // Si el servicio es igual a 1, creamos el ticketflujo y actualizamos el ticket
-if ($request->servicio == 1) {
-    // Insertar en la tabla ticketflujo con idEstadflujo 9
-    $ticketflujo = DB::table('ticketflujo')->insertGetId([
-        'idTicket' => $request->idTickets,  // Usamos el idTickets de la solicitud
-        'idEstadflujo' => 9,               // Siempre 9 como estado (o el estado que corresponda)
-        'idUsuario' => auth()->id(),
-        'fecha_creacion' => now(),          // Fecha actual
-    ]);
+        // Si el servicio es igual a 1, creamos el ticketflujo y actualizamos el ticket
+        if ($request->servicio == 1) {
+            // Insertar en la tabla ticketflujo con idEstadflujo 9
+            $ticketflujo = DB::table('ticketflujo')->insertGetId([
+                'idTicket' => $request->idTickets,  // Usamos el idTickets de la solicitud
+                'idEstadflujo' => 9,               // Siempre 9 como estado (o el estado que corresponda)
+                'idUsuario' => auth()->id(),
+                'fecha_creacion' => now(),          // Fecha actual
+            ]);
 
-    // Verificamos si la inserción fue exitosa
-    if (!$ticketflujo) {
-        return response()->json(['error' => 'Error al crear ticketflujo.'], 500);
-    }
+            // Verificamos si la inserción fue exitosa
+            if (!$ticketflujo) {
+                return response()->json(['error' => 'Error al crear ticketflujo.'], 500);
+            }
 
-    // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
-    DB::table('tickets')
-        ->where('idTickets', $request->idTickets)
-        ->update(['idTicketFlujo' => $ticketflujo]);
+            // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
+            DB::table('tickets')
+                ->where('idTickets', $request->idTickets)
+                ->update(['idTicketFlujo' => $ticketflujo]);
 
-    // Verificamos si la actualización fue exitosa
-    if ($ticketflujo) {
-        Log::info('ticketflujo creado correctamente con idTicketFlujo: ' . $ticketflujo);
-    } else {
-        Log::error('Error al actualizar ticketflujo en tickets.');
-        return response()->json(['error' => 'Error al actualizar el ticketflujo.'], 500);
-    }
+            // Verificamos si la actualización fue exitosa
+            if ($ticketflujo) {
+                Log::info('ticketflujo creado correctamente con idTicketFlujo: ' . $ticketflujo);
+            } else {
+                Log::error('Error al actualizar ticketflujo en tickets.');
+                return response()->json(['error' => 'Error al actualizar el ticketflujo.'], 500);
+            }
 
-    // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
-    $actualizarVisita = DB::table('visitas')
-        ->where('idVisitas', $request->idVisitas)
-        ->update(['estadovisita' => 1]);  // Esto actualiza la variable estadovisita a 1
+            // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
+            $actualizarVisita = DB::table('visitas')
+                ->where('idVisitas', $request->idVisitas)
+                ->update(['estadovisita' => 1]);  // Esto actualiza la variable estadovisita a 1
 
-    // Verificamos si la actualización de visita fue exitosa
-    if (!$actualizarVisita) {
-        return response()->json(['error' => 'Error al actualizar estadovisita.'], 500);
-    } else {
-        Log::info('estado visita actualizado correctamente a 1 para idVisitas: ' . $request->idVisitas);
-    }
-}
+            // Verificamos si la actualización de visita fue exitosa
+            if (!$actualizarVisita) {
+                return response()->json(['error' => 'Error al actualizar estadovisita.'], 500);
+            } else {
+                Log::info('estado visita actualizado correctamente a 1 para idVisitas: ' . $request->idVisitas);
+            }
+        }
 
 
         if ($condicion) {
@@ -2971,6 +2971,13 @@ if ($request->servicio == 1) {
             'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
         ];
 
+        $condicion = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada) // ✅
+            ->first();
+
+        $motivoCondicion = $condicion->motivo ?? null;
+
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
         $marca->logo_base64 = null;
@@ -3031,6 +3038,20 @@ if ($request->servicio == 1) {
             });
         }
 
+        $imagenesCondiciones = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->whereNotNull('imagen')
+            ->get()
+            ->map(function ($condicion) {
+                return [
+                    'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
+                    'descripcion' => 'CONDICIÓN: ' . ($condicion->motivo ?? 'Sin descripción')
+                ];
+            });
+
+        $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
+
         // 🔹 Obtener imágenes de los tickets y optimizarlas
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
@@ -3070,6 +3091,7 @@ if ($request->servicio == 1) {
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'marca' => $marca,
             'logoGKM' => $logoGKM,
+            'motivoCondicion' => $motivoCondicion,
             'modoVistaPrevia' => false
         ])->render();
 
@@ -3086,7 +3108,7 @@ if ($request->servicio == 1) {
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="' . $orden->numero_ticket . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -3162,6 +3184,14 @@ if ($request->servicio == 1) {
             'serie' => $orden->serie ?? 'No especificado',
             'fallaReportada' => $orden->fallaReportada ?? 'No especificado' // 🔹 Agregamos la falla reportada
         ];
+
+        $condicion = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada) // ✅
+            ->first();
+
+        $motivoCondicion = $condicion->motivo ?? null;
+
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
         $marca->logo_base64 = null;
@@ -3243,6 +3273,20 @@ if ($request->servicio == 1) {
             });
         }
 
+        $imagenesCondiciones = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->whereNotNull('imagen')
+            ->get()
+            ->map(function ($condicion) {
+                return [
+                    'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
+                    'descripcion' => 'CONDICIÓN: ' . ($condicion->motivo ?? 'Sin descripción')
+                ];
+            });
+
+        $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
+
         // Obtener las imágenes de los tickets y optimizarlas
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
@@ -3284,6 +3328,7 @@ if ($request->servicio == 1) {
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'marca' => $marca,
             'logoGKM' => $logoGKM,
+            'motivoCondicion' => $motivoCondicion,
             'modoVistaPrevia' => false
         ])->render();
 
@@ -3301,7 +3346,7 @@ if ($request->servicio == 1) {
         // 🔹 RETORNAR PDF SIN GUARDARLO EN STORAGE
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="' . $orden->numero_ticket . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -3336,6 +3381,14 @@ if ($request->servicio == 1) {
             'serie' => $orden->serie ?? 'No especificado',
             'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
         ];
+
+        $condicion = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada) // ✅
+            ->first();
+
+        $motivoCondicion = $condicion->motivo ?? null;
+
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
         $marca->logo_base64 = null;
@@ -3383,6 +3436,21 @@ if ($request->servicio == 1) {
             ];
         });
 
+
+        $imagenesCondiciones = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)
+            ->whereNotNull('imagen')
+            ->get()
+            ->map(function ($condicion) {
+                return [
+                    'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
+                    'descripcion' => 'CONDICIÓN: ' . ($condicion->motivo ?? 'Sin descripción')
+                ];
+            });
+
+        $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
+
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
                 'foto_base64' => !empty($foto->foto)
@@ -3411,6 +3479,7 @@ if ($request->servicio == 1) {
             'imagenesFotosTickets' => $imagenesFotosTickets,
             'marca' => $marca,
             'logoGKM' => $logoGKM,
+            'motivoCondicion' => $motivoCondicion,
             'modoVistaPrevia' => $modoVistaPrevia
         ])->render();
     }
