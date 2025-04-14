@@ -24,13 +24,13 @@ class TicketExport implements
     WithEvents,
     WithCustomStartCell
 {
-    protected $marca;
+    protected $clienteGeneral;
     protected $startDate;
     protected $endDate;
 
-    public function __construct($marca = null, $startDate = null, $endDate = null)
+    public function __construct($clienteGeneral = null, $startDate = null, $endDate = null)
     {
-        $this->marca = $marca;
+        $this->clienteGeneral = $clienteGeneral;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
     }
@@ -47,7 +47,7 @@ class TicketExport implements
             'tecnico'
         ])
             ->where('idTipotickets', 1)
-            ->when($this->marca, fn($q) => $q->whereHas('modelo', fn($q2) => $q2->where('idMarca', $this->marca)))
+            ->when($this->clienteGeneral, fn($q) => $q->where('idClientegeneral', $this->clienteGeneral))
             ->when($this->startDate, fn($q) => $q->whereDate('fecha_creacion', '>=', $this->startDate))
             ->when($this->endDate, fn($q) => $q->whereDate('fecha_creacion', '<=', $this->endDate))
             ->get();
@@ -60,8 +60,6 @@ class TicketExport implements
         $estado = optional(optional($ticket->ticketflujo)->estadoflujo)->descripcion ?? 'N/A';
         $color = optional(optional($ticket->ticketflujo)->estadoflujo)->color ?? 'N/A';
         $tecnico = optional(optional(optional($ticket->seleccionarVisita)->visita)->tecnico)->Nombre ?? optional($ticket->tecnico)->Nombre ?? 'N/A';
-
-        // ✅ Traer la fecha desde visitas.fecha_programada
         $fecha_visita = optional(optional(optional($ticket->seleccionarVisita)->visita))->fecha_programada ?? 'N/A';
 
         return [
@@ -80,8 +78,6 @@ class TicketExport implements
             $color
         ];
     }
-
-
 
     public function startCell(): string
     {
@@ -150,7 +146,6 @@ class TicketExport implements
 
                 $highestRow = $sheet->getHighestRow();
 
-                // ✅ Estilos para las filas de datos (centrado + bordes)
                 $sheet->getStyle("A3:M{$highestRow}")->applyFromArray([
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -165,7 +160,6 @@ class TicketExport implements
                     ],
                 ]);
 
-                // ✅ Aplicar color de fondo según columna M
                 for ($row = 3; $row <= $highestRow; $row++) {
                     $color = $sheet->getCell("M{$row}")->getValue();
                     if ($color && $color !== 'N/A') {
@@ -178,7 +172,6 @@ class TicketExport implements
                     }
                 }
 
-                // ✅ Ocultar columna M (color)
                 $sheet->getColumnDimension('M')->setVisible(false);
             },
         ];

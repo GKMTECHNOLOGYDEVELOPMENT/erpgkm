@@ -152,7 +152,9 @@
 
                 <!-- Botón Exportar (Excel) -->
                 <div x-data="{ open: false }" class="relative">
-                    <a href="{{ route('ordenes.export.helpdesk.excel') }}" class="btn btn-success btn-sm">
+                    <a class="btn btn-success btn-sm"
+                        x-bind:href="`{{ route('ordenes.export.helpdesk.excel') }}?clienteGeneral=${clienteGeneralFilter}&startDate=${startDate}&endDate=${endDate}`">
+
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" viewBox="0 0 24 24"
                             fill="currentColor">
                             <path

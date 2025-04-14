@@ -3022,10 +3022,17 @@ class OrdenesHelpdeskController extends Controller
         }
     }
 
-    public function exportHelpdeskToExcel()
+    public function exportHelpdeskToExcel(Request $request)
     {
-        return Excel::download(new OrdenesHelpdeskExport, 'ordenes_helpdesk.xlsx');
+        return Excel::download(
+            new HelpdeskTicketExport(
+                $request->startDate,
+                $request->endDate
+            ),
+            'ordenes_helpdesk.xlsx'
+        );
     }
+    
 
 
 

@@ -1125,10 +1125,18 @@ class OrdenesTrabajoController extends Controller
         }
     }
 
-    public function exportToExcel()
+    public function exportToExcel(Request $request)
     {
-        return Excel::download(new TicketExport(), 'tickets.xlsx');
+        return Excel::download(
+            new TicketExport(
+                $request->clienteGeneral,
+                $request->startDate,
+                $request->endDate
+            ),
+            'tickets.xlsx'
+        );
     }
+    
 
 
     // Exportar todas las órdenes de trabajo a PDF
