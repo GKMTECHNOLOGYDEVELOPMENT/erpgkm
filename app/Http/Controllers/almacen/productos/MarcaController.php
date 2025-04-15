@@ -140,6 +140,17 @@ class MarcaController extends Controller
             return redirect()->route('marcas.index')->with('error', 'Ocurrió un error al actualizar la marca.');
         }
     }
+    public function getMarcasPorCliente($idClienteGeneral)
+    {
+        $marcas = \App\Models\Marca::select('marca.idMarca', 'marca.nombre')
+            ->join('marca_clientegeneral as mcg', 'marca.idMarca', '=', 'mcg.idMarca')
+            ->where('mcg.idClienteGeneral', $idClienteGeneral)
+            ->groupBy('marca.idMarca', 'marca.nombre')
+            ->orderBy('marca.nombre')
+            ->get();
+
+        return response()->json($marcas);
+    }
 
 
     public function destroy($id)

@@ -4,7 +4,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2@2.0.0/dist/css/nice-select2.css" />
     <!-- DataTables CSS -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -73,12 +72,12 @@
         </div>
 
         <!-- Filtros -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="flex flex-wrap items-end gap-4 mb-6">
             <!-- Fecha de Inicio -->
-            <div>
+            <div class="w-[260px]">
                 <label for="startDate" class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
                 <input type="text" id="startDate" x-model="startDate" placeholder="Seleccionar Fecha"
-                    class="form-input w-full" x-init="flatpickr($el, {
+                    class="form-input w-full px-3 py-2 text-sm" x-init="flatpickr($el, {
                         dateFormat: 'Y-m-d',
                         onChange: function(selectedDates, dateStr) {
                             startDate = dateStr;
@@ -86,11 +85,12 @@
                         }
                     })" />
             </div>
-            <!-- Fecha de Fin -->
-            <div>
+
+            <!-- Fecha Fin -->
+            <div class="w-[260px]">
                 <label for="endDate" class="block text-sm font-medium text-gray-700">Fecha Fin</label>
                 <input type="text" id="endDate" x-model="endDate" placeholder="Seleccionar Fecha"
-                    class="form-input w-full" x-init="flatpickr($el, {
+                    class="form-input w-full px-3 py-2 text-sm" x-init="flatpickr($el, {
                         dateFormat: 'Y-m-d',
                         onChange: function(selectedDates, dateStr) {
                             endDate = dateStr;
@@ -98,24 +98,16 @@
                         }
                     })" />
             </div>
-            <!-- Filtrar por Cliente General -->
-            <div x-init="fetch('/api/clientegeneralfiltros/1')
-                .then(response => response.json())
-                .then(data => {
-                    clienteGenerales = data;
-                    $nextTick(() => {
-                        NiceSelect.bind(document.getElementById('clienteGeneralFilter'));
-                    });
-                })" x-data="{ clienteGenerales: [] }">
-                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">
-                    Filtrar por Cliente General
-                </label>
 
-                <select id="clienteGeneralFilter" x-model="$root.clienteGeneralFilter"
-                    class="form-select w-full text-white-dark" placeholder="Todos los clientes generales"
-                    @change="
-            $root.isLoading = true; // 🔥 Activa el preloader general
-            $dispatch('cliente-general-cambio', $event.target.value)">
+            <!-- Cliente General -->
+            <div class="w-[260px]" x-init="fetch('/api/clientegeneralfiltros/1')
+                .then(res => res.json())
+                .then(data => clienteGenerales = data)">
+                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente
+                    General</label>
+                <select id="clienteGeneralFilter" x-model="clienteGeneralFilter"
+                    @change="onClienteGeneralChange($event.target.value)"
+                    class="form-select w-full px-3 py-2 text-sm border-gray-300 rounded">
                     <option value="">Todos los clientes generales</option>
                     <template x-for="cliente in clienteGenerales" :key="cliente.idClienteGeneral">
                         <option :value="cliente.idClienteGeneral" x-text="cliente.descripcion"></option>
@@ -123,66 +115,68 @@
                 </select>
             </div>
 
-            <!-- Botones de Acción -->
-            <div class="flex flex-wrap items-end gap-2">
-                <!-- Botón Agregar -->
-                <a href="{{ route('ordenes.createsmart') }}" class="btn btn-primary btn-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <!-- Línea vertical -->
+            <!-- Marca -->
+            <div class="w-[260px]">
+                <label for="marcaFilter" class="block text-sm font-medium text-gray-700">Filtrar por Marca</label>
+                <select x-model="marcaFilter" @change="fetchDataAndInitTable()" id="marcaFilter"
+                    class="form-select w-full px-3 py-2 text-sm border-gray-300 rounded">
+                    <option value="">Todas las marcas</option>
+                    <template x-for="marca in marcas" :key="marca.idMarca">
+                        <option :value="marca.idMarca" x-text="marca.nombre"></option>
+                    </template>
+                </select>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex items-end gap-2">
+                <!-- Agregar -->
+                <a href="{{ route('ordenes.createsmart') }}" class="btn btn-primary btn-sm px-3 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <line x1="12" y1="6" x2="12" y2="18" stroke-linecap="round" />
-                        <!-- Línea horizontal -->
                         <line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round" />
                     </svg>
                 </a>
 
-                <!-- Botón Exportar (Excel) -->
-                <div x-data="{ open: false }" class="relative">
-                    <a class="btn btn-success btn-sm"
-                        x-bind:href="`{{ route('ordenes.export.excel') }}?clienteGeneral=${clienteGeneralFilter}&startDate=${startDate}&endDate=${endDate}`">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" viewBox="0 0 24 24"
-                            fill="currentColor">
-                            <!-- Fondo del ícono de Excel -->
-                            <path
-                                d="M6 2C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2H6Z"
-                                fill="#107C41" />
-                            <!-- Parte superior de la hoja de Excel -->
-                            <path d="M14 2V8H20" fill="#0B5E30" />
-                            <!-- Letra X de Excel -->
-                            <path d="M9 13L15 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M15 13L9 19" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+                <!-- Exportar -->
+                <a class="btn btn-success btn-sm px-3 py-2"
+                    x-bind:href="`{{ route('ordenes.export.excel') }}?clienteGeneral=${clienteGeneralFilter}&startDate=${startDate}&endDate=${endDate}`">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" viewBox="0 0 24 24"
+                        fill="currentColor">
+                        <path d="M6 2C4.9 2 4 2.9 4 4v16c0 1.1 0.9 2 2 2h12c1.1 0 2-0.9 2-2V8l-6-6H6z" fill="#107C41" />
+                        <path d="M14 2v6h6" fill="#0B5E30" />
+                        <path d="M9 13l6 6M15 13l-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </a>
 
-                    </a>
-                </div>
-
-                <!-- Botón Refrescar con tamaño uniforme -->
-                <button class="btn btn-secondary btn-sm"
+                <!-- Refrescar -->
+                <button class="btn btn-secondary btn-sm px-3 py-2"
                     @click="
-                    startDate = '';
-                    endDate = '';
-                    marcaFilter = '';
-                    clienteGeneralFilter = '';
-                    document.getElementById('clienteGeneralFilter').value = '';
-                    NiceSelect.destroy(document.getElementById('clienteGeneralFilter'));
-                    NiceSelect.bind(document.getElementById('clienteGeneralFilter'));
-                    fetchDataAndInitTable()">
-                    <svg xmlns='http://www.w3.org/2000/svg' class='h-6 w-6 block mx-auto' fill='none'
-                        viewBox='0 0 24 24' stroke='currentColor' stroke-width='2'>
-                        <polyline points='23 4 23 10 17 10' stroke-linecap='round' stroke-linejoin='round' />
-                        <polyline points='1 20 1 14 7 14' stroke-linecap='round' stroke-linejoin='round' />
-                        <path d='M3.51 9a9 9 0 0114.36-3.36L23 10' stroke-linecap='round' stroke-linejoin='round' />
-                        <path d='M20.49 15a9 9 0 01-14.36 3.36L1 14' stroke-linecap='round' stroke-linejoin='round' />
+                startDate = '';
+                endDate = '';
+                marcaFilter = '';
+                clienteGeneralFilter = '';
+                fetchDataAndInitTable();">
+                    <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5 block mx-auto' fill='none'
+                        viewBox='0 0 24 24' stroke='currentColor'>
+                        <polyline points='23 4 23 10 17 10' stroke-linecap='round' />
+                        <polyline points='1 20 1 14 7 14' stroke-linecap='round' />
+                        <path d='M3.51 9a9 9 0 0114.36-3.36L23 10' stroke-linecap='round' />
+                        <path d='M20.49 15a9 9 0 01-14.36 3.36L1 14' stroke-linecap='round' />
                     </svg>
                 </button>
-
             </div>
         </div>
 
+
+
+
         <!-- Tabla y Paginación -->
         <div class="panel mt-6">
+            <!-- Scroll horizontal superior -->
+            <div id="scroll-top" class="custom-scroll overflow-x-auto mb-2 hidden" style="height: 12px;">
+                <div id="scroll-top-inner" style="height: 1px;"></div>
+            </div>
             <div class="relative overflow-x-auto custom-scroll">
                 <!-- Preloader -->
                 <div x-show="isLoading" x-transition class="absolute inset-0 flex items-center justify-center z-50">
@@ -225,11 +219,40 @@
             <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const topScroll = document.getElementById('scroll-top');
+                const topInner = document.getElementById('scroll-top-inner');
+                const scrolls = document.querySelectorAll('.custom-scroll');
+                const bottomScroll = scrolls[1]; // ✅ Usar el segundo .custom-scroll (el de la tabla)
+                const table = document.querySelector('#myTable1');
+
+                if (!topScroll || !topInner || !bottomScroll || !table) return;
+
+                // Ajustar el ancho del scroll superior
+                topInner.style.width = table.scrollWidth + 'px';
+                topScroll.classList.remove('hidden');
+
+                // Sincronizar scroll horizontal
+                topScroll.onscroll = () => {
+                    bottomScroll.scrollLeft = topScroll.scrollLeft;
+                };
+                bottomScroll.onscroll = () => {
+                    topScroll.scrollLeft = bottomScroll.scrollLeft;
+                };
+
+            }, 1000);
+        });
+    </script>
+
+
+
     <!-- Scripts adicionales -->
     <script src="{{ asset('assets/js/tickets/smart/list.js') }}"></script>
     <!-- DataTables JS -->
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2@2.0.0/dist/js/nice-select2.js"></script>
 
 
 

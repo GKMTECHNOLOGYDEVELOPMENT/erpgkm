@@ -44,7 +44,8 @@ class TicketExport implements
             'ticketflujo.estadoflujo',
             'transicion_status_tickets',
             'seleccionarVisita.visita.tecnico',
-            'tecnico'
+            'tecnico',
+            'marca'
         ])
             ->where('idTipotickets', 1)
             ->when($this->clienteGeneral, fn($q) => $q->where('idClientegeneral', $this->clienteGeneral))
@@ -68,6 +69,7 @@ class TicketExport implements
             $fecha_visita,
             optional(optional($ticket->modelo)->categoria)->nombre ?? 'N/A',
             optional($ticket->clientegeneral)->descripcion ?? 'N/A',
+            optional($ticket->marca)->nombre ?? 'N/A',
             optional($ticket->modelo)->nombre ?? 'N/A',
             $serie,
             optional($ticket->cliente)->nombre ?? 'N/A',
@@ -86,9 +88,10 @@ class TicketExport implements
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->mergeCells('A1:M1');
+        $sheet->mergeCells('A1:N1');
         $sheet->setCellValue('A1', 'REPORTE TICKETS DE SMART TV');
-        $sheet->getStyle('A1:M1')->applyFromArray([
+
+        $sheet->getStyle('A1:N1')->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
@@ -98,7 +101,7 @@ class TicketExport implements
             'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
         ]);
 
-        $sheet->getStyle('A2:M2')->applyFromArray([
+        $sheet->getStyle('A2:N2')->applyFromArray([
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
                 'vertical' => Alignment::VERTICAL_CENTER,
@@ -109,13 +112,14 @@ class TicketExport implements
             'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']]],
         ]);
 
-        foreach (range('A', 'M') as $col) {
+        foreach (range('A', 'N') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        $sheet->getStyle('G')->getNumberFormat()->setFormatCode('0');
-        $sheet->setAutoFilter('A2:M2');
+        $sheet->getStyle('H')->getNumberFormat()->setFormatCode('0'); // SERIE
+        $sheet->setAutoFilter('A2:N2');
     }
+
 
     public function registerEvents(): array
     {
@@ -129,6 +133,7 @@ class TicketExport implements
                     'F. VISITA',
                     'CATEGORÍA',
                     'GENERAL',
+                    'MARCA',
                     'MODELO',
                     'SERIE',
                     'CLIENTE',
@@ -146,7 +151,7 @@ class TicketExport implements
 
                 $highestRow = $sheet->getHighestRow();
 
-                $sheet->getStyle("A3:M{$highestRow}")->applyFromArray([
+                $sheet->getStyle("A3:N{$highestRow}")->applyFromArray([
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                         'vertical'   => Alignment::VERTICAL_CENTER,
@@ -160,10 +165,11 @@ class TicketExport implements
                     ],
                 ]);
 
+                // Aplica el color a toda la fila visible (A-M)
                 for ($row = 3; $row <= $highestRow; $row++) {
-                    $color = $sheet->getCell("M{$row}")->getValue();
+                    $color = $sheet->getCell("N{$row}")->getValue();
                     if ($color && $color !== 'N/A') {
-                        $sheet->getStyle("A{$row}:L{$row}")->applyFromArray([
+                        $sheet->getStyle("A{$row}:M{$row}")->applyFromArray([
                             'fill' => [
                                 'fillType'   => Fill::FILL_SOLID,
                                 'startColor' => ['rgb' => ltrim($color, '#')],
@@ -172,7 +178,8 @@ class TicketExport implements
                     }
                 }
 
-                $sheet->getColumnDimension('M')->setVisible(false);
+                // Oculta la columna de color
+                $sheet->getColumnDimension('N')->setVisible(false);
             },
         ];
     }
