@@ -1,73 +1,62 @@
-let tabla; // fuera del ready
+document.addEventListener("DOMContentLoaded", function () {
+    // Inicializa Flatpickr
+    flatpickr("#startDate", {
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        defaultDate: new Date()
+    });
 
-$(document).ready(function () {
-    flatpickr("#startDate", { dateFormat: "Y-m-d" });
-    flatpickr("#endDate", { dateFormat: "Y-m-d" });
+    flatpickr("#endDate", {
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        defaultDate: new Date()
+    });
 
-    function cargarTabla() {
-        const $tabla = $('#tablaAsistencias');
-
-        if ($.fn.DataTable.isDataTable($tabla)) {
-            tabla.clear().destroy();
+    // Inicializa DataTable
+    const tabla = $('#tablaAsistencias').DataTable({
+        processing: true,
+        ajax: {
+            url: '/asistencia/listado',
+            data: function (d) {
+                d.startDate = document.getElementById('startDate').value;
+                d.endDate = document.getElementById('endDate').value;
+            }
+        },
+        columns: [
+            { data: 'empleado' },
+            { data: 'fecha' },
+            { data: 'entrada' },
+            { data: 'ubicacion_entrada' },
+            { data: 'inicio_break' },
+            { data: 'fin_break' },
+            { data: 'salida' },
+            { data: 'ubicacion_salida' }
+        ],
+        language: {
+            processing: "Procesando...",
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de _MAX_ registros totales)",
+            loadingRecords: "Cargando...",
+            zeroRecords: "No se encontraron registros",
+            emptyTable: "No hay datos disponibles en la tabla",
+            paginate: {
+                first: "Primero",
+                previous: "Anterior",
+                next: "Siguiente",
+                last: "Último"
+            },
+            aria: {
+                sortAscending: ": activar para ordenar la columna ascendente",
+                sortDescending: ": activar para ordenar la columna descendente"
+            }
         }
 
-        tabla = $tabla.DataTable({
-            scrollX: true,
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: '/asistencia/listado',
-                data: function (d) {
-                    d.startDate = $('#startDate').val();
-                    d.endDate = $('#endDate').val();
-                }
-            },
-            columns: [
-                { data: 'empleado' },
-                { data: 'fecha' },
-                { data: 'entrada' },
-                { data: 'ubicacion_entrada' },
-                { data: 'inicio_break' },
-                { data: 'fin_break' },
-                { data: 'salida' },
-                { data: 'ubicacion_salida' }
-            ],
-            columnDefs: [
-                { targets: '_all', className: 'text-center' } // 🔥 CENTRAR TODO
-            ],
-            language: {
-                processing: "Procesando...",
-                lengthMenu: "Mostrar _MENU_ registros",
-                zeroRecords: "No se encontraron resultados",
-                emptyTable: "No hay datos disponibles en la tabla",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                infoFiltered: "(filtrado de _MAX_ registros totales)",
-                search: "Buscar:",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
-                },
-                loadingRecords: "Cargando...",
-                aria: {
-                    sortAscending: ": activar para ordenar ascendente",
-                    sortDescending: ": activar para ordenar descendente"
-                }
-            },
-            dom:
-                "<'flex items-center justify-between mb-4'<'dataTables_length'l><'dataTables_filter'f>>" +
-                "<'overflow-x-auto'tr>" +
-                "<'flex items-center justify-between mt-4'<'dataTables_info'i><'dataTables_paginate'p>>"
-        });
-    }
-
-    // carga inicial
-    cargarTabla();
-
-    // recargar al cambiar fechas
-    $('#startDate, #endDate').on('change', function () {
-        cargarTabla();
     });
+
+    // Refresca la tabla al cambiar fechas
+    document.getElementById('startDate').addEventListener('change', () => tabla.ajax.reload());
+    document.getElementById('endDate').addEventListener('change', () => tabla.ajax.reload());
 });

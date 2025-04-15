@@ -88,7 +88,54 @@
                 return toastr.error("Por favor, realiza la firma primero.");
             }
 
-            const firma = signaturePadCliente.toDataURL();
+            const canvas = signaturePadCliente.canvas;
+            const ctx = canvas.getContext("2d");
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+
+            let top = null,
+                bottom = null,
+                left = null,
+                right = null;
+
+            for (let y = 0; y < canvas.height; y++) {
+                for (let x = 0; x < canvas.width; x++) {
+                    const index = (y * canvas.width + x) * 4 + 3;
+                    if (pixels[index] !== 0) {
+                        if (top === null || y < top) top = y;
+                        if (bottom === null || y > bottom) bottom = y;
+                        if (left === null || x < left) left = x;
+                        if (right === null || x > right) right = x;
+                    }
+                }
+            }
+
+            if (top === null || bottom === null || left === null || right === null) {
+                return toastr.error("Firma inválida.");
+            }
+
+            const croppedWidth = right - left + 1;
+            const croppedHeight = bottom - top + 1;
+
+            const tempCanvas = document.createElement("canvas");
+            tempCanvas.width = canvas.width; // <- mantén el ancho original
+            tempCanvas.height = canvas.height; // <- mantén el alto original
+
+            const tempCtx = tempCanvas.getContext("2d");
+            tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+            // Dibuja la parte recortada centrada abajo
+            tempCtx.drawImage(
+                canvas,
+                left, top, croppedWidth, croppedHeight, // fuente
+                (canvas.width - croppedWidth) / 2, // destino x (centrado)
+                canvas.height - croppedHeight, // destino y (pegado abajo)
+                croppedWidth, croppedHeight // tamaño destino
+            );
+
+            const firma = tempCanvas.toDataURL("image/png");
+
             const ticketId = document.getElementById('ticketId').value;
             const visitaId = document.getElementById('visitaId').value;
 
