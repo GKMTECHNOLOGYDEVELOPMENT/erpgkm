@@ -19,11 +19,51 @@
             <div class="w-full h-[300px] border-2 border-gray-300 rounded-lg relative mt-2">
                 <canvas id="signatureCanvasCliente" class="w-full h-full"></canvas>
             </div>
+<!-- Verificamos si el cliente es una tienda -->
+@if($cliente && $cliente->esTienda == '1')
+   
+<!-- Si es tienda, mostrar estos campos -->
+    <div id="clienteInfo" data-estienda="{{ $cliente->esTienda }}" style="display: none;"></div>
+
+
+    <!-- Tipo de documento -->
+        <select
+            id="tipoDocumento"
+            class="form-control w-full mt-2 mb-2 border border-gray-300 rounded px-3 py-2">
+            <option value="">Seleccione tipo de documento</option>
+            <option value="DNI">DNI</option>
+            <option value="Carné de Extranjería">Carné de Extranjería</option>
+            <option value="Pasaporte">Pasaporte</option>
+            <option value="RUC">RUC</option>
+            <option value="Otros">Otros</option>
+        </select>
+
+        <!-- Número de documento -->
+        <input
+            type="text"
+            id="numeroDocumento"
+            class="form-control w-full mb-3 border border-gray-300 rounded px-3 py-2"
+            placeholder="Número de documento">
+
+        <!-- Campo para el nombre del encargado -->
+        <input
+            type="text"
+            id="nombreEncargado"
+            class="form-control w-full mt-2 mb-3 border border-gray-300 rounded px-3 py-2"
+            placeholder="Nombre del encargado">
+
+      
+    </div>
+@endif
+
+
+
 
             <!-- Botones -->
             <div class="flex space-x-3 mt-4">
                 <button type="button" onclick="clearSignature()" class="btn btn-danger">Limpiar</button>
                 <button type="button" onclick="saveSignature()" class="btn btn-success">Guardar</button>
+            </div>
             </div>
 
             <div class="mb-4">
@@ -44,81 +84,111 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script src="https://unpkg.com/alpinejs" defer></script>
 
-
     <script>
-        toastr.options = {
-            closeButton: true,
-            progressBar: true,
-            positionClass: "toast-top-right",
-            timeOut: 5000,
-        };
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: 5000,
+    };
 
-        let signaturePadCliente = null;
+    let signaturePadCliente = null;
 
-        function initializeSignature(canvasId) {
-            const canvas = document.getElementById(canvasId);
-            const ctx = canvas.getContext("2d");
+    function initializeSignature(canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext("2d");
 
-            function resizeCanvas() {
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                canvas.width = canvas.offsetWidth * ratio;
-                canvas.height = canvas.offsetHeight * ratio;
-                ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-            }
-
-            signaturePadCliente = new SignaturePad(canvas, {
-                penColor: "#000000",
-                backgroundColor: "rgba(255,255,255,0)",
-                velocityFilterWeight: 0.7,
-                minWidth: 0.5,
-                maxWidth: 2.5,
-                throttle: 16
-            });
-
-            resizeCanvas();
-            window.addEventListener("resize", resizeCanvas);
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
         }
 
-        function clearSignature() {
-            if (signaturePadCliente) signaturePadCliente.clear();
-        }
-
-        function saveSignature() {
-            if (!signaturePadCliente || signaturePadCliente.isEmpty()) {
-                return toastr.error("Por favor, realiza la firma primero.");
-            }
-
-            const firma = signaturePadCliente.toDataURL();
-            const ticketId = document.getElementById('ticketId').value;
-            const visitaId = document.getElementById('visitaId').value;
-
-            if (!visitaId) {
-                return toastr.error("No se encontró la visita asociada.");
-            }
-
-            fetch(`/ordenes/smart/${ticketId}/guardar-firma/${visitaId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        firma
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    toastr.success(data.message);
-                })
-                .catch(err => {
-                    console.error(err);
-                    toastr.error('Error al guardar la firma.');
-                });
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            initializeSignature("signatureCanvasCliente");
+        signaturePadCliente = new SignaturePad(canvas, {
+            penColor: "#000000",
+            backgroundColor: "rgba(255,255,255,0)",
+            velocityFilterWeight: 0.7,
+            minWidth: 0.5,
+            maxWidth: 2.5,
+            throttle: 16
         });
-    </script>
+
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+    }
+
+    function clearSignature() {
+        if (signaturePadCliente) signaturePadCliente.clear();
+    }
+
+    function saveSignature() {
+    if (!signaturePadCliente || signaturePadCliente.isEmpty()) {
+        return toastr.error("Por favor, realiza la firma primero.");
+    }
+
+    const firma = signaturePadCliente.toDataURL();
+    const ticketId = document.getElementById('ticketId').value;
+    const visitaId = document.getElementById('visitaId').value;
+
+    const clienteInfoEl = document.getElementById('clienteInfo');
+    const esTienda = clienteInfoEl?.dataset?.estienda; // 👈 así accedes al atributo
+
+    let nombreEncargado = '';
+    let tipoDocumento = '';
+    let numeroDocumento = '';
+
+    // Si es tienda, validamos y capturamos los datos
+    if (esTienda === '1') {
+        nombreEncargado = document.getElementById('nombreEncargado')?.value ?? '';
+        tipoDocumento = document.getElementById('tipoDocumento')?.value ?? '';
+        numeroDocumento = document.getElementById('numeroDocumento')?.value ?? '';
+
+        if (!nombreEncargado.trim()) {
+            return toastr.error("Por favor, ingresa el nombre del encargado.");
+        }
+        if (!tipoDocumento.trim()) {
+            return toastr.error("Por favor, selecciona el tipo de documento.");
+        }
+        if (!numeroDocumento.trim()) {
+            return toastr.error("Por favor, ingresa el número de documento.");
+        }
+    }
+
+    if (!visitaId) {
+        return toastr.error("No se encontró la visita asociada.");
+    }
+
+    // Enviar los datos
+    fetch(`/ordenes/helpdesk/soporte/${ticketId}/guardar-firma/${visitaId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            firma,
+            nombreEncargado,
+            tipoDocumento,
+            documento: numeroDocumento
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        toastr.success(data.message);
+    })
+    .catch(err => {
+        console.error(err);
+        toastr.error('Error al guardar la firma.');
+    });
+}
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initializeSignature("signatureCanvasCliente");
+    });
+</script>
+
+
 
 </x-layout.auth>

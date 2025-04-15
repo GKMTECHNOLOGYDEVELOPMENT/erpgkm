@@ -913,51 +913,56 @@ class OrdenesTrabajoController extends Controller
         return response()->json(['url' => $url]);
     }
 
-
     public function firmacliente($id, $idVisitas)
     {
         // Obtener el ticket
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-
+    
         // Obtener los estados de OTS
         $estadosOTS = DB::table('estado_ots')->get();
         $ticketId = $ticket->idTickets;
-
+    
         // Verificar si ya existe una firma para el ticket y la visita
         $firmaExistente = DB::table('firmas')
             ->where('idTickets', $id)
             ->where('idVisitas', $idVisitas)
-            ->first(); // Verificamos si ya existe una firma para esa visita y ticket
-
+            ->first();
+    
         // Si ya existe una firma, redirigimos a la página de error 404
         if ($firmaExistente) {
-            return view("pages.error404"); // Mostrar error 404 si ya existe la firma
+            return view("pages.error404");
         }
-
+    
         // Obtener la visita usando idVisitas
         $visita = DB::table('visitas')
             ->where('idVisitas', $idVisitas)
-            ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
+            ->where('idTickets', $id)
             ->first();
-
-        // Verificamos que la visita exista, si no, devolver algún mensaje de error
+    
+        // Verificamos que la visita exista
         if (!$visita) {
-            return view("pages.error404"); // Redirigimos a error 404 si la visita no existe
+            return view("pages.error404");
         }
-
-        // Pasamos todos los datos a la vista
+    
+        // Obtener el cliente para verificar 'esTienda'
+        $cliente = DB::table('cliente')
+            ->where('idCliente', $ticket->idCliente)
+            ->first();
+    
+        // Pasamos los datos a la vista, incluyendo el valor de 'esTienda' del cliente
         return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
             'ticket',
             'orden',
             'estadosOTS',
             'ticketId',
-            'idVisitas', // Asegúrate de pasar idVisitas aquí
-            'visita', // El objeto visita completo
-            'id'
+            'idVisitas',
+            'visita',
+            'id',
+            'cliente' // Asegúrate de pasar la variable del cliente
         ));
     }
-
+    
 
 
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
@@ -1555,6 +1560,7 @@ class OrdenesTrabajoController extends Controller
             'serie' => 'required|string|max:255',
             'fechaCompra' => 'required|date',
             'fallaReportada' => 'nullable|string',
+            'erma' => 'nullable|string|max:255',
         ]);
 
         // Encontrar la orden y actualizarla
@@ -1573,6 +1579,8 @@ class OrdenesTrabajoController extends Controller
         $orden->serie = $request->serie;
         $orden->fechaCompra = $request->fechaCompra;
         $orden->fallaReportada = $request->fallaReportada;
+        $orden->erma = $request->erma;
+
 
         // Guardar los cambios
         $orden->save();
