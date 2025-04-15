@@ -168,13 +168,14 @@
                 </div>
             @endif
 
-            @if (!empty($motivoCondicion))
-            <!-- Sección de Motivo de Condición (igual a Falla Reportada) -->
-            <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
-            <div class="w-full text-xs mt-3">
-                <p>{{ $motivoCondicion }}</p>
-            </div>
+            @if (trim($motivoCondicion ?? '') !== '')
+                <!-- Sección de Motivo de la Condición -->
+                <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
+                <div class="w-full text-xs mt-3">
+                    <p>{{ $motivoCondicion }}</p>
+                </div>
             @endif
+
 
 
             @if ($transicionesStatusOt->isNotEmpty())
@@ -215,79 +216,79 @@
 
 
 
-        @php
-            $hayFotosDeVisita =
-                !empty($imagenesAnexos) &&
-                collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
-        
-            $hayFotosDeTickets =
-                !empty($imagenesFotosTickets) &&
-                collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
-        @endphp
-        
-        @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
-            <!-- Nueva página con el título ANEXOS -->
-            <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
-                <h2>ANEXOS</h2>
-            </div>
-        
-            <div class="mt-4">
-                @php $contador = 0; @endphp
-        
-                {{-- Imágenes de la visita (anexos + condiciones) --}}
-                @if ($hayFotosDeVisita)
-                    @foreach ($imagenesAnexos as $anexo)
-                        @if (!empty($anexo['foto_base64']))
-                            @if ($contador % 2 == 0)
-                                <div class="flex flex-col items-center"
-                                    @if ($contador > 0) style="page-break-before: always;" @endif>
-                            @endif
-        
-                            <div class="img-container mb-6">
-                                <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
-                            </div>
-        
-                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                IMAGEN DE LA VISITA
-                            </p>
-        
-                            @php $contador++; @endphp
-        
-                            @if ($contador % 2 == 0 || $loop->last)
+            @php
+                $hayFotosDeVisita =
+                    !empty($imagenesAnexos) &&
+                    collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+
+                $hayFotosDeTickets =
+                    !empty($imagenesFotosTickets) &&
+                    collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+            @endphp
+
+            @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
+                <!-- Nueva página con el título ANEXOS -->
+                <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
+                    <h2>ANEXOS</h2>
+                </div>
+
+                <div class="mt-4">
+                    @php $contador = 0; @endphp
+
+                    {{-- Imágenes de la visita (anexos + condiciones) --}}
+                    @if ($hayFotosDeVisita)
+                        @foreach ($imagenesAnexos as $anexo)
+                            @if (!empty($anexo['foto_base64']))
+                                @if ($contador % 2 == 0)
+                                    <div class="flex flex-col items-center"
+                                        @if ($contador > 0) style="page-break-before: always;" @endif>
+                                @endif
+
+                                <div class="img-container mb-6">
+                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                 </div>
-                            @endif
+
+                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                    IMAGEN DE LA VISITA
+                                </p>
+
+                                @php $contador++; @endphp
+
+                                @if ($contador % 2 == 0 || $loop->last)
+                </div>
+            @endif
+            @endif
+            @endforeach
+            @endif
+
+            {{-- Imágenes de fotos ticket --}}
+            @if ($hayFotosDeTickets)
+                @foreach ($imagenesFotosTickets as $fotoTicket)
+                    @if (!empty($fotoTicket['foto_base64']))
+                        @if ($contador % 2 == 0)
+                            <div class="flex flex-col items-center"
+                                @if ($contador > 0) style="page-break-before: always;" @endif>
                         @endif
-                    @endforeach
-                @endif
-        
-                {{-- Imágenes de fotos ticket --}}
-                @if ($hayFotosDeTickets)
-                    @foreach ($imagenesFotosTickets as $fotoTicket)
-                        @if (!empty($fotoTicket['foto_base64']))
-                            @if ($contador % 2 == 0)
-                                <div class="flex flex-col items-center"
-                                    @if ($contador > 0) style="page-break-before: always;" @endif>
-                            @endif
-        
-                            <div class="img-container mb-6">
-                                <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del ticket">
-                            </div>
-        
-                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
-                            </p>
-        
-                            @php $contador++; @endphp
-        
-                            @if ($contador % 2 == 0 || $loop->last)
-                                </div>
-                            @endif
-                        @endif
-                    @endforeach
-                @endif
-            </div>
+
+                        <div class="img-container mb-6">
+                            <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del ticket">
+                        </div>
+
+                        <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                            {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
+                        </p>
+
+                        @php $contador++; @endphp
+
+                        @if ($contador % 2 == 0 || $loop->last)
+        </div>
         @endif
-        
+        @endif
+        @endforeach
+        @endif
+    </div>
+    @endif
+
     </div>
 
     {{-- 🔍 Lógica para saber si la última imagen fue sola en la hoja --}}
@@ -295,7 +296,9 @@
         $mostrarFirmasEnMismaHoja = false;
 
         if (!$modoVistaPrevia && $hayFotosDeTickets) {
-            $imagenesTicketsFiltradas = collect($imagenesFotosTickets)->filter(fn($f) => !empty($f['foto_base64']))->values();
+            $imagenesTicketsFiltradas = collect($imagenesFotosTickets)
+                ->filter(fn($f) => !empty($f['foto_base64']))
+                ->values();
 
             if ($imagenesTicketsFiltradas->isNotEmpty()) {
                 $mostrarFirmasEnMismaHoja = $contador % 2 !== 0;
@@ -338,7 +341,7 @@
                     @if ($firmaCliente)
                         <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                             class="w-[90%] h-20 mx-auto object-contain"
-                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
+                            style="transform: scale(1.5); position: relative; bottom: 10px;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
                             <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>

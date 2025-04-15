@@ -25,6 +25,7 @@
 <!-- Si es tienda, mostrar estos campos -->
     <div id="clienteInfo" data-estienda="{{ $cliente->esTienda }}" style="display: none;"></div>
 
+    <div class="form-group" 
 
     <!-- Tipo de documento -->
         <select

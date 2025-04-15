@@ -3,25 +3,20 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
 
     <style>
-        /* 💥 ESTILO RESPONSIVE FIJO (igual al de Smart) */
-        #tablaAsistencias_wrapper {
-            font-size: 13px;
-            width: 100%;
+        /* Agrupar buscador y paginación en la misma línea */
+        div.dataTables_wrapper .dataTables_filter,
+        div.dataTables_wrapper .dataTables_paginate {
+            display: inline-block;
+            vertical-align: middle;
         }
 
-        #tablaAsistencias {
-            table-layout: auto !important;
-            width: 100% !important;
+        div.dataTables_wrapper .dataTables_filter {
+            float: right;
         }
 
-        #tablaAsistencias th,
-        #tablaAsistencias td {
-            padding: 6px 10px !important;
-            white-space: nowrap;
-        }
-
-        #tablaAsistencias th {
-            white-space: nowrap;
+        div.dataTables_wrapper .dataTables_paginate {
+            float: right;
+            margin-right: 10px;
         }
     </style>
 
@@ -55,15 +50,16 @@
                             <th class="font-bold">UBICACIÓN SALIDA</th>
                         </tr>
                     </thead>
-                    
+
                 </table>
             </div>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="{{ asset('assets/js/asistencia/asistencia.js') }}"></script>
+
 </x-layout.default>
