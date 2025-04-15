@@ -414,6 +414,13 @@
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
+             <!-- erma -->
+             <div>
+                <label class="text-sm font-medium">N. erma</label>
+                <input id="erma" name="erma" type="text" class="form-input w-full"
+                    value="{{ $orden->erma }}">
+            </div>
+
 
 
             <!-- Botón de Guardar -->
@@ -441,19 +448,18 @@
 
 
 
-
-    <!-- Contenedor de Estados -->
-    <div class="mt-3 overflow-x-auto">
-        <div id="draggableContainer" class="flex space-x-2 w-max">
-            @foreach ($estadosFlujo as $estado)
-                <div class="draggable-state min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-move text-white text-center shadow-md"
-                    style="background-color: {{ $estado->color }}; color: black;" draggable="true"
-                    data-state="{{ $estado->descripcion }}">
-                    {{ $estado->descripcion }}
-                </div>
-            @endforeach
-        </div>
+<!-- Contenedor de Estados -->
+<div class="mt-3 overflow-x-auto">
+    <div id="draggableContainer" class="flex space-x-2 w-max">
+        @foreach ($estadosFlujo as $estado)
+            <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
+                style="background-color: {{ $estado->color }}; color: black;" data-state-description="{{ $estado->descripcion }}">
+                {{ $estado->descripcion }}
+            </div>
+        @endforeach
     </div>
+</div>
+
 
 
     <!-- Div para mostrar la última modificación (Responsive) -->
@@ -775,89 +781,72 @@
         }
 
 
+// Pasa los estados de flujo desde Blade a JavaScript
+const estadosFlujo = @json($estadosFlujo);
 
+// Función para obtener el ID del estado a partir de la descripción
+function getStateId(stateDescription) {
+    const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
+    return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
+}
 
+// Selecciona todos los botones de estado
+const estadoElements = document.querySelectorAll(".estado-button");
 
-        // Pasa los estados de flujo desde Blade a JavaScript
-        const estadosFlujo = @json($estadosFlujo);
+estadoElements.forEach(function(estadoElement) {
+    estadoElement.addEventListener("click", function() {
+        const stateDescription = estadoElement.dataset.stateDescription; // Obtén la descripción del estado desde el atributo dataset
 
-        // Función para obtener el ID del estado a partir de la descripción
-        function getStateId(stateDescription) {
-            const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
-            return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
-        }
+        // Obtener el ID del estado basado en la descripción
+        const estadoId = getStateId(stateDescription);
 
-        // Código drag & drop
-        const draggables = document.querySelectorAll(".draggable-state");
-        draggables.forEach(function(draggable) {
-            draggable.addEventListener("dragstart", function(e) {
-                e.dataTransfer.setData("text/plain", this.dataset
-                    .state); // Obtén la descripción del estado
-            });
-        });
+        if (estadoId !== 0) { // Verifica si el estado existe
+            const usuario = "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
+            const fecha = formatDate(new Date());
+            const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
 
-        const dropZone = document.getElementById("estadosTableBody");
-        dropZone.addEventListener("dragover", function(e) {
-            e.preventDefault();
-        });
-
-        dropZone.addEventListener("drop", function(e) {
-            e.preventDefault();
-            const stateDescription = e.dataTransfer.getData("text/plain");
-            if (stateDescription) {
-                const draggableEl = document.querySelector(
-                    "#draggableContainer .draggable-state[data-state='" + stateDescription + "']");
-                if (draggableEl) {
-                    draggableEl.remove();
-                }
-
-                const usuario = "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
-                const fecha = formatDate(new Date());
-                const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
-
-                // Obtener el ID del estado basado en la descripción
-                const estadoId = getStateId(stateDescription);
-
-                let rowClasses = "";
-                if (estadoId === 1) {
-                    rowClasses = "bg-primary/20 border-primary/20";
-                } else if (estadoId === 2) {
-                    rowClasses = "bg-secondary/20 border-secondary/20";
-                } else if (estadoId === 3) {
-                    rowClasses = "bg-success/20 border-success/20";
-                }
-
-                const newRow = document.createElement("tr");
-                newRow.className = rowClasses;
-                newRow.innerHTML = `
-            <td class="px-4 py-2 text-center">${stateDescription}</td>
-            <td class="px-4 py-2 text-center">${usuario}</td>
-            <td class="px-4 py-2 text-center">${fecha}</td>
-        `;
-                dropZone.appendChild(newRow);
-
-                // Enviar la solicitud AJAX para guardar el estado
-                axios.post("{{ route('guardarEstado') }}", {
-                        idTicket: ticketId,
-                        idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
-                        idUsuario: usuario,
-                    })
-                    .then(response => {
-                        // Si la respuesta es exitosa
-                        console.log("Estado guardado exitosamente");
-                        location.reload();
-                        // Actualizar log de modificación
-                        document.getElementById('ultimaModificacion').textContent =
-                            `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
-                    })
-                    .catch(error => {
-                        // Manejar el error si ocurre
-                        console.error("Error al guardar el estado", error);
-                    });
+            // Actualizar el DOM con el nuevo estado (esto lo podrías hacer como prefieras)
+            let rowClasses = "";
+            if (estadoId === 1) {
+                rowClasses = "bg-primary/20 border-primary/20";
+            } else if (estadoId === 2) {
+                rowClasses = "bg-secondary/20 border-secondary/20";
+            } else if (estadoId === 3) {
+                rowClasses = "bg-success/20 border-success/20";
             }
-        });
 
+            const newRow = document.createElement("tr");
+            newRow.className = rowClasses;
+            newRow.innerHTML = `
+                <td class="px-4 py-2 text-center">${stateDescription}</td>
+                <td class="px-4 py-2 text-center">${usuario}</td>
+                <td class="px-4 py-2 text-center">${fecha}</td>
+            `;
+            document.getElementById("estadosTableBody").appendChild(newRow);
 
+            // Enviar la solicitud AJAX para guardar el estado
+            axios.post("{{ route('guardarEstado') }}", {
+                    idTicket: ticketId,
+                    idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+                    idUsuario: usuario,
+                })
+                .then(response => {
+                    // Si la respuesta es exitosa
+                    console.log("Estado guardado exitosamente");
+                    location.reload();
+                    // Actualizar log de modificación
+                    document.getElementById('ultimaModificacion').textContent =
+                        `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
+                })
+                .catch(error => {
+                    // Manejar el error si ocurre
+                    console.error("Error al guardar el estado", error);
+                });
+        } else {
+            console.error("Estado no encontrado");
+        }
+    });
+});
 
 
         function reinitializeDraggable(element) {
@@ -1040,7 +1029,6 @@
     });
 </script>
 
-
 <script>
     $(document).ready(function() {
         var idOrden = @json($orden->idTickets);
@@ -1059,17 +1047,18 @@
                 serie: $('input[name="serie"]').val(),
                 fechaCompra: $('input[name="fechaCompra"]').val(),
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
+                erma: $('input[name="erma"]').val(), // Este campo ya no será obligatorio
             };
 
             // Mostrar los datos del formulario en la consola
             console.log("Datos del formulario:", formData);
 
-            // Verificar si algún campo obligatorio está vacío
+            // Verificar si algún campo obligatorio está vacío, excluyendo "erma"
             for (var key in formData) {
-                if (formData[key] === '' || formData[key] === null) {
+                if (key !== 'erma' && (formData[key] === '' || formData[key] === null)) {
                     toastr.error('El campo "' + key +
                         '" está vacío. Por favor, complete todos los campos.');
-                    return; // Detener el envío si algún campo está vacío
+                    return; // Detener el envío si algún campo obligatorio está vacío
                 }
             }
 
@@ -1134,3 +1123,4 @@
         });
     });
 </script>
+
