@@ -292,7 +292,17 @@
 
 
 
-            @if (!$modoVistaPrevia && (!empty($imagenesFotosTickets) || (!empty($imagenesAnexos) && count($imagenesAnexos) > 0)))
+            @php
+                $hayFotosDeVisita =
+                    !empty($imagenesAnexos) &&
+                    collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+                $hayFotosDeTickets =
+                    !empty($imagenesFotosTickets) &&
+                    collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+            @endphp
+
+            @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
+
                 <!-- Nueva página con el título ANEXOS -->
                 <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
                     <h2>ANEXOS</h2>
