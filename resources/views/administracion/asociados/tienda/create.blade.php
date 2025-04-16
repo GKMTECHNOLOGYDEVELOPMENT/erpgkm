@@ -148,6 +148,8 @@
                         placeholder="Longitud">
                     <!-- <div id="longitud-error" class="text-red-500 text-sm" style="display: none;"></div> -->
                 </div>
+                <input id="mapSearchBox" class="form-control" type="text" placeholder="Buscar lugar..." style="width: 100%; max-width: 400px; margin-bottom: 10px;">
+
                 <!-- Mapa -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium">Mapa</label>
@@ -164,10 +166,168 @@
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
 </script>
 
 
+<!-- SCRIPT FINAL -->
+<script>
+    let map, marker, geocoder, autocomplete;
+
+    function initMap() {
+        const latInput = document.getElementById("latitud");
+        const lngInput = document.getElementById("longitud");
+        const linkInput = document.getElementById("referencia");
+        const direccionInput = document.getElementById("dirrecion");
+        const mapContainer = document.getElementById("map");
+        const input = document.getElementById("mapSearchBox");
+
+        const initialLat = parseFloat(latInput.value) || -11.957242;
+        const initialLng = parseFloat(lngInput.value) || -77.0731862;
+
+        map = new google.maps.Map(mapContainer, {
+            center: { lat: initialLat, lng: initialLng },
+            zoom: 15,
+        });
+
+        marker = new google.maps.Marker({
+            position: { lat: initialLat, lng: initialLng },
+            map: map,
+            draggable: true,
+        });
+
+        geocoder = new google.maps.Geocoder();
+
+        // 🔄 Actualiza inputs + dirección
+        function updateInputs(lat, lng, direccion = "") {
+            latInput.value = lat.toFixed(6);
+            lngInput.value = lng.toFixed(6);
+            linkInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
+            if (direccion) {
+                direccionInput.value = direccion;
+            } else {
+                getAddressFromCoords(lat, lng);
+            }
+        }
+
+        // 🔁 Geocodificación inversa
+        function getAddressFromCoords(lat, lng) {
+            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    const direccion = results[0].formatted_address;
+                    direccionInput.value = direccion;
+                    marker.setTitle(direccion);
+                } else {
+                    console.warn("⚠️ Dirección no encontrada:", status);
+                }
+            });
+        }
+
+        // 🖱 Clic en el mapa
+        map.addListener("click", function (event) {
+            const lat = event.latLng.lat();
+            const lng = event.latLng.lng();
+            marker.setPosition({ lat, lng });
+            updateInputs(lat, lng);
+        });
+
+        // 📍 Drag marker
+        marker.addListener("dragend", () => {
+            const pos = marker.getPosition();
+            updateInputs(pos.lat(), pos.lng());
+        });
+
+        // 🔍 Autocompletado
+        autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo("bounds", map);
+
+        autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry || !place.geometry.location) return;
+
+            const loc = place.geometry.location;
+            map.panTo(loc);
+            map.setZoom(17);
+            marker.setPosition(loc);
+            updateInputs(loc.lat(), loc.lng(), place.formatted_address || "");
+        });
+
+        // ✏️ Inputs de coordenadas
+        function updateMarker() {
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lngInput.value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const newPos = { lat, lng };
+                marker.setPosition(newPos);
+                map.setCenter(newPos);
+                getAddressFromCoords(lat, lng);
+            }
+        }
+
+        latInput.addEventListener("change", updateMarker);
+        lngInput.addEventListener("change", updateMarker);
+
+        // URL Maps -> Coordenadas
+        function extractCoordinates(url) {
+            let lat, lng;
+            if (url.includes("/search/")) {
+                let clean = url.split("/search/")[1].split("?")[0].replace(/\+/g, " ");
+                let coords = clean.split(",").map(c => c.trim());
+                if (coords.length === 2) {
+                    lat = parseFloat(coords[0]);
+                    lng = parseFloat(coords[1]);
+                }
+            }
+            if (!lat || !lng) {
+                let regex = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g;
+                let matches = [...url.matchAll(regex)];
+                if (matches.length > 0) {
+                    let last = matches[matches.length - 1];
+                    lat = parseFloat(last[1]);
+                    lng = parseFloat(last[2]);
+                }
+            }
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                marker.setPosition({ lat, lng });
+                map.setCenter({ lat, lng });
+                updateInputs(lat, lng);
+            } else {
+                console.warn("⚠️ Coordenadas inválidas en el link");
+            }
+        }
+
+        async function expandShortURL(shortURL) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+                const data = await response.json();
+                if (data.expanded_url) {
+                    extractCoordinates(data.expanded_url);
+                }
+            } catch (err) {
+                console.error("❌ Error al expandir URL:", err);
+            }
+        }
+
+        linkInput.addEventListener("change", () => {
+            const link = linkInput.value.trim();
+            if (link.includes("maps.app.goo.gl")) {
+                expandShortURL(link);
+            } else {
+                extractCoordinates(link);
+            }
+        });
+
+        // Primera carga
+        updateInputs(initialLat, initialLng);
+    }
+
+            // ✅ Select2 personalizado
+            document.querySelectorAll('.select2').forEach(function (select) {
+            NiceSelect.bind(select, { searchable: true });
+        });
+    
+</script>
 
 
 <script>

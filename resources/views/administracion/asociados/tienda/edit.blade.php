@@ -49,7 +49,7 @@
                 <!-- Dirección -->
                 <div>
                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
-                    <input id="direccion" type="text" class="form-input w-full" placeholder="Ingrese la dirección"
+                    <input id="dirrecion" type="text" class="form-input w-full" placeholder="Ingrese la dirección"
                         name="direccion" required value="{{ old('direccion', $tienda->direccion) }}">
 
                     <div id="dirrecion-error" class="text-red-500 text-sm" style="display: none;"></div>
@@ -82,7 +82,7 @@
                 <div>
                     <label for="email" class="block text-sm font-medium">Email</label>
                     <input id="email" type="email" class="form-input w-full" placeholder="Ingrese el email"
-                        name="email" required value="{{ old('email', $tienda->email) }}">
+                        name="email" value="{{ old('email', $tienda->email) }}">
                     <div id="email-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
 
@@ -165,6 +165,8 @@
                     <input id="longitud" type="text" name="lng" class="form-input w-full"
                         placeholder="Longitud" value="{{ old('lng', $tienda->lng) }}" readonly>
                 </div>
+
+                <input id="mapSearchBox" class="form-control" type="text" placeholder="Buscar lugar..." style="width: 100%; max-width: 400px; margin-bottom: 10px;">
 
 
                 <!-- Mapa -->
@@ -275,7 +277,7 @@
 
                 // Definir los campos a validar
                 const camposRequeridos = [
-                    '#ruc', '#nombre', '#email', '#celular', '#referencia', '#dirrecion',
+                    '#ruc', '#nombre', '#celular', '#referencia', '#dirrecion',
                     '#departamento', '#provincia', '#distrito', '#cliente', '#idCliente'
                 ];
 
@@ -486,107 +488,171 @@
         });
     </script>
 
+<script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const latInput = document.getElementById("latitud");
-            const lngInput = document.getElementById("longitud");
-            const linkInput = document.getElementById("referencia");
-            const mapContainer = document.getElementById("map");
+<script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
+</script>
 
-            const initialLat = parseFloat(latInput.value) || -11.957242;
-            const initialLng = parseFloat(lngInput.value) || -77.0731862;
 
-            window.map = L.map("map").setView([initialLat, initialLng], 15);
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: "&copy; OpenStreetMap contributors"
-            }).addTo(window.map);
+<!-- SCRIPT FINAL -->
+<script>
+    let map, marker, geocoder, autocomplete;
 
-            let marker = L.marker([initialLat, initialLng], {
-                draggable: true
-            }).addTo(window.map);
+    function initMap() {
+        const latInput = document.getElementById("latitud");
+        const lngInput = document.getElementById("longitud");
+        const linkInput = document.getElementById("referencia");
+        const direccionInput = document.getElementById("dirrecion");
+        const mapContainer = document.getElementById("map");
+        const input = document.getElementById("mapSearchBox");
 
-            function updateMarker() {
-                const lat = parseFloat(latInput.value);
-                const lng = parseFloat(lngInput.value);
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    marker.setLatLng([lat, lng]);
-                    window.map.setView([lat, lng], 15);
-                }
-            }
+        const initialLat = parseFloat(latInput.value) || -11.957242;
+        const initialLng = parseFloat(lngInput.value) || -77.0731862;
 
-            function extractCoordinates(url) {
-                let lat, lng;
-
-                if (url.includes("/search/")) {
-                    let cleanURL = url.split("/search/")[1].split("?")[0].replace(/\+/g, " ");
-                    let coords = cleanURL.split(",").map(c => c.trim());
-                    if (coords.length === 2) {
-                        lat = parseFloat(coords[0]);
-                        lng = parseFloat(coords[1]);
-                    }
-                }
-
-                if (!lat || !lng) {
-                    let regexClassic = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g;
-                    let matchesClassic = [...url.matchAll(regexClassic)];
-                    if (matchesClassic.length > 0) {
-                        let lastMatch = matchesClassic[matchesClassic.length - 1];
-                        lat = parseFloat(lastMatch[1]);
-                        lng = parseFloat(lastMatch[2]);
-                    }
-                }
-
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    latInput.value = lat;
-                    lngInput.value = lng;
-                    updateMarker();
-                }
-            }
-
-            async function expandShortURL(shortURL) {
-                try {
-                    let response = await fetch(
-                        `http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
-                    let data = await response.json();
-                    if (data.expanded_url) {
-                        extractCoordinates(data.expanded_url);
-                    }
-                } catch (error) {
-                    console.error("Error al expandir el link corto:", error);
-                }
-            }
-
-            linkInput.addEventListener("change", function() {
-                let link = linkInput.value.trim();
-                if (link !== "") {
-                    if (link.includes("maps.app.goo.gl")) {
-                        expandShortURL(link);
-                    } else {
-                        extractCoordinates(link);
-                    }
-                }
-            });
-
-            latInput.addEventListener("change", updateMarker);
-            lngInput.addEventListener("change", updateMarker);
-
-            marker.on("dragend", function() {
-                const position = marker.getLatLng();
-                latInput.value = position.lat.toFixed(6);
-                lngInput.value = position.lng.toFixed(6);
-            });
+        map = new google.maps.Map(mapContainer, {
+            center: { lat: initialLat, lng: initialLng },
+            zoom: 15,
         });
 
-        // Inicializar Select2
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
-            });
+        marker = new google.maps.Marker({
+            position: { lat: initialLat, lng: initialLng },
+            map: map,
+            draggable: true,
         });
-    </script>
+
+        geocoder = new google.maps.Geocoder();
+
+        // 🔄 Actualiza inputs + dirección
+        function updateInputs(lat, lng, direccion = "") {
+            latInput.value = lat.toFixed(6);
+            lngInput.value = lng.toFixed(6);
+            linkInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
+            if (direccion) {
+                direccionInput.value = direccion;
+            } else {
+                getAddressFromCoords(lat, lng);
+            }
+        }
+
+        // 🔁 Geocodificación inversa
+        function getAddressFromCoords(lat, lng) {
+            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    const direccion = results[0].formatted_address;
+                    direccionInput.value = direccion;
+                    marker.setTitle(direccion);
+                } else {
+                    console.warn("⚠️ Dirección no encontrada:", status);
+                }
+            });
+        }
+
+        // 🖱 Clic en el mapa
+        map.addListener("click", function (event) {
+            const lat = event.latLng.lat();
+            const lng = event.latLng.lng();
+            marker.setPosition({ lat, lng });
+            updateInputs(lat, lng);
+        });
+
+        // 📍 Drag marker
+        marker.addListener("dragend", () => {
+            const pos = marker.getPosition();
+            updateInputs(pos.lat(), pos.lng());
+        });
+
+        // 🔍 Autocompletado
+        autocomplete = new google.maps.places.Autocomplete(input);
+        autocomplete.bindTo("bounds", map);
+
+        autocomplete.addListener("place_changed", () => {
+            const place = autocomplete.getPlace();
+            if (!place.geometry || !place.geometry.location) return;
+
+            const loc = place.geometry.location;
+            map.panTo(loc);
+            map.setZoom(17);
+            marker.setPosition(loc);
+            updateInputs(loc.lat(), loc.lng(), place.formatted_address || "");
+        });
+
+        // ✏️ Inputs de coordenadas
+        function updateMarker() {
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lngInput.value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const newPos = { lat, lng };
+                marker.setPosition(newPos);
+                map.setCenter(newPos);
+                getAddressFromCoords(lat, lng);
+            }
+        }
+
+        latInput.addEventListener("change", updateMarker);
+        lngInput.addEventListener("change", updateMarker);
+
+        // URL Maps -> Coordenadas
+        function extractCoordinates(url) {
+            let lat, lng;
+            if (url.includes("/search/")) {
+                let clean = url.split("/search/")[1].split("?")[0].replace(/\+/g, " ");
+                let coords = clean.split(",").map(c => c.trim());
+                if (coords.length === 2) {
+                    lat = parseFloat(coords[0]);
+                    lng = parseFloat(coords[1]);
+                }
+            }
+            if (!lat || !lng) {
+                let regex = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g;
+                let matches = [...url.matchAll(regex)];
+                if (matches.length > 0) {
+                    let last = matches[matches.length - 1];
+                    lat = parseFloat(last[1]);
+                    lng = parseFloat(last[2]);
+                }
+            }
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                marker.setPosition({ lat, lng });
+                map.setCenter({ lat, lng });
+                updateInputs(lat, lng);
+            } else {
+                console.warn("⚠️ Coordenadas inválidas en el link");
+            }
+        }
+
+        async function expandShortURL(shortURL) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+                const data = await response.json();
+                if (data.expanded_url) {
+                    extractCoordinates(data.expanded_url);
+                }
+            } catch (err) {
+                console.error("❌ Error al expandir URL:", err);
+            }
+        }
+
+        linkInput.addEventListener("change", () => {
+            const link = linkInput.value.trim();
+            if (link.includes("maps.app.goo.gl")) {
+                expandShortURL(link);
+            } else {
+                extractCoordinates(link);
+            }
+        });
+
+        // Primera carga
+        updateInputs(initialLat, initialLng);
+    }
+
+            // ✅ Select2 personalizado
+            document.querySelectorAll('.select2').forEach(function (select) {
+            NiceSelect.bind(select, { searchable: true });
+        });
+    
+</script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>

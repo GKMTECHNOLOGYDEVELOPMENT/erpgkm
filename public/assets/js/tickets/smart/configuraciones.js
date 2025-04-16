@@ -51,57 +51,27 @@ $(document).ready(function () {
 
 
 
+// document.addEventListener("DOMContentLoaded", function () {
+//     // Inicializar mapa con Leaflet
+//     const map = L.map('map').setView([-12.0464, -77.0428], 13);
+//     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+//         maxZoom: 19,
+//         attribution: '© OpenStreetMap contributors'
+//     }).addTo(map);
 
+//     let marker;
 
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Inicializar mapa con Leaflet
-    const map = L.map('map').setView([-12.0464, -77.0428], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    let marker;
-
-    // function buscarDireccion() {
-    //     const direccion = document.getElementById("direccion").value.trim();
-    //     if (direccion) {
-    //         const url =
-    //             `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(direccion)}`;
-    //         $.get(url, function(data) {
-    //             if (data && data.length > 0) {
-    //                 const lat = data[0].lat;
-    //                 const lon = data[0].lon;
-    //                 map.setView([lat, lon], 13);
-    //                 if (marker) {
-    //                     marker.setLatLng([lat, lon]);
-    //                 } else {
-    //                     marker = L.marker([lat, lon]).addTo(map);
-    //                 }
-    //                 document.getElementById('latitud').value = lat;
-    //                 document.getElementById('longitud').value = lon;
-    //             } else {
-    //                 alert("No se encontraron resultados para esa dirección.");
-    //             }
-    //         });
-    //     }
-    // }
-    // document.getElementById("direccion").addEventListener("input", function() {
-    //     if (this.value.trim() !== "") {
-    //         buscarDireccion();
-    //     }
-    // });
-    map.on('click', function (e) {
-        document.getElementById('latitud').value = e.latlng.lat;
-        document.getElementById('longitud').value = e.latlng.lng;
-        if (marker) {
-            marker.setLatLng(e.latlng);
-        } else {
-            marker = L.marker(e.latlng).addTo(map);
-        }
-    });
-});
+ 
+//     map.on('click', function (e) {
+//         document.getElementById('latitud').value = e.latlng.lat;
+//         document.getElementById('longitud').value = e.latlng.lng;
+//         if (marker) {
+//             marker.setLatLng(e.latlng);
+//         } else {
+//             marker = L.marker(e.latlng).addTo(map);
+//         }
+//     });
+// });
 
 
 document.addEventListener("DOMContentLoaded", function () {
