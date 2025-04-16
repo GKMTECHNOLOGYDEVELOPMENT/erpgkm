@@ -3345,7 +3345,8 @@ class OrdenesTrabajoController extends Controller
             'marca' => $marca,
             'logoGKM' => $logoGKM,
             'motivoCondicion' => $motivoCondicion,
-            'modoVistaPrevia' => false
+            'modoVistaPrevia' => false,
+            'firma' => $firma, // ✅ AÑADE ESTO
         ])->render();
 
         // 🔹 GENERAR PDF EN MEMORIA CON BROWSERSHOT
