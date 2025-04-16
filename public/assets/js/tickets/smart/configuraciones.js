@@ -1,46 +1,56 @@
-
 $(document).ready(function () {
-    // Inicializar nice-select2 en todos los selects con clase .select2
     document.querySelectorAll('.select2').forEach(function (select) {
-        NiceSelect.bind(select, {
-            searchable: true
-        });
+        NiceSelect.bind(select, { searchable: true });
     });
 
-    // Cambio de marca para cargar modelos vía AJAX
+    // Ocultar inicialmente el contenedor del select modelo
+    $('.select-modelo-container').hide();
+
     $('#idMarca').change(function () {
         var idMarca = $(this).val();
         if (idMarca) {
+            $('#preload-modelo').show();
+
             $.ajax({
                 url: '/modelos/' + idMarca,
                 type: 'GET',
                 dataType: 'json',
                 success: function (data) {
                     var $modeloSelect = $('#idModelo');
-                    $modeloSelect.empty();
-                    $modeloSelect.append(
-                        '<option value="" disabled selected>Seleccionar Modelo</option>'
-                    );
+
+                    // 🔥 Elimina el nice-select anterior del DOM
+                    $modeloSelect.next('.nice-select').remove();
+
+                    // 🔥 Reinicia el select
+                    $modeloSelect.empty().append('<option value="" disabled selected>Seleccionar Modelo</option>');
+
                     $.each(data, function (key, modelo) {
-                        $modeloSelect.append('<option value="' + modelo
-                            .idModelo + '">' + modelo.nombre + '</option>');
+                        $modeloSelect.append('<option value="' + modelo.idModelo + '">' + modelo.nombre + '</option>');
                     });
-                    // Si existe instancia previa se destruye y se reinicializa (solo para selects que usen nice-select2)
-                    if ($modeloSelect.data('niceSelectInstance')) {
-                        $modeloSelect.data('niceSelectInstance').destroy();
-                    }
-                    // Nota: idModelo no usará nice-select2
+
+                    // Mostrar contenedor
+                    $('.select-modelo-container').show();
+
+                    // 🔁 Re-bind
+                    const instance = NiceSelect.bind($modeloSelect[0], { searchable: true });
+                    $modeloSelect.data('niceSelectInstance', instance);
                 },
                 error: function (xhr, status, error) {
                     console.error("Error en AJAX:", error);
+                },
+                complete: function () {
+                    $('#preload-modelo').hide();
                 }
             });
         } else {
-            $('#idModelo').empty();
-            $('#idModelo').append('<option value="" disabled selected>Seleccionar Modelo</option>');
+            $('#idModelo').empty().append('<option value="" disabled selected>Seleccionar Modelo</option>');
+            $('.select-modelo-container').hide();
         }
     });
 });
+
+
+
 
 
 

@@ -172,8 +172,8 @@
                 </div>
 
 
+                <!-- Modelo -->
                 <div>
-
                     <div class="flex items-center space-x-2">
                         <label for="idModelo" class="block text-sm font-medium">Modelo</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openModeloModal = true">
@@ -183,10 +183,14 @@
                             </svg>
                         </button>
                     </div>
-                    <select id="idModelo" name="idModelo" class="form-input w-full">
-                        <option value="" selected>Seleccionar Modelo</option>
-                    </select>
+                    <!-- Select para los modelos con preload -->
+                    <div class="relative">
+                        <select style="display: none;" id="idModelo" name="idModelo">
+                            <!-- Opciones dinámicas se insertarán vía JS -->
+                        </select>
+                    </div>
                 </div>
+
 
                 <!-- Serie -->
                 <div>
@@ -907,7 +911,8 @@
         // Validación en tiempo real para campos obligatorios
         const camposObligatorios = [
             'idCliente', 'idClienteGeneral',
-            'direccion', 'fechaCompra', 'idMarca', 'idTienda', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket', 'linkubicacion'
+            'direccion', 'fechaCompra', 'idMarca', 'idTienda', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket',
+            'linkubicacion'
         ];
 
         camposObligatorios.forEach(campo => {
@@ -994,16 +999,17 @@
             let errorMessages = []; // Para almacenar los mensajes de error
 
             camposObligatorios.forEach(campo => {
-    const input = document.getElementById(campo);
-    const label = document.querySelector(`label[for="${campo}"]`);
-    const nombreCampo = label ? label.innerText.trim() : campo;
+                const input = document.getElementById(campo);
+                const label = document.querySelector(`label[for="${campo}"]`);
+                const nombreCampo = label ? label.innerText.trim() : campo;
 
-    if (input.value.trim() === "") {
-        errorFound = true;
-        validateCampo(input); // Ejecuta la validación visual
-        errorMessages.push(`El campo "${nombreCampo}" está vacío. Por favor, complete el campo.`);
-    }
-});
+                if (input.value.trim() === "") {
+                    errorFound = true;
+                    validateCampo(input); // Ejecuta la validación visual
+                    errorMessages.push(
+                        `El campo "${nombreCampo}" está vacío. Por favor, complete el campo.`);
+                }
+            });
 
 
             // Validación específica para nroTicket (si está vacío o con error)
