@@ -178,7 +178,7 @@ public function update(Request $request, $id)
         'direccion' => 'required|string|max:255',
         'idCliente' => 'required|exists:cliente,idCliente',
         'celular' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
+        'email' => 'nullable|email|max:255',
         'referencia' => 'nullable|string|max:255',
         'lat' => 'required|numeric',
         'lng' => 'required|numeric',
