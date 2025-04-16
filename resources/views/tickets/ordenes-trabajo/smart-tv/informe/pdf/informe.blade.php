@@ -350,10 +350,12 @@
                 </div>
                 <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                 <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                <p class="text-xs uppercase">{{ $orden->cliente->nombre ?? 'N/A' }}</p>
+                <p class="text-xs text-gray-600 uppercase tracking-wide">
+                    {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
+                </p>
                 <p class="text-xs text-gray-500">
-                    {{ $orden->cliente->tipodocumento->nombre ?? 'Documento' }}:
-                    {{ $orden->cliente->documento ?? 'No disponible' }}
+                    {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
+                    {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
                 </p>
             </div>
         </div>
