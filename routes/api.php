@@ -74,6 +74,13 @@ Route::get('/verificarRegistroAnexo/{idVisitas}', [OrdenesTrabajoController::cla
 // Route::get('/ticket/{ticketId}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
 
 Route::get('/clientegeneralfiltros/{tipo}', [ClienteGeneralController::class, 'clientegeneralFiltros']);
+// routes/api.php
+Route::get('/marcasfiltros', function () {
+    return \App\Models\Marca::select('idMarca', 'nombre')->get();
+});
+
+Route::get('/marcasporcliente/{idClienteGeneral}', [MarcaController::class, 'getMarcasPorCliente']);
+
 Route::post('/guardarEstado', [OrdenesTrabajoController::class, 'guardarEstado']);
 Route::get('/obtenerJustificacion', [OrdenesTrabajoController::class, 'obtenerJustificacion']);
 Route::post('/guardarImagenes', [OrdenesTrabajoController::class, 'guardarImagenes']);
@@ -143,7 +150,7 @@ Route::post('/agregar/tecnicoapoyo', [OrdenesTrabajoController::class, 'agregarT
 
 Route::get('/datos-envio/{ticketId}', function ($ticketId) {
     $tipo = request('tipo', 2); // Por defecto tipo 2 como pediste
-    
+
     $datos = DB::table('datos_envio')
         ->where('idTickets', $ticketId)
         ->where('tipo', $tipo)
@@ -174,7 +181,7 @@ Route::get('/tipos-envio', function () {
 Route::post('/guardar-datos-envio', function (Request $request) {
     try {
         $datos = $request->all();
-        
+
         $existente = DB::table('datos_envio')
             ->where('idTickets', $datos['idTickets'])
             ->where('tipo', $datos['tipo'])

@@ -17,7 +17,7 @@ use App\Http\Controllers\administracion\CompraController;
 use App\Http\Controllers\administracion\asistencias\AsistenciaController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\ModelosController;
-use App\Http\Controllers\almacen\productos\TipoArticuloController;  
+use App\Http\Controllers\almacen\productos\TipoArticuloController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\CategoriasController;
 use App\Http\Controllers\configuracion\ConfiguracionController;

@@ -5,6 +5,7 @@ document.addEventListener('alpine:init', () => {
         marcas: [],
         marcaFilter: '',
         clienteGeneralFilter: '',
+        clienteGenerales: [], // 👈 OBLIGATORIO
         startDate: '',
         endDate: '',
         isLoading: false,
@@ -23,7 +24,7 @@ document.addEventListener('alpine:init', () => {
                     this.isLoading = true; // ✅ Mostrar preloader
                     this.fetchDataAndInitTable();
                 });
-                
+
 
             });
         },
@@ -36,27 +37,27 @@ document.addEventListener('alpine:init', () => {
                     word-wrap: break-word;
                     max-width: 1500px;
                 }
-        
+
                 /* Ajusta fuente y paddings */
                 #myTable1_wrapper {
                     font-size: 13px;
                     width: 100%;
                 }
-        
+
                 #myTable1 {
                     table-layout: auto !important;
                     width: 100% !important;
                 }
-        
+
                 #myTable1 th, #myTable1 td {
                     padding: 6px 10px !important;
                 }
-        
+
                 /* Evita el encogimiento innecesario de columnas */
                 #myTable1 th {
                     white-space: nowrap;
                 }
-        
+
                 /* Opcional: define un ancho mínimo para columnas importantes */
                 #myTable1 td:nth-child(3),
                 #myTable1 th:nth-child(3) {
@@ -65,7 +66,29 @@ document.addEventListener('alpine:init', () => {
             `;
             document.head.appendChild(style);
         },
-        
+
+        onClienteGeneralChange(clienteId) {
+            this.isLoading = true;
+            this.clienteGeneralFilter = clienteId;
+
+            if (!clienteId) {
+                // 🔁 Si selecciona "Todos", traer todas las marcas
+                this.fetchMarcas();
+                this.marcaFilter = '';
+                this.fetchDataAndInitTable();
+                return;
+            }
+
+            fetch(`/api/marcasporcliente/${clienteId}`)
+                .then(res => res.json())
+                .then(data => {
+                    this.marcas = data;
+                    this.marcaFilter = '';
+                    this.fetchDataAndInitTable();
+                });
+        },
+
+
 
         fetchMarcas() {
             fetch('/api/marcas')
@@ -78,10 +101,32 @@ document.addEventListener('alpine:init', () => {
             this.isLoading = true;
 
 
-            // 🔹 Destruir DataTable antes de inicializarlo de nuevo
             if ($.fn.DataTable.isDataTable('#myTable1')) {
                 $('#myTable1').DataTable().destroy();
+
+                // 🔥 Reparar encabezado roto por Alpine.js (por si acaso)
+                $('#myTable1 thead').remove();
+                $('#myTable1').prepend(`
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ACCIONES</th>
+                            <th>N. TICKET</th>
+                            <th>F. TICKET</th>
+                            <th>F. VISITA</th>
+                            <th>CATEGORIA</th>
+                            <th>CLIENTE GENERAL</th>
+                            <th>MARCA</th>
+                            <th>MODELO</th>
+                            <th>SERIE</th>
+                            <th>CLIENTE</th>
+                            <th>DIRECCIÓN</th>
+                            <th>MÁS</th>
+                        </tr>
+                    </thead>
+                `);
             }
+
 
             this.datatable1 = $('#myTable1').DataTable({
                 processing: false,
@@ -95,8 +140,10 @@ document.addEventListener('alpine:init', () => {
                         d.clienteGeneral = this.clienteGeneralFilter;
                         d.startDate = this.startDate;
                         d.endDate = this.endDate;
+                        d.marca = this.marcaFilter; // ✅ AÑADIDO PARA FILTRAR MARCA
                     },
-                    
+
+
 
                     beforeSend: () => {
                         this.isLoading = true; // 🔹 Muestra el preloader antes de la petición
@@ -109,7 +156,7 @@ document.addEventListener('alpine:init', () => {
                         this.ordenesData = json.data;
                         return json.data;
                     }
-                    
+
                 },
                 columns: [
                     { title: 'ID', data: "idTickets" }, // 👈 NUEVA COLUMNA
@@ -146,8 +193,8 @@ document.addEventListener('alpine:init', () => {
                 ],
 
                 columnDefs: [
-                    { targets: 0, visible: false }, // ✅ OCULTA ID
-                    { targets: 7, visible: false }, // 👈 Oculta MARCA (ajusta el índice si cambió)
+                    { targets: 0, visible: false }, // Oculta ID
+                    { targets: 6, className: 'hidden' }, // Oculta CLIENTE GENERAL sin romper nada
                     { targets: "_all", className: "text-center" },
                     { targets: 10, width: "200px", className: "text-wrap" } // DIRECCIÓN
                 ],
