@@ -7,6 +7,18 @@
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+
+<style>
+    .nice-select {
+        line-height: 2.25rem !important;
+        /* ajusta altura */
+        height: 2.5rem !important;
+        /* igual que un input base */
+        padding: 0 1rem !important;
+        font-size: 0.875rem;
+        /* text-sm */
+    }
+</style>
 <!-- Contenedor Alpine.js para el botón y el modal -->
 <div x-data="{ openModal: false }">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
@@ -414,8 +426,8 @@
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
-             <!-- erma -->
-             <div>
+            <!-- erma -->
+            <div>
                 <label class="text-sm font-medium">N. erma</label>
                 <input id="erma" name="erma" type="text" class="form-input w-full"
                     value="{{ $orden->erma }}">
@@ -448,17 +460,18 @@
 
 
 
-<!-- Contenedor de Estados -->
-<div class="mt-3 overflow-x-auto">
-    <div id="draggableContainer" class="flex space-x-2 w-max">
-        @foreach ($estadosFlujo as $estado)
-            <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
-                style="background-color: {{ $estado->color }}; color: black;" data-state-description="{{ $estado->descripcion }}">
-                {{ $estado->descripcion }}
-            </div>
-        @endforeach
+    <!-- Contenedor de Estados -->
+    <div class="mt-3 overflow-x-auto">
+        <div id="draggableContainer" class="flex space-x-2 w-max">
+            @foreach ($estadosFlujo as $estado)
+                <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
+                    style="background-color: {{ $estado->color }}; color: black;"
+                    data-state-description="{{ $estado->descripcion }}">
+                    {{ $estado->descripcion }}
+                </div>
+            @endforeach
+        </div>
     </div>
-</div>
 
 
 
@@ -781,72 +794,74 @@
         }
 
 
-// Pasa los estados de flujo desde Blade a JavaScript
-const estadosFlujo = @json($estadosFlujo);
+        // Pasa los estados de flujo desde Blade a JavaScript
+        const estadosFlujo = @json($estadosFlujo);
 
-// Función para obtener el ID del estado a partir de la descripción
-function getStateId(stateDescription) {
-    const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
-    return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
-}
+        // Función para obtener el ID del estado a partir de la descripción
+        function getStateId(stateDescription) {
+            const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
+            return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
+        }
 
-// Selecciona todos los botones de estado
-const estadoElements = document.querySelectorAll(".estado-button");
+        // Selecciona todos los botones de estado
+        const estadoElements = document.querySelectorAll(".estado-button");
 
-estadoElements.forEach(function(estadoElement) {
-    estadoElement.addEventListener("click", function() {
-        const stateDescription = estadoElement.dataset.stateDescription; // Obtén la descripción del estado desde el atributo dataset
+        estadoElements.forEach(function(estadoElement) {
+            estadoElement.addEventListener("click", function() {
+                const stateDescription = estadoElement.dataset
+                    .stateDescription; // Obtén la descripción del estado desde el atributo dataset
 
-        // Obtener el ID del estado basado en la descripción
-        const estadoId = getStateId(stateDescription);
+                // Obtener el ID del estado basado en la descripción
+                const estadoId = getStateId(stateDescription);
 
-        if (estadoId !== 0) { // Verifica si el estado existe
-            const usuario = "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
-            const fecha = formatDate(new Date());
-            const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
+                if (estadoId !== 0) { // Verifica si el estado existe
+                    const usuario =
+                        "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
+                    const fecha = formatDate(new Date());
+                    const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
 
-            // Actualizar el DOM con el nuevo estado (esto lo podrías hacer como prefieras)
-            let rowClasses = "";
-            if (estadoId === 1) {
-                rowClasses = "bg-primary/20 border-primary/20";
-            } else if (estadoId === 2) {
-                rowClasses = "bg-secondary/20 border-secondary/20";
-            } else if (estadoId === 3) {
-                rowClasses = "bg-success/20 border-success/20";
-            }
+                    // Actualizar el DOM con el nuevo estado (esto lo podrías hacer como prefieras)
+                    let rowClasses = "";
+                    if (estadoId === 1) {
+                        rowClasses = "bg-primary/20 border-primary/20";
+                    } else if (estadoId === 2) {
+                        rowClasses = "bg-secondary/20 border-secondary/20";
+                    } else if (estadoId === 3) {
+                        rowClasses = "bg-success/20 border-success/20";
+                    }
 
-            const newRow = document.createElement("tr");
-            newRow.className = rowClasses;
-            newRow.innerHTML = `
+                    const newRow = document.createElement("tr");
+                    newRow.className = rowClasses;
+                    newRow.innerHTML = `
                 <td class="px-4 py-2 text-center">${stateDescription}</td>
                 <td class="px-4 py-2 text-center">${usuario}</td>
                 <td class="px-4 py-2 text-center">${fecha}</td>
             `;
-            document.getElementById("estadosTableBody").appendChild(newRow);
+                    document.getElementById("estadosTableBody").appendChild(newRow);
 
-            // Enviar la solicitud AJAX para guardar el estado
-            axios.post("{{ route('guardarEstado') }}", {
-                    idTicket: ticketId,
-                    idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
-                    idUsuario: usuario,
-                })
-                .then(response => {
-                    // Si la respuesta es exitosa
-                    console.log("Estado guardado exitosamente");
-                    location.reload();
-                    // Actualizar log de modificación
-                    document.getElementById('ultimaModificacion').textContent =
-                        `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
-                })
-                .catch(error => {
-                    // Manejar el error si ocurre
-                    console.error("Error al guardar el estado", error);
-                });
-        } else {
-            console.error("Estado no encontrado");
-        }
-    });
-});
+                    // Enviar la solicitud AJAX para guardar el estado
+                    axios.post("{{ route('guardarEstado') }}", {
+                            idTicket: ticketId,
+                            idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+                            idUsuario: usuario,
+                        })
+                        .then(response => {
+                            // Si la respuesta es exitosa
+                            console.log("Estado guardado exitosamente");
+                            location.reload();
+                            // Actualizar log de modificación
+                            document.getElementById('ultimaModificacion').textContent =
+                                `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
+                        })
+                        .catch(error => {
+                            // Manejar el error si ocurre
+                            console.error("Error al guardar el estado", error);
+                        });
+                } else {
+                    console.error("Estado no encontrado");
+                }
+            });
+        });
 
 
         function reinitializeDraggable(element) {
@@ -980,40 +995,46 @@ estadoElements.forEach(function(estadoElement) {
 
 <script>
     document.getElementById('idMarca').addEventListener('change', function() {
-        var marcaId = this.value; // Obtén el ID de la marca seleccionada
-        console.log('Marca seleccionada:', marcaId); // Para depurar
+        var marcaId = this.value;
+        console.log('Marca seleccionada:', marcaId);
 
-        // Si se seleccionó una marca
         if (marcaId) {
             console.log('Haciendo la petición para obtener los modelos asociados a esta marca...');
 
-            // Realizamos la petición para obtener los modelos asociados a esta marca
             fetch(`/get-modelos/${marcaId}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Datos de modelos recibidos:', data); // Para depurar
+                    console.log('Datos de modelos recibidos:', data);
 
-                    // Obtener el select de "Modelo"
                     var modeloSelect = document.getElementById('idModelo');
 
-                    // Limpiar las opciones anteriores del select de Modelo
-                    modeloSelect.innerHTML = '<option value="" disabled>Seleccionar Modelo</option>';
+                    // 🔥 Elimina el NiceSelect anterior si existe
+                    const niceSelect = modeloSelect.nextElementSibling;
+                    if (niceSelect && niceSelect.classList.contains('nice-select')) {
+                        niceSelect.remove();
+                    }
 
-                    // Comprobar si hay datos
+                    // 🔄 Limpiar y agregar opciones
+                    modeloSelect.innerHTML =
+                        '<option value="" disabled selected>Seleccionar Modelo</option>';
+
                     if (data.length > 0) {
-                        console.log('Hay modelos asociados a esta marca. Agregando opciones...');
-                        // Si hay modelos, agregarlos al select
                         data.forEach(function(modelo) {
                             var option = document.createElement('option');
                             option.value = modelo.idModelo;
                             option.textContent = modelo.nombre;
                             modeloSelect.appendChild(option);
                         });
-                        // Mostrar el select de Modelo
+
                         modeloSelect.style.display = 'block';
+
+                        // 🔁 Re-bind de NiceSelect con buscador
+                        NiceSelect.bind(modeloSelect, {
+                            searchable: true
+                        });
+
                     } else {
                         console.log('No hay modelos asociados a esta marca.');
-                        // Si no hay modelos, ocultar el select
                         modeloSelect.style.display = 'none';
                     }
                 })
@@ -1022,8 +1043,7 @@ estadoElements.forEach(function(estadoElement) {
                     alert('Hubo un error al cargar los modelos.');
                 });
         } else {
-            console.log('No se seleccionó ninguna marca. Ocultando el select de Modelo...');
-            // Si no hay marca seleccionada, ocultar el select de Modelo
+            console.log('No se seleccionó ninguna marca.');
             document.getElementById('idModelo').style.display = 'none';
         }
     });
@@ -1123,4 +1143,3 @@ estadoElements.forEach(function(estadoElement) {
         });
     });
 </script>
-

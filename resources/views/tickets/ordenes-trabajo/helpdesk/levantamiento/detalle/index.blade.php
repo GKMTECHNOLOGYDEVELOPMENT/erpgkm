@@ -50,42 +50,89 @@
             </button>
         </div>
 
-        <!-- Contenido del modal con tabla -->
-        <div class="mt-4 overflow-y-auto">
-            <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
-                <thead class="bg-gray-100 dark:bg-gray-800">
-                    <tr>
-                        <th
-                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
-                            Campo</th>
-                        <th
-                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
-                            Valor Antiguo</th>
-                        <th
-                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
-                            Valor Nuevo</th>
-                        <th
-                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
-                            Fecha de Modificación</th>
-                        <th
-                            class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold w-1/5 text-gray-900 dark:text-gray-200">
-                            Usuario</th>
-                    </tr>
-                </thead>
-                <tbody id="historialModificaciones">
-                    <!-- Preload visible mientras se cargan los datos -->
-                    <tr id="preload" style="display: none;">
-                        <td colspan="5" class="text-center text-gray-900 dark:text-gray-200">
-                            <span class="w-5 h-5 m-auto mb-10">
-                                <span
-                                    class="animate-ping inline-flex h-full w-full rounded-full bg-info dark:bg-blue-500"></span>
-                            </span>
-                            Cargando datos...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Tabs dentro del modal -->
+        <div class="mt-4">
+            <div x-data="{ activeTab: 'estados' }" class="flex flex-col h-full">
+
+                <!-- Botones de Tabs -->
+                <div class="flex space-x-4 border-b border-gray-300 dark:border-gray-700">
+                    <button @click="activeTab = 'estados'"
+                        :class="activeTab === 'estados' ? 'border-b-2 border-red-600 text-red-600' :
+                            'text-gray-500 hover:text-gray-700'"
+                        class="pb-2 font-semibold text-sm uppercase">
+                        Estados
+                    </button>
+                    <button @click="activeTab = 'historial'"
+                        :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
+                            'text-gray-500 hover:text-gray-700'"
+                        class="pb-2 font-semibold text-sm uppercase">
+                        Historial de Cambios
+                    </button>
+                </div>
+
+                <!-- TAB: Estados -->
+                <div x-show="activeTab === 'estados'" class="overflow-x-auto mt-4">
+                    <table class="min-w-[600px] border-collapse w-full">
+                        <thead>
+                            <tr class="bg-gray-200 dark:bg-gray-800">
+                                <th class="px-4 py-2 text-center">Estado</th>
+                                <th class="px-4 py-2 text-center">Usuario</th>
+                                <th class="px-4 py-2 text-center">Fecha</th>
+                                <th class="px-4 py-2 text-center">Más</th>
+                            </tr>
+                        </thead>
+                        <tbody id="estadosTableBody">
+                            <!-- Aquí se llenarán los estados de flujo -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TAB: Historial -->
+                <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
+                    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
+                        <thead class="bg-gray-100 dark:bg-gray-800">
+                            <tr>
+                                <th
+                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
+                                    Campo</th>
+                                <th
+                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
+                                    Valor Antiguo</th>
+                                <th
+                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
+                                    Valor Nuevo</th>
+                                <th
+                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
+                                    Fecha de Modificación</th>
+                                <th
+                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
+                                    Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historialModificaciones">
+                            <!-- Preload visible mientras se cargan los datos -->
+                            <tr id="preload" style="display: none;">
+                                <td colspan="5" class="text-center text-gray-900 dark:text-gray-200">
+                                    <span class="w-5 h-5 m-auto mb-10">
+                                        <span
+                                            class="animate-ping inline-flex h-full w-full rounded-full bg-info dark:bg-blue-500"></span>
+                                    </span>
+                                    Cargando datos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Paginación para historial -->
+                    <div class="flex justify-center mt-4">
+                        <ul id="pagination" class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
+                            <!-- Se genera dinámicamente -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
+
 
         <!-- Contenedor de paginación -->
         <div class="flex justify-center mt-4">
@@ -358,24 +405,6 @@
 <div id="estadosCard" class="mt-4 p-4">
     <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
         style="background-color: {{ $colorEstado }};">Historial de Estados</span>
-    <!-- Tabla con scroll horizontal -->
-    <div class="overflow-x-auto mt-4">
-        <table class="min-w-[600px] border-collapse">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="px-4 py-2 text-center">Estado</th>
-                    <th class="px-4 py-2 text-center">Usuario</th>
-                    <th class="px-4 py-2 text-center">Fecha</th>
-                    <th class="px-4 py-2 text-center">Más</th>
-                </tr>
-            </thead>
-            <tbody id="estadosTableBody">
-                <!-- Aquí se llenarán los estados de flujo -->
-            </tbody>
-        </table>
-    </div>
-
-
 
     <!-- Contenedor de Estados -->
     <div class="mt-3 overflow-x-auto">
