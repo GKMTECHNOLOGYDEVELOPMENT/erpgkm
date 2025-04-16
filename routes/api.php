@@ -200,3 +200,14 @@ Route::post('/guardar-datos-envio', function (Request $request) {
         ], 500);
     }
 });
+
+
+Route::get('/tienda/{id}', function ($id) {
+    $tienda = App\Models\Tienda::find($id);
+
+    if (!$tienda) {
+        return response()->json(['error' => 'Tienda no encontrada'], 404);
+    }
+
+    return response()->json($tienda);
+});
