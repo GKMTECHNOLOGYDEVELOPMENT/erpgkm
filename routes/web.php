@@ -208,7 +208,7 @@ Route::prefix('categoria')->name('categorias.')->group(function () {
     Route::post('/store', [CategoriaController::class, 'store'])->name('store'); // Guardar una nueva categoría
     Route::get('/{id}/edit', [CategoriaController::class, 'edit'])->name('edit'); // Editar una categoría
     Route::put('/update/{id}', [CategoriaController::class, 'update'])->name('update'); // Actualizar una categoría
-    Route::delete('/{id}', [CategoriaController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
+    // Route::delete('/{id}', [CategoriaController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
     Route::get('/reporte-categorias', [CategoriaController::class, 'exportAllPDF'])->name('categorias.pdf'); // Exportar todas las categorías a PDF
     Route::get('/get-all', [CategoriaController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
     Route::post('/check-nombre', [CategoriaController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
@@ -216,6 +216,9 @@ Route::prefix('categoria')->name('categorias.')->group(function () {
         return Excel::download(new CategoriaExport, 'categorias.xlsx');
     })->name('exportExcel');
 });
+
+
+Route::delete('categorias/{id}', [CategoriaController::class, 'destroy'])->name('destroy');
 
 /// FIN CATEGORIA ///
 

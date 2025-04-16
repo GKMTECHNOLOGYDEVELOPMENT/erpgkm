@@ -85,16 +85,32 @@ class CategoriaController extends Controller
     {
         try {
             $categoria = Categoria::findOrFail($id);
-
-            // Eliminar la categoría
+    
+            // Intentar eliminar
             $categoria->delete();
-
+    
             return response()->json([
                 'success' => true,
                 'message' => 'Categoría eliminada con éxito',
             ]);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                // Código de error para violación de integridad referencial
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar la categoría porque está asociada a uno o más equipos.',
+                ], 409); // 409 Conflict
+            }
+    
+            // Otros errores de base de datos
             Log::error('Error al eliminar la categoría: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al eliminar la categoría.',
+                'error' => $e->getMessage(),
+            ], 500);
+        } catch (\Exception $e) {
+            Log::error('Error inesperado al eliminar la categoría: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un error al eliminar la categoría.',
@@ -102,6 +118,7 @@ class CategoriaController extends Controller
             ], 500);
         }
     }
+    
 
     public function exportAllPDF()
     {

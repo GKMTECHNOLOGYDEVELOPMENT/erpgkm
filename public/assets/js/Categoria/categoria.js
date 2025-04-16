@@ -118,38 +118,35 @@ document.addEventListener('alpine:init', () => {
                 if (result.value) {
                     console.log(`Iniciando eliminación de la categoría con ID: ${idCategoria}`);
 
-                    // Hacer la solicitud de eliminación
                     fetch(`/categorias/${idCategoria}`, {
                         method: 'DELETE',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // Obtiene el token CSRF
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                             'Content-Type': 'application/json',
                         },
                     })
-                        .then((response) => {
-                            if (!response.ok) throw new Error('Error al eliminar categoría');
-                            return response.json();
-                        })
-                        .then((data) => {
-                            // Mostrar notificación de éxito
-                            new window.Swal({
-                                title: '¡Eliminado!',
-                                text: 'La categoría ha sido eliminada con éxito.',
-                                icon: 'success',
-                                customClass: 'sweet-alerts',
-                            }).then(() => {
-                                location.reload();
-                            });
-                        })
-                        .catch((error) => {
-                            // Mostrar notificación de error
-                            new window.Swal({
-                                title: 'Error',
-                                text: 'Ocurrió un error al eliminar la categoría.',
-                                icon: 'error',
-                                customClass: 'sweet-alerts',
-                            });
+                    .then(async (response) => {
+                        const data = await response.json();
+                        if (!response.ok) throw new Error(data.message || 'Error al eliminar categoría');
+                    
+                        new window.Swal({
+                            title: '¡Eliminado!',
+                            text: data.message,
+                            icon: 'success',
+                            customClass: 'sweet-alerts',
+                        }).then(() => {
+                            location.reload();
                         });
+                    })
+                    .catch((error) => {
+                        new window.Swal({
+                            title: 'Error',
+                            text: error.message || 'Ocurrió un error al eliminar la categoría.',
+                            icon: 'error',
+                            customClass: 'sweet-alerts',
+                        });
+                    });
+                    
                 } else {
                     console.log('Eliminación cancelada.');
                 }
