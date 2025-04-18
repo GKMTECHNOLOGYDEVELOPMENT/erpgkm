@@ -1,5 +1,3 @@
-
-
 <x-layout.default>
     <script defer src="/assets/js/apexcharts.js"></script>
     <div x-data="sales">
@@ -8,7 +6,7 @@
                 <a href="javascript:;" class="text-primary hover:underline">Dashboard</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                <span>Sales</span>
+                <span>Ventas</span>
             </li>
         </ul>
 
@@ -16,7 +14,7 @@
             <div class="grid xl:grid-cols-3 gap-6 mb-6">
                 <div class="panel h-full xl:col-span-2">
                     <div class="flex items-center dark:text-white-light mb-5">
-                        <h5 class="font-semibold text-lg">Revenue</h5>
+                        <h5 class="font-semibold text-lg">Ganancia</h5>
                         <div x-data="dropdown" @click.outside="open = false"
                             class="dropdown ltr:ml-auto rtl:mr-auto">
                             <a href="javascript:;" @click="toggle">
@@ -24,8 +22,8 @@
                                     viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="5" cy="12" r="2" stroke="currentColor"
                                         stroke-width="1.5" />
-                                    <circle opacity="0.5" cx="12" cy="12" r="2"
-                                        stroke="currentColor" stroke-width="1.5" />
+                                    <circle opacity="0.5" cx="12" cy="12" r="2" stroke="currentColor"
+                                        stroke-width="1.5" />
                                     <circle cx="19" cy="12" r="2" stroke="currentColor"
                                         stroke-width="1.5" />
                                 </svg>
@@ -38,7 +36,7 @@
                             </ul>
                         </div>
                     </div>
-                    <p class="text-lg dark:text-white-light/90">Total Profit <span
+                    <p class="text-lg dark:text-white-light/90">Beneficio Total <span
                             class="text-primary ml-2">$10,840</span></p>
                     <div class="relative overflow-hidden">
                         <div x-ref="revenueChart" class="bg-white dark:bg-black rounded-lg">
@@ -54,7 +52,7 @@
 
                 <div class="panel h-full">
                     <div class="flex items-center mb-5">
-                        <h5 class="font-semibold text-lg dark:text-white-light">Sales By Category</h5>
+                        <h5 class="font-semibold text-lg dark:text-white-light">Ventas por Categoria</h5>
                     </div>
                     <div class="overflow-hidden">
                         <div x-ref="salesByCategory" class="bg-white dark:bg-black rounded-lg">
@@ -72,8 +70,9 @@
             <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                 <div class="panel h-full sm:col-span-2 xl:col-span-1">
                     <div class="flex items-center mb-5">
-                        <h5 class="font-semibold text-lg dark:text-white-light">Daily Sales <span
-                                class="block text-white-dark text-sm font-normal">Go to columns for details.</span></h5>
+                        <h5 class="font-semibold text-lg dark:text-white-light">Ventas Diarias <span
+                                class="block text-white-dark text-sm font-normal">Vaya a las columnas para obtener mas
+                                detalles.</span></h5>
                         <div class="ltr:ml-auto rtl:mr-auto relative">
                             <div
                                 class="w-11 h-11 text-warning bg-[#ffeccb] dark:bg-warning dark:text-[#ffeccb] grid place-content-center rounded-full">
@@ -102,7 +101,7 @@
 
                 <div class="panel h-full">
                     <div class="flex items-center dark:text-white-light mb-5">
-                        <h5 class="font-semibold text-lg">Summary</h5>
+                        <h5 class="font-semibold text-lg">Resumen</h5>
                         <div x-data="dropdown" @click.outside="open = false"
                             class="dropdown ltr:ml-auto rtl:mr-auto">
                             <a href="javascript:;" @click="toggle">
@@ -110,8 +109,8 @@
                                     viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="5" cy="12" r="2" stroke="currentColor"
                                         stroke-width="1.5" />
-                                    <circle opacity="0.5" cx="12" cy="12" r="2"
-                                        stroke="currentColor" stroke-width="1.5" />
+                                    <circle opacity="0.5" cx="12" cy="12" r="2" stroke="currentColor"
+                                        stroke-width="1.5" />
                                     <circle cx="19" cy="12" r="2" stroke="currentColor"
                                         stroke-width="1.5" />
                                 </svg>
@@ -142,7 +141,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex font-semibold text-white-dark mb-2">
-                                    <h6>Income</h6>
+                                    <h6>Ingreso</h6>
                                     <p class="ltr:ml-auto rtl:mr-auto">$92,600</p>
                                 </div>
                                 <div class="rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
@@ -171,7 +170,7 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex font-semibold text-white-dark mb-2">
-                                    <h6>Profit</h6>
+                                    <h6>Ganancia</h6>
                                     <p class="ltr:ml-auto rtl:mr-auto">$37,515</p>
                                 </div>
                                 <div class="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
@@ -191,16 +190,16 @@
                                             stroke="currentColor" stroke-width="1.5" />
                                         <path opacity="0.5" d="M10 16H6" stroke="currentColor" stroke-width="1.5"
                                             stroke-linecap="round" />
-                                        <path opacity="0.5" d="M14 16H12.5" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" />
-                                        <path opacity="0.5" d="M2 10L22 10" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" />
+                                        <path opacity="0.5" d="M14 16H12.5" stroke="currentColor" stroke-width="1.5"
+                                            stroke-linecap="round" />
+                                        <path opacity="0.5" d="M2 10L22 10" stroke="currentColor" stroke-width="1.5"
+                                            stroke-linecap="round" />
                                     </svg>
                                 </div>
                             </div>
                             <div class="flex-1">
                                 <div class="flex font-semibold text-white-dark mb-2">
-                                    <h6>Expenses</h6>
+                                    <h6>Gastos</h6>
                                     <p class="ltr:ml-auto rtl:mr-auto">$55,085</p>
                                 </div>
                                 <div class="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
@@ -238,7 +237,7 @@
                         </div>
                         <h5 class="font-semibold text-2xl ltr:text-right rtl:text-left dark:text-white-light">
                             3,192
-                            <span class="block text-sm font-normal">Total Orders</span>
+                            <span class="block text-sm font-normal">Pedidos Totales</span>
                         </h5>
                     </div>
                     <div x-ref="totalOrders" class="bg-transparent rounded-lg overflow-hidden">
@@ -410,8 +409,8 @@
                                     viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="5" cy="12" r="2" stroke="currentColor"
                                         stroke-width="1.5" />
-                                    <circle opacity="0.5" cx="12" cy="12" r="2"
-                                        stroke="currentColor" stroke-width="1.5" />
+                                    <circle opacity="0.5" cx="12" cy="12" r="2" stroke="currentColor"
+                                        stroke-width="1.5" />
                                     <circle cx="19" cy="12" r="2" stroke="currentColor"
                                         stroke-width="1.5" />
                                 </svg>
@@ -450,8 +449,8 @@
                                         <path
                                             d="M13 10C13 11.3807 11.8807 12.5 10.5 12.5C9.11929 12.5 8 11.3807 8 10C8 8.61929 9.11929 7.5 10.5 7.5C11.8807 7.5 13 8.61929 13 10Z"
                                             stroke="currentColor" stroke-width="1.5" />
-                                        <path opacity="0.5" d="M16 12L16 8" stroke="currentColor"
-                                            stroke-width="1.5" stroke-linecap="round" />
+                                        <path opacity="0.5" d="M16 12L16 8" stroke="currentColor" stroke-width="1.5"
+                                            stroke-linecap="round" />
                                         <path opacity="0.5" d="M5 12L5 8" stroke="currentColor" stroke-width="1.5"
                                             stroke-linecap="round" />
                                     </svg>
@@ -938,13 +937,13 @@
                 get revenueChartOptions() {
                     return {
                         series: [{
-                                name: 'Income',
+                                name: 'Ingreso',
                                 data: [16800, 16800, 15500, 17800, 15500, 17000, 19000, 16000,
                                     15000, 17000, 14000, 17000
                                 ]
                             },
                             {
-                                name: 'Expenses',
+                                name: 'Gastos',
                                 data: [16500, 17500, 16200, 17300, 16000, 19500, 16000, 17000,
                                     16000, 19000, 18000, 19000
                                 ]
@@ -1156,7 +1155,7 @@
                                 },
                             },
                         },
-                        labels: ['Apparel', 'Sports', 'Others'],
+                        labels: ['Camaras', 'DVR', 'Otros'],
                         states: {
                             hover: {
                                 filter: {
