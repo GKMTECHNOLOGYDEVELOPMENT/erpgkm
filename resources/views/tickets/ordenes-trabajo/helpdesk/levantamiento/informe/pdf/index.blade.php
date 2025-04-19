@@ -136,6 +136,7 @@
                 <!-- Técnico + Ticket -->
                 <div class="w-1/2 text-right">
                     <div class="text-xs leading-tight">
+                        <p>NRO OT: <span class="font-bold">{{ $orden->idTickets ?? 'N/A' }}</span></p>
                         <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
                         <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
                     </div>

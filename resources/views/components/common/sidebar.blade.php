@@ -270,14 +270,14 @@
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
-                    <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"
+                        fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                     <span>Administracion</span>
                 </h2>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'components' }"
                         @click="activeDropdown === 'components' ? activeDropdown = null : activeDropdown = 'components'">
@@ -351,11 +351,10 @@
                             <a href="/components/lightbox">Lightbox</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <li class="menu nav-item">
-                    <button type="button" class="nav-link group"
-                        :class="{ 'active': activeDropdown === 'asociados' }"
+                    <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'asociados' }"
                         @click="activeDropdown === 'asociados' ? activeDropdown = null : activeDropdown = 'asociados'">
                         <div class="flex items-center">
 
@@ -366,8 +365,7 @@
                             </svg>
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark "
-                                >Asociados</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark ">Asociados</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'asociados' }">
 
@@ -380,24 +378,24 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'asociados'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('administracion.cliente-general') }}" >Cliente General</a>
+                            <a href="{{ route('administracion.cliente-general') }}">Cliente General</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.tienda') }}" >Tienda</a>
+                            <a href="{{ route('administracion.tienda') }}">Tienda</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.cast') }}" >Cast</a>
+                            <a href="{{ route('administracion.cast') }}">Cast</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.clientes') }}" >Clientes</a>
+                            <a href="{{ route('administracion.clientes') }}">Clientes</a>
                         </li>
                         <li>
-                            <a href="{{ route('administracion.proveedores') }}" >Proveedores</a>
+                            <a href="{{ route('administracion.proveedores') }}">Proveedores</a>
                         </li>
                     </ul>
                 </li>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="{{ route('asistencia.index') }}" class="nav-link group">
                         <div class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -405,15 +403,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M3.75 3.75h5.25v5.25H3.75V3.75zM14.25 3.75h6v6h-6V3.75zM3.75 14.25h5.25v6H3.75v-6zM14.25 14.25h2.25v2.25h-2.25v2.25h2.25v2.25h2.25v-2.25h2.25v-2.25h-2.25v-2.25h-2.25z" />
                             </svg>
-                
+
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
                                 Asistencias
                             </span>
                         </div>
                     </a>
-                </li>
-                
+                </li> --}}
+
 
                 {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -449,7 +447,7 @@
                     </ul>
                 </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'elements' }"
                         @click="activeDropdown === 'elements' ? activeDropdown = null : activeDropdown = 'elements'">
@@ -531,7 +529,7 @@
                             <a href="/elements/typography">Typography</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
                 {{-- <li class="menu nav-item">
                     <a href="/charts" class="nav-link group">
@@ -672,7 +670,7 @@
                     <span>ALMACEN</span>
                 </h2>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <a href="/tables" class="nav-link group">
                         <div class="flex items-center">
 
@@ -695,7 +693,7 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Tables</span>
                         </div>
                     </a>
-                </li>
+                </li> --}}
 
                 <li class="menu nav-item">
                     <a href="{{ route('almacen.kits.index') }}" class="nav-link group">
@@ -725,7 +723,7 @@
                     </a>
                 </li>
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'datatables' }"
                         @click="activeDropdown === 'datatables' ? activeDropdown = null : activeDropdown = 'datatables'">
@@ -801,9 +799,9 @@
                             <a href="/datatables/column-chooser">Column Chooser</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
-                <li class="menu nav-item">
+                {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'forms' }"
                         @click="activeDropdown === 'forms' ? activeDropdown = null : activeDropdown = 'forms'">
@@ -883,7 +881,7 @@
                             <a href="/forms/clipboard">Clipboard</a>
                         </li>
                     </ul>
-                </li>
+                </li> --}}
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -906,7 +904,7 @@
                             </svg>
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark" >Productos</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Productos</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'productos' }">
 
@@ -919,16 +917,16 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('articulos.index') }}" >Articulos</a>
+                            <a href="{{ route('articulos.index') }}">Articulos</a>
                         </li>
                         <li>
-                            <a href="{{ route('modelos.index') }}" >Modelos</a>
+                            <a href="{{ route('modelos.index') }}">Modelos</a>
                         </li>
                         <li>
-                            <a href="{{ route('marcas.index') }}" >Marcas</a>
+                            <a href="{{ route('marcas.index') }}">Marcas</a>
                         </li>
                         <li>
-                            <a href="{{ route('categorias.index') }}" >Categoria</a>
+                            <a href="{{ route('categorias.index') }}">Categoria</a>
                         </li>
                     </ul>
                 </li>
@@ -957,8 +955,8 @@
                             </svg>
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark"
-                                >Ordenes de Trabajo</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes
+                                de Trabajo</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'users' }">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -970,7 +968,7 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('ordenes.smart') }}" >Smart-Tv</a>
+                            <a href="{{ route('ordenes.smart') }}">Smart-Tv</a>
                         </li>
                         <li>
                             <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
@@ -1158,7 +1156,7 @@
                                     fill="currentColor" />
                             </svg>
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark" >Configuración</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Configuración</span>
                         </div>
                     </a>
                 </li>
