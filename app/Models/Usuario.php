@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -63,7 +64,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Usuario extends Authenticatable
+class Usuario extends Authenticatable implements CanResetPassword
 {
 	use Notifiable;
 
@@ -107,6 +108,19 @@ class Usuario extends Authenticatable
 		'idRol',
 		'firma'
 	];
+
+
+	// Especifica el campo de email
+    public function getEmailForPasswordReset()
+    {
+        return $this->correo;
+    }
+
+    // Especifica cómo enviar notificaciones
+    public function routeNotificationForMail($notification)
+    {
+        return $this->correo;
+    }
 
 	public function sucursal()
 	{

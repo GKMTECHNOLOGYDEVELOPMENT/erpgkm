@@ -597,10 +597,27 @@ Route::delete('/eliminar-producto/{id}', [OrdenesHelpdeskController::class, 'eli
 
 
 // Ruta para mostrar el formulario de recuperación de contraseña
-Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+// Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+// Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-Route::post('/password/recover', [PasswordRecoveryController::class, 'sendRecoveryLink'])->name('password.recover');
+// Route::post('/password/recover', [PasswordRecoveryController::class, 'sendRecoveryLink'])->name('password.recover');
+
+
+
+
+Route::get('/password/reset', function () {
+    return view('auth.boxed-password-reset');
+})->name('password.request');
+
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Otras rutas necesarias para el reset
+Route::get('/password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+    
+Route::post('/password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
+
+
+
 
 
 Route::view('/components/tabs', 'ui-components.tabs');

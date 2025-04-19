@@ -41,8 +41,8 @@ return [
             'provider' => 'users',
         ],
         'api' => [
-        'driver' => 'passport',  // O 'token' si estás usando Laravel Passport o tokens simples
-        'provider' => 'users',
+            'driver' => 'passport',  // O 'token' si estás usando Laravel Passport o tokens simples
+            'provider' => 'users',
         ],
     ],
 
@@ -67,6 +67,14 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\Usuario::class,
+        ],
+        'passwords' => [
+            'users' => [
+                'provider' => 'users',
+                'table' => 'password_resets',
+                'expire' => 60,
+                'throttle' => 60,
+            ],
         ],
 
         // 'users' => [
