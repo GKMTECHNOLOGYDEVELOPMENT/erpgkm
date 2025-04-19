@@ -258,13 +258,13 @@
     <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
         style="background-color: {{ $colorEstado }};">Historial de Estados</span>
 
-    <!-- Contenedor de Estados -->
-    <div class="mt-3 overflow-x-auto">
+ <!-- Contenedor de Estados -->
+ <div class="mt-3 overflow-x-auto">
         <div id="draggableContainer" class="flex space-x-2 w-max">
             @foreach ($estadosFlujo as $estado)
-                <div class="draggable-state min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-move text-white text-center shadow-md"
-                    style="background-color: {{ $estado->color }}; color: black;" draggable="true"
-                    data-state="{{ $estado->descripcion }}">
+                <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
+                    style="background-color: {{ $estado->color }}; color: black;"
+                    data-state-description="{{ $estado->descripcion }}">
                     {{ $estado->descripcion }}
                 </div>
             @endforeach
@@ -286,6 +286,7 @@
 
 
 </div>
+
 
 
 
@@ -638,7 +639,6 @@
         setInterval(cargarEstados, 30000);
     });
 </script>
-
 
 
 <!-- Agregar Axios desde un CDN -->
