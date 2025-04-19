@@ -2089,7 +2089,7 @@ class OrdenesHelpdeskController extends Controller
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
     }
 
 
@@ -2252,7 +2252,7 @@ class OrdenesHelpdeskController extends Controller
 
         return response($pdfContent)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
     }
 
 
@@ -2443,7 +2443,7 @@ class OrdenesHelpdeskController extends Controller
 
         return response($pdf)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
     }
 
 
@@ -2624,7 +2624,7 @@ class OrdenesHelpdeskController extends Controller
 
         return response($pdf)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
     }
 
 
