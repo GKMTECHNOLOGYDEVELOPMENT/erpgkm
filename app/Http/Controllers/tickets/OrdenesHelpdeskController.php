@@ -716,6 +716,8 @@ class OrdenesHelpdeskController extends Controller
         return response()->json($productos);
     }
 
+
+
     public function obtenerMarcasPorCategoria($idCategoria)
     {
         // Obtener las marcas que pertenecen a la categoría seleccionada
@@ -731,6 +733,7 @@ class OrdenesHelpdeskController extends Controller
         // Retornar las marcas como respuesta JSON
         return response()->json($marcas);
     }
+
 
 
 
@@ -751,6 +754,18 @@ class OrdenesHelpdeskController extends Controller
         // Devolver los modelos como respuesta JSON
         return response()->json($modelos);
     }
+
+
+    
+
+    public function obtenerModelosPorMarcaYCategoria($idMarca, $idCategoria)
+{
+    $modelos = Modelo::where('idMarca', $idMarca)
+                     ->where('idCategoria', $idCategoria)
+                     ->get();
+
+    return response()->json($modelos);
+}
 
 
 

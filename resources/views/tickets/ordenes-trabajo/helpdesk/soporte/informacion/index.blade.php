@@ -542,44 +542,36 @@
             }
         });
 
-        // Cuando se selecciona una marca
         $('#marcaInstalar').change(function() {
-            var idMarca = $(this).val();
+    var idMarca = $(this).val();
+    var idCategoria = $('#tipoProductoInstalar').val(); // obtener categoría también
 
-            // Si se seleccionó una marca
-            if (idMarca) {
-                // Hacer la solicitud AJAX para obtener los modelos por marca
-                $.ajax({
-                    url: '/modelos/marca/' + idMarca, // Ruta definida en el controlador
-                    method: 'GET',
-                    success: function(response) {
-                        // Limpiar el select de modelos
-                        $('#modeloInstalar').empty();
-                        $('#modeloInstalar').append(
-                            '<option value="" disabled selected>Seleccionar Modelo</option>'
-                        );
+    if (idMarca && idCategoria) {
+        $.ajax({
+            url: '/modelos/marca/' + idMarca + '/categoria/' + idCategoria,
+            method: 'GET',
+            success: function(response) {
+                $('#modeloInstalar').empty();
+                $('#modeloInstalar').append(
+                    '<option value="" disabled selected>Seleccionar Modelo</option>'
+                );
 
-                        // Llenar el select de modelos con los datos recibidos
-                        response.forEach(function(modelo) {
-                            $('#modeloInstalar').append('<option value="' + modelo
-                                .idModelo + '">' + modelo.nombre + '</option>');
-                        });
-
-                        // Mostrar el select de modelos
-                        $('#modeloInstalar').show();
-                        $('#modeloInstalar').trigger(
-                            'change'); // Actualizar Select2 después de agregar opciones
-                    },
-                    error: function(xhr) {
-                        // Si ocurre un error, mostrar un mensaje
-                        alert('Hubo un error al cargar los modelos');
-                    }
+                response.forEach(function(modelo) {
+                    $('#modeloInstalar').append('<option value="' + modelo.idModelo + '">' + modelo.nombre + '</option>');
                 });
-            } else {
-                // Si no se seleccionó una marca, esconder el select de modelos
-                $('#modeloInstalar').hide();
+
+                $('#modeloInstalar').show();
+                $('#modeloInstalar').trigger('change');
+            },
+            error: function(xhr) {
+                alert('Hubo un error al cargar los modelos');
             }
         });
+    } else {
+        $('#modeloInstalar').hide();
+    }
+});
+
     });
 </script>
 
@@ -793,44 +785,42 @@
             }
         });
 
-        // Cuando se selecciona una marca en Retirar
-        $('#marcaRetirar').change(function() {
-            var idMarca = $(this).val();
+      // Cuando se selecciona una marca en Retirar
+$('#marcaRetirar').change(function() {
+    var idMarca = $(this).val();
+    var idCategoria = $('#tipoProductoRetirar').val(); // Obtenemos la categoría seleccionada
 
-            // Si se seleccionó una marca
-            if (idMarca) {
-                // Hacer la solicitud AJAX para obtener los modelos por marca
-                $.ajax({
-                    url: '/modelos/marca/' + idMarca, // Ruta definida en el controlador
-                    method: 'GET',
-                    success: function(response) {
-                        // Limpiar el select de modelos
-                        $('#modeloRetirar').empty();
-                        $('#modeloRetirar').append(
-                            '<option value="" disabled selected>Seleccionar Modelo</option>'
-                        );
+    // Validamos que ambos estén seleccionados
+    if (idMarca && idCategoria) {
+        $.ajax({
+            url: '/modelos/marca/' + idMarca + '/categoria/' + idCategoria,
+            method: 'GET',
+            success: function(response) {
+                // Limpiar el select de modelos
+                $('#modeloRetirar').empty();
+                $('#modeloRetirar').append(
+                    '<option value="" disabled selected>Seleccionar Modelo</option>'
+                );
 
-                        // Llenar el select de modelos con los datos recibidos
-                        response.forEach(function(modelo) {
-                            $('#modeloRetirar').append('<option value="' + modelo
-                                .idModelo + '">' + modelo.nombre + '</option>');
-                        });
-
-                        // Mostrar el select de modelos
-                        $('#modeloRetirar').show();
-                        $('#modeloRetirar').trigger(
-                            'change'); // Actualizar Select2 después de agregar opciones
-                    },
-                    error: function(xhr) {
-                        // Si ocurre un error, mostrar un mensaje
-                        alert('Hubo un error al cargar los modelos');
-                    }
+                // Llenar el select con los modelos recibidos
+                response.forEach(function(modelo) {
+                    $('#modeloRetirar').append('<option value="' + modelo.idModelo + '">' + modelo.nombre + '</option>');
                 });
-            } else {
-                // Si no se seleccionó una marca, esconder el select de modelos
-                $('#modeloRetirar').hide();
+
+                // Mostrar y actualizar el select
+                $('#modeloRetirar').show();
+                $('#modeloRetirar').trigger('change');
+            },
+            error: function(xhr) {
+                alert('Hubo un error al cargar los modelos');
             }
         });
+    } else {
+        // Si no se seleccionó todo, ocultamos el select
+        $('#modeloRetirar').hide();
+    }
+});
+
     });
 </script>
 
