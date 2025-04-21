@@ -396,7 +396,7 @@
                 </li>
 
                 <li class="menu nav-item">
-                    <a href="{{ route('asistencia.index') }}" class="nav-link group">
+                    <a href="{{ route('asistencias.index') }}" class="nav-link group">
                         <div class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke-width="1.5" stroke="currentColor" class="w-6 h-6 group-hover:!text-primary">
