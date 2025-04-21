@@ -140,155 +140,6 @@
 </div>
 
 
-<!-- 🛠️ Formulario de Detalles -->
-<div class="p-6 mt-4">
-    <form action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}" enctype="multipart/form-data"
-        method="POST">
-        @csrf
-        @method('PUT')
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Ticket -->
-            <div>
-                <label class="text-sm font-medium">Ticket</label>
-                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}"
-                    readonly>
-            </div>
-
-            <!-- Cliente -->
-            <div>
-                <label class="text-sm font-medium">Cliente</label>
-                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
-                    <option value="">Seleccionar Cliente</option>
-                    @foreach ($clientes as $cliente)
-                        <option value="{{ $cliente->idCliente }}"
-                            {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
-                            {{ $cliente->nombre }} - {{ $cliente->documento }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Cliente General -->
-            <div>
-                <label class="text-sm font-medium">Cliente General</label>
-                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
-                    <option value="" selected>Seleccionar Cliente General</option>
-                    @if ($orden->clienteGeneral)
-                        <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
-                            {{ $orden->clienteGeneral->descripcion }}
-                        </option>
-                    @endif
-                </select>
-            </div>
-
-            <!-- Tienda -->
-            <div>
-                <label class="text-sm font-medium">Tienda</label>
-                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
-                    <option value="" disabled>Seleccionar Tienda</option>
-                    @foreach ($tiendas as $tienda)
-                        <option value="{{ $tienda->idTienda }}"
-                            {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
-                            {{ $tienda->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="text-sm font-medium">Direción</label>
-                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->direccion }}"
-                    readonly>
-            </div>
-
-            <!-- Ejecutar -->
-            @if ($existeFlujo25)
-                <div>
-                    <label class="text-sm font-medium">Ejecutor</label>
-                    <select id="ejecutor" name="ejecutor" class="select2 w-full" style="display: none;">
-                        <option value="" disabled>Seleccionar Ejecutador</option>
-                        @foreach ($usuarios as $usuario)
-                            <option value="{{ $usuario->idUsuario }}"
-                                {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
-                                {{ $usuario->Nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
-
-
-
-
-
-            <!-- Tipo de Servicio -->
-            <div>
-                <label class="text-sm font-medium">Tipo de Servicio</label>
-                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100"
-                    style="display: none" disabled>
-                    <option value="" disabled>Seleccionar Tipo de Servicio</option>
-                    @foreach ($tiposServicio as $tipo)
-                        <option value="{{ $tipo->idTipoServicio }}"
-                            {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
-                            {{ $tipo->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-                <!-- Input oculto para mantener el valor al enviar el formulario -->
-                <input type="hidden" name="tipoServicio" value="{{ $orden->tipoServicio }}">
-            </div>
-
-            <!-- Falla Reportada -->
-            <div class="md:col-span-2">
-                <label class="text-sm font-medium">Falla Reportada</label>
-                <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
-            </div>
-
-            <!-- Botón de Guardar -->
-            <div class="md:col-span-2 flex justify-end space-x-4">
-                <a href="{{ route('ordenes.helpdesk') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
-                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- Nueva Card: Historial de Estados -->
-<div id="estadosCard" class="mt-4 p-4">
-    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
-        style="background-color: {{ $colorEstado }};">Historial de Estados</span>
-
- <!-- Contenedor de Estados -->
- <div class="mt-3 overflow-x-auto">
-        <div id="draggableContainer" class="flex space-x-2 w-max">
-            @foreach ($estadosFlujo as $estado)
-                <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
-                    style="background-color: {{ $estado->color }}; color: black;"
-                    data-state-description="{{ $estado->descripcion }}">
-                    {{ $estado->descripcion }}
-                </div>
-            @endforeach
-        </div>
-    </div>
-
-
-    <!-- Div para mostrar la última modificación (Responsive) -->
-    <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
-        <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
-            Última modificación:
-        </span>
-        <span id="ultimaModificacion"
-            class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600 
-               rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
-        </span>
-    </div>
-
-
-
-</div>
-
-
-
 
 
 <script>
@@ -444,6 +295,166 @@
         cargarHistorialModificaciones(ticketId, tbody, preload);
     });
 </script>
+
+
+
+
+
+
+<!-- 🛠️ Formulario de Detalles -->
+<div class="p-6 mt-4">
+    <form action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}" enctype="multipart/form-data"
+        method="POST">
+        @csrf
+        @method('PUT')
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Ticket -->
+            <div>
+                <label class="text-sm font-medium">Ticket</label>
+                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}"
+                    readonly>
+            </div>
+
+            <!-- Cliente -->
+            <div>
+                <label class="text-sm font-medium">Cliente</label>
+                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
+                    <option value="">Seleccionar Cliente</option>
+                    @foreach ($clientes as $cliente)
+                        <option value="{{ $cliente->idCliente }}"
+                            {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
+                            {{ $cliente->nombre }} - {{ $cliente->documento }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Cliente General -->
+            <div>
+                <label class="text-sm font-medium">Cliente General</label>
+                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+                    <option value="" selected>Seleccionar Cliente General</option>
+                    @if ($orden->clienteGeneral)
+                        <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+                            {{ $orden->clienteGeneral->descripcion }}
+                        </option>
+                    @endif
+                </select>
+            </div>
+
+            <!-- Tienda -->
+            <div>
+                <label class="text-sm font-medium">Tienda</label>
+                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
+                    <option value="" disabled>Seleccionar Tienda</option>
+                    @foreach ($tiendas as $tienda)
+                        <option value="{{ $tienda->idTienda }}"
+                            {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
+                            {{ $tienda->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="text-sm font-medium">Direción</label>
+                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->direccion }}"
+                    readonly>
+            </div>
+
+            <!-- Ejecutar -->
+            @if ($existeFlujo25)
+                <div>
+                    <label class="text-sm font-medium">Ejecutor</label>
+                    <select id="ejecutor" name="ejecutor" class="select2 w-full" style="display: none;">
+                        <option value="" disabled>Seleccionar Ejecutador</option>
+                        @foreach ($usuarios as $usuario)
+                            <option value="{{ $usuario->idUsuario }}"
+                                {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
+                                {{ $usuario->Nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
+
+
+
+
+            <!-- Tipo de Servicio -->
+            <div>
+                <label class="text-sm font-medium">Tipo de Servicio</label>
+                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100"
+                    style="display: none" disabled>
+                    <option value="" disabled>Seleccionar Tipo de Servicio</option>
+                    @foreach ($tiposServicio as $tipo)
+                        <option value="{{ $tipo->idTipoServicio }}"
+                            {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
+                            {{ $tipo->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+                <!-- Input oculto para mantener el valor al enviar el formulario -->
+                <input type="hidden" name="tipoServicio" value="{{ $orden->tipoServicio }}">
+            </div>
+
+            <!-- Falla Reportada -->
+            <div class="md:col-span-2">
+                <label class="text-sm font-medium">Falla Reportada</label>
+                <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
+            </div>
+
+            <!-- Botón de Guardar -->
+            <div class="md:col-span-2 flex justify-end space-x-4">
+                <a href="{{ route('ordenes.helpdesk') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
+                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<!-- Nueva Card: Historial de Estados -->
+<div id="estadosCard" class="mt-4 p-4">
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+        style="background-color: {{ $colorEstado }};">Historial de Estados</span>
+    <!-- Tabla con scroll horizontal -->
+
+
+
+    <!-- Contenedor de Estados -->
+    <div class="mt-3 overflow-x-auto">
+        <div id="draggableContainer" class="flex space-x-2 w-max">
+            @foreach ($estadosFlujo as $estado)
+                <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
+                    style="background-color: {{ $estado->color }}; color: black;"
+                    data-state-description="{{ $estado->descripcion }}">
+                    {{ $estado->descripcion }}
+                </div>
+            @endforeach
+        </div>
+    </div>
+
+
+
+    <!-- Div para mostrar la última modificación (Responsive) -->
+    <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
+        <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
+            Última modificación:
+        </span>
+        <span id="ultimaModificacion"
+            class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600 
+               rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
+        </span>
+    </div>
+
+
+
+</div>
+
+
+
 
 
 
@@ -641,10 +652,14 @@
 </script>
 
 
+
 <!-- Agregar Axios desde un CDN -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar NiceSelect2
@@ -743,16 +758,6 @@
         }
 
 
-
-
-
-        /* ================================
-           Registro de cambios en drag & drop
-        ================================ */
-
-
-
-
         // Pasa los estados de flujo desde Blade a JavaScript
         const estadosFlujo = @json($estadosFlujo);
 
@@ -762,78 +767,65 @@
             return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
         }
 
-        // Código drag & drop
-        const draggables = document.querySelectorAll(".draggable-state");
-        draggables.forEach(function(draggable) {
-            draggable.addEventListener("dragstart", function(e) {
-                e.dataTransfer.setData("text/plain", this.dataset
-                    .state); // Obtén la descripción del estado
-            });
-        });
+        // Selecciona todos los botones de estado
+        const estadoElements = document.querySelectorAll(".estado-button");
 
-        const dropZone = document.getElementById("estadosTableBody");
-        dropZone.addEventListener("dragover", function(e) {
-            e.preventDefault();
-        });
-
-        dropZone.addEventListener("drop", function(e) {
-            e.preventDefault();
-            const stateDescription = e.dataTransfer.getData("text/plain");
-            if (stateDescription) {
-                const draggableEl = document.querySelector(
-                    "#draggableContainer .draggable-state[data-state='" + stateDescription + "']");
-                if (draggableEl) {
-                    draggableEl.remove();
-                }
-
-                const usuario = "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
-                const fecha = formatDate(new Date());
-                const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
+        estadoElements.forEach(function(estadoElement) {
+            estadoElement.addEventListener("click", function() {
+                const stateDescription = estadoElement.dataset
+                    .stateDescription; // Obtén la descripción del estado desde el atributo dataset
 
                 // Obtener el ID del estado basado en la descripción
                 const estadoId = getStateId(stateDescription);
 
-                let rowClasses = "";
-                if (estadoId === 1) {
-                    rowClasses = "bg-primary/20 border-primary/20";
-                } else if (estadoId === 2) {
-                    rowClasses = "bg-secondary/20 border-secondary/20";
-                } else if (estadoId === 3) {
-                    rowClasses = "bg-success/20 border-success/20";
+                if (estadoId !== 0) { // Verifica si el estado existe
+                    const usuario =
+                        "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
+                    const fecha = formatDate(new Date());
+                    const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
+
+                    // Actualizar el DOM con el nuevo estado (esto lo podrías hacer como prefieras)
+                    let rowClasses = "";
+                    if (estadoId === 1) {
+                        rowClasses = "bg-primary/20 border-primary/20";
+                    } else if (estadoId === 2) {
+                        rowClasses = "bg-secondary/20 border-secondary/20";
+                    } else if (estadoId === 3) {
+                        rowClasses = "bg-success/20 border-success/20";
+                    }
+
+                    const newRow = document.createElement("tr");
+                    newRow.className = rowClasses;
+                    newRow.innerHTML = `
+                <td class="px-4 py-2 text-center">${stateDescription}</td>
+                <td class="px-4 py-2 text-center">${usuario}</td>
+                <td class="px-4 py-2 text-center">${fecha}</td>
+            `;
+                    document.getElementById("estadosTableBody").appendChild(newRow);
+
+                    // Enviar la solicitud AJAX para guardar el estado
+                    axios.post("{{ route('guardarEstado') }}", {
+                            idTicket: ticketId,
+                            idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+                            idUsuario: usuario,
+                        })
+                        .then(response => {
+                            // Si la respuesta es exitosa
+                            console.log("Estado guardado exitosamente");
+                            location.reload();
+                            // Actualizar log de modificación
+                            document.getElementById('ultimaModificacion').textContent =
+                                `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
+                        })
+                        .catch(error => {
+                            // Manejar el error si ocurre
+                            console.error("Error al guardar el estado", error);
+                        });
+                } else {
+                    console.error("Estado no encontrado");
                 }
-
-                const newRow = document.createElement("tr");
-                newRow.className = rowClasses;
-                newRow.innerHTML = `
-            <td class="px-4 py-2 text-center">${stateDescription}</td>
-            <td class="px-4 py-2 text-center">${usuario}</td>
-            <td class="px-4 py-2 text-center">${fecha}</td>
-        `;
-                dropZone.appendChild(newRow);
-
-                // Enviar la solicitud AJAX para guardar el estado
-                axios.post("{{ route('guardarEstado') }}", {
-                        idTicket: ticketId,
-                        idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
-                        idUsuario: usuario,
-                        comentarioflujo: 'Ingresar comentario para el flujo', // Comentario opcional
-                    })
-                    .then(response => {
-                        // Si la respuesta es exitosa
-                        console.log("Estado guardado exitosamente");
-                        location.reload();
-                        // Actualizar log de modificación
-                        document.getElementById('ultimaModificacion').textContent =
-                            `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
-                    })
-                    .catch(error => {
-                        // Manejar el error si ocurre
-                        console.error("Error al guardar el estado", error);
-                    });
-            }
+            });
         });
-
-
 
 
         function reinitializeDraggable(element) {
@@ -1084,109 +1076,4 @@
         });
     });
 </script>
-<script>
-    const ticketId = '{{ $orden->idTickets }}';
-    let historialCompleto = [];
-    let paginaActual = 1;
-    const registrosPorPagina = 10;
 
-    function obtenerLabelsFormulario() {
-        const labels = {};
-        document.querySelectorAll("form label").forEach(label => {
-            const input = label.nextElementSibling;
-            if (input) {
-                const name = input.getAttribute("name") || input.getAttribute("id");
-                if (name) labels[name] = label.textContent.trim();
-            }
-        });
-        return labels;
-    }
-
-    function cargarHistorialModificaciones(ticketId) {
-        const labels = obtenerLabelsFormulario();
-        $.ajax({
-            url: `/ticket/${ticketId}/historial-modificaciones`,
-            method: 'GET',
-            success: function(response) {
-                historialCompleto = response;
-                paginaActual = 1;
-                mostrarPagina(labels);
-            },
-            error: function(xhr, status, error) {
-                console.error("Error al cargar historial:", error);
-            }
-        });
-    }
-
-    function mostrarPagina(labels) {
-        const tbody = document.getElementById('historialModificaciones');
-        tbody.innerHTML = '';
-        const inicio = (paginaActual - 1) * registrosPorPagina;
-        const fin = inicio + registrosPorPagina;
-        const paginaDatos = historialCompleto.slice(inicio, fin);
-
-        paginaDatos.forEach(mod => {
-            const campoLabel = labels[mod.campo] || mod.campo;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="border px-4 py-2 text-sm">${campoLabel}</td>
-                <td class="border px-4 py-2 text-sm">${mod.valor_antiguo ?? '—'}</td>
-                <td class="border px-4 py-2 text-sm">${mod.valor_nuevo ?? '—'}</td>
-                <td class="border px-4 py-2 text-sm">${mod.fecha_modificacion}</td>
-                <td class="border px-4 py-2 text-sm">${mod.usuario}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        actualizarPaginacion();
-    }
-
-    function actualizarPaginacion() {
-        const totalPaginas = Math.ceil(historialCompleto.length / registrosPorPagina);
-        const container = document.getElementById('pagination');
-        container.innerHTML = '';
-
-        const prev = document.createElement('li');
-        prev.innerHTML =
-            `<button id="prevPage" class="p-2 rounded bg-white-light text-dark hover:bg-primary hover:text-white dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" ${paginaActual === 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>`;
-        container.appendChild(prev);
-
-        for (let i = 1; i <= totalPaginas; i++) {
-            const pageBtn = document.createElement('li');
-            pageBtn.innerHTML =
-                `<button data-page="${i}" class="px-3.5 py-2 rounded-full font-semibold ${paginaActual === i ? 'bg-primary text-white' : 'bg-white-light text-dark hover:bg-primary hover:text-white'} dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary">${i}</button>`;
-            container.appendChild(pageBtn);
-        }
-
-        const next = document.createElement('li');
-        next.innerHTML =
-            `<button id="nextPage" class="p-2 rounded bg-white-light text-dark hover:bg-primary hover:text-white dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" ${paginaActual === totalPaginas ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button>`;
-        container.appendChild(next);
-
-        document.getElementById('prevPage')?.addEventListener('click', () => {
-            if (paginaActual > 1) {
-                paginaActual--;
-                mostrarPagina(obtenerLabelsFormulario());
-            }
-        });
-
-        document.getElementById('nextPage')?.addEventListener('click', () => {
-            if (paginaActual < totalPaginas) {
-                paginaActual++;
-                mostrarPagina(obtenerLabelsFormulario());
-            }
-        });
-
-        document.querySelectorAll('[data-page]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                paginaActual = parseInt(e.target.getAttribute('data-page'));
-                mostrarPagina(obtenerLabelsFormulario());
-            });
-        });
-    }
-
-    document.getElementById('botonFlotante')?.addEventListener('click', function() {
-        document.getElementById('preload').style.display = 'table-row';
-        cargarHistorialModificaciones(ticketId);
-    });
-</script>

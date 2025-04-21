@@ -124,7 +124,7 @@
                 @if($loop->iteration % 2 == 0 && !$loop->last)
                     <div class="page-break"></div>
                 @endif
-            @endforeach
+            @endforeach 
         </div>
     </div>
 @endif
