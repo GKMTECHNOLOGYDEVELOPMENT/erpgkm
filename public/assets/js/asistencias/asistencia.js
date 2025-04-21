@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const tabla = $('#tablaAsistencias').DataTable({
         processing: true,
         ajax: {
-            url: '/asistencia/listado',
+            url: '/asistencias/listado',
             data: function (d) {
                 d.startDate = document.getElementById('startDate').value;
                 d.endDate = document.getElementById('endDate').value;
