@@ -4066,7 +4066,6 @@ public function mostrarFoto($id)
     return response($foto->imagen)
         ->header('Content-Type', 'image/jpeg');
 }
-
 public function descargarPDF($id)
 {
     try {
@@ -4075,17 +4074,29 @@ public function descargarPDF($id)
         $orden = Ticket::with('cliente')->findOrFail($id);
         Log::info("✅ Orden encontrada:", ['orden_id' => $orden->id]);
 
-        $constancia = ConstanciaEntrega::where('idticket', $id)->first();
+        $constancia = ConstanciaEntrega::with('fotos')->where('idticket', $id)->first();
 
         if (!$constancia) {
             Log::warning("⚠️ Constancia no encontrada para ticket ID: {$id}");
         } else {
-            Log::info("✅ Constancia encontrada", ['id' => $constancia->idconstancia]);
+            Log::info("✅ Constancia encontrada", [
+                'id' => $constancia->idconstancia,
+                'fotos_count' => $constancia->fotos ? $constancia->fotos->count() : 0
+            ]);
+            
+            // Procesar las fotos para convertirlas a base64
+            $fotos = $constancia->fotos->map(function($foto) {
+                return [
+                    'imagen_base64' => 'data:image/jpeg;base64,' . base64_encode($foto->imagen),
+                    'descripcion' => $foto->descripcion
+                ];
+            });
         }
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.constancia', [
             'orden' => $orden,
             'constancia' => $constancia,
+            'fotos' => $fotos ?? []
         ]);
 
         Log::info("📄 PDF generado correctamente. Enviando descarga...");

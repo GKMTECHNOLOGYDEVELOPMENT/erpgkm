@@ -57,6 +57,30 @@
             text-align: center;
             padding-top: 5px;
         }
+        .photos-container {
+            margin-top: 20px;
+        }
+        .photo-section {
+            page-break-inside: avoid;
+            margin-bottom: 15px;
+        }
+        .photo-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .photo-image {
+            max-width: 100%;
+            max-height: 300px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+        }
+        .photo-description {
+            font-size: 11px;
+            color: #555;
+        }
+        .page-break {
+            page-break-after: always;
+        }
     </style>
 </head>
 <body>
@@ -84,6 +108,26 @@
         <div>{!! nl2br(e(optional($constancia)->observaciones)) !!}</div>
     </div>
 
+    @if($fotos && count($fotos) > 0)
+    <div class="section">
+        <div class="section-title">EVIDENCIA FOTOGRÁFICA</div>
+        <div class="photos-container">
+            @foreach($fotos as $foto)
+                <div class="photo-section">
+                    <div class="photo-title">Imagen #{{ $loop->iteration }}</div>
+                    <img class="photo-image" src="{{ $foto['imagen_base64'] }}" alt="Evidencia {{ $loop->iteration }}">
+                    @if($foto['descripcion'])
+                        <div class="photo-description">{{ $foto['descripcion'] }}</div>
+                    @endif
+                </div>
+                
+                @if($loop->iteration % 2 == 0 && !$loop->last)
+                    <div class="page-break"></div>
+                @endif
+            @endforeach
+        </div>
+    </div>
+@endif
     <div class="signature-area">
         <div class="signature-line">Firma del Cliente</div>
         <div class="signature-line">Firma del Representante</div>
