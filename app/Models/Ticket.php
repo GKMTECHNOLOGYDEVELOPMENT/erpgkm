@@ -231,4 +231,9 @@ class Ticket extends Model
     {
         return $this->hasOne(ManejoEnvio::class, 'idTickets', 'idTickets');
     }
+
+    public function constancias()
+    {
+        return $this->hasMany(ConstanciaEntrega::class, 'idticket');
+    }
 }

@@ -218,3 +218,7 @@ Route::get('/tienda/{id}', function ($id) {
 
     return response()->json($tienda);
 });
+
+
+Route::get('/constancias/por-ticket/{ticketId}', [OrdenesTrabajoController::class, 'porTicket']);
+Route::delete('/constancias/fotos/{fotoId}', [OrdenesTrabajoController::class, 'eliminarFoto']);

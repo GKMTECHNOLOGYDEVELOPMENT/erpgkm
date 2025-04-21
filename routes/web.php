@@ -456,10 +456,15 @@ Route::get('/get-marcas', [MarcaController::class, 'checkMarcas']);
 
 Route::get('/marcas-por-cliente-general/{idClienteGeneral}', [MarcaController::class, 'getMarcasByClienteGeneral']);
 
+Route::post('/constancias', [OrdenesTrabajoController::class, 'storeConstancia'])
+    ->name('constancias.store');
+
+    Route::get('/constancia/pdf/{id}', [OrdenesTrabajoController::class, 'descargarPDF'])->name('constancia.pdf');
 
 
-
-
+    // En routes/web.php
+Route::get('/constancias/fotos/{id}', [OrdenesTrabajoController::class, 'mostrarFoto'])
+->name('constancias.fotos.mostrar');
 // Agrega esta ruta en tu archivo de rutas web.php
 
 Route::get('validar-ticket/{nroTicket}', [OrdenesTrabajoController::class, 'validarTicket'])->name('validarTicket');
@@ -615,6 +620,7 @@ Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkE
 Route::get('/password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
     
 Route::post('/password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
+
 
 
 
