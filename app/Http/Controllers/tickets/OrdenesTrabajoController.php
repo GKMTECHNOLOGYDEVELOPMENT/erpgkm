@@ -29,6 +29,8 @@ use App\Exports\HelpdeskTicketExport; // Importa el nuevo exportador
 use App\Models\AnexosVisita;
 use App\Models\Categoria;
 use App\Models\CondicionesTicket;
+use App\Models\ConstanciaEntrega;
+use App\Models\ConstanciaFoto;
 use App\Models\Fotostickest;
 use App\Models\SeleccionarVisita;
 use App\Models\SolicitudEntrega;
@@ -3922,4 +3924,192 @@ class OrdenesTrabajoController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Técnico de apoyo eliminado correctamente.']);
     }
+
+
+    public function storeConstancia(Request $request)
+    {
+        DB::beginTransaction();
+        
+        try {
+            // Validar datos (quitamos unique validation)
+            $validated = $request->validate([
+                'nrticket' => 'required',
+                'tipo' => 'required',
+                'fechacompra' => 'required|date',
+                'nombrecliente' => 'required',
+                'emailcliente' => 'nullable|email',
+                'direccioncliente' => 'nullable',
+                'telefonocliente' => 'nullable',
+                'observaciones' => 'nullable',
+                'photos.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB
+                'idticket' => 'nullable|exists:tickets,idTickets',
+                'fotos_existentes' => 'nullable|json' // Para manejar fotos existentes
+            ]);
+    
+            // Buscar constancia existente
+            $constancia = ConstanciaEntrega::where('numeroticket', $validated['nrticket'])->first();
+    
+            if ($constancia) {
+                // Actualizar constancia existente
+                $constancia->update([
+                    'tipo' => $validated['tipo'],
+                    'fechacompra' => $validated['fechacompra'],
+                    'nombrecliente' => $validated['nombrecliente'],
+                    'emailcliente' => $validated['emailcliente'],
+                    'direccioncliente' => $validated['direccioncliente'],
+                    'telefonocliente' => $validated['telefonocliente'],
+                    'observaciones' => $validated['observaciones'],
+                    'idticket' => $validated['idticket']
+                ]);
+                
+                $message = 'Constancia actualizada correctamente';
+            } else {
+                // Crear nueva constancia
+                $constancia = ConstanciaEntrega::create([
+                    'numeroticket' => $validated['nrticket'],
+                    'tipo' => $validated['tipo'],
+                    'fechacompra' => $validated['fechacompra'],
+                    'nombrecliente' => $validated['nombrecliente'],
+                    'emailcliente' => $validated['emailcliente'],
+                    'direccioncliente' => $validated['direccioncliente'],
+                    'telefonocliente' => $validated['telefonocliente'],
+                    'observaciones' => $validated['observaciones'],
+                    'idticket' => $validated['idticket']
+                ]);
+                
+                $message = 'Constancia creada correctamente';
+            }
+    
+            // Manejar fotos existentes (eliminar las que no están en el array)
+            if ($request->filled('fotos_existentes')) {
+                $fotosAMantener = json_decode($request->fotos_existentes, true);
+                
+                ConstanciaFoto::where('idconstancia', $constancia->idconstancia)
+                    ->whereNotIn('idfoto', $fotosAMantener)
+                    ->delete();
+            }
+    
+            // Guardar nuevas fotos
+            if ($request->hasFile('photos')) {
+                foreach ($request->file('photos') as $photo) {
+                    $imageData = file_get_contents($photo->getRealPath());
+                    
+                    ConstanciaFoto::create([
+                        'idconstancia' => $constancia->idconstancia,
+                        'imagen' => $imageData,
+                        'descripcion' => 'Foto adjunta a constancia'
+                    ]);
+                }
+            }
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'constancia_id' => $constancia->idconstancia
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar constancia: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+
+    public function porTicket($ticketId)
+{
+    $constancia = ConstanciaEntrega::with(['fotos' => function($query) {
+        $query->select('idfoto', 'idconstancia', 'descripcion');
+    }])->where('idticket', $ticketId)->first();
+
+    if (!$constancia) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No se encontró constancia para este ticket'
+        ]);
+    }
+
+    // Transformar fotos para incluir URLs
+    $constancia->fotos->transform(function($foto) {
+        $foto->imagen_url = route('constancias.fotos.mostrar', $foto->idfoto);
+        return $foto;
+    });
+
+    return response()->json([
+        'success' => true,
+        'constancia' => $constancia
+    ]);
+}
+
+public function eliminarFoto($fotoId)
+{
+    $foto = ConstanciaFoto::findOrFail($fotoId);
+    $foto->delete();
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Foto eliminada correctamente'
+    ]);
+}
+
+// En el controlador
+public function mostrarFoto($id)
+{
+    $foto = ConstanciaFoto::findOrFail($id);
+    return response($foto->imagen)
+        ->header('Content-Type', 'image/jpeg');
+}
+public function descargarPDF($id)
+{
+    try {
+        Log::info("📥 Iniciando descarga de PDF para ticket ID: {$id}");
+
+        $orden = Ticket::with('cliente')->findOrFail($id);
+        Log::info("✅ Orden encontrada:", ['orden_id' => $orden->id]);
+
+        $constancia = ConstanciaEntrega::with('fotos')->where('idticket', $id)->first();
+
+        if (!$constancia) {
+            Log::warning("⚠️ Constancia no encontrada para ticket ID: {$id}");
+        } else {
+            Log::info("✅ Constancia encontrada", [
+                'id' => $constancia->idconstancia,
+                'fotos_count' => $constancia->fotos ? $constancia->fotos->count() : 0
+            ]);
+            
+            // Procesar las fotos para convertirlas a base64
+            $fotos = $constancia->fotos->map(function($foto) {
+                return [
+                    'imagen_base64' => 'data:image/jpeg;base64,' . base64_encode($foto->imagen),
+                    'descripcion' => $foto->descripcion
+                ];
+            });
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.constancia', [
+            'orden' => $orden,
+            'constancia' => $constancia,
+            'fotos' => $fotos ?? []
+        ]);
+
+        Log::info("📄 PDF generado correctamente. Enviando descarga...");
+
+        return $pdf->download("constancia_{$orden->numero_ticket}.pdf");
+
+    } catch (\Exception $e) {
+        Log::error("❌ Error generando PDF: " . $e->getMessage(), [
+            'exception' => $e
+        ]);
+
+        abort(500, 'Error generando PDF');
+    }
+}
+
 }

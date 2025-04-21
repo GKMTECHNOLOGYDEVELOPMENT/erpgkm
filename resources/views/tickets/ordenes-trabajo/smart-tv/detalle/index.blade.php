@@ -696,6 +696,8 @@
 
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar NiceSelect2

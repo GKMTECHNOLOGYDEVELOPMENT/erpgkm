@@ -456,10 +456,15 @@ Route::get('/get-marcas', [MarcaController::class, 'checkMarcas']);
 
 Route::get('/marcas-por-cliente-general/{idClienteGeneral}', [MarcaController::class, 'getMarcasByClienteGeneral']);
 
+Route::post('/constancias', [OrdenesTrabajoController::class, 'storeConstancia'])
+    ->name('constancias.store');
+
+    Route::get('/constancia/pdf/{id}', [OrdenesTrabajoController::class, 'descargarPDF'])->name('constancia.pdf');
 
 
-
-
+    // En routes/web.php
+Route::get('/constancias/fotos/{id}', [OrdenesTrabajoController::class, 'mostrarFoto'])
+->name('constancias.fotos.mostrar');
 // Agrega esta ruta en tu archivo de rutas web.php
 
 Route::get('validar-ticket/{nroTicket}', [OrdenesTrabajoController::class, 'validarTicket'])->name('validarTicket');
@@ -597,10 +602,28 @@ Route::delete('/eliminar-producto/{id}', [OrdenesHelpdeskController::class, 'eli
 
 
 // Ruta para mostrar el formulario de recuperación de contraseña
-Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+// Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+// Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-Route::post('/password/recover', [PasswordRecoveryController::class, 'sendRecoveryLink'])->name('password.recover');
+// Route::post('/password/recover', [PasswordRecoveryController::class, 'sendRecoveryLink'])->name('password.recover');
+
+
+
+
+Route::get('/password/reset', function () {
+    return view('auth.boxed-password-reset');
+})->name('password.request');
+
+Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Otras rutas necesarias para el reset
+Route::get('/password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+    
+Route::post('/password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
+
+
+
+
 
 
 Route::view('/components/tabs', 'ui-components.tabs');
