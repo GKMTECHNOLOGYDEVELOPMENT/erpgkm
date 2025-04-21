@@ -593,6 +593,9 @@ Route::get('/marcas/categoria/{idCategoria}', [OrdenesHelpdeskController::class,
 Route::get('/modelos/marca/{idMarca}', [OrdenesHelpdeskController::class, 'obtenerModelosPorMarca']);
 Route::get('/modelos/marca/{idMarca}/categoria/{idCategoria}', [OrdenesHelpdeskController::class, 'obtenerModelosPorMarcaYCategoria']);
 
+Route::get('/modelos/marca/{idMarca}/obtener/categoria/{idCategoria}', 
+    [OrdenesHelpdeskController::class, 'obtenerModelosPorMarcaYCategoriaobtener'])
+    ->name('modelos.porMarcaYCategoria');
 
 
 Route::post('/guardar-equipo', [OrdenesHelpdeskController::class, 'guardarEquipo'])->name('guardarEquipo');

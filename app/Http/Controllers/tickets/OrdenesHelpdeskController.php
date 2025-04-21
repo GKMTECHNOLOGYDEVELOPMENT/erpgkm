@@ -667,52 +667,51 @@ class OrdenesHelpdeskController extends Controller
         ]);
     }
 
-
     public function obtenerProductosInstalados(Request $request)
     {
-        // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Instalación"
         $productos = Equipo::select(
             'equipos.idEquipos',
             'equipos.nserie',
+            'equipos.idCategoria',  // Añadir este campo
+            'equipos.idMarca',      // Añadir este campo
+            'equipos.idModelo',     // Añadir este campo
             'categoria.nombre as categoria_nombre',
             'marca.nombre as marca_nombre',
             'modelo.nombre as modelo_nombre',
-            'equipos.observaciones' // Agregar observaciones a la selección
+            'equipos.observaciones'
         )
-            ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
-            ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
-            ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
-            ->where('equipos.idTickets', $request->idTicket)
-            ->where('equipos.idVisitas', $request->idVisita)
-            ->where('equipos.modalidad', 'Instalación')
-            ->get();
-
-        // Retornar la respuesta como JSON
+        ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
+        ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
+        ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
+        ->where('equipos.idTickets', $request->idTicket)
+        ->where('equipos.idVisitas', $request->idVisita)
+        ->where('equipos.modalidad', 'Instalación')
+        ->get();
+    
         return response()->json($productos);
     }
-
-
-
+    
     public function obtenerProductosRetirados(Request $request)
     {
-        // Obtener los equipos filtrados por ticketId, idVisitaSeleccionada y modalidad "Retirar"
         $productos = Equipo::select(
             'equipos.idEquipos',
             'equipos.nserie',
+            'equipos.idCategoria',  // Añadir este campo
+            'equipos.idMarca',      // Añadir este campo
+            'equipos.idModelo',     // Añadir este campo
             'categoria.nombre as categoria_nombre',
             'marca.nombre as marca_nombre',
             'modelo.nombre as modelo_nombre',
-            'equipos.observaciones' // Añadir las observaciones a la consulta
+            'equipos.observaciones'
         )
-            ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
-            ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
-            ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
-            ->where('equipos.idTickets', $request->idTicket)
-            ->where('equipos.idVisitas', $request->idVisita)
-            ->where('equipos.modalidad', 'Retirar')
-            ->get();
-
-        // Retornar la respuesta como JSON
+        ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
+        ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
+        ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
+        ->where('equipos.idTickets', $request->idTicket)
+        ->where('equipos.idVisitas', $request->idVisita)
+        ->where('equipos.modalidad', 'Retirar')
+        ->get();
+    
         return response()->json($productos);
     }
 
@@ -756,7 +755,7 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-    
+
 
     public function obtenerModelosPorMarcaYCategoria($idMarca, $idCategoria)
 {
@@ -767,6 +766,38 @@ class OrdenesHelpdeskController extends Controller
     return response()->json($modelos);
 }
 
+
+public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
+    {
+        try {
+            // Validar que los IDs sean numéricos
+            if (!is_numeric($idMarca) || !is_numeric($idCategoria)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'IDs de marca y categoría deben ser numéricos'
+                ], 400);
+            }
+
+            // Obtener modelos activos que pertenezcan a la marca y categoría
+            $modelos = Modelo::where('idMarca', $idMarca)
+                ->where('idCategoria', $idCategoria)
+                ->where('estado', 1) // Solo modelos activos
+                ->select('idModelo', 'nombre')
+                ->orderBy('nombre', 'asc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'modelos' => $modelos
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener modelos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 
 
