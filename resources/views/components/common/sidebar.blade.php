@@ -277,7 +277,7 @@
                     <span>Administracion</span>
                 </h2>
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'components' }"
                         @click="activeDropdown === 'components' ? activeDropdown = null : activeDropdown = 'components'">
@@ -351,7 +351,7 @@
                             <a href="/components/lightbox">Lightbox</a>
                         </li>
                     </ul>
-                </li> --}}
+                </li>
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'asociados' }"
@@ -395,7 +395,7 @@
                     </ul>
                 </li>
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <a href="{{ route('asistencia.index') }}" class="nav-link group">
                         <div class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -410,7 +410,7 @@
                             </span>
                         </div>
                     </a>
-                </li> --}}
+                </li>
 
 
                 {{-- <li class="menu nav-item">
@@ -447,7 +447,7 @@
                     </ul>
                 </li> --}}
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'elements' }"
                         @click="activeDropdown === 'elements' ? activeDropdown = null : activeDropdown = 'elements'">
@@ -529,7 +529,7 @@
                             <a href="/elements/typography">Typography</a>
                         </li>
                     </ul>
-                </li> --}}
+                </li>
 
                 {{-- <li class="menu nav-item">
                     <a href="/charts" class="nav-link group">
@@ -723,7 +723,7 @@
                     </a>
                 </li>
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'datatables' }"
                         @click="activeDropdown === 'datatables' ? activeDropdown = null : activeDropdown = 'datatables'">
@@ -799,7 +799,7 @@
                             <a href="/datatables/column-chooser">Column Chooser</a>
                         </li>
                     </ul>
-                </li> --}}
+                </li>
 
                 {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"

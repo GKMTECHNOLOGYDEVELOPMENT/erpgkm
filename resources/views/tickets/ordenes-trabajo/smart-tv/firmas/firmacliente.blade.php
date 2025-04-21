@@ -92,10 +92,12 @@
             const ctx = canvas.getContext("2d");
 
             function resizeCanvas() {
+                const data = signaturePadCliente?.toData();
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
                 canvas.width = canvas.offsetWidth * ratio;
                 canvas.height = canvas.offsetHeight * ratio;
                 ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+                signaturePadCliente.fromData(data); // Restaura la firma
             }
 
             signaturePadCliente = new SignaturePad(canvas, {

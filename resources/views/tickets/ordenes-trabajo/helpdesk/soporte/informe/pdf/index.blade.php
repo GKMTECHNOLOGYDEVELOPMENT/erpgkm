@@ -196,7 +196,7 @@
                 <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
                 <div class="red-bg mt-4 text-left">Falla Reportada</div>
                 <div class="w-full text-xs mt-3">
-                    <p>{{ $producto['fallaReportada'] }}</p>
+                    <p class="uppercase">{{ $producto['fallaReportada'] }}</p>
                 </div>
             @endif
 
@@ -235,8 +235,9 @@
 
                         <!-- Justificación debajo del estado -->
                         <div class="w-full text-xs">
-                            <p class="text-xs text-gray-700">{{ $transicion->justificacion }}</p>
+                            <p class="text-xs text-gray-700 uppercase">{{ $transicion->justificacion }}</p>
                         </div>
+
                     @endforeach
                 </div>
             @endif
@@ -315,6 +316,15 @@
                         $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
                     @endphp
 
+                    @php
+                    $descripciones = [
+                        'IMAGEN EN DESPLAZAMIENTO',
+                        'IMAGEN LLEGADA A SERVICIO',
+                        'IMAGEN MOTIVO'
+                    ];
+                    $contador = 0;
+                    @endphp
+
                     <!-- Primero las imágenes de la visita (incluye condiciones también) -->
                     @if ($hayFotosDeVisita)
                         @foreach ($imagenesAnexos as $anexo)
@@ -330,9 +340,8 @@
                                     <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                 </div>
 
-                                <!-- Descripción fija -->
                                 <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                    IMAGEN DE LA VISITA
+                                    {{ $descripciones[$contador] ?? 'IMAGEN DE LA VISITA' }}
                                 </p>
 
                                 @php $contador++; @endphp

@@ -18,7 +18,14 @@
             float: right;
             margin-right: 10px;
         }
+
+        .truncate {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
     </style>
+
 
     <div class="p-4">
         <!-- Filtros -->
@@ -48,6 +55,7 @@
                             <th class="font-bold">FIN BREAK</th>
                             <th class="font-bold">SALIDA</th>
                             <th class="font-bold">UBICACIÓN SALIDA</th>
+                            <th class="font-bold">ASISTENCIA</th>
                         </tr>
                     </thead>
 
