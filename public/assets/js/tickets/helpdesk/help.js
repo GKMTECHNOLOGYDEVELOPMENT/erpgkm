@@ -116,7 +116,7 @@ function formatDate(dateString) {
               id="viewImageButton-${visita.idVisitas}" 
               data-image-type="visita"
               data-id="${visita.idVisitas}"
-              title="Ver imagen">
+              title="Ver image">
         <i class="fa-solid fa-image text-sm sm:text-base"></i> 
       </button>
               </div>                   
@@ -397,6 +397,8 @@ visitaCard.appendChild(detailsButton);
 
 
                    <!-- Botón para ver imagen -->
+                   ${visita.recojo === 1 ? `
+
                       <button 
                       class="flex items-center justify-center gap-2 
                              px-2 py-1 sm:px-3 sm:py-1.5
@@ -411,6 +413,9 @@ visitaCard.appendChild(detailsButton);
                       title="Ver imagen">
                       <i class="fa-solid fa-image text-base md:text-lg"></i> 
                   </button>
+
+                  ` : ''}
+
 
 
               </div>                   

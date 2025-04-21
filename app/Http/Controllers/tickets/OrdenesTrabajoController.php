@@ -1887,6 +1887,9 @@ class OrdenesTrabajoController extends Controller
 
             $visita->idTipoUsuario = $visita->tecnico ? $visita->tecnico->idTipoUsuario : null;
 
+            $visita->recojo = $visita->recojo ?? 0; // Asegurar que siempre tenga un valor
+
+
 
             // Incluir tipoServicio
             $visita->tipoServicio = $visita->tipoServicio;  // Trae el campo tipoServi
