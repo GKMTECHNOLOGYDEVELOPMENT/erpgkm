@@ -4225,7 +4225,7 @@ class OrdenesTrabajoController extends Controller
 
             return response($pdf)
                 ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="CONSTANCIA_ENTREGA_' . $orden->numero_ticket . '.pdf"');
+                ->header('Content-Disposition', 'inline; filename="ORDEN_DE_INGRESO ' . $orden->idTickets . '.pdf"');
         } catch (\Exception $e) {
             Log::error('Error generando constancia PDF: ' . $e->getMessage());
             abort(500, 'Error generando PDF');
