@@ -365,6 +365,17 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('helpdesk/soporte/{idOt}/pdf/{idVisita}', [OrdenesHelpdeskController::class, 'generateSoportePdfVisita'])
         ->name('helpdesk.soporte.pdf');
 
+
+
+
+
+        Route::get('helpdesk/lab/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteLab'])->name('firmacliente.Lab');
+        Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('pdfcliente');
+
+
+
+
+
     Route::get('/helpdesk/export-excel', [OrdenesHelpdeskController::class, 'exportHelpdeskToExcel'])->name('ordenes.export.helpdesk.excel');
 
 
@@ -382,6 +393,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/create-helpdesk', [OrdenesHelpdeskController::class, 'createhelpdesk'])->name('createhelpdesk');
     Route::post('/storehelpdesk', [OrdenesHelpdeskController::class, 'storehelpdesk'])->name('storehelpdesk')->middleware('auth');
     Route::get('/helpdesk/levantamiento/{id}/edit', [OrdenesHelpdeskController::class, 'editHelpdesk'])->name('helpdesk.levantamiento.edit');
+    
     Route::put('/helpdesk/update/{id}', [OrdenesHelpdeskController::class, 'updateHelpdesk'])->name('helpdesk.update');
     Route::get('/export-helpdesk-excel', [OrdenesHelpdeskController::class, 'exportHelpdeskToExcel'])->name('export.helpdesk.excel');
     Route::get('/helpdesk/get-all', [OrdenesHelpdeskController::class, 'getAll'])->name('helpdesk.getAll');
@@ -389,6 +401,11 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
     Route::get('/helpdesk/soporte/{id}/edit', [OrdenesHelpdeskController::class, 'editSoporte'])
         ->name('helpdesk.soporte.edit');
+
+        Route::get('/helpdesk/laboratorio/{id}/edit', [OrdenesHelpdeskController::class, 'ediLaboratorio'])
+        ->name('helpdesk.laboratorio.edit');
+
+
     Route::get('/helpdesk/pdf/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdf'])
         ->name('helpdesk.pdf.levantamiento');
     Route::get('/helpdesk/pdf/soporte/{idOt}', [OrdenesHelpdeskController::class, 'generateSoportePdf'])->name('helpdesk.pdf.soporte');

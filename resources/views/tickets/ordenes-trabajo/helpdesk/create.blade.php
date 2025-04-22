@@ -97,6 +97,57 @@
                         </label>
                     </div> -->
 
+
+
+
+                    <div id="esEquipoContainer" style="display: none;" >
+
+                           <!-- Tipo Producto -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Tipo Producto</label>
+                    <select id="tipoProductoLab" name="tipoProducto" class="form-select w-full h-10 px-3 py-2 rounded-md truncate">
+                        <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+                        @foreach ($categorias as $categoria)
+                            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Marca -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Marca</label>
+                    <select id="marcaLab" name="marca" class="form-select w-full h-10 px-3 py-2 rounded-md truncate">
+                        <option value="" disabled selected>Seleccionar Marca</option>
+                        @foreach ($marcas as $marca)
+                            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Modelo -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Modelo</label>
+                    <select id="modeloLab" name="modelo" class="form-select w-full h-10 px-3 py-2 rounded-md truncate hidden">
+                        <option value="" disabled selected>Seleccionar Modelo</option>
+                    </select>
+                </div>
+
+                <!-- Número de Serie -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nro. de Serie</label>
+                    <input type="text" id="serieRetirar" name="serieRetirar" class="form-input w-full" placeholder="Ingrese Nro. de Serie">
+                </div>
+
+                <!-- Observaciones -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Observaciones</label>
+                    <textarea id="observacionesRetirar" name="observaciones" class="form-textarea w-full" rows="3"
+                              placeholder="Ingrese observaciones (opcional)"></textarea>
+                </div>
+
+                    </div>
+
+
                     <!-- ¿Es Envío? -->
                     <div id="esEnvioContainer" style="display: none;">
                         <label class="block text-sm font-medium mb-2">¿Es Envío?</label>
@@ -213,37 +264,20 @@
                             return;
                         }
 
-                        // function verificarDepartamento() {
-                        //     const selectedOption = selectTienda.options[selectTienda.selectedIndex];
-                        //     const departamento = selectedOption.getAttribute("data-departamento");
-                        //     console.log("Departamento seleccionado:", departamento); // Debugging: Ver departamento seleccionado
 
-                        //     if (departamento === "3926") {
-                        //         console.log("Departamento es 3926. Ocultando esEnvioContainer y tecnicoContainer.");
-                        //         esEnvioContainer.style.display = "none";
-                        //         tecnicoContainer.style.display = "none";
-                        //         tecnicoDatosContainer.style.display = "none";
-                        //     } else {
-                        //         console.log("Departamento diferente a 3926. Verificando Tipo de Servicio.");
-                        //         verificarTipoServicio(); // Verificar también el tipo de servicio
-                        //     }
-                        // }
+                        function verificarTipoServicio() {
+        const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
+        const esEquipoContainer = document.getElementById("esEquipoContainer");
+        
+        if (parseInt(tipoServicio) === 6) {
+            esEquipoContainer.style.display = "block";
+            console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
+        } else {
+            esEquipoContainer.style.display = "none";
+            console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
+        }
+    }
 
-                        // function verificarTipoServicio() {
-                        //     const selectedTipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex];
-                        //     const tipoServicio = selectedTipoServicio ? selectedTipoServicio.value : null;
-                        //     console.log("Tipo de Servicio seleccionado:",
-                        //         tipoServicio); // Debugging: Ver tipo de servicio seleccionado
-
-                        //     // Si el tipo de servicio es 2, ocultamos el contenedor de "esEnvio"
-                        //     if (tipoServicio == "2") {
-                        //         console.log("Tipo de servicio es 2. Ocultando esEnvioContainer.");
-                        //         esEnvioContainer.style.display = "none";
-                        //     } else {
-                        //         console.log("Tipo de servicio no es 2. Mostrando esEnvioContainer.");
-                        //         esEnvioContainer.style.display = "block";
-                        //     }
-                        // }
 
 
                         function verificarEnvioContainer() {
@@ -328,16 +362,23 @@
                         esEnvioContainer.style.display = "none";
                         tecnicoContainer.style.display = "none";
                         tecnicoDatosContainer.style.display = "none";
+                        verificarTipoServicio(); // Agrega esta línea para el estado inicial
+
 
                         // Eventos
                         selectTienda.addEventListener("change", function() {
                             console.log("Cambiando tienda."); // Debugging: Ver cuando se cambia la tienda
                             verificarEnvioContainer();
+                            verificarEnvioContainer();
+
                         });
                         selectTipoServicio.addEventListener("change", function() {
                             console.log(
                                 "Cambiando tipo de servicio."); // Debugging: Ver cuando se cambia el tipo de servicio
                                 verificarEnvioContainer();
+
+                                verificarTipoServicio(); // Agrega esta línea
+
                         });
                         esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
                         agregarTecnicoBtn.addEventListener("click", agregarTecnico);
@@ -356,6 +397,9 @@
             </form>
         </div>
     </div>
+
+
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Inicializa Select2 solo una vez para otros selects si es necesario
@@ -366,26 +410,7 @@
                 });
             });
 
-            // // Lógica para mostrar el checkbox si el tipo de servicio es "SOPORTE ON SITE"
-            // const selectTipoServicio = document.getElementById("tipoServicio");
-            // const esRecojoContainer = document.getElementById("esRecojoContainer");
-
-            // function verificarTipoServicio() {
-            //     const tipoSeleccionado = selectTipoServicio.options[selectTipoServicio.selectedIndex];
-            //     const nombreTipo = tipoSeleccionado ? tipoSeleccionado.dataset.nombre : "";
-
-            //     if (nombreTipo === "SOPORTE ON SITE") {
-            //         esRecojoContainer.classList.remove("hidden");
-            //     } else {
-            //         esRecojoContainer.classList.add("hidden");
-            //     }
-            // }
-
-            // // Evento de cambio en el select
-            // selectTipoServicio.addEventListener("change", verificarTipoServicio);
-
-            // // Verificar al cargar la página
-            // verificarTipoServicio();
+          
 
 
 
@@ -899,4 +924,67 @@
 
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
+
+    <script>
+
+$(document).ready(function() {
+
+         // Manejo de productos a retirar (similar a instalar)
+    $("#tipoProductoLab").change(function() {
+        const idCategoria = $(this).val();
+        const $marcaLab = $("#marcaLab");
+        const $modeloLab = $("#modeloLab");
+
+        if (idCategoria) {
+            $.ajax({
+                url: '/marcas/categoria/' + idCategoria,
+                method: 'GET',
+                success: function(response) {
+                    $marcaLab.empty().append('<option value="" disabled selected>Seleccionar Marca</option>');
+                    response.forEach(function(marca) {
+                        $marcaLab.append(`<option value="${marca.idMarca}">${marca.nombre}</option>`);
+                    });
+                    $marcaLab.show().trigger('change');
+                    $modeloLab.hide();
+                },
+                error: function() {
+                    toastr.error('Error al cargar las marcas');
+                }
+            });
+        } else {
+            $marcaLab.hide();
+            $modeloLab.hide();
+        }
+    });
+
+    $("#marcaLab").change(function() {
+        const idMarca = $(this).val();
+        const idCategoria = $("#tipoProductoLab").val();
+        const $modeloLab = $("#modeloLab");
+
+        if (idMarca && idCategoria) {
+            $.ajax({
+                url: `/modelos/marca/${idMarca}/categoria/${idCategoria}`,
+                method: 'GET',
+                success: function(response) {
+                    $modeloLab.empty().append('<option value="" disabled selected>Seleccionar Modelo</option>');
+                    response.forEach(function(modelo) {
+                        $modeloLab.append(`<option value="${modelo.idModelo}">${modelo.nombre}</option>`);
+                    });
+                    $modeloLab.show().trigger('change');
+                },
+                error: function() {
+                    toastr.error('Error al cargar los modelos');
+                }
+            });
+        } else {
+            $modeloLab.hide();
+        }
+    });
+
+});
+
+
+
+    </script>
 </x-layout.default>

@@ -119,6 +119,24 @@
                 </a>
             </li>
 
+            <!-- Constancia de entrega -->
+@if ($orden->clienteGeneral && $orden->clienteGeneral->idClienteGeneral != 6)
+    <li>
+        <a href="javascript:;"
+            class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
+            :class="{ '!bg-success text-white': tab === 'constancia' }" @click="tab = 'constancia'">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
+                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 12l2 2l4 -4m2 -4v12a2 2 0 0 1 -2 2H7a2 2 0 0 1 -2 -2V6a2 2 0 0 1 2 -2h7l4 4z" />
+            </svg>
+            Constancia de entrega
+        </a>
+    </li>
+@endif
+
+
+
  @if ($existeFlujo31)
             <li>
                 <a href="javascript:;"
@@ -136,7 +154,7 @@
 
             @endif
 
-            @if ($tipoServicio == 1)
+            @if ($tipoServicio == 1 || $tipoServicio == 6)
                 <li>
                     <a href="javascript:;"
                         class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
@@ -151,6 +169,7 @@
                     </a>
                 </li>
             @endif
+
             @if ($tipoServicio == 2)
                 {{-- Levantamiento de Información: Mostrar Recursos --}}
                 <li>
@@ -211,74 +230,106 @@
             @endif            
         </ul>
 
-        <!-- Cargar contenido según tipo de servicio -->
-        <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
-            @if ($tipoServicio == 2)
-                {{-- Levantamiento de Información --}}
-                <div x-show="tab === 'detalle'">
-                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.detalle.index')
-                </div>
-                <div x-show="tab === 'visitas'">
-                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index')
-                </div>
-                <div x-show="tab === 'desarrollo'">
-                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.informacion.index')
-                </div>
-
-                <div x-show="tab === 'recursos'">
-                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.recursos.index')
-                </div>
-                <div x-show="tab === 'firmas'">
-                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
-                </div>
-                <div x-show="tab === 'informe'">
-                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.informe.index')
-                    <div id="loadingSpinner"
-                        class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
-                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
-                            role="status">
-                            <span class="w-5 h-5 m-auto mb-10">
-                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
-                            </span>
-                        </div>
-                    </div>
-
-                </div>
-            @elseif ($tipoServicio == 1)
-                {{-- Soporte On Site --}}
-                <div x-show="tab === 'detalle'">
-                    @include('tickets.ordenes-trabajo.helpdesk.soporte.detalle.index')
-                </div>
-          
-                <div x-show="tab === 'visitas'">
-                    @include('tickets.ordenes-trabajo.helpdesk.soporte.visitas.index')
-                </div>
-                <div x-show="tab === 'desarrollo'">
-                    @include('tickets.ordenes-trabajo.helpdesk.soporte.informacion.index')
-                </div>
-                <div x-show="tab === 'retorno'">
-                    @include('tickets.ordenes-trabajo.helpdesk.soporte.retorno.index')
-                </div>
-                <div x-show="tab === 'imagenes'">
-                    @include('tickets.ordenes-trabajo.helpdesk.soporte.imagenes.index')
-                </div>
-                <div x-show="tab === 'firmas'">
-                    @include('tickets.ordenes-trabajo.helpdesk.soporte.firmas.index')
-                </div>
-                <div x-show="tab === 'informe'">
-                    @include('tickets.ordenes-trabajo.helpdesk.soporte.informe.index')
-                    <div id="loadingSpinner"
-                        class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
-                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
-                            role="status">
-                            <span class="w-5 h-5 m-auto mb-10">
-                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            @endif
+      <!-- Cargar contenido según tipo de servicio -->
+<div class="panel mt-6 p-5 max-w-4x2 mx-auto">
+    @if ($tipoServicio == 2)
+        {{-- Levantamiento de Información --}}
+        <div x-show="tab === 'detalle'">
+            @include('tickets.ordenes-trabajo.helpdesk.levantamiento.detalle.index')
         </div>
+        <div x-show="tab === 'visitas'">
+            @include('tickets.ordenes-trabajo.helpdesk.levantamiento.visitas.index')
+        </div>
+        <div x-show="tab === 'desarrollo'">
+            @include('tickets.ordenes-trabajo.helpdesk.levantamiento.informacion.index')
+        </div>
+        <div x-show="tab === 'recursos'">
+            @include('tickets.ordenes-trabajo.helpdesk.levantamiento.recursos.index')
+        </div>
+        <div x-show="tab === 'firmas'">
+            @include('tickets.ordenes-trabajo.helpdesk.levantamiento.firmas.index')
+        </div>
+        <div x-show="tab === 'informe'">
+            @include('tickets.ordenes-trabajo.helpdesk.levantamiento.informe.index')
+            <div id="loadingSpinner"
+                class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                    role="status">
+                    <span class="w-5 h-5 m-auto mb-10">
+                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    @elseif ($tipoServicio == 6)
+        {{-- Laboratorio --}}
+        <div x-show="tab === 'detalle'">
+            @include('tickets.ordenes-trabajo.helpdesk.laboratorio.detalle.index')
+        </div>
+        <div x-show="tab === 'visitas'">
+            @include('tickets.ordenes-trabajo.helpdesk.laboratorio.visitas.index')
+        </div>
+        <div x-show="tab === 'desarrollo'">
+            @include('tickets.ordenes-trabajo.helpdesk.laboratorio.informacion.index')
+        </div>
+        <div x-show="tab === 'constancia'">
+                @include('tickets.ordenes-trabajo.smart-tv.constancia.index')
+            </div>
+        <div x-show="tab === 'imagenes'">
+            @include('tickets.ordenes-trabajo.helpdesk.laboratorio.imagenes.index')
+        </div>
+        <div x-show="tab === 'firmas'">
+            @include('tickets.ordenes-trabajo.helpdesk.laboratorio.firmas.index')
+        </div>
+        <div x-show="tab === 'informe'">
+            @include('tickets.ordenes-trabajo.helpdesk.laboratorio.informe.index')
+            <div id="loadingSpinner"
+                class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                    role="status">
+                    <span class="w-5 h-5 m-auto mb-10">
+                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    @elseif ($tipoServicio == 1)
+        {{-- Soporte On Site --}}
+        <div x-show="tab === 'detalle'">
+            @include('tickets.ordenes-trabajo.helpdesk.soporte.detalle.index')
+        </div>
+        <div x-show="tab === 'visitas'">
+            @include('tickets.ordenes-trabajo.helpdesk.soporte.visitas.index')
+        </div>
+        <div x-show="tab === 'desarrollo'">
+            @include('tickets.ordenes-trabajo.helpdesk.soporte.informacion.index')
+        </div>
+        <div x-show="tab === 'retorno'">
+            @include('tickets.ordenes-trabajo.helpdesk.soporte.retorno.index')
+        </div>
+        <div x-show="tab === 'imagenes'">
+            @include('tickets.ordenes-trabajo.helpdesk.soporte.imagenes.index')
+        </div>
+        <div x-show="tab === 'firmas'">
+            @include('tickets.ordenes-trabajo.helpdesk.soporte.firmas.index')
+        </div>
+        <div x-show="tab === 'informe'">
+            @include('tickets.ordenes-trabajo.helpdesk.soporte.informe.index')
+            <div id="loadingSpinner"
+                class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                    role="status">
+                    <span class="w-5 h-5 m-auto mb-10">
+                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    @endif
+</div>
+
     </div>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
