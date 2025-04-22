@@ -1,4 +1,5 @@
-<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Firmas</span>
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+    style="background-color: {{ $colorEstado }};">Firmas</span>
 
 <!-- Contenedor general -->
 <div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">
@@ -6,11 +7,11 @@
     <div class="w-full md:w-[500px] flex flex-col items-center">
         <p class="mb-2 text-lg font-bold text-center">
             @if ($tipoUsuario == 5)
-            FIRMA DEL CHOFER
+                FIRMA DEL CHOFER
             @elseif ($tipoUsuario == 1)
-            FIRMA DEL TÉCNICO
+                FIRMA DEL TÉCNICO
             @else
-            FIRMA
+                FIRMA
             @endif
         </p>
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
@@ -51,13 +52,13 @@
     document.addEventListener("DOMContentLoaded", function() {
         const ticketId = document.getElementById("ticketId").value;
         const visitaId = document.getElementById("visitaId").value;
-        
+
         // Obtener el dominio actual (sin puerto, solo el nombre del dominio)
-        const baseUrl = window.location.origin;  // Esto obtendrá "http://dominio.com" o "https://dominio.com"
-        
+        const baseUrl = window.location.origin; // Esto obtendrá "http://dominio.com" o "https://dominio.com"
+
         // Construir la URL con el dominio actual
         const url = `${baseUrl}/ordenes/helpdesk/lab/${ticketId}/firmas/${visitaId}`;
-        
+
         // Mostrar la URL en el span
         const firmaUrlText = document.getElementById("firmaUrlText");
         firmaUrlText.textContent = url;
@@ -71,18 +72,18 @@
 
 <!-- Verificar el valor de tipoServicio -->
 @if ($estadovisita != 1)
-
     <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-   
-            <!-- Mostrar estos botones solo si idtipoServicio es 1 -->
-            <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-                    style="background-color: #BDB762; border: none; box-shadow: none;" value="7" onclick="finalizarServicio()">
-                ✅ Visita finaliza correctamente
-            </button>
 
-    
+        <!-- Mostrar estos botones solo si idtipoServicio es 1 -->
+        <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+            style="background-color: #BDB762; border: none; box-shadow: none;" value="7"
+            onclick="finalizarServicio()">
+            ✅ Visita finaliza correctamente
+        </button>
+
+
     </div>
-    @endif
+@endif
 
 
 
@@ -192,7 +193,8 @@
 
     function solicitudEntrega() {
         const ticketId = document.getElementById('ticketId').value; // Obtener el id del ticket
-        const visitaId = document.getElementById('visitaId').value; // Obtener el id de la visita (puedes pasarlo como un input oculto o extraerlo de otra parte)
+        const visitaId = document.getElementById('visitaId')
+            .value; // Obtener el id de la visita (puedes pasarlo como un input oculto o extraerlo de otra parte)
 
         console.log("Enviando solicitud de entrega para el ticket ID:", ticketId, "y visita ID:", visitaId);
 
