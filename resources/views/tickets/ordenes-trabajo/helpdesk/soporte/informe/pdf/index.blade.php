@@ -140,7 +140,7 @@
                         <p>NRO OT: <span class="font-bold">{{ $orden->idTickets ?? 'N/A' }}</span></p>
                         <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
                         <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
-                    </div>                    
+                    </div>
                     <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
                         <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}
@@ -196,143 +196,256 @@
                         <div class="w-full text-xs">
                             <p class="text-xs text-gray-700 uppercase">{{ $transicion->justificacion }}</p>
                         </div>
-
                     @endforeach
                 </div>
             @endif
             @php
-            $instaladosCount = $equiposInstalados->count();
-            $retiradosCount = $equiposRetirados->count();
-        @endphp
-        
-        {{-- 🔴 Caso: muchos retirados → separar hoja y mostrar instalados solo si existen --}}
-        @if ($retiradosCount > 15)
-            </div> {{-- Cierra el contenido anterior --}}
-            <div style="page-break-before: always;"><div class="container mx-auto bg-white p-2">
+                $instaladosCount = $equiposInstalados->count();
+                $retiradosCount = $equiposRetirados->count();
+            @endphp
+
+            @if ($retiradosCount > 15)
+        </div> {{-- Cierra página anterior --}}
+        <div style="page-break-before: always;">
+            <div class="container mx-auto bg-white p-2">
                 <div class="red-bg mt-2">Equipos Retirados</div>
-                <div class="w-full space-y-1">
-                    @foreach ($equiposRetirados as $equipo)
-                        <div class="text-xs py-1">
-                            <div class="flex flex-wrap justify-between gap-x-4">
-                                <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
-                                <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
-                                <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
-                                <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
-                                @if (!empty($equipo['observacion']))
-                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
+                <div class="w-full mt-2">
+                    <table class="w-full table-fixed text-xs text-center">
+                        <thead>
+                            <tr class="bg-gray-200 text-center">
+                                <th class="border-t border-b px-2 py-1">TIPO</th>
+                                <th class="border-t border-b px-2 py-1">MARCA</th>
+                                <th class="border-t border-b px-2 py-1">MODELO</th>
+                                <th class="border-t border-b px-2 py-1">SERIE</th>
+                                <th class="border-t border-b px-2 py-1">OBSERVACIÓN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($equiposRetirados as $equipo)
+                                <tr>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['tipoProducto']) }}
+                                    </td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['marca']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['modelo']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['nserie']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ !empty($equipo['observacion']) ? strtoupper($equipo['observacion']) : '-' }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        
+
             @if ($equiposInstalados->isNotEmpty())
-                <div style="page-break-before: always;"><div class="container mx-auto bg-white p-2">
-                    <div class="red-bg mt-2">Equipos Instalados</div>
-                    <div class="w-full space-y-1">
-                        @foreach ($equiposInstalados as $equipo)
-                            <div class="text-xs py-1">
-                                <div class="flex flex-wrap justify-between gap-x-4">
-                                    <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
-                                    <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
-                                    <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
-                                    <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
-                                    @if (!empty($equipo['observacion']))
-                                        <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
+                <div style="page-break-before: always;">
+                    <div class="container mx-auto bg-white p-2">
+                        <div class="red-bg mt-2">Equipos Instalados</div>
+                        <div class="w-full mt-2">
+                            <table class="w-full table-fixed text-xs text-center">
+                                <thead>
+                                    <tr class="bg-gray-200 text-center">
+                                        <th class="border-t border-b px-2 py-1">TIPO</th>
+                                        <th class="border-t border-b px-2 py-1">MARCA</th>
+                                        <th class="border-t border-b px-2 py-1">MODELO</th>
+                                        <th class="border-t border-b px-2 py-1">SERIE</th>
+                                        <th class="border-t border-b px-2 py-1">OBSERVACIÓN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($equiposInstalados as $equipo)
+                                        <tr>
+                                            <td
+                                                class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                                {{ strtoupper($equipo['tipoProducto']) }}</td>
+                                            <td
+                                                class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                                {{ strtoupper($equipo['marca']) }}
+                                            </td>
+                                            <td
+                                                class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                                {{ strtoupper($equipo['modelo']) }}
+                                            </td>
+                                            <td
+                                                class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                                {{ strtoupper($equipo['nserie']) }}
+                                            </td>
+                                            <td
+                                                class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                                {{ !empty($equipo['observacion']) ? strtoupper($equipo['observacion']) : '-' }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             @endif
-        
-        {{-- 🔁 Caso: total equipos > 3 → todos en nueva hoja --}}
         @elseif ($instaladosCount + $retiradosCount > 3)
-            </div>
-            <div style="page-break-before: always;"><div class="container mx-auto bg-white p-2">
+        </div>
+        <div style="page-break-before: always;">
+            <div class="container mx-auto bg-white p-2">
                 @if ($equiposInstalados->isNotEmpty())
                     <div class="red-bg mt-2">Equipos Instalados</div>
-                    <div class="w-full space-y-1">
-                        @foreach ($equiposInstalados as $equipo)
-                            <div class="text-xs py-1">
-                                <div class="flex flex-wrap justify-between gap-x-4">
-                                    <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
-                                    <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
-                                    <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
-                                    <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
-                                    @if (!empty($equipo['observacion']))
-                                        <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="w-full mt-2">
+                        <table class="w-full table-fixed text-xs text-center">
+                            <thead>
+                                <tr class="bg-gray-200 text-center">
+                                    <th class="border-t border-b px-2 py-1">TIPO</th>
+                                    <th class="border-t border-b px-2 py-1">MARCA</th>
+                                    <th class="border-t border-b px-2 py-1">MODELO</th>
+                                    <th class="border-t border-b px-2 py-1">SERIE</th>
+                                    <th class="border-t border-b px-2 py-1">OBSERVACIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($equiposInstalados as $equipo)
+                                    <tr>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ strtoupper($equipo['tipoProducto']) }}</td>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ strtoupper($equipo['marca']) }}</td>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ strtoupper($equipo['modelo']) }}
+                                        </td>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ strtoupper($equipo['nserie']) }}
+                                        </td>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ !empty($equipo['observacion']) ? strtoupper($equipo['observacion']) : '-' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 @endif
-        
+
                 @if ($equiposRetirados->isNotEmpty())
-                    <div class="red-bg mt-2">Equipos Retirados</div>
-                    <div class="w-full space-y-1">
-                        @foreach ($equiposRetirados as $equipo)
-                            <div class="text-xs py-1">
-                                <div class="flex flex-wrap justify-between gap-x-4">
-                                    <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
-                                    <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
-                                    <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
-                                    <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
-                                    @if (!empty($equipo['observacion']))
-                                        <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="red-bg mt-6">Equipos Retirados</div>
+                    <div class="w-full mt-2">
+                        <table class="w-full table-fixed text-xs text-center">
+                            <thead>
+                                <tr class="bg-gray-200 text-center">
+                                    <th class="border-t border-b px-2 py-1">TIPO</th>
+                                    <th class="border-t border-b px-2 py-1">MARCA</th>
+                                    <th class="border-t border-b px-2 py-1">MODELO</th>
+                                    <th class="border-t border-b px-2 py-1">SERIE</th>
+                                    <th class="border-t border-b px-2 py-1">OBSERVACIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($equiposRetirados as $equipo)
+                                    <tr>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ strtoupper($equipo['tipoProducto']) }}</td>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ strtoupper($equipo['marca']) }}
+                                        </td>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ strtoupper($equipo['modelo']) }}
+                                        </td>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ strtoupper($equipo['nserie']) }}
+                                        </td>
+                                        <td
+                                            class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                            {{ !empty($equipo['observacion']) ? strtoupper($equipo['observacion']) : '-' }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 @endif
             </div>
-        
-        {{-- ✅ Caso final: pocos equipos → todo en misma hoja --}}
         @else
+            {{-- Caso final: pocos equipos en misma hoja --}}
             @if ($equiposInstalados->isNotEmpty())
                 <div class="red-bg mt-2">Equipos Instalados</div>
-                <div class="w-full space-y-1">
-                    @foreach ($equiposInstalados as $equipo)
-                        <div class="text-xs py-1">
-                            <div class="flex flex-wrap justify-between gap-x-4">
-                                <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
-                                <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
-                                <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
-                                <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
-                                @if (!empty($equipo['observacion']))
-                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
+                <div class="w-full mt-2">
+                    <table class="w-full table-fixed text-xs text-center">
+                        <thead>
+                            <tr class="bg-gray-200 text-center">
+                                <th class="border-t border-b px-2 py-1">TIPO</th>
+                                <th class="border-t border-b px-2 py-1">MARCA</th>
+                                <th class="border-t border-b px-2 py-1">MODELO</th>
+                                <th class="border-t border-b px-2 py-1">SERIE</th>
+                                <th class="border-t border-b px-2 py-1">OBSERVACIÓN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($equiposInstalados as $equipo)
+                                <tr>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['tipoProducto']) }}
+                                    </td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['marca']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['modelo']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['nserie']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ !empty($equipo['observacion']) ? strtoupper($equipo['observacion']) : '-' }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             @endif
-        
+
             @if ($equiposRetirados->isNotEmpty())
-                <div class="red-bg mt-2">Equipos Retirados</div>
-                <div class="w-full space-y-1">
-                    @foreach ($equiposRetirados as $equipo)
-                        <div class="text-xs py-1">
-                            <div class="flex flex-wrap justify-between gap-x-4">
-                                <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
-                                <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
-                                <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
-                                <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
-                                @if (!empty($equipo['observacion']))
-                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
-                                @endif
-                            </div>
-                        </div>
-                    @endforeach
+                <div class="red-bg mt-6">Equipos Retirados</div>
+                <div class="w-full mt-2">
+                    <table class="w-full table-fixed text-xs text-center">
+                        <thead>
+                            <tr class="bg-gray-200 text-center">
+                                <th class="border-t border-b px-2 py-1">TIPO</th>
+                                <th class="border-t border-b px-2 py-1">MARCA</th>
+                                <th class="border-t border-b px-2 py-1">MODELO</th>
+                                <th class="border-t border-b px-2 py-1">SERIE</th>
+                                <th class="border-t border-b px-2 py-1">OBSERVACIÓN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($equiposRetirados as $equipo)
+                                <tr>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['tipoProducto']) }}
+                                    </td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['marca']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['modelo']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ strtoupper($equipo['nserie']) }}</td>
+                                    <td class="border-t border-b px-2 py-1 text-center whitespace-normal break-words">
+                                        {{ !empty($equipo['observacion']) ? strtoupper($equipo['observacion']) : '-' }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             @endif
-        @endif
-        
-        
+            @endif
 
             <!-- FOOTER -->
             <div class="footer text-center text-gray-500 text-xs">
@@ -409,12 +522,8 @@
                     @endphp
 
                     @php
-                    $descripciones = [
-                        'IMAGEN EN DESPLAZAMIENTO',
-                        'IMAGEN LLEGADA A SERVICIO',
-                        'IMAGEN MOTIVO'
-                    ];
-                    $contador = 0;
+                        $descripciones = ['IMAGEN EN DESPLAZAMIENTO', 'IMAGEN LLEGADA A SERVICIO', 'IMAGEN MOTIVO'];
+                        $contador = 0;
                     @endphp
 
                     <!-- Primero las imágenes de la visita (incluye condiciones también) -->
