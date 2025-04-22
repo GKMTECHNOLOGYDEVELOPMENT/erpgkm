@@ -52,14 +52,18 @@
         const ticketId = document.getElementById("ticketId").value;
         const visitaId = document.getElementById("visitaId").value;
         
-        // Construir la URL
-        const url = `http://127.0.0.1:8000/ordenes/helpdesk/lab/${ticketId}/firmas/${visitaId}`;
+        // Obtener el dominio actual (sin puerto, solo el nombre del dominio)
+        const baseUrl = window.location.origin;  // Esto obtendrá "http://dominio.com" o "https://dominio.com"
+        
+        // Construir la URL con el dominio actual
+        const url = `${baseUrl}/ordenes/helpdesk/lab/${ticketId}/firmas/${visitaId}`;
         
         // Mostrar la URL en el span
         const firmaUrlText = document.getElementById("firmaUrlText");
         firmaUrlText.textContent = url;
     });
 </script>
+
 
 
 
