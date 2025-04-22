@@ -4,7 +4,29 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
 
+    <style>
+        .nice-select {
+            display: flex !important;
+            align-items: center !important;
+            padding-top: 0.5rem !important;
+            padding-bottom: 0.5rem !important;
+            border-radius: 0.375rem !important;
+            /* igual a rounded-md */
+            border: 1px solid #d1d5db !important;
+            /* igual a border-gray-300 */
+            width: 100% !important;
+            font-size: 0.875rem !important;
+            /* igual a text-sm */
+            height: auto !important;
+            min-height: 2.5rem;
+            /* similar a h-10 */
+        }
 
+        .nice-select .current {
+            line-height: normal !important;
+            width: 100%;
+        }
+    </style>
 
 
     <div>
@@ -100,52 +122,56 @@
 
 
 
-                    <div id="esEquipoContainer" style="display: none;" >
+                    <!-- Dentro del formulario -->
+                    <div id="esEquipoContainer" class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                        <!-- Tipo Producto -->
+                        <div>
+                            <label class="block text-sm font-medium">Tipo Producto</label>
+                            <select id="tipoProductoLab" name="tipoProducto" class="form-select select2 w-full">
+                                <option value="" disabled selected>Seleccionar Tipo de Producto</option>
+                                @foreach ($categorias as $categoria)
+                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                           <!-- Tipo Producto -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Tipo Producto</label>
-                    <select id="tipoProductoLab" name="tipoProducto" class="form-select w-full h-10 px-3 py-2 rounded-md truncate">
-                        <option value="" disabled selected>Seleccionar Tipo de Producto</option>
-                        @foreach ($categorias as $categoria)
-                            <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                        <!-- Marca -->
+                        <div>
+                            <label class="block text-sm font-medium">Marca</label>
+                            <select id="marcaLab" name="marca" class="form-select select2 w-full">
+                                <option value="" disabled selected>Seleccionar Marca</option>
+                                @foreach ($marcas as $marca)
+                                    <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                <!-- Marca -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Marca</label>
-                    <select id="marcaLab" name="marca" class="form-select w-full h-10 px-3 py-2 rounded-md truncate">
-                        <option value="" disabled selected>Seleccionar Marca</option>
-                        @foreach ($marcas as $marca)
-                            <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                        <!-- Modelo -->
+                        <div>
+                            <label class="block text-sm font-medium">Modelo</label>
+                            <select id="modeloLab" name="modelo" class="form-select select2 w-full hidden">
+                                <option value="" disabled selected>Seleccionar Modelo</option>
+                            </select>
+                        </div>
 
-                <!-- Modelo -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Modelo</label>
-                    <select id="modeloLab" name="modelo" class="form-select w-full h-10 px-3 py-2 rounded-md truncate hidden">
-                        <option value="" disabled selected>Seleccionar Modelo</option>
-                    </select>
-                </div>
 
-                <!-- Número de Serie -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nro. de Serie</label>
-                    <input type="text" id="serieRetirar" name="serieRetirar" class="form-input w-full" placeholder="Ingrese Nro. de Serie">
-                </div>
 
-                <!-- Observaciones -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Observaciones</label>
-                    <textarea id="observacionesRetirar" name="observaciones" class="form-textarea w-full" rows="3"
-                              placeholder="Ingrese observaciones (opcional)"></textarea>
-                </div>
+                        <!-- Número de Serie -->
+                        <div>
+                            <label class="block text-sm font-medium">Nro. de Serie</label>
+                            <input type="text" id="serieRetirar" name="serieRetirar" class="form-input w-full"
+                                placeholder="Ingrese Nro. de Serie">
+                        </div>
 
+                        <!-- Observaciones (ocupa ambas columnas internas) -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium">Observaciones</label>
+                            <textarea id="observacionesRetirar" name="observaciones" class="form-textarea w-full" rows="3"
+                                placeholder="Ingrese observaciones (opcional)"></textarea>
+                        </div>
                     </div>
+
+
 
 
                     <!-- ¿Es Envío? -->
@@ -168,7 +194,8 @@
                     <!-- Agencia -->
                     <div>
                         <label class="block text-sm font-medium">Corruir</label>
-                        <input type="text" name="agencia" class="form-input w-full" placeholder="Ingrese el Agencia">
+                        <input type="text" name="agencia" class="form-input w-full"
+                            placeholder="Ingrese el Agencia">
                     </div>
                     <!-- Técnico -->
                     <div>
@@ -265,44 +292,73 @@
                         }
 
 
+                        let selectsInicializados = false;
+
                         function verificarTipoServicio() {
-        const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
-        const esEquipoContainer = document.getElementById("esEquipoContainer");
-        
-        if (parseInt(tipoServicio) === 6) {
-            esEquipoContainer.style.display = "block";
-            console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
-        } else {
-            esEquipoContainer.style.display = "none";
-            console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
-        }
-    }
+                            const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
+                            const esEquipoContainer = document.getElementById("esEquipoContainer");
+
+                            if (parseInt(tipoServicio) === 6) {
+                                esEquipoContainer.classList.remove("hidden");
+
+                                if (!selectsInicializados) {
+                                    esEquipoContainer.querySelectorAll('select.select2').forEach(function(select) {
+                                        // Si ya existe nice-select renderizado, lo quitamos para evitar duplicado
+                                        const prevNiceSelect = select.nextElementSibling;
+                                        if (prevNiceSelect && prevNiceSelect.classList.contains('nice-select')) {
+                                            prevNiceSelect.remove();
+                                        }
+
+                                        // Aplica nice select
+                                        NiceSelect.bind(select, {
+                                            searchable: true
+                                        });
+
+                                        // Oculta el <select> original para evitar salto visual
+                                        select.classList.add('hidden');
+                                    });
+
+                                    selectsInicializados = true;
+                                }
+
+                                console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
+                            } else {
+                                esEquipoContainer.classList.add("hidden");
+                                console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
+                            }
+                        }
+
+
+
+
+
 
 
 
                         function verificarEnvioContainer() {
-    const selectedDepartamento = selectTienda.options[selectTienda.selectedIndex]?.getAttribute("data-departamento");
-    const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
+                            const selectedDepartamento = selectTienda.options[selectTienda.selectedIndex]?.getAttribute(
+                                "data-departamento");
+                            const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
 
-    console.log("Departamento:", selectedDepartamento, "| Tipo de Servicio:", tipoServicio);
+                            console.log("Departamento:", selectedDepartamento, "| Tipo de Servicio:", tipoServicio);
 
-    // Convertir a número por si vienen como string
-    const dep = parseInt(selectedDepartamento);
-    const tipo = parseInt(tipoServicio);
+                            // Convertir a número por si vienen como string
+                            const dep = parseInt(selectedDepartamento);
+                            const tipo = parseInt(tipoServicio);
 
-    // Condiciones según tu lógica
-    if (
-        (dep === 3926 && tipo === 1) ||    // Si es 3926 y tipo 1 => ocultar
-        (dep === 3926 && tipo === 2) ||    // Si es 3926 y tipo 2 => ocultar
-        (dep !== 3926 && tipo === 2)       // Si es diferente a 3926 y tipo 2 => ocultar
-    ) {
-        esEnvioContainer.style.display = "none";
-        console.log("❌ Ocultando esEnvioContainer");
-    } else if (dep !== 3926 && tipo === 1) { // Si es diferente a 3926 y tipo 1 => mostrar
-        esEnvioContainer.style.display = "block";
-        console.log("✅ Mostrando esEnvioContainer");
-    }
-}
+                            // Condiciones según tu lógica
+                            if (
+                                (dep === 3926 && tipo === 1) || // Si es 3926 y tipo 1 => ocultar
+                                (dep === 3926 && tipo === 2) || // Si es 3926 y tipo 2 => ocultar
+                                (dep !== 3926 && tipo === 2) // Si es diferente a 3926 y tipo 2 => ocultar
+                            ) {
+                                esEnvioContainer.style.display = "none";
+                                console.log("❌ Ocultando esEnvioContainer");
+                            } else if (dep !== 3926 && tipo === 1) { // Si es diferente a 3926 y tipo 1 => mostrar
+                                esEnvioContainer.style.display = "block";
+                                console.log("✅ Mostrando esEnvioContainer");
+                            }
+                        }
 
 
 
@@ -375,9 +431,9 @@
                         selectTipoServicio.addEventListener("change", function() {
                             console.log(
                                 "Cambiando tipo de servicio."); // Debugging: Ver cuando se cambia el tipo de servicio
-                                verificarEnvioContainer();
+                            verificarEnvioContainer();
 
-                                verificarTipoServicio(); // Agrega esta línea
+                            verificarTipoServicio(); // Agrega esta línea
 
                         });
                         esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
@@ -410,7 +466,7 @@
                 });
             });
 
-          
+
 
 
 
@@ -926,65 +982,119 @@
 
 
     <script>
+        $(document).ready(function() {
 
-$(document).ready(function() {
+            $("#tipoProductoLab").change(function() {
+                const idCategoria = $(this).val();
+                const $marcaLab = $("#marcaLab");
+                const $modeloLab = $("#modeloLab");
 
-         // Manejo de productos a retirar (similar a instalar)
-    $("#tipoProductoLab").change(function() {
-        const idCategoria = $(this).val();
-        const $marcaLab = $("#marcaLab");
-        const $modeloLab = $("#modeloLab");
+                if (idCategoria) {
+                    $.ajax({
+                        url: '/marcas/categoria/' + idCategoria,
+                        method: 'GET',
+                        success: function(response) {
+                            // Limpiar y repoblar marcas
+                            $marcaLab.empty().append(
+                                '<option value="" disabled selected>Seleccionar Marca</option>'
+                            );
+                            response.forEach(function(marca) {
+                                $marcaLab.append(
+                                    `<option value="${marca.idMarca}">${marca.nombre}</option>`
+                                );
+                            });
 
-        if (idCategoria) {
-            $.ajax({
-                url: '/marcas/categoria/' + idCategoria,
-                method: 'GET',
-                success: function(response) {
-                    $marcaLab.empty().append('<option value="" disabled selected>Seleccionar Marca</option>');
-                    response.forEach(function(marca) {
-                        $marcaLab.append(`<option value="${marca.idMarca}">${marca.nombre}</option>`);
+                            // 🔁 Eliminar nice-select anterior en marca
+                            const prevNiceMarca = $marcaLab.next('.nice-select');
+                            if (prevNiceMarca.length) prevNiceMarca.remove();
+
+                            // 🔁 Volver a aplicar nice-select
+                            NiceSelect.bind($marcaLab[0], {
+                                searchable: true
+                            });
+                            $marcaLab.addClass('hidden');
+                            // Ajuste visual para centrar el texto del select
+                            $marcaLab.next('.nice-select').css({
+                                'display': 'flex',
+                                'align-items': 'center',
+                                'padding-top': '0.5rem',
+                                'padding-bottom': '0.5rem'
+                            });
+                            // Limpiar modelo y ocultarlo
+                            const prevNiceModelo = $modeloLab.next('.nice-select');
+                            if (prevNiceModelo.length) prevNiceModelo.remove();
+
+                            $modeloLab.empty().append(
+                                '<option value="" disabled selected>Seleccionar Modelo</option>'
+                            );
+                            $modeloLab.addClass('hidden');
+                        },
+                        error: function() {
+                            toastr.error('Error al cargar las marcas');
+                        }
                     });
-                    $marcaLab.show().trigger('change');
-                    $modeloLab.hide();
-                },
-                error: function() {
-                    toastr.error('Error al cargar las marcas');
+                } else {
+                    const prevNiceMarca = $marcaLab.next('.nice-select');
+                    if (prevNiceMarca.length) prevNiceMarca.remove();
+
+                    const prevNiceModelo = $modeloLab.next('.nice-select');
+                    if (prevNiceModelo.length) prevNiceModelo.remove();
+
+                    $marcaLab.empty().addClass('hidden');
+                    $modeloLab.empty().addClass('hidden');
                 }
             });
-        } else {
-            $marcaLab.hide();
-            $modeloLab.hide();
-        }
-    });
 
-    $("#marcaLab").change(function() {
-        const idMarca = $(this).val();
-        const idCategoria = $("#tipoProductoLab").val();
-        const $modeloLab = $("#modeloLab");
 
-        if (idMarca && idCategoria) {
-            $.ajax({
-                url: `/modelos/marca/${idMarca}/categoria/${idCategoria}`,
-                method: 'GET',
-                success: function(response) {
-                    $modeloLab.empty().append('<option value="" disabled selected>Seleccionar Modelo</option>');
-                    response.forEach(function(modelo) {
-                        $modeloLab.append(`<option value="${modelo.idModelo}">${modelo.nombre}</option>`);
+
+            $("#marcaLab").change(function() {
+                const idMarca = $(this).val();
+                const idCategoria = $("#tipoProductoLab").val();
+                const $modeloLab = $("#modeloLab");
+
+                if (idMarca && idCategoria) {
+                    $.ajax({
+                        url: `/modelos/marca/${idMarca}/categoria/${idCategoria}`,
+                        method: 'GET',
+                        success: function(response) {
+                            // Limpiar y cargar modelos
+                            $modeloLab.empty().append(
+                                '<option value="" disabled selected>Seleccionar Modelo</option>'
+                            );
+                            response.forEach(function(modelo) {
+                                $modeloLab.append(
+                                    `<option value="${modelo.idModelo}">${modelo.nombre}</option>`
+                                );
+                            });
+
+                            // 🔁 Eliminar nice-select anterior en modelo
+                            const prevNiceModelo = $modeloLab.next('.nice-select');
+                            if (prevNiceModelo.length) prevNiceModelo.remove();
+
+                            // 🔁 Volver a aplicar nice-select
+                            NiceSelect.bind($modeloLab[0], {
+                                searchable: true
+                            });
+                            $modeloLab.addClass('hidden');
+                            // Ajuste visual para centrar el texto del select
+                            $marcaLab.next('.nice-select').css({
+                                'display': 'flex',
+                                'align-items': 'center',
+                                'padding-top': '0.5rem',
+                                'padding-bottom': '0.5rem'
+                            });
+                        },
+                        error: function() {
+                            toastr.error('Error al cargar los modelos');
+                        }
                     });
-                    $modeloLab.show().trigger('change');
-                },
-                error: function() {
-                    toastr.error('Error al cargar los modelos');
+                } else {
+                    const prevNiceModelo = $modeloLab.next('.nice-select');
+                    if (prevNiceModelo.length) prevNiceModelo.remove();
+
+                    $modeloLab.empty().addClass('hidden');
                 }
             });
-        } else {
-            $modeloLab.hide();
-        }
-    });
-
-});
-
-
-
+        });
     </script>
 </x-layout.default>
