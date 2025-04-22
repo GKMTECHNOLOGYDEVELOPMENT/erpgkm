@@ -919,38 +919,38 @@ class OrdenesTrabajoController extends Controller
         // Obtener el ticket
         $orden = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo', 'usuario'])->findOrFail($id);
         $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
-    
+
         // Obtener los estados de OTS
         $estadosOTS = DB::table('estado_ots')->get();
         $ticketId = $ticket->idTickets;
-    
+
         // Verificar si ya existe una firma para el ticket y la visita
         $firmaExistente = DB::table('firmas')
             ->where('idTickets', $id)
             ->where('idVisitas', $idVisitas)
             ->first();
-    
+
         // Si ya existe una firma, redirigimos a la página de error 404
         if ($firmaExistente) {
             return view("pages.error404");
         }
-    
+
         // Obtener la visita usando idVisitas
         $visita = DB::table('visitas')
             ->where('idVisitas', $idVisitas)
             ->where('idTickets', $id)
             ->first();
-    
+
         // Verificamos que la visita exista
         if (!$visita) {
             return view("pages.error404");
         }
-    
+
         // Obtener el cliente para verificar 'esTienda'
         $cliente = DB::table('cliente')
             ->where('idCliente', $ticket->idCliente)
             ->first();
-    
+
         // Pasamos los datos a la vista, incluyendo el valor de 'esTienda' del cliente
         return view("tickets.ordenes-trabajo.smart-tv.firmas.firmacliente", compact(
             'ticket',
@@ -963,7 +963,7 @@ class OrdenesTrabajoController extends Controller
             'cliente' // Asegúrate de pasar la variable del cliente
         ));
     }
-    
+
 
 
     public function guardarFirmaCliente(Request $request, $id, $idVisitas)
@@ -1142,7 +1142,7 @@ class OrdenesTrabajoController extends Controller
             'tickets.xlsx'
         );
     }
-    
+
 
 
     // Exportar todas las órdenes de trabajo a PDF
@@ -3931,7 +3931,7 @@ class OrdenesTrabajoController extends Controller
     public function storeConstancia(Request $request)
     {
         DB::beginTransaction();
-        
+
         try {
             // Validar datos (quitamos unique validation)
             $validated = $request->validate([
@@ -3947,10 +3947,10 @@ class OrdenesTrabajoController extends Controller
                 'idticket' => 'nullable|exists:tickets,idTickets',
                 'fotos_existentes' => 'nullable|json' // Para manejar fotos existentes
             ]);
-    
+
             // Buscar constancia existente
             $constancia = ConstanciaEntrega::where('numeroticket', $validated['nrticket'])->first();
-    
+
             if ($constancia) {
                 // Actualizar constancia existente
                 $constancia->update([
@@ -3963,7 +3963,7 @@ class OrdenesTrabajoController extends Controller
                     'observaciones' => $validated['observaciones'],
                     'idticket' => $validated['idticket']
                 ]);
-                
+
                 $message = 'Constancia actualizada correctamente';
             } else {
                 // Crear nueva constancia
@@ -3978,24 +3978,24 @@ class OrdenesTrabajoController extends Controller
                     'observaciones' => $validated['observaciones'],
                     'idticket' => $validated['idticket']
                 ]);
-                
+
                 $message = 'Constancia creada correctamente';
             }
-    
+
             // Manejar fotos existentes (eliminar las que no están en el array)
             if ($request->filled('fotos_existentes')) {
                 $fotosAMantener = json_decode($request->fotos_existentes, true);
-                
+
                 ConstanciaFoto::where('idconstancia', $constancia->idconstancia)
                     ->whereNotIn('idfoto', $fotosAMantener)
                     ->delete();
             }
-    
+
             // Guardar nuevas fotos
             if ($request->hasFile('photos')) {
                 foreach ($request->file('photos') as $photo) {
                     $imageData = file_get_contents($photo->getRealPath());
-                    
+
                     ConstanciaFoto::create([
                         'idconstancia' => $constancia->idconstancia,
                         'imagen' => $imageData,
@@ -4003,18 +4003,17 @@ class OrdenesTrabajoController extends Controller
                     ]);
                 }
             }
-            
+
             DB::commit();
-            
+
             return response()->json([
                 'success' => true,
                 'message' => $message,
                 'constancia_id' => $constancia->idconstancia
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al procesar constancia: ' . $e->getMessage()
@@ -4026,194 +4025,210 @@ class OrdenesTrabajoController extends Controller
 
 
     public function porTicket($ticketId)
-{
-    $constancia = ConstanciaEntrega::with(['fotos' => function($query) {
-        $query->select('idfoto', 'idconstancia', 'descripcion');
-    }])->where('idticket', $ticketId)->first();
+    {
+        $constancia = ConstanciaEntrega::with(['fotos' => function ($query) {
+            $query->select('idfoto', 'idconstancia', 'descripcion');
+        }])->where('idticket', $ticketId)->first();
 
-    if (!$constancia) {
-        return response()->json([
-            'success' => false,
-            'message' => 'No se encontró constancia para este ticket'
-        ]);
-    }
-
-    // Transformar fotos para incluir URLs
-    $constancia->fotos->transform(function($foto) {
-        $foto->imagen_url = route('constancias.fotos.mostrar', $foto->idfoto);
-        return $foto;
-    });
-
-    return response()->json([
-        'success' => true,
-        'constancia' => $constancia
-    ]);
-}
-
-public function eliminarFoto($fotoId)
-{
-    $foto = ConstanciaFoto::findOrFail($fotoId);
-    $foto->delete();
-    
-    return response()->json([
-        'success' => true,
-        'message' => 'Foto eliminada correctamente'
-    ]);
-}
-
-// En el controlador
-public function mostrarFoto($id)
-{
-    $foto = ConstanciaFoto::findOrFail($id);
-    return response($foto->imagen)
-        ->header('Content-Type', 'image/jpeg');
-}
-
-public function descargarPDF($id)
-{
-    try {
-        Log::info("\ud83d\udcc5 Iniciando descarga de constancia para ticket ID: {$id}");
-
-        $orden = Ticket::with([
-            'cliente.tipodocumento',
-            'clienteGeneral',
-            'tecnico.tipodocumento',
-            'tienda',
-            'marca',
-            'modelo.categoria',
-            'transicion_status_tickets.estado_ot',
-            'visitas.tecnico.tipodocumento',
-            'visitas.anexos_visitas',
-            'visitas.fotostickest'
-        ])->findOrFail($id);
-
-        $seleccionada = SeleccionarVisita::where('idTickets', $id)->first();
-        if (!$seleccionada) {
-            abort(404, 'No se encontr\xf3 una visita seleccionada para este ticket.');
-        }
-
-        $idVisitasSeleccionada = $seleccionada->idVisitas;
-
-        $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $id)
-            ->where('idVisitas', $idVisitasSeleccionada)
-            ->whereNotNull('justificacion')
-            ->where('justificacion', '!=', '')
-            ->with('estado_ot')
-            ->get();
-
-        $producto = [
-            'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
-            'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
-            'modelo' => $orden->modelo->nombre ?? 'No especificado',
-            'serie' => $orden->serie ?? 'No especificado',
-            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
-        ];
-
-        $condicion = DB::table('condicionesticket')
-            ->where('idTickets', $id)
-            ->where('idVisitas', $idVisitasSeleccionada)
-            ->first();
-
-        $motivoCondicion = $condicion->motivo ?? null;
-
-        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
-
-        $marca = $orden->modelo->marca ?? null;
-        $marca->logo_base64 = $marca && $marca->foto ? $this->procesarLogoMarca($marca->foto) : null;
-
-        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
-
-        $visitas = collect();
-        if ($visitaSeleccionada) {
-            $visitas = collect([
-                [
-                    'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
-                    'fecha_programada' => optional($visitaSeleccionada->fecha_programada)->format('d/m/Y') ?? 'N/A',
-                    'hora_inicio' => optional($visitaSeleccionada->fecha_inicio)->format('H:i') ?? 'N/A',
-                    'hora_final' => optional($visitaSeleccionada->fecha_final)->format('H:i') ?? 'N/A',
-                    'fecha_llegada' => optional($visitaSeleccionada->fecha_llegada)->format('d/m/Y H:i') ?? 'N/A',
-                    'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
-                    'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
-                    'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
-                    'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
-                    'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
-                    'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa'
-                ]
+        if (!$constancia) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró constancia para este ticket'
             ]);
         }
 
-        $firma = DB::table('firmas')->where('idTickets', $id)
-            ->where('idVisitas', $idVisitasSeleccionada)
-            ->first();
-
-        $firmaCliente = $firma && $firma->firma_cliente ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente)) : null;
-        $firmaTecnico = $visitaSeleccionada->tecnico->firma ?? null;
-        $firmaTecnico = $firmaTecnico ? 'data:image/png;base64,' . base64_encode($firmaTecnico) : null;
-
-        $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
-            return [
-                'foto_base64' => $anexo->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto)) : null,
-                'descripcion' => $anexo->descripcion
-            ];
+        // Transformar fotos para incluir URLs
+        $constancia->fotos->transform(function ($foto) {
+            $foto->imagen_url = route('constancias.fotos.mostrar', $foto->idfoto);
+            return $foto;
         });
 
-        $imagenesCondiciones = DB::table('condicionesticket')
-            ->where('idTickets', $id)
-            ->where('idVisitas', $idVisitasSeleccionada)
-            ->whereNotNull('imagen')
-            ->get()
-            ->map(function ($condicion) {
+        return response()->json([
+            'success' => true,
+            'constancia' => $constancia
+        ]);
+    }
+
+    public function eliminarFoto($fotoId)
+    {
+        $foto = ConstanciaFoto::findOrFail($fotoId);
+        $foto->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto eliminada correctamente'
+        ]);
+    }
+
+    // En el controlador
+    public function mostrarFoto($id)
+    {
+        $foto = ConstanciaFoto::findOrFail($id);
+        return response($foto->imagen)
+            ->header('Content-Type', 'image/jpeg');
+    }
+
+    public function descargarPDF($id)
+    {
+        try {
+            Log::info("\ud83d\udcc5 Iniciando descarga de constancia para ticket ID: {$id}");
+
+            $orden = Ticket::with([
+                'cliente.tipodocumento',
+                'clienteGeneral',
+                'tecnico.tipodocumento',
+                'tienda',
+                'marca',
+                'modelo.categoria',
+                'transicion_status_tickets.estado_ot',
+                'visitas.tecnico.tipodocumento',
+                'visitas.anexos_visitas',
+                'visitas.fotostickest'
+            ])->findOrFail($id);
+
+            $seleccionada = SeleccionarVisita::where('idTickets', $id)->first();
+            if (!$seleccionada) {
+                abort(404, 'No se encontr\xf3 una visita seleccionada para este ticket.');
+            }
+
+            $idVisitasSeleccionada = $seleccionada->idVisitas;
+
+            $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->whereNotNull('justificacion')
+                ->where('justificacion', '!=', '')
+                ->with('estado_ot')
+                ->get();
+
+            $producto = [
+                'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
+                'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
+                'modelo' => $orden->modelo->nombre ?? 'No especificado',
+                'serie' => $orden->serie ?? 'No especificado',
+                'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+            ];
+
+            $condicion = DB::table('condicionesticket')
+                ->where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->first();
+
+            $motivoCondicion = $condicion->motivo ?? null;
+            $constancia = DB::table('constancia_entregas')
+                ->where('idticket', $id)
+                ->first();
+
+            $constanciaFotos = DB::table('constancia_fotos')
+                ->where('idconstancia', $constancia->idconstancia ?? 0)
+                ->get()
+                ->map(function ($foto) {
+                    $mime = finfo_buffer(finfo_open(), $foto->imagen, FILEINFO_MIME_TYPE);
+                    $base64 = $foto->imagen ? 'data:' . $mime . ';base64,' . base64_encode($foto->imagen) : null;
+                    return [
+                        'foto_base64' => $base64 ? $this->optimizeBase64Image($base64) : null,
+                        'descripcion' => $foto->descripcion ?? 'Sin descripción'
+                    ];
+                });
+
+
+            $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+
+            $marca = $orden->modelo->marca ?? null;
+            $marca->logo_base64 = $marca && $marca->foto ? $this->procesarLogoMarca($marca->foto) : null;
+
+            $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+
+            $visitas = collect();
+            if ($visitaSeleccionada) {
+                $visitas = collect([
+                    [
+                        'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                        'fecha_programada' => optional($visitaSeleccionada->fecha_programada)->format('d/m/Y') ?? 'N/A',
+                        'hora_inicio' => optional($visitaSeleccionada->fecha_inicio)->format('H:i') ?? 'N/A',
+                        'hora_final' => optional($visitaSeleccionada->fecha_final)->format('H:i') ?? 'N/A',
+                        'fecha_llegada' => optional($visitaSeleccionada->fecha_llegada)->format('d/m/Y H:i') ?? 'N/A',
+                        'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                        'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
+                        'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
+                        'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                        'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
+                        'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa'
+                    ]
+                ]);
+            }
+
+            $firma = DB::table('firmas')->where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->first();
+
+            $firmaCliente = $firma && $firma->firma_cliente ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente)) : null;
+            $firmaTecnico = $visitaSeleccionada->tecnico->firma ?? null;
+            $firmaTecnico = $firmaTecnico ? 'data:image/png;base64,' . base64_encode($firmaTecnico) : null;
+
+            $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
                 return [
-                    'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
-                    'descripcion' => 'CONDICION: ' . ($condicion->motivo ?? 'Sin descripcion')
+                    'foto_base64' => $anexo->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto)) : null,
+                    'descripcion' => $anexo->descripcion
                 ];
             });
 
-        $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
+            $imagenesCondiciones = DB::table('condicionesticket')
+                ->where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->whereNotNull('imagen')
+                ->get()
+                ->map(function ($condicion) {
+                    return [
+                        'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
+                        'descripcion' => 'CONDICION: ' . ($condicion->motivo ?? 'Sin descripcion')
+                    ];
+                });
 
-        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
-            return [
-                'foto_base64' => $foto->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto)) : null,
-                'descripcion' => $foto->descripcion
-            ];
-        });
+            $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
 
-        $fechaCreacion = optional($visitaSeleccionada->fecha_inicio)->format('d/m/Y') ?? 'N/A';
+            $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+                return [
+                    'foto_base64' => $foto->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto)) : null,
+                    'descripcion' => $foto->descripcion
+                ];
+            });
 
-        $html = view('tickets.ordenes-trabajo.smart-tv.informe.pdf.constancia_entrega', [
-            'orden' => $orden,
-            'fechaCreacion' => $fechaCreacion,
-            'producto' => $producto,
-            'transicionesStatusOt' => $transicionesStatusOt,
-            'visitas' => $visitas,
-            'firmaTecnico' => $firmaTecnico,
-            'firmaCliente' => $firmaCliente,
-            'imagenesAnexos' => $imagenesAnexos,
-            'imagenesFotosTickets' => $imagenesFotosTickets,
-            'marca' => $marca,
-            'logoGKM' => $logoGKM,
-            'motivoCondicion' => $motivoCondicion,
-            'modoVistaPrevia' => false,
-            'firma' => $firma
-        ])->render();
+            $fechaCreacion = optional($visitaSeleccionada->fecha_inicio)->format('d/m/Y') ?? 'N/A';
 
-        $pdf = Browsershot::html($html)
-            ->format('A4')
-            ->fullPage()
-            ->noSandbox()
-            ->emulateMedia('screen')
-            ->waitUntilNetworkIdle()
-            ->showBackground()
-            ->pdf();
+            $html = view('tickets.ordenes-trabajo.smart-tv.informe.pdf.constancia_entrega', [
+                'orden' => $orden,
+                'fechaCreacion' => $fechaCreacion,
+                'producto' => $producto,
+                'transicionesStatusOt' => $transicionesStatusOt,
+                'visitas' => $visitas,
+                'firmaTecnico' => $firmaTecnico,
+                'firmaCliente' => $firmaCliente,
+                'imagenesAnexos' => $imagenesAnexos,
+                'imagenesFotosTickets' => $imagenesFotosTickets,
+                'marca' => $marca,
+                'logoGKM' => $logoGKM,
+                'motivoCondicion' => $motivoCondicion,
+                'constancia' => $constancia,
+                'constanciaFotos' => $constanciaFotos,
+                'modoVistaPrevia' => false,
+                'firma' => $firma
+            ])->render();
 
-        return response($pdf)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="CONSTANCIA_ENTREGA_' . $orden->numero_ticket . '.pdf"');
-    } catch (\Exception $e) {
-        Log::error('Error generando constancia PDF: ' . $e->getMessage());
-        abort(500, 'Error generando PDF');
+            $pdf = Browsershot::html($html)
+                ->format('A4')
+                ->fullPage()
+                ->noSandbox()
+                ->emulateMedia('screen')
+                ->waitUntilNetworkIdle()
+                ->showBackground()
+                ->pdf();
+
+            return response($pdf)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'inline; filename="CONSTANCIA_ENTREGA_' . $orden->numero_ticket . '.pdf"');
+        } catch (\Exception $e) {
+            Log::error('Error generando constancia PDF: ' . $e->getMessage());
+            abort(500, 'Error generando PDF');
+        }
     }
-}
-
-
 }

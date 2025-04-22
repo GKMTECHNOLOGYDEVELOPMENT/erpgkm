@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informe Técnico</title>
+    <title>ORDEN DE INGRESO</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
@@ -101,7 +101,7 @@
 
                 <!-- Datos empresa -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 text-center mt-4">
-                    <h1 class="text-lg font-bold">INFORME TÉCNICO</h1>
+                    <h1 class="text-lg font-bold">ORDEN DE INGRESO</h1>
                     <p class="text-md">RUC 20543618587</p>
                     <p class="text-md">AV. SANTA ELVIRA E URB. SAN ELÍAS, N°MZ B LOTE 8. LOS OLIVOS - LIMA</p>
                     <p class="text-md">CONSULTAS@GKMTECHNOLOGY.COM.PE</p>
@@ -130,8 +130,10 @@
                 <!-- Información del Técnico + Ticket -->
                 <div class="w-1/2 text-right">
                     <div class="text-xs leading-tight">
-                        <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
-                        <p>FECHA DE COMPRA: <span class="font-bold">{{ \Carbon\Carbon::parse($orden->fechaCompra)->format('d/m/Y') }}</span></p>
+                        <p>NRO OT: <span class="font-bold">{{ $orden->idTickets ?? 'N/A' }}</span></p>
+                        <p>FECHA DE COMPRA: <span
+                                class="font-bold">{{ \Carbon\Carbon::parse($orden->fechaCompra)->format('d/m/Y') }}</span>
+                        </p>
 
                     </div>
                     <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
@@ -142,11 +144,6 @@
                 </div>
             </div>
 
-            <!-- 🔹 Dirección en toda la fila -->
-            {{-- <div class="w-full mt-4">
-                <p class="text-xs"><span class="font-bold">DIRECCIÓN:</span> {{ $orden->direccion ?? 'No registrada' }}
-                </p>
-            </div> --}}
             <hr class="my-4 border-0">
             @if (!empty($producto))
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
@@ -169,199 +166,129 @@
                 </div>
             @endif
 
-            @if (trim($motivoCondicion ?? '') !== '')
-                <!-- Sección de Motivo de la Condición -->
-                <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
-                <div class="w-full text-xs mt-3">
-                    <p>{{ $motivoCondicion }}</p>
+
+            @if (!empty($constancia?->observaciones))
+                <div class="red-bg px-3 py-2 rounded-md mt-4">
+                    OBSERVACIONES DE INGRESO
+                </div>
+                <div class="w-full text-xs">
+                    <p class="text-gray-700 whitespace-pre-line break-words">
+                        {{ strtoupper($constancia->observaciones) }}
+                    </p>
                 </div>
             @endif
-
-
-
-            @if ($transicionesStatusOt->isNotEmpty())
-                @php
-                    // 🔥 Definir el orden deseado según el ID de estado en la BD
-                    $ordenEstados = [
-                        1 => 1, // DETALLES ESTÉTICOS
-                        2 => 2, // DIAGNÓSTICO
-                        3 => 3, // SOLUCIÓN
-                        4 => 4, // OBSERVACIÓN
-                    ];
-
-                    // 🔥 Ordenar la colección por idEstadoots
-                    $transicionesStatusOt = $transicionesStatusOt->sortBy(function ($item) use ($ordenEstados) {
-                        return $ordenEstados[$item->idEstadoots] ?? 999; // Si no está en la lista, lo manda al final
-                    });
-                @endphp
-
-                <div class="space-y-2 mt-2">
-                    @foreach ($transicionesStatusOt as $transicion)
-                        <!-- Nombre del Estado con fondo rojo -->
-                        <div class="red-bg px-3 py-2 rounded-md">
-                            {{ strtoupper($transicion->estado_ot->descripcion ?? 'Sin Estado') }}
-                        </div>
-
-                        <!-- Justificación debajo del estado -->
-                        <div class="w-full text-xs">
-                            <p class="text-xs text-gray-700">{{ strtoupper($transicion->justificacion) }}</p>
-                        </div>
-                    @endforeach
-                </div>
-
-            @endif
-
-
-
-
-
-
 
             @php
-                $hayFotosDeVisita =
-                    !empty($imagenesAnexos) &&
-                    collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
-
-                $hayFotosDeTickets =
-                    !empty($imagenesFotosTickets) &&
-                    collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
+                $contador = 0;
+                $hayFotosConstancia =
+                    !empty($constanciaFotos) &&
+                    collect($constanciaFotos)->filter(fn($f) => !empty($f['foto_base64']))->isNotEmpty();
+                $constanciaFiltradas = collect($constanciaFotos)->filter(fn($f) => !empty($f['foto_base64']))->values();
             @endphp
 
-            @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
-                <!-- Nueva página con el título ANEXOS -->
-                <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
-                    <h2>ANEXOS</h2>
+            @if (!$modoVistaPrevia && $hayFotosConstancia)
+                <div class="red-bg mt-4 font-bold">
+                    <h2>ANEXOS DE INGRESO</h2>
                 </div>
 
+                {{-- Primera imagen sin salto --}}
                 <div class="mt-4">
-                    @php $contador = 0; @endphp
-
-                    {{-- Imágenes de la visita (anexos + condiciones) --}}
-                    @if ($hayFotosDeVisita)
-                        @foreach ($imagenesAnexos as $anexo)
-                            @if (!empty($anexo['foto_base64']))
-                                @if ($contador % 2 == 0)
-                                    <div class="flex flex-col items-center"
-                                        @if ($contador > 0) style="page-break-before: always;" @endif>
-                                @endif
-
-                                <div class="img-container mb-6">
-                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
-                                </div>
-
-                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                    IMAGEN DE LA VISITA
-                                </p>
-
-                                @php $contador++; @endphp
-
-                                @if ($contador % 2 == 0 || $loop->last)
+                    <div class="img-container mb-6">
+                        <img src="{{ $constanciaFiltradas[0]['foto_base64'] }}" alt="Foto constancia">
+                    </div>
+                    <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                        {{ $constanciaFiltradas[0]['descripcion'] ?? 'Sin descripción' }}
+                    </p>
+                    @php $contador++; @endphp
                 </div>
-            @endif
-            @endif
-            @endforeach
-            @endif
 
-            {{-- Imágenes de fotos ticket --}}
-            @if ($hayFotosDeTickets)
-                @foreach ($imagenesFotosTickets as $fotoTicket)
-                    @if (!empty($fotoTicket['foto_base64']))
-                        @if ($contador % 2 == 0)
-                            <div class="flex flex-col items-center"
-                                @if ($contador > 0) style="page-break-before: always;" @endif>
+                {{-- Resto de imágenes, 2 por hoja --}}
+                @if ($constanciaFiltradas->count() > 1)
+                    <div class="mt-4">
+                        @for ($i = 1; $i < $constanciaFiltradas->count(); $i++)
+                            @if ($i % 2 == 1)
+                                <div class="flex flex-col items-center" style="page-break-before: always;">
+                            @endif
+
+                            <div class="img-container mb-6">
+                                <img src="{{ $constanciaFiltradas[$i]['foto_base64'] }}" alt="Foto constancia">
+                            </div>
+                            <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                {{ $constanciaFiltradas[$i]['descripcion'] ?? 'Sin descripción' }}
+                            </p>
+                            @php $contador++; @endphp
+
+                            @if ($i % 2 == 0 || $i == $constanciaFiltradas->count() - 1)
+                    </div>
+                @endif
+            @endfor
+        </div>
+        @endif
+        @endif
+
+        @php
+            $totalImagenes = $constanciaFiltradas->count();
+            $imagenesEnPaginasSeparadas = $totalImagenes - 1; // excluye la primera que va en la primera hoja
+            $ultimaHojaTieneUnaSolaImagen = $imagenesEnPaginasSeparadas % 2 !== 0;
+        @endphp
+
+        @if (!$ultimaHojaTieneUnaSolaImagen)
+            <div style="page-break-before: always;"></div>
+        @endif
+
+
+
+
+        <!-- FOOTER: FIRMAS -->
+        <div class="footer text-center text-gray-500 text-xs">
+            <div class="flex justify-between mt-6">
+                <!-- Firma del Técnico -->
+                <div class="w-1/2 text-center">
+                    <div class="inline-block mb-1 h-24 flex justify-center items-end">
+                        @if ($firmaTecnico)
+                            <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
+                                class="w-[90%] h-20 mx-auto object-contain"
+                                style="transform: scale(1.5); transform-origin: bottom center; bottom: -30px; position: relative;">
+                        @else
+                            <div class="h-full flex items-center justify-center w-full">
+                                <p class="text-xs text-gray-500">N/A</p>
+                            </div>
                         @endif
-
-                        <div class="img-container mb-6">
-                            <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del ticket">
-                        </div>
-
-                        <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                            {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
-                        </p>
-
-                        @php $contador++; @endphp
-
-                        @if ($contador % 2 == 0 || $loop->last)
-        </div>
-        @endif
-        @endif
-        @endforeach
-        @endif
-    </div>
-    @endif
-
-    </div>
-
-    {{-- 🔍 Lógica para saber si la última imagen fue sola en la hoja --}}
-    @php
-        $mostrarFirmasEnMismaHoja = false;
-
-        if (!$modoVistaPrevia && $hayFotosDeTickets) {
-            $imagenesTicketsFiltradas = collect($imagenesFotosTickets)
-                ->filter(fn($f) => !empty($f['foto_base64']))
-                ->values();
-
-            if ($imagenesTicketsFiltradas->isNotEmpty()) {
-                $mostrarFirmasEnMismaHoja = $contador % 2 !== 0;
-            }
-        }
-    @endphp
-
-    {{-- 🔻 Forzar salto de página solo si la firma no debe ir en la misma hoja --}}
-    @if (!$mostrarFirmasEnMismaHoja)
-        <div style="page-break-before: always;"></div>
-    @endif
-
-    <!-- FOOTER: FIRMAS -->
-    <div class="footer text-center text-gray-500 text-xs">
-        <div class="flex justify-between mt-6">
-            <!-- Firma del Técnico -->
-            <div class="w-1/2 text-center">
-                <div class="inline-block mb-1 h-24 flex justify-center items-end">
-                    @if ($firmaTecnico)
-                        <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                            class="w-[90%] h-20 mx-auto object-contain"
-                            style="transform: scale(1.5); transform-origin: bottom center; bottom: -30px; position: relative;">
-                    @else
-                        <div class="h-full flex items-center justify-center w-full">
-                            <p class="text-xs text-gray-500">N/A</p>
-                        </div>
-                    @endif
+                    </div>
+                    <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-0">
+                    <p class="text-xs font-semibold text-gray-700 mt-1">FIRMA DEL TÉCNICO</p>
+                    <p class="text-xs uppercase">{{ $visita['tecnico'] }}</p>
+                    <p class="text-xs text-gray-500">
+                        {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
+                    </p>
                 </div>
-                <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-0">
-                <p class="text-xs font-semibold text-gray-700 mt-1">FIRMA DEL TÉCNICO</p>
-                <p class="text-xs uppercase">{{ $visita['tecnico'] }}</p>
-                <p class="text-xs text-gray-500">
-                    {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
-                </p>
-            </div>
 
-            <!-- Firma del Cliente -->
-            <div class="w-1/2 text-center">
-                <div class="inline-block mb-1 h-24 flex justify-center items-end">
-                    @if ($firmaCliente)
-                        <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                            class="w-[90%] h-20 mx-auto object-contain"
-                            style="transform: scale(1.5); position: relative; bottom: 10px;">
-                    @else
-                        <div class="h-full flex items-center justify-center w-full">
-                            <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
-                        </div>
-                    @endif
+                <!-- Firma del Cliente -->
+                <div class="w-1/2 text-center">
+                    <div class="inline-block mb-1 h-24 flex justify-center items-end">
+                        @if ($firmaCliente)
+                            <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
+                                class="w-[90%] h-20 mx-auto object-contain"
+                                style="transform: scale(1.5); position: relative; bottom: 10px;">
+                        @else
+                            <div class="h-full flex items-center justify-center w-full">
+                                <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
+                            </div>
+                        @endif
+                    </div>
+                    <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
+                    <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
+                    <p class="text-xs text-gray-600 uppercase tracking-wide">
+                        {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
+                        {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
+                    </p>
                 </div>
-                <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
-                <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                <p class="text-xs text-gray-600 uppercase tracking-wide">
-                    {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
-                </p>
-                <p class="text-xs text-gray-500">
-                    {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
-                    {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
-                </p>
             </div>
+            <br>
         </div>
-        <br>
-    </div>
 
 
 </body>

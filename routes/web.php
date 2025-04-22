@@ -459,12 +459,12 @@ Route::get('/marcas-por-cliente-general/{idClienteGeneral}', [MarcaController::c
 Route::post('/constancias', [OrdenesTrabajoController::class, 'storeConstancia'])
     ->name('constancias.store');
 
-    Route::get('/constancia/pdf/{id}', [OrdenesTrabajoController::class, 'descargarPDF'])->name('constancia.pdf');
+Route::get('/constancia/pdf/{id}', [OrdenesTrabajoController::class, 'descargarPDF'])->name('constancia.pdf');
 
 
-    // En routes/web.php
+// En routes/web.php
 Route::get('/constancias/fotos/{id}', [OrdenesTrabajoController::class, 'mostrarFoto'])
-->name('constancias.fotos.mostrar');
+    ->name('constancias.fotos.mostrar');
 // Agrega esta ruta en tu archivo de rutas web.php
 
 Route::get('validar-ticket/{nroTicket}', [OrdenesTrabajoController::class, 'validarTicket'])->name('validarTicket');
@@ -593,8 +593,10 @@ Route::get('/marcas/categoria/{idCategoria}', [OrdenesHelpdeskController::class,
 Route::get('/modelos/marca/{idMarca}', [OrdenesHelpdeskController::class, 'obtenerModelosPorMarca']);
 Route::get('/modelos/marca/{idMarca}/categoria/{idCategoria}', [OrdenesHelpdeskController::class, 'obtenerModelosPorMarcaYCategoria']);
 
-Route::get('/modelos/marca/{idMarca}/obtener/categoria/{idCategoria}', 
-    [OrdenesHelpdeskController::class, 'obtenerModelosPorMarcaYCategoriaobtener'])
+Route::get(
+    '/modelos/marca/{idMarca}/obtener/categoria/{idCategoria}',
+    [OrdenesHelpdeskController::class, 'obtenerModelosPorMarcaYCategoriaobtener']
+)
     ->name('modelos.porMarcaYCategoria');
 
 
@@ -624,7 +626,7 @@ Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkE
 
 // Otras rutas necesarias para el reset
 Route::get('/password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
-    
+
 Route::post('/password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
 
 
