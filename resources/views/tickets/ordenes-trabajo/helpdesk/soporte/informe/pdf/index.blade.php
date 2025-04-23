@@ -511,11 +511,11 @@
             @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
 
                 <!-- Nueva página con el título ANEXOS -->
-                <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
-                    <h2>ANEXOS</h2>
-                </div>
+                <div style="page-break-before: always;">
+                    <div class="container mx-auto bg-white p-2">
+                        <div class="red-bg mt-4 text-left">ANEXOS</div>
 
-                <div class="mt-4">
+                <div class="mt-2">
                     @php
                         $contador = 0;
                         $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
@@ -560,7 +560,7 @@
                 @foreach ($imagenesFotosTickets as $fotoTicket)
                     @if (!empty($fotoTicket['foto_base64']))
                         @if ($contador % 2 == 0)
-                            <div class="flex flex-col items-center"
+                            <div class="flex flex-col justify-center items-center min-h-[100vh] py-16"
                                 @if ($contador > 0) style="page-break-before: always;" @endif>
                         @endif
 

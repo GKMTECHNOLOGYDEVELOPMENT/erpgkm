@@ -2504,6 +2504,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
             ->fullPage()
             ->noSandbox()
             ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
             ->emulateMedia('screen')
             ->waitUntilNetworkIdle()
             ->showBackground()
@@ -2667,6 +2668,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
             ->fullPage()
             ->noSandbox()
             ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
             ->emulateMedia('screen')
             ->waitUntilNetworkIdle()
             ->showBackground()
@@ -2860,6 +2862,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
             ->fullPage()
             ->waitUntilNetworkIdle()
             ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
             ->emulateMedia('screen')
             ->pdf();
 
@@ -3041,6 +3044,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
             ->fullPage()
             ->waitUntilNetworkIdle()
             ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
             ->emulateMedia('screen')
             ->pdf();
 
@@ -3227,6 +3231,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
             ->fullPage()
             ->waitUntilNetworkIdle()
             ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
             ->emulateMedia('screen')
             ->pdf();
 
