@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\MensajeEnviado;
 use App\Http\Controllers\administracion\asociados\CastController;
 use App\Http\Controllers\administracion\asociados\ClienteGeneralController;
 use App\Http\Controllers\administracion\asociados\ClientesController;
@@ -646,6 +647,12 @@ Route::get('/password/reset/{token}', [ForgotPasswordController::class, 'showRes
 
 Route::post('/password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
 
+
+
+Route::get('/emitir', function () {
+    broadcast(new MensajeEnviado('Hola bro, WebSocket activo 🔥'))->toOthers();
+    return 'Evento enviado X5!';
+});
 
 
 

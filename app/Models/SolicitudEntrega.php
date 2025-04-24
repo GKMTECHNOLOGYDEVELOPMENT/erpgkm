@@ -20,6 +20,7 @@ class SolicitudEntrega extends Model
         'idUsuario',
         'comentario',
         'estado',
-        'fechaHora'
+        'fechaHora',
+        'idTipoServicio'
     ];
 }

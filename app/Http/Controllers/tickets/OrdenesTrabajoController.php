@@ -3729,6 +3729,7 @@ class OrdenesTrabajoController extends Controller
         $solicitud->idUsuario = Auth::id(); // Obtener el id del usuario autenticado
         $solicitud->comentario = ''; // No asignamos ningún comentario
         $solicitud->estado = 0; // Estado inicial es 0
+        $solicitud->idTipoServicio = 1;
         $solicitud->fechaHora = now(); // Almacenar la fecha y hora actual
 
         $solicitud->save();
@@ -3761,28 +3762,130 @@ class OrdenesTrabajoController extends Controller
     // }
 
 
+    // public function obtenerSolicitudes()
+    // {
+    //     // Obtener solicitudes con estado = 0
+    //     $solicitudes = Solicitudentrega::where('solicitudentrega.estado', 0)  // Especificar la tabla para 'estado'
+    //         ->join('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+    //         ->join('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+    //         ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+    //         ->select(
+    //             'solicitudentrega.idSolicitudentrega',
+    //             'solicitudentrega.comentario',
+    //             'solicitudentrega.idTickets',
+    //             'solicitudentrega.idVisitas',
+    //             'tickets.numero_ticket',   // Agregar el número de ticket
+    //             'usuarios.Nombre as nombre_usuario',  // Agregar el nombre del usuario
+    //             'solicitudentrega.fechaHora'  // Agregar la fecha y hora de la solicitud
+    //         )
+    //         ->get();
+
+    //     return response()->json($solicitudes);
+    // }
+
+    
+
     public function obtenerSolicitudes()
     {
-        // Obtener solicitudes con estado = 0
-        $solicitudes = Solicitudentrega::where('solicitudentrega.estado', 0)  // Especificar la tabla para 'estado'
-            ->join('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
-            ->join('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
-            ->join('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
-            ->select(
-                'solicitudentrega.idSolicitudentrega',
-                'solicitudentrega.comentario',
-                'solicitudentrega.idTickets',
-                'solicitudentrega.idVisitas',
-                'tickets.numero_ticket',   // Agregar el número de ticket
-                'usuarios.Nombre as nombre_usuario',  // Agregar el nombre del usuario
-                'solicitudentrega.fechaHora'  // Agregar la fecha y hora de la solicitud
-            )
-            ->get();
+        // Paso 1: Verificar tickets con más de 48 horas
+        $fechaLimite = Carbon::now()->subHours(48);
+        Log::info('Obteniendo tickets creados antes de: ' . $fechaLimite);
+    
+        $tickets = Ticket::where('fecha_creacion', '<=', $fechaLimite)->get();
+        Log::info('Cantidad de tickets encontrados: ' . $tickets->count());
+    
+        foreach ($tickets as $ticket) {
+            Log::info('Revisando ticket ID: ' . $ticket->idTickets);
+        
+            $existe = SolicitudEntrega::where('idTickets', $ticket->idTickets)->exists();
+            if ($existe) {
+                Log::info('Ya existe solicitud para ticket ID: ' . $ticket->idTickets);
+                continue;
+            }
+        
+            // 👉 CASO 1: Flujo 1 con más de 48h
+            $flujoEstado1 = DB::table('ticketflujo')
+                ->where('idTicket', $ticket->idTickets)
+                ->where('idEstadflujo', 1)
+                ->orderBy('fecha_creacion', 'asc')
+                ->first();
 
+                if ($flujoEstado1) {
+                    Log::info("✅ Ticket ID {$ticket->idTickets} tiene flujo 1 con fecha: " . $flujoEstado1->fecha_creacion);
+                } else {
+                    Log::info("🚫 Ticket ID {$ticket->idTickets} NO tiene flujo 1.");
+                }
+        
+            if ($flujoEstado1 && Carbon::parse($flujoEstado1->fecha_creacion)->lte(Carbon::now()->subHours(48))) {
+                Log::info('✅ Creando solicitud tipo 2 (flujo 1) para ticket ID: ' . $ticket->idTickets);
+                SolicitudEntrega::create([
+                    'idTickets' => $ticket->idTickets,
+                    'comentario' => '48 horas despues del flujo 1',
+                    'fechaHora' => Carbon::now(),
+                    'idTipoServicio' => 2,
+                    'estado' => 0
+                ]);
+                continue;
+            }
+        
+            // 👉 CASO 2: Flujo 10 con más de 48h
+            $flujoEstado10 = DB::table('ticketflujo')
+                ->where('idTicket', $ticket->idTickets)
+                ->where('idEstadflujo', 10)
+                ->orderBy('fecha_creacion', 'asc')
+                ->first();
+
+                if ($flujoEstado10) {
+                    Log::info("✅ Ticket ID {$ticket->idTickets} tiene flujo 10 con fecha: " . $flujoEstado10->fecha_creacion);
+                } else {
+                    Log::info("🚫 Ticket ID {$ticket->idTickets} NO tiene flujo 10.");
+                }
+        
+            if ($flujoEstado10 && Carbon::parse($flujoEstado10->fecha_creacion)->lte(Carbon::now()->subHours(48))) {
+                Log::info('✅ Creando solicitud tipo 3 (flujo 10) para ticket ID: ' . $ticket->idTickets);
+                SolicitudEntrega::create([
+                    'idTickets' => $ticket->idTickets,
+                    'comentario' => '48 horas despues del flujo 10',
+                    'fechaHora' => Carbon::now(),
+                    'idTipoServicio' => 3,
+                    'estado' => 0
+                ]);
+                continue;
+            }
+        
+            // ❌ Si no cumple ningún flujo permitido
+            Log::info('❌ Ticket ID ' . $ticket->idTickets . ' no cumple condiciones de flujo 1 ni 10.');
+        }
+        
+        
+
+        
+        
+    
+        // Paso 2: Obtener solicitudes con estado = 0
+        Log::info('Obteniendo solicitudes con estado 0');
+    
+        $solicitudes = Solicitudentrega::where('solicitudentrega.estado', 0)
+        ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+        ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+        ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+        ->select(
+            'solicitudentrega.idSolicitudentrega',
+            'solicitudentrega.comentario',
+            'solicitudentrega.idTickets',
+            'solicitudentrega.idVisitas',
+            'solicitudentrega.idTipoServicio', // 👈 AÑADE ESTA LÍNEA
+            'tickets.numero_ticket',
+            'usuarios.Nombre as nombre_usuario',
+            'solicitudentrega.fechaHora'
+        )
+        ->get();
+    
+    
+        Log::info('Total de solicitudes con estado 0 encontradas: ' . $solicitudes->count());
+    
         return response()->json($solicitudes);
     }
-
-
 
 
 
@@ -3798,9 +3901,16 @@ class OrdenesTrabajoController extends Controller
         $solicitud = Solicitudentrega::where('idSolicitudentrega', $id)->first();
 
         if ($solicitud) {
+
+
             // Cambiar el estado de la solicitud a "Aceptada"
             $solicitud->estado = 1; // Estado "Aceptada"
             $solicitud->save();
+
+                // Si el tipo de servicio es 2 o 3, solo cambiamos el estado y salimos
+            if (in_array($solicitud->idTipoServicio, [2, 3])) {
+                return response()->json(['message' => 'Estado de la solicitud actualizado.']);
+            }
 
             // Registrar el ID del usuario autenticado
             Log::info('Usuario autenticado ID: ' . auth()->user()->idUsuario);

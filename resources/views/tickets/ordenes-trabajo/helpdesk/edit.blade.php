@@ -119,8 +119,7 @@
                 </a>
             </li>
 
-            <!-- Constancia de entrega -->
-@if ($orden->clienteGeneral && $orden->clienteGeneral->idClienteGeneral != 6)
+@if ($tipoServicio == 6 && $orden->clienteGeneral && $orden->clienteGeneral->idClienteGeneral != 6)
     <li>
         <a href="javascript:;"
             class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
@@ -134,6 +133,9 @@
         </a>
     </li>
 @endif
+
+
+
 
 
 
