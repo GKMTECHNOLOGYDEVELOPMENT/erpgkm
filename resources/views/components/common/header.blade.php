@@ -1,3 +1,27 @@
+<style>
+@keyframes custom-ping {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    75%, 100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+.custom-ping {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    height: 12px;
+    width: 12px;
+    border-radius: 9999px;
+    background-color: rgba(34, 197, 94, 0.5); /* equivalente a bg-success/50 */
+    animation: custom-ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+    z-index: 1;
+}
+</style>
 <header class="z-40" :class="{ 'dark': $store.app.semidark && $store.app.menu === 'horizontal' }">
     <div class="shadow-sm">
         <div class="relative bg-white flex w-full items-center px-5 py-2.5 dark:bg-[#0e1726]">
@@ -276,8 +300,7 @@
                     </ul>
                 </div>
                 <div x-data="{ open: false, showModal: false }" @click.outside="open = false">
-                    <!-- 🔔 Botón de Notificaciones -->
-                    <a href="javascript:;" class="relative block p-2 rounded-full bg-white-light/40 dark:bg-dark/40 
+                <a href="javascript:;" class="relative block p-2 rounded-full bg-white-light/40 dark:bg-dark/40 
                         hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60" @click="open = !open">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19.0001 9.7041V9C19.0001 5.13401 15.8661 2 12.0001 2C8.13407 2 5.00006 5.13401 5.00006 9V9.7041C5.00006 10.5491 4.74995 11.3752 4.28123 12.0783L3.13263 13.8012C2.08349 15.3749 2.88442 17.5139 4.70913 18.0116C9.48258 19.3134 14.5175 19.3134 19.291 18.0116C21.1157 17.5139 21.9166 15.3749 20.8675 13.8012L19.7189 12.0783C19.2502 11.3752 19.0001 10.5491 19.0001 9.7041Z"
@@ -287,14 +310,12 @@
                             <path d="M12 6V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
                         <!-- 🟢 Ping animado si hay notificaciones -->
-    <template x-if="notifications.length">
-        <span class="flex absolute w-3 h-3 ltr:right-0 rtl:left-0 top-0">
-            <span
-                class="animate-ping absolute ltr:-left-[3px] rtl:-right-[3px] -top-[3px] inline-flex h-full w-full rounded-full bg-success/50 opacity-75">
-            </span>
-            <span class="relative inline-flex rounded-full w-[6px] h-[6px] bg-success"></span>
-        </span>
-    </template>
+                        <template x-if="notifications.length">
+                            <span class="flex absolute w-3 h-3 ltr:right-0 rtl:left-0 top-0">
+                                <span class="custom-ping"></span>
+                                <span class="relative inline-flex rounded-full w-[6px] h-[6px] bg-green-500 z-10"></span>
+                            </span>
+                        </template>
 
                     </a>
                 
