@@ -336,12 +336,12 @@
                     </button>
 
                     <!-- 👁️ Ver Ticket (Nuevo Botón) -->
-                    <a :href="`/ordenes/smart/${notification.idTickets}/edit`" class="text-blue-500" target="_blank">
+                    <!-- <a :href="`/ordenes/smart/${notification.idTickets}/edit`" class="text-blue-500" target="_blank">
                             <svg width="20" height="20" fill="none" stroke="blue" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 19.5l7.5-7.5-7.5-7.5-7.5 7.5 7.5 7.5z"></path>
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14"></path>
                             </svg>
-                    </a>
+                    </a> -->
 
 
                 </div>
@@ -1237,20 +1237,35 @@
                 fetch('/api/solicitudentrega')  // La URL de la API de Laravel
                     .then(response => response.json())
                     .then(data => {
-                        // console.log(data);  // Verifica la respuesta de la API
+                        this.notifications = data.map(solicitud => {
+    let tipoServicio = solicitud.idTipoServicio === 1
+        ? 'Solicitud de entrega'
+        : solicitud.idTipoServicio === 2
+        ? 'Pendiente por programación'
+        : solicitud.idTipoServicio === 3
+        ? 'Ingreso a laboratorio'
+        : 'Tipo desconocido';
 
-                        // Procesar los datos obtenidos
-                        this.notifications = data.map(solicitud => ({
-                            id: solicitud.idSolicitudentrega,  // Asegúrate de que el ID esté bien asignado
-                            idTickets: solicitud.idTickets,
-                            profile: 'user-profile.jpeg',  // Puedes personalizar esto
-                            message: `<strong class="text-sm mr-1">Solicitud de entrega</strong><br> 
-          El Chofer ${solicitud.nombre_usuario} envió una solicitud para una entrega.
-          
-          <strong class="text-sm mr-1">Numero Ticket </strong><br> 
-         ${solicitud.numero_ticket}`,  // Mostrar ID Ticket e ID Visita
-         time: solicitud.fechaHora,  // Mostrar la fecha y hora de la solicitud
-        }));
+    let choferMensaje = solicitud.idTipoServicio === 1
+        ? `El Chofer ${solicitud.nombre_usuario ?? 'Desconocido'} envió una solicitud.<br><br>`
+        : '';
+
+    return {
+        id: solicitud.idSolicitudentrega,
+        idTickets: solicitud.idTickets,
+        profile: 'user-profile.jpeg',
+        tipoServicio: tipoServicio,
+        message: `<strong class="text-sm mr-1">${tipoServicio}</strong><br> 
+        ${choferMensaje}
+        <strong class="text-sm mr-1">Numero Ticket</strong><br> 
+        ${solicitud.numero_ticket}`,
+        time: solicitud.fechaHora
+    };
+});
+
+
+
+
                     })
                     .catch(error => console.error('Error al obtener las solicitudes:', error));
             },
