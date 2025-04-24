@@ -3121,7 +3121,7 @@ class OrdenesTrabajoController extends Controller
             ->fullPage()
             ->noSandbox()
             ->setDelay(2000)
-            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
+            ->margins(3, 3, 3, 3)
             ->emulateMedia('screen')
             ->waitUntilNetworkIdle()
             ->showBackground()
@@ -3360,7 +3360,7 @@ class OrdenesTrabajoController extends Controller
             ->fullPage()
             ->noSandbox()
             ->setDelay(2000)
-            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
+            ->margins(3, 3, 3, 3)
             ->emulateMedia('screen')
             ->waitUntilNetworkIdle()
             ->showBackground()

@@ -129,7 +129,7 @@ class OrdenesHelpdeskController extends Controller
     {
         try {
             Log::debug('Datos recibidos en storehelpdesk:', $request->all());
-    
+
             // Validación
             $validatedData = $request->validate([
                 'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
@@ -145,7 +145,7 @@ class OrdenesHelpdeskController extends Controller
                 'nombreTecnicoEnvio' => 'nullable|array',
                 'dniTecnicoEnvio' => 'nullable|array',
                 'agencia' => 'nullable|string|max:255',
-    
+
                 // Validación solo si el tipoServicio es 6
                 'tipoProducto' => 'required_if:tipoServicio,6|integer|exists:categoria,idCategoria',
                 'marca' => 'required_if:tipoServicio,6|integer|exists:marca,idMarca',
@@ -153,9 +153,9 @@ class OrdenesHelpdeskController extends Controller
                 'serieRetirar' => 'nullable|string|max:255',
                 'observaciones' => 'nullable|string|max:1000',
             ]);
-    
+
             Log::debug('Datos validados:', $validatedData);
-    
+
             // Crear el ticket
             $ticket = Ticket::create([
                 'numero_ticket' => $validatedData['numero_ticket'],
@@ -169,41 +169,41 @@ class OrdenesHelpdeskController extends Controller
                 'idTipotickets' => 2,
                 'envio' => $validatedData['esEnvio'] ? 1 : 0,
             ]);
-    
+
             Log::debug('Orden de trabajo creada correctamente.');
-    
+
             // Guardar técnicos si es envío
             if ($validatedData['esEnvio']) {
                 foreach ($validatedData['nombreTecnicoEnvio'] as $index => $nombre) {
                     $dni = $validatedData['dniTecnicoEnvio'][$index];
-    
+
                     DB::table('ticket_receptor')->insert([
                         'idTickets' => $ticket->idTickets,
                         'nombre' => $nombre,
                         'dni' => $dni,
                     ]);
                 }
-    
+
                 Log::info('Datos de técnicos de recojo guardados correctamente');
             }
-    
+
             // Solo crear el flujo normal si tipoServicio NO es 6
             if ($validatedData['tipoServicio'] != 6) {
                 $idEstadflujo = $validatedData['esEnvio'] ? 30 : 1;
-    
+
                 $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
                     'idTicket' => $ticket->idTickets,
                     'idEstadflujo' => $idEstadflujo,
                     'idUsuario' => auth()->id(),
                     'fecha_creacion' => now(),
                 ]);
-    
+
                 $ticket->idTicketFlujo = $ticketFlujoId;
                 $ticket->save();
-    
+
                 Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
             }
-    
+
             // Guardar datos de envío si es necesario
             if ($validatedData['esEnvio']) {
                 DB::table('datos_envio')->insert([
@@ -216,7 +216,7 @@ class OrdenesHelpdeskController extends Controller
                 ]);
                 Log::info('Datos de envío guardados correctamente');
             }
-    
+
             // Crear visita y flujo adicional si tipoServicio es 6 (Laboratorio)
             if ($validatedData['tipoServicio'] == 6) {
                 // Crear la visita
@@ -242,9 +242,9 @@ class OrdenesHelpdeskController extends Controller
                     'dniclientetienda' => null,
                     'nombreclientetienda' => null
                 ]);
-    
+
                 Log::info('Visita de laboratorio creada automáticamente.');
-    
+
                 // Crear flujo adicional con estado 2
                 $ticketFlujoEstado2 = DB::table('ticketflujo')->insertGetId([
                     'idTicket' => $ticket->idTickets,
@@ -252,16 +252,16 @@ class OrdenesHelpdeskController extends Controller
                     'idUsuario' => auth()->id(),
                     'fecha_creacion' => now(),
                 ]);
-    
+
                 // Actualizar el ticket con el nuevo flujo (estado 2)
                 $ticket->idTicketFlujo = $ticketFlujoEstado2;
                 $ticket->save();
-    
+
                 Log::info('Ticket actualizado con segundo idTicketFlujo (estado 2)', [
                     'ticket' => $ticket->idTickets,
                     'nuevo_flujo' => $ticketFlujoEstado2
                 ]);
-    
+
                 // Ahora, guardamos los datos en la tabla equipos
                 DB::table('equipos')->insert([
                     'nserie' => $validatedData['serieRetirar'],
@@ -273,10 +273,10 @@ class OrdenesHelpdeskController extends Controller
                     'idVisitas' => $idVisita,  // Usamos el idVisita generado
                     'observaciones' => $validatedData['observaciones'],
                 ]);
-    
+
                 Log::info('Datos del equipo guardados correctamente');
             }
-    
+
             // Redirección según tipoServicio
             if ($validatedData['tipoServicio'] == 2) {
                 return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
@@ -290,7 +290,6 @@ class OrdenesHelpdeskController extends Controller
             } else {
                 return redirect()->route('ordenes.helpdesk.index')->with('success', 'Orden de trabajo creada correctamente.');
             }
-    
         } catch (\Illuminate\Validation\ValidationException $e) {
             Log::error('Errores de validación:', $e->errors());
             return redirect()->back()->withErrors($e->errors())->withInput();
@@ -299,8 +298,8 @@ class OrdenesHelpdeskController extends Controller
             return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
         }
     }
-    
-    
+
+
 
 
 
@@ -611,7 +610,7 @@ class OrdenesHelpdeskController extends Controller
 
 
 
-    
+
 
     public function ediLaboratorio($id)
     {
@@ -1056,17 +1055,17 @@ class OrdenesHelpdeskController extends Controller
             'modelo.nombre as modelo_nombre',
             'equipos.observaciones'
         )
-        ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
-        ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
-        ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
-        ->where('equipos.idTickets', $request->idTicket)
-        ->where('equipos.idVisitas', $request->idVisita)
-        ->where('equipos.modalidad', 'Instalación')
-        ->get();
-    
+            ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
+            ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
+            ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
+            ->where('equipos.idTickets', $request->idTicket)
+            ->where('equipos.idVisitas', $request->idVisita)
+            ->where('equipos.modalidad', 'Instalación')
+            ->get();
+
         return response()->json($productos);
     }
-    
+
     public function obtenerProductosRetirados(Request $request)
     {
         $productos = Equipo::select(
@@ -1080,14 +1079,14 @@ class OrdenesHelpdeskController extends Controller
             'modelo.nombre as modelo_nombre',
             'equipos.observaciones'
         )
-        ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
-        ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
-        ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
-        ->where('equipos.idTickets', $request->idTicket)
-        ->where('equipos.idVisitas', $request->idVisita)
-        ->where('equipos.modalidad', 'Retirar')
-        ->get();
-    
+            ->join('categoria', 'equipos.idCategoria', '=', 'categoria.idCategoria')
+            ->join('marca', 'equipos.idMarca', '=', 'marca.idMarca')
+            ->join('modelo', 'equipos.idModelo', '=', 'modelo.idModelo')
+            ->where('equipos.idTickets', $request->idTicket)
+            ->where('equipos.idVisitas', $request->idVisita)
+            ->where('equipos.modalidad', 'Retirar')
+            ->get();
+
         return response()->json($productos);
     }
 
@@ -1134,16 +1133,16 @@ class OrdenesHelpdeskController extends Controller
 
 
     public function obtenerModelosPorMarcaYCategoria($idMarca, $idCategoria)
-{
-    $modelos = Modelo::where('idMarca', $idMarca)
-                     ->where('idCategoria', $idCategoria)
-                     ->get();
+    {
+        $modelos = Modelo::where('idMarca', $idMarca)
+            ->where('idCategoria', $idCategoria)
+            ->get();
 
-    return response()->json($modelos);
-}
+        return response()->json($modelos);
+    }
 
 
-public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
+    public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
     {
         try {
             // Validar que los IDs sean numéricos
@@ -1166,7 +1165,6 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
                 'success' => true,
                 'modelos' => $modelos
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -2392,10 +2390,10 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
         ];
 
         $condicion = DB::table('condicionesticket')
-        ->where('idTickets', $idOt)
-        ->where('idVisitas', $idVisitasSeleccionada) // ✅
-        ->first();
-    
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada) // ✅
+            ->first();
+
         $motivoCondicion = $condicion->motivo ?? null;
 
         $suministros = Suministro::with('articulo.tipoArticulo', 'articulo.modelo.marca')
@@ -2556,10 +2554,10 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
         ];
 
         $condicion = DB::table('condicionesticket')
-        ->where('idTickets', $idOt)
-        ->where('idVisitas', $idVisitasSeleccionada) // ✅
-        ->first();
-    
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada) // ✅
+            ->first();
+
         $motivoCondicion = $condicion->motivo ?? null;
 
         $suministros = Suministro::with('articulo.tipoArticulo', 'articulo.modelo.marca')
@@ -2862,7 +2860,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
             ->fullPage()
             ->waitUntilNetworkIdle()
             ->setDelay(2000)
-            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
+            ->margins(3, 3, 3, 3)
             ->emulateMedia('screen')
             ->pdf();
 
@@ -3044,9 +3042,10 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
             ->fullPage()
             ->waitUntilNetworkIdle()
             ->setDelay(2000)
-            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
+            ->margins(3, 3, 3, 3)
             ->emulateMedia('screen')
             ->pdf();
+
 
         return response($pdf)
             ->header('Content-Type', 'application/pdf')
@@ -3057,7 +3056,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
 
 
 
-    
+
 
     public function generateLabPdfVisita($idOt, $idVisita)
     {
@@ -3509,7 +3508,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
     }
 
 
-    
+
     public function firmaclienteLab($id, $idVisitas)
     {
         // Obtener el ticket
@@ -3688,7 +3687,7 @@ public function obtenerModelosPorMarcaYCategoriaobtener($idMarca, $idCategoria)
             'ordenes_helpdesk.xlsx'
         );
     }
-    
+
 
 
 
