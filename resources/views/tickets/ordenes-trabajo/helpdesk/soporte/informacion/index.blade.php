@@ -123,7 +123,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
     <!-- Sección de Detalles de los Estados -->
     <div class="p-5 rounded-lg shadow-md">
-        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" id="badgeEstado" style="background-color: {{ $colorEstado }};">Detalles de los Estados</span>
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Detalles de los Estados</span>
 
         <div class="grid grid-cols-1 gap-4 mt-4">
             <!-- Select de Estado con Nice Select -->
@@ -880,8 +880,6 @@ $(document).ready(function() {
         const visitaId = {{ $visitaId ?? 'null' }};
         const color = $(`#estado option[value="${estadoId}"]`).data('color');
         
-        // Actualizar color del badge
-        $('#badgeEstado').css('background-color', color);
         
         // Obtener justificación si existe
         $.ajax({

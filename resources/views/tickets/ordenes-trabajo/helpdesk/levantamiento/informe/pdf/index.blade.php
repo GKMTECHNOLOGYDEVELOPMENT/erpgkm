@@ -155,7 +155,7 @@
                 <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
                 <div class="red-bg mt-4 text-left">Falla Reportada</div>
                 <div class="w-full text-xs mt-3">
-                    <p class="uppercase">{{ $producto['fallaReportada'] }}</p>
+                    <p style="text-transform: uppercase">{{ $producto['fallaReportada'] }}</p>
                 </div>
             @endif
 

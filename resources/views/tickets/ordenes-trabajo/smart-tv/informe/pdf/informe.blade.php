@@ -8,9 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
+            font-family: "Times New Roman", Times, serif !important;
             font-size: 10px;
-            margin: 0;
-            padding: 0;
         }
 
         .red-bg {
@@ -24,6 +23,17 @@
             width: 100% !important;
             margin-top: 1rem !important;
             border-radius: 4px !important;
+        }
+
+        .indent-paragraph {
+            text-align: left !important;
+            /* alineado a la izquierda */
+            text-indent: 2em !important;
+            /* sangría en primera línea */
+            line-height: 2 !important;
+            /* interlineado 2.0 */
+            margin-bottom: 0 !important;
+            /* sin espacio entre párrafos */
         }
 
 
@@ -52,9 +62,9 @@
         }
 
         .img-container img {
-            width: 90% !important;
+            width: 98% !important;
             /* 🔹 Fuerza todas las imágenes a tener el mismo ancho */
-            max-width: 90% !important;
+            max-width: 100% !important;
             height: auto !important;
             max-height: 400px !important;
             /* 🔹 Asegura que las imágenes no sean demasiado altas */
@@ -164,7 +174,7 @@
                 <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
                 <div class="red-bg mt-4 text-left">Falla Reportada</div>
                 <div class="w-full text-xs mt-3">
-                    <p>{{ $producto['fallaReportada'] }}</p>
+                    <p class="uppercase indent-paragraph">{{ $producto['fallaReportada'] }}</p>
                 </div>
             @endif
 
@@ -172,7 +182,7 @@
                 <!-- Sección de Motivo de la Condición -->
                 <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
                 <div class="w-full text-xs mt-3">
-                    <p>{{ $motivoCondicion }}</p>
+                    <p class="uppercase indent-paragraph">{{ $motivoCondicion }}</p>
                 </div>
             @endif
 
@@ -198,12 +208,12 @@
                     @foreach ($transicionesStatusOt as $transicion)
                         <!-- Nombre del Estado con fondo rojo -->
                         <div class="red-bg px-3 py-2 rounded-md">
-                            {{ strtoupper($transicion->estado_ot->descripcion ?? 'Sin Estado') }}
+                            {{ ($transicion->estado_ot->descripcion ?? 'Sin Estado') }}
                         </div>
 
                         <!-- Justificación debajo del estado -->
                         <div class="w-full text-xs">
-                            <p class="text-xs text-gray-700">{{ strtoupper($transicion->justificacion) }}</p>
+                            <p class="text-xs uppercase indent-paragraph">{{ ($transicion->justificacion) }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -266,7 +276,7 @@
                 @foreach ($imagenesFotosTickets as $fotoTicket)
                     @if (!empty($fotoTicket['foto_base64']))
                         @if ($contador % 2 == 0)
-                            <div class="flex flex-col items-center"
+                        <div class="flex flex-col justify-center items-center min-h-[100vh] py-24"
                                 @if ($contador > 0) style="page-break-before: always;" @endif>
                         @endif
 
