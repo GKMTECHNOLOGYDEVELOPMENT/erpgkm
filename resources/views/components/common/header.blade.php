@@ -286,6 +286,11 @@
                                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             <path d="M12 6V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
+                        <!-- 🟢 Punto verde si hay notificaciones -->
+                        <template x-if="notifications.length">
+                            <span class="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-green-500"></span>
+                        </template>
+
                     </a>
                 
                
