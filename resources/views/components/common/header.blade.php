@@ -286,10 +286,15 @@
                                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             <path d="M12 6V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
-                        <!-- 🟢 Punto verde si hay notificaciones -->
-                        <template x-if="notifications.length">
-                            <span class="absolute top-0 right-0 block h-3 w-3 rounded-full ring-2 ring-white bg-green-500"></span>
-                        </template>
+                        <!-- 🟢 Ping animado si hay notificaciones -->
+    <template x-if="notifications.length">
+        <span class="flex absolute w-3 h-3 ltr:right-0 rtl:left-0 top-0">
+            <span
+                class="animate-ping absolute ltr:-left-[3px] rtl:-right-[3px] -top-[3px] inline-flex h-full w-full rounded-full bg-success/50 opacity-75">
+            </span>
+            <span class="relative inline-flex rounded-full w-[6px] h-[6px] bg-success"></span>
+        </span>
+    </template>
 
                     </a>
                 
