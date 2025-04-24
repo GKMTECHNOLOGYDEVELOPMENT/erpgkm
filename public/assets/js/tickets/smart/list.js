@@ -275,28 +275,37 @@ document.addEventListener('alpine:init', () => {
 
         toggleRowDetails(id) {
             let currentRow = $(`#myTable1 tbody button[data-id="${id}"]`).closest('tr');
-
+        
             if (currentRow.next().hasClass('expanded-row')) {
                 currentRow.next().remove();
             } else {
                 let record = this.ordenesData.find(r => r.idTickets == id);
                 if (record) {
-                    let newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
+                    // 🧠 Agrupar por idVisitas y seleccionar la más reciente
+                    const transiciones = record.transicion_status_tickets || [];
+                    const ultimaVisitaId = Math.max(...transiciones.map(t => t.idVisitas));
+        
+                    // ✅ Buscar justificación con idEstadoots = 3 de la última visita
+                    const justificacionItem = transiciones.find(
+                        t => t.idVisitas === ultimaVisitaId && t.idEstadoots === 3
+                    );
+        
+                    const justificacion = justificacionItem?.justificacion || 'N/A';
                     const estadoColor = record.ticketflujo?.estadoflujo?.color || '';
                     const estadoDescripcion = record.ticketflujo?.estadoflujo?.descripcion || 'N/A';
-                    let tecnicoNombre = record.seleccionar_visita?.visita?.tecnico?.Nombre || 'N/A';
-                    let justificacion = record.transicion_status_tickets?.[0]?.justificacion || 'N/A';
-
+                    const tecnicoNombre = record.seleccionar_visita?.visita?.tecnico?.Nombre || 'N/A';
+        
+                    const newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
                     newRow.find('td').attr("style", `background-color: ${estadoColor} !important; color: black !important;`);
                     newRow.find('td').html(`
-                <div class="p-2" style="font-size: 13px;">
-                    <ul>
-                    <li><strong>SOLUCIÓN:</strong> <span class="solucion-text">${justificacion}</span></li>
-                        <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
-                        <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
-                    </ul>
-                </div>
-            `);
+                        <div class="p-2" style="font-size: 13px;">
+                            <ul>
+                                <li><strong>SOLUCIÓN:</strong> <span class="solucion-text">${justificacion}</span></li>
+                                <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
+                                <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
+                            </ul>
+                        </div>
+                    `);
                     currentRow.after(newRow);
                 }
             }

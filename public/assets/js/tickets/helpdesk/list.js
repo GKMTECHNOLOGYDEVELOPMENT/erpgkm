@@ -95,7 +95,7 @@ document.addEventListener('alpine:init', () => {
                         d.startDate = this.startDate;
                         d.endDate = this.endDate;
                     },
-                    
+
 
                     beforeSend: () => {
                         this.isLoading = true; // 🔹 Muestra el preloader antes de la petición
@@ -171,7 +171,7 @@ document.addEventListener('alpine:init', () => {
                             return '';
                         }
                     },
-                                                  
+
                     { title: 'MÁS', data: null, orderable: false, render: this.getMoreButton }
                 ],
 
@@ -256,13 +256,12 @@ document.addEventListener('alpine:init', () => {
 
             return `
 <div class="flex justify-center items-center space-x-2">
-    <a href="/ordenes/helpdesk/${
-        data.tipoServicio == 1 
-            ? 'soporte' 
-            : data.tipoServicio == 2 
-                ? 'levantamiento' 
-                : 'laboratorio'
-    }/${data.idTickets}/edit" class="ltr:mr-1 rtl:ml-1" x-tooltip="Editar">
+    <a href="/ordenes/helpdesk/${data.tipoServicio == 1
+                    ? 'soporte'
+                    : data.tipoServicio == 2
+                        ? 'levantamiento'
+                        : 'laboratorio'
+                }/${data.idTickets}/edit" class="ltr:mr-1 rtl:ml-1" x-tooltip="Editar">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-green-600 hover:text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" />
             <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" />
@@ -271,7 +270,7 @@ document.addEventListener('alpine:init', () => {
     ${verEnvioBtn}
 </div>
 `;
-;
+            ;
         },
 
 
@@ -294,32 +293,46 @@ document.addEventListener('alpine:init', () => {
 
         toggleRowDetails(id) {
             let currentRow = $(`#myTable1 tbody button[data-id="${id}"]`).closest('tr');
-
+        
             if (currentRow.next().hasClass('expanded-row')) {
                 currentRow.next().remove();
             } else {
                 let record = this.ordenesData.find(r => r.idTickets == id);
                 if (record) {
-                    let newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
+                    const transiciones = record.transicion_status_tickets || [];
+                    const tipoServicio = record.tiposervicio?.nombre?.toLowerCase() || ''; // asegúrate que esté bien mapeado
+        
+                    // Última visita del ticket
+                    const ultimaVisitaId = Math.max(...transiciones.map(t => t.idVisitas));
+        
+                    // Estado deseado según tipo de servicio
+                    const estadoObjetivo = tipoServicio.includes('levantamiento') ? 5 : 3;
+        
+                    // Buscar justificación con ese estado en la última visita
+                    const justificacionItem = transiciones.find(
+                        t => t.idVisitas === ultimaVisitaId && t.idEstadoots === estadoObjetivo
+                    );
+        
+                    const justificacion = justificacionItem?.justificacion || 'N/A';
                     const estadoColor = record.ticketflujo?.estadoflujo?.color || '';
                     const estadoDescripcion = record.ticketflujo?.estadoflujo?.descripcion || 'N/A';
-                    let tecnicoNombre = record.seleccionar_visita?.visita?.tecnico?.Nombre || 'N/A';
-                    let justificacion = record.transicion_status_tickets?.[0]?.justificacion || 'N/A';
-
+                    const tecnicoNombre = record.seleccionar_visita?.visita?.tecnico?.Nombre || 'N/A';
+        
+                    let newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
                     newRow.find('td').attr("style", `background-color: ${estadoColor} !important; color: black !important;`);
                     newRow.find('td').html(`
-                <div class="p-2" style="font-size: 13px;">
-                    <ul>
-                    <li><strong>SOLUCIÓN:</strong> <span class="solucion-text">${justificacion}</span></li>
-                        <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
-                        <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
-                    </ul>
-                </div>
-            `);
+                        <div class="p-2" style="font-size: 13px;">
+                            <ul>
+                                <li><strong>SOLUCIÓN:</strong> <span class="solucion-text">${justificacion}</span></li>
+                                <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
+                                <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
+                            </ul>
+                        </div>
+                    `);
                     currentRow.after(newRow);
                 }
             }
-        }
+        }        
     }));
 
     function formatDate(dateString) {
