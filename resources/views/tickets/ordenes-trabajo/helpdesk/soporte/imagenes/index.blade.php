@@ -2,7 +2,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
-
+<script src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
 <!-- Sección de Fotos (se mantiene igual) -->
 <div id="cardFotos" class="mt-6 p-5 rounded-lg shadow-md">
     <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Fotos</span>
@@ -247,50 +247,80 @@
                 }
 
                 const formData = new FormData();
+                const files = Array.from(imagenInput.files);
+                const descripcionInputs = imagePreviewContainer.querySelectorAll(".descripcion-input");
 
-                Array.from(imagenInput.files).forEach((file, index) => {
-                    const descripcion = imagePreviewContainer.children[index]?.querySelector(
-                        ".descripcion-input").value || "Sin descripción";
-                    formData.append("imagenes[]", file);
-                    formData.append("descripciones[]", descripcion);
-                });
+                let archivosProcesados = 0;
 
-                formData.append("ticket_id", ticketId);
-                formData.append("visita_id", visitaId);
+                files.forEach((file, index) => {
+                    new Compressor(file, {
+                        quality: 0.8, // 80% calidad
+                        maxWidth: 1024,
+                        convertTypes: ['image/webp'],
+                        convertSize: 0, // convierte todo a webp
+                        success(compressedFile) {
+                            const descripcion = descripcionInputs[index]?.value ||
+                                "Sin descripción";
+                            formData.append("imagenes[]", compressedFile,
+                                `imagen${index}.webp`);
+                            formData.append("descripciones[]", descripcion);
 
-                fetch('/api/guardarImagen', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            archivosProcesados++;
+
+                            if (archivosProcesados === files.length) {
+                                formData.append("ticket_id", ticketId);
+                                formData.append("visita_id", visitaId);
+
+                                fetch("/api/guardarImagen", {
+                                        method: "POST",
+                                        headers: {
+                                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                                        },
+                                        body: formData
+                                    })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            return response.text().then(text => {
+                                                throw new Error(text);
+                                            });
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        if (data.success) {
+                                            toastr.success(
+                                                "Imágenes comprimidas y guardadas correctamente."
+                                                );
+                                            modalAgregarImagen.classList.add(
+                                                "hidden");
+                                            imagenInput.value = "";
+                                            imagePreviewContainer.innerHTML = "";
+                                            renderizarImagenes
+                                        (); // actualiza el swiper
+                                        } else {
+                                            toastr.error(data.message ||
+                                                "Error al guardar las imágenes."
+                                                );
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Error:", error);
+                                        toastr.error(
+                                            "Hubo un error al guardar las imágenes."
+                                            );
+                                    });
+                            }
                         },
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => {
-                                throw new Error(text);
-                            });
+                        error(err) {
+                            toastr.error("Error al comprimir imagen: " + err.message);
+                            console.error("❌ Compresión fallida:", err);
                         }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            toastr.success("Imágenes guardadas correctamente.");
-                            modalAgregarImagen.classList.add("hidden");
-                            imagenInput.value = "";
-                            imagePreviewContainer.innerHTML = "";
-
-                            // 🔹 Llamar a renderizarImagenes() para actualizar el Swiper
-                            renderizarImagenes();
-                        } else {
-                            toastr.error("Error al guardar las imágenes.");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error:", error);
-                        toastr.error("Hubo un error al guardar las imágenes.");
                     });
+                });
             });
+
+
+
         } else {
             console.error("guardarImagenBtn no encontrado en el DOM");
         }

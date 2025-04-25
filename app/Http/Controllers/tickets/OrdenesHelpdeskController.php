@@ -3200,7 +3200,7 @@ class OrdenesHelpdeskController extends Controller
             ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
             : 'N/A';
 
-        $html = view('tickets.ordenes-trabajo.helpdesk.soporte.informe.pdf.index', [
+        $html = view('tickets.ordenes-trabajo.helpdesk.laboratorio.informe.pdf.index', [
             'orden' => $orden,
             'fechaCreacion' => $fechaCreacion,
             'producto' => $producto,

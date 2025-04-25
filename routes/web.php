@@ -403,8 +403,10 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/helpdesk/soporte/{id}/edit', [OrdenesHelpdeskController::class, 'editSoporte'])
         ->name('helpdesk.soporte.edit');
 
-        Route::get('/helpdesk/laboratorio/{id}/edit', [OrdenesHelpdeskController::class, 'ediLaboratorio'])
+    Route::get('/helpdesk/laboratorio/{id}/edit', [OrdenesHelpdeskController::class, 'ediLaboratorio'])
         ->name('helpdesk.laboratorio.edit');
+
+    Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('helpdesk.pdf.laboratorio');
 
 
     Route::get('/helpdesk/pdf/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdf'])

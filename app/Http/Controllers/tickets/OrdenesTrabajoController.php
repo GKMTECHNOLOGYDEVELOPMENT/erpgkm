@@ -43,6 +43,8 @@ use Illuminate\Support\Facades\Validator;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Facades\Image;
+
 
 // use Barryvdh\DomPDF\Facade as PDF;
 
@@ -2556,48 +2558,58 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+
     public function guardarImagen(Request $request)
     {
-        // Validar que se envíen imágenes y descripciones en array
         $request->validate([
-            'imagenes' => 'required|array', // Asegura que es un array
-            'imagenes.*' => 'image|max:2048', // Cada imagen no debe exceder 2MB
+            'imagenes' => 'required|array',
+            'imagenes.*' => 'image',
             'descripciones' => 'required|array',
             'descripciones.*' => 'string|max:255',
             'ticket_id' => 'required|integer|exists:tickets,idTickets',
         ]);
-
-        // Obtener el idVisitas del ticket
+    
         $visita = DB::table('seleccionarvisita')
             ->where('idTickets', $request->ticket_id)
             ->first();
-
+    
         if (!$visita) {
             return response()->json(['success' => false, 'message' => 'No se encontró una visita válida para este ticket.'], 400);
         }
-
+    
         $visita_id = $visita->idVisitas;
-
         $imagenesGuardadas = [];
-
-        // Recorrer las imágenes y guardarlas
+    
+        $manager = new \Intervention\Image\ImageManager(['driver' => 'gd']); // o imagick
+    
         foreach ($request->file('imagenes') as $index => $imagen) {
             $descripcion = $request->descripciones[$index] ?? 'Sin descripción';
-            $imagen_binaria = file_get_contents($imagen->getRealPath());
-
+    
+            // Convertir a WebP con buena calidad (90%)
+            $img = $manager->make($imagen->getRealPath())
+                ->resize(1024, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                })
+                ->encode('webp', 90); // calidad alta, pero muy comprimido
+    
             $foto = new Fotostickest();
             $foto->idTickets = $request->ticket_id;
             $foto->idVisitas = $visita_id;
-            $foto->foto = $imagen_binaria;
+            $foto->foto = $img->getEncoded(); // guardar como binario webp
             $foto->descripcion = $descripcion;
             $foto->save();
-
+    
             $imagenesGuardadas[] = ['id' => $foto->id, 'descripcion' => $descripcion];
         }
-
-        return response()->json(['success' => true, 'message' => 'Imágenes guardadas correctamente.', 'imagenes' => $imagenesGuardadas]);
+    
+        return response()->json([
+            'success' => true,
+            'message' => 'Imágenes comprimidas en WebP y guardadas correctamente.',
+            'imagenes' => $imagenesGuardadas
+        ]);
     }
-
+    
 
 
 

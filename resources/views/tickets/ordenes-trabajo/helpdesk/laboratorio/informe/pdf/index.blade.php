@@ -140,7 +140,7 @@
                         <p>NRO OT: <span class="font-bold">{{ $orden->idTickets ?? 'N/A' }}</span></p>
                         <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
                         <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
-                    </div>                    
+                    </div>
                     <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
                         <p class="text-xs"><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}
@@ -196,19 +196,19 @@
                         <div class="w-full text-xs">
                             <p class="text-xs text-gray-700 uppercase">{{ $transicion->justificacion }}</p>
                         </div>
-
                     @endforeach
                 </div>
             @endif
             @php
-            $instaladosCount = $equiposInstalados->count();
-            $retiradosCount = $equiposRetirados->count();
-        @endphp
-        
-        {{-- 🔴 Caso: muchos retirados → separar hoja y mostrar instalados solo si existen --}}
-        @if ($retiradosCount > 15)
-            </div> {{-- Cierra el contenido anterior --}}
-            <div style="page-break-before: always;"><div class="container mx-auto bg-white p-2">
+                $instaladosCount = $equiposInstalados->count();
+                $retiradosCount = $equiposRetirados->count();
+            @endphp
+
+            {{-- 🔴 Caso: muchos retirados → separar hoja y mostrar instalados solo si existen --}}
+            @if ($retiradosCount > 15)
+        </div> {{-- Cierra el contenido anterior --}}
+        <div style="page-break-before: always;">
+            <div class="container mx-auto bg-white p-2">
                 <div class="red-bg mt-2">Equipos Retirados</div>
                 <div class="w-full space-y-1">
                     @foreach ($equiposRetirados as $equipo)
@@ -219,70 +219,81 @@
                                 <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
                                 <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
                                 @if (!empty($equipo['observacion']))
-                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
+                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span>
+                                        {{ strtoupper($equipo['observacion']) }}</p>
                                 @endif
                             </div>
                         </div>
                     @endforeach
                 </div>
             </div>
-        
+
             @if ($equiposInstalados->isNotEmpty())
-                <div style="page-break-before: always;"><div class="container mx-auto bg-white p-2">
-                    <div class="red-bg mt-2">Equipos Instalados</div>
-                    <div class="w-full space-y-1">
-                        @foreach ($equiposInstalados as $equipo)
-                            <div class="text-xs py-1">
-                                <div class="flex flex-wrap justify-between gap-x-4">
-                                    <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
-                                    <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
-                                    <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
-                                    <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
-                                    @if (!empty($equipo['observacion']))
-                                        <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
-                                    @endif
+                <div style="page-break-before: always;">
+                    <div class="container mx-auto bg-white p-2">
+                        <div class="red-bg mt-2">Equipos Instalados</div>
+                        <div class="w-full space-y-1">
+                            @foreach ($equiposInstalados as $equipo)
+                                <div class="text-xs py-1">
+                                    <div class="flex flex-wrap justify-between gap-x-4">
+                                        <p><span class="font-bold">TIPO:</span>
+                                            {{ strtoupper($equipo['tipoProducto']) }}</p>
+                                        <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
+                                        <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}
+                                        </p>
+                                        <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}
+                                        </p>
+                                        @if (!empty($equipo['observacion']))
+                                            <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span>
+                                                {{ strtoupper($equipo['observacion']) }}</p>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
-                </div>
             @endif
-        
-        {{-- 🔁 Caso: total equipos > 3 → todos en nueva hoja --}}
+
+            {{-- 🔁 Caso: total equipos > 3 → todos en nueva hoja --}}
         @elseif ($instaladosCount + $retiradosCount > 3)
-            </div>
-            <div style="page-break-before: always;"><div class="container mx-auto bg-white p-2">
+        </div>
+        <div style="page-break-before: always;">
+            <div class="container mx-auto bg-white p-2">
                 @if ($equiposInstalados->isNotEmpty())
                     <div class="red-bg mt-2">Equipos Instalados</div>
                     <div class="w-full space-y-1">
                         @foreach ($equiposInstalados as $equipo)
                             <div class="text-xs py-1">
                                 <div class="flex flex-wrap justify-between gap-x-4">
-                                    <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
+                                    <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}
+                                    </p>
                                     <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
                                     <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
                                     <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
                                     @if (!empty($equipo['observacion']))
-                                        <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
+                                        <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span>
+                                            {{ strtoupper($equipo['observacion']) }}</p>
                                     @endif
                                 </div>
                             </div>
                         @endforeach
                     </div>
                 @endif
-        
+
                 @if ($equiposRetirados->isNotEmpty())
                     <div class="red-bg mt-2">Equipos Retirados</div>
                     <div class="w-full space-y-1">
                         @foreach ($equiposRetirados as $equipo)
                             <div class="text-xs py-1">
                                 <div class="flex flex-wrap justify-between gap-x-4">
-                                    <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}</p>
+                                    <p><span class="font-bold">TIPO:</span> {{ strtoupper($equipo['tipoProducto']) }}
+                                    </p>
                                     <p><span class="font-bold">MARCA:</span> {{ strtoupper($equipo['marca']) }}</p>
                                     <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
                                     <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
                                     @if (!empty($equipo['observacion']))
-                                        <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
+                                        <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span>
+                                            {{ strtoupper($equipo['observacion']) }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -290,8 +301,8 @@
                     </div>
                 @endif
             </div>
-        
-        {{-- ✅ Caso final: pocos equipos → todo en misma hoja --}}
+
+            {{-- ✅ Caso final: pocos equipos → todo en misma hoja --}}
         @else
             @if ($equiposInstalados->isNotEmpty())
                 <div class="red-bg mt-2">Equipos Instalados</div>
@@ -304,14 +315,15 @@
                                 <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
                                 <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
                                 @if (!empty($equipo['observacion']))
-                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
+                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span>
+                                        {{ strtoupper($equipo['observacion']) }}</p>
                                 @endif
                             </div>
                         </div>
                     @endforeach
                 </div>
             @endif
-        
+
             @if ($equiposRetirados->isNotEmpty())
                 <div class="red-bg mt-2">Equipos Retirados</div>
                 <div class="w-full space-y-1">
@@ -323,16 +335,17 @@
                                 <p><span class="font-bold">MODELO:</span> {{ strtoupper($equipo['modelo']) }}</p>
                                 <p><span class="font-bold">SERIE:</span> {{ strtoupper($equipo['nserie']) }}</p>
                                 @if (!empty($equipo['observacion']))
-                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span> {{ strtoupper($equipo['observacion']) }}</p>
+                                    <p class="w-full"><span class="font-bold">OBSERVACIÓN:</span>
+                                        {{ strtoupper($equipo['observacion']) }}</p>
                                 @endif
                             </div>
                         </div>
                     @endforeach
                 </div>
             @endif
-        @endif
-        
-        
+            @endif
+
+
 
             <!-- FOOTER -->
             <div class="footer text-center text-gray-500 text-xs">
@@ -382,97 +395,29 @@
                 </div>
             </div>
 
-
-
-
-
-            @php
-                $hayFotosDeVisita =
-                    !empty($imagenesAnexos) &&
-                    collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
-                $hayFotosDeTickets =
-                    !empty($imagenesFotosTickets) &&
-                    collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
-            @endphp
-
-            @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
-
-                <!-- Nueva página con el título ANEXOS -->
-                <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
-                    <h2>ANEXOS</h2>
-                </div>
-
-                <div class="mt-4">
-                    @php
-                        $contador = 0;
-                        $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
-                    @endphp
-
-                    @php
-                    $descripciones = [
-                        'IMAGEN EN DESPLAZAMIENTO',
-                        'IMAGEN LLEGADA A SERVICIO',
-                        'IMAGEN MOTIVO'
-                    ];
-                    $contador = 0;
-                    @endphp
-
-                    <!-- Primero las imágenes de la visita (incluye condiciones también) -->
-                    @if ($hayFotosDeVisita)
-                        @foreach ($imagenesAnexos as $anexo)
-                            @if (!empty($anexo['foto_base64']))
-                                @if ($contador % 2 == 0)
-                                    <!-- Abrir contenedor para 2 imágenes por página -->
-                                    <div class="flex flex-col items-center"
-                                        @if ($contador > 0) style="page-break-before: always;" @endif>
-                                @endif
-
-                                <!-- Imagen centrada -->
-                                <div class="img-container mb-6">
-                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
-                                </div>
-
-                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                    {{ $descripciones[$contador] ?? 'IMAGEN DE LA VISITA' }}
-                                </p>
-
-                                @php $contador++; @endphp
-
-                                @if ($contador % 2 == 0 || $loop->last)
-                </div> <!-- Cierra grupo de 2 imágenes -->
-            @endif
-            @endif
-            @endforeach
-            @endif
-
-
             <!-- Luego las imágenes de los tickets anexos -->
             @if (!empty($imagenesFotosTickets) && count($imagenesFotosTickets) > 0)
+                @php $contador = 0; @endphp
                 @foreach ($imagenesFotosTickets as $fotoTicket)
                     @if (!empty($fotoTicket['foto_base64']))
-                        @if ($contador % 2 == 0)
-                            <div class="flex flex-col items-center"
-                                @if ($contador > 0) style="page-break-before: always;" @endif>
+                        @if ($contador % 2 == 0 && $contador > 0)
+                            <div class="page-break"></div>
                         @endif
-
                         <div class="img-container">
                             <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen de la visita">
                         </div>
-
                         <p class="text-sm text-center text-gray-700 font-semibold mt-2">
                             {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
                         </p>
 
                         @php $contador++; @endphp
+                    @endif
+                @endforeach
+            @endif
 
-                        @if ($contador % 2 == 0 || $loop->last)
+
         </div>
         @endif
-        @endif
-        @endforeach
-        @endif
-    </div>
-    @endif
 
 
 
