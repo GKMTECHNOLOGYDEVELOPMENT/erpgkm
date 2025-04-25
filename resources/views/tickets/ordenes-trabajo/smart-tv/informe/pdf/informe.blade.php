@@ -157,6 +157,7 @@
                 </p>
             </div> --}}
             <hr class="my-4 border-0">
+
             @if (!empty($producto))
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
@@ -168,136 +169,114 @@
                     </div>
                 </div>
             @endif
-
-
+            
             @if (!empty($producto['fallaReportada']))
-                <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
                 <div class="red-bg mt-4 text-left">Falla Reportada</div>
                 <div class="w-full text-xs mt-3">
                     <p class="uppercase indent-paragraph">{{ $producto['fallaReportada'] }}</p>
                 </div>
             @endif
-
+            
             @if (trim($motivoCondicion ?? '') !== '')
-                <!-- Sección de Motivo de la Condición -->
                 <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
                 <div class="w-full text-xs mt-3">
                     <p class="uppercase indent-paragraph">{{ $motivoCondicion }}</p>
                 </div>
             @endif
-
-
-
+            
             @if ($transicionesStatusOt->isNotEmpty())
                 @php
-                    // 🔥 Definir el orden deseado según el ID de estado en la BD
                     $ordenEstados = [
                         1 => 1, // DETALLES ESTÉTICOS
                         2 => 2, // DIAGNÓSTICO
                         3 => 3, // SOLUCIÓN
                         4 => 4, // OBSERVACIÓN
                     ];
-
-                    // 🔥 Ordenar la colección por idEstadoots
                     $transicionesStatusOt = $transicionesStatusOt->sortBy(function ($item) use ($ordenEstados) {
-                        return $ordenEstados[$item->idEstadoots] ?? 999; // Si no está en la lista, lo manda al final
+                        return $ordenEstados[$item->idEstadoots] ?? 999;
                     });
                 @endphp
-
+            
                 <div class="space-y-2 mt-2">
                     @foreach ($transicionesStatusOt as $transicion)
-                        <!-- Nombre del Estado con fondo rojo -->
                         <div class="red-bg px-3 py-2 rounded-md">
-                            {{ ($transicion->estado_ot->descripcion ?? 'Sin Estado') }}
+                            {{ $transicion->estado_ot->descripcion ?? 'Sin Estado' }}
                         </div>
-
-                        <!-- Justificación debajo del estado -->
+            
                         <div class="w-full text-xs">
-                            <p class="text-xs uppercase indent-paragraph">{{ ($transicion->justificacion) }}</p>
+                            <p class="text-xs uppercase indent-paragraph">{{ $transicion->justificacion }}</p>
                         </div>
                     @endforeach
                 </div>
-
             @endif
-
-
-
-
-
-
-
+            
             @php
-                $hayFotosDeVisita =
+                $hayFotosCondicion =
                     !empty($imagenesAnexos) &&
                     collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
-
+            
                 $hayFotosDeTickets =
                     !empty($imagenesFotosTickets) &&
                     collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
             @endphp
-
-            @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
-                <!-- Nueva página con el título ANEXOS -->
+            
+            @if (!$modoVistaPrevia && ($hayFotosCondicion || $hayFotosDeTickets))
                 <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
                     <h2>ANEXOS</h2>
                 </div>
-
+            
                 <div class="mt-4">
                     @php $contador = 0; @endphp
-
-                    {{-- Imágenes de la visita (anexos + condiciones) --}}
-                    @if ($hayFotosDeVisita)
+            
+                    {{-- 🔴 Imágenes de condiciones --}}
+                    @if ($hayFotosCondicion)
                         @foreach ($imagenesAnexos as $anexo)
                             @if (!empty($anexo['foto_base64']))
                                 @if ($contador % 2 == 0)
-                                    <div class="flex flex-col items-center"
-                                        @if ($contador > 0) style="page-break-before: always;" @endif>
+                                    <div class="flex flex-col items-center" @if ($contador > 0) style="page-break-before: always;" @endif>
                                 @endif
-
+            
                                 <div class="img-container mb-6">
-                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
+                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de condición">
                                 </div>
-
-                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                    IMAGEN DE LA VISITA
-                                </p>
-
+        
+            
                                 @php $contador++; @endphp
-
+            
                                 @if ($contador % 2 == 0 || $loop->last)
+                                    </div>
+                                @endif
+                            @endif
+                        @endforeach
+                    @endif
+            
+                    {{-- 🔵 Imágenes de fotos de tickets --}}
+                    @if ($hayFotosDeTickets)
+                        @foreach ($imagenesFotosTickets as $fotoTicket)
+                            @if (!empty($fotoTicket['foto_base64']))
+                                @if ($contador % 2 == 0)
+                                    <div class="flex flex-col items-center" @if ($contador > 0) style="page-break-before: always;" @endif>
+                                @endif
+            
+                                <div class="img-container mb-6">
+                                    <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del ticket">
+                                </div>
+            
+                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                                    {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
+                                </p>
+            
+                                @php $contador++; @endphp
+            
+                                @if ($contador % 2 == 0 || $loop->last)
+                                    </div>
+                                @endif
+                            @endif
+                        @endforeach
+                    @endif
                 </div>
             @endif
-            @endif
-            @endforeach
-            @endif
-
-            {{-- Imágenes de fotos ticket --}}
-            @if ($hayFotosDeTickets)
-                @foreach ($imagenesFotosTickets as $fotoTicket)
-                    @if (!empty($fotoTicket['foto_base64']))
-                        @if ($contador % 2 == 0)
-                        <div class="flex flex-col justify-center items-center min-h-[100vh] py-24"
-                                @if ($contador > 0) style="page-break-before: always;" @endif>
-                        @endif
-
-                        <div class="img-container mb-6">
-                            <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del ticket">
-                        </div>
-
-                        <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                            {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
-                        </p>
-
-                        @php $contador++; @endphp
-
-                        @if ($contador % 2 == 0 || $loop->last)
-        </div>
-        @endif
-        @endif
-        @endforeach
-        @endif
-    </div>
-    @endif
+            
 
     </div>
 

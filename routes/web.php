@@ -370,8 +370,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
 
 
-        Route::get('helpdesk/lab/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteLab'])->name('firmacliente.Lab');
-        Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('pdfcliente');
+    Route::get('helpdesk/lab/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteLab'])->name('firmacliente.Lab');
 
 
 
@@ -408,9 +407,10 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
     Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('helpdesk.pdf.laboratorio');
 
-
     Route::get('/helpdesk/pdf/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdf'])
         ->name('helpdesk.pdf.levantamiento');
+
+        
     Route::get('/helpdesk/pdf/soporte/{idOt}', [OrdenesHelpdeskController::class, 'generateSoportePdf'])->name('helpdesk.pdf.soporte');
 
 

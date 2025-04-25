@@ -2568,23 +2568,23 @@ class OrdenesTrabajoController extends Controller
             'descripciones.*' => 'string|max:255',
             'ticket_id' => 'required|integer|exists:tickets,idTickets',
         ]);
-    
+
         $visita = DB::table('seleccionarvisita')
             ->where('idTickets', $request->ticket_id)
             ->first();
-    
+
         if (!$visita) {
             return response()->json(['success' => false, 'message' => 'No se encontró una visita válida para este ticket.'], 400);
         }
-    
+
         $visita_id = $visita->idVisitas;
         $imagenesGuardadas = [];
-    
+
         $manager = new \Intervention\Image\ImageManager(['driver' => 'gd']); // o imagick
-    
+
         foreach ($request->file('imagenes') as $index => $imagen) {
             $descripcion = $request->descripciones[$index] ?? 'Sin descripción';
-    
+
             // Convertir a WebP con buena calidad (90%)
             $img = $manager->make($imagen->getRealPath())
                 ->resize(1024, null, function ($constraint) {
@@ -2592,24 +2592,24 @@ class OrdenesTrabajoController extends Controller
                     $constraint->upsize();
                 })
                 ->encode('webp', 90); // calidad alta, pero muy comprimido
-    
+
             $foto = new Fotostickest();
             $foto->idTickets = $request->ticket_id;
             $foto->idVisitas = $visita_id;
             $foto->foto = $img->getEncoded(); // guardar como binario webp
             $foto->descripcion = $descripcion;
             $foto->save();
-    
+
             $imagenesGuardadas[] = ['id' => $foto->id, 'descripcion' => $descripcion];
         }
-    
+
         return response()->json([
             'success' => true,
             'message' => 'Imágenes comprimidas en WebP y guardadas correctamente.',
             'imagenes' => $imagenesGuardadas
         ]);
     }
-    
+
 
 
 
@@ -3293,20 +3293,8 @@ class OrdenesTrabajoController extends Controller
             }
         }
 
-        // Obtener los anexos de la visita seleccionada y optimizarlos
-        $imagenesAnexos = [];
-        if ($visitaSeleccionada && $visitaSeleccionada->anexos_visitas) {
-            $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
-                return [
-                    'foto_base64' => !empty($anexo->foto)
-                        ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
-                        : null,
-                    'descripcion' => $anexo->descripcion
-                ];
-            });
-        }
-
-        $imagenesCondiciones = DB::table('condicionesticket')
+        // ✅ Solo cargar imágenes desde condicionesticket
+        $imagenesAnexos = DB::table('condicionesticket')
             ->where('idTickets', $idOt)
             ->where('idVisitas', $idVisitasSeleccionada)
             ->whereNotNull('imagen')
@@ -3317,8 +3305,6 @@ class OrdenesTrabajoController extends Controller
                     'descripcion' => 'CONDICIÓN: ' . ($condicion->motivo ?? 'Sin descripción')
                 ];
             });
-
-        $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
 
         // Obtener las imágenes de los tickets y optimizarlas
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
@@ -3802,13 +3788,13 @@ class OrdenesTrabajoController extends Controller
         // Paso 1: Verificar tickets con más de 48 horas
         $fechaLimite = Carbon::now()->subHours(48);
         Log::info('Obteniendo tickets creados antes de: ' . $fechaLimite);
-    
+
         $tickets = Ticket::where('fecha_creacion', '<=', $fechaLimite)->get();
         Log::info('Cantidad de tickets encontrados: ' . $tickets->count());
-    
+
         foreach ($tickets as $ticket) {
             Log::info('Revisando ticket ID: ' . $ticket->idTickets);
-        
+
             $existe = SolicitudEntrega::where('idTickets', $ticket->idTickets)->exists();
             if ($existe) {
                 Log::info('Ya existe solicitud para ticket ID: ' . $ticket->idTickets);
@@ -3817,110 +3803,110 @@ class OrdenesTrabajoController extends Controller
 
 
 
-        
-    // 👉 CASO 1: Flujo 1 con más de 48h y además debe ser el ÚLTIMO flujo creado
-$ultimoFlujo = DB::table('ticketflujo')
-->where('idTicket', $ticket->idTickets)
-->orderBy('fecha_creacion', 'desc')
-->first();
 
-$flujoEstado1 = DB::table('ticketflujo')
-->where('idTicket', $ticket->idTickets)
-->where('idEstadflujo', 1)
-->orderBy('fecha_creacion', 'desc')
-->first();
+            // 👉 CASO 1: Flujo 1 con más de 48h y además debe ser el ÚLTIMO flujo creado
+            $ultimoFlujo = DB::table('ticketflujo')
+                ->where('idTicket', $ticket->idTickets)
+                ->orderBy('fecha_creacion', 'desc')
+                ->first();
 
-if ($flujoEstado1) {
-Log::info("✅ Ticket ID {$ticket->idTickets} tiene flujo 1 con fecha: " . $flujoEstado1->fecha_creacion);
+            $flujoEstado1 = DB::table('ticketflujo')
+                ->where('idTicket', $ticket->idTickets)
+                ->where('idEstadflujo', 1)
+                ->orderBy('fecha_creacion', 'desc')
+                ->first();
 
-// Validar que sea el último flujo
-if ($ultimoFlujo && $ultimoFlujo->idTicketFlujo == $flujoEstado1->idTicketFlujo) {
-    if (Carbon::parse($flujoEstado1->fecha_creacion)->lte(Carbon::now()->subHours(48))) {
-        Log::info("⏰ Flujo 1 es el último y tiene más de 48h. Creando solicitud tipo 2 para ticket ID: {$ticket->idTickets}");
-        SolicitudEntrega::create([
-            'idTickets' => $ticket->idTickets,
-            'comentario' => '48 horas despues del flujo 1',
-            'fechaHora' => Carbon::now(),
-            'idTipoServicio' => 2,
-            'estado' => 0
-        ]);
-        continue;
-    } else {
-        Log::info("🕒 Flujo 1 aún no cumple las 48h para ticket ID: {$ticket->idTickets}");
-    }
-} else {
-    Log::info("🚫 Flujo 1 NO es el último flujo para ticket ID: {$ticket->idTickets}. Se omite.");
-}
-} else {
-Log::info("🚫 Ticket ID {$ticket->idTickets} NO tiene flujo 1.");
-}
+            if ($flujoEstado1) {
+                Log::info("✅ Ticket ID {$ticket->idTickets} tiene flujo 1 con fecha: " . $flujoEstado1->fecha_creacion);
 
-
+                // Validar que sea el último flujo
+                if ($ultimoFlujo && $ultimoFlujo->idTicketFlujo == $flujoEstado1->idTicketFlujo) {
+                    if (Carbon::parse($flujoEstado1->fecha_creacion)->lte(Carbon::now()->subHours(48))) {
+                        Log::info("⏰ Flujo 1 es el último y tiene más de 48h. Creando solicitud tipo 2 para ticket ID: {$ticket->idTickets}");
+                        SolicitudEntrega::create([
+                            'idTickets' => $ticket->idTickets,
+                            'comentario' => '48 horas despues del flujo 1',
+                            'fechaHora' => Carbon::now(),
+                            'idTipoServicio' => 2,
+                            'estado' => 0
+                        ]);
+                        continue;
+                    } else {
+                        Log::info("🕒 Flujo 1 aún no cumple las 48h para ticket ID: {$ticket->idTickets}");
+                    }
+                } else {
+                    Log::info("🚫 Flujo 1 NO es el último flujo para ticket ID: {$ticket->idTickets}. Se omite.");
+                }
+            } else {
+                Log::info("🚫 Ticket ID {$ticket->idTickets} NO tiene flujo 1.");
+            }
 
 
-        // 👉 CASO 2: Flujo 10 con más de 48h y además debe ser el ÚLTIMO flujo creado
-$flujoEstado10 = DB::table('ticketflujo')
-->where('idTicket', $ticket->idTickets)
-->where('idEstadflujo', 10)
-->orderBy('fecha_creacion', 'desc')
-->first();
 
-if ($flujoEstado10) {
-Log::info("✅ Ticket ID {$ticket->idTickets} tiene flujo 10 con fecha: " . $flujoEstado10->fecha_creacion);
 
-if ($ultimoFlujo && $ultimoFlujo->idTicketFlujo == $flujoEstado10->idTicketFlujo) {
-    if (Carbon::parse($flujoEstado10->fecha_creacion)->lte(Carbon::now()->subHours(48))) {
-        Log::info("⏰ Flujo 10 es el último y tiene más de 48h. Creando solicitud tipo 3 para ticket ID: {$ticket->idTickets}");
-        SolicitudEntrega::create([
-            'idTickets' => $ticket->idTickets,
-            'comentario' => '48 horas despues del flujo 10',
-            'fechaHora' => Carbon::now(),
-            'idTipoServicio' => 3,
-            'estado' => 0
-        ]);
-        continue;
-    } else {
-        Log::info("🕒 Flujo 10 aún no cumple las 48h para ticket ID: {$ticket->idTickets}");
-    }
-} else {
-    Log::info("🚫 Flujo 10 NO es el último flujo para ticket ID: {$ticket->idTickets}. Se omite.");
-}
-} else {
-Log::info("🚫 Ticket ID {$ticket->idTickets} NO tiene flujo 10.");
-}
+            // 👉 CASO 2: Flujo 10 con más de 48h y además debe ser el ÚLTIMO flujo creado
+            $flujoEstado10 = DB::table('ticketflujo')
+                ->where('idTicket', $ticket->idTickets)
+                ->where('idEstadflujo', 10)
+                ->orderBy('fecha_creacion', 'desc')
+                ->first();
 
-        
+            if ($flujoEstado10) {
+                Log::info("✅ Ticket ID {$ticket->idTickets} tiene flujo 10 con fecha: " . $flujoEstado10->fecha_creacion);
+
+                if ($ultimoFlujo && $ultimoFlujo->idTicketFlujo == $flujoEstado10->idTicketFlujo) {
+                    if (Carbon::parse($flujoEstado10->fecha_creacion)->lte(Carbon::now()->subHours(48))) {
+                        Log::info("⏰ Flujo 10 es el último y tiene más de 48h. Creando solicitud tipo 3 para ticket ID: {$ticket->idTickets}");
+                        SolicitudEntrega::create([
+                            'idTickets' => $ticket->idTickets,
+                            'comentario' => '48 horas despues del flujo 10',
+                            'fechaHora' => Carbon::now(),
+                            'idTipoServicio' => 3,
+                            'estado' => 0
+                        ]);
+                        continue;
+                    } else {
+                        Log::info("🕒 Flujo 10 aún no cumple las 48h para ticket ID: {$ticket->idTickets}");
+                    }
+                } else {
+                    Log::info("🚫 Flujo 10 NO es el último flujo para ticket ID: {$ticket->idTickets}. Se omite.");
+                }
+            } else {
+                Log::info("🚫 Ticket ID {$ticket->idTickets} NO tiene flujo 10.");
+            }
+
+
             // ❌ Si no cumple ningún flujo permitido
             Log::info('❌ Ticket ID ' . $ticket->idTickets . ' no cumple condiciones de flujo 1 ni 10.');
         }
-        
-        
 
-        
-        
-    
+
+
+
+
+
         // Paso 2: Obtener solicitudes con estado = 0
         Log::info('Obteniendo solicitudes con estado 0');
-    
+
         $solicitudes = Solicitudentrega::where('solicitudentrega.estado', 0)
-        ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
-        ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
-        ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
-        ->select(
-            'solicitudentrega.idSolicitudentrega',
-            'solicitudentrega.comentario',
-            'solicitudentrega.idTickets',
-            'solicitudentrega.idVisitas',
-            'solicitudentrega.idTipoServicio', // 👈 AÑADE ESTA LÍNEA
-            'tickets.numero_ticket',
-            'usuarios.Nombre as nombre_usuario',
-            'solicitudentrega.fechaHora'
-        )
-        ->get();
-    
-    
+            ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+            ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+            ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+            ->select(
+                'solicitudentrega.idSolicitudentrega',
+                'solicitudentrega.comentario',
+                'solicitudentrega.idTickets',
+                'solicitudentrega.idVisitas',
+                'solicitudentrega.idTipoServicio', // 👈 AÑADE ESTA LÍNEA
+                'tickets.numero_ticket',
+                'usuarios.Nombre as nombre_usuario',
+                'solicitudentrega.fechaHora'
+            )
+            ->get();
+
+
         Log::info('Total de solicitudes con estado 0 encontradas: ' . $solicitudes->count());
-    
+
         return response()->json($solicitudes);
     }
 
@@ -3944,7 +3930,7 @@ Log::info("🚫 Ticket ID {$ticket->idTickets} NO tiene flujo 10.");
             $solicitud->estado = 1; // Estado "Aceptada"
             $solicitud->save();
 
-                // Si el tipo de servicio es 2 o 3, solo cambiamos el estado y salimos
+            // Si el tipo de servicio es 2 o 3, solo cambiamos el estado y salimos
             if (in_array($solicitud->idTipoServicio, [2, 3])) {
                 return response()->json(['message' => 'Estado de la solicitud actualizado.']);
             }
