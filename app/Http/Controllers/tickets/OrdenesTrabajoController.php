@@ -4221,11 +4221,28 @@ class OrdenesTrabajoController extends Controller
                 ->with('estado_ot')
                 ->get();
 
+            $equipo = DB::table('equipos')
+                ->where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->first();
+
+            // 🔹 Si encontramos el equipo, buscamos su modelo, marca y categoría
+            $modelo = null;
+            $marca = null;
+            $categoria = null;
+
+            if ($equipo) {
+                $modelo = \App\Models\Modelo::find($equipo->idModelo);
+                $marca = \App\Models\Marca::find($equipo->idMarca);
+                $categoria = \App\Models\Categoria::find($equipo->idCategoria);
+            }
+
+            // 🔹 Armamos los datos del producto
             $producto = [
-                'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
-                'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
-                'modelo' => $orden->modelo->nombre ?? 'No especificado',
-                'serie' => $orden->serie ?? 'No especificado',
+                'categoria' => $categoria->nombre ?? 'No especificado',
+                'marca' => $marca->nombre ?? 'No especificado',
+                'modelo' => $modelo->nombre ?? 'No especificado',
+                'serie' => $equipo->nserie ?? 'No especificado',
                 'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
             ];
 
@@ -4254,9 +4271,187 @@ class OrdenesTrabajoController extends Controller
 
             $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
 
-            $marca = $orden->modelo->marca ?? null;
-            $marca->logo_base64 = $marca && $marca->foto ? $this->procesarLogoMarca($marca->foto) : null;
+            if ($marca) {
+                $marca->logo_base64 = $marca->foto ? $this->procesarLogoMarca($marca->foto) : null;
+            }
+            $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
 
+            $visitas = collect();
+            if ($visitaSeleccionada) {
+                $visitas = collect([
+                    [
+                        'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                        'fecha_programada' => optional($visitaSeleccionada->fecha_programada)->format('d/m/Y') ?? 'N/A',
+                        'hora_inicio' => optional($visitaSeleccionada->fecha_inicio)->format('H:i') ?? 'N/A',
+                        'hora_final' => optional($visitaSeleccionada->fecha_final)->format('H:i') ?? 'N/A',
+                        'fecha_llegada' => optional($visitaSeleccionada->fecha_llegada)->format('d/m/Y H:i') ?? 'N/A',
+                        'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                        'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
+                        'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
+                        'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                        'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
+                        'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa'
+                    ]
+                ]);
+            }
+
+            $firma = DB::table('firmas')->where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->first();
+
+            $firmaCliente = $firma && $firma->firma_cliente ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente)) : null;
+            $firmaTecnico = $visitaSeleccionada->tecnico->firma ?? null;
+            $firmaTecnico = $firmaTecnico ? 'data:image/png;base64,' . base64_encode($firmaTecnico) : null;
+
+            $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
+                return [
+                    'foto_base64' => $anexo->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto)) : null,
+                    'descripcion' => $anexo->descripcion
+                ];
+            });
+
+            $imagenesCondiciones = DB::table('condicionesticket')
+                ->where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->whereNotNull('imagen')
+                ->get()
+                ->map(function ($condicion) {
+                    return [
+                        'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
+                        'descripcion' => 'CONDICION: ' . ($condicion->motivo ?? 'Sin descripcion')
+                    ];
+                });
+
+            $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
+
+            $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+                return [
+                    'foto_base64' => $foto->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto)) : null,
+                    'descripcion' => $foto->descripcion
+                ];
+            });
+
+            $fechaCreacion = optional($visitaSeleccionada->fecha_inicio)->format('d/m/Y') ?? 'N/A';
+
+            $html = view('tickets.ordenes-trabajo.smart-tv.informe.pdf.constancia_entrega', [
+                'orden' => $orden,
+                'fechaCreacion' => $fechaCreacion,
+                'producto' => $producto,
+                'transicionesStatusOt' => $transicionesStatusOt,
+                'visitas' => $visitas,
+                'firmaTecnico' => $firmaTecnico,
+                'firmaCliente' => $firmaCliente,
+                'imagenesAnexos' => $imagenesAnexos,
+                'imagenesFotosTickets' => $imagenesFotosTickets,
+                'marca' => $marca,
+                'logoGKM' => $logoGKM,
+                'motivoCondicion' => $motivoCondicion,
+                'constancia' => $constancia,
+                'constanciaFotos' => $constanciaFotos,
+                'modoVistaPrevia' => false,
+                'firma' => $firma
+            ])->render();
+
+            $pdf = Browsershot::html($html)
+                ->format('A4')
+                ->fullPage()
+                ->noSandbox()
+                ->emulateMedia('screen')
+                ->waitUntilNetworkIdle()
+                ->showBackground()
+                ->pdf();
+
+            return response($pdf)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'inline; filename="ORDEN_DE_INGRESO ' . $orden->idTickets . '.pdf"');
+        } catch (\Exception $e) {
+            Log::error('Error generando constancia PDF: ' . $e->getMessage());
+            abort(500, 'Error generando PDF');
+        }
+    }
+
+
+    public function descargarPDF_App($id, $idVisitas)
+    {
+        try {
+            Log::info("\ud83d\udcc5 Iniciando descarga de constancia para ticket ID: {$id}");
+
+            $orden = Ticket::with([
+                'cliente.tipodocumento',
+                'clienteGeneral',
+                'tecnico.tipodocumento',
+                'tienda',
+                'marca',
+                'modelo.categoria',
+                'transicion_status_tickets.estado_ot',
+                'visitas.tecnico.tipodocumento',
+                'visitas.anexos_visitas',
+                'visitas.fotostickest'
+            ])->findOrFail($id);
+
+
+            $idVisitasSeleccionada = $idVisitas;
+
+            $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->whereNotNull('justificacion')
+                ->where('justificacion', '!=', '')
+                ->with('estado_ot')
+                ->get();
+
+            $equipo = DB::table('equipos')
+                ->where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->first();
+
+            // 🔹 Si encontramos el equipo, buscamos su modelo, marca y categoría
+            $modelo = null;
+            $marca = null;
+            $categoria = null;
+
+            if ($equipo) {
+                $modelo = \App\Models\Modelo::find($equipo->idModelo);
+                $marca = \App\Models\Marca::find($equipo->idMarca);
+                $categoria = \App\Models\Categoria::find($equipo->idCategoria);
+            }
+
+            // 🔹 Armamos los datos del producto
+            $producto = [
+                'categoria' => $categoria->nombre ?? 'No especificado',
+                'marca' => $marca->nombre ?? 'No especificado',
+                'modelo' => $modelo->nombre ?? 'No especificado',
+                'serie' => $equipo->nserie ?? 'No especificado',
+                'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+            ];
+
+            $condicion = DB::table('condicionesticket')
+                ->where('idTickets', $id)
+                ->where('idVisitas', $idVisitasSeleccionada)
+                ->first();
+
+            $motivoCondicion = $condicion->motivo ?? null;
+            $constancia = DB::table('constancia_entregas')
+                ->where('idticket', $id)
+                ->first();
+
+            $constanciaFotos = DB::table('constancia_fotos')
+                ->where('idconstancia', $constancia->idconstancia ?? 0)
+                ->get()
+                ->map(function ($foto) {
+                    $mime = finfo_buffer(finfo_open(), $foto->imagen, FILEINFO_MIME_TYPE);
+                    $base64 = $foto->imagen ? 'data:' . $mime . ';base64,' . base64_encode($foto->imagen) : null;
+                    return [
+                        'foto_base64' => $base64 ? $this->optimizeBase64Image($base64) : null,
+                        'descripcion' => $foto->descripcion ?? 'Sin descripción'
+                    ];
+                });
+
+
+            $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+
+            if ($marca) {
+                $marca->logo_base64 = $marca->foto ? $this->procesarLogoMarca($marca->foto) : null;
+            }
             $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
 
             $visitas = collect();

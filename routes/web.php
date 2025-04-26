@@ -481,6 +481,7 @@ Route::post('/constancias', [OrdenesTrabajoController::class, 'storeConstancia']
 
 Route::get('/constancia/pdf/{id}', [OrdenesTrabajoController::class, 'descargarPDF'])->name('constancia.pdf');
 
+Route::get('/constancia/pdf/{id}/{idVisitas}', [OrdenesTrabajoController::class, 'descargarPDF_App'])->name('constancia.pdf');
 
 // En routes/web.php
 Route::get('/constancias/fotos/{id}', [OrdenesTrabajoController::class, 'mostrarFoto'])
