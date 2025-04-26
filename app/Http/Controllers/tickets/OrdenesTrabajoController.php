@@ -3057,20 +3057,8 @@ class OrdenesTrabajoController extends Controller
             }
         }
 
-        // 🔹 Obtener imágenes de anexos y optimizarlas
-        $imagenesAnexos = [];
-        if ($visitaSeleccionada && $visitaSeleccionada->anexos_visitas) {
-            $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
-                return [
-                    'foto_base64' => !empty($anexo->foto)
-                        ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
-                        : null,
-                    'descripcion' => $anexo->descripcion
-                ];
-            });
-        }
-
-        $imagenesCondiciones = DB::table('condicionesticket')
+        // ✅ Solo cargar imágenes desde condicionesticket
+        $imagenesAnexos = DB::table('condicionesticket')
             ->where('idTickets', $idOt)
             ->where('idVisitas', $idVisitasSeleccionada)
             ->whereNotNull('imagen')
@@ -3082,9 +3070,7 @@ class OrdenesTrabajoController extends Controller
                 ];
             });
 
-        $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
-
-        // 🔹 Obtener imágenes de los tickets y optimizarlas
+        // Obtener las imágenes de los tickets y optimizarlas
         $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
             return [
                 'foto_base64' => !empty($foto->foto)
