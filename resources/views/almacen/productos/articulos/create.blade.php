@@ -17,7 +17,8 @@
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Nuevo Artículo</h2>
 
-        <form method="POST" action="{{ route('articulos.store') }}" enctype="multipart/form-data">
+        <form id="articuloForm" method="POST" action="{{ route('articulos.store') }}" enctype="multipart/form-data" onsubmit="return false;">
+
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

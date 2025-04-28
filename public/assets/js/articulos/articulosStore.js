@@ -75,7 +75,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (alpineData && alpineData.updateTable) {
                         alpineData.updateTable();
                     }
-                    window.location.reload();
+                    window.location.href = '/articulos';
+
                 } else {
                     // Mostrar mensaje de error
                     showMessage('Hubo un error al guardar el artículo.', 'top-end', true, '', 3000, 'error');

@@ -431,32 +431,36 @@ class ClientesController extends Controller
 
     public function destroy($id)
     {
-        // Intentar encontrar al cliente
         $cliente = Cliente::find($id);
-
-        // Verificar si el cliente existe
+    
         if (!$cliente) {
-            // Log para depuración
-            Log::error("Cliente con ID {$id} no encontrado.");
-
             return response()->json(['error' => 'Cliente no encontrado'], 404);
         }
-
-        // Eliminar el cliente
+    
+        // 🔴 Verificar si tiene relaciones activas
+        $relaciones = DB::table('cliente_clientegeneral')->where('idCliente', $id)->exists();
+    
+        if ($relaciones) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No puedes eliminar este cliente porque está asociado a uno o más clientes generales.'
+            ], 400); // Código HTTP 400: mala solicitud
+        }
+    
         try {
             $cliente->delete();
-
-            // Log para depuración
-            Log::info("Cliente con ID {$id} eliminado con éxito.");
-
+    
             return response()->json([
-                'message' => 'Cliente eliminado con éxito'
-            ], 200);
+                'success' => true,
+                'message' => 'Cliente eliminado con éxito.'
+            ]);
         } catch (\Exception $e) {
-            // Log para errores durante la eliminación
-            Log::error("Error al eliminar el cliente con ID {$id}: " . $e->getMessage());
-
-            return response()->json(['error' => 'Error al eliminar el cliente'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el cliente.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
+    
 }

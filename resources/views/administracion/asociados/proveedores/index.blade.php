@@ -1,11 +1,28 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <style>
         .panel {
             overflow: visible !important;
             /* Asegura que el modal no restrinja contenido */
+        }
+        
+        #myTable1 {
+            min-width: 1000px;
+            /* puedes ajustar si quieres más ancho */
+        }
+        .dataTables_length select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            padding-right: 1.5rem;
+            /* Ajusta espacio a la derecha para que el texto no se corte */
+            background-image: none;
+            /* Opcional, elimina cualquier ícono */
         }
     </style>
     <div x-data="multipleTable">
@@ -71,7 +88,22 @@
                 </div>
             </div>
 
-            <table id="myTable1" class="whitespace-nowrap"></table>
+            <table id="myTable1" class="table whitespace-nowrap">
+                <thead>
+                    <tr>
+                        <th>Tipo Documento</th>
+                        <th>Documento</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Área</th>
+                        <th>Dirección</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
@@ -271,7 +303,7 @@ $(document).ready(function() {
         formValid = true; // Resetear la bandera antes de realizar la validación
         if (/[^0-9]/.test(numeroDocumento) || numeroDocumento.length < 8) {
             $('#numeroDocumento').addClass('border-red-500');
-            $('#numeroDocumento-error').text('El numeroDocumento debe tener al menos 8 dígitos y solo números').show();
+            $('#numeroDocumento-error').text('El número debe tener al menos 8 dígitos y solo números').show();
             formValid = false;
         } else {
             $.post('{{ route("validar.numerodocumentoproveedores") }}', { numeroDocumento: numeroDocumento, _token: '{{ csrf_token() }}' }, function(response) {
@@ -384,6 +416,14 @@ $(document).ready(function() {
         });
     });
 });
+document.addEventListener("DOMContentLoaded", function() {
+    // Inicializar Nice Select 2 en todos los selects que tengan la clase .select2
+    document.querySelectorAll('.select2').forEach(function(select) {
+        NiceSelect.bind(select, {
+            searchable: true
+        });
+    });
+});
 
 
 
@@ -404,7 +444,9 @@ $(document).ready(function() {
             routeProveedorStore: '{{ route('proveedor.store') }}' // Define la ruta del endpoint
         };
     </script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="{{ asset('assets/js/proveedores/proveedoresstore.js') }}"></script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>

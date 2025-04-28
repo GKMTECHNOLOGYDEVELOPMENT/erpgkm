@@ -1,128 +1,117 @@
 document.addEventListener("alpine:init", () => {
     Alpine.data("multipleTable", () => ({
         datatable1: null,
-        castData: [], // Almacena los datos actuales de la tabla de cast
-        // pollInterval: 2000, // Intervalo de polling (en ms)
 
         init() {
-            // console.log("Component initialized for Cast");
-
-            // Obtener datos iniciales e inicializar la tabla
             this.fetchDataAndInitTable();
-
-            // Configurar polling para verificar actualizaciones
-            // setInterval(() => {
-            //     this.checkForUpdates();
-            // }, this.pollInterval);
         },
 
-        fetchDataAndInitTable() {
-            fetch("/api/cast") // Cambiar la URL de la API a /api/cast
-                .then((response) => {
-                    if (!response.ok) throw new Error("Error al obtener datos del servidor");
-                    return response.json();
-                })
-                .then((data) => {
-                    this.castData = data;
+        async fetchDataAndInitTable() {
+            try {
+                const res = await fetch("/api/cast");
+                if (!res.ok) throw new Error("Error al obtener datos del servidor");
 
-                    // Inicializar DataTable con las nuevas cabeceras
-                    this.datatable1 = new simpleDatatables.DataTable("#myTable1", {
-                        data: {
-                            headings: ["RUC", "Nombre", "Teléfono", "Email", "Departamento", "Provincia", "Distrito", "Dirección", "Estado", "Acción"], // Nuevas cabeceras
-                            data: this.formatDataForTable(data), // Asegúrate de que esta función mapee los nuevos datos
+                const data = await res.json();
+
+                this.datatable1 = $('#myTable1').DataTable({
+                    data,
+                    columns: [
+                        { data: 'ruc', className: 'text-center', render: ruc => ruc || 'N/A' },
+                        { data: 'nombre', className: 'text-center', render: nombre => nombre || 'N/A' },
+                        { data: 'telefono', className: 'text-center', render: telefono => telefono || 'N/A' },
+                        { data: 'email', className: 'text-center', render: email => email || 'N/A' },
+                        { data: 'departamento', className: 'text-center', render: departamento => departamento || 'N/A' },
+                        { data: 'provincia', className: 'text-center', render: provincia => provincia || 'N/A' },
+                        { data: 'distrito', className: 'text-center', render: distrito => distrito || 'N/A' },
+                        {
+                            data: 'direccion',
+                            className: 'text-center',
+                            render: direccion => `
+                                <div style="max-width: 250px; overflow-wrap: break-word; white-space: normal; margin: 0 auto;">
+                                    ${direccion || 'N/A'}
+                                </div>`
                         },
-                        searchable: true,
-                        perPage: 10,
-                        labels: {
-                            placeholder: "Buscar...",
-                            perPage: "{select}",
-                            noRows: "No se encontraron registros",
-                            info: "Mostrando {start} a {end} de {rows} registros",
+                        {
+                            data: 'estado',
+                            className: 'text-center',
+                            render: estado => estado === 'Activo'
+                                ? '<span class="badge badge-outline-success">Activo</span>'
+                                : '<span class="badge badge-outline-danger">Inactivo</span>'
                         },
-                    });
-                    // Centrando los encabezados manualmente
-                    const headers = document.querySelectorAll("#myTable1 thead th");
-                    headers.forEach((header) => {
-                        header.style.textAlign = "center";
-                        header.style.verticalAlign = "middle";
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error al inicializar la tabla:", error);
+                        {
+                            data: null,
+                            orderable: false,
+                            searchable: false,
+                            className: 'text-center',
+                            render: (data, type, row) => `
+                                <div class="flex justify-center items-center gap-2">
+                                    <a href="/cast/${row.idCast}/edit" x-tooltip="Editar">
+                                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                                            <path d="M15.29 3.15L14.36 4.08 5.84 12.6c-.58.58-.87.87-1.11 1.2-.29.38-.54.79-.75 1.2-.17.36-.3.73-.56 1.51L2.32 19.8l-.27.8c-.13.38-.03.8.27 1.1.3.3.72.4 1.1.27l.8-.27 3.28-1.1c.78-.26 1.15-.39 1.51-.56.41-.21.82-.46 1.2-.75.33-.24.62-.53 1.2-1.11l8.52-8.52.93-.93c1.54-1.54 1.54-4.04 0-5.58-1.54-1.54-4.04-1.54-5.58 0z" stroke-width="1.5"/>
+                                            <path d="M14.36 4.08s.12 1.97 1.85 3.74c1.73 1.77 3.74 1.79 3.74 1.79M4.2 21.68l-1.88-1.88" opacity="0.5" stroke-width="1.5"/>
+                                        </svg>
+                                    </a>
+                                    <button type="button" x-tooltip="Eliminar" @click="deleteCast(${row.idCast})">
+                                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                            <path opacity="0.5" d="M9.17 4c.41-1.17 1.52-2 2.83-2s2.42.83 2.83 2" stroke-width="1.5" stroke-linecap="round"/>
+                                            <path d="M20.5 6h-17" stroke-width="1.5" stroke-linecap="round"/>
+                                            <path d="M18.83 8.5l-.46 6.9c-.18 2.65-.27 3.97-1.13 4.78-.86.8-2.19.82-4.85.82h-.77c-2.66 0-4 .02-4.85-.82-.86-.81-.95-2.13-1.13-4.78l-.46-6.9" stroke-width="1.5" stroke-linecap="round"/>
+                                            <path d="M9.5 11l.5 5" opacity="0.5" stroke-width="1.5" stroke-linecap="round"/>
+                                            <path d="M14.5 11l-.5 5" opacity="0.5" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            `
+                        }
+                    ],
+                    responsive: true,
+                    autoWidth: false,
+                    pageLength: 10,
+                    order: [[0, 'desc']],
+                    language: {
+                        search: 'Buscar...',
+                        zeroRecords: 'No se encontraron registros',
+                        lengthMenu: 'Mostrar _MENU_ registros por página',
+                        loadingRecords: 'Cargando...',
+                        info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                        paginate: {
+                            first: 'Primero',
+                            last: 'Último',
+                            next: 'Siguiente',
+                            previous: 'Anterior'
+                        }
+                    },
+                    dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
                 });
+                // Hacer flotante la barra de paginación + info + mostrar registros
+                const dataTableWrapper = document.querySelector('.dataTables_wrapper');
+
+                const floatingControls = document.createElement('div');
+                floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
+                floatingControls.style.position = 'sticky';
+                floatingControls.style.bottom = '0';
+                floatingControls.style.left = '0';
+                floatingControls.style.width = '100%';
+                floatingControls.style.zIndex = '10';
+
+                const info = dataTableWrapper.querySelector('.dataTables_info');
+                const length = dataTableWrapper.querySelector('.dataTables_length');
+                const paginate = dataTableWrapper.querySelector('.dataTables_paginate');
+
+                // Mover los elementos a la nueva barra flotante
+                floatingControls.appendChild(info);
+                floatingControls.appendChild(length);
+                floatingControls.appendChild(paginate);
+
+                // Insertarlo al final del contenedor
+                dataTableWrapper.appendChild(floatingControls);
+            } catch (error) {
+                console.error('Error al inicializar la DataTable:', error);
+            }
         },
-
-        // Actualiza esta función para que incluya los nuevos datos de cast
-        formatDataForTable(data) {
-            return data.map((cast) => [
-                `<div style="text-align: center;">${cast.ruc}</div>`,       // RUC
-                `<div style="text-align: center;">${cast.nombre}</div>`,    // Nombre
-                `<div style="text-align: center;">${cast.telefono}</div>`,  // Teléfono
-                `<div style="text-align: center;">${cast.email}</div>`,     // Email
-                `<div style="text-align: center;">${cast.departamento}</div>`, // Departamento
-                `<div style="text-align: center;">${cast.provincia}</div>`,    // Provincia
-                `<div style="text-align: center;">${cast.distrito}</div>`,     // Distrito
-                `<div style="text-align: center;">${cast.direccion}</div>`,    // Dirección
-                `<div style="text-align: center;">
-                    ${cast.estado === 'Activo' ?
-                    `<span class="badge badge-outline-success">Activo</span>` :
-                    `<span class="badge badge-outline-danger">Inactivo</span>`}
-                </div>`, // Estado
-                // Estado (ajustado según el valor del campo 'estado')
-                `<div style="text-align: center;" class="flex justify-center items-center">
-                        <a href="/cast/${cast.idCast}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                                <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
-                                <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
-                            </svg>
-                        </a>
-                        <button type="button" x-tooltip="Eliminar" @click="deleteCast(${cast.idCast})">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            </svg>
-                        </button>
-                    </div>`
-            ]); // El formato de datos de la tabla de cast
-        },
-
-        // checkForUpdates() {
-        //     fetch("/api/cast") // Cambiar la URL de la API a /api/cast
-        //         .then((response) => {
-        //             if (!response.ok) throw new Error("Error al verificar actualizaciones");
-        //             return response.json();
-        //         })
-        //         .then((data) => {
-              
-
-        //             // Detectar nuevas filas
-        //             const newData = data.filter(
-        //                 (newCast) =>
-        //                     !this.castData.some(
-        //                         (existingCast) =>
-        //                             existingCast.idCast === newCast.idCast
-        //                     )
-        //             );
-
-        //             if (newData.length > 0) {
-        //                 console.log("Nuevos datos detectados:", newData);
-
-        //                 // Agregar filas nuevas a la tabla
-        //                 this.datatable1.rows().add(this.formatDataForTable(newData));
-        //                 this.castData.push(...newData); // Actualizar castData
-        //             }
-        //         })
-        //         .catch((error) => {
-        //             console.error("Error al verificar actualizaciones:", error);
-        //         });
-        // },
 
         deleteCast(idCast) {
-
-            new window.Swal({
+            Swal.fire({
                 icon: 'warning',
                 title: '¿Estás seguro?',
                 text: "¡No podrás revertir esta acción!",
@@ -132,73 +121,25 @@ document.addEventListener("alpine:init", () => {
                 padding: '2em',
                 customClass: 'sweet-alerts',
             }).then((result) => {
-                if (result.value) {
-                    // Hacer la solicitud de eliminación
+                if (result.isConfirmed) {
                     fetch(`/api/cast/${idCast}`, {
                         method: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
                     })
-                        .then((response) => {
-                            if (!response.ok) throw new Error("Error al eliminar cast");
-                            return response.json();
+                        .then(async response => {
+                            const data = await response.json();
+                            if (!response.ok) throw new Error(data.message || 'Error al eliminar cast.');
+
+                            Swal.fire('¡Eliminado!', data.message || 'El cast ha sido eliminado.', 'success')
+                                .then(() => location.reload());
                         })
-                        .then((data) => {
-                            console.log(`Respuesta del servidor al eliminar cast:`, data);
-
-                            // Verificar que el cast ha sido eliminado correctamente
-                            if (data.message) {
-                                console.log(`Cast ${idCast} eliminado con éxito`);
-
-                                // Actualizar la lista de casts en el frontend
-                                this.castData = this.castData.filter(
-                                    (cast) => cast.idCast !== idCast
-                                );
-
-                                // Actualizar la tabla eliminando la fila
-                                const rows = this.datatable1.rows();
-                                Array.from(rows).forEach((row, index) => {
-                                    if (row.cells[0].innerText == idCast.toString()) {
-                                        console.log(`Eliminando fila con ID ${idCast}`);
-                                        this.datatable1.rows().remove(index); // Eliminar la fila
-                                    }
-                                });
-
-                                // Mostrar notificación de éxito
-                                new window.Swal({
-                                    title: '¡Eliminado!',
-                                    text: 'El cast ha sido eliminado con éxito.',
-                                    icon: 'success',
-                                    customClass: 'sweet-alerts',
-                                }).then(() => {
-                                    // Recargar la página después de la eliminación exitosa
-                                    location.reload();
-                                });
-                            } else {
-                                throw new Error('No se pudo eliminar el cast.');
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Error al eliminar cast:", error);
-
-                            // Mostrar notificación de error
-                            new window.Swal({
-                                title: 'Error',
-                                text: 'Ocurrió un error al eliminar el cast.',
-                                icon: 'error',
-                                customClass: 'sweet-alerts',
-                            });
+                        .catch(error => {
+                            Swal.fire('Error', error.message || 'Ocurrió un error.', 'error');
                         });
                 }
             });
         }
-
     }));
-});
-
-// Inicializar Select2
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll('.select2').forEach(function (select) {
-        NiceSelect.bind(select, {
-            searchable: true
-        });
-    });
 });

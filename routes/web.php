@@ -115,6 +115,8 @@ Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tiendas.update');
 Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
+Route::delete('/tienda/{idTienda}', [TiendaController::class, 'destroy'])->name('tienda.destroy');
+
 Route::get('/exportar-tiendas', function () {
     return Excel::download(new TiendaExport, 'reporte_tiendas.xlsx');
 })->name('tiendas.exportExcel');
