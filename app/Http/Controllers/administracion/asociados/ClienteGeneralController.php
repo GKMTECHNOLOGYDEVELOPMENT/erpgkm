@@ -283,55 +283,57 @@ class ClienteGeneralController extends Controller
 
     public function destroy($id)
     {
-        $cliente = ClienteGeneral::find($id);
-
-        if (!$cliente) {
-            return response()->json(['error' => 'Cliente no encontrado'], 404);
-        }
-
-        $fotoEliminada = false; // Variable para saber si la foto fue eliminada
-        $carpetaEliminada = false; // Variable para saber si la carpeta fue eliminada
-
-        // Verificar si el cliente tiene una imagen y eliminarla
-        if ($cliente->foto) {
-            // Eliminar el prefijo 'storage/' de la ruta almacenada en la base de datos
-            $fotoPath = str_replace('storage/', '', $cliente->foto);  // Eliminar 'storage/' si está presente
-
-            // Crear la ruta completa para la foto utilizando el storage_path
-            $fotoPathCompleta = storage_path('app/public/' . $fotoPath);
-
-            // Log para ver la ruta de la imagen
-            Log::info("Ruta completa de la foto del cliente $id: " . $fotoPathCompleta);
-
-            // Verificar si el archivo existe
-            if (file_exists($fotoPathCompleta)) {
-                // Eliminar la imagen
-                unlink($fotoPathCompleta); // Usamos unlink para eliminar archivos en el sistema de archivos
-                Log::info("Imagen del cliente $id eliminada: " . $fotoPathCompleta);
-                $fotoEliminada = true; // Si se eliminó la foto, cambiamos la variable
-            } else {
-                Log::warning("La imagen no fue encontrada en la ruta: " . $fotoPathCompleta);
+        try {
+            $cliente = ClienteGeneral::find($id);
+    
+            if (!$cliente) {
+                return response()->json(['error' => 'Cliente no encontrado'], 404);
             }
-
-            // Eliminar la carpeta que contiene la imagen (si está vacía)
-            $directorio = dirname($fotoPathCompleta); // Obtener el directorio de la foto
-            if (is_dir($directorio) && count(scandir($directorio)) == 2) { // Verificamos si la carpeta está vacía
-                rmdir($directorio); // Eliminar la carpeta vacía
-                Log::info("Carpeta vacía eliminada: " . $directorio);
-                $carpetaEliminada = true; // Si la carpeta fue eliminada, cambiamos la variable
+    
+            $fotoEliminada = false;
+            $carpetaEliminada = false;
+    
+            if ($cliente->foto) {
+                $fotoPath = str_replace('storage/', '', $cliente->foto);
+                $fotoPathCompleta = storage_path('app/public/' . $fotoPath);
+    
+                if (file_exists($fotoPathCompleta)) {
+                    unlink($fotoPathCompleta);
+                    $fotoEliminada = true;
+                }
+    
+                $directorio = dirname($fotoPathCompleta);
+                if (is_dir($directorio) && count(scandir($directorio)) == 2) {
+                    rmdir($directorio);
+                    $carpetaEliminada = true;
+                }
             }
+    
+            $cliente->delete();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Cliente y su imagen eliminados con éxito',
+                'fotoEliminada' => $fotoEliminada,
+                'carpetaEliminada' => $carpetaEliminada,
+            ], 200);
+    
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == '23000') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No puedes eliminar, el cliente general está asociado a una o más marcas.',
+                ], 409);
+            }
+    
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el cliente general.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        // Eliminar el cliente
-        $cliente->delete();
-
-        // Responder con el estado de la eliminación
-        return response()->json([
-            'message' => 'Cliente y su imagen eliminados con éxito',
-            'fotoEliminada' => $fotoEliminada, // Indicamos si la foto fue eliminada
-            'carpetaEliminada' => $carpetaEliminada // Indicamos si la carpeta fue eliminada
-        ], 200);
     }
+    
 
     public function exportAllPDF()
     {

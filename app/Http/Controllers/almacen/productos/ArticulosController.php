@@ -44,7 +44,6 @@ class ArticulosController extends Controller
     public function store(Request $request)
     {
         try {
-            // Validar los datos del formulario
             $validatedData = $request->validate([
                 'codigo_barras' => 'nullable|string|max:255',
                 'nombre' => 'nullable|string|max:255',
@@ -63,32 +62,27 @@ class ArticulosController extends Controller
                 'idTipoArticulo' => 'nullable|integer',
                 'idModelo' => 'nullable|integer',
             ]);
-
-            // Datos básicos del artículo
+    
             $dataArticulo = $validatedData;
             $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
-
-            // Guardar el artículo en la base de datos
-            Log::info('Insertando artículo:', $dataArticulo);
+    
             $articulo = Articulo::create($dataArticulo);
-
-            // Procesar la imagen si se ha subido
+    
             if ($request->hasFile('foto')) {
                 $extension = $request->file('foto')->getClientOriginalExtension();
                 $fileName = uniqid() . '.' . $extension;
                 $directory = "img/articulos/{$articulo->idArticulos}";
                 $path = $request->file('foto')->storeAs($directory, $fileName, 'public');
                 $articulo->update(['foto' => "storage/$path"]);
-                Log::info('Imagen almacenada en: ' . $path);
             }
-
+    
+            // ⬇️ Aquí corregimos
             return response()->json([
                 'success' => true,
                 'message' => 'Artículo agregado correctamente',
-                'data' => $articulo,
             ]);
+    
         } catch (\Exception $e) {
-       
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un error al guardar el artículo.',
@@ -96,6 +90,7 @@ class ArticulosController extends Controller
             ], 500);
         }
     }
+    
 
     public function edit($id)
     {
@@ -108,7 +103,7 @@ class ArticulosController extends Controller
     }
 
 
-    
+
 
     public function update(Request $request, $id)
     {

@@ -1,10 +1,28 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         .panel {
             overflow: visible !important;
             /* Asegura que el modal no restrinja contenido */
+        }
+
+        #myTable1 {
+            min-width: 1000px;
+            /* puedes ajustar si quieres más ancho */
+        }
+
+        .dataTables_length select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            padding-right: 1.5rem;
+            /* Ajusta espacio a la derecha para que el texto no se corte */
+            background-image: none;
+            /* Opcional, elimina cualquier ícono */
         }
     </style>
     <div x-data="multipleTable">
@@ -63,7 +81,17 @@
                     </button>
                 </div>
             </div>
-            <table id="myTable1" class="table whitespace-nowrap"></table>
+            <table id="myTable1" class="table whitespace-nowrap">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Foto</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
@@ -96,27 +124,27 @@
                                     placeholder="Ingrese el nombre de la marca" required>
                             </div>
 
-                                   <!-- Foto -->
-                        <div class="mb-5">
-                            <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
-                            <!-- Campo de archivo -->
-                            <input id="ctnFile" type="file" name="foto" accept="image/*" required
-                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
-                                @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual" />
+                            <!-- Foto -->
+                            <div class="mb-5">
+                                <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
+                                <!-- Campo de archivo -->
+                                <input id="ctnFile" type="file" name="foto" accept="image/*" required
+                                    class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
+                                    @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual" />
 
-                            <!-- Contenedor de previsualización -->
-                            <div
-                                class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                                <template x-if="imagenPreview">
-                                    <img :src="imagenPreview" alt="Previsualización de la imagen"
-                                        class="w-40 h-40 object-cover">
-                                </template>
-                                <template x-if="!imagenPreview">
-                                    <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
-                                        class="w-50 h-40 object-cover">
-                                </template>
+                                <!-- Contenedor de previsualización -->
+                                <div
+                                    class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+                                    <template x-if="imagenPreview">
+                                        <img :src="imagenPreview" alt="Previsualización de la imagen"
+                                            class="w-40 h-40 object-cover">
+                                    </template>
+                                    <template x-if="!imagenPreview">
+                                        <img src="/assets/images/file-preview.svg" alt="Imagen predeterminada"
+                                            class="w-50 h-40 object-cover">
+                                    </template>
+                                </div>
                             </div>
-                        </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
@@ -161,6 +189,9 @@
             }));
         });
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="{{ asset('assets/js/Marcas/marca.js') }}"></script>
     <script src="{{ asset('assets/js/Marcas/marcaStore.js') }}"></script>
     <script src="{{ asset('assets/js/Marcas/marcaValidaciones.js') }}"></script>

@@ -39,4 +39,9 @@ class Marca extends Model
 	{
 		return $this->belongsToMany(ClienteGeneral::class, 'marca_clientegeneral', 'idMarca', 'idClienteGeneral');
 	}
+
+	public function articulos()
+	{
+		return $this->hasMany(Articulo::class, 'idMarca', 'idMarca');
+	}
 }

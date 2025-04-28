@@ -1,13 +1,44 @@
 <x-layout.default>
-    <!-- Asegúrate de que jQuery se carga antes de DataTables -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
         .panel {
             overflow: visible !important;
             /* Asegura que el modal no restrinja contenido */
+        }
+
+        #myTable1 {
+            min-width: 1000px;
+            /* puedes ajustar si quieres más ancho */
+        }
+
+        .dataTables_wrapper {
+            width: 100%;
+        }
+
+        .dataTables_scrollable {
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .dataTables_scrollable table {
+            min-width: 1000px;
+            /* ajusta según tus columnas */
+        }
+
+        .dataTables_length select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            padding-right: 1.5rem;
+            /* Ajusta espacio a la derecha para que el texto no se corte */
+            background-image: none;
+            /* Opcional, elimina cualquier ícono */
         }
     </style>
 
@@ -80,9 +111,31 @@
                     </a>
                 </div>
             </div>
-            <table id="myTable1" class="whitespace-nowrap"></table>
+            <table id="myTable1" class="table whitespace-nowrap">
+                <thead>
+                    <tr>
+                        <th>Avatar</th>
+                        <th>Nombre</th>
+                        <th>Apellido Paterno</th>
+                        <th>Tipo Documento</th>
+                        <th>Documento</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Tipo Usuario</th>
+                        <th>Rol</th>
+                        <th>Área</th>
+                        <th>Estado</th>
+                        <th>Firma</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="{{ asset('assets/js/usuarios/list.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="/assets/js/simple-datatables.js"></script>
