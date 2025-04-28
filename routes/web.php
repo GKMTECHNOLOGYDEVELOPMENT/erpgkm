@@ -360,6 +360,10 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('helpdesk/levantamiento/{id}/firmas/{idVisitas}', [OrdenesHelpdeskController::class, 'firmaclienteLeva'])->name('firmacliente.leva');
 
     Route::get('helpdesk/soporte/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteSopo'])->name('firmacliente.sopo');
+
+
+    Route::get('helpdesk/ejecucion/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteEjecucion'])->name('firmacliente.ejecucion');
+
     Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
 
     Route::get('helpdesk/levantamiento/{idOt}/pdf/{idVisita}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdfVisita'])
@@ -372,7 +376,10 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
 
 
-    Route::get('helpdesk/lab/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteLab'])->name('firmacliente.Lab');
+        Route::get('helpdesk/lab/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteLab'])->name('firmacliente.Lab');
+
+
+        Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('pdfcliente');
 
 
 
@@ -403,17 +410,20 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
     Route::get('/helpdesk/soporte/{id}/edit', [OrdenesHelpdeskController::class, 'editSoporte'])
         ->name('helpdesk.soporte.edit');
-
     Route::get('/helpdesk/laboratorio/{id}/edit', [OrdenesHelpdeskController::class, 'ediLaboratorio'])
         ->name('helpdesk.laboratorio.edit');
-
-    Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('helpdesk.pdf.laboratorio');
+    //EJECUCION
+    Route::get('/helpdesk/ejecucion/{id}/edit', [OrdenesHelpdeskController::class, 'editejecucion'])
+        ->name('helpdesk.ejecucion.edit');
 
     Route::get('/helpdesk/pdf/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdf'])
         ->name('helpdesk.pdf.levantamiento');
 
-        
     Route::get('/helpdesk/pdf/soporte/{idOt}', [OrdenesHelpdeskController::class, 'generateSoportePdf'])->name('helpdesk.pdf.soporte');
+
+
+
+Route::get('/helpdesk/pdf/ejecucion/{idOt}', [OrdenesHelpdeskController::class, 'generateEjecucionPdf'])->name('helpdesk.pdf.ejecucion');
 
 
 
@@ -450,6 +460,8 @@ Route::post('ordenes/helpdesk/levantamiento/{id}/guardar-firma/{idVisitas}', [Or
 
 Route::post('ordenes/helpdesk/soporte/{id}/guardar-firma/{idVisitas}', [OrdenesHelpdeskController::class, 'guardarFirmaCliente']);
 
+Route::post('ordenes/helpdesk/ejecucion/{id}/guardar-firma/{idVisitas}', [OrdenesHelpdeskController::class, 'guardarFirmaCliente']);
+
 
 Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])
     ->name('guardar.firma.cliente');
@@ -468,6 +480,10 @@ Route::get('ordenes/helpdesk/soporte/{id}/obtener-firma-tecnico', [OrdenesHelpde
     ->name('obtener.firma.tecnico')
     ->middleware('auth');
 
+    Route::get('ordenes/helpdesk/ejecucion/{id}/obtener-firma-tecnico', [OrdenesHelpdeskController::class, 'obtenerFirmaTecnico'])
+    ->name('obtener.firma.tecnico')
+    ->middleware('auth');
+
 
 // Route::post('/guardar-datos-envio', [OrdenesHelpdeskController::class, 'guardardatosenviosoporte']);
 
@@ -483,6 +499,7 @@ Route::post('/constancias', [OrdenesTrabajoController::class, 'storeConstancia']
 
 Route::get('/constancia/pdf/{id}', [OrdenesTrabajoController::class, 'descargarPDF'])->name('constancia.pdf');
 
+Route::get('/constancia/pdf/{id}/{idVisitas}', [OrdenesTrabajoController::class, 'descargarPDF_App'])->name('constancia.pdf');
 
 // En routes/web.php
 Route::get('/constancias/fotos/{id}', [OrdenesTrabajoController::class, 'mostrarFoto'])
