@@ -448,10 +448,15 @@ Route::get('/helpdesk/pdf/ejecucion/{idOt}', [OrdenesHelpdeskController::class, 
 Route::get('/informe/vista-previa-imagen/{idOt}/{idVisita}', [OrdenesTrabajoController::class, 'vistaPreviaImagen'])->name('informe.vista-previa.imagen');
 Route::get('/ordenes/helpdesk/soporte/{idOt}/vista-previa/{idVisita}/{tipo?}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])
     ->name('ordenes.helpdesk.soporte.vista-previa.imagen');
+    
+    Route::get('/ordenes/helpdesk/ejecucion/{idOt}/vista-previa/{idVisita}/{tipo?}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])
+    ->name('ordenes.helpdesk.ejecucion.vista-previa.imagen');
 
+    
 Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 'actualizarHelpdesk'])->name('formActualizarOrdenHelpdesk');
 
 Route::put('actualizar-orden-soporte/{id}', [OrdenesHelpdeskController::class, 'actualizarSoporte'])->name('formActualizarOrdenHelpdesk');
+Route::put('actualizar-orden-ejecucion/{id}', [OrdenesHelpdeskController::class, 'actualizarEjecucion'])->name('formActualizarOrdenHelpdesk');
 
 Route::post('ordenes/helpdesk/levantamiento/{id}/guardar-firma/{idVisitas}', [OrdenesHelpdeskController::class, 'guardarFirmaCliente'])
     ->name('helpdesk.levantamiento.guardar-firma');

@@ -44,6 +44,7 @@ use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Facades\Image;
+use Intervention\Image\Drivers\Gd\Driver; // <-- importante
 
 
 // use Barryvdh\DomPDF\Facade as PDF;
@@ -2558,7 +2559,6 @@ class OrdenesTrabajoController extends Controller
     }
 
 
-
     public function guardarImagen(Request $request)
     {
         $request->validate([
@@ -2568,41 +2568,39 @@ class OrdenesTrabajoController extends Controller
             'descripciones.*' => 'string|max:255',
             'ticket_id' => 'required|integer|exists:tickets,idTickets',
         ]);
-
+    
         $visita = DB::table('seleccionarvisita')
             ->where('idTickets', $request->ticket_id)
             ->first();
-
+    
         if (!$visita) {
             return response()->json(['success' => false, 'message' => 'No se encontró una visita válida para este ticket.'], 400);
         }
-
+    
         $visita_id = $visita->idVisitas;
         $imagenesGuardadas = [];
-
-        $manager = new \Intervention\Image\ImageManager(['driver' => 'gd']); // o imagick
-
+    
+        // CAMBIO: crear el manager de forma correcta en Image 3.x
+        $manager = new ImageManager(new Driver());
+    
         foreach ($request->file('imagenes') as $index => $imagen) {
             $descripcion = $request->descripciones[$index] ?? 'Sin descripción';
-
+    
             // Convertir a WebP con buena calidad (90%)
-            $img = $manager->make($imagen->getRealPath())
-                ->resize(1024, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                })
-                ->encode('webp', 90); // calidad alta, pero muy comprimido
-
+            $img = $manager->read($imagen->getRealPath())
+                ->scale(width: 1024)
+                ->toWebp(quality: 90); // calidad alta
+    
             $foto = new Fotostickest();
             $foto->idTickets = $request->ticket_id;
             $foto->idVisitas = $visita_id;
-            $foto->foto = $img->getEncoded(); // guardar como binario webp
+            $foto->foto = (string) $img; // guardar como binario webp
             $foto->descripcion = $descripcion;
             $foto->save();
-
+    
             $imagenesGuardadas[] = ['id' => $foto->id, 'descripcion' => $descripcion];
         }
-
+    
         return response()->json([
             'success' => true,
             'message' => 'Imágenes comprimidas en WebP y guardadas correctamente.',

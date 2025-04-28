@@ -7,7 +7,7 @@
         <div class="w-full max-w-[360px] flex flex-col items-center" x-data="modal">
 
             <!-- Vista previa del informe generado (como imagen) -->
-            <img src="{{ route('ordenes.helpdesk.soporte.vista-previa.imagen', ['idOt' => $id, 'idVisita' => $idVisitas, 'tipo' => 'soporte']) }}"
+            <img src="{{ route('ordenes.helpdesk.ejecucion.vista-previa.imagen', ['idOt' => $id, 'idVisita' => $idVisitas, 'tipo' => 'ejeucion']) }}"
                 alt="Vista previa del informe" class="w-full rounded-xl shadow-xl border border-gray-300 mt-6 mb-4">
 
 

@@ -152,6 +152,8 @@ class OrdenesHelpdeskController extends Controller
                 'modelo' => 'required_if:tipoServicio,6|integer|exists:modelo,idModelo',
                 'serieRetirar' => 'nullable|string|max:255',
                 'observaciones' => 'nullable|string|max:1000',
+                'nrmcotizacion' => 'nullable|string|max:1000',
+
             ]);
 
             Log::debug('Datos validados:', $validatedData);
@@ -165,6 +167,7 @@ class OrdenesHelpdeskController extends Controller
                 'tipoServicio' => $validatedData['tipoServicio'],
                 'idUsuario' => auth()->id(),
                 'fallaReportada' => $validatedData['fallaReportada'],
+                'nrmcotizacion' => $validatedData['nrmcotizacion'],
                 'fecha_creacion' => now(),
                 'idTipotickets' => 2,
                 'envio' => $validatedData['esEnvio'] ? 1 : 0,
@@ -2497,6 +2500,51 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
+    
+
+
+    public function actualizarEjecucion(Request $request, $id)
+    {
+        // Log para ver los datos que se están recibiendo
+        Log::info('Datos recibidos para actualizar la orden:', $request->all());
+
+        // Validar los datos del formulario
+        $validated = $request->validate([
+            'idCliente' => 'required|exists:cliente,idCliente',
+            'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+            'idTienda' => 'required|exists:tienda,idTienda',
+            'fallaReportada' => 'nullable|string',
+            'ejecutor' => 'nullable|exists:usuarios,idUsuario', // Validar que el ejecutor sea un usuario válido
+            'nrmcotizacion' => 'nullable|string',
+
+        ]);
+
+        // Encontrar la orden y actualizarla
+        $orden = Ticket::findOrFail($id); // Usamos findOrFail para asegurarnos que la orden existe
+
+        // Log para verificar que se encontró la orden
+        Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
+
+        // Actualizar los campos de la orden
+        $orden->idCliente = $request->idCliente;
+        $orden->idClienteGeneral = $request->idClienteGeneral;
+        $orden->idTienda = $request->idTienda;
+        $orden->fallaReportada = $request->fallaReportada;
+        $orden->ejecutor = $request->ejecutor; // Actualizamos el ejecutor
+        $orden->nrmcotizacion = $request->nrmcotizacion;
+
+        // Guardar los cambios
+        $orden->save();
+
+        // Log para confirmar que los cambios se guardaron
+        Log::info('Orden actualizada:', ['id' => $orden->id, 'nuevos_datos' => $orden->toArray()]);
+
+        // Responder con éxito
+        return response()->json(['success' => true]);
+    }
+
+
+
 
     public function seleccionarVisitaLevantamiento(Request $request)
     {
@@ -3984,6 +4032,12 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
+  
+
+
+
+
+
     public function firmaclienteSopo($id, $idVisitas)
     {
         // Obtener el ticket
@@ -4016,6 +4070,51 @@ class OrdenesHelpdeskController extends Controller
 
         // Pasamos todos los datos a la vista
         return view("tickets.ordenes-trabajo.helpdesk.soporte.firmas.firmaClienteSopo", compact(
+            'ticket',
+            'orden',
+            'estadosOTS',
+            'ticketId',
+            'idVisitas',
+            'visita',
+            'id'
+        ));
+    }
+
+
+    
+
+    public function firmaclienteEjecucion($id, $idVisitas)
+    {
+        // Obtener el ticket
+        $ticket = Ticket::with(['marca', 'modelo', 'cliente', 'tecnico', 'tienda', 'ticketflujo.estadoFlujo', 'usuario'])->findOrFail($id);
+        $orden = $ticket;
+        $estadosOTS = DB::table('estado_ots')->get();
+        $ticketId = $ticket->idTickets;
+
+        // Verificar si ya existe una firma para el ticket y la visita
+        $firmaExistente = DB::table('firmas')
+            ->where('idTickets', $id)
+            ->where('idVisitas', $idVisitas)
+            ->first(); // Verificamos si ya existe una firma para esa visita y ticket
+
+        // Si ya existe una firma, redirigimos a la página de error 404
+        if ($firmaExistente) {
+            return view("pages.error404"); // Mostrar error 404 si ya existe la firma
+        }
+
+        // Obtener la visita usando idVisitas
+        $visita = DB::table('visitas')
+            ->where('idVisitas', $idVisitas)
+            ->where('idTickets', $id) // Verificamos que el idTickets de la visita coincida con el id del ticket
+            ->first();
+
+        // Verificamos que la visita exista, si no, devolver algún mensaje de error
+        if (!$visita) {
+            return view("pages.error404"); // Redirigimos a error 404 si la visita no existe
+        }
+
+        // Pasamos todos los datos a la vista
+        return view("tickets.ordenes-trabajo.helpdesk.ejecucion.firmas.firmaClienteEjecu", compact(
             'ticket',
             'orden',
             'estadosOTS',

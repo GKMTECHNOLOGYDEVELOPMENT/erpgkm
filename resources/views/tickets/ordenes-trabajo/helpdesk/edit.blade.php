@@ -156,8 +156,8 @@
 
             @endif
 
-            @if ($tipoServicio == 1 || $tipoServicio == 6)
-                <li>
+            @if ($tipoServicio == 1 || $tipoServicio == 5 || $tipoServicio == 6)
+            <li>
                     <a href="javascript:;"
                         class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
                         :class="{ '!bg-success text-white': tab === 'imagenes' }" @click="tab = 'imagenes'">
