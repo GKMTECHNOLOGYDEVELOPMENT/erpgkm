@@ -1,5 +1,5 @@
 @php
-    $rutaPdf = route('ordenes.helpdesk.pdf.soporte', ['idOt' => $orden->idTickets])
+    $rutaPdf = route('ordenes.helpdesk.pdf.laboratorio', ['idOt' => $orden->idTickets])
 @endphp
 
 <div class="mt-4 border rounded-lg overflow-hidden">

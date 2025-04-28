@@ -157,6 +157,7 @@
                 </p>
             </div> --}}
             <hr class="my-4 border-0">
+
             @if (!empty($producto))
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
@@ -169,9 +170,7 @@
                 </div>
             @endif
 
-
             @if (!empty($producto['fallaReportada']))
-                <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
                 <div class="red-bg mt-4 text-left">Falla Reportada</div>
                 <div class="w-full text-xs mt-3">
                     <p class="uppercase indent-paragraph">{{ $producto['fallaReportada'] }}</p>
@@ -179,55 +178,40 @@
             @endif
 
             @if (trim($motivoCondicion ?? '') !== '')
-                <!-- Sección de Motivo de la Condición -->
                 <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
                 <div class="w-full text-xs mt-3">
                     <p class="uppercase indent-paragraph">{{ $motivoCondicion }}</p>
                 </div>
             @endif
 
-
-
             @if ($transicionesStatusOt->isNotEmpty())
                 @php
-                    // 🔥 Definir el orden deseado según el ID de estado en la BD
                     $ordenEstados = [
                         1 => 1, // DETALLES ESTÉTICOS
                         2 => 2, // DIAGNÓSTICO
                         3 => 3, // SOLUCIÓN
                         4 => 4, // OBSERVACIÓN
                     ];
-
-                    // 🔥 Ordenar la colección por idEstadoots
                     $transicionesStatusOt = $transicionesStatusOt->sortBy(function ($item) use ($ordenEstados) {
-                        return $ordenEstados[$item->idEstadoots] ?? 999; // Si no está en la lista, lo manda al final
+                        return $ordenEstados[$item->idEstadoots] ?? 999;
                     });
                 @endphp
 
                 <div class="space-y-2 mt-2">
                     @foreach ($transicionesStatusOt as $transicion)
-                        <!-- Nombre del Estado con fondo rojo -->
                         <div class="red-bg px-3 py-2 rounded-md">
-                            {{ ($transicion->estado_ot->descripcion ?? 'Sin Estado') }}
+                            {{ $transicion->estado_ot->descripcion ?? 'Sin Estado' }}
                         </div>
 
-                        <!-- Justificación debajo del estado -->
                         <div class="w-full text-xs">
-                            <p class="text-xs uppercase indent-paragraph">{{ ($transicion->justificacion) }}</p>
+                            <p class="text-xs uppercase indent-paragraph">{{ $transicion->justificacion }}</p>
                         </div>
                     @endforeach
                 </div>
-
             @endif
 
-
-
-
-
-
-
             @php
-                $hayFotosDeVisita =
+                $hayFotosCondicion =
                     !empty($imagenesAnexos) &&
                     collect($imagenesAnexos)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
 
@@ -236,8 +220,7 @@
                     collect($imagenesFotosTickets)->filter(fn($a) => !empty($a['foto_base64']))->isNotEmpty();
             @endphp
 
-            @if (!$modoVistaPrevia && ($hayFotosDeVisita || $hayFotosDeTickets))
-                <!-- Nueva página con el título ANEXOS -->
+            @if (!$modoVistaPrevia && ($hayFotosCondicion || $hayFotosDeTickets))
                 <div class="red-bg mt-4 font-bold" style="page-break-before: always;">
                     <h2>ANEXOS</h2>
                 </div>
@@ -245,8 +228,8 @@
                 <div class="mt-4">
                     @php $contador = 0; @endphp
 
-                    {{-- Imágenes de la visita (anexos + condiciones) --}}
-                    @if ($hayFotosDeVisita)
+                    {{-- 🔴 Imágenes de condiciones --}}
+                    @if ($hayFotosCondicion)
                         @foreach ($imagenesAnexos as $anexo)
                             @if (!empty($anexo['foto_base64']))
                                 @if ($contador % 2 == 0)
@@ -255,12 +238,9 @@
                                 @endif
 
                                 <div class="img-container mb-6">
-                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
+                                    <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de condición">
                                 </div>
 
-                                <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                    IMAGEN DE LA VISITA
-                                </p>
 
                                 @php $contador++; @endphp
 
@@ -271,12 +251,12 @@
             @endforeach
             @endif
 
-            {{-- Imágenes de fotos ticket --}}
+            {{-- 🔵 Imágenes de fotos de tickets --}}
             @if ($hayFotosDeTickets)
                 @foreach ($imagenesFotosTickets as $fotoTicket)
                     @if (!empty($fotoTicket['foto_base64']))
                         @if ($contador % 2 == 0)
-                        <div class="flex flex-col justify-center items-center min-h-[100vh] py-24"
+                        <div class="flex flex-col justify-center items-center min-h-[100vh] py-8"
                                 @if ($contador > 0) style="page-break-before: always;" @endif>
                         @endif
 
@@ -299,22 +279,30 @@
     </div>
     @endif
 
+
     </div>
 
     {{-- 🔍 Lógica para saber si la última imagen fue sola en la hoja --}}
     @php
         $mostrarFirmasEnMismaHoja = false;
 
-        if (!$modoVistaPrevia && $hayFotosDeTickets) {
-            $imagenesTicketsFiltradas = collect($imagenesFotosTickets)
-                ->filter(fn($f) => !empty($f['foto_base64']))
-                ->values();
+        if (!$modoVistaPrevia) {
+            if ($hayFotosCondicion) {
+                // ✅ Si hay imagen de condición, siempre mostrar firmas en la misma hoja
+                $mostrarFirmasEnMismaHoja = true;
+            } elseif ($hayFotosDeTickets) {
+                // 🔵 Si NO hay condición, seguir la lógica de par/impar de fotos de ticket
+                $imagenesTicketsFiltradas = collect($imagenesFotosTickets)
+                    ->filter(fn($f) => !empty($f['foto_base64']))
+                    ->values();
 
-            if ($imagenesTicketsFiltradas->isNotEmpty()) {
-                $mostrarFirmasEnMismaHoja = $contador % 2 !== 0;
+                if ($imagenesTicketsFiltradas->isNotEmpty()) {
+                    $mostrarFirmasEnMismaHoja = $contador % 2 !== 0;
+                }
             }
         }
     @endphp
+
 
     {{-- 🔻 Forzar salto de página solo si la firma no debe ir en la misma hoja --}}
     @if (!$mostrarFirmasEnMismaHoja)
