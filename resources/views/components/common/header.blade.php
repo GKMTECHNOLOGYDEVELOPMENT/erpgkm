@@ -300,7 +300,7 @@
                     </ul>
                 </div>
                 <div x-data="{ open: false, showModal: false }" @click.outside="open = false">
-                <a href="javascript:;" class="relative block p-2 rounded-full bg-white-light/40 dark:bg-dark/40 
+                <a href="javascript:;" class="relative block p-2 rounded-full bg-white-light/40 dark:bg-dark/40
                         hover:text-primary hover:bg-white-light/90 dark:hover:bg-dark/60" @click="open = !open">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19.0001 9.7041V9C19.0001 5.13401 15.8661 2 12.0001 2C8.13407 2 5.00006 5.13401 5.00006 9V9.7041C5.00006 10.5491 4.74995 11.3752 4.28123 12.0783L3.13263 13.8012C2.08349 15.3749 2.88442 17.5139 4.70913 18.0116C9.48258 19.3134 14.5175 19.3134 19.291 18.0116C21.1157 17.5139 21.9166 15.3749 20.8675 13.8012L19.7189 12.0783C19.2502 11.3752 19.0001 10.5491 19.0001 9.7041Z"
@@ -318,14 +318,14 @@
                         </template>
 
                     </a>
-                
-               
-               
-               
-               
+
+
+
+
+
                     <!-- 🔹 Menú de Notificaciones -->
 <ul x-cloak x-show="open" x-transition x-transition.duration.300ms
-    class="absolute ltr:-right-2 rtl:-left-2 top-11 bg-white dark:bg-gray-900 text-dark dark:text-white-dark 
+    class="absolute ltr:-right-2 rtl:-left-2 top-11 bg-white dark:bg-gray-900 text-dark dark:text-white-dark
     w-[300px] sm:w-[350px] shadow-lg rounded-lg divide-y dark:divide-white/10 z-50">
 
     <!-- 🔹 Encabezado -->
@@ -343,7 +343,7 @@
         <template x-for="notification in notifications.slice(-3)" :key="notification.id">
             <li class="dark:text-white-light/90">
                 <div class="flex items-center px-4 py-2">
-                    <img class="w-12 h-12 rounded-full object-cover" 
+                    <img class="w-12 h-12 rounded-full object-cover"
                         :src="`/assets/images/${notification.profile}`" alt="image" />
 
                     <div class="ltr:pl-3 rtl:pr-3 flex-auto">
@@ -399,13 +399,13 @@
 
 
 
-                
+
                     <!-- 🔥 MODAL con todas las notificaciones -->
                     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="showModal && '!block'">
                         <div class="flex items-start justify-center min-h-screen px-4" @click.self="showModal = false">
-                            <div x-show="showModal" x-transition x-transition.duration.300 
+                            <div x-show="showModal" x-transition x-transition.duration.300
                                 class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg">
-                                
+
                                 <!-- 🔹 Encabezado del Modal -->
                                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                                     <div class="font-bold text-lg">Todas las Notificaciones</div>
@@ -413,27 +413,27 @@
                                         ✖
                                     </button>
                                 </div>
-                
+
                                 <!-- 🔹 Lista con Scroll -->
                                 <div class="p-5 max-h-[400px] overflow-y-auto">
                                     <ul class="divide-y dark:divide-white/10">
                                         <template x-for="notification in notifications" :key="notification.id">
                                             <li class="dark:text-white-light/90 flex items-center px-4 py-2">
-                                                <img class="w-12 h-12 rounded-full object-cover" 
+                                                <img class="w-12 h-12 rounded-full object-cover"
                                                     :src="`/assets/images/${notification.profile}`" alt="image" />
                                                 <div class="ml-3 flex-auto">
                                                     <h6 x-html="notification.message"></h6>
                                                     <span class="text-xs block font-normal dark:text-gray-500"
                                                         x-text="notification.time"></span>
                                                 </div>
-                
+
                                                 <!-- ✅ Aceptar -->
                                                 <button @click="aceptarNotificacion(notification.id)">
                                                     <svg width="20" height="20" fill="none" stroke="green" stroke-width="2" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
                                                     </svg>
                                                 </button>
-                
+
                                                 <!-- ❌ Denegar -->
                                                 <button @click="denegarNotificacion(notification.id)">
                                                     <svg width="20" height="20" fill="none" stroke="red" stroke-width="2" viewBox="0 0 24 24">
@@ -448,19 +448,19 @@
                         </div>
                     </div>
                 </div>
-                
-                
-                
-                
-                
-                
 
 
 
 
-                
-                
-                
+
+
+
+
+
+
+
+
+
                 <div class="dropdown flex-shrink-0" x-data="dropdown" @click.outside="open = false">
                     <a href="javascript:;" class="relative group" @click="toggle()">
                         <span><img class="w-9 h-9 rounded-full object-cover saturate-50 group-hover:saturate-100"
@@ -476,20 +476,25 @@
                                         alt="image" />
                                 </div>
                                 <div class="ltr:pl-4 rtl:pr-4 truncate">
-                                    <h4 class="text-base">
-                                    {{ auth()->user()->Nombre }} 
-                                    <span class="text-xs bg-success-light rounded text-success px-1 ltr:ml-2 rtl:ml-2">
-                                    {{ auth()->user()->rol->nombre ?? 'Rol no definido' }} Si tienes una relación de rol
-
-                                        </span>
-                                    </h4>
-                                    <a class="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
-                                    href="javascript:;">
-                                    {{ auth()->user()->correo }}
-                                    </a>
+                                    @auth
+                                        <h4 class="text-base">
+                                            {{ auth()->user()->Nombre }}
+                                            <span class="text-xs bg-success-light rounded text-success px-1 ltr:ml-2 rtl:ml-2">
+                                                {{ auth()->user()->rol->nombre ?? 'Rol no definido' }}
+                                            </span>
+                                        </h4>
+                                        <a class="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white"
+                                           href="javascript:;">
+                                            {{ auth()->user()->correo }}
+                                        </a>
+                                    @else
+                                        <h4 class="text-base text-gray-500">Invitado</h4>
+                                        <a href="{{ route('login') }}" class="text-blue-500 underline">Iniciar sesión</a>
+                                    @endauth
                                 </div>
                             </div>
                         </li>
+
 
 
 
@@ -1286,9 +1291,9 @@
         idTickets: solicitud.idTickets,
         profile: 'user-profile.jpeg',
         tipoServicio: tipoServicio,
-        message: `<strong class="text-sm mr-1">${tipoServicio}</strong><br> 
+        message: `<strong class="text-sm mr-1">${tipoServicio}</strong><br>
         ${choferMensaje}
-        <strong class="text-sm mr-1">Numero Ticket</strong><br> 
+        <strong class="text-sm mr-1">Numero Ticket</strong><br>
         ${solicitud.numero_ticket}`,
         time: solicitud.fechaHora
     };
@@ -1301,7 +1306,7 @@
                     .catch(error => console.error('Error al obtener las solicitudes:', error));
             },
 
-            
+
             aceptarNotificacion(id) {
     console.log(`Enviando solicitud PUT para aceptar la notificación con ID: ${id}`);
 
@@ -1349,7 +1354,7 @@
         if (data.message === 'Solicitud rechazada con éxito.') {
             // Muestra un mensaje de éxito
             alert('La solicitud ha sido rechazada con éxito.');
-            
+
             // Aquí podrías también actualizar la lista de notificaciones si es necesario
             // Por ejemplo, eliminar la notificación o actualizar su estado
             console.log('Solicitud rechazada:', data);

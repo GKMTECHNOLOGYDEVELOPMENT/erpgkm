@@ -43,8 +43,9 @@ use Illuminate\Support\Facades\Validator;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Facades\Image;
-use Intervention\Image\Drivers\Gd\Driver; // <-- importante
+
 
 
 // use Barryvdh\DomPDF\Facade as PDF;
@@ -2568,45 +2569,57 @@ class OrdenesTrabajoController extends Controller
             'descripciones.*' => 'string|max:255',
             'ticket_id' => 'required|integer|exists:tickets,idTickets',
         ]);
-    
+
+        if (!extension_loaded('gd') || !function_exists('imagewebp')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El servidor no soporta WebP con GD.'
+            ], 500);
+        }
+
         $visita = DB::table('seleccionarvisita')
             ->where('idTickets', $request->ticket_id)
             ->first();
-    
+
         if (!$visita) {
-            return response()->json(['success' => false, 'message' => 'No se encontró una visita válida para este ticket.'], 400);
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró una visita válida para este ticket.'
+            ], 400);
         }
-    
+
         $visita_id = $visita->idVisitas;
         $imagenesGuardadas = [];
-    
-        // CAMBIO: crear el manager de forma correcta en Image 3.x
+
+        // ✅ Usar el nuevo constructor con Driver explícito
         $manager = new ImageManager(new Driver());
-    
+
         foreach ($request->file('imagenes') as $index => $imagen) {
             $descripcion = $request->descripciones[$index] ?? 'Sin descripción';
-    
-            // Convertir a WebP con buena calidad (90%)
-            $img = $manager->read($imagen->getRealPath())
+
+            $img = $manager->read($imagen->getRealPath()) // v3 usa `read` en vez de `make`
                 ->scale(width: 1024)
-                ->toWebp(quality: 90); // calidad alta
-    
+                ->toWebp(quality: 90);
+
             $foto = new Fotostickest();
             $foto->idTickets = $request->ticket_id;
             $foto->idVisitas = $visita_id;
-            $foto->foto = (string) $img; // guardar como binario webp
+            $foto->foto = (string) $img;
             $foto->descripcion = $descripcion;
             $foto->save();
-    
+
             $imagenesGuardadas[] = ['id' => $foto->id, 'descripcion' => $descripcion];
         }
-    
+
         return response()->json([
             'success' => true,
-            'message' => 'Imágenes comprimidas en WebP y guardadas correctamente.',
+            'message' => 'Imágenes procesadas y guardadas correctamente.',
             'imagenes' => $imagenesGuardadas
         ]);
     }
+
+
+
 
 
 
@@ -2886,75 +2899,73 @@ class OrdenesTrabajoController extends Controller
         ]);
     }
 
-    private function optimizeBase64Image($base64String, $quality = 60, $maxWidth = 800)
+    private function optimizeBase64Image($base64String, $calidad = 70, $destinoAncho = 600, $destinoAlto = 400)
     {
         if (!$base64String) return null;
 
-        // Extraer el tipo de imagen
+        // Verificar que es una imagen base64 válida
         if (!preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches)) {
-            return $base64String; // Si no es imagen base64 válida, devolverla sin cambios
-        }
-
-        $imageType = strtolower($matches[1]); // Convertir a minúsculas (jpeg, png, webp)
-
-        // Decodificar la imagen base64
-        $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
-
-        // Evitar errores con imágenes corruptas
-        if (!$imageData) {
-            \Log::error("Error al decodificar imagen base64.");
             return $base64String;
         }
 
-        // Crear la imagen desde la cadena binaria
-        $image = @imagecreatefromstring($imageData);
-        if (!$image) {
-            \Log::error("Error al procesar la imagen con imagecreatefromstring.");
-            return $base64String; // Retornar imagen original si no se puede procesar
+        $datosImagen = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
+        $origen = @imagecreatefromstring($datosImagen);
+        if (!$origen) return $base64String;
+
+        $anchoOriginal = imagesx($origen);
+        $altoOriginal = imagesy($origen);
+
+        // 🔁 Rotar si la imagen es vertical
+        if ($altoOriginal > $anchoOriginal) {
+            $origen = imagerotate($origen, -90, 0);
+            $anchoOriginal = imagesx($origen);
+            $altoOriginal = imagesy($origen);
         }
 
-        // Obtener dimensiones
-        $width = imagesx($image);
-        $height = imagesy($image);
-        $newWidth = min($width, $maxWidth);
-        $newHeight = ($height / $width) * $newWidth; // Mantener proporción
+        // 📐 Calcular proporciones
+        $ratioOriginal = $anchoOriginal / $altoOriginal;
+        $ratioDestino = $destinoAncho / $destinoAlto;
 
-        // Crear nueva imagen con transparencia si es PNG
-        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
-        if ($imageType === 'png') {
-            imagealphablending($resizedImage, false);
-            imagesavealpha($resizedImage, true);
-            $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
-            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
+        if ($ratioOriginal > $ratioDestino) {
+            $nuevoAncho = $destinoAncho;
+            $nuevoAlto = intval($destinoAncho / $ratioOriginal);
         } else {
-            $background = imagecolorallocate($resizedImage, 255, 255, 255); // Blanco para JPG
-            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $background);
+            $nuevoAlto = $destinoAlto;
+            $nuevoAncho = intval($destinoAlto * $ratioOriginal);
         }
 
-        // Redimensionar imagen
-        imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        // 🎯 Crear imagen redimensionada con fondo transparente
+        $resized = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
+        imagealphablending($resized, false);
+        imagesavealpha($resized, true);
+        $transparente = imagecolorallocatealpha($resized, 0, 0, 0, 127);
+        imagefilledrectangle($resized, 0, 0, $nuevoAncho, $nuevoAlto, $transparente);
+        imagecopyresampled($resized, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $anchoOriginal, $altoOriginal);
 
-        // Convertir y optimizar
+        // 🖼️ Canvas final del tamaño deseado
+        $canvas = imagecreatetruecolor($destinoAncho, $destinoAlto);
+        imagealphablending($canvas, false);
+        imagesavealpha($canvas, true);
+        $transparente = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+        imagefilledrectangle($canvas, 0, 0, $destinoAncho, $destinoAlto, $transparente);
+
+        $destX = intval(($destinoAncho - $nuevoAncho) / 2);
+        $destY = intval(($destinoAlto - $nuevoAlto) / 2);
+        imagecopy($canvas, $resized, $destX, $destY, 0, 0, $nuevoAncho, $nuevoAlto);
+
+        // 🧭 Convertir a WebP optimizado
         ob_start();
-        if ($imageType === 'png') {
-            imagepng($resizedImage, null, 9); // Mantener transparencia y alta compresión
-            $optimizedType = 'png';
-        } elseif ($imageType === 'jpeg' || $imageType === 'jpg') {
-            imagejpeg($resizedImage, null, $quality);
-            $optimizedType = 'jpeg';
-        } else {
-            imagewebp($resizedImage, null, $quality); // WebP para imágenes no compatibles
-            $optimizedType = 'webp';
-        }
-        $compressedImage = ob_get_clean();
+        imagewebp($canvas, null, $calidad);
+        $contenido = ob_get_clean();
 
-        // Liberar memoria
-        imagedestroy($image);
-        imagedestroy($resizedImage);
+        // 🧹 Liberar recursos
+        imagedestroy($origen);
+        imagedestroy($resized);
+        imagedestroy($canvas);
 
-        // Retornar imagen optimizada en base64
-        return "data:image/{$optimizedType};base64," . base64_encode($compressedImage);
+        return 'data:image/webp;base64,' . base64_encode($contenido);
     }
+
 
 
     public function generateInformePdfVisita($idOt, $idVisita)
@@ -3139,22 +3150,19 @@ class OrdenesTrabajoController extends Controller
 
     public function procesarLogoMarca($imagenRaw)
     {
-        $manager = new ImageManager(); // crear instancia
+        $manager = new ImageManager(new Driver());
 
-        $img = $manager->make($imagenRaw);
+        $img = $manager->read($imagenRaw); // 👈 CAMBIO IMPORTANT
 
-        // Redimensionar manteniendo proporciones, sin deformar
-        $img->resize(256, 160, function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
+        $img = $img->scaleDown(width: 256, height: 160); // Este método respeta proporciones
 
-        $canvas = $manager->canvas(256, 160, '#FFFFFF');
+        $canvas = $manager->create(256, 160, 'ffffff'); // 👈 nuevo método en v3
 
-        $canvas->insert($img, 'center');
+        $canvas->place($img, 'center');
 
-        return 'data:image/png;base64,' . base64_encode($canvas->encode('png'));
+        return 'data:image/png;base64,' . base64_encode($canvas->toPng());
     }
+
 
 
 
