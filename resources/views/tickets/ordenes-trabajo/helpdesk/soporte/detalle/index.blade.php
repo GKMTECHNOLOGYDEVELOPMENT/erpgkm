@@ -1,3 +1,4 @@
+Antiguo
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -5,6 +6,17 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+
+<!-- Estilos adicionales para el log -->
+
+
+<!-- 📌 Encabezado de la Orden -->
+<!-- <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">
+        Orden de Trabajo N° {{ $orden->idTickets }}
+    </span>
+</div> -->
 
 
 <!-- Estilos adicionales para el log -->
@@ -138,7 +150,6 @@
         </div>
     </div>
 </div>
-
 
 
 
@@ -297,10 +308,6 @@
 </script>
 
 
-
-
-
-
 <!-- 🛠️ Formulario de Detalles -->
 <div class="p-6 mt-4">
     <form action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}" enctype="multipart/form-data"
@@ -357,26 +364,26 @@
                 </select>
             </div>
             <div>
-                <label class="text-sm font-medium">Direción</label>
+                <label class="text-sm font-medium">Dirrecion</label>
                 <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->direccion }}"
-                    readonly>
+                readonly>
             </div>
 
-            <!-- Ejecutar -->
-            @if ($existeFlujo25)
-                <div>
-                    <label class="text-sm font-medium">Ejecutor</label>
-                    <select id="ejecutor" name="ejecutor" class="select2 w-full" style="display: none;">
-                        <option value="" disabled>Seleccionar Ejecutador</option>
-                        @foreach ($usuarios as $usuario)
-                            <option value="{{ $usuario->idUsuario }}"
-                                {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
-                                {{ $usuario->Nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-            @endif
+<!-- Ejecutar -->
+@if($existeFlujo25)
+    <div>
+        <label class="text-sm font-medium">Ejecutor</label>
+        <select id="ejecutor" name="ejecutor" class="select2 w-full"  style="display: none;">
+            <option value="" disabled>Seleccionar Ejecutador</option>
+            @foreach ($usuarios as $usuario)
+                <option value="{{ $usuario->idUsuario }}"
+                    {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
+                    {{ $usuario->Nombre }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+@endif
 
 
 
@@ -385,8 +392,8 @@
             <!-- Tipo de Servicio -->
             <div>
                 <label class="text-sm font-medium">Tipo de Servicio</label>
-                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100"
-                    style="display: none" disabled>
+                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display: none"
+                    disabled>
                     <option value="" disabled>Seleccionar Tipo de Servicio</option>
                     @foreach ($tiposServicio as $tipo)
                         <option value="{{ $tipo->idTipoServicio }}"
@@ -407,19 +414,32 @@
 
             <!-- Botón de Guardar -->
             <div class="md:col-span-2 flex justify-end space-x-4">
-                <a href="{{ route('ordenes.helpdesk') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
+                <a href="{{ route('ordenes.smart') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
                 <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
             </div>
         </div>
     </form>
 </div>
 
-
 <!-- Nueva Card: Historial de Estados -->
 <div id="estadosCard" class="mt-4 p-4">
-    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
-        style="background-color: {{ $colorEstado }};">Historial de Estados</span>
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Historial de Estados</span>
     <!-- Tabla con scroll horizontal -->
+    <div class="overflow-x-auto mt-4">
+        <table class="min-w-[600px] border-collapse">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="px-4 py-2 text-center">Estado</th>
+                    <th class="px-4 py-2 text-center">Usuario</th>
+                    <th class="px-4 py-2 text-center">Fecha</th>
+                    <th class="px-4 py-2 text-center">Más</th>
+                </tr>
+            </thead>
+            <tbody id="estadosTableBody">
+                <!-- Aquí se llenarán los estados de flujo -->
+            </tbody>
+        </table>
+    </div>
 
 
 
@@ -427,15 +447,14 @@
     <div class="mt-3 overflow-x-auto">
         <div id="draggableContainer" class="flex space-x-2 w-max">
             @foreach ($estadosFlujo as $estado)
-                <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
-                    style="background-color: {{ $estado->color }}; color: black;"
-                    data-state-description="{{ $estado->descripcion }}">
+                <div class="draggable-state min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-move text-white text-center shadow-md"
+                    style="background-color: {{ $estado->color }}; color: black;" draggable="true"
+                    data-state="{{ $estado->descripcion }}">
                     {{ $estado->descripcion }}
                 </div>
             @endforeach
         </div>
     </div>
-
 
 
     <!-- Div para mostrar la última modificación (Responsive) -->
@@ -452,10 +471,6 @@
 
 
 </div>
-
-
-
-
 
 
 
@@ -657,9 +672,6 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         // Inicializar NiceSelect2
@@ -758,6 +770,16 @@
         }
 
 
+
+
+
+        /* ================================
+           Registro de cambios en drag & drop
+        ================================ */
+
+
+
+
         // Pasa los estados de flujo desde Blade a JavaScript
         const estadosFlujo = @json($estadosFlujo);
 
@@ -767,65 +789,78 @@
             return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
         }
 
-        // Selecciona todos los botones de estado
-        const estadoElements = document.querySelectorAll(".estado-button");
+        // Código drag & drop
+        const draggables = document.querySelectorAll(".draggable-state");
+        draggables.forEach(function(draggable) {
+            draggable.addEventListener("dragstart", function(e) {
+                e.dataTransfer.setData("text/plain", this.dataset
+                    .state); // Obtén la descripción del estado
+            });
+        });
 
-        estadoElements.forEach(function(estadoElement) {
-            estadoElement.addEventListener("click", function() {
-                const stateDescription = estadoElement.dataset
-                    .stateDescription; // Obtén la descripción del estado desde el atributo dataset
+        const dropZone = document.getElementById("estadosTableBody");
+        dropZone.addEventListener("dragover", function(e) {
+            e.preventDefault();
+        });
+
+        dropZone.addEventListener("drop", function(e) {
+            e.preventDefault();
+            const stateDescription = e.dataTransfer.getData("text/plain");
+            if (stateDescription) {
+                const draggableEl = document.querySelector(
+                    "#draggableContainer .draggable-state[data-state='" + stateDescription + "']");
+                if (draggableEl) {
+                    draggableEl.remove();
+                }
+
+                const usuario = "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
+                const fecha = formatDate(new Date());
+                const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
 
                 // Obtener el ID del estado basado en la descripción
                 const estadoId = getStateId(stateDescription);
 
-                if (estadoId !== 0) { // Verifica si el estado existe
-                    const usuario =
-                        "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
-                    const fecha = formatDate(new Date());
-                    const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
-
-                    // Actualizar el DOM con el nuevo estado (esto lo podrías hacer como prefieras)
-                    let rowClasses = "";
-                    if (estadoId === 1) {
-                        rowClasses = "bg-primary/20 border-primary/20";
-                    } else if (estadoId === 2) {
-                        rowClasses = "bg-secondary/20 border-secondary/20";
-                    } else if (estadoId === 3) {
-                        rowClasses = "bg-success/20 border-success/20";
-                    }
-
-                    const newRow = document.createElement("tr");
-                    newRow.className = rowClasses;
-                    newRow.innerHTML = `
-                <td class="px-4 py-2 text-center">${stateDescription}</td>
-                <td class="px-4 py-2 text-center">${usuario}</td>
-                <td class="px-4 py-2 text-center">${fecha}</td>
-            `;
-                    document.getElementById("estadosTableBody").appendChild(newRow);
-
-                    // Enviar la solicitud AJAX para guardar el estado
-                    axios.post("{{ route('guardarEstado') }}", {
-                            idTicket: ticketId,
-                            idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
-                            idUsuario: usuario,
-                        })
-                        .then(response => {
-                            // Si la respuesta es exitosa
-                            console.log("Estado guardado exitosamente");
-                            location.reload();
-                            // Actualizar log de modificación
-                            document.getElementById('ultimaModificacion').textContent =
-                                `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
-                        })
-                        .catch(error => {
-                            // Manejar el error si ocurre
-                            console.error("Error al guardar el estado", error);
-                        });
-                } else {
-                    console.error("Estado no encontrado");
+                let rowClasses = "";
+                if (estadoId === 1) {
+                    rowClasses = "bg-primary/20 border-primary/20";
+                } else if (estadoId === 2) {
+                    rowClasses = "bg-secondary/20 border-secondary/20";
+                } else if (estadoId === 3) {
+                    rowClasses = "bg-success/20 border-success/20";
                 }
-            });
+
+                const newRow = document.createElement("tr");
+                newRow.className = rowClasses;
+                newRow.innerHTML = `
+            <td class="px-4 py-2 text-center">${stateDescription}</td>
+            <td class="px-4 py-2 text-center">${usuario}</td>
+            <td class="px-4 py-2 text-center">${fecha}</td>
+        `;
+                dropZone.appendChild(newRow);
+
+                // Enviar la solicitud AJAX para guardar el estado
+                axios.post("{{ route('guardarEstado') }}", {
+                        idTicket: ticketId,
+                        idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+                        idUsuario: usuario,
+                        comentarioflujo: 'Ingresar comentario para el flujo', // Comentario opcional
+                    })
+                    .then(response => {
+                        // Si la respuesta es exitosa
+                        console.log("Estado guardado exitosamente");
+                        location.reload();
+                        // Actualizar log de modificación
+                        document.getElementById('ultimaModificacion').textContent =
+                            `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
+                    })
+                    .catch(error => {
+                        // Manejar el error si ocurre
+                        console.error("Error al guardar el estado", error);
+                    });
+            }
         });
+
+
 
 
         function reinitializeDraggable(element) {
@@ -1036,7 +1071,7 @@
                 }
             }
 
-
+          
 
             // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -1052,8 +1087,7 @@
 
             // Enviar datos por AJAX
             $.ajax({
-                url: '/actualizar-orden-soporte/' +
-                    idOrden, // Pasar el id de la orden en la URL
+                url: '/actualizar-orden-soporte/' + idOrden, // Pasar el id de la orden en la URL
                 method: 'PUT', // Usar PUT para la actualización
                 data: formData,
                 headers: {
@@ -1076,4 +1110,3 @@
         });
     });
 </script>
-
