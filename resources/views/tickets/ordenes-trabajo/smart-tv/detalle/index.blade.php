@@ -314,7 +314,7 @@
 
 
 <div class="p-6 mt-4">
-    <form action="formActualizarOrden" enctype="multipart/form-data" method="POST">
+    <form id="tuFormulario" action="formActualizarOrden" enctype="multipart/form-data" method="POST">
         @CSRF
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -700,14 +700,18 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        console.log("DOM completamente cargado y analizado");
+        
         // Inicializar NiceSelect2
         document.querySelectorAll('.select2').forEach(function(select) {
+            console.log("Inicializando NiceSelect para elemento:", select);
             NiceSelect.bind(select, {
                 searchable: true
             });
         });
 
         // Inicializar Flatpickr en "Fecha de Compra"
+        console.log("Inicializando Flatpickr para fechaCompra");
         flatpickr("#fechaCompra", {
             dateFormat: "Y-m-d",
             allowInput: true
@@ -715,6 +719,7 @@
 
         // Función para formatear la fecha
         function formatDate(fecha) {
+            console.log("Formateando fecha:", fecha);
             const año = fecha.getFullYear();
             const mes = (fecha.getMonth() + 1).toString().padStart(2, "0");
             const dia = fecha.getDate().toString().padStart(2, "0");
@@ -725,55 +730,63 @@
             return `${año}-${mes}-${dia} ${horas}:${minutos} ${ampm}`;
         }
 
-
         $(document).ready(function() {
+            console.log("jQuery document ready");
             // Obtener el idTickets de la variable de Blade
             const idTickets = "{{ $orden->idTickets }}";
+            console.log("idTickets:", idTickets);
 
             // Llamar al backend para obtener la última modificación
+            console.log("Iniciando AJAX para obtener última modificación");
             $.ajax({
-                url: '/ultima-modificacion/' +
-                    idTickets, // Obtener la última modificación del ticket
+                url: '/ultima-modificacion/' + idTickets,
                 method: 'GET',
                 success: function(response) {
+                    console.log("Respuesta AJAX recibida:", response);
                     if (response.success) {
                         const ultimaModificacion = response.ultima_modificacion;
-                        const fechaUltimaModificacion = formatDate(new Date(
-                            ultimaModificacion.created_at)); // Formatear la fecha
+                        console.log("Última modificación encontrada:", ultimaModificacion);
+                        
+                        const fechaUltimaModificacion = formatDate(new Date(ultimaModificacion.created_at));
+                        console.log("Fecha formateada:", fechaUltimaModificacion);
+                        
                         const usuarioUltimaModificacion = ultimaModificacion.usuario;
                         const campoUltimaModificacion = ultimaModificacion.campo;
                         const oldValueUltimaModificacion = ultimaModificacion.valor_antiguo;
                         const newValueUltimaModificacion = ultimaModificacion.valor_nuevo;
 
-                        // Actualizar el log de modificación con la última modificación
+                        console.log("Actualizando UI con última modificación");
                         document.getElementById('ultimaModificacion').textContent =
                             `${fechaUltimaModificacion} por ${usuarioUltimaModificacion}: Se modificó ${campoUltimaModificacion} de "${oldValueUltimaModificacion}" a "${newValueUltimaModificacion}"`;
 
                     } else {
-                        // Si no hay modificaciones previas, mostrar mensaje de no hay cambios
+                        console.log("No se encontraron modificaciones previas");
                         document.getElementById('ultimaModificacion').textContent =
                             "No hay modificaciones previas.";
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error al obtener la última modificación:', error);
+                    console.error('Error al obtener la última modificación:', error, xhr);
                 }
             });
         });
 
         // Función para actualizar el log de modificación cuando se haga un cambio
         function updateModificationLog(field, oldValue, newValue) {
-            const usuario = "{{ auth()->user()->Nombre }}"; // Usuario logueado
+            console.log("Actualizando log de modificación:", {field, oldValue, newValue});
+            const usuario = "{{ auth()->user()->Nombre }}";
+            console.log("Usuario:", usuario);
+            
             const fecha = formatDate(new Date());
-            const idTickets =
-                "{{ $orden->idTickets }}"; // Aquí asumo que el id de la orden está disponible en el Blade
+            const idTickets = "{{ $orden->idTickets }}";
+            console.log("Fecha:", fecha, "idTickets:", idTickets);
 
-            // Actualizar el log de modificación con la nueva modificación
             document.getElementById('ultimaModificacion').textContent =
                 `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
 
-            // Enviar la nueva modificación al servidor para guardarla en la base de datos
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            console.log("CSRF Token:", csrfToken);
+            
             const data = {
                 field: field,
                 oldValue: oldValue,
@@ -781,48 +794,50 @@
                 usuario: usuario,
                 _token: csrfToken
             };
+            console.log("Datos a enviar:", data);
 
             $.ajax({
-                url: '/guardar-modificacion/' + idTickets, // Ruta para guardar la modificación
+                url: '/guardar-modificacion/' + idTickets,
                 method: 'POST',
                 data: data,
                 success: function(response) {
                     console.log('Modificación guardada correctamente:', response);
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error al guardar la modificación:', error);
+                    console.error('Error al guardar la modificación:', error, xhr);
                 }
             });
         }
 
-
         // Pasa los estados de flujo desde Blade a JavaScript
         const estadosFlujo = @json($estadosFlujo);
+        console.log("Estados de flujo cargados:", estadosFlujo);
 
         // Función para obtener el ID del estado a partir de la descripción
         function getStateId(stateDescription) {
+            console.log("Buscando ID para estado:", stateDescription);
             const estado = estadosFlujo.find(e => e.descripcion === stateDescription);
-            return estado ? estado.idEstadflujo : 0; // Si no encuentra el estado, devuelve 0
+            return estado ? estado.idEstadflujo : 0;
         }
 
         // Selecciona todos los botones de estado
         const estadoElements = document.querySelectorAll(".estado-button");
+        console.log("Botones de estado encontrados:", estadoElements.length);
 
         estadoElements.forEach(function(estadoElement) {
             estadoElement.addEventListener("click", function() {
-                const stateDescription = estadoElement.dataset
-                    .stateDescription; // Obtén la descripción del estado desde el atributo dataset
+                const stateDescription = estadoElement.dataset.stateDescription;
+                console.log("Botón de estado clickeado:", stateDescription);
 
-                // Obtener el ID del estado basado en la descripción
                 const estadoId = getStateId(stateDescription);
+                console.log("ID del estado encontrado:", estadoId);
 
-                if (estadoId !== 0) { // Verifica si el estado existe
-                    const usuario =
-                        "{{ auth()->user()->id }}"; // Utiliza el ID del usuario autenticado
+                if (estadoId !== 0) {
+                    const usuario = "{{ auth()->user()->id }}";
                     const fecha = formatDate(new Date());
-                    const ticketId = "{{ $ticket->idTickets }}"; // Obtén el ID del ticket
+                    const ticketId = "{{ $ticket->idTickets }}";
+                    console.log("Datos para actualización:", {usuario, fecha, ticketId});
 
-                    // Actualizar el DOM con el nuevo estado (esto lo podrías hacer como prefieras)
                     let rowClasses = "";
                     if (estadoId === 1) {
                         rowClasses = "bg-primary/20 border-primary/20";
@@ -831,6 +846,7 @@
                     } else if (estadoId === 3) {
                         rowClasses = "bg-success/20 border-success/20";
                     }
+                    console.log("Clases CSS para fila:", rowClasses);
 
                     const newRow = document.createElement("tr");
                     newRow.className = rowClasses;
@@ -839,24 +855,23 @@
                 <td class="px-4 py-2 text-center">${usuario}</td>
                 <td class="px-4 py-2 text-center">${fecha}</td>
             `;
+                    console.log("Nueva fila creada:", newRow);
                     document.getElementById("estadosTableBody").appendChild(newRow);
 
-                    // Enviar la solicitud AJAX para guardar el estado
+                    console.log("Enviando solicitud para guardar estado");
                     axios.post("{{ route('guardarEstado') }}", {
                             idTicket: ticketId,
-                            idEstadflujo: estadoId, // Usamos el idEstadflujo obtenido
+                            idEstadflujo: estadoId,
                             idUsuario: usuario,
                         })
                         .then(response => {
-                            // Si la respuesta es exitosa
+                            console.log("Respuesta del servidor:", response);
                             console.log("Estado guardado exitosamente");
                             location.reload();
-                            // Actualizar log de modificación
                             document.getElementById('ultimaModificacion').textContent =
                                 `${fecha} por ${usuario}: Se modificó Estado a "${stateDescription}"`;
                         })
                         .catch(error => {
-                            // Manejar el error si ocurre
                             console.error("Error al guardar el estado", error);
                         });
                 } else {
@@ -865,82 +880,131 @@
             });
         });
 
-
         function reinitializeDraggable(element) {
+            console.log("Reinicializando elemento draggable:", element);
             element.setAttribute("draggable", "true");
             element.addEventListener("dragstart", function(e) {
+                console.log("Dragstart en elemento:", this);
                 e.dataTransfer.setData("text/plain", this.dataset.state);
             });
         }
 
-        dropZone.addEventListener("click", function(e) {
-            if (e.target.classList.contains("delete-state")) {
-                const row = e.target.closest("tr");
-                const state = row.querySelector("td").textContent.trim();
-                row.remove();
-                if (!document.querySelector("#draggableContainer .draggable-state[data-state='" +
-                        state + "']")) {
-                    const container = document.getElementById("draggableContainer");
-                    const newDraggable = document.createElement("div");
-                    let colorClass = "";
-                    if (state === "Recojo") {
-                        colorClass = "bg-primary/20";
-                    } else if (state === "Coordinado") {
-                        colorClass = "bg-secondary/20";
-                    } else if (state === "Operativo") {
-                        colorClass = "bg-success/20";
-                    }
-                    newDraggable.className =
-                        `draggable-state ${colorClass} px-3 py-1 rounded cursor-move`;
-                    newDraggable.dataset.state = state;
-                    newDraggable.textContent = state;
-                    reinitializeDraggable(newDraggable);
-                    container.appendChild(newDraggable);
-                }
-            }
-        });
-
-        /* ======================================================
-           Registro global de cambios en todos los campos
-           (input, select, textarea), incluso si están bloqueados
-        ====================================================== */
-        const allFields = document.querySelectorAll("input, select, textarea");
-        allFields.forEach(function(field) {
-            // Si es un select, almacena el texto de la opción seleccionada
-            if (field.tagName.toLowerCase() === "select") {
-                field.dataset.oldValue = field.options[field.selectedIndex].text;
-            } else {
-                field.dataset.oldValue = field.value;
-            }
-            field.addEventListener("change", function() {
-                let oldVal = field.dataset.oldValue;
-                let newVal;
-                if (field.tagName.toLowerCase() === "select") {
-                    newVal = field.options[field.selectedIndex].text;
-                } else {
-                    newVal = field.value;
-                }
-                if (oldVal !== newVal) {
-                    // Se obtiene el label asociado mediante el atributo "for"
-                    let fieldLabel = "";
-                    if (field.id) {
-                        const label = document.querySelector('label[for="' + field.id + '"]');
-                        if (label) {
-                            fieldLabel = label.textContent.trim();
+        // Solución para el error dropZone is not defined
+        const dropZone = document.getElementById('dropZone');
+        if (dropZone) {
+            dropZone.addEventListener("click", function(e) {
+                console.log("Click en dropZone:", e.target);
+                if (e.target.classList.contains("delete-state")) {
+                    console.log("Eliminando estado");
+                    const row = e.target.closest("tr");
+                    const state = row.querySelector("td").textContent.trim();
+                    console.log("Estado a eliminar:", state);
+                    row.remove();
+                    if (!document.querySelector("#draggableContainer .draggable-state[data-state='" + state + "']")) {
+                        console.log("Recreando elemento draggable para:", state);
+                        const container = document.getElementById("draggableContainer");
+                        const newDraggable = document.createElement("div");
+                        let colorClass = "";
+                        if (state === "Recojo") {
+                            colorClass = "bg-primary/20";
+                        } else if (state === "Coordinado") {
+                            colorClass = "bg-secondary/20";
+                        } else if (state === "Operativo") {
+                            colorClass = "bg-success/20";
                         }
+                        newDraggable.className = `draggable-state ${colorClass} px-3 py-1 rounded cursor-move`;
+                        newDraggable.dataset.state = state;
+                        newDraggable.textContent = state;
+                        reinitializeDraggable(newDraggable);
+                        container.appendChild(newDraggable);
                     }
-                    // Si no se encuentra un label, se usa como fallback el id o name
-                    if (!fieldLabel) {
-                        fieldLabel = field.getAttribute("name") || field.getAttribute("id") ||
-                            "campo desconocido";
-                    }
-                    updateModificationLog(fieldLabel, oldVal, newVal);
-                    field.dataset.oldValue = newVal;
                 }
             });
-        });
+        } else {
+            console.warn("Elemento dropZone no encontrado en el DOM");
+        }
+
+// Por esta versión mejorada:
+function initializeFieldValues() {
+    // Selecciona solo los campos dentro del formulario principal
+    const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
+    if (!form) {
+        console.error("Formulario no encontrado");
+        return;
+    }
+
+    form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
+        // Ignora campos sin nombre o ID (como los de Alpine.js)
+        if (!field.name && !field.id) {
+            console.log("Ignorando campo sin nombre/ID:", field);
+            return;
+        }
+
+        console.log("Inicializando campo:", field.id || field.name);
+        if (field.tagName.toLowerCase() === "select") {
+            field.dataset.oldValue = field.options[field.selectedIndex].text;
+        } else {
+            field.dataset.oldValue = field.value;
+        }
+        console.log("Valor inicial guardado:", field.dataset.oldValue);
+    });
+}
+
+     // Y modifica el manejador de eventos así:
+function handleFieldChange(e) {
+    const field = e.target;
+    
+    // Filtra solo los campos que nos interesan
+    if (!field.matches('#tuFormulario input:not([type="hidden"]), #tuFormulario select, #tuFormulario textarea')) {
+        return;
+    }
+
+    // Ignora campos sin nombre o ID
+    if (!field.name && !field.id) {
+        return;
+    }
+
+    console.log("Evento detectado en campo:", field.id || field.name, "Tipo:", e.type);
+    
+    let oldVal = field.dataset.oldValue || '';
+    let newVal;
+    
+    if (field.tagName.toLowerCase() === "select") {
+        newVal = field.options[field.selectedIndex].text;
+    } else {
+        newVal = field.value;
+    }
+    
+    console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
+    
+    if (oldVal !== newVal) {
+        let fieldLabel = "";
+        if (field.id) {
+            const label = document.querySelector('label[for="' + field.id + '"]');
+            if (label) {
+                fieldLabel = label.textContent.trim();
+            }
+        }
+        if (!fieldLabel) {
+            fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
+        }
+        console.log("Etiqueta del campo:", fieldLabel);
+        
+        updateModificationLog(fieldLabel, oldVal, newVal);
+        field.dataset.oldValue = newVal;
+        console.log("Valor antiguo actualizado a:", newVal);
+    }
+}
+
+        // Inicialización
+        initializeFieldValues();
+        
+        // Escuchar eventos de cambio (versión mejorada)
+        document.addEventListener('input', handleFieldChange, true);
+        document.addEventListener('change', handleFieldChange, true);
     });
 </script>
+
 
 
 <script>
