@@ -62,20 +62,14 @@
         }
 
         .img-container img {
-            width: 98% !important;
-            /* 🔹 Fuerza todas las imágenes a tener el mismo ancho */
-            max-width: 100% !important;
-            height: auto !important;
-            max-height: 400px !important;
-            /* 🔹 Asegura que las imágenes no sean demasiado altas */
-            object-fit: cover !important;
-            /* 🔹 Mantiene el recorte sin deformar */
+            width: 750px !important;
+            height: 450px !important;
+            object-fit: fill !important;
             display: block;
-            margin: 20px auto 0 auto !important;
+            margin: 6px auto 0 auto !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
         }
-
 
         /* 🔹 Detecta imágenes que están justo después de un salto de página */
         @media print {
@@ -347,7 +341,7 @@
                         <div class="red-bg mt-4 text-left">ANEXOS</div>
 
 
-                        <div class="mt-4">
+                        <div>
                             @php
                                 $contador = 0;
                                 $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
@@ -372,7 +366,7 @@
                                         @endif
 
                                         <!-- Imagen centrada -->
-                                        <div class="img-container mb-6">
+                                        <div class="img-container mb-2">
                                             <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                         </div>
 
@@ -395,7 +389,7 @@
                 @foreach ($imagenesFotosTickets as $fotoTicket)
                     @if (!empty($fotoTicket['foto_base64']))
                         @if ($contador % 2 == 0)
-                            <div class="flex flex-col justify-center items-center min-h-[100vh] py-12"
+                            <div class="flex flex-col justify-center items-center py-6"
                                 @if ($contador > 0) style="page-break-before: always;" @endif>
                         @endif
 
