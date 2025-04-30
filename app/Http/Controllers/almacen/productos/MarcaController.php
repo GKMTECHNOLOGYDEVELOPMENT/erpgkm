@@ -157,23 +157,32 @@ class MarcaController extends Controller
     {
         try {
             $marca = Marca::findOrFail($id);
-
-            // Eliminar la marca
+    
             $marca->delete();
-
+    
             return response()->json([
                 'success' => true,
                 'message' => 'Marca eliminada con éxito',
             ]);
         } catch (\Exception $e) {
             Log::error('Error al eliminar la marca: ' . $e->getMessage());
+    
+            // Aquí detectamos si es error de clave foránea
+            if (str_contains($e->getMessage(), 'Integrity constraint violation')) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Marca asociada a uno o más registros.',
+                ], 500);
+            }
+    
             return response()->json([
                 'success' => false,
-                'message' => 'Ocurrió un error al eliminar la marca.',
-                'error' => $e->getMessage(),
+                'error' => 'Ocurrió un error al eliminar la marca.',
             ], 500);
         }
     }
+    
+    
 
     public function exportAllPDF()
     {

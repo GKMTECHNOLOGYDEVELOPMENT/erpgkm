@@ -156,8 +156,8 @@
 
             @endif
 
-            @if ($tipoServicio == 1 || $tipoServicio == 6)
-                <li>
+            @if ($tipoServicio == 1 || $tipoServicio == 5 || $tipoServicio == 6)
+            <li>
                     <a href="javascript:;"
                         class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
                         :class="{ '!bg-success text-white': tab === 'imagenes' }" @click="tab = 'imagenes'">
@@ -296,6 +296,38 @@
                 </div>
             </div>
         </div>
+
+        @elseif ($tipoServicio == 5)
+        {{-- Soporte On Site --}}
+        <div x-show="tab === 'detalle'">
+            @include('tickets.ordenes-trabajo.helpdesk.ejecucion.detalle.index')
+        </div>
+        <div x-show="tab === 'visitas'">
+            @include('tickets.ordenes-trabajo.helpdesk.ejecucion.visitas.index')
+        </div>
+        <div x-show="tab === 'desarrollo'">
+            @include('tickets.ordenes-trabajo.helpdesk.ejecucion.informacion.index')
+        </div>
+   
+        <div x-show="tab === 'imagenes'">
+            @include('tickets.ordenes-trabajo.helpdesk.ejecucion.imagenes.index')
+        </div>
+        <div x-show="tab === 'firmas'">
+            @include('tickets.ordenes-trabajo.helpdesk.ejecucion.firmas.index')
+        </div>
+        <div x-show="tab === 'informe'">
+            @include('tickets.ordenes-trabajo.helpdesk.ejecucion.informe.index')
+            <div id="loadingSpinner"
+                class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                    role="status">
+                    <span class="w-5 h-5 m-auto mb-10">
+                        <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+   
 
     @elseif ($tipoServicio == 1)
         {{-- Soporte On Site --}}

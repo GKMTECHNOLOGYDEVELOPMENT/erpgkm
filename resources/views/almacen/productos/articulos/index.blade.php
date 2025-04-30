@@ -1,7 +1,20 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
+    <style>
+        .dataTables_length select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            padding-right: 1.5rem;
+            /* Ajusta espacio a la derecha para que el texto no se corte */
+            background-image: none;
+            /* Opcional, elimina cualquier ícono */
+        }
+    </style>
     <div x-data="multipleTable">
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -64,7 +77,23 @@
                 </div>
             </div>
 
-            <table id="myTable1" class="table whitespace-nowrap"></table>
+            <table id="myTable1" class="table whitespace-nowrap">
+                <thead>
+                    <tr>
+                        <th>Foto</th>
+                        <th>Código de Barras</th>
+                        <th>SKU</th>
+                        <th>Nombre</th>
+                        <th>Unidad</th>
+                        <th>Stock Total</th>
+                        <th>Tipo Artículo</th>
+                        <th>Modelo</th>
+                        <th>Estados</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
@@ -389,6 +418,9 @@
             });
         });
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="{{ asset('assets/js/articulos/articulos.js') }}"></script>
     <!-- <script src="{{ asset('assets/js/articulos/articulosValidaciones.js') }}"></script> -->
     <script src="/assets/js/simple-datatables.js"></script>

@@ -1,10 +1,26 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         .panel {
             overflow: visible !important;
             /* Asegura que el modal no restrinja contenido */
+        }
+        #myTable1 {
+            min-width: 1000px;
+            /* puedes ajustar si quieres más ancho */
+        }
+        .dataTables_length select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            padding-right: 1.5rem;
+            /* Ajusta espacio a la derecha para que el texto no se corte */
+            background-image: none;
+            /* Opcional, elimina cualquier ícono */
         }
     </style>
     <div x-data="multipleTable">
@@ -23,7 +39,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
-                    onclick="window.location.href='{{ route('categorias.exportExcel') }}'">
+                        onclick="window.location.href='{{ route('categorias.exportExcel') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -69,7 +85,17 @@
                 </div>
             </div>
 
-            <table id="myTable1" class="table whitespace-nowrap"></table>
+            <table id="myTable1" class="table whitespace-nowrap">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
         </div>
     </div>
 
@@ -142,7 +168,9 @@
             }));
         });
     </script>
-    <script src="/assets/js/simple-datatables.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="{{ asset('assets/js/Categoria/categoria.js') }}"></script>
     <script src="{{ asset('assets/js/Categoria/categoriaStore.js') }}"></script>

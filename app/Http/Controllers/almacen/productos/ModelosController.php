@@ -149,8 +149,18 @@ class ModelosController extends Controller
     public function checkNombre(Request $request)
     {
         $nombre = $request->input('nombre');
-        $exists = Modelo::where('nombre', $nombre)->exists();
-
+        $idMarca = $request->input('idMarca');
+        $idCategoria = $request->input('idCategoria');
+    
+        $exists = Modelo::where('nombre', $nombre)
+            ->where('idMarca', $idMarca)
+            ->where('idCategoria', $idCategoria)
+            ->exists();
+    
         return response()->json(['unique' => !$exists]);
     }
+    
+
+
+    
 }

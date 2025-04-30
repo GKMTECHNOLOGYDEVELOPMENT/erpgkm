@@ -112,7 +112,7 @@
                         <div class="mb-10">
                             <h1 class="text-3xl font-extrabold uppercase !leading-snug md:text-4xl text-[#EA1C1C]">
                                 Iniciar Sesión
-                            </h1>                            
+                            </h1>
                             <p class="text-base font-bold leading-normal text-white-dark">Ingrese su correo electrónico
                                 y contraseña para iniciar sesión</p>
                         </div>
@@ -251,14 +251,16 @@
                         <div class="text-center dark:text-white">
                             Te olvidaste tu contraseña ?
                             <a href="{{ route('auth.password-reset') }}"
-                            class="uppercase text-sm font-bold text-black transition duration-300 ease-in-out hover:text-red-600 hover:underline px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
-                             Resetear Contraseña
-                         </a>
-                         
+                                class="uppercase text-sm font-bold text-black transition duration-300 ease-in-out hover:text-red-600 hover:underline px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
+                                Resetear Contraseña
+                            </a>
+
                         </div>
                     </div>
                     <p class="absolute bottom-6 w-full text-center dark:text-white">
                         © <span id="footer-year">2025</span>. Solutions Force. Todos los derechos reservados.
+                        <a href="{{ route('politicas') }}" target="_blank" class="underline hover:text-gray-400">Ver
+                            Políticas</a>
                     </p>
                 </div>
             </div>

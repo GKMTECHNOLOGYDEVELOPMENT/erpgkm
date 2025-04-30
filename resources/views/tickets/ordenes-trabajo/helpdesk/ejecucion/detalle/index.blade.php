@@ -405,6 +405,12 @@
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
+             <!-- Nrm. Cotizacion -->
+             <div>
+                <label class="text-sm font-medium">Nrm. Cotizacion</label>
+                <input id="nrmcotizacion" name="nrmcotizacion" type="text" class="form-input w-full bg-gray-100" value="{{ $orden->nrmcotizacion }}">
+            </div>
+
             <!-- Botón de Guardar -->
             <div class="md:col-span-2 flex justify-end space-x-4">
                 <a href="{{ route('ordenes.helpdesk') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
@@ -965,6 +971,7 @@ function handleFieldChange(e) {
     });
 </script>
 
+
 <script>
     document.getElementById('idCliente').addEventListener('change', function() {
         var clienteId = this.value; // Obtén el ID del cliente seleccionado
@@ -1081,7 +1088,7 @@ function handleFieldChange(e) {
                 idTienda: $('#idTienda').val(),
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
                 ejecutor: $('#ejecutor').val(), // Capturar el valor del ejecutor
-
+                nrmcotizacion: $('#nrmcotizacion').val(),
             };
 
             // Mostrar los datos del formulario en la consola
@@ -1112,7 +1119,7 @@ function handleFieldChange(e) {
 
             // Enviar datos por AJAX
             $.ajax({
-                url: '/actualizar-orden-soporte/' +
+                url: '/actualizar-orden-ejecucion/' +
                     idOrden, // Pasar el id de la orden en la URL
                 method: 'PUT', // Usar PUT para la actualización
                 data: formData,

@@ -1,5 +1,5 @@
 <x-layout.default>
-
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,6 +13,22 @@
         .selected-items {
             font-size: 0.875rem;
             color: #374151;
+        }
+
+        #myTable1 {
+            min-width: 1000px;
+            /* puedes ajustar si quieres más ancho */
+        }
+        .dataTables_length select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            padding-right: 1.5rem;
+            /* Ajusta espacio a la derecha para que el texto no se corte */
+            background-image: none;
+            /* Opcional, elimina cualquier ícono */
         }
     </style>
     <div x-data="multipleTable">
@@ -75,7 +91,21 @@
                 </div>
             </div>
 
-            <table id="myTable1" class="whitespace-nowrap"></table>
+            <table id="myTable1" class="table whitespace-nowrap">
+                <thead>
+                    <tr>
+                        <th>Tipo Documento</th>
+                        <th>Documento</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Dirección</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
@@ -101,7 +131,7 @@
                         <!-- Formulario -->
                         <form class="p-5 space-y-4" id="clienteForm" enctype="multipart/form-data" method="post">
                             @csrf <!-- Asegúrate de incluir el token CSRF -->
-    
+
                             <!-- Cliente General (Ocupa todo el ancho) -->
                             <div>
                                 <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
@@ -113,13 +143,15 @@
                                     @endforeach
                                 </select>
                             </div>
-    
+
                             <!-- Contenedor para mostrar los seleccionados (Ocupa todo el ancho) -->
                             <div id="selected-items-container">
                                 <strong>Seleccionados:</strong>
-                                <div id="selected-items-list" class="overflow-y-auto border border-gray-300 rounded-md p-2 flex flex-wrap gap-2"></div>
+                                <div id="selected-items-list"
+                                    class="overflow-y-auto border border-gray-300 rounded-md p-2 flex flex-wrap gap-2">
+                                </div>
                             </div>
-    
+
                             <!-- Resto del formulario (en grid de 2 columnas) -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Nombre -->
@@ -130,17 +162,19 @@
                                 </div>
                                 <!-- Tipo Documento -->
                                 <div>
-                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
-                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full" style="display:none">
+                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
+                                        Documento</label>
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full"
+                                        style="display: none;">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}
-                                            </option>
+                                                {{ $tipoDocumento->nombre }}</option>
                                         @endforeach
                                     </select>
+
                                 </div>
-    
+
                                 <!-- Contenedor del switch "Es tienda" -->
                                 <div id="esTiendaContainer" class="hidden mt-4">
                                     <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
@@ -156,7 +190,7 @@
                                         </div>
                                     </div>
                                 </div>
-    
+
                                 <!-- Documento -->
                                 <div>
                                     <label for="documento" class="block text-sm font-medium">Documento</label>
@@ -187,7 +221,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-    
+
                                 <!-- Provincia -->
                                 <div>
                                     <label for="provincia" class="block text-sm font-medium">Provincia</label>
@@ -195,7 +229,7 @@
                                         <option value="" disabled selected>Seleccionar Provincia</option>
                                     </select>
                                 </div>
-    
+
                                 <!-- Distrito -->
                                 <div>
                                     <label for="distrito" class="block text-sm font-medium">Distrito</label>
@@ -240,30 +274,26 @@
         document.addEventListener("DOMContentLoaded", function() {
             // Inicializar nice-select2
             NiceSelect.bind(document.getElementById("idClienteGeneral"));
+            NiceSelect.bind(document.getElementById("idTipoDocumento")); // 🔥 Agregado aquí
 
             const select = document.getElementById('idClienteGeneral');
             const selectedItemsContainer = document.getElementById('selected-items-list');
 
-            // Función para actualizar los seleccionados
             function updateSelectedItems() {
-                selectedItemsContainer.innerHTML = ''; // Limpiar el contenedor
-
-                const selectedOptions = Array.from(select.selectedOptions); // Obtener las opciones seleccionadas
-
+                selectedItemsContainer.innerHTML = '';
+                const selectedOptions = Array.from(select.selectedOptions);
                 selectedOptions.forEach(option => {
                     const badge = document.createElement('span');
                     badge.textContent = option.textContent;
-                    badge.className = 'badge bg-primary'; // Aplicar el estilo del badge
-                    selectedItemsContainer.appendChild(badge); // Agregar el badge al contenedor
+                    badge.className = 'badge bg-primary';
+                    selectedItemsContainer.appendChild(badge);
                 });
             }
 
-            // Escuchar cambios en el select
             select.addEventListener('change', updateSelectedItems);
-
-            // Actualizar los seleccionados al cargar la página
             updateSelectedItems();
         });
+
         document.addEventListener("DOMContentLoaded", function() {
             const tipoDocumento = document.getElementById("idTipoDocumento");
             const esTiendaContainer = document.getElementById("esTiendaContainer");
@@ -280,6 +310,9 @@
             });
         });
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
     <script src="{{ asset('assets/js/cliente/clientestore.js') }}"></script>
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>

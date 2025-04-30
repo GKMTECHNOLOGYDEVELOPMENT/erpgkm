@@ -27,6 +27,7 @@ use App\Http\Controllers\LockscreenController;
 use App\Http\Controllers\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Apps\ChatController;
+use App\Http\Controllers\Politicas\PoliticasController;
 use App\Http\Controllers\Apps\MailboxController;
 use App\Http\Controllers\Apps\TodolistController;
 use App\Http\Controllers\Apps\NotesController;
@@ -115,6 +116,8 @@ Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tiendas.update');
 Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
+Route::delete('/tienda/{idTienda}', [TiendaController::class, 'destroy'])->name('tienda.destroy');
+
 Route::get('/exportar-tiendas', function () {
     return Excel::download(new TiendaExport, 'reporte_tiendas.xlsx');
 })->name('tiendas.exportExcel');
@@ -358,6 +361,10 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('helpdesk/levantamiento/{id}/firmas/{idVisitas}', [OrdenesHelpdeskController::class, 'firmaclienteLeva'])->name('firmacliente.leva');
 
     Route::get('helpdesk/soporte/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteSopo'])->name('firmacliente.sopo');
+
+
+    Route::get('helpdesk/ejecucion/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteEjecucion'])->name('firmacliente.ejecucion');
+
     Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesTrabajoController::class, 'generateInformePdfVisita'])->name('pdfcliente');
 
     Route::get('helpdesk/levantamiento/{idOt}/pdf/{idVisita}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdfVisita'])
@@ -371,6 +378,9 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
 
     Route::get('helpdesk/lab/{id}/firmas/{idVisitas}/', [OrdenesHelpdeskController::class, 'firmaclienteLab'])->name('firmacliente.Lab');
+
+
+    Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('pdfcliente');
 
 
 
@@ -393,7 +403,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/create-helpdesk', [OrdenesHelpdeskController::class, 'createhelpdesk'])->name('createhelpdesk');
     Route::post('/storehelpdesk', [OrdenesHelpdeskController::class, 'storehelpdesk'])->name('storehelpdesk')->middleware('auth');
     Route::get('/helpdesk/levantamiento/{id}/edit', [OrdenesHelpdeskController::class, 'editHelpdesk'])->name('helpdesk.levantamiento.edit');
-    
+
     Route::put('/helpdesk/update/{id}', [OrdenesHelpdeskController::class, 'updateHelpdesk'])->name('helpdesk.update');
     Route::get('/export-helpdesk-excel', [OrdenesHelpdeskController::class, 'exportHelpdeskToExcel'])->name('export.helpdesk.excel');
     Route::get('/helpdesk/get-all', [OrdenesHelpdeskController::class, 'getAll'])->name('helpdesk.getAll');
@@ -401,17 +411,20 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
     Route::get('/helpdesk/soporte/{id}/edit', [OrdenesHelpdeskController::class, 'editSoporte'])
         ->name('helpdesk.soporte.edit');
-
     Route::get('/helpdesk/laboratorio/{id}/edit', [OrdenesHelpdeskController::class, 'ediLaboratorio'])
         ->name('helpdesk.laboratorio.edit');
-
-    Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('helpdesk.pdf.laboratorio');
+    //EJECUCION
+    Route::get('/helpdesk/ejecucion/{id}/edit', [OrdenesHelpdeskController::class, 'editejecucion'])
+        ->name('helpdesk.ejecucion.edit');
 
     Route::get('/helpdesk/pdf/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdf'])
         ->name('helpdesk.pdf.levantamiento');
 
-        
     Route::get('/helpdesk/pdf/soporte/{idOt}', [OrdenesHelpdeskController::class, 'generateSoportePdf'])->name('helpdesk.pdf.soporte');
+
+
+
+    Route::get('/helpdesk/pdf/ejecucion/{idOt}', [OrdenesHelpdeskController::class, 'generateEjecucionPdf'])->name('helpdesk.pdf.ejecucion');
 
 
 
@@ -439,14 +452,21 @@ Route::get('/informe/vista-previa-imagen/{idOt}/{idVisita}', [OrdenesTrabajoCont
 Route::get('/ordenes/helpdesk/soporte/{idOt}/vista-previa/{idVisita}/{tipo?}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])
     ->name('ordenes.helpdesk.soporte.vista-previa.imagen');
 
+Route::get('/ordenes/helpdesk/ejecucion/{idOt}/vista-previa/{idVisita}/{tipo?}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])
+    ->name('ordenes.helpdesk.ejecucion.vista-previa.imagen');
+
+
 Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 'actualizarHelpdesk'])->name('formActualizarOrdenHelpdesk');
 
 Route::put('actualizar-orden-soporte/{id}', [OrdenesHelpdeskController::class, 'actualizarSoporte'])->name('formActualizarOrdenHelpdesk');
+Route::put('actualizar-orden-ejecucion/{id}', [OrdenesHelpdeskController::class, 'actualizarEjecucion'])->name('formActualizarOrdenHelpdesk');
 
 Route::post('ordenes/helpdesk/levantamiento/{id}/guardar-firma/{idVisitas}', [OrdenesHelpdeskController::class, 'guardarFirmaCliente'])
     ->name('helpdesk.levantamiento.guardar-firma');
 
 Route::post('ordenes/helpdesk/soporte/{id}/guardar-firma/{idVisitas}', [OrdenesHelpdeskController::class, 'guardarFirmaCliente']);
+
+Route::post('ordenes/helpdesk/ejecucion/{id}/guardar-firma/{idVisitas}', [OrdenesHelpdeskController::class, 'guardarFirmaCliente']);
 
 
 Route::post('ordenes/smart/{id}/guardar-firma/{idVisitas}', [OrdenesTrabajoController::class, 'guardarFirmaCliente'])
@@ -463,6 +483,10 @@ Route::get('ordenes/smart/{id}/obtener-firma-tecnico', [OrdenesTrabajoController
 
 
 Route::get('ordenes/helpdesk/soporte/{id}/obtener-firma-tecnico', [OrdenesHelpdeskController::class, 'obtenerFirmaTecnico'])
+    ->name('obtener.firma.tecnico')
+    ->middleware('auth');
+
+Route::get('ordenes/helpdesk/ejecucion/{id}/obtener-firma-tecnico', [OrdenesHelpdeskController::class, 'obtenerFirmaTecnico'])
     ->name('obtener.firma.tecnico')
     ->middleware('auth');
 
@@ -570,7 +594,9 @@ Route::post('/tickets/{idTicket}/actualizar-estado', [OrdenesTrabajoController::
 
 Route::post('/guardar-estado', [OrdenesTrabajoController::class, 'guardarEstadoflujo'])->name('guardarEstado');
 
+//politicas
 
+Route::get('/politicas', [PoliticasController::class, 'index'])->name('politicas');
 
 // web.php (Rutas)
 Route::get('/usuario/firma/{idUsuario}', [UsuarioController::class, 'obtenerFirma']);

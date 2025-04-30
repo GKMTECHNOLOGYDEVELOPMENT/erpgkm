@@ -1,10 +1,27 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         .panel {
             overflow: visible !important;
             /* Asegura que el modal no restrinja contenido */
+        }
+
+        #myTable1 {
+            min-width: 1000px;
+            /* puedes ajustar si quieres más ancho */
+        }
+        .dataTables_length select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            padding-right: 1.5rem;
+            /* Ajusta espacio a la derecha para que el texto no se corte */
+            background-image: none;
+            /* Opcional, elimina cualquier ícono */
         }
     </style>
     <div x-data="multipleTable">
@@ -23,7 +40,7 @@
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
-                    onclick="window.location.href='{{ route('modelos.exportExcel') }}'">
+                        onclick="window.location.href='{{ route('modelos.exportExcel') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -37,7 +54,7 @@
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
-                    onclick="window.location.href='{{ route('modelos.export.pdf') }}'">
+                        onclick="window.location.href='{{ route('modelos.export.pdf') }}'">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -69,7 +86,18 @@
                 </div>
             </div>
 
-            <table id="myTable1" class="table whitespace-nowrap"></table>
+            <table id="myTable1" class="table whitespace-nowrap">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Marca</th>
+                        <th>Categoría</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 
@@ -99,12 +127,14 @@
                             <!-- Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                <input id="nombre" name="nombre" class="form-input w-full" placeholder="Ingrese el nombre del modelo" required>
+                                <input id="nombre" name="nombre" class="form-input w-full"
+                                    placeholder="Ingrese el nombre del modelo" required>
                             </div>
                             <!-- Marca -->
                             <div>
                                 <label for="idMarca" class="block text-sm font-medium">Marca</label>
-                                <select id="idMarca" name="idMarca" class="select2 w-full" style="display:none" required>
+                                <select id="idMarca" name="idMarca" class="select2 w-full" style="display:none"
+                                    required>
                                     <option value="" disabled selected>Seleccione la Marca</option>
                                     @foreach ($marcas as $marca)
                                         <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
@@ -114,7 +144,8 @@
                             <!-- Categoría -->
                             <div>
                                 <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
-                                <select id="idCategoria" name="idCategoria" class="select2 w-full" style="display:none" required>
+                                <select id="idCategoria" name="idCategoria" class="select2 w-full"
+                                    style="display:none" required>
                                     <option value="" disabled selected>Seleccione la Categoría</option>
                                     @foreach ($categorias as $categoria)
                                         <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
@@ -123,11 +154,12 @@
                             </div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
-                                <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="open = false">Cancelar</button>
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
                             </div>
                         </form>
-                        
+
                     </div>
                 </div>
             </div>
@@ -136,7 +168,6 @@
 
 
     <script>
-  
         // Inicializar Select2
         document.addEventListener("DOMContentLoaded", function() {
             // Inicializar todos los select con la clase "select2"
@@ -161,7 +192,9 @@
             }));
         });
     </script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="{{ asset('assets/js/Modelos/modelos.js') }}"></script>
     <script src="{{ asset('assets/js/Modelos/modeloStore.js') }}"></script>
     <script src="{{ asset('assets/js/Modelos/modeloValidaciones.js') }}"></script>

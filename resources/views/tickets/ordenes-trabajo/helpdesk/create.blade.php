@@ -171,7 +171,14 @@
                         </div>
                     </div>
 
-
+               <!-- numero cotizacion -->
+              <div id="numeroCotizacionContainer" style="display: none;">
+                        <label class="block text-sm font-medium mb-2">Numero Cotizacion</label>
+                       
+                        <input type="text" id="numerocotizacion" name="nrmcotizacion" class="form-input w-full"
+                        placeholder="Ingrese Nro. Cotizacion">
+                        </label>
+                    </div>
 
 
                     <!-- ¿Es Envío? -->
@@ -295,38 +302,39 @@
                         let selectsInicializados = false;
 
                         function verificarTipoServicio() {
-                            const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
-                            const esEquipoContainer = document.getElementById("esEquipoContainer");
+    const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
+    const esEquipoContainer = document.getElementById("esEquipoContainer");
+    const numeroCotizacionContainer = document.getElementById("numeroCotizacionContainer");
 
-                            if (parseInt(tipoServicio) === 6) {
-                                esEquipoContainer.classList.remove("hidden");
+    if (parseInt(tipoServicio) === 6) {
+        esEquipoContainer.classList.remove("hidden");
 
-                                if (!selectsInicializados) {
-                                    esEquipoContainer.querySelectorAll('select.select2').forEach(function(select) {
-                                        // Si ya existe nice-select renderizado, lo quitamos para evitar duplicado
-                                        const prevNiceSelect = select.nextElementSibling;
-                                        if (prevNiceSelect && prevNiceSelect.classList.contains('nice-select')) {
-                                            prevNiceSelect.remove();
-                                        }
+        if (!selectsInicializados) {
+            esEquipoContainer.querySelectorAll('select.select2').forEach(function(select) {
+                const prevNiceSelect = select.nextElementSibling;
+                if (prevNiceSelect && prevNiceSelect.classList.contains('nice-select')) {
+                    prevNiceSelect.remove();
+                }
+                NiceSelect.bind(select, { searchable: true });
+                select.classList.add('hidden');
+            });
+            selectsInicializados = true;
+        }
+        console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
+    } else {
+        esEquipoContainer.classList.add("hidden");
+        console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
+    }
 
-                                        // Aplica nice select
-                                        NiceSelect.bind(select, {
-                                            searchable: true
-                                        });
+    if (parseInt(tipoServicio) === 5) {
+        numeroCotizacionContainer.style.display = "block";
+        console.log("✅ Mostrando numeroCotizacionContainer (Tipo Servicio = 5)");
+    } else {
+        numeroCotizacionContainer.style.display = "none";
+        console.log("❌ Ocultando numeroCotizacionContainer (Tipo Servicio ≠ 5)");
+    }
+}
 
-                                        // Oculta el <select> original para evitar salto visual
-                                        select.classList.add('hidden');
-                                    });
-
-                                    selectsInicializados = true;
-                                }
-
-                                console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
-                            } else {
-                                esEquipoContainer.classList.add("hidden");
-                                console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
-                            }
-                        }
 
 
 

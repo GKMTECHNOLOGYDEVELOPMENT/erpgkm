@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('modeloForm');
     const nombreInput = document.getElementById('nombre');
+    const idMarcaInput = document.getElementById('idMarca');
+    const idCategoriaInput = document.getElementById('idCategoria');
 
     // Validaciones
-    const validateNombreUnico = async (nombre) => {
+    const validateNombreUnico = async (nombre, idMarca, idCategoria) => {
+        console.log('🔍 Validando nombre único...');
+        console.log('📦 Datos enviados:', { nombre, idMarca, idCategoria });
+
         try {
             const response = await fetch('/api/modelo/check-nombre', {
                 method: 'POST',
@@ -13,11 +18,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     nombre,
+                    idMarca,
+                    idCategoria,
                 }),
             });
+
             const data = await response.json();
-            return data.unique; // true si es único, false si ya existe
+            console.log('✅ Respuesta del servidor:', data);
+
+            return data.unique;
         } catch (error) {
+            console.error('❌ Error en la petición:', error);
             return false;
         }
     };
@@ -27,36 +38,59 @@ document.addEventListener('DOMContentLoaded', () => {
         return value.trim() !== '' && regex.test(value);
     };
 
-    // Escucha de eventos para validaciones en tiempo real
-    nombreInput.addEventListener('input', async () => {
+    // Función reutilizable para validar nombre completo
+    const validarNombreCompleto = async () => {
         const nombre = nombreInput.value;
+        const idMarca = idMarcaInput.value;
+        const idCategoria = idCategoriaInput.value;
+
+        console.log('🛠 Ejecutando validación completa:', { nombre, idMarca, idCategoria });
+
         if (!validateNombre(nombre)) {
+            console.log('❗ Nombre inválido (vacío o con caracteres especiales)');
             nombreInput.setCustomValidity(
                 'El nombre no debe estar vacío ni tener caracteres especiales.',
             );
-        } else if (!(await validateNombreUnico(nombre))) {
-            nombreInput.setCustomValidity('El nombre ya está en uso.');
+        } else if (!(await validateNombreUnico(nombre, idMarca, idCategoria))) {
+            console.log('⚠️ El nombre ya está en uso con esa marca y categoría.');
+            nombreInput.setCustomValidity('Ya existe un modelo con ese nombre, marca y categoría.');
         } else {
+            console.log('✅ Nombre válido y único');
             nombreInput.setCustomValidity('');
         }
-        nombreInput.reportValidity();
-    });
 
-    // Validaciones al enviar el formulario
+        nombreInput.reportValidity();
+    };
+
+    // Validar cuando se escribe el nombre
+    nombreInput.addEventListener('input', validarNombreCompleto);
+
+    // Validar cuando se cambia la marca o categoría
+    idMarcaInput.addEventListener('change', validarNombreCompleto);
+    idCategoriaInput.addEventListener('change', validarNombreCompleto);
+
+    // Validación al enviar el formulario
     form.addEventListener('submit', async (event) => {
         const nombre = nombreInput.value;
+        const idMarca = idMarcaInput.value;
+        const idCategoria = idCategoriaInput.value;
 
-        // Validar el nombre
+        console.log('🚀 Enviando formulario con:', { nombre, idMarca, idCategoria });
+
         if (!validateNombre(nombre)) {
+            console.log('❌ Envío cancelado: nombre inválido');
             event.preventDefault();
             return;
         }
 
-        if (!(await validateNombreUnico(nombre))) {
+        const isUnique = await validateNombreUnico(nombre, idMarca, idCategoria);
+
+        if (!isUnique) {
+            console.log('❌ Envío cancelado: nombre duplicado');
             event.preventDefault();
             return;
         }
 
-        // Si todo es válido, el formulario se enviará
+        console.log('✅ Formulario válido, se enviará');
     });
 });
