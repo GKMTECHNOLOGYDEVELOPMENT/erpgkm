@@ -3021,7 +3021,6 @@ class OrdenesTrabajoController extends Controller
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
         $visitas = collect();
         $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
-
         if ($visitaSeleccionada) {
             $visitas = collect([
                 [
@@ -3034,7 +3033,9 @@ class OrdenesTrabajoController extends Controller
                     'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
                     'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
                     'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
-                    'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado')
+                    'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
+                    'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+
                 ]
             ]);
         }
@@ -3223,6 +3224,7 @@ class OrdenesTrabajoController extends Controller
 
         // 🔹 FORMATEAR VISITAS PARA LA VISTA
         $visitas = collect();
+
         if ($orden->visitas) {
             // Filtrar la visita seleccionada utilizando el idVisitas obtenido anteriormente
             $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
@@ -3242,8 +3244,6 @@ class OrdenesTrabajoController extends Controller
                         'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
                         'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
                         'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
-
-
                     ]
                 ]);
             }

@@ -8,9 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
+            font-family: "Times New Roman", Times, serif !important;
             font-size: 10px;
-            margin: 0;
-            padding: 0;
         }
 
         .red-bg {
@@ -26,7 +25,16 @@
             border-radius: 4px !important;
         }
 
-
+        .indent-paragraph {
+            text-align: left !important;
+            /* alineado a la izquierda */
+            text-indent: 2em !important;
+            /* sangría en primera línea */
+            line-height: 2 !important;
+            /* interlineado 2.0 */
+            margin-bottom: 0 !important;
+            /* sin espacio entre párrafos */
+        }
 
         .table th,
         .table td {
@@ -52,9 +60,9 @@
         }
 
         .img-container img {
-            width: 90% !important;
+            width: 98% !important;
             /* 🔹 Fuerza todas las imágenes a tener el mismo ancho */
-            max-width: 90% !important;
+            max-width: 100% !important;
             height: auto !important;
             max-height: 400px !important;
             /* 🔹 Asegura que las imágenes no sean demasiado altas */
@@ -80,7 +88,6 @@
             width: 100%;
             padding: 6px 10px !important;
             /* Reducir espacio */
-            background-color: white;
             page-break-before: avoid;
             page-break-after: avoid;
         }
@@ -160,9 +167,11 @@
 
             @if (!empty($producto['fallaReportada']))
                 <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
-                <div class="red-bg mt-4 text-left">Falla Reportada</div>
+                <div class="red-bg mt-4 text-left">FALLA REPORTADA</div>
                 <div class="w-full text-xs mt-3">
-                    <p>{{ $producto['fallaReportada'] }}</p>
+                    <p class="uppercase indent-paragraph">
+                        {{ $producto['fallaReportada'] }}
+                    </p>
                 </div>
             @endif
 
@@ -172,7 +181,7 @@
                     OBSERVACIONES DE INGRESO
                 </div>
                 <div class="w-full text-xs">
-                    <p class="text-gray-700 whitespace-pre-line break-words">
+                    <p class="whitespace-pre-line break-words uppercase indent-paragraph">
                         {{ strtoupper($constancia->observaciones) }}
                     </p>
                 </div>
