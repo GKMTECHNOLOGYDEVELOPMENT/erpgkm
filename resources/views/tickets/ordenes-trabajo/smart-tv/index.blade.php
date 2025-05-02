@@ -9,6 +9,26 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <style>
+    .tachado td {
+        text-decoration: line-through !important;
+        color: #999 !important;
+        position: relative;
+    }
+    
+    .tachado::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        
+        pointer-events: none;
+        z-index: 1;
+    }
+</style>
+
+    <style>
         .panel {
             overflow: visible !important;
         }

@@ -4,13 +4,67 @@
     Coordinación
 </span>
 
-<div class="flex gap-1 sm:gap-2 justify-center mt-2" id="botonCoordinacionContainer">
-    <!-- Si no existe el flujo con idEstadflujo = 4, existe una condición para el idTickets y idVisitas, o no existe ninguna visita, mostrar el botón -->
-    <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
-        Coordinación
-    </button>
-</div>
+<style>
+    .boton-tachado {
+    text-decoration: line-through;
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
 
+.boton-tachado::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(255,0,0,0.2) 2px,
+        rgba(255,0,0,0.2) 4px
+    );
+}
+</style>
+<div class="flex gap-1 sm:gap-2 justify-center mt-2" id="botonCoordinacionContainer">
+    @if($idEstadflujo != 33)
+        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
+            Coordinación
+        </button>
+    @else
+        <button disabled class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base" style="text-decoration: line-through; opacity: 0.6; pointer-events: none;">
+            <s>Coordinación</s>
+        </button>
+    @endif
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const idEstadflujo = @json($idEstadflujo);
+    const boton = document.getElementById('crearCordinacionBtn');
+    
+    if(idEstadflujo === 33 && boton) {
+        boton.style.textDecoration = 'line-through';
+        boton.style.opacity = '0.6';
+        boton.disabled = true;
+        boton.innerHTML = '<s>' + boton.textContent + '</s>';
+        
+        // Opcional: agregar rayado diagonal
+        const rayado = document.createElement('div');
+        rayado.style.position = 'absolute';
+        rayado.style.top = '0';
+        rayado.style.left = '0';
+        rayado.style.right = '0';
+        rayado.style.bottom = '0';
+        rayado.style.background = 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,0,0,0.2) 2px, rgba(255,0,0,0.2) 4px)';
+        rayado.style.pointerEvents = 'none';
+        
+        boton.style.position = 'relative';
+        boton.appendChild(rayado);
+    }
+});
+</script>
 <script>
     // Pasamos el valor de 'ultimaVisitaConEstado1' desde Laravel a JavaScript
     var ultimaVisitaConEstado1 = @json($ultimaVisitaConEstado1);

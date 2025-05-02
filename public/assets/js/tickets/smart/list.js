@@ -215,16 +215,19 @@ document.addEventListener('alpine:init', () => {
                         previous: 'Anterior'
                     }
                 },
-
                 rowCallback: (row, data) => {
                     const estadoColor = data.ticketflujo?.estadoflujo?.color || '';
-
+                
+                    // Aplicar color de fondo según el estado
                     if (estadoColor) {
                         $(row)
                             .addClass('estado-bg')
-                            .attr('data-bg', estadoColor); // Guarda el color en un atributo
+                            .attr('data-bg', estadoColor);
                     }
+                
+                  
                 },
+                
 
                 drawCallback: () => {
                     $('#myTable1 tbody tr.estado-bg').each(function () {

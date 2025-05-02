@@ -35,6 +35,7 @@ use App\Models\TransicionStatusTicket;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Browsershot\Browsershot;
 use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Str;
 use App\Exports\OrdenesHelpdeskExport;
 
@@ -2616,94 +2617,60 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-    private function optimizeBase64Image($base64String, $quality = 60, $maxWidth = 800)
+    private function optimizeBase64Image($base64String, $calidad = 70, $destinoAncho = 700, $destinoAlto = 450)
     {
         if (!$base64String) return null;
-
-        // Extraer el tipo de imagen
+    
         if (!preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches)) {
-            return $base64String; // Si no es imagen base64 válida, devolverla sin cambios
-        }
-
-        $imageType = strtolower($matches[1]); // Convertir a minúsculas (jpeg, png, webp)
-
-        // Decodificar la imagen base64
-        $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
-
-        // Evitar errores con imágenes corruptas
-        if (!$imageData) {
-            \Log::error("Error al decodificar imagen base64.");
             return $base64String;
         }
-
-        // Crear la imagen desde la cadena binaria
-        $image = @imagecreatefromstring($imageData);
-        if (!$image) {
-            \Log::error("Error al procesar la imagen con imagecreatefromstring.");
-            return $base64String; // Retornar imagen original si no se puede procesar
+    
+        $datosImagen = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
+        $origen = @imagecreatefromstring($datosImagen);
+        if (!$origen) return $base64String;
+    
+        $anchoOriginal = imagesx($origen);
+        $altoOriginal = imagesy($origen);
+    
+        // 🔁 Rotar si es vertical
+        if ($altoOriginal > $anchoOriginal) {
+            $origen = imagerotate($origen, -90, 0);
+            $anchoOriginal = imagesx($origen);
+            $altoOriginal = imagesy($origen);
         }
-
-        // Obtener dimensiones
-        $width = imagesx($image);
-        $height = imagesy($image);
-        $newWidth = min($width, $maxWidth);
-        $newHeight = ($height / $width) * $newWidth; // Mantener proporción
-
-        // Crear nueva imagen con transparencia si es PNG
-        $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
-        if ($imageType === 'png') {
-            imagealphablending($resizedImage, false);
-            imagesavealpha($resizedImage, true);
-            $transparent = imagecolorallocatealpha($resizedImage, 255, 255, 255, 127);
-            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $transparent);
-        } else {
-            $background = imagecolorallocate($resizedImage, 255, 255, 255); // Blanco para JPG
-            imagefilledrectangle($resizedImage, 0, 0, $newWidth, $newHeight, $background);
-        }
-
-        // Redimensionar imagen
-        imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-
-        // Convertir y optimizar
+    
+        // 🖼️ Redimensionar directamente al tamaño deseado (aunque deforme un poco si es necesario)
+        $resized = imagecreatetruecolor($destinoAncho, $destinoAlto);
+        imagealphablending($resized, false);
+        imagesavealpha($resized, true);
+        $transparente = imagecolorallocatealpha($resized, 0, 0, 0, 127);
+        imagefilledrectangle($resized, 0, 0, $destinoAncho, $destinoAlto, $transparente);
+        imagecopyresampled($resized, $origen, 0, 0, 0, 0, $destinoAncho, $destinoAlto, $anchoOriginal, $altoOriginal);
+    
         ob_start();
-        if ($imageType === 'png') {
-            imagepng($resizedImage, null, 9); // Mantener transparencia y alta compresión
-            $optimizedType = 'png';
-        } elseif ($imageType === 'jpeg' || $imageType === 'jpg') {
-            imagejpeg($resizedImage, null, $quality);
-            $optimizedType = 'jpeg';
-        } else {
-            imagewebp($resizedImage, null, $quality); // WebP para imágenes no compatibles
-            $optimizedType = 'webp';
-        }
-        $compressedImage = ob_get_clean();
-
-        // Liberar memoria
-        imagedestroy($image);
-        imagedestroy($resizedImage);
-
-        // Retornar imagen optimizada en base64
-        return "data:image/{$optimizedType};base64," . base64_encode($compressedImage);
+        imagewebp($resized, null, $calidad);
+        $contenido = ob_get_clean();
+    
+        imagedestroy($origen);
+        imagedestroy($resized);
+    
+        return 'data:image/webp;base64,' . base64_encode($contenido);
     }
 
 
     public function procesarLogoMarca($imagenRaw)
     {
-        $manager = new ImageManager(); // crear instancia
+        $manager = new ImageManager(new Driver());
 
-        $img = $manager->make($imagenRaw);
+        $img = $manager->read($imagenRaw); // 👈 CAMBIO IMPORTANT
 
-        // Redimensionar manteniendo proporciones, sin deformar
-        $img->resize(256, 160, function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
+        $img = $img->scaleDown(width: 256, height: 160); // Este método respeta proporciones
 
-        $canvas = $manager->canvas(256, 160, '#FFFFFF');
+        $canvas = $manager->create(256, 160, 'ffffff'); // 👈 nuevo método en v3
 
-        $canvas->insert($img, 'center');
+        $canvas->place($img, 'center');
 
-        return 'data:image/png;base64,' . base64_encode($canvas->encode('png'));
+        return 'data:image/png;base64,' . base64_encode($canvas->toPng());
     }
 
     public function generateLevantamientoPdf($idOt)

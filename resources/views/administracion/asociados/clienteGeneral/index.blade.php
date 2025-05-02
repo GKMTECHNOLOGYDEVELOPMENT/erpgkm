@@ -76,7 +76,8 @@
                 </div>
             </div>
 
-            <table id="myTable1" class="table whitespace-nowrap">
+            <table id="myTable1" class="w-full min-w-[1000px] table whitespace-nowrap">
+
                 <thead>
                     <tr>
                         <th>Descripción</th>

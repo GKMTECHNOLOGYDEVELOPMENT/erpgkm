@@ -357,7 +357,8 @@ fetch(`/api/actualizar/visitas/${idVisita}`, {
 visitaCard.appendChild(detailsButton);
 
   
-  
+console.log(`visita.recojo para visita ID ${visita.idVisitas}:`, visita.recojo);
+
   
   
           // Tarjeta de Técnico en Desplazamiento con el botón de "like"
