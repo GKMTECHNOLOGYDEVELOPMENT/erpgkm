@@ -12,7 +12,6 @@ document.addEventListener("alpine:init", () => {
                 if (!res.ok) throw new Error("Error al obtener datos del servidor");
 
                 const data = await res.json();
-                console.log("Datos de proveedores:", data);
 
                 this.datatable1 = $('#myTable1').DataTable({
                     data,
@@ -22,18 +21,11 @@ document.addEventListener("alpine:init", () => {
                         { data: 'nombre', className: 'text-center', render: nombre => nombre || 'N/A' },
                         { data: 'telefono', className: 'text-center', render: telefono => telefono || 'N/A' },
                         { data: 'email', className: 'text-center', render: email => email || 'N/A' },
-                        { 
-                            data: 'idArea', 
-                            className: 'text-center', 
-                            render: area => area || 'N/A' 
-                        },
-                        { 
-                            data: 'direccion', 
-                            className: 'text-center', 
-                            render: direccion => `
-                                <div style="max-width: 250px; overflow-wrap: break-word; white-space: normal; margin: 0 auto;">
-                                    ${direccion || 'N/A'}
-                                </div>`
+                        { data: 'idArea', className: 'text-center', render: area => area || 'N/A' },
+                        {
+                            data: 'direccion',
+                            className: 'text-center',
+                            render: direccion => `<div style="max-width: 250px; overflow-wrap: break-word; white-space: normal; margin: 0 auto;">${direccion || 'N/A'}</div>`
                         },
                         {
                             data: 'estado',
@@ -87,25 +79,52 @@ document.addEventListener("alpine:init", () => {
                     },
                     dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
                     initComplete: function () {
-                        const dataTableWrapper = document.querySelector('.dataTables_wrapper');
-                
+                        const wrapper = document.querySelector('.dataTables_wrapper');
+                        const table = wrapper.querySelector('#myTable1');
+
+                        const scrollContainer = document.createElement('div');
+                        scrollContainer.className = 'dataTables_scrollable overflow-x-auto border border-gray-200 rounded-md mb-3';
+                        table.parentNode.insertBefore(scrollContainer, table);
+                        scrollContainer.appendChild(table);
+
+                        const scrollTop = document.createElement('div');
+                        scrollTop.className = 'dataTables_scrollTop overflow-x-auto mb-2';
+                        scrollTop.style.height = '14px';
+
+                        const topInner = document.createElement('div');
+                        topInner.style.width = scrollContainer.scrollWidth + 'px';
+                        topInner.style.height = '1px';
+                        scrollTop.appendChild(topInner);
+
+                        scrollTop.addEventListener('scroll', () => {
+                            scrollContainer.scrollLeft = scrollTop.scrollLeft;
+                        });
+                        scrollContainer.addEventListener('scroll', () => {
+                            scrollTop.scrollLeft = scrollContainer.scrollLeft;
+                        });
+
+                        wrapper.insertBefore(scrollTop, scrollContainer);
+
                         const floatingControls = document.createElement('div');
                         floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
-                        floatingControls.style.position = 'sticky';
-                        floatingControls.style.bottom = '0';
-                        floatingControls.style.left = '0';
-                        floatingControls.style.width = '100%';
-                        floatingControls.style.zIndex = '10';
-                
-                        const info = dataTableWrapper.querySelector('.dataTables_info');
-                        const length = dataTableWrapper.querySelector('.dataTables_length');
-                        const paginate = dataTableWrapper.querySelector('.dataTables_paginate');
-                
-                        floatingControls.appendChild(info);
-                        floatingControls.appendChild(length);
-                        floatingControls.appendChild(paginate);
-                
-                        dataTableWrapper.appendChild(floatingControls);
+                        Object.assign(floatingControls.style, {
+                            position: 'sticky',
+                            bottom: '0',
+                            left: '0',
+                            width: '100%',
+                            zIndex: '10'
+                        });
+
+                        const info = wrapper.querySelector('.dataTables_info');
+                        const length = wrapper.querySelector('.dataTables_length');
+                        const paginate = wrapper.querySelector('.dataTables_paginate');
+
+                        if (info && length && paginate) {
+                            floatingControls.appendChild(info);
+                            floatingControls.appendChild(length);
+                            floatingControls.appendChild(paginate);
+                            wrapper.appendChild(floatingControls);
+                        }
                     }
                 });
 
