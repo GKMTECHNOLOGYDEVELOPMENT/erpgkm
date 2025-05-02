@@ -19,6 +19,36 @@
         /* text-sm */
     }
 </style>
+<style>
+    /* Estilo cuando el formulario está "tachado" */
+    .formulario-tachado {
+        position: relative;
+    }
+    
+    .formulario-tachado * {
+        text-decoration: line-through;
+        color: #999 !important;
+    }
+    
+    /* Opcional: Efecto de rayado diagonal en el fondo */
+    .formulario-tachado::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+   
+        pointer-events: none;
+        z-index: 1;
+    }
+    
+    /* Deshabilitar interacción */
+    .formulario-tachado form {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+</style>
 <!-- Contenedor Alpine.js para el botón y el modal -->
 <div x-data="{ openModal: false }">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full text-center sm:text-left">
@@ -313,7 +343,7 @@
 
 
 
-<div class="p-6 mt-4">
+<div class="p-6 mt-4 @if($idEstadflujo == 33) formulario-tachado @endif">
     <form id="tuFormulario" action="formActualizarOrden" enctype="multipart/form-data" method="POST">
         @CSRF
 
@@ -441,12 +471,43 @@
                 <a href="{{ route('ordenes.smart') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
 
                 <!-- Botón de Modificar -->
-                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
-            </div>
+                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto" 
+        @if($idEstadflujo == 33) disabled @endif>
+    Modificar
+</button>            </div>
         </div>
     </form>
 </div>
 
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const idEstadflujo = @json($idEstadflujo);
+    
+    if(idEstadflujo === 33) {
+        const form = document.getElementById('tuFormulario');
+        
+        // Aplicar tachado a todos los elementos de texto
+        const textElements = form.querySelectorAll('label, input, select, textarea, button, span, div');
+        textElements.forEach(el => {
+            el.style.textDecoration = 'line-through';
+            el.style.color = '#999';
+        });
+        
+        // Deshabilitar todos los inputs
+        const inputs = form.querySelectorAll('input, select, textarea, button');
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+        
+        // Agregar mensaje
+        const warning = document.createElement('div');
+        warning.className = 'text-center mt-4 text-red-500 font-bold';
+        warning.textContent = '⚠️ Este formulario no puede ser modificado';
+        form.parentNode.insertBefore(warning, form.nextSibling);
+    }
+});
+</script>
 
 
 
@@ -812,7 +873,9 @@
         // Pasa los estados de flujo desde Blade a JavaScript
         const estadosFlujo = @json($estadosFlujo);
         console.log("Estados de flujo cargados:", estadosFlujo);
-
+        // Mostrar idEstadflujo actual
+        const idEstadflujo = @json($idEstadflujo);
+        console.log("idEstadflujo actual:", idEstadflujo);
         // Función para obtener el ID del estado a partir de la descripción
         function getStateId(stateDescription) {
             console.log("Buscando ID para estado:", stateDescription);
