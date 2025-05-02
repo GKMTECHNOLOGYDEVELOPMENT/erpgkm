@@ -13,7 +13,7 @@ document.addEventListener('alpine:init', () => {
                 const data = await res.json();
 
                 jQuery.fn.DataTable.ext.type.search.string = function (data) {
-                    return !data ? '' : typeof data === 'string' ? data.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : data;
+                    return !data ? '' : typeof data === 'string' ? data.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase() : data;
                 };
 
                 this.datatable1 = $('#myTable1').DataTable({
@@ -84,29 +84,55 @@ document.addEventListener('alpine:init', () => {
                         }
                     },
                     dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
+                    initComplete: function () {
+                        const wrapper = document.querySelector('.dataTables_wrapper');
+                        const table = wrapper.querySelector('#myTable1');
+
+                        const scrollContainer = document.createElement('div');
+                        scrollContainer.className = 'dataTables_scrollable overflow-x-auto border border-gray-200 rounded-md mb-3';
+                        table.parentNode.insertBefore(scrollContainer, table);
+                        scrollContainer.appendChild(table);
+
+                        const scrollTop = document.createElement('div');
+                        scrollTop.className = 'dataTables_scrollTop overflow-x-auto mb-2';
+                        scrollTop.style.height = '14px';
+
+                        const topInner = document.createElement('div');
+                        topInner.style.width = scrollContainer.scrollWidth + 'px';
+                        topInner.style.height = '1px';
+                        scrollTop.appendChild(topInner);
+
+                        scrollTop.addEventListener('scroll', () => {
+                            scrollContainer.scrollLeft = scrollTop.scrollLeft;
+                        });
+                        scrollContainer.addEventListener('scroll', () => {
+                            scrollTop.scrollLeft = scrollContainer.scrollLeft;
+                        });
+
+                        wrapper.insertBefore(scrollTop, scrollContainer);
+
+                        const floatingControls = document.createElement('div');
+                        floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
+                        Object.assign(floatingControls.style, {
+                            position: 'sticky',
+                            bottom: '0',
+                            left: '0',
+                            width: '100%',
+                            zIndex: '10'
+                        });
+
+                        const info = wrapper.querySelector('.dataTables_info');
+                        const length = wrapper.querySelector('.dataTables_length');
+                        const paginate = wrapper.querySelector('.dataTables_paginate');
+
+                        if (info && length && paginate) {
+                            floatingControls.appendChild(info);
+                            floatingControls.appendChild(length);
+                            floatingControls.appendChild(paginate);
+                            wrapper.appendChild(floatingControls);
+                        }
+                    }
                 });
-                // Hacer flotante la barra de paginación + info + mostrar registros
-                const dataTableWrapper = document.querySelector('.dataTables_wrapper');
-
-                const floatingControls = document.createElement('div');
-                floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
-                floatingControls.style.position = 'sticky';
-                floatingControls.style.bottom = '0';
-                floatingControls.style.left = '0';
-                floatingControls.style.width = '100%';
-                floatingControls.style.zIndex = '10';
-
-                const info = dataTableWrapper.querySelector('.dataTables_info');
-                const length = dataTableWrapper.querySelector('.dataTables_length');
-                const paginate = dataTableWrapper.querySelector('.dataTables_paginate');
-
-                // Mover los elementos a la nueva barra flotante
-                floatingControls.appendChild(info);
-                floatingControls.appendChild(length);
-                floatingControls.appendChild(paginate);
-
-                // Insertarlo al final del contenedor
-                dataTableWrapper.appendChild(floatingControls);
 
             } catch (e) {
                 console.error('Error al inicializar DataTable:', e);
