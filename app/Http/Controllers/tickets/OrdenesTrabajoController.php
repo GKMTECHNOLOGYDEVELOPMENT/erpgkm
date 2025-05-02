@@ -2899,72 +2899,48 @@ class OrdenesTrabajoController extends Controller
         ]);
     }
 
-    private function optimizeBase64Image($base64String, $calidad = 70, $destinoAncho = 600, $destinoAlto = 400)
+    private function optimizeBase64Image($base64String, $calidad = 70, $destinoAncho = 700, $destinoAlto = 450)
     {
         if (!$base64String) return null;
-
-        // Verificar que es una imagen base64 válida
+    
         if (!preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches)) {
             return $base64String;
         }
-
+    
         $datosImagen = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
         $origen = @imagecreatefromstring($datosImagen);
         if (!$origen) return $base64String;
-
+    
         $anchoOriginal = imagesx($origen);
         $altoOriginal = imagesy($origen);
-
-        // 🔁 Rotar si la imagen es vertical
+    
+        // 🔁 Rotar si es vertical
         if ($altoOriginal > $anchoOriginal) {
             $origen = imagerotate($origen, -90, 0);
             $anchoOriginal = imagesx($origen);
             $altoOriginal = imagesy($origen);
         }
-
-        // 📐 Calcular proporciones
-        $ratioOriginal = $anchoOriginal / $altoOriginal;
-        $ratioDestino = $destinoAncho / $destinoAlto;
-
-        if ($ratioOriginal > $ratioDestino) {
-            $nuevoAncho = $destinoAncho;
-            $nuevoAlto = intval($destinoAncho / $ratioOriginal);
-        } else {
-            $nuevoAlto = $destinoAlto;
-            $nuevoAncho = intval($destinoAlto * $ratioOriginal);
-        }
-
-        // 🎯 Crear imagen redimensionada con fondo transparente
-        $resized = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
+    
+        // 🖼️ Redimensionar directamente al tamaño deseado (aunque deforme un poco si es necesario)
+        $resized = imagecreatetruecolor($destinoAncho, $destinoAlto);
         imagealphablending($resized, false);
         imagesavealpha($resized, true);
         $transparente = imagecolorallocatealpha($resized, 0, 0, 0, 127);
-        imagefilledrectangle($resized, 0, 0, $nuevoAncho, $nuevoAlto, $transparente);
-        imagecopyresampled($resized, $origen, 0, 0, 0, 0, $nuevoAncho, $nuevoAlto, $anchoOriginal, $altoOriginal);
-
-        // 🖼️ Canvas final del tamaño deseado
-        $canvas = imagecreatetruecolor($destinoAncho, $destinoAlto);
-        imagealphablending($canvas, false);
-        imagesavealpha($canvas, true);
-        $transparente = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
-        imagefilledrectangle($canvas, 0, 0, $destinoAncho, $destinoAlto, $transparente);
-
-        $destX = intval(($destinoAncho - $nuevoAncho) / 2);
-        $destY = intval(($destinoAlto - $nuevoAlto) / 2);
-        imagecopy($canvas, $resized, $destX, $destY, 0, 0, $nuevoAncho, $nuevoAlto);
-
-        // 🧭 Convertir a WebP optimizado
+        imagefilledrectangle($resized, 0, 0, $destinoAncho, $destinoAlto, $transparente);
+        imagecopyresampled($resized, $origen, 0, 0, 0, 0, $destinoAncho, $destinoAlto, $anchoOriginal, $altoOriginal);
+    
         ob_start();
-        imagewebp($canvas, null, $calidad);
+        imagewebp($resized, null, $calidad);
         $contenido = ob_get_clean();
-
-        // 🧹 Liberar recursos
+    
         imagedestroy($origen);
         imagedestroy($resized);
-        imagedestroy($canvas);
-
+    
         return 'data:image/webp;base64,' . base64_encode($contenido);
     }
+    
+    
+    
 
 
 

@@ -52,16 +52,11 @@
         }
 
         .img-container img {
-            width: 90% !important;
-            /* 🔹 Fuerza todas las imágenes a tener el mismo ancho */
-            max-width: 90% !important;
-            height: auto !important;
-            max-height: 400px !important;
-            /* 🔹 Asegura que las imágenes no sean demasiado altas */
-            object-fit: cover !important;
-            /* 🔹 Mantiene el recorte sin deformar */
+            width: 750px !important;
+            height: 450px !important;
+            object-fit: fill !important;
             display: block;
-            margin: 20px auto 0 auto !important;
+            margin: 6px auto 0 auto !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
         }
@@ -292,7 +287,7 @@
                     <h2>ANEXOS</h2>
                 </div>
 
-                <div class="mt-4">
+                <div>
                     @php
                         $contador = 0;
                         $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
@@ -315,7 +310,7 @@
                                 @endif
 
                                 <!-- Imagen centrada -->
-                                <div class="img-container mb-6">
+                                <div class="img-container mb-2">
                                     <img src="{{ $anexo['foto_base64'] }}" alt="Imagen de la visita">
                                 </div>
 

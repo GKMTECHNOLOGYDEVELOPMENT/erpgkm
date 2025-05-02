@@ -62,11 +62,10 @@
         }
 
         .img-container img {
-            width: auto !important;
-            object-fit: cover !important;
-            /* Evita fondo gris o negro si la imagen es transparente */
+            width: 750px !important;
+            height: 450px !important;
+            object-fit: fill !important;
             display: block;
-            margin: 20px auto 0 auto !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
         }
@@ -221,7 +220,7 @@
                     <h2>ANEXOS</h2>
                 </div>
 
-                <div class="mt-4">
+                <div>
                     @php $contador = 0; @endphp
 
                     {{-- 🔴 Imágenes de condiciones --}}
@@ -252,15 +251,15 @@
                 @foreach ($imagenesFotosTickets as $fotoTicket)
                     @if (!empty($fotoTicket['foto_base64']))
                         @if ($contador % 2 == 0)
-                            <div class="flex flex-col justify-center items-center min-h-[100vh] py-8"
+                            <div class="flex flex-col justify-center items-center min-h-[100vh] py-6"
                                 @if ($contador > 0) style="page-break-before: always;" @endif>
                         @endif
 
-                        <div class="img-container mb-6">
+                        <div class="img-container mb-2">
                             <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del ticket">
                         </div>
 
-                        <p class="text-sm text-center text-gray-700 font-semibold mt-2">
+                        <p class="text-sm text-center text-gray-700 font-semibold mb-2">
                             {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
                         </p>
 
