@@ -227,7 +227,7 @@ document.addEventListener('alpine:init', () => {
                     }
 
                     // ✅ Si el estado es ANULADO (id = 33), aplica tachado a los <td>
-                    if (estadoId === 33) {
+                    if (estadoId === 34) {
                         $(row).find('td').css({
                             'text-decoration': 'line-through',
                             'opacity': '0.7'
@@ -292,7 +292,7 @@ document.addEventListener('alpine:init', () => {
 
         toggleRowDetails(id) {
             let currentRow = $(`#myTable1 tbody button[data-id="${id}"]`).closest('tr');
-        
+
             if (currentRow.next().hasClass('expanded-row')) {
                 currentRow.next().remove();
             } else {
@@ -303,29 +303,29 @@ document.addEventListener('alpine:init', () => {
                     const justificacionItem = transiciones.find(
                         t => t.idVisitas === ultimaVisitaId && t.idEstadoots === 3
                     );
-        
+
                     const justificacion = justificacionItem?.justificacion || 'N/A';
                     const estadoColor = record.ticketflujo?.estadoflujo?.color || '';
                     const estadoDescripcion = record.ticketflujo?.estadoflujo?.descripcion || 'N/A';
                     const tecnicoNombre = record.seleccionar_visita?.visita?.tecnico?.Nombre || 'N/A';
                     const estadoId = record.ticketflujo?.estadoflujo?.idEstadflujo || 0;
-        
+
                     const newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
-        
+
                     // ✅ Aplica fondo y color
                     newRow.find('td').css({
                         'background-color': estadoColor,
                         'color': 'black'
                     });
-        
+
                     // ✅ Si está anulado, aplica tachado
-                    if (estadoId === 33) {
+                    if (estadoId === 34) {
                         newRow.find('td').css({
                             'text-decoration': 'line-through',
                             'opacity': '0.7'
                         });
                     }
-        
+
                     newRow.find('td').html(`
                         <div class="p-2" style="font-size: 13px;">
                             <ul>
@@ -335,12 +335,12 @@ document.addEventListener('alpine:init', () => {
                             </ul>
                         </div>
                     `);
-        
+
                     currentRow.after(newRow);
                 }
             }
         }
-        
+
     }));
 
     function formatDate(dateString) {
