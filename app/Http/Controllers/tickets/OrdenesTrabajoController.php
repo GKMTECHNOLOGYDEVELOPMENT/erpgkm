@@ -1572,6 +1572,7 @@ class OrdenesTrabajoController extends Controller
             'idModelo' => 'required|exists:modelo,idModelo',
             'serie' => 'required|string|max:255',
             'fechaCompra' => 'required|date',
+            'fechaCreacion' => 'required|date_format:Y-m-d H:i:s',
             'fallaReportada' => 'nullable|string',
             'erma' => 'nullable|string|max:255',
         ]);
@@ -1591,6 +1592,7 @@ class OrdenesTrabajoController extends Controller
         $orden->idModelo = $request->idModelo;
         $orden->serie = $request->serie;
         $orden->fechaCompra = $request->fechaCompra;
+        $orden->fecha_creacion = $request->fechaCreacion;
         $orden->fallaReportada = $request->fallaReportada;
         $orden->erma = $request->erma;
 
