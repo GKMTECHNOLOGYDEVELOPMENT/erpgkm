@@ -271,6 +271,7 @@ Route::prefix('articulos')->name('articulos.')->group(function () {
     Route::get('/create', [ArticulosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [ArticulosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [ArticulosController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/detalles', [ArticulosController::class, 'detalle'])->name('detalles'); // Editar un artículo
     Route::put('/update/{id}', [ArticulosController::class, 'update'])->name('update'); // Actualizar un artículo
     Route::delete('/{id}', [ArticulosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
     Route::get('/export-pdf', [ArticulosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF

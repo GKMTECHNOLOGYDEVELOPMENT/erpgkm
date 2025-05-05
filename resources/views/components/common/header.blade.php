@@ -1267,44 +1267,57 @@
 
 
 
+// Método para obtener las solicitudes desde la API de Laravel
+obtenerSolicitudes() {
+    fetch('/api/solicitudentrega')  // La URL de la API de Laravel
+        .then(response => response.json())
+        .then(data => {
+            this.notifications = data.map(solicitud => {
+                // Determinar el tipo de servicio basado en idTipoServicio
+                let tipoServicio = solicitud.idTipoServicio === 1
+                    ? 'Solicitud de entrega'
+                    : solicitud.idTipoServicio === 2
+                    ? 'Pendiente por programación'
+                    : solicitud.idTipoServicio === 3
+                    ? 'Ingreso a laboratorio'
+                    : solicitud.idTipoServicio === 4
+                    ? 'Observación de asistencia'  // Agregar este caso para idTipoServicio == 4
+                    : 'Tipo desconocido';
 
-   // Método para obtener las solicitudes desde la API de Laravel
-            obtenerSolicitudes() {
-                fetch('/api/solicitudentrega')  // La URL de la API de Laravel
-                    .then(response => response.json())
-                    .then(data => {
-                        this.notifications = data.map(solicitud => {
-    let tipoServicio = solicitud.idTipoServicio === 1
-        ? 'Solicitud de entrega'
-        : solicitud.idTipoServicio === 2
-        ? 'Pendiente por programación'
-        : solicitud.idTipoServicio === 3
-        ? 'Ingreso a laboratorio'
-        : 'Tipo desconocido';
+                // Mensaje para el chofer si idTipoServicio es 1
+                let choferMensaje = solicitud.idTipoServicio === 1
+                    ? `El Chofer ${solicitud.nombre_usuario ?? 'Desconocido'} envió una solicitud.<br><br>`
+                    : '';
 
-    let choferMensaje = solicitud.idTipoServicio === 1
-        ? `El Chofer ${solicitud.nombre_usuario ?? 'Desconocido'} envió una solicitud.<br><br>`
-        : '';
+                // Construir el mensaje base
+                let mensaje = `<strong class="text-sm mr-1">${tipoServicio}</strong><br>
+                    ${choferMensaje}`;
 
-    return {
-        id: solicitud.idSolicitudentrega,
-        idTickets: solicitud.idTickets,
-        profile: 'user-profile.jpeg',
-        tipoServicio: tipoServicio,
-        message: `<strong class="text-sm mr-1">${tipoServicio}</strong><br>
-        ${choferMensaje}
-        <strong class="text-sm mr-1">Numero Ticket</strong><br>
-        ${solicitud.numero_ticket}`,
-        time: solicitud.fechaHora
-    };
-});
+                // Si el idTipoServicio es 4, agregar el comentario
+                if (solicitud.idTipoServicio === 4) {
+                    mensaje += `<strong class="text-sm mr-1">Comentario</strong><br>
+                        ${solicitud.comentario}`;
+                }
 
+                // Si el idTipoServicio no es 4, añadir el número de ticket
+                if (solicitud.idTipoServicio !== 4) {
+                    mensaje += `<strong class="text-sm mr-1">Numero Ticket</strong><br>
+                        ${solicitud.numero_ticket}`;
+                }
 
+                return {
+                    id: solicitud.idSolicitudentrega,
+                    idTickets: solicitud.idTickets,
+                    profile: 'user-profile.jpeg',
+                    tipoServicio: tipoServicio,
+                    message: mensaje,
+                    time: solicitud.fechaHora
+                };
+            });
+        })
+        .catch(error => console.error('Error al obtener las solicitudes:', error));
+},
 
-
-                    })
-                    .catch(error => console.error('Error al obtener las solicitudes:', error));
-            },
 
 
             aceptarNotificacion(id) {

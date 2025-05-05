@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Articulo;
 use App\Models\Modelo;
 use App\Models\Moneda;
+use App\Models\Tipoarea;
 use App\Models\Tipoarticulo;
 use App\Models\Unidad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class ArticulosController extends Controller
 {
@@ -44,6 +46,7 @@ class ArticulosController extends Controller
     public function store(Request $request)
     {
         try {
+            // Validación de datos
             $validatedData = $request->validate([
                 'codigo_barras' => 'nullable|string|max:255',
                 'nombre' => 'nullable|string|max:255',
@@ -62,27 +65,45 @@ class ArticulosController extends Controller
                 'idTipoArticulo' => 'nullable|integer',
                 'idModelo' => 'nullable|integer',
             ]);
-    
+            
+            // Asignación de valores por defecto
             $dataArticulo = $validatedData;
             $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
-    
+            
+            // Crear el artículo
             $articulo = Articulo::create($dataArticulo);
     
-            if ($request->hasFile('foto')) {
-                $extension = $request->file('foto')->getClientOriginalExtension();
-                $fileName = uniqid() . '.' . $extension;
-                $directory = "img/articulos/{$articulo->idArticulos}";
-                $path = $request->file('foto')->storeAs($directory, $fileName, 'public');
-                $articulo->update(['foto' => "storage/$path"]);
+            // Generar y guardar el código de barras para 'codigo_barras' como binario
+            if (!empty($dataArticulo['codigo_barras'])) {
+                $barcodeGenerator = new BarcodeGeneratorPNG();
+                $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
+                $fotoCodigobarrasBinario = $barcode; // El código de barras ya es binario
+                $articulo->update(['foto_codigobarras' => $fotoCodigobarrasBinario]);
             }
     
-            // ⬇️ Aquí corregimos
+            // Generar y guardar el código de barras para 'sku' como binario
+            if (!empty($dataArticulo['sku'])) {
+                $barcodeGenerator = new BarcodeGeneratorPNG();
+                $barcode = $barcodeGenerator->getBarcode($dataArticulo['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
+                $fotoSkuBinario = $barcode; // El código de barras ya es binario
+                $articulo->update(['fotosku' => $fotoSkuBinario]);
+            }
+    
+            // Subir la foto del artículo y convertirla a binario
+            if ($request->hasFile('foto')) {
+                $photoPath = $request->file('foto')->getRealPath(); // Obtener la ruta del archivo
+                $photoData = file_get_contents($photoPath); // Leer el archivo como binario
+                $articulo->update(['foto' => $photoData]); // Guardar la foto como binario
+            }
+    
+            // Respuesta de éxito
             return response()->json([
                 'success' => true,
                 'message' => 'Artículo agregado correctamente',
             ]);
     
         } catch (\Exception $e) {
+            // Respuesta de error en caso de excepción
             return response()->json([
                 'success' => false,
                 'message' => 'Ocurrió un error al guardar el artículo.',
@@ -93,14 +114,31 @@ class ArticulosController extends Controller
     
 
     public function edit($id)
-    {
-        $articulo = Articulo::findOrFail($id);
-        $unidades = Unidad::all();
-        $tiposArticulo = Tipoarticulo::all();
-        $modelos = Modelo::all();
-        $monedas = Moneda::all();
-        return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas'));
-    }
+{
+    $articulo = Articulo::findOrFail($id);
+    $unidades = Unidad::all();
+    $tiposArticulo = Tipoarticulo::all();
+    $modelos = Modelo::all();
+    $monedas = Moneda::all();
+    $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
+
+    return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+}
+
+
+public function detalle($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $unidades = Unidad::all();
+    $tiposArticulo = Tipoarticulo::all();
+    $modelos = Modelo::all();
+    $monedas = Moneda::all();
+    $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
+
+    return view('almacen.productos.articulos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+}
+
+
 
 
 
@@ -190,11 +228,11 @@ class ArticulosController extends Controller
     public function getAll()
     {
         $articulos = Articulo::with(['unidad', 'tipoarticulo', 'modelo'])->get();
-
+    
         $articulosData = $articulos->map(function ($articulo) {
             return [
                 'idArticulos' => $articulo->idArticulos,
-                'foto' => $articulo->foto ? asset($articulo->foto) : null,
+                'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
                 'nombre' => $articulo->nombre,
                 'unidad' => $articulo->unidad ? $articulo->unidad->nombre : 'Sin Unidad',
                 'codigo_barras' => $articulo->codigo_barras,
@@ -205,7 +243,7 @@ class ArticulosController extends Controller
                 'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
             ];
         });
-
+    
         return response()->json($articulosData);
     }
 
