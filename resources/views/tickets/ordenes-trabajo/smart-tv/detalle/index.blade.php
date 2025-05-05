@@ -778,6 +778,16 @@ document.addEventListener('DOMContentLoaded', function() {
             allowInput: true
         });
 
+        // Inicializar Flatpickr en "Fecha de Creación"
+console.log("Inicializando Flatpickr para fechaCreacion");
+flatpickr("#fechaCreacion", {
+    enableTime: true, // Habilita la selección de hora
+    dateFormat: "Y-m-d H:i:S", // Formato con fecha, hora, minutos y segundos
+    time_24hr: true, // Reloj de 24 horas
+    allowInput: true
+});
+
+
         // Función para formatear la fecha
         function formatDate(fecha) {
             console.log("Formateando fecha:", fecha);
@@ -1195,6 +1205,7 @@ function handleFieldChange(e) {
                 idModelo: $('#idModelo').val(),
                 serie: $('input[name="serie"]').val(),
                 fechaCompra: $('input[name="fechaCompra"]').val(),
+                fechaCreacion: $('input[name="fechaCreacion"]').val(), // <--- Aquí la agregas
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
                 erma: $('input[name="erma"]').val(), // Este campo ya no será obligatorio
             };
