@@ -223,7 +223,7 @@
                                 <img src="{{ $constanciaFiltradas[$i]['foto_base64'] }}" alt="Foto constancia">
                             </div>
                             <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                                {{ $constanciaFiltradas[$i]['descripcion'] ?? 'Sin descripción' }}
+                                {{ $constanciaFiltradas[$i]['descripcion'] ?? ' ' }}
                             </p>
                             @php $contador++; @endphp
 

@@ -330,8 +330,8 @@
                         </div>
 
                         <!-- Descripción centrada -->
-                        <p class="text-sm text-center text-gray-700 font-semibold mt-2">
-                            {{ $fotoTicket['descripcion'] ?? 'Sin descripción' }}
+                        <p class="text-sm text-center text-gray-700 font-semibold mb-2">
+                            {{ $fotoTicket['descripcion'] ?? '' }}
                         </p>
 
                         @php $contador++; @endphp
