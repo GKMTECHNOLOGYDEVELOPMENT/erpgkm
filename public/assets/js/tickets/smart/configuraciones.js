@@ -368,6 +368,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const tiendaSelectContainer = $("#selectTiendaContainer");
         const tiendaSelect = $("#idTienda");
         let tipoDocumentoCliente = null; // Guardamos el tipo de documento del cliente
+        let esTiendaCliente = null; // Guardamos el estado de la tienda del cliente
     
         // ✅ Limpiar clases raras y aplicar estilos
         tiendaSelect.removeAttr("class style").addClass("form-input w-full");
@@ -391,20 +392,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log("📌 Datos del cliente:", data);
     
                 tipoDocumentoCliente = data.idTipoDocumento;
+                esTiendaCliente = data.esTienda;
+                
+                console.log('tienda: ', esTiendaCliente);
     
+                // Llenar dirección según el tipo de documento
                 if (tipoDocumentoCliente == 8) {
-                    // 👉 Tipo doc 8: dirección del cliente
+                    // Tipo doc 8: dirección del cliente
                     $("#direccion").val(data.direccion || "");
                 } else {
-                    // 👉 Otro tipo: se usará la dirección de la tienda
+                    // Otro tipo: se usará la dirección de la tienda
                     $("#direccion").val("");
                 }
     
-                if (tipoDocumentoCliente == 8) {
-                    console.log("🌍 Cliente con tipo 8, cargando todas las tiendas...");
+                // Lógica de visualización de tiendas
+                if (tipoDocumentoCliente == 8 || esTiendaCliente == 0) {
+                    // Tipo de documento 8 o tienda es 0, mostrar todas las tiendas
+                    console.log("🌍 Cargando todas las tiendas...");
                     mostrarSelectTiendas(clienteId, true);
                 } else {
-                    console.log("🏪 Cliente con otro tipo, cargando tiendas relacionadas...");
+                    // Otro tipo de documento y tienda = 1, mostrar solo tiendas relacionadas
+                    console.log("🏪 Cargando tiendas relacionadas...");
                     mostrarSelectTiendas(clienteId, false);
                 }
     
@@ -436,8 +444,8 @@ document.addEventListener('DOMContentLoaded', function () {
             tiendaSelect.empty().append('<option value="" selected disabled>Seleccionar Tienda</option>');
     
             const urlTiendas = cargarTodasTiendas
-                ? `/api/tiendas`
-                : `/api/cliente/${clienteId}/tiendas`;
+                ? `/api/tiendas` // Si cargarTodasTiendas es true, cargamos todas las tiendas
+                : `/api/cliente/${clienteId}/tiendas`; // Si no, cargamos solo las tiendas relacionadas al cliente
     
             $.get(urlTiendas, function (data) {
                 console.log("🏪 Tiendas obtenidas:", data);
@@ -481,6 +489,7 @@ document.addEventListener('DOMContentLoaded', function () {
             clienteSelect.trigger("change");
         }
     });
+    
     
 
 

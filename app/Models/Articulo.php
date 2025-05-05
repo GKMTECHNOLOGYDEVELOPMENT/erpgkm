@@ -81,7 +81,9 @@ class Articulo extends Model
 		'estado',
 		'idUnidad',
 		'idTipoArticulo',
-		'idModelo'
+		'idModelo',
+		'foto_codigobarras',
+		'fotosku'
 	];
 
 	public function unidad()
