@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class ArticulosController extends Controller
@@ -140,55 +141,78 @@ public function detalle($id)
 
 
 
+public function update(Request $request, $id)
+{
+    DB::beginTransaction();
+    try {
+        // Validar datos
+        $validatedData = $request->validate([
+            'codigo_barras' => 'nullable|string|max:255',
+            'nombre' => 'required|string|max:255',
+            'stock_total' => 'nullable|integer',
+            'stock_minimo' => 'nullable|integer',
+            'precio_compra' => 'nullable|numeric',
+            'precio_venta' => 'nullable|numeric',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Aumenté a 5MB
+            'sku' => 'nullable|string|max:255',
+            'peso' => 'nullable|numeric',
+            'mostrarWeb' => 'nullable|boolean',
+            'estado' => 'nullable|boolean',
+            'idUnidad' => 'required|integer',
+            'idTipoArticulo' => 'required|integer',
+            'idModelo' => 'required|integer',
+        ]);
 
+        $articulo = Articulo::findOrFail($id);
 
-
-    public function update(Request $request, $id)
-    {
-        try {
-            $validatedData = $request->validate([
-                'codigo_barras' => 'nullable|string|max:255',
-                'nombre' => 'required|string|max:255',
-                'stock_total' => 'nullable|integer',
-                'stock_minimo' => 'nullable|integer',
-                'moneda_compra' => 'nullable|integer',
-                'moneda_venta' => 'nullable|integer',
-                'precio_compra' => 'nullable|numeric',
-                'precio_venta' => 'nullable|numeric',
-                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'sku' => 'nullable|string|max:255',
-                'peso' => 'nullable|numeric',
-                'mostrarWeb' => 'nullable|boolean',
-                'estado' => 'nullable|boolean',
-                'idUnidad' => 'required|integer',
-                'idTipoArticulo' => 'required|integer',
-                'idModelo' => 'required|integer',
-            ]);
-
-            $articulo = Articulo::findOrFail($id);
-            $articulo->update($validatedData);
-
-            if ($request->hasFile('foto')) {
-                if ($articulo->foto) {
-                    $fotoPath = str_replace('storage/', '', $articulo->foto);
-                    Storage::disk('public')->delete($fotoPath);
-                }
-
-                $extension = $request->file('foto')->getClientOriginalExtension();
-                $fileName = uniqid() . '.' . $extension;
-                $directory = "img/articulos/{$articulo->idArticulos}";
-                $path = $request->file('foto')->storeAs($directory, $fileName, 'public');
-                $articulo->update(['foto' => "storage/$path"]);
+        // Manejar imagen solo si es válida
+        if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
+            $foto = $request->file('foto');
+            
+            // Verificar tamaño mínimo (1KB)
+            if ($foto->getSize() < 1024) {
+                throw new \Exception('La imagen es demasiado pequeña (mínimo 1KB requerido)');
             }
-
-            return redirect()->route('articulos.index')
-                ->with('success', 'Artículo actualizado exitosamente.');
-        } catch (\Exception $e) {
-            Log::error('Error al actualizar el artículo: ' . $e->getMessage());
-            return redirect()->route('articulos.index')
-                ->with('error', 'Ocurrió un error al actualizar el artículo.');
+            
+            $fotoBinario = file_get_contents($foto->getRealPath());
+            if ($fotoBinario === false) {
+                throw new \Exception('No se pudo leer el archivo de imagen');
+            }
+            
+            $validatedData['foto'] = $fotoBinario;
+            $validatedData['foto_mime'] = $foto->getClientMimeType();
+        } else {
+            unset($validatedData['foto']);
         }
+
+        // Actualizar artículo
+        $articulo->update($validatedData);
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artículo actualizado exitosamente.',
+            'data' => $articulo
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de validación',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error actualizando artículo ID '.$id.': '.$e->getMessage()."\n".$e->getTraceAsString());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: '.$e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
     }
+}
 
     public function destroy($id)
     {

@@ -13,7 +13,7 @@
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR ARTÍCULO</h2>
 
-        <form action="{{ route('articulos.update', $articulo->idArticulos) }}" method="POST"
+        <form id="edit-articulo-form" method="POST"
             enctype="multipart/form-data" class="space-y-6">
             @csrf
             @method('PUT')
@@ -96,18 +96,7 @@
                         @endforeach
                     </select>
                 </div>
-                <!-- Moneda de Compra -->
-                <div>
-                    <label for="moneda_compra" class="block text-sm font-medium">Moneda de Compra</label>
-                    <select id="moneda_compra" name="moneda_compra" class="form-input w-full">
-                        @foreach ($monedas as $moneda)
-                            <option value="{{ $moneda->idMonedas }}"
-                                {{ old('moneda_compra', $articulo->moneda_compra) == $moneda->idMonedas ? 'selected' : '' }}>
-                                {{ $moneda->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+           
 
                 <!-- Precio de Compra -->
                 <div>
@@ -126,18 +115,7 @@
                     </div>
                 </div>
 
-                <!-- Moneda de Venta -->
-                <div>
-                    <label for="moneda_venta" class="block text-sm font-medium">Moneda de Venta</label>
-                    <select id="moneda_venta" name="moneda_venta" class="form-input w-full">
-                        @foreach ($monedas as $moneda)
-                            <option value="{{ $moneda->idMonedas }}"
-                                {{ old('moneda_venta', $articulo->moneda_venta) == $moneda->idMonedas ? 'selected' : '' }}>
-                                {{ $moneda->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+          
                 <!-- Precio de Venta -->
                 <div>
                     <label for="precio_venta" class="block text-sm font-medium">Precio de Venta</label>
@@ -196,28 +174,37 @@
                 </div>
 
 
-                <!-- Foto -->
-                <div x-data="{ fotoPreview: '{{ asset($articulo->foto) }}' }">
-                    <label for="foto" class="block text-sm font-medium">Foto</label>
-                    <input type="file" id="foto" name="foto" accept="image/*"
-                        class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
-                        @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ asset($articulo->foto) }}'">
-                    <div
-                        class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
-                        <template x-if="fotoPreview">
-                            <img :src="fotoPreview" alt="Previsualización de la foto"
-                                class="w-40 h-40 object-cover object-center">
-                        </template>
-                        <template x-if="!fotoPreview">
-                            <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
-                                Sin imagen
-                            </div>
-                        </template>
-                    </div>
-                    @error('foto')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
+         <!-- Foto -->
+<div x-data="{ fotoPreview: '{{ $articulo->foto ? 'data:image/jpeg;base64,'.base64_encode($articulo->foto) : '' }}' }">
+    <label for="foto" class="block text-sm font-medium">Foto</label>
+    <input type="file" id="foto" name="foto" accept="image/*"
+           class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
+           @change="
+               if ($event.target.files[0]) {
+                   const reader = new FileReader();
+                   reader.onload = (e) => {
+                       fotoPreview = e.target.result;
+                   };
+                   reader.readAsDataURL($event.target.files[0]);
+               } else {
+                   fotoPreview = '{{ $articulo->foto ? 'data:image/jpeg;base64,'.base64_encode($articulo->foto) : '' }}';
+               }
+           ">
+    <div class="mt-4 w-full border border-gray-300 rounded-lg overflow-hidden flex justify-center items-center">
+        <template x-if="fotoPreview">
+            <img :src="fotoPreview" alt="Previsualización de la foto"
+                 class="w-40 h-40 object-cover object-center">
+        </template>
+        <template x-if="!fotoPreview">
+            <div class="flex items-center justify-center w-40 h-40 text-gray-400 text-sm">
+                Sin imagen
+            </div>
+        </template>
+    </div>
+    @error('foto')
+        <span class="text-red-500 text-sm">{{ $message }}</span>
+    @enderror
+</div>
 
 
 
@@ -231,6 +218,56 @@
         </form>
     </div>
 
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('edit-articulo-form');
+    if (!form) {
+        console.error('Formulario no encontrado');
+        return;
+    }
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        console.log('[DEBUG] Inicio del envío del formulario');
+
+        const formData = new FormData(form);
+        formData.append('_method', 'PUT'); // Para Laravel
+        
+        // Eliminar duplicados (como el doble 'estado')
+        const seen = new Set();
+        for (let [key, value] of formData.entries()) {
+            if (seen.has(key)) {
+                formData.delete(key);
+            }
+            seen.add(key);
+        }
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            if (!response.ok) {
+                console.error('[SERVER ERROR]', result);
+                throw new Error(result.message || 'Error en el servidor');
+            }
+
+            alert(result.message);
+            
+        } catch (error) {
+            console.error('[ERROR]', error);
+            alert('Error: ' + error.message);
+        }
+    });
+});
+</script>
     <!-- Script para Select2 -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
