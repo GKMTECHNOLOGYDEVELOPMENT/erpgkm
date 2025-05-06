@@ -28,6 +28,8 @@ document.addEventListener('alpine:init', () => {
 
         initTable() {
             this.datatable = $('#tablaAsistencias').DataTable({
+                serverSide: true,
+                processing: true,
                 ajax: {
                     url: '/asistencias/listado',
                     dataSrc: 'data',
@@ -56,12 +58,22 @@ document.addEventListener('alpine:init', () => {
                         render: function (data, type, row) {
                             if (!data) return '-';
                             let color = 'badge-outline-secondary';
-                            if (row.estado_entrada === 'azul') color = 'badge-outline-primary';
-                            else if (row.estado_entrada === 'amarillo') color = 'badge-outline-warning';
-                            else if (row.estado_entrada === 'rojo') color = 'badge-outline-danger';
-                            return `<div class="inline-block px-1 text-xs whitespace-normal"><span class="badge ${color} block w-full">${data}</span></div>`;
+
+                            if (row.observacion?.estado === 1) {
+                                color = 'badge-outline-primary'; // aprobado = azul
+                            } else {
+                                if (row.estado_entrada === 'azul') color = 'badge-outline-primary';
+                                else if (row.estado_entrada === 'amarillo') color = 'badge-outline-warning';
+                                else if (row.estado_entrada === 'rojo') color = 'badge-outline-danger';
+                            }
+
+
+                            return `<div class="inline-block px-1 text-xs whitespace-normal">
+                                        <span class="badge ${color} block w-full">${data}</span>
+                                    </div>`;
                         }
                     },
+
                     {
                         data: 'ubicacion_entrada',
                         className: 'text-center align-middle col-ubicacion',
@@ -69,7 +81,7 @@ document.addEventListener('alpine:init', () => {
                             ? `<div class="whitespace-normal break-words leading-snug text-sm">${d}</div>`
                             : '-'
                     },
-                    
+
                     {
                         data: 'inicio_break',
                         className: 'text-center align-middle',
@@ -95,11 +107,34 @@ document.addEventListener('alpine:init', () => {
                     {
                         data: 'asistencia',
                         className: 'text-center align-middle',
-                        render: d =>
-                            d === 'ASISTIÓ'
-                                ? '<span class="badge bg-success">ASISTIÓ</span>'
-                                : '<span class="badge bg-danger">NO ASISTIÓ</span>'
+                        render: function (d, type, row) {
+                            const observacion = row.observacion;
+                            if (observacion) {
+                                const estado = observacion.estado;
+                                let clase = 'bg-warning';
+                                let texto = 'OBSERVACIÓN';
+
+                                if (estado === 1) {
+                                    clase = 'bg-primary';
+                                    texto = 'APROBADO';
+                                } else if (estado === 2) {
+                                    clase = 'bg-danger';
+                                    texto = 'DENEGADO';
+                                }
+
+                                return `
+                                <span class="badge ${clase} cursor-pointer ver-observacion"
+                                    data-observacion="${encodeURIComponent(JSON.stringify(observacion))}">
+                                    ${texto}
+                                </span>`;
+
+                            }
+
+                            const clase = d === 'ASISTIÓ' ? 'bg-success' : 'bg-danger';
+                            return `<span class="badge ${clase}">${d}</span>`;
+                        }
                     }
+
                 ],
                 responsive: true,
                 autoWidth: false,
@@ -176,6 +211,136 @@ document.addEventListener('alpine:init', () => {
                 }
 
             });
+            $('#tablaAsistencias tbody').off('click', '.ver-observacion').on('click', '.ver-observacion', function () {
+                try {
+                    const json = $(this).data('observacion');
+                    const observacion = typeof json === 'string'
+                        ? JSON.parse(decodeURIComponent(json))
+                        : json;
+
+
+                    window.verObservacion(observacion);
+                } catch (e) {
+                    console.error('Error al parsear observación', e);
+                }
+            });
+
         }
     }));
+    let observacionActual = null;
+    function nombreTipoAsunto(id) {
+        switch (id) {
+            case 1: return 'TARDANZA';
+            case 2: return 'FALTA MEDICA';
+            case 3: return 'FALTA';
+            default: return 'OBSERVACIÓN';
+        }
+    }
+    window.verObservacion = function (observacion) {
+        observacionActual = observacion;
+
+        // 👉 Cambiar título del modal según el tipo de asunto
+        document.querySelector('#modalObservacion h5').textContent = nombreTipoAsunto(observacion?.idTipoAsunto);
+
+        // 👉 Mostrar mensaje
+        document.getElementById('observacionMensaje').textContent = observacion?.mensaje || 'Sin mensaje';
+
+        // 👉 Mostrar u ocultar botones
+        const acciones = document.getElementById('observacionAcciones');
+        if (observacion?.estado === 0) {
+            acciones.classList.remove('hidden');
+        } else {
+            acciones.classList.add('hidden');
+        }
+
+        const contenedor = document.getElementById('observacionImagenes');
+        contenedor.innerHTML = 'Cargando...';
+
+        fetch(`/asistencias/observacion/${observacion.idObservaciones}`)
+            .then(res => res.json())
+            .then(data => {
+                contenedor.innerHTML = '';
+                if (Array.isArray(data.imagenes)) {
+                    data.imagenes.forEach(src => {
+                        const img = document.createElement('img');
+                        img.src = 'data:image/jpeg;base64,' + src;
+                        img.className = 'w-24 h-24 object-contain rounded border cursor-zoom-in';
+                        contenedor.appendChild(img);
+                    });
+
+                    if (window.viewerInstance) window.viewerInstance.destroy();
+                    window.viewerInstance = new Viewer(contenedor, {
+                        toolbar: true,
+                        title: false,
+                        navbar: false
+                    });
+                } else {
+                    contenedor.innerHTML = 'Sin imágenes';
+                }
+            });
+
+        document.getElementById('modalObservacion').classList.remove('hidden');
+    };
+
+    window.cerrarModalObservacion = function () {
+        document.getElementById('modalObservacion').classList.add('hidden');
+    };
+
+    window.aprobarObservacion = function () {
+        const id = observacionActual?.idObservaciones ?? observacionActual?.id;
+
+        if (id) {
+            fetch('/asistencias/actualizar-observacion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    id: id,
+                    estado: 1
+                })
+            })
+                .then(res => res.json())
+                .then(() => {
+                    cerrarModalObservacion();
+                    // ✅ Recargar tabla directamente
+                    if (window.Alpine?.store('usuariosTable')?.datatable) {
+                        window.Alpine.store('usuariosTable').datatable.ajax.reload();
+                    }
+                })
+                .catch(console.error);
+        } else {
+            console.error('❌ ID de observación no definido (aprobación)');
+        }
+    };
+
+    window.denegarObservacion = function () {
+        const id = observacionActual?.idObservaciones ?? observacionActual?.id;
+
+        if (id) {
+            fetch('/asistencias/actualizar-observacion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    id: id,
+                    estado: 2
+                })
+            })
+                .then(res => res.json())
+                .then(() => {
+                    cerrarModalObservacion();
+                    // ✅ Recargar tabla directamente
+                    if (window.Alpine?.store('usuariosTable')?.datatable) {
+                        window.Alpine.store('usuariosTable').datatable.ajax.reload();
+                    }
+                })
+                .catch(console.error);
+        } else {
+            console.error('❌ ID de observación no definido (denegación)');
+        }
+    };
 });

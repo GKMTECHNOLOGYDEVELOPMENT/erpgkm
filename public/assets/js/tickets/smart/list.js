@@ -226,7 +226,7 @@ document.addEventListener('alpine:init', () => {
                             .attr('data-bg', estadoColor);
                     }
 
-                    // ✅ Si el estado es ANULADO (id = 33), aplica tachado a los <td>
+                    // ✅ Si el estado es ANULADO (id = 34), aplica tachado a los <td>
                     if (estadoId === 34) {
                         $(row).find('td').css({
                             'text-decoration': 'line-through',
@@ -244,7 +244,7 @@ document.addEventListener('alpine:init', () => {
                         // ✅ Mantener color de fondo sin borrar otros estilos
                         $(this).css('background-color', `${bgColor}`);
 
-                        // ✅ Detectar si la fila tiene texto tachado (estadoId === 33)
+                        // ✅ Detectar si la fila tiene texto tachado (estadoId === 34)
                         const isTachado = $(this).find('td').css('text-decoration').includes('line-through');
 
                         if (!isTachado) {

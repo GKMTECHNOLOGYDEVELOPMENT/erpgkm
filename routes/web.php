@@ -169,6 +169,8 @@ Route::get('/reporte-clientes', [ClientesController::class, 'exportAllPDF'])->na
 //Ruta para Administracion Asistencia
 
 Route::get('/asistencias', [AsistenciaController::class, 'index'])->name('asistencias.index');
+Route::post('/asistencias/actualizar-observacion', [AsistenciaController::class, 'actualizarEstadoObservacion']);
+Route::get('/asistencias/observacion/{id}', [AsistenciaController::class, 'obtenerImagenesObservacion']);
 Route::get('/asistencias/listado', [AsistenciaController::class, 'getAsistencias'])->name('asistencias.listado');
 
 //Ruta para Administracion Proveedores
