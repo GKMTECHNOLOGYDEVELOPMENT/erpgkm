@@ -162,7 +162,7 @@ class OrdenesTrabajoController extends Controller
 
 
 
-    
+
 
     public function storesmart(Request $request)
     {
@@ -453,7 +453,7 @@ class OrdenesTrabajoController extends Controller
 
 
 
- 
+
         $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
         $clientes = Cliente::all();
         $clientesGenerales = Clientegeneral::all();
@@ -511,13 +511,13 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 1) {
                     // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3, 8, 33 ])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [3, 8, 33])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 9) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                    ->whereIn('idEstadflujo', [3, 33 ])  // Solo obtener el estado con idEstadflujo 3
-                    ->get();
+                        ->whereIn('idEstadflujo', [3, 33])  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
                 } elseif ($idEstadflujo == 14) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
@@ -1270,18 +1270,10 @@ class OrdenesTrabajoController extends Controller
                         }
                     });
             });
-
-            $query->orderByRaw("
-            CASE
-                WHEN serie = ? THEN 1
-                WHEN numero_ticket = ? THEN 2
-                ELSE 3
-            END
-        ", [$searchValue, $searchValue]);
         }
 
         $recordsTotal = Ticket::count();
-        $query->orderBy('idTickets', 'desc');
+        $query->orderBy('fecha_creacion', 'desc');
         $recordsFiltered = (clone $query)->count();
 
         $ordenes = $query->skip($request->input('start', 0))
