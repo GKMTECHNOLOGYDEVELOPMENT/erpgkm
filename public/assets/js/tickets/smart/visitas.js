@@ -156,15 +156,33 @@ detailsButton.innerHTML = `
   </svg>
 `;
 
+
+
+
+
+
 detailsButton.addEventListener('click', function () {
   console.log('Botón "Ver Detalles" clickeado');
 
   // Rellenar los detalles del modal con valores dinámicos
   document.getElementById('detalleNombre').innerText = nombre_visita;
 
-  // Actualizando los campos de fecha
-  document.getElementById('detalleFechaInicioHora').value = visita.fecha_inicio_hora ? formatDatos(visita.fecha_inicio_hora) : '';
-  document.getElementById('detalleFechaFinalHora').value = visita.fecha_final_hora ? formatDatos(visita.fecha_final_hora) : '';
+  // Actualizando los campos de fecha y hora
+  if (visita.fecha_inicio_hora) {
+    const fechaInicio = new Date(visita.fecha_inicio_hora);
+    document.getElementById('detalleFecha').value = fechaInicio.toISOString().split('T')[0];
+    document.getElementById('detalleHoraInicio').value = fechaInicio.toTimeString().substring(0, 5);
+  } else {
+    document.getElementById('detalleFecha').value = '';
+    document.getElementById('detalleHoraInicio').value = '';
+  }
+
+  if (visita.fecha_final_hora) {
+    const fechaFin = new Date(visita.fecha_final_hora);
+    document.getElementById('detalleHoraFin').value = fechaFin.toTimeString().substring(0, 5);
+  } else {
+    document.getElementById('detalleHoraFin').value = '';
+  }
 
   if (visita.nombreclientetienda) {
     const clienteTiendaContainer = document.getElementById('clienteTiendaContainer');
@@ -346,24 +364,29 @@ document.getElementById('actualizarButton').addEventListener('click', function()
   const actualizarButton = document.getElementById('actualizarButton');
   const idVisita = actualizarButton.getAttribute('data-id'); // Obtener el ID de la visita del atributo 'data-id'
   
-  const fechaInicio = document.getElementById('detalleFechaInicioHora').value;
-  const fechaFinal = document.getElementById('detalleFechaFinalHora').value;
+  const fecha = document.getElementById('detalleFecha').value;
+  const horaInicio = document.getElementById('detalleHoraInicio').value;
+  const horaFin = document.getElementById('detalleHoraFin').value;
   const idUsuario = document.getElementById('detalleUsuario').value;
   
   // Obtener los valores de los campos opcionales
   const nombreCliente = document.getElementById('detalleClienteTienda').value;
   const celularCliente = document.getElementById('detalleCelularClienteTienda').value;
 
-  // Validar si los campos obligatorios son correctos
-  if (!fechaInicio || !fechaFinal || !idUsuario) {
+  // Validación
+  if (!fecha || !horaInicio || !horaFin || !idUsuario) {
     alert('Por favor complete todos los campos obligatorios.');
     return;
   }
 
-  // Crear un objeto de datos con los campos que tienen valores
+  // Combinar fecha y horas
+  const fechaInicioHora = `${fecha}T${horaInicio}:00`;
+  const fechaFinalHora = `${fecha}T${horaFin}:00`;
+
+  // Crear objeto de datos
   const dataToUpdate = {
-    fecha_inicio_hora: fechaInicio,
-    fecha_final_hora: fechaFinal,
+    fecha_inicio_hora: fechaInicioHora,
+    fecha_final_hora: fechaFinalHora,
     idUsuario: idUsuario
   };
 

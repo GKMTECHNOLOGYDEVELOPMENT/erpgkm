@@ -516,7 +516,7 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 9) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                    ->whereIn('idEstadflujo', [3, 33, 35 ])  // Solo obtener el estado con idEstadflujo 3
+                    ->whereIn('idEstadflujo', [3, 33, 35,2 ])  // Solo obtener el estado con idEstadflujo 3
                     ->get();
                 } elseif ($idEstadflujo == 14) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
@@ -2201,6 +2201,7 @@ class OrdenesTrabajoController extends Controller
         // Actualizar los datos de la visita
         $visita->fecha_inicio_hora = $request->fecha_inicio_hora;
         $visita->fecha_final_hora = $request->fecha_final_hora;
+        $visita->fecha_programada = $request->fecha_inicio_hora;
         $visita->idUsuario = $request->idUsuario;
 
         // Actualizar los campos opcionales si existen
