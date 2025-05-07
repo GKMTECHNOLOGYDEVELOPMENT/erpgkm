@@ -131,7 +131,7 @@ document.addEventListener('alpine:init', () => {
             this.datatable1 = $('#myTable1').DataTable({
                 processing: false,
                 serverSide: true,
-                order: [[0, 'desc']], // 👈 ORDENAR POR ID
+                order: [[3, 'desc']], // ✅ columna 3 = "F. TICKET" (fecha_creacion)
                 ajax: {
                     url: "/api/ordenes",
                     type: "GET",

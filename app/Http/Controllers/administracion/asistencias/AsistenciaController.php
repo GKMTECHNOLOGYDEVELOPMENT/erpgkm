@@ -23,20 +23,18 @@ class AsistenciaController extends Controller
         $draw = $request->input('draw');
         $start = $request->input('start', 0);
         $length = $request->input('length', 10);
+        $search = $request->input('search.value');
 
-        // Obtener IDs de usuarios activos
         $usuarios = \App\Models\Usuario::where('estado', 1)
             ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno')
             ->get();
 
         $usuarioIds = $usuarios->pluck('idUsuario');
 
-        // Cargar asistencias solo de usuarios activos
         $asistencias = Asistencia::whereIn('idUsuario', $usuarioIds)
             ->whereBetween('fechaHora', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
             ->get();
 
-        // Cargar observaciones solo de usuarios activos
         $observaciones = Observacion::with('anexos')
             ->whereIn('idUsuario', $usuarioIds)
             ->whereBetween('fechaHora', [$fechaInicio . ' 00:00:00', $fechaFin . ' 23:59:59'])
@@ -48,6 +46,7 @@ class AsistenciaController extends Controller
         $datos = [];
 
         foreach ($usuarios as $usuario) {
+            $tieneHistorial = Observacion::where('idUsuario', $usuario->idUsuario)->exists();
             $periodo = Carbon::parse($fechaInicio)->toPeriod(Carbon::parse($fechaFin));
             $obsUsuario = $observaciones[$usuario->idUsuario] ?? collect();
             $obsPorDia = $obsUsuario->groupBy(fn($obs) => Carbon::parse($obs->fechaHora)->format('Y-m-d'));
@@ -62,7 +61,6 @@ class AsistenciaController extends Controller
 
                 if ($entrada) {
                     $horaEntrada = Carbon::parse($entrada->fechaHora);
-
                     $limiteAzul = $fecha->isSaturday() ? $horaEntrada->copy()->setTime(9, 0, 59) : $horaEntrada->copy()->setTime(8, 0, 59);
                     $limiteAmarillo = $fecha->isSaturday() ? $horaEntrada->copy()->setTime(9, 5, 59) : $horaEntrada->copy()->setTime(8, 5, 59);
 
@@ -75,7 +73,19 @@ class AsistenciaController extends Controller
                     }
                 }
 
-                $obsDelDia = $obsPorDia[$fecha->format('Y-m-d')][0] ?? null;
+                $obsDelDiaTodas = $obsPorDia[$fecha->format('Y-m-d')] ?? collect();
+                $obsAprobada = $obsDelDiaTodas->firstWhere('estado', 1);
+                $obsPendiente = $obsDelDiaTodas->firstWhere('estado', 0);
+                $obsDenegada = $obsDelDiaTodas->firstWhere('estado', 2);
+                $obsFinal = $obsAprobada ?? $obsPendiente ?? $obsDenegada;
+
+                if ($obsFinal === $obsAprobada) {
+                    $obsTotal = 1;
+                    $obsIndex = 1;
+                } else {
+                    $obsTotal = $obsDelDiaTodas->count();
+                    $obsIndex = $obsDelDiaTodas->search(fn($o) => $o->idObservaciones === $obsFinal?->idObservaciones) + 1;
+                }
 
                 $datos[] = [
                     'empleado' => strtoupper(trim("{$usuario->Nombre} {$usuario->apellidoPaterno} {$usuario->apellidoMaterno}")),
@@ -88,25 +98,61 @@ class AsistenciaController extends Controller
                     'ubicacion_salida' => $grupo->firstWhere('idTipoHorario', 4)?->ubicacion,
                     'asistencia' => $entrada ? 'ASISTIÓ' : 'NO ASISTIÓ',
                     'estado_entrada' => $estadoColor,
-                    'observacion' => $obsDelDia ? [
-                        'idObservaciones' => $obsDelDia->idObservaciones,
-                        'mensaje' => $obsDelDia->mensaje,
-                        'estado' => $obsDelDia->estado,
-                        'idTipoAsunto' => $obsDelDia->idTipoAsunto
+                    'tiene_historial' => $tieneHistorial,
+                    'idUsuario' => $usuario->idUsuario,
+                    'observacion' => $obsFinal ? [
+                        'idObservaciones' => $obsFinal->idObservaciones,
+                        'mensaje' => $obsFinal->mensaje,
+                        'estado' => $obsFinal->estado,
+                        'idTipoAsunto' => $obsFinal->idTipoAsunto,
+                        'fechaHora' => $obsFinal->fechaHora, // 👈 agregado
+                        'ubicacion' => $obsFinal->ubicacion, // 👈 agregado
+                        'lat' => $obsFinal->lat,             // 👈 agregado
+                        'lng' => $obsFinal->lng,             // 👈 agregado
+                        'total' => $obsTotal,
+                        'index' => $obsIndex
                     ] : null
                 ];
             }
         }
 
-        $sorted = collect($datos)->sortBy([['asistencia', 'desc'], fn($a, $b) => strtotime($b['entrada'] ?? '') <=> strtotime($a['entrada'] ?? '')])->values();
+        $filtrados = collect($datos)->filter(function ($item) use ($search) {
+            if (!$search) return true;
+
+            $valores = [
+                $item['empleado'],
+                $item['fecha'],
+                $item['entrada'],
+                $item['inicio_break'],
+                $item['fin_break'],
+                $item['salida'],
+                $item['ubicacion_entrada'],
+                $item['ubicacion_salida'],
+                $item['asistencia'],
+                $item['estado_entrada'],
+                isset($item['observacion']) ? (
+                    ($item['observacion']['estado'] === 1) ? 'APROBADO' : (($item['observacion']['estado'] === 2) ? 'DENEGADO' : 'OBSERVACIÓN')
+                ) : '',
+                $item['observacion']['mensaje'] ?? ''
+            ];
+
+            return collect($valores)->some(function ($valor) use ($search) {
+                return str_contains(strtolower(strval($valor)), strtolower($search));
+            });
+        });
+
+
+
+        $sorted = $filtrados->sortBy([['asistencia', 'desc'], fn($a, $b) => strtotime($b['entrada'] ?? '') <=> strtotime($a['entrada'] ?? '')])->values();
 
         return response()->json([
             'draw' => intval($draw),
-            'recordsTotal' => $sorted->count(),
+            'recordsTotal' => count($datos),
             'recordsFiltered' => $sorted->count(),
             'data' => $sorted->slice($start)->take($length)->values()
         ]);
     }
+
 
     public function actualizarEstadoObservacion(Request $request)
     {
@@ -128,5 +174,16 @@ class AsistenciaController extends Controller
         return response()->json([
             'imagenes' => $observacion->anexos->map(fn($a) => base64_encode($a->foto))
         ]);
+    }
+    public function verHistorialUsuario($idUsuario)
+    {
+        $usuario = \App\Models\Usuario::findOrFail($idUsuario);
+
+        $observaciones = \App\Models\Observacion::with('anexos')
+            ->where('idUsuario', $idUsuario)
+            ->orderBy('fechaHora', 'desc')
+            ->get();
+
+        return view('administracion.asistencia.historial', compact('usuario', 'observaciones'));
     }
 }

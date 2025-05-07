@@ -47,6 +47,48 @@ document.addEventListener('alpine:init', () => {
                             : data
                     },
                     {
+                        data: 'asistencia',
+                        className: 'text-center align-middle',
+                        render: function (d, type) {
+                            if (type !== 'display') return d;
+
+                            const clase = d === 'ASISTIÓ' ? 'bg-success' : 'bg-danger';
+                            return `<span class="badge ${clase}">${d}</span>`;
+                        }
+                    },
+
+                    {
+                        title: 'DETALLE',
+                        data: null, // Usamos toda la fila
+                        className: 'text-center align-middle',
+                        render: function (data, type, row) {
+                            const tieneDelDia = !!row.observacion;
+                            const tieneHistorial = row.tiene_historial; // este campo lo debes enviar desde backend (bool)
+
+                            if (!tieneDelDia && !tieneHistorial) return '-';
+
+                            let html = '<div class="flex justify-center gap-1">';
+
+                            if (tieneDelDia) {
+                                html += `<button class="btn btn-sm btn-info ver-observacion" title="Ver observación del día"
+                                            data-observacion="${encodeURIComponent(JSON.stringify(row.observacion))}">
+                                            📩
+                                        </button>`;
+                            }
+
+                            if (tieneHistorial) {
+                                html += `<a href="/asistencias/historial/${row.idUsuario}" target="_blank" class="btn btn-sm btn-primary" title="Ver todas las observaciones">
+                                    📑
+                                </a>`;
+                            }
+
+
+                            html += '</div>';
+                            return html;
+                        }
+                    },
+
+                    {
                         data: 'fecha',
                         className: 'text-center align-middle',
                         render: (data, type) => type === 'display'
@@ -104,37 +146,6 @@ document.addEventListener('alpine:init', () => {
                             ? `<div class="whitespace-normal break-words leading-snug text-sm">${d}</div>`
                             : '-'
                     },
-                    {
-                        data: 'asistencia',
-                        className: 'text-center align-middle',
-                        render: function (d, type, row) {
-                            const observacion = row.observacion;
-                            if (observacion) {
-                                const estado = observacion.estado;
-                                let clase = 'bg-warning';
-                                let texto = 'OBSERVACIÓN';
-
-                                if (estado === 1) {
-                                    clase = 'bg-primary';
-                                    texto = 'APROBADO';
-                                } else if (estado === 2) {
-                                    clase = 'bg-danger';
-                                    texto = 'DENEGADO';
-                                }
-
-                                return `
-                                <span class="badge ${clase} cursor-pointer ver-observacion"
-                                    data-observacion="${encodeURIComponent(JSON.stringify(observacion))}">
-                                    ${texto}
-                                </span>`;
-
-                            }
-
-                            const clase = d === 'ASISTIÓ' ? 'bg-success' : 'bg-danger';
-                            return `<span class="badge ${clase}">${d}</span>`;
-                        }
-                    }
-
                 ],
                 responsive: true,
                 autoWidth: false,
@@ -156,26 +167,26 @@ document.addEventListener('alpine:init', () => {
                 dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
                 initComplete: function () {
                     const wrapper = document.querySelector('.dataTables_wrapper');
-                    const table = wrapper.querySelector('#tablaAsistencias');
+                    const table = wrapper?.querySelector('#tablaAsistencias');
 
-                    // Envolver la tabla en un contenedor scrollable
+                    if (!table || !wrapper) return; // 💥 Si no existe, detiene ejecución
+
+                    // Crear contenedor scroll horizontal
                     const scrollContainer = document.createElement('div');
                     scrollContainer.className = 'dataTables_scrollable overflow-x-auto border border-gray-200 rounded-md mb-3';
                     table.parentNode.insertBefore(scrollContainer, table);
                     scrollContainer.appendChild(table);
 
-                    // Scroll superior sincronizado (usando div vacío con mismo ancho del scrollContainer)
+                    // Crear scroll superior
                     const scrollTop = document.createElement('div');
                     scrollTop.className = 'dataTables_scrollTop overflow-x-auto mb-2';
                     scrollTop.style.height = '14px';
 
-                    // Usamos un div interno para que tome el mismo ancho que el scroll real
                     const topInner = document.createElement('div');
-                    topInner.style.width = scrollContainer.scrollWidth + 'px'; // ancho real del scroll horizontal
-                    topInner.style.height = '1px'; // invisible
+                    topInner.style.width = scrollContainer.scrollWidth + 'px';
+                    topInner.style.height = '1px';
                     scrollTop.appendChild(topInner);
 
-                    // Sincronizar scroll
                     scrollTop.addEventListener('scroll', () => {
                         scrollContainer.scrollLeft = scrollTop.scrollLeft;
                     });
@@ -183,9 +194,7 @@ document.addEventListener('alpine:init', () => {
                         scrollTop.scrollLeft = scrollContainer.scrollLeft;
                     });
 
-                    // Insertar arriba de la tabla
                     wrapper.insertBefore(scrollTop, scrollContainer);
-
 
                     // Controles flotantes
                     const floatingControls = document.createElement('div');
@@ -209,6 +218,7 @@ document.addEventListener('alpine:init', () => {
                         wrapper.appendChild(floatingControls);
                     }
                 }
+
 
             });
             $('#tablaAsistencias tbody').off('click', '.ver-observacion').on('click', '.ver-observacion', function () {
@@ -239,8 +249,16 @@ document.addEventListener('alpine:init', () => {
     window.verObservacion = function (observacion) {
         observacionActual = observacion;
 
-        // 👉 Cambiar título del modal según el tipo de asunto
-        document.querySelector('#modalObservacion h5').textContent = nombreTipoAsunto(observacion?.idTipoAsunto);
+        const tipoTexto = nombreTipoAsunto(observacion?.idTipoAsunto);
+        const total = observacion.total ?? 1;
+        const index = observacion.index ?? 1;
+        document.querySelector('#modalObservacion h5').textContent = `${tipoTexto} (${index} de ${total})`;
+
+        document.getElementById('observacionFechaHora').textContent =
+            observacion?.fechaHora ? `Fecha y hora: ${observacion.fechaHora}` : 'Fecha no registrada';
+
+        document.getElementById('observacionUbicacion').textContent =
+            observacion?.ubicacion ? `Ubicación: ${observacion.ubicacion}` : 'Ubicación no registrada';
 
         // 👉 Mostrar mensaje
         document.getElementById('observacionMensaje').textContent = observacion?.mensaje || 'Sin mensaje';
@@ -304,10 +322,7 @@ document.addEventListener('alpine:init', () => {
                 .then(res => res.json())
                 .then(() => {
                     cerrarModalObservacion();
-                    // ✅ Recargar tabla directamente
-                    if (window.Alpine?.store('usuariosTable')?.datatable) {
-                        window.Alpine.store('usuariosTable').datatable.ajax.reload();
-                    }
+                    setTimeout(() => location.reload(), 300); // espera breve
                 })
                 .catch(console.error);
         } else {
@@ -333,14 +348,12 @@ document.addEventListener('alpine:init', () => {
                 .then(res => res.json())
                 .then(() => {
                     cerrarModalObservacion();
-                    // ✅ Recargar tabla directamente
-                    if (window.Alpine?.store('usuariosTable')?.datatable) {
-                        window.Alpine.store('usuariosTable').datatable.ajax.reload();
-                    }
+                    setTimeout(() => location.reload(), 300); // espera breve
                 })
                 .catch(console.error);
         } else {
             console.error('❌ ID de observación no definido (denegación)');
         }
     };
+
 });

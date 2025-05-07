@@ -63,6 +63,27 @@
                 <label for="endDateInput" class="text-sm font-medium text-gray-700">Fecha Fin</label>
                 <input type="text" id="endDate" class="form-input w-full" placeholder="Seleccionar Fecha">
             </div>
+            <div class="flex items-end h-full">
+                <button type="button" class="badge bg-secondary btn-sm px-3 py-2 shadow-md focus:outline-none"
+                    onclick="
+                    document.getElementById('startDate')._flatpickr.clear();
+                    document.getElementById('endDate')._flatpickr.clear();
+                    Alpine.store('usuariosTable').reloadTable();
+                "
+                    title="Reiniciar Filtros">
+                    <svg xmlns='http://www.w3.org/2000/svg' class='h-4 w-4 block mx-auto' fill='none'
+                        viewBox='0 0 24 24' stroke='currentColor'>
+                        <polyline points='23 4 23 10 17 10' stroke-linecap='round' />
+                        <polyline points='1 20 1 14 7 14' stroke-linecap='round' />
+                        <path d='M3.51 9a9 9 0 0114.36-3.36L23 10' stroke-linecap='round' />
+                        <path d='M20.49 15a9 9 0 01-14.36 3.36L1 14' stroke-linecap='round' />
+                    </svg>
+                </button>
+
+
+            </div>
+
+
         </div>
 
         <div class="panel mt-6">
@@ -71,6 +92,8 @@
                     <tr>
                         <th class="font-bold text-center w-[200px] break-words whitespace-normal col-ubicacion">EMPLEADO
                         </th>
+                        <th class="font-bold text-center">ASISTENCIA</th>
+                        <th class="font-bold text-center">DETALLE</th>
                         <th class="font-bold text-center">FECHA</th>
                         <th class="font-bold text-center">ENTRADA</th>
                         <th class="font-bold text-center w-[200px] break-words whitespace-normal col-ubicacion">
@@ -80,7 +103,7 @@
                         <th class="font-bold text-center">SALIDA</th>
                         <th class="font-bold text-center w-[200px] break-words whitespace-normal col-ubicacion">
                             UBICACIÓN SALIDA</th>
-                        <th class="font-bold text-center">ASISTENCIA</th>
+
                     </tr>
                 </thead>
 
@@ -110,7 +133,20 @@
 
                     <!-- Cuerpo -->
                     <div class="p-5 space-y-4">
-                        <p id="observacionMensaje" class="text-sm text-gray-700 dark:text-white-dark/70">Mensaje</p>
+                        <div
+                            class="border border-gray-400 dark:border-white/20 bg-gray-50 dark:bg-white/5 rounded-md p-3">
+                            <p id="observacionMensaje" class="text-sm text-gray-800 dark:text-white-dark/80">Mensaje</p>
+                        </div>
+
+                        <p class="text-sm text-gray-600 dark:text-white-dark/60">
+                            <span class="font-bold">Fecha y hora:</span> <span id="observacionFechaHora"></span>
+                        </p>
+                        <p class="text-sm text-gray-600 dark:text-white-dark/60">
+                            <span class="font-bold">Ubicación:</span> <span id="observacionUbicacion"></span>
+                        </p>
+
+
+
                         <div id="observacionImagenes" class="flex flex-wrap gap-2"></div>
 
                         <!-- Botones de acción -->
@@ -125,6 +161,7 @@
                 </div>
             </div>
         </div>
+
 
 
 

@@ -162,7 +162,7 @@ class OrdenesTrabajoController extends Controller
 
 
 
-    
+
 
     public function storesmart(Request $request)
     {
@@ -453,7 +453,7 @@ class OrdenesTrabajoController extends Controller
 
 
 
- 
+
         $tecnicos_apoyo = Usuario::where('idTipoUsuario', 1)->get();
         $clientes = Cliente::all();
         $clientesGenerales = Clientegeneral::all();
@@ -1276,18 +1276,10 @@ class OrdenesTrabajoController extends Controller
                         }
                     });
             });
-
-            $query->orderByRaw("
-            CASE
-                WHEN serie = ? THEN 1
-                WHEN numero_ticket = ? THEN 2
-                ELSE 3
-            END
-        ", [$searchValue, $searchValue]);
         }
 
         $recordsTotal = Ticket::count();
-        $query->orderBy('idTickets', 'desc');
+        $query->orderBy('fecha_creacion', 'desc');
         $recordsFiltered = (clone $query)->count();
 
         $ordenes = $query->skip($request->input('start', 0))
