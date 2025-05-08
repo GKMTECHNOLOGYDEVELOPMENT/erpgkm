@@ -208,22 +208,31 @@ document.addEventListener('alpine:init', () => {
                 initComplete: function () {
                     setTimeout(() => {
                         const wrapper = document.querySelector('.dataTables_wrapper');
-                        const table = $('#myTable1').DataTable().table().node();
                         const scrollTopContainer = document.getElementById('scroll-top');
                         const scrollTopInner = document.getElementById('scroll-top-inner');
-                        const tableParent = table.parentElement;
-                        if (!wrapper || !table || !scrollTopContainer || !scrollTopInner || !tableParent) return;
                 
-                        const scrollContainer = document.createElement('div');
-                        scrollContainer.className = 'overflow-x-auto border rounded-md custom-scroll';
-                        tableParent.appendChild(scrollContainer);
-                        scrollContainer.appendChild(table);
+                        // Este es el contenedor real con overflow horizontal
+                        const tableScrollContainer = document.querySelector('.relative.overflow-x-auto.custom-scroll');
                 
+                        if (!wrapper || !scrollTopContainer || !scrollTopInner || !tableScrollContainer) return;
+                
+                        // Mostrar barra superior
                         scrollTopContainer.classList.remove('hidden');
-                        scrollTopInner.style.width = table.scrollWidth + 'px';
-                        scrollTopContainer.onscroll = () => scrollContainer.scrollLeft = scrollTopContainer.scrollLeft;
-                        scrollContainer.onscroll = () => scrollTopContainer.scrollLeft = scrollContainer.scrollLeft;
                 
+                        // Ajustar ancho sincronizado con tabla
+                        requestAnimationFrame(() => {
+                            scrollTopInner.style.width = tableScrollContainer.scrollWidth + 'px';
+                        });
+                
+                        // Scroll sincronizado
+                        scrollTopContainer.onscroll = () => {
+                            tableScrollContainer.scrollLeft = scrollTopContainer.scrollLeft;
+                        };
+                        tableScrollContainer.onscroll = () => {
+                            scrollTopContainer.scrollLeft = tableScrollContainer.scrollLeft;
+                        };
+                
+                        // Controles flotantes
                         const panel = document.querySelector('.panel.mt-6');
                         const info = wrapper.querySelector('.dataTables_info');
                         const length = wrapper.querySelector('.dataTables_length');
@@ -249,9 +258,8 @@ document.addEventListener('alpine:init', () => {
                             floatingControls.appendChild(paginate);
                             panel.appendChild(floatingControls);
                         }
-                    }, 300); // Espera un poco más para asegurar renderizado
+                    }, 300); // Espera para asegurar render completo
                 },
-                
                 
                 rowCallback: (row, data) => {
                     const estadoColor = data.ticketflujo?.estadoflujo?.color || '';
