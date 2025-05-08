@@ -107,14 +107,23 @@
 
         <!-- Cuerpo del Modal -->
         <div class="p-5 max-h-[70vh] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-                <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Inicio:</h3>
-                <input type="text" id="detalleFechaInicioHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
-            </div>
-            <div>
-                <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Fin:</h3>
-                <input type="text" id="detalleFechaFinalHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
-            </div>
+             <!-- Fecha única -->
+    <div class="sm:col-span-2">
+        <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha:</h3>
+        <input type="date" id="detalleFecha" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+    </div>
+    
+    <!-- Hora de inicio -->
+    <div>
+        <h3 class="font-semibold text-sm text-gray-600 mb-1">Hora Inicio:</h3>
+        <input type="time" id="detalleHoraInicio" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+    </div>
+    
+    <!-- Hora de fin -->
+    <div>
+        <h3 class="font-semibold text-sm text-gray-600 mb-1">Hora Fin:</h3>
+        <input type="time" id="detalleHoraFin" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+    </div>
             <div>
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnico:</h3>
                 <select id="detalleUsuario" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
