@@ -40,24 +40,6 @@ document.addEventListener('alpine:init', () => {
                 },
                 columns: [
                     {
-                        data: 'empleado',
-                        className: 'text-center align-middle w-[140px]',
-                        render: (data, type) => type === 'display'
-                            ? `<strong class="block break-words whitespace-normal text-sm uppercase font-semibold">${data}</strong>`
-                            : data
-                    },
-                    {
-                        data: 'asistencia',
-                        className: 'text-center align-middle',
-                        render: function (d, type) {
-                            if (type !== 'display') return d;
-
-                            const clase = d === 'ASISTIÓ' ? 'bg-success' : 'bg-danger';
-                            return `<span class="badge ${clase}">${d}</span>`;
-                        }
-                    },
-
-                    {
                         title: 'DETALLE',
                         data: null, // Usamos toda la fila
                         className: 'text-center align-middle',
@@ -85,6 +67,23 @@ document.addEventListener('alpine:init', () => {
 
                             html += '</div>';
                             return html;
+                        }
+                    },
+                    {
+                        data: 'empleado',
+                        className: 'text-center align-middle w-[140px]',
+                        render: (data, type) => type === 'display'
+                            ? `<strong class="block break-words whitespace-normal text-sm uppercase font-semibold">${data}</strong>`
+                            : data
+                    },
+                    {
+                        data: 'asistencia',
+                        className: 'text-center align-middle',
+                        render: function (d, type) {
+                            if (type !== 'display') return d;
+
+                            const clase = d === 'ASISTIÓ' ? 'bg-success' : 'bg-danger';
+                            return `<span class="badge ${clase}">${d}</span>`;
                         }
                     },
 
@@ -238,6 +237,7 @@ document.addEventListener('alpine:init', () => {
         }
     }));
     let observacionActual = null;
+
     function nombreTipoAsunto(id) {
         switch (id) {
             case 1: return 'TARDANZA';
@@ -246,30 +246,37 @@ document.addEventListener('alpine:init', () => {
             default: return 'OBSERVACIÓN';
         }
     }
+
     window.verObservacion = function (observacion) {
         observacionActual = observacion;
+        const respuestaTextarea = document.getElementById('respuestaTexto');
+        const btnEnviar = document.getElementById('btnEnviarRespuesta');
+
+        if (observacion?.respuesta) {
+            respuestaTextarea.value = observacion.respuesta;
+            respuestaTextarea.setAttribute('readonly', true);
+            btnEnviar.classList.add('hidden');
+        } else {
+            respuestaTextarea.value = '';
+            respuestaTextarea.removeAttribute('readonly');
+            btnEnviar.classList.remove('hidden');
+        }
 
         const tipoTexto = nombreTipoAsunto(observacion?.idTipoAsunto);
-        const total = observacion.total ?? 1;
-        const index = observacion.index ?? 1;
+        const total = (observacion.total ?? 1);
+        const index = (observacion.index ?? 1);
+
         document.querySelector('#modalObservacion h5').textContent = `${tipoTexto} (${index} de ${total})`;
 
         document.getElementById('observacionFechaHora').textContent =
-            observacion?.fechaHora ? `Fecha y hora: ${observacion.fechaHora}` : 'Fecha no registrada';
+            observacion?.fechaHora ? `${observacion.fechaHora}` : 'Fecha no registrada';
 
         document.getElementById('observacionUbicacion').textContent =
-            observacion?.ubicacion ? `Ubicación: ${observacion.ubicacion}` : 'Ubicación no registrada';
+            observacion?.ubicacion ? `${observacion.ubicacion}` : 'Ubicación no registrada';
 
-        // 👉 Mostrar mensaje
         document.getElementById('observacionMensaje').textContent = observacion?.mensaje || 'Sin mensaje';
 
-        // 👉 Mostrar u ocultar botones
-        const acciones = document.getElementById('observacionAcciones');
-        if (observacion?.estado === 0) {
-            acciones.classList.remove('hidden');
-        } else {
-            acciones.classList.add('hidden');
-        }
+        document.getElementById('observacionAcciones').classList.remove('hidden');
 
         const contenedor = document.getElementById('observacionImagenes');
         contenedor.innerHTML = 'Cargando...';
@@ -300,60 +307,118 @@ document.addEventListener('alpine:init', () => {
         document.getElementById('modalObservacion').classList.remove('hidden');
     };
 
+    window.aprobarObservacion = function () {
+        const id = observacionActual?.idObservaciones;
+        if (!id) return console.error('ID no definido');
+    
+        fetch('/asistencias/actualizar-observacion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ id, estado: 1 })
+        })
+            .then(res => res.json())
+            .then(() => {
+                Toastify({
+                    text: "✅ Observación aprobada.",
+                    duration: 2500,
+                    style: { background: "#22c55e" }
+                }).showToast();
+    
+                cerrarModalObservacion();
+                setTimeout(() => location.reload(), 600);
+            })
+            .catch(() => {
+                Toastify({
+                    text: "❌ Error al aprobar la observación.",
+                    duration: 2500,
+                    style: { background: "#ef4444" }
+                }).showToast();
+            });
+    };
+    
+    window.denegarObservacion = function () {
+        const id = observacionActual?.idObservaciones;
+        if (!id) return console.error('ID no definido');
+    
+        fetch('/asistencias/actualizar-observacion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ id, estado: 2 })
+        })
+            .then(res => res.json())
+            .then(() => {
+                Toastify({
+                    text: "❌ Observación denegada.",
+                    duration: 2500,
+                    style: { background: "#f87171" }
+                }).showToast();
+    
+                cerrarModalObservacion();
+                setTimeout(() => location.reload(), 600);
+            })
+            .catch(() => {
+                Toastify({
+                    text: "❌ Error al denegar la observación.",
+                    duration: 2500,
+                    style: { background: "#dc2626" }
+                }).showToast();
+            });
+    };
+    
+    window.enviarRespuesta = function () {
+        const id = observacionActual?.idObservaciones;
+        const respuesta = document.getElementById('respuestaTexto').value.trim();
+    
+        if (!id || !respuesta) {
+            Toastify({
+                text: "⚠️ La respuesta no puede estar vacía.",
+                duration: 2500,
+                style: { background: "#facc15", color: "#000" }
+            }).showToast();
+            return;
+        }
+    
+        fetch('/asistencias/responder-observacion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ id, respuesta })
+        })
+            .then(res => res.json())
+            .then(() => {
+                Toastify({
+                    text: "📩 Respuesta registrada.",
+                    duration: 2500,
+                    style: { background: "#3b82f6" }
+                }).showToast();
+    
+                // Bloquear textarea y ocultar botón
+                const respuestaTextarea = document.getElementById('respuestaTexto');
+                const btnEnviar = document.getElementById('btnEnviarRespuesta');
+                respuestaTextarea.setAttribute('readonly', true);
+                btnEnviar.classList.add('hidden');
+            })
+            .catch(() => {
+                Toastify({
+                    text: "❌ Error al enviar la respuesta.",
+                    duration: 2500,
+                    style: { background: "#ef4444" }
+                }).showToast();
+            });
+    };
+    
+
     window.cerrarModalObservacion = function () {
         document.getElementById('modalObservacion').classList.add('hidden');
     };
 
-    window.aprobarObservacion = function () {
-        const id = observacionActual?.idObservaciones ?? observacionActual?.id;
-
-        if (id) {
-            fetch('/asistencias/actualizar-observacion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    id: id,
-                    estado: 1
-                })
-            })
-                .then(res => res.json())
-                .then(() => {
-                    cerrarModalObservacion();
-                    setTimeout(() => location.reload(), 300); // espera breve
-                })
-                .catch(console.error);
-        } else {
-            console.error('❌ ID de observación no definido (aprobación)');
-        }
-    };
-
-    window.denegarObservacion = function () {
-        const id = observacionActual?.idObservaciones ?? observacionActual?.id;
-
-        if (id) {
-            fetch('/asistencias/actualizar-observacion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    id: id,
-                    estado: 2
-                })
-            })
-                .then(res => res.json())
-                .then(() => {
-                    cerrarModalObservacion();
-                    setTimeout(() => location.reload(), 300); // espera breve
-                })
-                .catch(console.error);
-        } else {
-            console.error('❌ ID de observación no definido (denegación)');
-        }
-    };
 
 });

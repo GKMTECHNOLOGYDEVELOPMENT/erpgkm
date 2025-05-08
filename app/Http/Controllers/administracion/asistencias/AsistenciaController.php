@@ -77,15 +77,18 @@ class AsistenciaController extends Controller
                 $obsAprobada = $obsDelDiaTodas->firstWhere('estado', 1);
                 $obsPendiente = $obsDelDiaTodas->firstWhere('estado', 0);
                 $obsDenegada = $obsDelDiaTodas->firstWhere('estado', 2);
-                $obsFinal = $obsAprobada ?? $obsPendiente ?? $obsDenegada;
+                $obsFinal = $obsPendiente
+                    ?? $obsDelDiaTodas->sortByDesc('fechaHora')->first(); // última observación del día (aprobada o denegada)
 
-                if ($obsFinal === $obsAprobada) {
-                    $obsTotal = 1;
-                    $obsIndex = 1;
+                // si no hay ninguna observación
+                if (!$obsFinal) {
+                    $obsTotal = 0;
+                    $obsIndex = 0;
                 } else {
                     $obsTotal = $obsDelDiaTodas->count();
-                    $obsIndex = $obsDelDiaTodas->search(fn($o) => $o->idObservaciones === $obsFinal?->idObservaciones) + 1;
+                    $obsIndex = $obsDelDiaTodas->search(fn($o) => $o->idObservaciones === $obsFinal->idObservaciones) + 1;
                 }
+
 
                 $datos[] = [
                     'empleado' => strtoupper(trim("{$usuario->Nombre} {$usuario->apellidoPaterno} {$usuario->apellidoMaterno}")),
@@ -109,6 +112,7 @@ class AsistenciaController extends Controller
                         'ubicacion' => $obsFinal->ubicacion, // 👈 agregado
                         'lat' => $obsFinal->lat,             // 👈 agregado
                         'lng' => $obsFinal->lng,             // 👈 agregado
+                        'respuesta' => $obsFinal->respuesta,
                         'total' => $obsTotal,
                         'index' => $obsIndex
                     ] : null
@@ -185,5 +189,18 @@ class AsistenciaController extends Controller
             ->get();
 
         return view('administracion.asistencia.historial', compact('usuario', 'observaciones'));
+    }
+    public function responderObservacion(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:observaciones,idObservaciones',
+            'respuesta' => 'required|string'
+        ]);
+
+        $observacion = Observacion::findOrFail($request->id);
+        $observacion->respuesta = $request->respuesta;
+        $observacion->save();
+
+        return response()->json(['success' => true]);
     }
 }

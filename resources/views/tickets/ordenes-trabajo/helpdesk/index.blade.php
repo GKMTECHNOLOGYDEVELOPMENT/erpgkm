@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <style>
@@ -29,12 +29,6 @@
             /* Evita la interacción con el encabezado */
         }
 
-        #myTable1 thead .sorting,
-        #myTable1 thead .sorting_asc,
-        #myTable1 thead .sorting_desc {
-            background-image: none !important;
-            /* Oculta los íconos de ordenación */
-        }
 
         /* SCROLLBAR MODERNO Y REDONDEADO */
         .custom-scroll {
@@ -194,6 +188,9 @@
 
         <!-- Tabla y Paginación -->
         <div class="panel mt-6">
+            <div id="scroll-top" class="custom-scroll overflow-x-auto mb-2 hidden" style="height: 12px;">
+                <div id="scroll-top-inner" style="height: 1px;"></div>
+            </div>
             <div class="relative overflow-x-auto custom-scroll">
                 <!-- Preloader -->
                 <div x-show="isLoading" x-transition class="absolute inset-0 flex items-center justify-center z-50">
@@ -207,27 +204,25 @@
 
 
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
-                <div id="tabla-wrapper" style="w-full overflow-x: auto;">
-                    <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
-                        <thead>
-                            <tr>
-                                <th class="text-center px-4 py-2">ACCIONES</th>
-                                <th class="text-center px-4 py-2">ID</th>
-                                <th class="text-center px-4 py-2">N. TICKET</th>
-                                <th class="text-center px-4 py-2">F. TICKET</th>
-                                <th class="text-center px-4 py-2">F. VISITA</th>
-                                <th class="text-center px-4 py-2">CLIENTE</th>
-                                <th class="text-center px-4 py-2">TIENDA</th>
-                                <th style="display: none;">TIPO TEXTO</th>
-                                <th class="text-center px-4 py-2">TIPO SERVICIO</th>
-                                <th class="text-center px-4 py-2">MÁS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Los datos se llenarán dinámicamente -->
-                        </tbody>
-                    </table>
-                </div>
+                <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
+                    <thead>
+                        <tr>
+                            <th class="text-center px-4 py-2">ACCIONES</th>
+                            <th class="text-center px-4 py-2">ID</th>
+                            <th class="text-center px-4 py-2">N. TICKET</th>
+                            <th class="text-center px-4 py-2">F. TICKET</th>
+                            <th class="text-center px-4 py-2">F. VISITA</th>
+                            <th class="text-center px-4 py-2">CLIENTE</th>
+                            <th class="text-center px-4 py-2">TIENDA</th>
+                            <th style="display: none;">TIPO TEXTO</th>
+                            <th class="text-center px-4 py-2">TIPO SERVICIO</th>
+                            <th class="text-center px-4 py-2">MÁS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se llenarán dinámicamente -->
+                    </tbody>
+                </table>
             </div>
             <!-- Paginación -->
             <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>
@@ -237,6 +232,7 @@
     <!-- Scripts adicionales -->
     <script src="{{ asset('assets/js/tickets/helpdesk/list.js') }}"></script>
     <!-- DataTables JS -->
-    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 </x-layout.default>

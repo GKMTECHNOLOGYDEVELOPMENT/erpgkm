@@ -16,10 +16,10 @@ document.addEventListener('alpine:init', () => {
                 responsive: true,
                 autoWidth: false,
                 columnDefs: [
-                    { targets: 1, width: "340px" }, // mensaje
-                    { targets: 4, width: "200px" }  // imágenes
+                    { targets: 1, width: "320px" }, // mensaje
+                    { targets: 2, width: "180px" }, // fecha y hora ✅
+                    { targets: 4, width: "300px" }  // imágenes
                 ],
-
                 language: {
                     search: "Buscar...",
                     zeroRecords: "No se encontraron observaciones",

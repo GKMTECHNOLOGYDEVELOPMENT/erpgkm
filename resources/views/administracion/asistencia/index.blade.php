@@ -1,6 +1,8 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/viewerjs/dist/viewer.min.css" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -90,10 +92,10 @@
             <table id="tablaAsistencias" class="table whitespace-nowrap">
                 <thead>
                     <tr>
+                        <th class="font-bold text-center">DETALLE</th>
                         <th class="font-bold text-center w-[200px] break-words whitespace-normal col-ubicacion">EMPLEADO
                         </th>
                         <th class="font-bold text-center">ASISTENCIA</th>
-                        <th class="font-bold text-center">DETALLE</th>
                         <th class="font-bold text-center">FECHA</th>
                         <th class="font-bold text-center">ENTRADA</th>
                         <th class="font-bold text-center w-[200px] break-words whitespace-normal col-ubicacion">
@@ -106,16 +108,12 @@
 
                     </tr>
                 </thead>
-
-                <tbody></tbody>
             </table>
-
-
         </div>
 
         <div id="modalObservacion" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto">
             <div class="flex items-start justify-center min-h-screen px-4" onclick="cerrarModalObservacion()">
-                <div class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg"
+                <div class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-5xl my-8"
                     onclick="event.stopPropagation()">
                     <!-- Header -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
@@ -131,43 +129,75 @@
                         </button>
                     </div>
 
-                    <!-- Cuerpo -->
-                    <div class="p-5 space-y-4">
-                        <div
-                            class="border border-gray-400 dark:border-white/20 bg-gray-50 dark:bg-white/5 rounded-md p-3">
-                            <p id="observacionMensaje" class="text-sm text-gray-800 dark:text-white-dark/80">Mensaje</p>
+                    <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Columna izquierda: info -->
+                        <div class="space-y-4 md:pr-6 border-r border-gray-300 dark:border-white/20">
+                            <!-- Fecha y ubicación -->
+                            <p class="text-sm text-gray-600 dark:text-white-dark/60">
+                                <span class="font-bold">Fecha y hora:</span> <span id="observacionFechaHora"></span>
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-white-dark/60">
+                                <span class="font-bold">Ubicación:</span> <span id="observacionUbicacion"></span>
+                            </p>
+
+                            <!-- Mensaje -->
+                            <div>
+                                <label class="text-sm font-semibold text-gray-700 dark:text-white">Mensaje:</label>
+                                <div
+                                    class="border border-gray-400 dark:border-white/20 bg-gray-50 dark:bg-white/5 rounded-md p-3 mt-1">
+                                    <p id="observacionMensaje" class="text-sm text-gray-800 dark:text-white-dark/80">
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Campo de respuesta -->
+                            <div id="respuestaContenedor">
+                                <label for="respuestaTexto"
+                                    class="text-sm font-semibold text-gray-700 dark:text-white">Respuesta:</label>
+                                <div class="relative mt-1">
+                                    <textarea id="respuestaTexto" rows="3"
+                                        class="form-input w-full pr-12 resize-none border-gray-300 dark:border-white/20 dark:bg-[#121c2c] dark:text-white-dark"
+                                        placeholder="Escribe tu respuesta aquí..."></textarea>
+
+                                    <button id="btnEnviarRespuesta" type="button"
+                                        class="absolute bottom-1.5 right-2 badge bg-primary text-white p-1.5 rounded-full shadow-md transition"
+                                        onclick="enviarRespuesta()" title="Enviar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M3 10l9 4-9 4v-8zm0 0l18-4-9 18-2-8" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Botones -->
+                            <div id="observacionAcciones" class="flex justify-start gap-4 pt-4 border-t mt-4">
+                                <button type="button" class="btn btn-outline-danger"
+                                    onclick="denegarObservacion()">Denegado</button>
+                                <button type="button" class="btn btn-primary"
+                                    onclick="aprobarObservacion()">Aprobado</button>
+                            </div>
                         </div>
 
-                        <p class="text-sm text-gray-600 dark:text-white-dark/60">
-                            <span class="font-bold">Fecha y hora:</span> <span id="observacionFechaHora"></span>
-                        </p>
-                        <p class="text-sm text-gray-600 dark:text-white-dark/60">
-                            <span class="font-bold">Ubicación:</span> <span id="observacionUbicacion"></span>
-                        </p>
 
-
-
-                        <div id="observacionImagenes" class="flex flex-wrap gap-2"></div>
-
-                        <!-- Botones de acción -->
-                        <div id="observacionAcciones" class="flex justify-end gap-3 pt-4 border-t mt-4 hidden">
-                            <button type="button" class="btn btn-outline-danger"
-                                onclick="denegarObservacion()">Denegado</button>
-                            <button type="button" class="btn btn-primary"
-                                onclick="aprobarObservacion()">Aprobado</button>
+                        <!-- Columna derecha: imágenes -->
+                        <div class="flex flex-col gap-2 md:pl-6 justify-start items-start">
+                            <h6 class="text-sm font-semibold text-gray-700 dark:text-white">Imágenes:</h6>
+                            <div id="observacionImagenes" class="flex flex-wrap gap-2 overflow-auto max-h-[500px]">
+                            </div>
                         </div>
-
                     </div>
+
                 </div>
             </div>
         </div>
 
-
-
-
         <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/viewerjs/dist/viewer.min.js"></script>
+        <!-- Toastify JS -->
+        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
         <script src="{{ asset('assets/js/asistencias/asistencia.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>

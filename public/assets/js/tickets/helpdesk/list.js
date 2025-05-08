@@ -85,6 +85,7 @@ document.addEventListener('alpine:init', () => {
             this.datatable1 = $('#myTable1').DataTable({
                 processing: false,
                 serverSide: true,
+                ordering: false,
                 order: [[0, 'desc']], // 👈 ORDENAR POR ID
                 ajax: {
                     url: "/api/ordenes/helpdesk",
@@ -203,7 +204,51 @@ document.addEventListener('alpine:init', () => {
                         previous: 'Anterior'
                     }
                 },
-
+                dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
+                initComplete: function () {
+                    const wrapper = document.querySelector('.dataTables_wrapper');
+                    const table = $('#myTable1').DataTable().table().node();
+                    const scrollTopContainer = document.getElementById('scroll-top');
+                    const scrollTopInner = document.getElementById('scroll-top-inner');
+                    const tableParent = table.parentElement;
+                
+                    // Scroll horizontal inferior como contenedor real
+                    const scrollContainer = document.createElement('div');
+                    scrollContainer.className = 'overflow-x-auto border rounded-md custom-scroll';
+                    tableParent.appendChild(scrollContainer);
+                    scrollContainer.appendChild(table);
+                
+                    // Scroll superior sincronizado
+                    scrollTopContainer.classList.remove('hidden');
+                    scrollTopInner.style.width = table.scrollWidth + 'px';
+                    scrollTopContainer.onscroll = () => scrollContainer.scrollLeft = scrollTopContainer.scrollLeft;
+                    scrollContainer.onscroll = () => scrollTopContainer.scrollLeft = scrollTopContainer.scrollLeft;
+                
+                    // Controles flotantes
+                    const panel = document.querySelector('.panel.mt-6');
+                    const info = wrapper.querySelector('.dataTables_info');
+                    const length = wrapper.querySelector('.dataTables_length');
+                    const paginate = wrapper.querySelector('.dataTables_paginate');
+                
+                    const floatingControls = document.createElement('div');
+                    floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
+                    Object.assign(floatingControls.style, {
+                        position: 'sticky',
+                        bottom: '0',
+                        left: '0',
+                        width: '100%',
+                        zIndex: '10'
+                    });
+                
+                    if (info && length && paginate && panel) {
+                        floatingControls.appendChild(info);
+                        floatingControls.appendChild(length);
+                        floatingControls.appendChild(paginate);
+                        panel.appendChild(floatingControls);
+                    }
+                },
+                
+                
                 rowCallback: (row, data) => {
                     const estadoColor = data.ticketflujo?.estadoflujo?.color || '';
 

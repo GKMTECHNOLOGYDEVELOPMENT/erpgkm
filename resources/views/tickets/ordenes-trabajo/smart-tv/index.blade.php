@@ -5,28 +5,28 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <!-- DataTables CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <style>
-    .tachado td {
-        text-decoration: line-through !important;
-        color: #999 !important;
-        position: relative;
-    }
-    
-    .tachado::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        
-        pointer-events: none;
-        z-index: 1;
-    }
-</style>
+        .tachado td {
+            text-decoration: line-through !important;
+            color: #999 !important;
+            position: relative;
+        }
+
+        .tachado::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
 
     <style>
         .panel {
@@ -210,30 +210,28 @@
 
 
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
-                <div id="tabla-wrapper" style="w-full overflow-x: auto;">
-                    <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
-                        <thead>
-                            <tr>
-                                <th class="text-center px-4 py-2">ID</th>
-                                <th class="text-center px-4 py-2">ACCIONES</th>
-                                <th class="text-center px-4 py-2">N. TICKET</th>
-                                <th class="text-center px-4 py-2">F. TICKET</th>
-                                <th class="text-center px-4 py-2">F. VISITA</th>
-                                <th class="text-center px-4 py-2">CATEGORIA</th>
-                                <th class="text-center px-4 py-2">GENERAL</th>
-                                <th class="text-center px-4 py-2">MARCA</th>
-                                <th class="text-center px-4 py-2">MODELO</th>
-                                <th class="text-center px-4 py-2">SERIE</th>
-                                <th class="text-center px-4 py-2">CLIENTE</th>
-                                <th class="text-center px-4 py-2">DIRECCIÓN</th>
-                                <th class="text-center px-4 py-2">MÁS</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Los datos se llenarán dinámicamente -->
-                        </tbody>
-                    </table>
-                </div>
+                <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
+                    <thead>
+                        <tr>
+                            <th class="text-center px-4 py-2">ID</th>
+                            <th class="text-center px-4 py-2">ACCIONES</th>
+                            <th class="text-center px-4 py-2">N. TICKET</th>
+                            <th class="text-center px-4 py-2">F. TICKET</th>
+                            <th class="text-center px-4 py-2">F. VISITA</th>
+                            <th class="text-center px-4 py-2">CATEGORIA</th>
+                            <th class="text-center px-4 py-2">GENERAL</th>
+                            <th class="text-center px-4 py-2">MARCA</th>
+                            <th class="text-center px-4 py-2">MODELO</th>
+                            <th class="text-center px-4 py-2">SERIE</th>
+                            <th class="text-center px-4 py-2">CLIENTE</th>
+                            <th class="text-center px-4 py-2">DIRECCIÓN</th>
+                            <th class="text-center px-4 py-2">MÁS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos se llenarán dinámicamente -->
+                    </tbody>
+                </table>
             </div>
             <!-- Paginación -->
             <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>
@@ -272,8 +270,6 @@
     <!-- Scripts adicionales -->
     <script src="{{ asset('assets/js/tickets/smart/list.js') }}"></script>
     <!-- DataTables JS -->
-    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
-
-
-
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
 </x-layout.default>
