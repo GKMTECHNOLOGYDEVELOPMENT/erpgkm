@@ -17,8 +17,9 @@ document.addEventListener('alpine:init', () => {
                 autoWidth: false,
                 columnDefs: [
                     { targets: 1, width: "320px" }, // mensaje
+                    { targets: 2, width: "320px" }, // mensaje
                     { targets: 2, width: "180px" }, // fecha y hora ✅
-                    { targets: 4, width: "300px" }  // imágenes
+                    { targets: 5, width: "300px" }  // imágenes
                 ],
                 language: {
                     search: "Buscar...",

@@ -164,13 +164,20 @@ class AsistenciaController extends Controller
             'id' => 'required|integer|exists:observaciones,idObservaciones',
             'estado' => 'required|in:1,2'
         ]);
-
+    
         $observacion = \App\Models\Observacion::findOrFail($request->id);
         $observacion->estado = $request->estado;
+    
+        // ✅ Agrega esto para guardar la respuesta si se envía
+        if ($request->filled('respuesta')) {
+            $observacion->respuesta = $request->respuesta;
+        }
+    
         $observacion->save();
-
+    
         return response()->json(['success' => true]);
     }
+    
     public function obtenerImagenesObservacion($id)
     {
         $observacion = Observacion::with('anexos')->findOrFail($id);

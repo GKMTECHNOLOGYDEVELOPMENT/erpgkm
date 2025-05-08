@@ -7,11 +7,26 @@
             vertical-align: middle;
         }
 
+        /* Mismo estilo para MENSAJE y RESPUESTA */
         .tabla-observaciones td:nth-child(2),
-        .tabla-observaciones th:nth-child(2) {
+        .tabla-observaciones th:nth-child(2),
+        .tabla-observaciones td:nth-child(3),
+        .tabla-observaciones th:nth-child(3) {
             max-width: 320px;
             white-space: pre-wrap;
             overflow-wrap: break-word;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* UBICACIÓN */
+        .tabla-observaciones td:nth-child(5),
+        .tabla-observaciones th:nth-child(5) {
+            max-width: 300px;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            text-align: center;
+            vertical-align: middle;
         }
     </style>
 
@@ -27,7 +42,8 @@
                     <tr>
                         <th class="font-bold">#</th>
                         <th class="font-bold text-center w-[320px]">MENSAJE</th>
-                        <th class="font-bold text-center w-[180px] break-words whitespace-normal">FECHA Y HORA</th>
+                        <th class="font-bold text-center w-[320px]">RESPUESTA</th>
+                        <th class="font-bold text-center w-[180px] break-words whitespace-normal">FECHA</th>
                         <th class="font-bold text-center w-[300px] break-words whitespace-normal">UBICACIÓN</th>
                         <th class="font-bold text-center">IMÁGENES</th>
                         <th class="font-bold text-center">ESTADO</th>
@@ -38,6 +54,7 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-[#2d3748]">
                             <td class="px-1 py-1 border font-semibold">{{ $i + 1 }}</td>
                             <td class="px-1 py-1 border w-[320px]">{{ $obs->mensaje }}</td>
+                            <td class="px-1 py-1 border w-[320px]">{{ $obs->respuesta ?? ' ' }}</td>
                             <td class="px-1 py-1 border w-[180px]">{{ $obs->fechaHora }}</td>
                             <td class="px-1 py-1 border w-[300px]">{{ $obs->ubicacion }}</td>
                             <td class="px-1 py-1 border align-top">
@@ -45,7 +62,7 @@
                                     <div class="grid grid-cols-2 gap-1 viewer-container">
                                         @foreach ($obs->anexos as $img)
                                             <img src="data:image/jpeg;base64,{{ base64_encode($img->foto) }}"
-                                                class="w-full h-16 object-cover rounded border cursor-zoom-in"
+                                                class="w-full h-12 object-cover rounded border cursor-zoom-in"
                                                 @click="$dispatch('open-img', '{{ base64_encode($img->foto) }}')" />
                                         @endforeach
                                     </div>
@@ -55,7 +72,7 @@
                             </td>
                             <td class="px-1 py-1 border">
                                 @php
-                                    $estadoBadge = match($obs->estado) {
+                                    $estadoBadge = match ($obs->estado) {
                                         1 => '<span class="badge bg-primary">Aprobado</span>',
                                         2 => '<span class="badge bg-danger">Denegado</span>',
                                         default => '<span class="badge bg-warning">Pendiente</span>',

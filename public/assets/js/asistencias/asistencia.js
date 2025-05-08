@@ -250,37 +250,36 @@ document.addEventListener('alpine:init', () => {
     window.verObservacion = function (observacion) {
         observacionActual = observacion;
         const respuestaTextarea = document.getElementById('respuestaTexto');
-        const btnEnviar = document.getElementById('btnEnviarRespuesta');
-
-        if (observacion?.respuesta) {
-            respuestaTextarea.value = observacion.respuesta;
-            respuestaTextarea.setAttribute('readonly', true);
-            btnEnviar.classList.add('hidden');
-        } else {
-            respuestaTextarea.value = '';
-            respuestaTextarea.removeAttribute('readonly');
-            btnEnviar.classList.remove('hidden');
-        }
-
+        const btnAprobar = document.querySelector('#observacionAcciones button.btn-primary');
+        const btnDenegar = document.querySelector('#observacionAcciones button.btn-outline-danger');
+    
         const tipoTexto = nombreTipoAsunto(observacion?.idTipoAsunto);
         const total = (observacion.total ?? 1);
         const index = (observacion.index ?? 1);
-
+    
         document.querySelector('#modalObservacion h5').textContent = `${tipoTexto} (${index} de ${total})`;
-
-        document.getElementById('observacionFechaHora').textContent =
-            observacion?.fechaHora ? `${observacion.fechaHora}` : 'Fecha no registrada';
-
-        document.getElementById('observacionUbicacion').textContent =
-            observacion?.ubicacion ? `${observacion.ubicacion}` : 'Ubicación no registrada';
-
+        document.getElementById('observacionFechaHora').textContent = observacion?.fechaHora ?? 'Fecha no registrada';
+        document.getElementById('observacionUbicacion').textContent = observacion?.ubicacion ?? 'Ubicación no registrada';
         document.getElementById('observacionMensaje').textContent = observacion?.mensaje || 'Sin mensaje';
-
-        document.getElementById('observacionAcciones').classList.remove('hidden');
-
+    
+        // Asignar respuesta
+        respuestaTextarea.value = observacion?.respuesta || '';
+    
+        // Habilitar/deshabilitar según estado
+        if (observacion?.estado === 1 || observacion?.estado === 2) {
+            respuestaTextarea.setAttribute('readonly', true);
+            btnAprobar.disabled = true;
+            btnDenegar.disabled = true;
+        } else {
+            respuestaTextarea.removeAttribute('readonly');
+            btnAprobar.disabled = false;
+            btnDenegar.disabled = false;
+        }
+    
+        // Cargar imágenes
         const contenedor = document.getElementById('observacionImagenes');
         contenedor.innerHTML = 'Cargando...';
-
+    
         fetch(`/asistencias/observacion/${observacion.idObservaciones}`)
             .then(res => res.json())
             .then(data => {
@@ -292,7 +291,7 @@ document.addEventListener('alpine:init', () => {
                         img.className = 'w-24 h-24 object-contain rounded border cursor-zoom-in';
                         contenedor.appendChild(img);
                     });
-
+    
                     if (window.viewerInstance) window.viewerInstance.destroy();
                     window.viewerInstance = new Viewer(contenedor, {
                         toolbar: true,
@@ -303,21 +302,24 @@ document.addEventListener('alpine:init', () => {
                     contenedor.innerHTML = 'Sin imágenes';
                 }
             });
-
+    
         document.getElementById('modalObservacion').classList.remove('hidden');
     };
+    
 
     window.aprobarObservacion = function () {
         const id = observacionActual?.idObservaciones;
+        const respuesta = document.getElementById('respuestaTexto').value.trim();
+
         if (!id) return console.error('ID no definido');
-    
+
         fetch('/asistencias/actualizar-observacion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ id, estado: 1 })
+            body: JSON.stringify({ id, estado: 1, respuesta }) // puede ser ''
         })
             .then(res => res.json())
             .then(() => {
@@ -326,7 +328,7 @@ document.addEventListener('alpine:init', () => {
                     duration: 2500,
                     style: { background: "#22c55e" }
                 }).showToast();
-    
+
                 cerrarModalObservacion();
                 setTimeout(() => location.reload(), 600);
             })
@@ -338,18 +340,20 @@ document.addEventListener('alpine:init', () => {
                 }).showToast();
             });
     };
-    
+
     window.denegarObservacion = function () {
         const id = observacionActual?.idObservaciones;
+        const respuesta = document.getElementById('respuestaTexto').value.trim();
+
         if (!id) return console.error('ID no definido');
-    
+
         fetch('/asistencias/actualizar-observacion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ id, estado: 2 })
+            body: JSON.stringify({ id, estado: 2, respuesta })
         })
             .then(res => res.json())
             .then(() => {
@@ -358,7 +362,7 @@ document.addEventListener('alpine:init', () => {
                     duration: 2500,
                     style: { background: "#f87171" }
                 }).showToast();
-    
+
                 cerrarModalObservacion();
                 setTimeout(() => location.reload(), 600);
             })
@@ -370,51 +374,8 @@ document.addEventListener('alpine:init', () => {
                 }).showToast();
             });
     };
-    
-    window.enviarRespuesta = function () {
-        const id = observacionActual?.idObservaciones;
-        const respuesta = document.getElementById('respuestaTexto').value.trim();
-    
-        if (!id || !respuesta) {
-            Toastify({
-                text: "⚠️ La respuesta no puede estar vacía.",
-                duration: 2500,
-                style: { background: "#facc15", color: "#000" }
-            }).showToast();
-            return;
-        }
-    
-        fetch('/asistencias/responder-observacion', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ id, respuesta })
-        })
-            .then(res => res.json())
-            .then(() => {
-                Toastify({
-                    text: "📩 Respuesta registrada.",
-                    duration: 2500,
-                    style: { background: "#3b82f6" }
-                }).showToast();
-    
-                // Bloquear textarea y ocultar botón
-                const respuestaTextarea = document.getElementById('respuestaTexto');
-                const btnEnviar = document.getElementById('btnEnviarRespuesta');
-                respuestaTextarea.setAttribute('readonly', true);
-                btnEnviar.classList.add('hidden');
-            })
-            .catch(() => {
-                Toastify({
-                    text: "❌ Error al enviar la respuesta.",
-                    duration: 2500,
-                    style: { background: "#ef4444" }
-                }).showToast();
-            });
-    };
-    
+
+
 
     window.cerrarModalObservacion = function () {
         document.getElementById('modalObservacion').classList.add('hidden');
