@@ -249,27 +249,50 @@ public function update(Request $request, $id)
         return $pdf->download('reporte-articulos.pdf');
     }
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        $articulos = Articulo::with(['unidad', 'tipoarticulo', 'modelo'])->get();
+        $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo']);
     
-        $articulosData = $articulos->map(function ($articulo) {
+        $total = $query->count();
+    
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                  ->orWhere('codigo_barras', 'like', "%$search%")
+                  ->orWhere('sku', 'like', "%$search%");
+            });
+        }
+    
+        $filtered = $query->count();
+    
+        $articulos = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+    
+        $data = $articulos->map(function ($articulo) {
             return [
                 'idArticulos' => $articulo->idArticulos,
                 'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
                 'nombre' => $articulo->nombre,
-                'unidad' => $articulo->unidad ? $articulo->unidad->nombre : 'Sin Unidad',
+                'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
                 'codigo_barras' => $articulo->codigo_barras,
                 'stock_total' => $articulo->stock_total,
                 'sku' => $articulo->sku,
-                'tipo_articulo' => $articulo->tipoarticulo ? $articulo->tipoarticulo->nombre : 'Sin Tipo',
-                'modelo' => $articulo->modelo ? $articulo->modelo->nombre : 'Sin Modelo',
+                'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
+                'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
                 'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
             ];
         });
     
-        return response()->json($articulosData);
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+    
 
 
     public function checkNombre(Request $request)

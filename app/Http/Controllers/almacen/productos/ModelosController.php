@@ -130,21 +130,45 @@ class ModelosController extends Controller
         return $pdf->download('reporte-modelos.pdf');
     }
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        $modelos = Modelo::with(['marca', 'categoria'])->get();
-        $modelosData = $modelos->map(function ($modelo) {
+        $query = Modelo::with(['marca', 'categoria']);
+    
+        $total = $query->count();
+    
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                  ->orWhereHas('marca', fn($m) => $m->where('nombre', 'like', "%$search%"))
+                  ->orWhereHas('categoria', fn($c) => $c->where('nombre', 'like', "%$search%"));
+            });
+        }
+    
+        $filtered = $query->count();
+    
+        $modelos = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+    
+        $data = $modelos->map(function ($m) {
             return [
-                'idModelo' => $modelo->idModelo,
-                'nombre' => $modelo->nombre,
-                'marca' => $modelo->marca->nombre ?? 'Sin Marca',
-                'categoria' => $modelo->categoria->nombre ?? 'Sin Categoría',
-                'estado' => $modelo->estado ? 'Activo' : 'Inactivo',
+                'idModelo' => $m->idModelo,
+                'nombre' => $m->nombre,
+                'marca' => $m->marca->nombre ?? 'Sin Marca',
+                'categoria' => $m->categoria->nombre ?? 'Sin Categoría',
+                'estado' => $m->estado ? 'Activo' : 'Inactivo',
             ];
         });
-
-        return response()->json($modelosData);
+    
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+    
 
     public function checkNombre(Request $request)
     {

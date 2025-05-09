@@ -149,19 +149,19 @@ class CastController extends Controller
         try {
             // Datos validados del request
             $dataCast = $request->validated();
-    
+
             // Establecer valores predeterminados para 'estado'
             $dataCast['estado'] = 1; // Asegura que el estado siempre sea 1 (activo)
-    
+
             // Verificar los datos validados con los valores predeterminados
             Log::debug('Datos validados recibidos con estado predeterminado:', $dataCast);
-    
+
             // Crear el registro en la base de datos
             $cast = Cast::create($dataCast);
-    
+
             // Verificar si el cast se guardó correctamente
             Log::debug('Cast insertado:', $cast->toArray());
-    
+
             // Responder con JSON
             return response()->json([
                 'success' => true,
@@ -177,7 +177,7 @@ class CastController extends Controller
             ], 500);
         }
     }
-    
+
     public function exportAllPDF()
     {
         $casts = Cast::all(); // Obtén todos los registros de CAST
@@ -193,76 +193,92 @@ class CastController extends Controller
         }
     }
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        // Cargar los datos de departamentos, provincias y distritos desde los JSON
         $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
         $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
         $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
-
-        // Obtener todos los registros de la tabla 'cast'
-        $casts = Cast::all();
-
-        // Procesar los datos para incluir nombres de departamento, provincia y distrito
-        $castsData = $casts->map(function ($cast) use ($departamentos, $provincias, $distritos) {
+    
+        $query = Cast::query();
+        $total = Cast::count();
+    
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                  ->orWhere('ruc', 'like', "%$search%")
+                  ->orWhere('telefono', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('direccion', 'like', "%$search%");
+            });
+        }
+    
+        $filtered = $query->count();
+    
+        $casts = $query->skip($request->start)->take($request->length)->get();
+    
+        $data = $casts->map(function ($cast) use ($departamentos, $provincias, $distritos) {
             $departamentoNombre = collect($departamentos)->firstWhere('id_ubigeo', $cast->departamento)['nombre_ubigeo'] ?? 'N/A';
-
             $provinciaNombre = isset($provincias[$cast->departamento])
                 ? collect($provincias[$cast->departamento])->firstWhere('id_ubigeo', $cast->provincia)['nombre_ubigeo'] ?? 'N/A'
                 : 'N/A';
-
             $distritoNombre = isset($distritos[$cast->provincia])
                 ? collect($distritos[$cast->provincia])->firstWhere('id_ubigeo', $cast->distrito)['nombre_ubigeo'] ?? 'N/A'
                 : 'N/A';
-
+    
             return [
-                'idCast'       => $cast->idCast,
-                'nombre'       => $cast->nombre,
-                'ruc'          => $cast->ruc,
-                'telefono'     => $cast->telefono,
-                'email'        => $cast->email,
-                'direccion'    => $cast->direccion,
+                'idCast' => $cast->idCast,
+                'nombre' => $cast->nombre,
+                'ruc' => $cast->ruc,
+                'telefono' => $cast->telefono,
+                'email' => $cast->email,
+                'direccion' => $cast->direccion,
                 'departamento' => $departamentoNombre,
-                'provincia'    => $provinciaNombre,
-                'distrito'     => $distritoNombre,
-                'estado'       => $cast->estado == 1 ? 'Activo' : 'Inactivo',
+                'provincia' => $provinciaNombre,
+                'distrito' => $distritoNombre,
+                'estado' => $cast->estado == 1 ? 'Activo' : 'Inactivo',
             ];
         });
-
-        // Retorna los datos en formato JSON
-        return response()->json($castsData);
+    
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+    
+
 
     // Validar RUC
-public function validarRucCast(Request $request)
-{
+    public function validarRucCast(Request $request)
+    {
 
-         $ruc = $request->ruc;
-         $exists = Cast::where('ruc', $ruc)->exists();
-         return response()->json(['exists' => $exists]);
-}
-// Validar email
- public function validarEmailCast(Request $request)
-{
+        $ruc = $request->ruc;
+        $exists = Cast::where('ruc', $ruc)->exists();
+        return response()->json(['exists' => $exists]);
+    }
+    // Validar email
+    public function validarEmailCast(Request $request)
+    {
 
-     $email = $request->email;
-         $exists = Cast::where('email', $email)->exists();
-         return response()->json(['exists' => $exists]);
-}
- 
-// Validar celular
-public function validarTelefonoCast(Request $request)
-{
-         $telefono = $request->telefono;
-         $exists = Cast::where('telefono', $telefono)->exists();
-         return response()->json(['exists' => $exists]);
-}
- 
-// Validar nombre
-public function validarNombreCast(Request $request)
-{
-         $nombre = $request->nombre;
-         $exists = Cast::where('nombre', $nombre)->exists();
-         return response()->json(['exists' => $exists]);
-}
+        $email = $request->email;
+        $exists = Cast::where('email', $email)->exists();
+        return response()->json(['exists' => $exists]);
+    }
+
+    // Validar celular
+    public function validarTelefonoCast(Request $request)
+    {
+        $telefono = $request->telefono;
+        $exists = Cast::where('telefono', $telefono)->exists();
+        return response()->json(['exists' => $exists]);
+    }
+
+    // Validar nombre
+    public function validarNombreCast(Request $request)
+    {
+        $nombre = $request->nombre;
+        $exists = Cast::where('nombre', $nombre)->exists();
+        return response()->json(['exists' => $exists]);
+    }
 }

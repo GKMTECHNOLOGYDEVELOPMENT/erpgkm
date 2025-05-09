@@ -385,28 +385,51 @@ class ClientesController extends Controller
     }
 
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        // Obtener todos los clientes con sus relaciones (TipoDocumento y ClienteGeneral)
-        $clientes = Cliente::with(['tipoDocumento'])->get();
-
-        // Procesa los datos para incluir los campos necesarios, mostrando los nombres relacionados
-        $clientesData = $clientes->map(function ($cliente) {
+        $query = Cliente::with('tipoDocumento');
+    
+        $total = Cliente::count(); // Total sin filtros
+    
+        // Buscador general
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                  ->orWhere('documento', 'like', "%$search%")
+                  ->orWhere('telefono', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%");
+            });
+        }
+    
+        $filtered = $query->count(); // Total después de aplicar filtros
+    
+        $clientes = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+    
+        $data = $clientes->map(function ($cliente) {
             return [
                 'idCliente' => $cliente->idCliente,
-                'idTipoDocumento' => $cliente->tipoDocumento->nombre, // Mostrar nombre del tipo de documento
-                'documento'       => $cliente->documento,
-                'nombre'          => $cliente->nombre,
-                'telefono'        => $cliente->telefono,
-                'email'           => $cliente->email,
-                'direccion'       => $cliente->direccion,
-                'estado'          => $cliente->estado == 1 ? 'Activo' : 'Inactivo',
+                'idTipoDocumento' => $cliente->tipoDocumento->nombre,
+                'documento' => $cliente->documento,
+                'nombre' => $cliente->nombre,
+                'telefono' => $cliente->telefono,
+                'email' => $cliente->email,
+                'direccion' => $cliente->direccion,
+                'estado' => $cliente->estado == 1 ? 'Activo' : 'Inactivo',
             ];
         });
-
-        // Retorna los datos en formato JSON
-        return response()->json($clientesData);
+    
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+    
+    
 
     public function exportAllPDF()
     {
