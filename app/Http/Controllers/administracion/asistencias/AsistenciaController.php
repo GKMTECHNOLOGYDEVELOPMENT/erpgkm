@@ -147,14 +147,47 @@ class AsistenciaController extends Controller
 
 
 
-        $sorted = $filtrados->sortBy([['asistencia', 'desc'], fn($a, $b) => strtotime($b['entrada'] ?? '') <=> strtotime($a['entrada'] ?? '')])->values();
-
+        $order = $request->input('order', []);
+        $columns = $request->input('columns', []);
+        
+        if (!empty($order)) {
+            foreach ($order as $ord) {
+                $colIdx = $ord['column'];
+                $dir = $ord['dir'];
+                $colName = $columns[$colIdx]['data'] ?? null;
+        
+                $filtrados = $filtrados->sortBy(function ($item) use ($colName) {
+                    // Orden especial para fecha
+                    if ($colName === 'fecha') {
+                        return strtotime($item['fecha'] ?? '0000-00-00');
+                    }
+        
+                    // Orden especial para asistencia
+                    if ($colName === 'asistencia') {
+                        return $item['asistencia'] === 'ASISTIÓ' ? 1 : 0;
+                    }
+        
+                    // Resto
+                    return strtolower($item[$colName] ?? '');
+                }, SORT_REGULAR, $dir === 'desc');
+        
+                $filtrados = $filtrados->values(); // resetear índices después del sort
+            }
+        } else {
+            // Orden por defecto: asistencia DESC, entrada DESC
+            $filtrados = $filtrados->sortBy([
+                ['asistencia', 'desc'],
+                fn($a, $b) => strtotime($b['entrada'] ?? '') <=> strtotime($a['entrada'] ?? '')
+            ])->values();
+        }
+        
         return response()->json([
             'draw' => intval($draw),
             'recordsTotal' => count($datos),
-            'recordsFiltered' => $sorted->count(),
-            'data' => $sorted->slice($start)->take($length)->values()
+            'recordsFiltered' => $filtrados->count(),
+            'data' => $filtrados->slice($start)->take($length)->values()
         ]);
+        
     }
 
 
@@ -164,20 +197,15 @@ class AsistenciaController extends Controller
             'id' => 'required|integer|exists:observaciones,idObservaciones',
             'estado' => 'required|in:1,2'
         ]);
-    
+
         $observacion = \App\Models\Observacion::findOrFail($request->id);
         $observacion->estado = $request->estado;
-    
-        // ✅ Agrega esto para guardar la respuesta si se envía
-        if ($request->filled('respuesta')) {
-            $observacion->respuesta = $request->respuesta;
-        }
-    
+        $observacion->respuesta = $request->respuesta ?? null; // importante: también puede ser cadena vacía
         $observacion->save();
-    
+        
+
         return response()->json(['success' => true]);
     }
-    
     public function obtenerImagenesObservacion($id)
     {
         $observacion = Observacion::with('anexos')->findOrFail($id);

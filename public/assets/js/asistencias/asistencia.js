@@ -5,14 +5,12 @@ document.addEventListener('alpine:init', () => {
         init() {
             flatpickr("#startDate", {
                 dateFormat: "Y-m-d",
-                maxDate: "today",
                 defaultDate: new Date(),
                 onChange: () => this.reloadTable()
             });
 
             flatpickr("#endDate", {
                 dateFormat: "Y-m-d",
-                maxDate: "today",
                 defaultDate: new Date(),
                 onChange: () => this.reloadTable()
             });
@@ -149,7 +147,7 @@ document.addEventListener('alpine:init', () => {
                 responsive: true,
                 autoWidth: false,
                 pageLength: 10,
-                order: [[1, 'desc']],
+                order: [],
                 language: {
                     search: "Buscar...",
                     zeroRecords: "No se encontraron registros",
@@ -330,7 +328,6 @@ document.addEventListener('alpine:init', () => {
                 }).showToast();
 
                 cerrarModalObservacion();
-                setTimeout(() => location.reload(), 600);
             })
             .catch(() => {
                 Toastify({
@@ -364,7 +361,6 @@ document.addEventListener('alpine:init', () => {
                 }).showToast();
 
                 cerrarModalObservacion();
-                setTimeout(() => location.reload(), 600);
             })
             .catch(() => {
                 Toastify({
