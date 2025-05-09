@@ -347,6 +347,8 @@ class ClientesController extends Controller
                 'provincia' => 'required|string|max:255',    // Validar el campo 'provincia'
                 'distrito' => 'required|string|max:255',     // Validar el campo 'distrito'
                 'direccion' => 'required|string|max:255',
+                'esTienda' => 'nullable|boolean', // Aseguramos que es un valor booleano
+
             ]);
             Log::info('Datos validados correctamente:', $validatedData);
 
@@ -359,6 +361,10 @@ class ClientesController extends Controller
             }
             Log::info("Cliente encontrado con ID {$id}:", $cliente->toArray());
 
+             // Determinar el valor de 'esTienda', si el checkbox está marcado, será 1, si no, 0
+        $esTienda = $request->has('esTienda') && $request->esTienda == '1' ? '1' : '0'; // Si el checkbox está marcado, asigna '1', de lo contrario, '0'
+
+
             // Actualizar los campos del cliente
             $cliente->update([
                 'nombre' => $validatedData['nombre'],
@@ -370,6 +376,8 @@ class ClientesController extends Controller
                 'provincia' => $validatedData['provincia'],
                 'distrito' => $validatedData['distrito'],
                 'direccion' => $validatedData['direccion'],
+                'esTienda' => $esTienda, // Actualiza el valor de 'esTienda'
+
             ]);
             Log::info("Cliente con ID {$id} actualizado exitosamente.");
 

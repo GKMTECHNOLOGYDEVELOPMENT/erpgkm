@@ -55,9 +55,12 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
+use App\Models\Cliente;
 use App\Models\Marca;
 use App\Models\Modelo;
+use App\Models\Tienda;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 Auth::routes();
@@ -304,6 +307,9 @@ Route::prefix('kits')->name('almacen.kits.')->group(function () {
 Route::get('/clientes-generales/{idCliente}', [OrdenesTrabajoController::class, 'getClientesGeneraless']);
 Route::get('/clientesdatos', [OrdenesTrabajoController::class, 'getClientes'])->name('clientes.get');
 Route::post('/guardar-cliente', [OrdenesTrabajoController::class, 'guardarCliente'])->name('guardar.cliente');
+Route::get('/clientesDatosCliente', [OrdenesTrabajoController::class, 'clientesDatosCliente'])->name('clientes.get');
+
+
 Route::get('/clientesdatoscliente', [OrdenesTrabajoController::class, 'getClientesdatosclientes'])->name('clientes.get');
 Route::post('/clientes/{idCliente}/agregar-clientes-generales', [ClientesController::class, 'agregarClientesGenerales']);
 Route::delete('/clientes/{idCliente}/eliminar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'eliminarClienteGeneral']);
@@ -667,7 +673,133 @@ Route::delete('/eliminar-producto/{id}', [OrdenesHelpdeskController::class, 'eli
 // Route::post('/password/recover', [PasswordRecoveryController::class, 'sendRecoveryLink'])->name('password.recover');
 
 
+// Obtener datos del cliente
+Route::get('/get-cliente-data/{id}', function($id) {
+    $cliente = Cliente::find($id);
+    
+    if (!$cliente) {
+        return response()->json(['error' => 'Cliente no encontrado'], 404);
+    }
+    
+    return response()->json([
+        'idTipoDocumento' => $cliente->idTipoDocumento,
+        'esTienda' => $cliente->esTienda,
+        'direccion' => $cliente->direccion
+    ]);
+});
+Route::get('/get-all-tiendas', function() {
+    return response()->json(
+        Tienda::select('idTienda', 'nombre', 'direccion')
+            ->get()
+    );
+});
 
+Route::get('/get-tiendas-by-cliente/{clienteId}', function($clienteId) {
+    return response()->json(
+        Tienda::where('idCliente', $clienteId)
+            ->select('idTienda', 'nombre', 'direccion')
+            ->get()
+    );
+});
+
+
+Route::get('/get-tiendas/{clienteId?}', function($clienteId = null) {
+    try {
+        // 1. Si no viene clienteId, devolver todas las tiendas
+        if (!$clienteId) {
+            return response()->json(
+                Tienda::select('idTienda', 'nombre', 'direccion', 'idCliente')
+                     ->orderBy('nombre')
+                     ->get()
+            );
+        }
+
+        // 2. Obtener datos del cliente para determinar el filtro
+        $cliente = Cliente::find($clienteId);
+        
+        if (!$cliente) {
+            return response()->json([], 404);
+        }
+
+        // 3. Aplicar filtros según tipo de documento y esTienda
+        $query = Tienda::query();
+
+        if ($cliente->idTipoDocumento == 8 && $cliente->esTienda == 0) {
+            // Mostrar todas las tiendas
+            $query->select('idTienda', 'nombre', 'direccion', 'idCliente')
+                 ->orderBy('nombre');
+        } elseif ($cliente->idTipoDocumento == 9 && $cliente->esTienda == 1) {
+            // Mostrar solo tiendas asociadas a este cliente
+            $query->where('idCliente', $clienteId)
+                 ->select('idTienda', 'nombre', 'direccion')
+                 ->orderBy('nombre');
+        } else {
+            // Caso por defecto (no debería ocurrir según tu lógica)
+            return response()->json([], 200);
+        }
+
+        return response()->json($query->get());
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error al obtener tiendas',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
+Route::get('/get-no-tiendas', function() {
+    // Log para depuración
+    Log::info('Solicitud de tiendas vacías recibida');
+    
+    return response()->json([]);
+})->middleware('auth'); // Opcional: proteger la ruta
+
+
+Route::get('/get-marcas-by-cliente-general/{clienteGeneralId}', function($clienteGeneralId) {
+    try {
+        // Obtener marcas relacionadas con el cliente general
+        $marcas = DB::table('marca_clientegeneral')
+            ->join('marca', 'marca_clientegeneral.idMarca', '=', 'marca.idMarca')
+            ->where('marca_clientegeneral.idClienteGeneral', $clienteGeneralId)
+            ->where('marca.estado', 1) // Solo marcas activas
+            ->select('marca.idMarca', 'marca.nombre')
+            ->orderBy('marca.nombre')
+            ->get();
+
+        return response()->json($marcas);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error al obtener marcas',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
+
+// Obtener modelos por marca
+Route::get('/get-modelos-by-marca/{marcaId}', function($marcaId) {
+    return response()->json(
+        DB::table('modelo')
+            ->where('idMarca', $marcaId)
+            ->where('estado', 1) // Solo modelos activos
+            ->select('idModelo', 'nombre')
+            ->orderBy('nombre')
+            ->get()
+    );
+});
+
+// Obtener todas las marcas (actualizada para incluir solo activas)
+Route::get('/get-all-marcas', function() {
+    return response()->json(
+        DB::table('marca')
+            ->where('estado', 1)
+            ->select('idMarca', 'nombre')
+            ->orderBy('nombre')
+            ->get()
+    );
+});
 
 Route::get('/password/reset', function () {
     return view('auth.boxed-password-reset');

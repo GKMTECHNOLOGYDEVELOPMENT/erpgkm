@@ -65,6 +65,8 @@
     }
 });
 </script>
+
+
 <script>
     // Pasamos el valor de 'ultimaVisitaConEstado1' desde Laravel a JavaScript
     var ultimaVisitaConEstado1 = @json($ultimaVisitaConEstado1);

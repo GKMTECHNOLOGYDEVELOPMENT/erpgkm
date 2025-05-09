@@ -1534,6 +1534,33 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+
+
+
+    public function clientesDatosCliente($ticketId) // Pasamos el ID del ticket
+{
+    // Obtén el ticket usando el ID
+    $orden = Ticket::find($ticketId);
+
+    // Si no encuentras el ticket, puedes retornar una respuesta con error
+    if (!$orden) {
+        return response()->json(['error' => 'Orden no encontrada'], 404);
+    }
+
+    // Obtén el cliente seleccionado del ticket
+    $clienteSeleccionado = optional($orden->cliente)->idCliente;
+
+    // Obtén todos los clientes
+    $clientes = Cliente::all();
+
+    return response()->json([
+        'clientes' => $clientes,
+        'clienteSeleccionado' => $clienteSeleccionado, // Cliente seleccionado
+    ]);
+}
+
+
+
     public function getClientesGeneraless($idCliente)
     {
         // Obtener los clientes generales asociados al cliente usando la tabla intermedia cliente_clientegeneral

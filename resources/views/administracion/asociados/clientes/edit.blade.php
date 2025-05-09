@@ -93,6 +93,28 @@
                         placeholder="Ingrese el documento" value="{{ old('documento', $cliente->documento) }}">
                 </div>
 
+                
+
+                @php
+    $mostrarEsTienda = $cliente->idTipoDocumento == 1; // Por ejemplo, si el tipo de documento es "RUC" (asumiendo que '1' corresponde a RUC)
+@endphp
+
+<div id="esTiendaContainer" class="{{ $mostrarEsTienda ? '' : 'hidden' }} mt-4">
+    <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
+    <div class="flex items-center">
+        <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
+        <input type="hidden" name="esTienda" value="0">
+
+        <div class="w-12 h-6 relative">
+            <input type="checkbox" id="esTienda" name="esTienda" class="custom_sitch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                value="1" @checked($cliente->esTienda == 1) />
+            <span for="esTienda" class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+        </div>
+    </div>
+</div>
+
+
+
                 <!-- Teléfono -->
                 <div>
                     <label for="telefono" class="block text-sm font-medium">Teléfono</label>
@@ -181,6 +203,30 @@
     </div>
 
 
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const tipoDocumento = document.getElementById("idTipoDocumento");
+        const esTiendaContainer = document.getElementById("esTiendaContainer");
+
+        // Verificar el tipo de documento inicialmente
+        const selectedOptionText = tipoDocumento.options[tipoDocumento.selectedIndex].text;
+        if (selectedOptionText === "RUC") {
+            esTiendaContainer.classList.remove("hidden"); // Muestra el switch si el tipo de documento es RUC
+        } else {
+            esTiendaContainer.classList.add("hidden"); // Oculta el switch si no es RUC
+        }
+
+        tipoDocumento.addEventListener("change", function() {
+            // Verificar si el texto del option seleccionado es "RUC"
+            const selectedOptionText = tipoDocumento.options[tipoDocumento.selectedIndex].text;
+            if (selectedOptionText === "RUC") {
+                esTiendaContainer.classList.remove("hidden"); // Muestra el switch
+            } else {
+                esTiendaContainer.classList.add("hidden"); // Oculta el switch
+            }
+        });
+    });
+</script>
 
 
     <script>

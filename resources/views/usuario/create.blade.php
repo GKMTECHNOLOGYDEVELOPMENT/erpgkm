@@ -176,6 +176,18 @@
                                         <input id="correo" name="correo" type="email"
                                             placeholder="darlin@gmail.com" class="form-input" />
                                     </div>
+                                    <!-- Estado Civil -->
+                                    <div>
+                                        <label for="estadocivil">Estado Civil</label>
+                                        <select id="estadocivil" name="estadocivil" class="form-input">
+                                            <option value="" disabled selected>Seleccionar Estado Civil</option>
+                                            <option value="1">Soltero</option>
+                                            <option value="2">Casado</option>
+                                            <option value="3">Divorciado</option>
+                                            <option value="4">Viudo</option>
+                                        </select>
+                                    </div>
+
 
                                     <!-- Botones -->
                                     <div class="sm:col-span-2 mt-3">

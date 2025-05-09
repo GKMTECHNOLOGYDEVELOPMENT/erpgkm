@@ -161,6 +161,7 @@ public function store(Request $request)
             'documento' => $documentoReglas[$tipoDocumentoNombre] ?? 'required|string|max:255|unique:usuarios,documento', // Valida según el tipo
             'telefono' => 'required|string|digits:9|unique:usuarios,telefono',
             'correo' => 'required|email|max:255|unique:usuarios,correo',
+            'estadocivil' => 'required|integer|in:1,2,3,4', // Validación para el estado civil
             'profile-image' => 'nullable|image|max:1024',
         ]);
 
@@ -194,6 +195,7 @@ public function store(Request $request)
         $usuarioNuevo->usuario = $usuario;
         $usuarioNuevo->clave = $claveEncriptada;
         $usuarioNuevo->estado = 1;
+        $usuarioNuevo->estadocivil = $request->estadocivil; // Aquí asignamos el estado civil
         $usuarioNuevo->save();
         Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
 
@@ -372,6 +374,7 @@ public function update(Request $request, $id)
         'documento' => 'required|string|max:255',
         'telefono' => 'required|string|max:255',
         'correo' => 'required|email|max:255',
+        'estadocivil' => 'required|integer|in:1,2,3,4',  // Aseguramos que el estado civil esté en los valores correctos
         'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validación de la imagen
     ]);
 
@@ -386,6 +389,7 @@ public function update(Request $request, $id)
     $usuario->documento = $request->input('documento');
     $usuario->telefono = $request->input('telefono');
     $usuario->correo = $request->input('correo');
+    $usuario->estadocivil = $request->input('estadocivil');  // Actualizamos el estado civil
 
     // Verificar si se subió una nueva imagen
     if ($request->hasFile('profile-image')) {
