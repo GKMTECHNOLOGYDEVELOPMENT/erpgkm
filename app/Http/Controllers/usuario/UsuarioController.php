@@ -299,10 +299,11 @@ class UsuarioController extends Controller
             'apellidoPaterno' => 'required|string|max:255',
             'apellidoMaterno' => 'required|string|max:255',
             'idTipoDocumento' => 'required|integer',
-            'documento' => 'required|string|max:255',
-            'telefono' => 'required|string|max:255',
-            'correo' => 'required|email|max:255',
-            'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validación de la imagen
+            'documento' => $documentoReglas[$tipoDocumentoNombre] ?? 'required|string|max:255|unique:usuarios,documento', // Valida según el tipo
+            'telefono' => 'required|string|digits:9|unique:usuarios,telefono',
+            'correo' => 'required|email|max:255|unique:usuarios,correo',
+            'estadocivil' => 'required|integer|in:1,2,3,4', // Validación para el estado civil
+            'profile-image' => 'nullable|image|max:1024',
         ]);
 
         // Obtener el usuario por su id

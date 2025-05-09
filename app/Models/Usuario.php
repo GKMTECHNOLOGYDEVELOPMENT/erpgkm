@@ -106,7 +106,8 @@ class Usuario extends Authenticatable implements CanResetPassword
 		'idSexo',
 		'idArea',
 		'idRol',
-		'firma'
+		'firma',
+		'estadocivil'
 	];
 
 

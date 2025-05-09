@@ -172,18 +172,150 @@
 
 
 
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Columna 1: Lista de cuentas bancarias -->
+    <div class="panel">
+        <div x-data="{ customUserId: @json($usuario->idUsuario) }" x-init="cargarCuentasBancarias(customUserId)" class="mb-5">
+            <h5 class="font-semibold text-lg mb-4">Cuentas Bancarias</h5>
+            <!-- <p>Changes to your <span class="text-primary">Payment Method</span> information
+                will take effect starting with scheduled payment and will be reflected on your
+                next invoice.</p> -->
+        </div>
+        <div class="mb-5" id="cuentas-bancarias">
+            <!-- Aquí se cargarán las cuentas bancarias dinámicamente con JS -->
+        </div>
+    </div>
 
-            <div class="panel">
-                <div x-data="{ customUserId: @json($usuario->idUsuario) }" x-init="cargarCuentasBancarias(customUserId)" class="mb-5">
-                    <h5 class="font-semibold text-lg mb-4">Cuentas Bancarias</h5>
-                    <!-- <p>Changes to your <span class="text-primary">Payment Method</span> information
-                        will take effect starting with scheduled payment and will be refelected on your
-                        next invoice.</p> -->
-                </div>
-                <div class="mb-5" id="cuentas-bancarias">
-                    <!-- Aquí se cargarán las cuentas bancarias dinámicamente con JS -->
-                </div>
-            </div>
+    <!-- Columna 2: Formulario de nueva cuenta -->
+    <div class="panel">
+        <div class="mb-5">
+            <h5 class="font-semibold text-lg mb-4">Número de cuenta</h5>
+        </div>
+        <div class="mb-5">
+       <form>
+    <div class="mb-5 grid grid-cols-1 gap-4">
+        <!-- Fila 1: Banco -->
+        <div>
+            <label for="banco">Banco</label>
+            <select id="banco" class="form-select text-white-dark">
+                <option selected>Seleccione una Opción</option>
+                <option value="1">Banco de Crédito del Perú</option>
+                <option value="2">BBVA Perú</option>
+                <option value="3">Scotiabank Perú</option>
+                <option value="4">Interbank</option>
+                <option value="5">Banco de la Nación</option>
+                <option value="6">Banco de Comercio</option>
+                <option value="7">BanBif</option>
+                <option value="8">Banco Pichincha</option>
+                <option value="9">Citibank Perú</option>
+                <option value="10">MiBanco</option>
+                <option value="11">Banco GNB Perú</option>
+                <option value="12">Banco Falabella</option>
+                <option value="13">Banco Ripley</option>
+                <option value="14">Banco Santander Perú</option>
+                <option value="15">Alfin Banco</option>
+                <option value="16">Bank of China</option>
+                <option value="17">Bci Perú</option>
+                <option value="18">ICBC Perú Bank</option>
+            </select>
+        </div>
+
+        <!-- Fila 2: Tipo de cuenta -->
+        <div>
+            <label for="payBrand">Tipo de Cuenta Bancaria</label>
+            <select id="payBrand" class="form-select text-white-dark">
+                <option selected>Seleccione una Opción</option>
+                <option value="1">Cuenta número interbancario</option>
+                <option value="2">Número de cuenta</option>
+            </select>
+        </div>
+
+        <!-- Fila 3: Número de cuenta -->
+        <div>
+            <label for="payNumber">Número de cuenta</label>
+            <input id="payNumber" type="text" placeholder="Número de cuenta" class="form-input" />
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" id="saveBtn">Guardar</button>
+</form>
+
+
+
+            <script>
+                document.getElementById('payBrand').addEventListener('change', function () {
+                    const tipoCuenta = this.value;
+                    const numeroCuentaInput = document.getElementById('payNumber');
+
+                    // Limpiar campo de número de cuenta antes de validar
+                    numeroCuentaInput.value = '';
+                    numeroCuentaInput.removeAttribute('maxlength');
+                    numeroCuentaInput.setAttribute('placeholder', 'Número de cuenta');
+
+                    if (tipoCuenta == "1") {
+                        numeroCuentaInput.setAttribute('maxlength', '20');
+                        numeroCuentaInput.setAttribute('placeholder', 'Número interbancario (20 dígitos)');
+                    } else if (tipoCuenta == "2") {
+                        numeroCuentaInput.setAttribute('maxlength', '24');
+                        numeroCuentaInput.setAttribute('placeholder', 'Número de cuenta (13-24 dígitos)');
+                    }
+                });
+
+                document.getElementById('saveBtn').addEventListener('click', function () {
+                    const tipoCuenta = document.getElementById('payBrand').value;
+                    const numeroCuenta = document.getElementById('payNumber').value;
+
+                    if (tipoCuenta == "1" && numeroCuenta.length !== 20) {
+                        toastr.error('El número interbancario debe tener exactamente 20 dígitos.');
+                        return;
+                    }
+
+                    if (tipoCuenta == "2" && (numeroCuenta.length < 13 || numeroCuenta.length > 24)) {
+                        toastr.error('El número de cuenta debe tener entre 13 y 24 dígitos.');
+                        return;
+                    }
+
+                    if (tipoCuenta && numeroCuenta) {
+                        const usuarioId = @json($usuario->idUsuario);
+
+                        fetch('/api/guardar-cuenta', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            },
+                            body: JSON.stringify({
+                                tipoCuenta: tipoCuenta,
+                                numeroCuenta: numeroCuenta,
+                                usuarioId: usuarioId,
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                toastr.success('Cuenta bancaria guardada con éxito');
+                            } else {
+                                toastr.error('Hubo un error al guardar la cuenta bancaria');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al guardar la cuenta:', error);
+                            toastr.error('Error al guardar la cuenta bancaria');
+                        });
+                    } else {
+                        toastr.error('Por favor, complete todos los campos');
+                    }
+                });
+            </script>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
 
             <script>
                 // Recibe el `customUserId` pasado desde Alpine.js
@@ -254,345 +386,111 @@
 
 
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div class="panel">
-                <div class="mb-5">
-                    <h5 class="font-semibold text-lg mb-4">Agregar dirección </h5>
-                    <!-- <p>Changes your New <span class="text-primary">Billing</span> Information.</p> -->
-                </div>
-                <div class="mb-5">
-                    <form id="direccion-form">
-                        @csrf
-                        @method('PUT')
+        
+       <div class="grid grid-cols-1 lg:grid-cols-1 gap-5">
+<!-- Tabla de pagos de quincena -->
+<div class="bg-white shadow rounded-lg p-4">
+    <h5 class="text-lg font-semibold mb-4">Pagos de Quincena</h5>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Empleado</th>
+                    <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">DNI</th>
+                    <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Cargo</th>
+                    <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Fecha</th>
+                    <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Monto (S/)</th>
+                    <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Estado</th>
+                    <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Opciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 text-sm text-gray-800">
+                <!-- Pagado -->
+                <tr>
+                    <td class="px-4 py-2">STUAR</td>
+                    <td class="px-4 py-2">12345678</td>
+                    <td class="px-4 py-2">Programador Junior</td>
+                    <td class="px-4 py-2">15/04/2025</td>
+                    <td class="px-4 py-2">1,200.00</td>
+                    <td class="px-4 py-2">
+                        <span class="badge badge-outline-success">Pagado</span>
+                    </td>
+                 <td class="px-4 py-2">
+                        <!-- Opciones directas -->
+                        <a href="#" class="btn btn-sm btn-outline-info mr-2">Ver Detalles</a>
+                        <a href="#" class="btn btn-sm btn-outline-warning mr-2">Editar</a>
+                        <a href="#" class="btn btn-sm btn-outline-danger mr-2">Eliminar</a>
+                        <a href="#" class="btn btn-sm btn-outline-success">Generar Reporte</a>
+                    </td>
+                </tr>
 
-                        <!-- Información Básica -->
-                        <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <!-- Nacionalidad -->
-                            <div>
-                                <label for="nacionalidad">Nacionalidad</label>
-                                <input id="nacionalidad" name="nacionalidad" type="text"
-                                    value="{{ old('nacionalidad', $usuario->nacionalidad) }}" class="form-input" />
-                            </div>
-                            <!-- Departamento -->
-                            <div>
-                                <label for="departamento" class="block text-sm font-medium">Departamento</label>
-                                <select id="departamento" name="departamento" class="form-input w-full">
-                                    <option value="" disabled selected>Seleccionar Departamento</option>
-                                    @foreach ($departamentos as $departamento)
-                                        <option value="{{ $departamento['id_ubigeo'] }}"
-                                            {{ old('departamento', $usuario->departamento) == $departamento['id_ubigeo'] ? 'selected' : '' }}>
-                                            {{ $departamento['nombre_ubigeo'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div id="departamento-error" class="text-red-500 text-sm" style="display: none;"></div>
-                            </div>
-                        </div>
+                <!-- No Pagado -->
+                <tr class="bg-gray-50">
+                    <td class="px-4 py-2">STUAR</td>
+                    <td class="px-4 py-2">87654321</td>
+                    <td class="px-4 py-2">Programador Junior</td>
+                    <td class="px-4 py-2">15/04/2025</td>
+                    <td class="px-4 py-2">1,500.00</td>
+                    <td class="px-4 py-2">
+                        <span class="badge badge-outline-danger">No Pagado</span>
+                    </td>
+                  <td class="px-4 py-2">
+                        <!-- Opciones directas -->
+                        <a href="#" class="btn btn-sm btn-outline-info mr-2">Ver Detalles</a>
+                        <a href="#" class="btn btn-sm btn-outline-warning mr-2">Editar</a>
+                        <a href="#" class="btn btn-sm btn-outline-danger mr-2">Eliminar</a>
+                        <a href="#" class="btn btn-sm btn-outline-success">Generar Reporte</a>
+                    </td>
+                </tr>
 
-                        <!-- Información de Ubicación -->
-                        <div class="mb-5">
-                            <div>
-                                <label for="provincia" class="block text-sm font-medium">Provincia</label>
-                                <select id="provincia" name="provincia" class="form-input w-full">
-                                    <option value="" disabled>Seleccionar Provincia</option>
-                                    @foreach ($provinciasDelDepartamento as $provincia)
-                                        <option value="{{ $provincia['id_ubigeo'] }}"
-                                            {{ old('provincia', $usuario->provincia) == $provincia['id_ubigeo'] ? 'selected' : '' }}>
-                                            {{ $provincia['nombre_ubigeo'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div id="provincia-error" class="text-red-500 text-sm" style="display: none;"></div>
-                            </div>
-                            <div>
-                                <label for="distrito" class="block text-sm font-medium mt-2">Distrito</label>
-                                <select id="distrito" name="distrito" class="form-input w-full">
-                                    <option value="" disabled>Seleccionar Distrito</option>
-                                    @foreach ($distritosDeLaProvincia as $distrito)
-                                        <option value="{{ $distrito['id_ubigeo'] }}"
-                                            {{ old('distrito', $usuario->distrito) == $distrito['id_ubigeo'] ? 'selected' : '' }}>
-                                            {{ $distrito['nombre_ubigeo'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                <!-- Pendiente -->
+                <tr>
+                    <td class="px-4 py-2">STUAR</td>
+                    <td class="px-4 py-2">45678912</td>
+                    <td class="px-4 py-2">Programador Junior</td>
+                    <td class="px-4 py-2">15/04/2025</td>
+                    <td class="px-4 py-2">2,300.00</td>
+                    <td class="px-4 py-2">
+                        <span class="badge badge-outline-warning">Pendiente</span>
+                    </td>
+                     <td class="px-4 py-2">
+                        <!-- Opciones directas -->
+                        <a href="#" class="btn btn-sm btn-outline-info mr-2">Ver Detalles</a>
+                        <a href="#" class="btn btn-sm btn-outline-warning mr-2">Editar</a>
+                        <a href="#" class="btn btn-sm btn-outline-danger mr-2">Eliminar</a>
+                        <a href="#" class="btn btn-sm btn-outline-success">Generar Reporte</a>
+                    </td>
+                </tr>
 
-                                <div id="distrito-error" class="text-red-500 text-sm" style="display: none;"></div>
-                            </div>
-
-                            <div>
-                                <label for="direccion" class="block text-sm font-medium mt-2">Dirección</label>
-                                <input id="direccion" name="direccion" type="text" class="form-input w-full"
-                                    value="{{ old('direccion', $usuario->direccion) }}"
-                                    placeholder="Ingrese la dirección">
-                                <div id="direccion-error" class="text-red-500 text-sm" style="display: none;"></div>
-                            </div>
-                        </div>
-
-                        <!-- Botón de Actualización -->
-                        <button type="submit" class="btn btn-primary">Actualizar</button>
-                    </form>
-
-                    <script>
-                        $(document).ready(function() {
-                            // Cargar provincias y distritos al cargar el formulario si ya hay un departamento seleccionado
-                            function cargarProvincias(departamentoId) {
-                                $.get('/ubigeo/provincias/' + departamentoId, function(data) {
-                                    var provinciaSelect = $('#provincia');
-                                    provinciaSelect.empty().prop('disabled', false);
-                                    provinciaSelect.append(
-                                        '<option value="" disabled selected>Seleccionar Provincia</option>');
-
-                                    data.forEach(function(provincia) {
-                                        provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
-                                            provincia.nombre_ubigeo + '</option>');
-                                    });
-
-                                    // Si hay provincia seleccionada previamente, se selecciona automáticamente
-                                    var provinciaSeleccionada = '{{ old('provincia', $usuario->provincia) }}';
-                                    if (provinciaSeleccionada) {
-                                        $('#provincia').val(provinciaSeleccionada).change();
-                                    }
-                                });
-                            }
-
-                            function cargarDistritos(provinciaId) {
-                                $.get('/ubigeo/distritos/' + provinciaId, function(data) {
-                                    var distritoSelect = $('#distrito');
-                                    distritoSelect.empty().prop('disabled', false);
-                                    distritoSelect.append(
-                                        '<option value="" disabled selected>Seleccionar Distrito</option>');
-
-                                    data.forEach(function(distrito) {
-                                        distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
-                                            distrito.nombre_ubigeo + '</option>');
-                                    });
-
-                                    // Si hay distrito seleccionado previamente, se selecciona automáticamente
-                                    var distritoSeleccionado = '{{ old('distrito', $usuario->distrito) }}';
-                                    if (distritoSeleccionado) {
-                                        $('#distrito').val(distritoSeleccionado);
-                                    }
-                                });
-                            }
-
-                            // Si ya hay un departamento seleccionado al cargar la página
-                            var departamentoId = $('#departamento').val();
-                            if (departamentoId) {
-                                cargarProvincias(departamentoId);
-                            }
-
-                            // Cargar distritos si ya hay una provincia seleccionada al cargar la página
-                            var provinciaId = $('#provincia').val();
-                            if (provinciaId) {
-                                cargarDistritos(provinciaId);
-                            }
-
-                            // Cuando se selecciona un nuevo departamento
-                            $('#departamento').change(function() {
-                                var departamentoId = $(this).val();
-                                if (departamentoId) {
-                                    // Limpiar los selects de provincia y distrito
-                                    $('#provincia').empty().prop('disabled', true);
-                                    $('#distrito').empty().prop('disabled', true);
-
-                                    cargarProvincias(departamentoId);
-                                }
-                            });
-
-                            // Cuando se selecciona una provincia
-                            $('#provincia').on('change', function() {
-                                var provinciaId = $(this).val();
-                                if (provinciaId) {
-                                    // Limpiar el select de distritos
-                                    $('#distrito').empty().prop('disabled', true);
-
-                                    cargarDistritos(provinciaId);
-                                }
-                            });
-                        });
-                    </script>
-
-                    <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
+                <!-- Por Realizar -->
+                <tr class="bg-gray-50">
+                    <td class="px-4 py-2">STUAR</td>
+                    <td class="px-4 py-2">11223344</td>
+                    <td class="px-4 py-2">Programador Junior</td>
+                    <td class="px-4 py-2">15/04/2025</td>
+                    <td class="px-4 py-2">900.00</td>
+                    <td class="px-4 py-2">
+                        <span class="badge badge-outline-info">Por Realizar</span>
+                    </td>
+                     <td class="px-4 py-2">
+                        <!-- Opciones directas -->
+                        <a href="#" class="btn btn-sm btn-outline-info mr-2">Ver Detalles</a>
+                        <a href="#" class="btn btn-sm btn-outline-warning mr-2">Editar</a>
+                        <a href="#" class="btn btn-sm btn-outline-danger mr-2">Eliminar</a>
+                        <a href="#" class="btn btn-sm btn-outline-success">Generar Reporte</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
 
 
-                    <script>
-                        document.getElementById('direccion-form').addEventListener('submit', function(event) {
-                            event.preventDefault(); // Evita el envío normal del formulario
+    <!-- Otro contenido, si lo deseas -->
+    <div id="displayArea" class="mt-4"></div>
+</div>
 
-                            // Recolecta los datos del formulario
-                            const formData = new FormData(this);
-                            const formDataObj = {};
-                            formData.forEach((value, key) => {
-                                formDataObj[key] = value;
-                            });
-
-                            // ID del usuario (será inyectado en tu Blade)
-                            const userId = {{ $usuario->idUsuario }};
-
-                            // URL para actualizar la dirección
-                            const url = `/usuario/direccion/${userId}`;
-
-                            // Obtener el token CSRF
-                            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-                            // Realiza la solicitud `fetch` con el método PUT y los datos JSON
-                            fetch(url, {
-                                    method: 'PUT', // Usamos el método PUT para actualización
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': csrfToken
-                                    },
-                                    body: JSON.stringify(formDataObj) // Convierte los datos del formulario a JSON
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        // Si la respuesta es exitosa, puedes mostrar un mensaje de éxito
-                                        toastr.success('Dirección actualizada correctamente');
-                                    } else {
-                                        // Si ocurre un error, mostrar los mensajes de error
-                                        toastr.error('Error al actualizar la dirección');
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error al enviar la solicitud:', error);
-                                    toastr.error('Error al intentar actualizar');
-                                });
-                        });
-                    </script>
-
-
-
-
-
-                </div>
-            </div>
-            <div class="panel">
-                <div class="mb-5">
-                    <h5 class="font-semibold text-lg mb-4">Numero de cuenta</h5>
-                </div>
-                <div class="mb-5">
-                    <form>
-                        <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label for="banco">Banco</label>
-                                <select id="banco" class="form-select text-white-dark">
-                                    <option selected>Seleccione una Opción</option>
-                                    <option value="1">Banco de Crédito del Perú</option>
-                                    <option value="2">BBVA Perú</option>
-                                    <option value="3">Scotiabank Perú</option>
-                                    <option value="4">Interbank</option>
-                                    <option value="5">Banco de la Nación</option>
-                                    <option value="6">Banco de Comercio</option>
-                                    <option value="7">Banco Interamericano de Finanzas (BanBif)</option>
-                                    <option value="8">Banco Pichincha</option>
-                                    <option value="9">Citibank Perú</option>
-                                    <option value="10">MiBanco</option>
-                                    <option value="11">Banco GNB Perú</option>
-                                    <option value="12">Banco Falabella</option>
-                                    <option value="13">Banco Ripley</option>
-                                    <option value="14">Banco Santander Perú</option>
-                                    <option value="15">Alfin Banco</option>
-                                    <option value="16">Bank of China</option>
-                                    <option value="17">Bci Perú</option>
-                                    <option value="18">ICBC Perú Bank</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="payBrand">Tipo de Cuenta Bancaria</label>
-                                <select id="payBrand" class="form-select text-white-dark">
-                                    <option selected>Seleccione una Opcion</option>
-                                    <option value="1">Cuenta numero interbancario</option>
-                                    <option value="2">Número de cuenta</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="payNumber">Numero de cuenta</label>
-                                <input id="payNumber" type="text" placeholder="Número de cuenta"
-                                    class="form-input" />
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-primary" id="saveBtn">Guardar</button>
-                    </form>
-
-                    <script>
-                        document.getElementById('payBrand').addEventListener('change', function() {
-                            const tipoCuenta = this.value;
-                            const numeroCuentaInput = document.getElementById('payNumber');
-
-                            // Limpiar campo de número de cuenta antes de validar
-                            numeroCuentaInput.value = '';
-                            numeroCuentaInput.removeAttribute('maxlength');
-                            numeroCuentaInput.setAttribute('placeholder', 'Numero de cuenta');
-
-                            // Establecer el número máximo de dígitos en el campo según el tipo de cuenta
-                            if (tipoCuenta == "1") {
-                                // Si es Número interbancario, se establece 20 dígitos
-                                numeroCuentaInput.setAttribute('maxlength', '20');
-                                numeroCuentaInput.setAttribute('placeholder', 'Numero interbancario (20 digitos)');
-                            } else if (tipoCuenta == "2") {
-                                // Si es Número de cuenta, se establece entre 13 a 24 dígitos
-                                numeroCuentaInput.setAttribute('maxlength', '24');
-                                numeroCuentaInput.setAttribute('placeholder', 'Numero de cuenta (13-24 digitos)');
-                            }
-                        });
-
-                        document.getElementById('saveBtn').addEventListener('click', function() {
-                            const tipoCuenta = document.getElementById('payBrand').value;
-                            const numeroCuenta = document.getElementById('payNumber').value;
-
-                            // Validación según el tipo de cuenta
-                            if (tipoCuenta == "1" && numeroCuenta.length !== 20) {
-                                toastr.error('El número interbancario debe tener exactamente 20 dígitos.');
-                                return;
-                            }
-
-                            if (tipoCuenta == "2" && (numeroCuenta.length < 13 || numeroCuenta.length > 24)) {
-                                toastr.error('El número de cuenta debe tener entre 13 y 24 dígitos.');
-                                return;
-                            }
-
-                            if (tipoCuenta && numeroCuenta) {
-                                const usuarioId = @json($usuario->idUsuario);
-
-                                fetch('/api/guardar-cuenta', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                                'content'),
-                                        },
-                                        body: JSON.stringify({
-                                            tipoCuenta: tipoCuenta,
-                                            numeroCuenta: numeroCuenta,
-                                            usuarioId: usuarioId,
-                                        })
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            toastr.success('Cuenta bancaria guardada con éxito');
-                                        } else {
-                                            toastr.error('Hubo un error al guardar la cuenta bancaria');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error al guardar la cuenta:', error);
-                                        toastr.error('Error al guardar la cuenta bancaria');
-                                    });
-                            } else {
-                                toastr.error('Por favor, complete todos los campos');
-                            }
-                        });
-                    </script>
-                </div>
-            </div>
-            <!-- Contenedor donde se mostrará el número guardado -->
-            <div id="displayArea" class="mt-4"></div>
-        </div>
     </div>
 </template>
 

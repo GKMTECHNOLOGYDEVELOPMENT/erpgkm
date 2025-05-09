@@ -654,6 +654,32 @@
     
 </script>
 
+<script>
+    // Al cargar el documento
+document.addEventListener('DOMContentLoaded', function() {
+    const clienteSelect = document.getElementById('idCliente');
+    const rucInput = document.getElementById('ruc');
+
+    // Esta función se ejecuta cuando el cliente es seleccionado
+    clienteSelect.addEventListener('change', function() {
+        // Obtén el id del cliente seleccionado
+        const clienteId = clienteSelect.value;
+
+        // Aquí mapeamos los clientes ya cargados en la página (por ejemplo, con un atributo data-)
+        const clientes = @json($clientes); // Pasamos el array de clientes desde el backend a JavaScript
+
+        // Buscar el cliente seleccionado por id
+        const clienteSeleccionado = clientes.find(cliente => cliente.idCliente == clienteId);
+
+        // Si encontramos al cliente, ponemos el RUC en el input
+        if (clienteSeleccionado) {
+            rucInput.value = clienteSeleccionado.documento; // Asignamos el RUC al campo
+        }
+    });
+});
+
+</script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
