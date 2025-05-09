@@ -7,14 +7,13 @@ document.addEventListener("alpine:init", () => {
         },
 
         async fetchDataAndInitTable() {
-            try {
-                const res = await fetch("/api/clientes");
-                if (!res.ok) throw new Error("Error al obtener datos del servidor");
-
-                const data = await res.json();
-
                 this.datatable1 = $('#myTable1').DataTable({
-                    data,
+                    serverSide: true,
+                    processing: true,
+                    ajax: {
+                        url: "/api/clientes",
+                        type: "GET"
+                    },
                     columns: [
                         { data: 'idTipoDocumento', className: 'text-center', render: tipo => tipo || 'N/A' },
                         { data: 'documento', className: 'text-center', render: doc => doc || 'N/A' },
@@ -128,11 +127,10 @@ document.addEventListener("alpine:init", () => {
                             wrapper.appendChild(floatingControls);
                         }
                     }
+                    
                 });
-            } catch (error) {
-                console.error('Error al inicializar la DataTable:', error);
-            }
         },
+        
 
         deleteCliente(idCliente) {
             Swal.fire({

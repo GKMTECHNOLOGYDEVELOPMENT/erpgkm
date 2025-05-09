@@ -161,16 +161,30 @@ class ProveedoresController extends Controller
 
 
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        // Obtener todos los proveedores con sus relaciones (TipoDocumento y Tipoarea)
-        $proveedores = Proveedore::with(['tipoDocumento', 'area'])->get(); // Cambia 'tipoarea' por 'area' si tu relación se llama 'area'
-
-        // Registrar los datos obtenidos (para depuración)
-        Log::debug('Proveedores obtenidos:', $proveedores->toArray()); // Utiliza toArray() para registrar los datos completos
-
-        // Procesa los datos para incluir los campos necesarios, mostrando los nombres relacionados
-        $proveedoresData = $proveedores->map(function ($proveedor) {
+        $query = Proveedore::with(['tipoDocumento', 'area']);
+    
+        $total = Proveedore::count();
+    
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                  ->orWhere('numeroDocumento', 'like', "%$search%")
+                  ->orWhere('telefono', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('direccion', 'like', "%$search%");
+            });
+        }
+    
+        $filtered = $query->count();
+    
+        $proveedores = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+    
+        $data = $proveedores->map(function ($proveedor) {
             return [
                 'idProveedor'      => $proveedor->idProveedor,
                 'nombre'           => $proveedor->nombre,
@@ -183,14 +197,19 @@ class ProveedoresController extends Controller
                 'telefono'         => $proveedor->telefono,
                 'email'            => $proveedor->email,
                 'numeroDocumento'  => $proveedor->numeroDocumento,
-                'idArea'           => $proveedor->area->nombre ?? '', // Mostrar nombre del área (relación 'area')
-                'idTipoDocumento'  => $proveedor->tipoDocumento->nombre ?? '', // Mostrar nombre del tipo de documento
+                'idArea'           => $proveedor->area->nombre ?? '',
+                'idTipoDocumento'  => $proveedor->tipoDocumento->nombre ?? '',
             ];
         });
-
-        // Retorna los datos en formato JSON
-        return response()->json($proveedoresData);
+    
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+    
 
     public function exportAllPDF()
     {

@@ -11,7 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class CategoriaController extends Controller
 {
     public function index()
-    {   
+    {
 
         return view('almacen.productos.categoria.index');
     }
@@ -85,10 +85,10 @@ class CategoriaController extends Controller
     {
         try {
             $categoria = Categoria::findOrFail($id);
-    
+
             // Intentar eliminar
             $categoria->delete();
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Categoría eliminada con éxito',
@@ -101,7 +101,7 @@ class CategoriaController extends Controller
                     'message' => 'No se puede eliminar la categoría porque está asociada a uno o más equipos.',
                 ], 409); // 409 Conflict
             }
-    
+
             // Otros errores de base de datos
             Log::error('Error al eliminar la categoría: ' . $e->getMessage());
             return response()->json([
@@ -118,7 +118,7 @@ class CategoriaController extends Controller
             ], 500);
         }
     }
-    
+
 
     public function exportAllPDF()
     {
@@ -132,20 +132,43 @@ class CategoriaController extends Controller
         return $pdf->download('reporte-categorias.pdf');
     }
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        $categorias = Categoria::all();
+        $draw = $request->input('draw');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10);
+        $search = $request->input('search.value');
 
-        $categoriasData = $categorias->map(function ($categoria) {
+        $query = Categoria::query();
+
+        $total = $query->count();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%");
+            });
+        }
+
+        $filtered = $query->count();
+
+        $categorias = $query->skip($start)->take($length)->get();
+
+        $data = $categorias->map(function ($c) {
             return [
-                'idCategoria' => $categoria->idCategoria,
-                'nombre' => $categoria->nombre,
-                'estado' => $categoria->estado ? 'Activo' : 'Inactivo',
+                'idCategoria' => $c->idCategoria,
+                'nombre' => $c->nombre,
+                'estado' => $c->estado ? 'Activo' : 'Inactivo',
             ];
         });
 
-        return response()->json($categoriasData);
+        return response()->json([
+            'draw' => intval($draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+
 
     public function checkNombre(Request $request)
     {

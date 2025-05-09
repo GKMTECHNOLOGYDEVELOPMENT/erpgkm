@@ -85,6 +85,7 @@ document.addEventListener('alpine:init', () => {
             this.datatable1 = $('#myTable1').DataTable({
                 processing: false,
                 serverSide: true,
+                ordering: false,
                 order: [[0, 'desc']], // 👈 ORDENAR POR ID
                 ajax: {
                     url: "/api/ordenes/helpdesk",
@@ -203,7 +204,63 @@ document.addEventListener('alpine:init', () => {
                         previous: 'Anterior'
                     }
                 },
-
+                dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
+                initComplete: function () {
+                    setTimeout(() => {
+                        const wrapper = document.querySelector('.dataTables_wrapper');
+                        const scrollTopContainer = document.getElementById('scroll-top');
+                        const scrollTopInner = document.getElementById('scroll-top-inner');
+                
+                        // Este es el contenedor real con overflow horizontal
+                        const tableScrollContainer = document.querySelector('.relative.overflow-x-auto.custom-scroll');
+                
+                        if (!wrapper || !scrollTopContainer || !scrollTopInner || !tableScrollContainer) return;
+                
+                        // Mostrar barra superior
+                        scrollTopContainer.classList.remove('hidden');
+                
+                        // Ajustar ancho sincronizado con tabla
+                        requestAnimationFrame(() => {
+                            scrollTopInner.style.width = tableScrollContainer.scrollWidth + 'px';
+                        });
+                
+                        // Scroll sincronizado
+                        scrollTopContainer.onscroll = () => {
+                            tableScrollContainer.scrollLeft = scrollTopContainer.scrollLeft;
+                        };
+                        tableScrollContainer.onscroll = () => {
+                            scrollTopContainer.scrollLeft = tableScrollContainer.scrollLeft;
+                        };
+                
+                        // Controles flotantes
+                        const panel = document.querySelector('.panel.mt-6');
+                        const info = wrapper.querySelector('.dataTables_info');
+                        const length = wrapper.querySelector('.dataTables_length');
+                        const paginate = wrapper.querySelector('.dataTables_paginate');
+                
+                        if (info && length && paginate && panel) {
+                            const existingControls = panel.querySelector('.floating-controls');
+                            if (existingControls) existingControls.remove();
+                
+                            const floatingControls = document.createElement('div');
+                            floatingControls.className =
+                                'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
+                            Object.assign(floatingControls.style, {
+                                position: 'sticky',
+                                bottom: '0',
+                                left: '0',
+                                width: '100%',
+                                zIndex: '10'
+                            });
+                
+                            floatingControls.appendChild(info);
+                            floatingControls.appendChild(length);
+                            floatingControls.appendChild(paginate);
+                            panel.appendChild(floatingControls);
+                        }
+                    }, 300); // Espera para asegurar render completo
+                },
+                
                 rowCallback: (row, data) => {
                     const estadoColor = data.ticketflujo?.estadoflujo?.color || '';
 

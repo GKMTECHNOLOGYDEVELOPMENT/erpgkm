@@ -196,24 +196,43 @@ class MarcaController extends Controller
         return $pdf->download('reporte-marcas.pdf');
     }
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        $marcas = Marca::all();
-
-        $marcasData = $marcas->map(function ($marca) {
-            // Obtener la foto de la marca como una cadena base64
-            $foto = $marca->foto ? 'data:image/jpeg;base64,' . base64_encode($marca->foto) : null;
-
+        $query = Marca::query();
+    
+        $total = $query->count();
+    
+        // Filtro global
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%");
+            });
+        }
+    
+        $filtered = $query->count();
+    
+        $marcas = $query
+            ->skip($request->start ?? 0)
+            ->take($request->length ?? 10)
+            ->get();
+    
+        $data = $marcas->map(function ($marca) {
             return [
                 'idMarca' => $marca->idMarca,
                 'nombre' => $marca->nombre,
                 'estado' => $marca->estado ? 'Activo' : 'Inactivo',
-                'foto' => $foto, // Añadir la foto en base64
+                'foto' => $marca->foto ? 'data:image/jpeg;base64,' . base64_encode($marca->foto) : null,
             ];
         });
-
-        return response()->json($marcasData);
+    
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+    
 
     public function checkNombre(Request $request)
     {

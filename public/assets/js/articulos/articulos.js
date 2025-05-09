@@ -7,17 +7,13 @@ document.addEventListener('alpine:init', () => {
         },
 
         async fetchDataAndInitTable() {
-            try {
-                const res = await fetch('/api/articulos');
-                if (!res.ok) throw new Error('Error al obtener datos del servidor');
-                const data = await res.json();
-
-                jQuery.fn.DataTable.ext.type.search.string = function (data) {
-                    return !data ? '' : typeof data === 'string' ? data.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase() : data;
-                };
-
                 this.datatable1 = $('#myTable1').DataTable({
-                    data,
+                    serverSide: true,
+                    processing: true,
+                    ajax: {
+                        url: '/api/articulos',
+                        type: 'GET'
+                    },
                     columns: [
                         {
                             data: 'foto',
@@ -142,10 +138,6 @@ document.addEventListener('alpine:init', () => {
                         }
                     }
                 });
-
-            } catch (e) {
-                console.error('Error al inicializar DataTable:', e);
-            }
         },
 
         deleteArticulo(idArticulos) {
