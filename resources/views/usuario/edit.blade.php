@@ -3,6 +3,8 @@
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <!-- Cargar jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
 
 
     <!-- Toastr JS -->
@@ -72,7 +74,23 @@
                                 <ellipse opacity="0.5" cx="12" cy="17" rx="7" ry="4"
                                     stroke="currentColor" stroke-width="1.5" />
                             </svg>
-                            Preferencias
+                            Legajo
+                        </a>
+                    </li>
+
+                    <!-- Tab 4: Danger Zone -->
+                    <li class="inline-block">
+                        <a href="javascript:;"
+                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
+                            :class="{ '!border-primary text-primary': tab == 'danger-zone' }"
+                            @click="tab='informacion'">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                <path
+                                    d="M16.1007 13.359L16.5562 12.9062C17.1858 12.2801 18.1672 12.1515 18.9728 12.5894L20.8833 13.628C22.1102 14.2949 22.3806 15.9295 21.4217 16.883L20.0011 18.2954C19.6399 18.6546 19.1917 18.9171 18.6763 18.9651M4.00289 5.74561C3.96765 5.12559 4.25823 4.56668 4.69185 4.13552L6.26145 2.57483C7.13596 1.70529 8.61028 1.83992 9.37326 2.85908L10.6342 4.54348C11.2507 5.36691 11.1841 6.49484 10.4775 7.19738L10.1907 7.48257"
+                                    stroke="currentColor" stroke-width="1.5" />
+                            </svg>
+                            Informacion Importante
                         </a>
                     </li>
 
@@ -103,6 +121,9 @@
                     </div>
                     <div x-show="tab === 'preferences'">
                         @include('usuario.tabs.configuracion.index') <!-- Ajusta el path -->
+                    </div>
+                      <div x-show="tab === 'informacion'">
+                        @include('usuario.tabs.informacion.index') <!-- Ajusta el path -->
                     </div>
                     <div x-show="tab === 'danger-zone'">
                         @include('usuario.tabs.detalles.index') <!-- Ajusta el path -->
