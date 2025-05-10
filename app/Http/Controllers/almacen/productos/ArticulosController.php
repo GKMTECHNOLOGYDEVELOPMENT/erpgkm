@@ -123,7 +123,14 @@ class ArticulosController extends Controller
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
 
-    return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    // Convertimos las imágenes a base64 si están presentes
+    $fotoCodigobarras = $articulo->foto_codigobarras ? base64_encode($articulo->foto_codigobarras) : null;
+    $fotoSku = $articulo->fotosku ? base64_encode($articulo->fotosku) : null;
+
+    return view('almacen.productos.articulos.edit', compact(
+        'articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas', 
+        'fotoCodigobarras', 'fotoSku'
+    ));
 }
 
 
@@ -139,6 +146,55 @@ public function detalle($id)
     return view('almacen.productos.articulos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
 
+public function imagen($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $unidades = Unidad::all();
+    $tiposArticulo = Tipoarticulo::all();
+    $modelos = Modelo::all();
+    $monedas = Moneda::all();
+    $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
+
+    return view('almacen.productos.articulos.imagen', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+}
+
+
+
+public function updateFoto(Request $request, $id)
+{
+    $articulo = Articulo::findOrFail($id);
+
+    if ($request->hasFile('foto')) {
+        $file = $request->file('foto');
+
+        $request->validate([
+            'foto' => 'image|mimes:jpeg,png|max:3072', // 3MB
+        ]);
+
+        $binary = file_get_contents($file->getRealPath());
+        $articulo->foto = $binary;
+        $articulo->save();
+
+        return response()->json([
+            'success' => true,
+            'preview_url' => 'data:image/jpeg;base64,' . base64_encode($binary)
+        ]);
+    }
+
+    return response()->json(['success' => false]);
+}
+
+public function deleteFoto($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $articulo->foto = null;
+    $articulo->save();
+
+    return response()->json([
+        'success' => true,
+        'preview_url' => asset('assets/images/articulo/producto-default.png')
+    ]);
+}
 
 
 public function update(Request $request, $id)

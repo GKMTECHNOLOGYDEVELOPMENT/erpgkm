@@ -279,11 +279,16 @@ Route::prefix('articulos')->name('articulos.')->group(function () {
     Route::post('/store', [ArticulosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [ArticulosController::class, 'edit'])->name('edit'); // Editar un artículo
     Route::get('/{id}/detalles', [ArticulosController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::get('/{id}/imagen', [ArticulosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+
     Route::put('/update/{id}', [ArticulosController::class, 'update'])->name('update'); // Actualizar un artículo
     Route::delete('/{id}', [ArticulosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
     Route::get('/export-pdf', [ArticulosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
     Route::get('/get-all', [ArticulosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
     Route::post('/check-nombre', [ArticulosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::post('/{id}/fotoupdate', [ArticulosController::class, 'updateFoto']);
+    Route::delete('/{id}/fotodelete', [ArticulosController::class, 'deleteFoto']);
+
     Route::get('/exportar-excel', function () {
         return Excel::download(new ArticuloExport, 'articulos.xlsx');
     })->name('exportExcel');
