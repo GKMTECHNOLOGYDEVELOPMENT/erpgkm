@@ -145,7 +145,6 @@
                     @foreach ($visitas as $visita)
                         <div class="grid grid-cols-2 gap-y-1 justify-end text-right">
                             <p><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}</p>
-                            <p><span class="font-bold">TELÉFONO:</span> {{ $visita['telefono'] }}</p>
                             <p><span class="font-bold">DNI:</span> {{ $visita['documento'] }}</p>
                             <p><span class="font-bold">PLACA:</span> {{ $visita['vehiculo_placa'] }}</p>
                         </div>
@@ -159,15 +158,12 @@
 
             @if (!empty($producto))
                 <div class="red-bg mt-4 text-left">Datos de Retiro del Equipo</div>
-                <div class="w-full text-xs mt-2">
-                    <div class="flex justify-between">
-                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ strtoupper($producto['categoria']) }}
-                        </p>
-                        <p><span class="font-bold">MARCA:</span> {{ strtoupper($producto['marca']) }}</p>
-                        <p><span class="font-bold">MODELO:</span> {{ strtoupper($producto['modelo']) }}</p>
-                    </div>
-                    <div class="mt-2">
-                        <p><span class="font-bold">SERIE:</span> {{ strtoupper($producto['serie']) }}</p>
+                <div class="w-full text-xs mt-3">
+                    <div class="flex justify-between flex-wrap gap-4">
+                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> <span class="uppercase">{{ $producto['categoria'] }}</span></p>
+                        <p><span class="font-bold">MARCA:</span> <span class="uppercase">{{ $producto['marca'] }}</span></p>
+                        <p><span class="font-bold">MODELO:</span> <span class="uppercase">{{ $producto['modelo'] }}</span></p>
+                        <p><span class="font-bold">SERIE:</span> <span class="uppercase">{{ $producto['serie'] }}</span></p>                        
                     </div>
                 </div>
             @endif

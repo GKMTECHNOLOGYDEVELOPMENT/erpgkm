@@ -103,19 +103,38 @@ class AsistenciaController extends Controller
                     'estado_entrada' => $estadoColor,
                     'tiene_historial' => $tieneHistorial,
                     'idUsuario' => $usuario->idUsuario,
+                
+                    // observación principal
                     'observacion' => $obsFinal ? [
                         'idObservaciones' => $obsFinal->idObservaciones,
-                        'mensaje' => $obsFinal->mensaje,
-                        'estado' => $obsFinal->estado,
-                        'idTipoAsunto' => $obsFinal->idTipoAsunto,
-                        'fechaHora' => $obsFinal->fechaHora, // 👈 agregado
-                        'ubicacion' => $obsFinal->ubicacion, // 👈 agregado
-                        'lat' => $obsFinal->lat,             // 👈 agregado
-                        'lng' => $obsFinal->lng,             // 👈 agregado
-                        'respuesta' => $obsFinal->respuesta,
-                        'total' => $obsTotal,
-                        'index' => $obsIndex
-                    ] : null
+                        'mensaje'         => $obsFinal->mensaje,
+                        'estado'          => $obsFinal->estado,
+                        'idTipoAsunto'    => $obsFinal->idTipoAsunto,
+                        'fechaHora'       => $obsFinal->fechaHora,
+                        'ubicacion'       => $obsFinal->ubicacion,
+                        'lat'             => $obsFinal->lat,
+                        'lng'             => $obsFinal->lng,
+                        'respuesta'       => $obsFinal->respuesta,
+                        'total'           => $obsTotal,
+                        'index'           => $obsIndex
+                    ] : null,
+                
+                    // TODAS las observaciones del día para navegación
+                    'observaciones' => $obsDelDiaTodas->values()->map(function ($obs, $i) use ($obsDelDiaTodas) {
+                        return [
+                            'idObservaciones' => $obs->idObservaciones,
+                            'mensaje'         => $obs->mensaje,
+                            'estado'          => $obs->estado,
+                            'idTipoAsunto'    => $obs->idTipoAsunto,
+                            'fechaHora'       => $obs->fechaHora,
+                            'ubicacion'       => $obs->ubicacion,
+                            'lat'             => $obs->lat,
+                            'lng'             => $obs->lng,
+                            'respuesta'       => $obs->respuesta,
+                            'total'           => $obsDelDiaTodas->count(),
+                            'index'           => $i + 1
+                        ];
+                    })->toArray()
                 ];
             }
         }

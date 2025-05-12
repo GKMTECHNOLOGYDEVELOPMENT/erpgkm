@@ -132,7 +132,6 @@ document.addEventListener('alpine:init', () => {
                 processing: false,
                 serverSide: true,
                 ordering: false,
-                order: [[3, 'desc']], // ✅ columna 3 = "F. TICKET" (fecha_creacion)
                 ajax: {
                     url: "/api/ordenes",
                     type: "GET",
@@ -202,7 +201,6 @@ document.addEventListener('alpine:init', () => {
                 searching: true,
                 paging: true,
                 pageLength: 10,
-                order: [[0, 'desc']], // ✅ ORDENA POR ID
                 language: {
                     search: 'Buscar...',
                     zeroRecords: 'No se encontraron registros',

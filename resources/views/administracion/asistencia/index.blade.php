@@ -178,7 +178,13 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="flex justify-between items-center px-5 pb-4 mt-2 border-t pt-3">
+                        <button id="btnAnteriorObs" class="btn btn-outline-primary"
+                            onclick="navegarObservacion(-1)">← Anterior</button>
+                        <span id="paginadorObs" class="text-sm font-semibold text-gray-700 dark:text-white"></span>
+                        <button id="btnSiguienteObs" class="btn btn-outline-primary"
+                            onclick="navegarObservacion(1)">Siguiente →</button>
+                    </div>
                 </div>
             </div>
         </div>
