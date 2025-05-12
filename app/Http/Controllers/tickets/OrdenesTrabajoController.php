@@ -511,13 +511,13 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 1) {
                     // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3, 8, 33, 35 ])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [3, 8, 33, 35])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 9) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                    ->whereIn('idEstadflujo', [3, 33, 35,2 ])  // Solo obtener el estado con idEstadflujo 3
-                    ->get();
+                        ->whereIn('idEstadflujo', [3, 33, 35, 2])  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
                 } elseif ($idEstadflujo == 14) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
@@ -568,12 +568,11 @@ class OrdenesTrabajoController extends Controller
                     $estadosFlujo = DB::table('estado_flujo')
                         ->whereIn('idEstadflujo', [1, 5, 8, 9, 35])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
-
-                }elseif ($idEstadflujo == 35) {
-                            // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
-                            $estadosFlujo = DB::table('estado_flujo')
-                                ->whereIn('idEstadflujo', [1, 5, 8, 9, 35])  // Solo obtener el estado con idEstadflujo 3
-                                ->get();
+                } elseif ($idEstadflujo == 35) {
+                    // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
+                    $estadosFlujo = DB::table('estado_flujo')
+                        ->whereIn('idEstadflujo', [1, 5, 8, 9, 35])  // Solo obtener el estado con idEstadflujo 3
+                        ->get();
                 } else {
                     // Si no tiene idEstadflujo = 1, 3, 8 o 9, verificar si es 6 o 7
                     if (in_array($idEstadflujo, [6, 7])) {
@@ -1538,26 +1537,26 @@ class OrdenesTrabajoController extends Controller
 
 
     public function clientesDatosCliente($ticketId) // Pasamos el ID del ticket
-{
-    // Obtén el ticket usando el ID
-    $orden = Ticket::find($ticketId);
+    {
+        // Obtén el ticket usando el ID
+        $orden = Ticket::find($ticketId);
 
-    // Si no encuentras el ticket, puedes retornar una respuesta con error
-    if (!$orden) {
-        return response()->json(['error' => 'Orden no encontrada'], 404);
+        // Si no encuentras el ticket, puedes retornar una respuesta con error
+        if (!$orden) {
+            return response()->json(['error' => 'Orden no encontrada'], 404);
+        }
+
+        // Obtén el cliente seleccionado del ticket
+        $clienteSeleccionado = optional($orden->cliente)->idCliente;
+
+        // Obtén todos los clientes
+        $clientes = Cliente::all();
+
+        return response()->json([
+            'clientes' => $clientes,
+            'clienteSeleccionado' => $clienteSeleccionado, // Cliente seleccionado
+        ]);
     }
-
-    // Obtén el cliente seleccionado del ticket
-    $clienteSeleccionado = optional($orden->cliente)->idCliente;
-
-    // Obtén todos los clientes
-    $clientes = Cliente::all();
-
-    return response()->json([
-        'clientes' => $clientes,
-        'clienteSeleccionado' => $clienteSeleccionado, // Cliente seleccionado
-    ]);
-}
 
 
 
@@ -3159,8 +3158,9 @@ class OrdenesTrabajoController extends Controller
             'modoVistaPrevia' => false
         ])->render();
 
-        // 🔹 Generar PDF con Browsershot
-        $pdfContent = Browsershot::html($html)
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
             ->format('A4')
             ->fullPage()
             ->noSandbox()
@@ -3169,9 +3169,31 @@ class OrdenesTrabajoController extends Controller
             ->emulateMedia('screen')
             ->waitUntilNetworkIdle()
             ->showBackground()
-            ->pdf();
+            ->save($tempOriginal);
 
-        return response($pdfContent)
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
+
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
+
+        return response($pdfOutput)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
@@ -3218,152 +3240,85 @@ class OrdenesTrabajoController extends Controller
             'visitas.fotostickest'
         ])->findOrFail($idOt);
 
-
-        // 🔹 Obtener el idVisitas de la tabla seleccionarvisita según el idTickets
         $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
-
-        // Si no se ha encontrado una visita seleccionada, manejar el caso adecuadamente
         if (!$seleccionada) {
-            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada para este ticket.']);
+            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada.']);
         }
 
-        // Obtener el idVisitas de la visita seleccionada
         $idVisitasSeleccionada = $seleccionada->idVisitas;
 
-        // 🔹 Obtener transiciones de estado filtradas por idTickets y idVisitas
         $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
-            ->where('idVisitas', $idVisitasSeleccionada)  // Filtrar por la visita seleccionada
+            ->where('idVisitas', $idVisitasSeleccionada)
             ->whereNotNull('justificacion')
             ->where('justificacion', '!=', '')
-            ->with('estado_ot')
-            ->get();
+            ->with('estado_ot')->get();
 
-        // 🔹 OBTENER DATOS DEL PRODUCTO
         $producto = [
             'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
             'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
             'modelo' => $orden->modelo->nombre ?? 'No especificado',
             'serie' => $orden->serie ?? 'No especificado',
-            'fallaReportada' => $orden->fallaReportada ?? 'No especificado' // 🔹 Agregamos la falla reportada
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
         ];
 
         $condicion = DB::table('condicionesticket')
             ->where('idTickets', $idOt)
-            ->where('idVisitas', $idVisitasSeleccionada) // ✅
+            ->where('idVisitas', $idVisitasSeleccionada)
             ->first();
 
         $motivoCondicion = $condicion->motivo ?? null;
-
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
-        $marca->logo_base64 = null;
+        $marca->logo_base64 = !empty($marca->foto) ? $this->procesarLogoMarca($marca->foto) : null;
 
-        if ($marca && !empty($marca->foto)) {
-            $marca->logo_base64 = $this->procesarLogoMarca($marca->foto);
-        }
-
-
-
-        // 🔹 FORMATEAR VISITAS PARA LA VISTA
-        $visitas = collect();
-
-        if ($orden->visitas) {
-            // Filtrar la visita seleccionada utilizando el idVisitas obtenido anteriormente
-            $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
-
-            if ($visitaSeleccionada) {
-                // Formatear la visita seleccionada para el informe
-                $visitas = collect([ // Creamos un array solo con la visita seleccionada
-                    [
-                        'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
-                        'fecha_programada' => $visitaSeleccionada->fecha_programada ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada)) : 'N/A',
-                        'hora_inicio' => $visitaSeleccionada->fecha_inicio ? date('H:i', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A',
-                        'hora_final' => $visitaSeleccionada->fecha_final ? date('H:i', strtotime($visitaSeleccionada->fecha_final)) : 'N/A',
-                        'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
-                        'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
-                        'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
-                        'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
-                        'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
-                        'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
-                        'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
-                    ]
-                ]);
-            }
-        }
-
-        // 🔹 OBTENER FIRMAS FILTRADAS POR idTickets Y idVisitas
-        $firma = DB::table('firmas')->where('idTickets', $idOt)
-            ->where('idVisitas', $idVisitasSeleccionada)  // Filtrar por la visita seleccionada
-            ->first();
-
-        // Aplicar optimización de imágenes a las firmas
-        // $firmaTecnico = $firma && !empty($firma->firma_tecnico)
-        //     ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
-        //     : null;
-
-        $firmaCliente = $firma && !empty($firma->firma_cliente)
-            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
-            : null;
-
-        // 🔹 OBTENER IMÁGENES EN BASE64 (Filtrar los anexos de la visita seleccionada)
         $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
-
-        // 🔹 Obtener la firma del técnico (usuario)
-        $firmaTecnico = null;
-        if ($visitaSeleccionada && $visitaSeleccionada->tecnico) {
-            // Obtener el técnico (usuario) asociado a la visita
-            $tecnico = $visitaSeleccionada->tecnico;
-
-            // Comprobar si el técnico tiene una firma en la tabla `usuarios`
-            if ($tecnico && !empty($tecnico->firma)) {
-                // Codificar la firma en base64 para ser mostrada en el PDF
-                $firmaTecnico = 'data:image/png;base64,' . base64_encode($tecnico->firma);
-            }
+        $visitas = collect();
+        if ($visitaSeleccionada) {
+            $visitas = collect([[
+                'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                'fecha_programada' => optional($visitaSeleccionada->fecha_programada)->format('d/m/Y'),
+                'hora_inicio' => optional($visitaSeleccionada->fecha_inicio)->format('H:i'),
+                'hora_final' => optional($visitaSeleccionada->fecha_final)->format('H:i'),
+                'fecha_llegada' => optional($visitaSeleccionada->fecha_llegada)->format('d/m/Y H:i'),
+                'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? '') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
+                'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
+                'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
+                'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+            ]]);
         }
 
-        // ✅ Solo cargar imágenes desde condicionesticket
+        $firma = DB::table('firmas')->where('idTickets', $idOt)->where('idVisitas', $idVisitasSeleccionada)->first();
+        $firmaCliente = $firma && $firma->firma_cliente
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente)) : null;
+        $firmaTecnico = $visitaSeleccionada->tecnico->firma
+            ? 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma) : null;
+
         $imagenesAnexos = DB::table('condicionesticket')
             ->where('idTickets', $idOt)
             ->where('idVisitas', $idVisitasSeleccionada)
             ->whereNotNull('imagen')
             ->get()
-            ->map(function ($condicion) {
-                return [
-                    'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
-                    'descripcion' => 'CONDICIÓN: ' . ($condicion->motivo ?? 'Sin descripción')
-                ];
-            });
+            ->map(fn($c) => [
+                'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($c->imagen)),
+                'descripcion' => 'CONDICIÓN: ' . ($c->motivo ?? 'Sin descripción')
+            ]);
 
-        // Obtener las imágenes de los tickets y optimizarlas
-        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
-            return [
-                'foto_base64' => !empty($foto->foto)
-                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
-                    : null,
-                'descripcion' => $foto->descripcion
-            ];
-        });
+        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(fn($f) => [
+            'foto_base64' => $f->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($f->foto)) : null,
+            'descripcion' => $f->descripcion
+        ]);
 
+        $fechaCreacion = $visitaSeleccionada->fecha_inicio
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A';
 
-
-        // 🔹 Obtener la fecha_inicio de la visita seleccionada
-        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio)) // Formato dd/mm/yyyy
-            : 'N/A';
-
-
-        // 🔹 Verificar si el técnico es de tipoUsuario = 4
-        $tipoUsuario = null;
-        if ($visitaSeleccionada && $visitaSeleccionada->tecnico) {
-            $tipoUsuario = $visitaSeleccionada->tecnico->idTipoUsuario ?? null;
-        }
-
-        // 🔹 Determinar la vista del PDF según el tipo de usuario
+        $tipoUsuario = $visitaSeleccionada->tecnico->idTipoUsuario ?? null;
         $vistaPdf = ($tipoUsuario == 4)
             ? 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer'
             : 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
 
-        $html = View($vistaPdf, [
+        $html = view($vistaPdf, [
             'orden' => $orden,
             'fechaCreacion' => $fechaCreacion,
             'producto' => $producto,
@@ -3377,11 +3332,12 @@ class OrdenesTrabajoController extends Controller
             'logoGKM' => $logoGKM,
             'motivoCondicion' => $motivoCondicion,
             'modoVistaPrevia' => false,
-            'firma' => $firma, // ✅ AÑADE ESTO
+            'firma' => $firma
         ])->render();
 
-        // 🔹 GENERAR PDF EN MEMORIA CON BROWSERSHOT
-        $pdfContent = Browsershot::html($html)
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
             ->format('A4')
             ->fullPage()
             ->noSandbox()
@@ -3390,13 +3346,35 @@ class OrdenesTrabajoController extends Controller
             ->emulateMedia('screen')
             ->waitUntilNetworkIdle()
             ->showBackground()
-            ->pdf();
+            ->save($tempOriginal);
 
-        // 🔹 RETORNAR PDF SIN GUARDARLO EN STORAGE
-        return response($pdfContent)
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
+
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
+
+        return response($pdfOutput)
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
+
 
 
     private function buildInformeHtml($idOt, $idVisita, $modoVistaPrevia = false)

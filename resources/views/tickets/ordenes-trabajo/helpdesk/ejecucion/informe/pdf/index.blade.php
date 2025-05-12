@@ -28,8 +28,6 @@
         .indent-paragraph {
             text-align: left !important;
             /* alineado a la izquierda */
-            text-indent: 2em !important;
-            /* sangría en primera línea */
             line-height: 2 !important;
             /* interlineado 2.0 */
             margin-bottom: 0 !important;

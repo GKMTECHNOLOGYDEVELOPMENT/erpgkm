@@ -28,8 +28,6 @@
         .indent-paragraph {
             text-align: left !important;
             /* alineado a la izquierda */
-            text-indent: 2em !important;
-            /* sangría en primera línea */
             line-height: 2 !important;
             /* interlineado 2.0 */
             margin-bottom: 0 !important;
@@ -157,10 +155,10 @@
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
                     <div class="flex justify-between flex-wrap gap-4">
-                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> {{ strtoupper($producto['categoria']) }}</p>
-                        <p><span class="font-bold">MARCA:</span> {{ strtoupper($producto['marca']) }}</p>
-                        <p><span class="font-bold">MODELO:</span> {{ strtoupper($producto['modelo']) }}</p>
-                        <p><span class="font-bold">SERIE:</span> {{ strtoupper($producto['serie']) }}</p>
+                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> <span class="uppercase">{{ $producto['categoria'] }}</span></p>
+                        <p><span class="font-bold">MARCA:</span> <span class="uppercase">{{ $producto['marca'] }}</span></p>
+                        <p><span class="font-bold">MODELO:</span> <span class="uppercase">{{ $producto['modelo'] }}</span></p>
+                        <p><span class="font-bold">SERIE:</span> <span class="uppercase">{{ $producto['serie'] }}</span></p>                        
                     </div>
                 </div>
             @endif
@@ -259,10 +257,6 @@
                             <img src="{{ $fotoTicket['foto_base64'] }}" alt="Imagen del ticket">
                         </div>
 
-                        <p class="text-sm text-center text-gray-700 font-semibold mb-2">
-                            {{ $fotoTicket['descripcion'] ?? '' }}
-                        </p>
-
                         @php $contador++; @endphp
 
                         @if ($contador % 2 == 0 || $loop->last)
@@ -337,7 +331,7 @@
                             style="transform: scale(1.5); position: relative; bottom: 10px;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
-                            <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
+                            <p class="text-xs text-gray-500 font-bold"></p>
                         </div>
                     @endif
                 </div>

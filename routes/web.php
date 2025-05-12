@@ -394,6 +394,8 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('help/{id}/pdf/{idVisitas}/', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])->name('pdfcliente');
 
 
+    Route::get('help/{id}/pdf_app/{idVisitas}/', [OrdenesHelpdeskController::class, 'generateLabPdfVisitaApp'])->name('pdfclienteapp');
+
 
 
 
