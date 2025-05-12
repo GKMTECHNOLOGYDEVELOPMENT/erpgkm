@@ -153,6 +153,9 @@
                                     });
                             };
 
+                            // setInterval(cargarFirma, 5000);
+
+
                             // Llamar a la función para cargar la firma al cargar el script
                             cargarFirma();
 
@@ -415,13 +418,22 @@
                     <td class="px-4 py-2">
                         <span class="badge badge-outline-success">Pagado</span>
                     </td>
-                 <td class="px-4 py-2">
-                        <!-- Opciones directas -->
-                        <a href="#" class="btn btn-sm btn-outline-info mr-2">Ver Detalles</a>
-                        <a href="#" class="btn btn-sm btn-outline-warning mr-2">Editar</a>
-                        <a href="#" class="btn btn-sm btn-outline-danger mr-2">Eliminar</a>
-                        <a href="#" class="btn btn-sm btn-outline-success">Generar Reporte</a>
-                    </td>
+                <!-- Opciones con solo iconos -->
+<td class="px-4 py-2 space-x-2 text-lg">
+    <a href="#" class="text-info" title="Ver Detalles">
+        <i class="fas fa-eye"></i>
+    </a>
+    <a href="#" class="text-warning" title="Editar">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="#" class="text-danger" title="Eliminar">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+    <a href="#" class="text-success" title="Generar Reporte">
+        <i class="fas fa-file-alt"></i>
+    </a>
+</td>
+
                 </tr>
 
                 <!-- No Pagado -->
@@ -434,13 +446,22 @@
                     <td class="px-4 py-2">
                         <span class="badge badge-outline-danger">No Pagado</span>
                     </td>
-                  <td class="px-4 py-2">
-                        <!-- Opciones directas -->
-                        <a href="#" class="btn btn-sm btn-outline-info mr-2">Ver Detalles</a>
-                        <a href="#" class="btn btn-sm btn-outline-warning mr-2">Editar</a>
-                        <a href="#" class="btn btn-sm btn-outline-danger mr-2">Eliminar</a>
-                        <a href="#" class="btn btn-sm btn-outline-success">Generar Reporte</a>
-                    </td>
+                  <!-- Opciones con solo iconos -->
+<td class="px-4 py-2 space-x-2 text-lg">
+    <a href="#" class="text-info" title="Ver Detalles">
+        <i class="fas fa-eye"></i>
+    </a>
+    <a href="#" class="text-warning" title="Editar">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="#" class="text-danger" title="Eliminar">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+    <a href="#" class="text-success" title="Generar Reporte">
+        <i class="fas fa-file-alt"></i>
+    </a>
+</td>
+
                 </tr>
 
                 <!-- Pendiente -->
@@ -453,13 +474,22 @@
                     <td class="px-4 py-2">
                         <span class="badge badge-outline-warning">Pendiente</span>
                     </td>
-                     <td class="px-4 py-2">
-                        <!-- Opciones directas -->
-                        <a href="#" class="btn btn-sm btn-outline-info mr-2">Ver Detalles</a>
-                        <a href="#" class="btn btn-sm btn-outline-warning mr-2">Editar</a>
-                        <a href="#" class="btn btn-sm btn-outline-danger mr-2">Eliminar</a>
-                        <a href="#" class="btn btn-sm btn-outline-success">Generar Reporte</a>
-                    </td>
+                    <!-- Opciones con solo iconos -->
+<td class="px-4 py-2 space-x-2 text-lg">
+    <a href="#" class="text-info" title="Ver Detalles">
+        <i class="fas fa-eye"></i>
+    </a>
+    <a href="#" class="text-warning" title="Editar">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="#" class="text-danger" title="Eliminar">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+    <a href="#" class="text-success" title="Generar Reporte">
+        <i class="fas fa-file-alt"></i>
+    </a>
+</td>
+
                 </tr>
 
                 <!-- Por Realizar -->
@@ -472,13 +502,22 @@
                     <td class="px-4 py-2">
                         <span class="badge badge-outline-info">Por Realizar</span>
                     </td>
-                     <td class="px-4 py-2">
-                        <!-- Opciones directas -->
-                        <a href="#" class="btn btn-sm btn-outline-info mr-2">Ver Detalles</a>
-                        <a href="#" class="btn btn-sm btn-outline-warning mr-2">Editar</a>
-                        <a href="#" class="btn btn-sm btn-outline-danger mr-2">Eliminar</a>
-                        <a href="#" class="btn btn-sm btn-outline-success">Generar Reporte</a>
-                    </td>
+                    <!-- Opciones con solo iconos -->
+<td class="px-4 py-2 space-x-2 text-lg">
+    <a href="#" class="text-info" title="Ver Detalles">
+        <i class="fas fa-eye"></i>
+    </a>
+    <a href="#" class="text-warning" title="Editar">
+        <i class="fas fa-edit"></i>
+    </a>
+    <a href="#" class="text-danger" title="Eliminar">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+    <a href="#" class="text-success" title="Generar Reporte">
+        <i class="fas fa-file-alt"></i>
+    </a>
+</td>
+
                 </tr>
             </tbody>
         </table>
@@ -618,83 +657,6 @@
     });
 
 
-    // $(document).ready(function() {
-    //     // Cargar provincias y distritos al cargar el formulario si ya hay un departamento seleccionado
-    //     function cargarProvincias(departamentoId) {
-    //         $.get('/ubigeo/provincias/' + departamentoId, function(data) {
-    //             var provinciaSelect = $('#provincia');
-    //             provinciaSelect.empty().prop('disabled', false);
-    //             provinciaSelect.append(
-    //                 '<option value="" disabled selected>Seleccionar Provincia</option>');
-
-    //             data.forEach(function(provincia) {
-    //                 provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
-    //                     provincia.nombre_ubigeo + '</option>');
-    //             });
-
-    //             // Si hay provincia seleccionada previamente, se selecciona automáticamente
-    //             var provinciaSeleccionada = '{{ old('provincia', $usuario->provincia) }}';
-    //             if (provinciaSeleccionada) {
-    //                 $('#provincia').val(provinciaSeleccionada).change();
-    //             }
-    //         });
-    //     }
-
-    //     function cargarDistritos(provinciaId) {
-    //         $.get('/ubigeo/distritos/' + provinciaId, function(data) {
-    //             var distritoSelect = $('#distrito');
-    //             distritoSelect.empty().prop('disabled', false);
-    //             distritoSelect.append(
-    //                 '<option value="" disabled selected>Seleccionar Distrito</option>');
-
-    //             data.forEach(function(distrito) {
-    //                 distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
-    //                     distrito.nombre_ubigeo + '</option>');
-    //             });
-
-    //             // Si hay distrito seleccionado previamente, se selecciona automáticamente
-    //             var distritoSeleccionado = '{{ old('distrito', $usuario->distrito) }}';
-    //             if (distritoSeleccionado) {
-    //                 $('#distrito').val(distritoSeleccionado);
-    //             }
-    //         });
-    //     }
-
-    //     // Si ya hay un departamento seleccionado al cargar la página
-    //     var departamentoId = $('#departamento').val();
-    //     if (departamentoId) {
-    //         cargarProvincias(departamentoId);
-    //     }
-
-    //     // Cargar distritos si ya hay una provincia seleccionada al cargar la página
-    //     var provinciaId = $('#provincia').val();
-    //     if (provinciaId) {
-    //         cargarDistritos(provinciaId);
-    //     }
-
-    //     // Cuando se selecciona un nuevo departamento
-    //     $('#departamento').change(function() {
-    //         var departamentoId = $(this).val();
-    //         if (departamentoId) {
-    //             // Limpiar los selects de provincia y distrito
-    //             $('#provincia').empty().prop('disabled', true);
-    //             $('#distrito').empty().prop('disabled', true);
-
-    //             cargarProvincias(departamentoId);
-    //         }
-    //     });
-
-    //     // Cuando se selecciona una provincia
-    //     $('#provincia').on('change', function() {
-    //         var provinciaId = $(this).val();
-    //         if (provinciaId) {
-    //             // Limpiar el select de distritos
-    //             $('#distrito').empty().prop('disabled', true);
-
-    //             cargarDistritos(provinciaId);
-    //         }
-    //     });
-    // });
 
     // Inicializar Select2
     document.addEventListener("DOMContentLoaded", function() {

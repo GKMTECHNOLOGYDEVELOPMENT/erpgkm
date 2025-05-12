@@ -101,12 +101,18 @@
                         class="pb-2 font-semibold text-sm uppercase">
                         Estados
                     </button>
-                    <button @click="activeTab = 'historial'"
-                        :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
-                            'text-gray-500 hover:text-gray-700'"
-                        class="pb-2 font-semibold text-sm uppercase">
-                        Historial de Cambios
-                    </button>
+              <button
+  @click="() => { 
+      activeTab = 'historial'; 
+      cargarHistorialModificaciones(ticketId); 
+  }"
+  :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
+                                      'text-gray-500 hover:text-gray-700'"
+  class="pb-2 font-semibold text-sm uppercase"
+>
+  Historial de Cambios
+</button>
+
                 </div>
 
                 <!-- TAB: Estados -->
@@ -758,7 +764,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         console.log("DOM completamente cargado y analizado");
@@ -779,14 +784,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Inicializar Flatpickr en "Fecha de Creación"
-console.log("Inicializando Flatpickr para fechaCreacion");
-flatpickr("#fechaCreacion", {
-    enableTime: true, // Habilita la selección de hora
-    dateFormat: "Y-m-d H:i:S", // Formato con fecha, hora, minutos y segundos
-    time_24hr: true, // Reloj de 24 horas
-    allowInput: true
-});
-
+        console.log("Inicializando Flatpickr para fechaCreacion");
+        flatpickr("#fechaCreacion", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i:S",
+            time_24hr: true,
+            allowInput: true
+        });
 
         // Función para formatear la fecha
         function formatDate(fecha) {
@@ -924,10 +928,10 @@ flatpickr("#fechaCreacion", {
                     const newRow = document.createElement("tr");
                     newRow.className = rowClasses;
                     newRow.innerHTML = `
-                <td class="px-4 py-2 text-center">${stateDescription}</td>
-                <td class="px-4 py-2 text-center">${usuario}</td>
-                <td class="px-4 py-2 text-center">${fecha}</td>
-            `;
+                        <td class="px-4 py-2 text-center">${stateDescription}</td>
+                        <td class="px-4 py-2 text-center">${usuario}</td>
+                        <td class="px-4 py-2 text-center">${fecha}</td>
+                    `;
                     console.log("Nueva fila creada:", newRow);
                     document.getElementById("estadosTableBody").appendChild(newRow);
 
@@ -997,84 +1001,121 @@ flatpickr("#fechaCreacion", {
             console.warn("Elemento dropZone no encontrado en el DOM");
         }
 
-// Por esta versión mejorada:
-function initializeFieldValues() {
-    // Selecciona solo los campos dentro del formulario principal
-    const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
-    if (!form) {
-        console.error("Formulario no encontrado");
-        return;
-    }
+        // Función para inicializar valores de campos
+        function initializeFieldValues() {
+            const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
+            if (!form) {
+                console.error("Formulario no encontrado");
+                return;
+            }
 
-    form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
-        // Ignora campos sin nombre o ID (como los de Alpine.js)
-        if (!field.name && !field.id) {
-            console.log("Ignorando campo sin nombre/ID:", field);
-            return;
+            form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
+                if (!field.name && !field.id) {
+                    console.log("Ignorando campo sin nombre/ID:", field);
+                    return;
+                }
+
+                console.log("Inicializando campo:", field.id || field.name);
+                if (field.tagName.toLowerCase() === "select") {
+                    field.dataset.oldValue = field.options[field.selectedIndex].text;
+                } else {
+                    field.dataset.oldValue = field.value;
+                }
+                console.log("Valor inicial guardado:", field.dataset.oldValue);
+            });
         }
 
-        console.log("Inicializando campo:", field.id || field.name);
-        if (field.tagName.toLowerCase() === "select") {
-            field.dataset.oldValue = field.options[field.selectedIndex].text;
-        } else {
-            field.dataset.oldValue = field.value;
+        // Función para manejar cambios en campos de texto/textarea con debounce
+        function handleInputChange(e) {
+            const field = e.target;
+            
+            // Solo campos de texto y textarea dentro del formulario
+            if (!field.matches('#tuFormulario input[type="text"], #tuFormulario textarea')) {
+                return;
+            }
+
+            if (!field.name && !field.id) {
+                return;
+            }
+
+            console.log("Evento input detectado en campo:", field.id || field.name);
+            
+            let oldVal = field.dataset.oldValue || '';
+            let newVal = field.value;
+            
+            // Debounce para evitar múltiples llamadas mientras se escribe
+            clearTimeout(field.debounceTimer);
+            field.debounceTimer = setTimeout(() => {
+                if (oldVal !== newVal) {
+                    let fieldLabel = "";
+                    if (field.id) {
+                        const label = document.querySelector('label[for="' + field.id + '"]');
+                        if (label) {
+                            fieldLabel = label.textContent.trim();
+                        }
+                    }
+                    if (!fieldLabel) {
+                        fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
+                    }
+                    console.log("Cambio detectado en:", fieldLabel, "de", oldVal, "a", newVal);
+                    
+                    updateModificationLog(fieldLabel, oldVal, newVal);
+                    field.dataset.oldValue = newVal;
+                }
+            }, 500); // 500ms de retraso después de la última tecla presionada
         }
-        console.log("Valor inicial guardado:", field.dataset.oldValue);
-    });
-}
 
-     // Y modifica el manejador de eventos así:
-function handleFieldChange(e) {
-    const field = e.target;
-    
-    // Filtra solo los campos que nos interesan
-    if (!field.matches('#tuFormulario input:not([type="hidden"]), #tuFormulario select, #tuFormulario textarea')) {
-        return;
-    }
+        // Función para manejar cambios en selects y otros campos
+        function handleFieldChange(e) {
+            const field = e.target;
+            
+            // Filtra solo los campos que nos interesan (excepto text/textarea)
+            if (!field.matches('#tuFormulario select, #tuFormulario input:not([type="text"]):not([type="hidden"])')) {
+                return;
+            }
 
-    // Ignora campos sin nombre o ID
-    if (!field.name && !field.id) {
-        return;
-    }
+            if (!field.name && !field.id) {
+                return;
+            }
 
-    console.log("Evento detectado en campo:", field.id || field.name, "Tipo:", e.type);
-    
-    let oldVal = field.dataset.oldValue || '';
-    let newVal;
-    
-    if (field.tagName.toLowerCase() === "select") {
-        newVal = field.options[field.selectedIndex].text;
-    } else {
-        newVal = field.value;
-    }
-    
-    console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
-    
-    if (oldVal !== newVal) {
-        let fieldLabel = "";
-        if (field.id) {
-            const label = document.querySelector('label[for="' + field.id + '"]');
-            if (label) {
-                fieldLabel = label.textContent.trim();
+            console.log("Evento change detectado en campo:", field.id || field.name);
+            
+            let oldVal = field.dataset.oldValue || '';
+            let newVal;
+            
+            if (field.tagName.toLowerCase() === "select") {
+                newVal = field.options[field.selectedIndex].text;
+            } else {
+                newVal = field.value;
+            }
+            
+            console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
+            
+            if (oldVal !== newVal) {
+                let fieldLabel = "";
+                if (field.id) {
+                    const label = document.querySelector('label[for="' + field.id + '"]');
+                    if (label) {
+                        fieldLabel = label.textContent.trim();
+                    }
+                }
+                if (!fieldLabel) {
+                    fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
+                }
+                console.log("Etiqueta del campo:", fieldLabel);
+                
+                updateModificationLog(fieldLabel, oldVal, newVal);
+                field.dataset.oldValue = newVal;
+                console.log("Valor antiguo actualizado a:", newVal);
             }
         }
-        if (!fieldLabel) {
-            fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
-        }
-        console.log("Etiqueta del campo:", fieldLabel);
-        
-        updateModificationLog(fieldLabel, oldVal, newVal);
-        field.dataset.oldValue = newVal;
-        console.log("Valor antiguo actualizado a:", newVal);
-    }
-}
 
         // Inicialización
         initializeFieldValues();
         
-        // Escuchar eventos de cambio (versión mejorada)
-        document.addEventListener('input', handleFieldChange, true);
-        document.addEventListener('change', handleFieldChange, true);
+        // Escuchar eventos
+        document.addEventListener('input', handleInputChange, true); // Para cambios de texto en tiempo real
+        document.addEventListener('change', handleFieldChange, true); // Para selects, checkboxes, etc.
     });
 </script>
 
