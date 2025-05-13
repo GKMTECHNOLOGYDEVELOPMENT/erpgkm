@@ -168,6 +168,10 @@ class OrdenesTrabajoController extends Controller
     {
         try {
             Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
+            // Manejar los checkboxes para que siempre estén presentes
+        $request->merge([
+            'evaluaciontienda' => $request->has('evaluaciontienda') ? 1 : 0,
+        ]);
 
             // Validación de los datos
             $validatedData = $request->validate([
@@ -185,6 +189,8 @@ class OrdenesTrabajoController extends Controller
                 'linkubicacion' => 'required|string',
                 'lat' => 'nullable|string|max:255',
                 'lng' => 'nullable|string|max:255',
+                'evaluaciontienda' => 'required|in:0,1'
+
             ]);
 
             Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
@@ -226,6 +232,8 @@ class OrdenesTrabajoController extends Controller
                 'fecha_creacion' => $fechaCreacion,  // Aseguramos que se guarda correctamente
                 'idTipotickets' => 1,
                 'tipoServicio' => 1,
+                'evaluaciontienda' => $validatedData['evaluaciontienda']
+
             ]);
 
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);

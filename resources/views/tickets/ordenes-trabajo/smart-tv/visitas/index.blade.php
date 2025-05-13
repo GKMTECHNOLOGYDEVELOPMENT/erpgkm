@@ -813,45 +813,35 @@
         // ABRIR MODAL AL CREAR VISITA
         const crearCordinacionBtn = document.getElementById('crearCordinacionBtn');
 
-        crearCordinacionBtn.addEventListener("click", function(event) {
+   crearCordinacionBtn.addEventListener("click", function (event) {
+    const ticketId = '{{ $ticket->idTickets }}';
 
-            // Si la validación es correcta, proceder con la llamada AJAX
-            const ticketId =
-                '{{ $ticket->idTickets }}'; // El ID del ticket, que lo obtienes desde el backend
+    $.ajax({
+        url: `/obtener-numero-visitas/${ticketId}`,
+        type: 'GET',
+        success: function (response) {
+            let numeroVisitas = response.numeroVisitas || 0;
+            let tipoNombre = response.tipoNombre || 'Visita';
 
-            console.log("ID del ticket:", ticketId);
+            let siguienteIdVisita = numeroVisitas + 1;
+            nombreVisitaInput.value = `${tipoNombre} ${siguienteIdVisita}`;
 
-            // Realizar consulta AJAX para obtener el número de visitas existentes para ese ticket
-            $.ajax({
-                url: `/obtener-numero-visitas/${ticketId}`, // Endpoint que te dará el número de visitas actuales para ese ticket
-                type: 'GET',
-                success: function(response) {
-                    // Supongamos que la respuesta es el número de visitas asociadas al ticket
-                    let numeroVisitas = response
-                        .numeroVisitas; // Esto lo deberías ajustar según lo que devuelvas desde el backend
+            // Limpiar campos
+            fechaVisitaInput.value = "";
+            horaInicioInput.value = "";
+            horaFinInput.value = "";
 
-                    // El siguiente ID de visita sería el número de visitas + 1
-                    let siguienteIdVisita = numeroVisitas + 1;
+            // Mostrar modal
+            window.dispatchEvent(new Event('toggle-modal'));
+            console.log("Nombre de la visita:", nombreVisitaInput.value);
+        },
+        error: function (xhr, status, error) {
+            console.log("Error al obtener el número de visitas:", error);
+        }
+    });
+});
 
-                    // Usamos el siguiente ID de visita para el nombre de la visita
-                    nombreVisitaInput.value = `Visita ${siguienteIdVisita}`;
 
-                    // Limpiar los campos de fecha y hora
-                    fechaVisitaInput.value = "";
-                    horaInicioInput.value = "";
-                    horaFinInput.value = "";
-
-                    // Abrir el modal
-                    window.dispatchEvent(new Event('toggle-modal'));
-
-                    console.log("Siguiente ID de visita:", siguienteIdVisita);
-                },
-                error: function(xhr, status, error) {
-                    console.log("Error al obtener el número de visitas para el ticket:",
-                        error);
-                }
-            });
-        });
 
 
         guardarBtn.addEventListener("click", function(event) {
