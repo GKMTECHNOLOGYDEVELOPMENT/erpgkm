@@ -1723,32 +1723,48 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+public function guardarVisita(Request $request)
+{
+    // Validación de los datos
+    Log::info('Validando los datos de la visita', $request->all());
+    $request->validate([
+        'nombre' => 'required|string|max:255',
+        'fecha_visita' => 'required|date',
+        'hora_inicio' => 'required|date_format:H:i',
+        'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
+        'encargado' => 'required|integer|exists:usuarios,idUsuario', // Validar que el encargado existe
+        'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
+        'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
+        'imagenVisita' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validar la imagen
+        'nombreclientetienda' => 'nullable|string|max:255', // Validación para el nombre del cliente
+        'celularclientetienda' => 'nullable|string|max:255', // Validación para el celular del cliente
+    ]);
 
-    public function guardarVisita(Request $request)
-    {
-        // Validación de los datos
-        Log::info('Validando los datos de la visita', $request->all());
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'fecha_visita' => 'required|date',
-            'hora_inicio' => 'required|date_format:H:i',
-            'hora_fin' => 'required|date_format:H:i|after:hora_inicio',
-            'encargado' => 'required|integer|exists:usuarios,idUsuario', // Validar que el encargado existe
-            'necesita_apoyo' => 'nullable|in:0,1',  // Ahora se valida si es 0 o 1
-            'tecnicos_apoyo' => 'nullable|array', // Si seleccionaron técnicos de apoyo
-            'imagenVisita' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validar la imagen
-            'nombreclientetienda' => 'nullable|string|max:255', // Validación para el nombre del cliente
-            'celularclientetienda' => 'nullable|string|max:255', // Validación para el celular del cliente
-        ]);
+    Log::info('Datos validados correctamente');
 
-        Log::info('Datos validados correctamente');
+    $fechaInicio = $request->fecha_visita . ' ' . $request->hora_inicio;
+    $fechaFinal = $request->fecha_visita . ' ' . $request->hora_fin;
 
-        $fechaInicio = $request->fecha_visita . ' ' . $request->hora_inicio;
-        $fechaFinal = $request->fecha_visita . ' ' . $request->hora_fin;
+    Log::info('Fechas de inicio y fin: ', ['inicio' => $fechaInicio, 'fin' => $fechaFinal]);
 
-        Log::info('Fechas de inicio y fin: ', ['inicio' => $fechaInicio, 'fin' => $fechaFinal]);
+    // NUEVO: Verificar si se debe omitir la validación de conflicto
+    $omitirValidacion = false;
 
-        // Verificar si el técnico ya tiene una visita en ese rango de tiempo
+    $ticket = DB::table('tickets')->where('idTickets', $request->idTickets)->first();
+
+    if ($ticket) {
+        if ($ticket->evaluaciontienda == 1) {
+            $omitirValidacion = true;
+        } elseif ($ticket->idTicketFlujo) {
+            $flujo = DB::table('ticketflujo')->where('idTicketFlujo', $ticket->idTicketFlujo)->first();
+            if ($flujo && $flujo->idEstadflujo == 8) {
+                $omitirValidacion = true;
+            }
+        }
+    }
+
+    // Verificar si el técnico ya tiene una visita en ese rango de tiempo, solo si no se debe omitir
+    if (!$omitirValidacion) {
         $visitasConflicto = DB::table('visitas')
             ->where('idUsuario', $request->encargado)
             ->where(function ($query) use ($fechaInicio, $fechaFinal) {
@@ -1769,129 +1785,125 @@ class OrdenesTrabajoController extends Controller
             ]);
             return response()->json(['success' => false, 'message' => 'El técnico ya tiene una visita asignada en este horario.'], 400);
         }
-
-        // Obtener el tipo de usuario del encargado
-        $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
-        $tipoServicio = 1; // Default para técnico (idTipoUsuario 1)
-
-        // Asignar tipoServicio basado en el tipo de usuario
-        if ($encargado->idTipoUsuario == 4) {
-            $tipoServicio = 3; // Si el tipo de usuario es 4, asignamos 3 (por ejemplo, Chofer)
-        }
-
-        // Crear la nueva visita
-        $visita = new Visita();
-        $visita->nombre = $request->nombre;
-        $visita->fecha_programada = $request->fecha_visita;
-        $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
-        $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
-        $visita->tipoServicio = $tipoServicio; // O el valor correspondiente que quieras
-        $visita->idUsuario = $request->encargado;
-
-        // Aquí guardamos los nuevos campos
-        $visita->nombreclientetienda = $request->nombreclientetienda;
-        $visita->celularclientetienda = $request->celularclientetienda;
-
-        Log::info('Creando la visita', ['visita' => $visita]);
-
-        // Asignar 0 o 1 a "necesita_apoyo"
-        $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
-        $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
-
-        // Guardar la visita
-        $visita->save();
-        Log::info('Visita guardada con éxito', ['visita_id' => $visita->idVisitas]);
-
-        // Manejar la imagen (si se subió)
-        if ($request->hasFile('imagenVisita')) {
-            Log::info('Imagen recibida', ['imagen' => $request->file('imagenVisita')->getClientOriginalName()]);
-            Log::info('Tipo de archivo de la imagen:', ['tipo' => $request->file('imagenVisita')->getMimeType()]);
-
-            $imagen = file_get_contents($request->file('imagenVisita')->getRealPath());  // Leer archivo como binario
-
-            // Guardar la imagen en la tabla 'imagenapoyosmart'
-            DB::table('imagenapoyosmart')->insert([
-                'imagen' => $imagen,
-                'idVisitas' => $visita->idVisitas,
-                'descripcion' => $request->nombre,  // Usar el nombre de la visita como descripción
-            ]);
-
-            Log::info('Imagen guardada correctamente en imagenapoyosmart');
-        }
-
-        // Guardar en la tabla anexos_visitas
-        DB::table('anexos_visitas')->insert([
-            'idVisitas' => $visita->idVisitas,  // Usamos el id de la visita recién creada
-            'idTipovisita' => 1,  // El tipo de visita siempre es 1
-            'foto' => null,  // Puedes pasar la foto aquí si tienes una, o dejarla como null
-            'descripcion' => null,  // Puedes pasar la descripción aquí si tienes alguna, o dejarla como null
-            'lat' => null,  // Puedes pasar la latitud aquí si la tienes, o dejarla como null
-            'lng' => null,  // Puedes pasar la longitud aquí si la tienes, o dejarla como null
-            'ubicacion' => null,  // Puedes pasar la ubicación aquí si la tienes, o dejarla como null
-        ]);
-
-        Log::info('Anexo de visita guardado correctamente');
-
-        $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
-
-        // Asignar el idEstadflujo basado en el tipo de encargado
-        $idEstadflujo = ($encargado->idTipoUsuario == 1) ? 2 : 2;
-        Log::info('Asignando idEstadflujo', ['idEstadflujo' => $idEstadflujo]);
-
-        // Insertar en la tabla ticketflujo
-        $ticketflujo = DB::table('ticketflujo')->insertGetId([  // Usamos insertGetId para obtener el ID
-            'idTicket' => $visita->idTickets,
-            'idEstadflujo' => $idEstadflujo,
-            'idUsuario' => auth()->id(),  // Usuario autenticado
-            'fecha_creacion' => now(),
-        ]);
-
-        Log::info('Flujo de ticket insertado con éxito', ['ticketflujo_id' => $ticketflujo]);
-
-        // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
-        DB::table('tickets')
-            ->where('idTickets', $visita->idTickets)
-            ->update(['idTicketFlujo' => $ticketflujo]);
-
-        Log::info('Actualización de idTicketFlujo completada');
-
-        // Comprobar si necesita apoyo y si se seleccionaron técnicos de apoyo
-        if ($visita->necesita_apoyo == 1 && $request->has('tecnicos_apoyo')) {
-            Log::info('Guardando técnicos de apoyo', ['tecnicos_apoyo' => $request->tecnicos_apoyo]);
-
-            // Guardar técnicos de apoyo en la tabla ticketapoyo
-            foreach ($request->tecnicos_apoyo as $tecnicoId) {
-                DB::table('ticketapoyo')->insert([
-                    'idTecnico' => $tecnicoId,
-                    'idTicket' => $visita->idTickets, // Usar el idTickets de la visita
-                    'idVisita' => $visita->idVisitas,
-                ]);
-            }
-
-            Log::info('Técnicos de apoyo guardados exitosamente');
-        }
-
-
-        // Aquí agregamos la parte que guarda la modificación en la tabla 'modificaciones'
-        $usuarioAutenticado = auth()->user()->Nombre; // Obtener el nombre del usuario autenticado
-
-        DB::table('modificaciones')->insert([
-            'idTickets' => $visita->idTickets,
-            'campo' => 'Crear Visita',
-            'valor_antiguo' => 'Visita nueva',
-            'valor_nuevo' => 'Visita nueva creada',
-            'usuario' => $usuarioAutenticado,
-            'fecha_modificacion' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        Log::info('Modificación registrada en la tabla modificaciones');
-
-
-
-        return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
     }
+
+    // Obtener el tipo de usuario del encargado
+    $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
+    $tipoServicio = 1; // Default para técnico (idTipoUsuario 1)
+
+    // Asignar tipoServicio basado en el tipo de usuario
+    if ($encargado->idTipoUsuario == 4) {
+        $tipoServicio = 3; // Si el tipo de usuario es 4, asignamos 3 (por ejemplo, Chofer)
+    }
+
+    // Crear la nueva visita
+    $visita = new Visita();
+    $visita->nombre = $request->nombre;
+    $visita->fecha_programada = $request->fecha_visita;
+    $visita->fecha_inicio_hora = $fechaInicio;  // Concatenar fecha y hora
+    $visita->fecha_final_hora = $fechaFinal; // Concatenar fecha y hora
+    $visita->tipoServicio = $tipoServicio; // O el valor correspondiente que quieras
+    $visita->idUsuario = $request->encargado;
+    // Aquí guardamos los nuevos campos
+    $visita->nombreclientetienda = $request->nombreclientetienda;
+    $visita->celularclientetienda = $request->celularclientetienda;
+
+    Log::info('Creando la visita', ['visita' => $visita]);
+
+    // Asignar 0 o 1 a "necesita_apoyo"
+    $visita->necesita_apoyo = $request->necesita_apoyo ?? 0;  // Si no se envió, asignar 0
+    $visita->idTickets = $request->idTickets; // Asegúrate de pasar este valor desde el frontend
+
+    // Guardar la visita
+    $visita->save();
+    Log::info('Visita guardada con éxito', ['visita_id' => $visita->idVisitas]);
+
+    // Manejar la imagen (si se subió)
+    if ($request->hasFile('imagenVisita')) {
+        Log::info('Imagen recibida', ['imagen' => $request->file('imagenVisita')->getClientOriginalName()]);
+        Log::info('Tipo de archivo de la imagen:', ['tipo' => $request->file('imagenVisita')->getMimeType()]);
+
+        $imagen = file_get_contents($request->file('imagenVisita')->getRealPath());  // Leer archivo como binario
+
+        // Guardar la imagen en la tabla 'imagenapoyosmart'
+        DB::table('imagenapoyosmart')->insert([
+            'imagen' => $imagen,
+            'idVisitas' => $visita->idVisitas,
+            'descripcion' => $request->nombre,  // Usar el nombre de la visita como descripción
+        ]);
+
+        Log::info('Imagen guardada correctamente en imagenapoyosmart');
+    }
+
+    // Guardar en la tabla anexos_visitas
+    DB::table('anexos_visitas')->insert([
+        'idVisitas' => $visita->idVisitas,  // Usamos el id de la visita recién creada
+        'idTipovisita' => 1,  // El tipo de visita siempre es 1
+        'foto' => null,
+        'descripcion' => null,
+        'lat' => null,
+        'lng' => null,
+        'ubicacion' => null,
+    ]);
+
+    Log::info('Anexo de visita guardado correctamente');
+
+    $encargado = DB::table('usuarios')->where('idUsuario', $request->encargado)->first();
+
+    // Asignar el idEstadflujo basado en el tipo de encargado
+    $idEstadflujo = ($encargado->idTipoUsuario == 1) ? 2 : 2;
+    Log::info('Asignando idEstadflujo', ['idEstadflujo' => $idEstadflujo]);
+
+    // Insertar en la tabla ticketflujo
+    $ticketflujo = DB::table('ticketflujo')->insertGetId([
+        'idTicket' => $visita->idTickets,
+        'idEstadflujo' => $idEstadflujo,
+        'idUsuario' => auth()->id(),
+        'fecha_creacion' => now(),
+    ]);
+
+    Log::info('Flujo de ticket insertado con éxito', ['ticketflujo_id' => $ticketflujo]);
+
+    // Actualizar el campo idTicketFlujo en la tabla tickets con el nuevo idTicketFlujo
+    DB::table('tickets')
+        ->where('idTickets', $visita->idTickets)
+        ->update(['idTicketFlujo' => $ticketflujo]);
+
+    Log::info('Actualización de idTicketFlujo completada');
+
+    // Comprobar si necesita apoyo y si se seleccionaron técnicos de apoyo
+    if ($visita->necesita_apoyo == 1 && $request->has('tecnicos_apoyo')) {
+        Log::info('Guardando técnicos de apoyo', ['tecnicos_apoyo' => $request->tecnicos_apoyo]);
+
+        foreach ($request->tecnicos_apoyo as $tecnicoId) {
+            DB::table('ticketapoyo')->insert([
+                'idTecnico' => $tecnicoId,
+                'idTicket' => $visita->idTickets,
+                'idVisita' => $visita->idVisitas,
+            ]);
+        }
+
+        Log::info('Técnicos de apoyo guardados exitosamente');
+    }
+
+    // Guardar en modificaciones
+    $usuarioAutenticado = auth()->user()->Nombre;
+
+    DB::table('modificaciones')->insert([
+        'idTickets' => $visita->idTickets,
+        'campo' => 'Crear Visita',
+        'valor_antiguo' => 'Visita nueva',
+        'valor_nuevo' => 'Visita nueva creada',
+        'usuario' => $usuarioAutenticado,
+        'fecha_modificacion' => now(),
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+
+    Log::info('Modificación registrada en la tabla modificaciones');
+
+    return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
+}
 
 
 
