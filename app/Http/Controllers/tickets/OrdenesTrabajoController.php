@@ -529,7 +529,7 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 14) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [19, 35])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [19, 35, 36])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 19) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
