@@ -2454,7 +2454,10 @@ class OrdenesTrabajoController extends Controller
                 return response()->json(['error' => 'Error al actualizar el ticketflujo.'], 500);
             }
 
-            // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
+          
+        }
+
+          // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
             $actualizarVisita = DB::table('visitas')
                 ->where('idVisitas', $request->idVisitas)
                 ->update(['estadovisita' => 1]);  // Esto actualiza la variable estadovisita a 1
@@ -2465,7 +2468,6 @@ class OrdenesTrabajoController extends Controller
             } else {
                 Log::info('estado visita actualizado correctamente a 1 para idVisitas: ' . $request->idVisitas);
             }
-        }
 
 
         if ($condicion) {
