@@ -38,7 +38,7 @@ document.addEventListener('alpine:init', () => {
                 },
                 columns: [
                     {
-                        title: 'DETALLE',
+                        title: 'OBSERVACION',
                         data: null, // Usamos toda la fila
                         className: 'text-center align-middle',
                         render: function (data, type, row) {
@@ -324,28 +324,8 @@ document.addEventListener('alpine:init', () => {
     window.aprobarObservacion = function () {
         const id = observacionActual?.idObservaciones;
         const respuesta = document.getElementById('respuestaTexto').value.trim();
-
-        if (!id) return console.error('ID no definido');
-
-        fetch('/asistencias/actualizar-observacion', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ id, estado: 1, respuesta })
-        })
-            .then(res => res.json())
-            .then(() => {
-                Toastify({ text: "✅ Observación aprobada.", duration: 2500, style: { background: "#22c55e" } }).showToast();
-                cerrarModalObservacion();
-            });
-    };
-
-    window.denegarObservacion = function () {
-        const id = observacionActual?.idObservaciones;
-        const respuesta = document.getElementById('respuestaTexto').value.trim();
-        const estado = 2;
+        const estado = 1;
+        const esUltima = indiceActualObs === observacionesLista.length - 1;
 
         if (!id) return console.error('ID no definido');
 
@@ -360,33 +340,74 @@ document.addEventListener('alpine:init', () => {
             .then(res => res.json())
             .then(() => {
                 Toastify({
-                    text: estado === 1 ? "✅ Observación aprobada." : "❌ Observación denegada.",
+                    text: "✅ Observación aprobada.",
                     duration: 2500,
-                    style: { background: estado === 1 ? "#22c55e" : "#ef4444" }
+                    style: { background: "#22c55e" }
                 }).showToast();
 
-                // Actualizar en memoria
-                observacionActual.estado = estado;
-                observacionActual.respuesta = respuesta;
-                observacionesLista[indiceActualObs] = observacionActual;
+                if (esUltima) {
+                    location.reload(); // 🔁 recarga toda la página si es la última
+                } else {
+                    observacionActual.estado = estado;
+                    observacionActual.respuesta = respuesta;
+                    observacionesLista[indiceActualObs] = observacionActual;
 
-                // Bloquear botones y textarea
-                document.querySelector('#respuestaTexto').setAttribute('readonly', true);
-                document.querySelector('#observacionAcciones .btn-primary').disabled = true;
-                document.querySelector('#observacionAcciones .btn-outline-danger').disabled = true;
+                    document.querySelector('#respuestaTexto').setAttribute('readonly', true);
+                    document.querySelector('#observacionAcciones .btn-primary').disabled = true;
+                    document.querySelector('#observacionAcciones .btn-outline-danger').disabled = true;
 
-                // Re-renderizar
-                verObservacion(observacionActual, indiceActualObs, observacionesLista.length);
+                    verObservacion(observacionActual, indiceActualObs, observacionesLista.length);
+                }
             });
     };
 
 
+    window.denegarObservacion = function () {
+        const id = observacionActual?.idObservaciones;
+        const respuesta = document.getElementById('respuestaTexto').value.trim();
+        const estado = 2;
+        const esUltima = indiceActualObs === observacionesLista.length - 1;
+
+        if (!id) return console.error('ID no definido');
+
+        fetch('/asistencias/actualizar-observacion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ id, estado, respuesta })
+        })
+            .then(res => res.json())
+            .then(() => {
+                Toastify({
+                    text: "❌ Observación denegada.",
+                    duration: 2500,
+                    style: { background: "#ef4444" }
+                }).showToast();
+
+                if (esUltima) {
+                    location.reload(); // 🔁 recarga total
+                } else {
+                    observacionActual.estado = estado;
+                    observacionActual.respuesta = respuesta;
+                    observacionesLista[indiceActualObs] = observacionActual;
+
+                    document.querySelector('#respuestaTexto').setAttribute('readonly', true);
+                    document.querySelector('#observacionAcciones .btn-primary').disabled = true;
+                    document.querySelector('#observacionAcciones .btn-outline-danger').disabled = true;
+
+                    verObservacion(observacionActual, indiceActualObs, observacionesLista.length);
+                }
+            });
+    };
+
     window.cerrarModalObservacion = function () {
         document.getElementById('modalObservacion').classList.add('hidden');
-    
+
         // Emitir evento personalizado para recargar tabla
         window.dispatchEvent(new CustomEvent('recargar-asistencias'));
     };
-    
+
 
 });
