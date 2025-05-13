@@ -92,7 +92,7 @@
             <table id="tablaAsistencias" class="table whitespace-nowrap">
                 <thead>
                     <tr>
-                        <th class="font-bold text-center">DETALLE</th>
+                        <th class="font-bold text-center">OBSERVACIÓN</th>
                         <th class="font-bold text-center w-[200px] break-words whitespace-normal col-ubicacion">EMPLEADO
                         </th>
                         <th class="font-bold text-center">ASISTENCIA</th>
