@@ -134,7 +134,6 @@
                 <div class="w-1/2 text-right">
                     <div class="text-xs leading-tight">
                         <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
-                        <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
                     </div>
                     <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
@@ -335,14 +334,14 @@
                             style="transform: scale(1.5); position: relative; bottom: 10px;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
-                            <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
+                            <p class="text-xs text-gray-500 font-bold"></p>
                         </div>
                     @endif
                 </div>
                 <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
                 <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
                 <p class="text-xs text-gray-600 uppercase tracking-wide">
-                    {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
+                    {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? '') }}
                 </p>
                 <p class="text-xs text-gray-500">
                     {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:

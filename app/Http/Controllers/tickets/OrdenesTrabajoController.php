@@ -169,9 +169,9 @@ class OrdenesTrabajoController extends Controller
         try {
             Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
             // Manejar los checkboxes para que siempre estén presentes
-        $request->merge([
-            'evaluaciontienda' => $request->has('evaluaciontienda') ? 1 : 0,
-        ]);
+            $request->merge([
+                'evaluaciontienda' => $request->has('evaluaciontienda') ? 1 : 0,
+            ]);
 
             // Validación de los datos
             $validatedData = $request->validate([
@@ -2453,21 +2453,19 @@ class OrdenesTrabajoController extends Controller
                 Log::error('Error al actualizar ticketflujo en tickets.');
                 return response()->json(['error' => 'Error al actualizar el ticketflujo.'], 500);
             }
-
-          
         }
 
-          // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
-            $actualizarVisita = DB::table('visitas')
-                ->where('idVisitas', $request->idVisitas)
-                ->update(['estadovisita' => 1]);  // Esto actualiza la variable estadovisita a 1
+        // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
+        $actualizarVisita = DB::table('visitas')
+            ->where('idVisitas', $request->idVisitas)
+            ->update(['estadovisita' => 1]);  // Esto actualiza la variable estadovisita a 1
 
-            // Verificamos si la actualización de visita fue exitosa
-            if (!$actualizarVisita) {
-                return response()->json(['error' => 'Error al actualizar estadovisita.'], 500);
-            } else {
-                Log::info('estado visita actualizado correctamente a 1 para idVisitas: ' . $request->idVisitas);
-            }
+        // Verificamos si la actualización de visita fue exitosa
+        if (!$actualizarVisita) {
+            return response()->json(['error' => 'Error al actualizar estadovisita.'], 500);
+        } else {
+            Log::info('estado visita actualizado correctamente a 1 para idVisitas: ' . $request->idVisitas);
+        }
 
 
         if ($condicion) {
@@ -3324,9 +3322,15 @@ class OrdenesTrabajoController extends Controller
             ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A';
 
         $tipoUsuario = $visitaSeleccionada->tecnico->idTipoUsuario ?? null;
-        $vistaPdf = ($tipoUsuario == 4)
-            ? 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer'
-            : 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
+        $nombreVisita = Str::lower($visitaSeleccionada->nombre ?? '');
+
+        if (Str::contains($nombreVisita, 'laboratorio')) {
+            $vistaPdf = 'tickets.ordenes-trabajo.smart-tv.informe.pdf.laboratorio';
+        } elseif ($tipoUsuario == 4) {
+            $vistaPdf = 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer';
+        } else {
+            $vistaPdf = 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
+        }
 
         $html = view($vistaPdf, [
             'orden' => $orden,
