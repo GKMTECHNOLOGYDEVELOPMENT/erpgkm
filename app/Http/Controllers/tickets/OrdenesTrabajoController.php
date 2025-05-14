@@ -1902,6 +1902,31 @@ class OrdenesTrabajoController extends Controller
 
         Log::info('Modificación registrada en la tabla modificaciones');
 
+
+        // 🔥 Aquí agregamos la lógica para seleccionar la visita automáticamente
+    $vistaseleccionada = $request->nombre; // O cualquier otro texto que quieras mostrar
+
+    $seleccionarVisita = DB::table('seleccionarvisita')
+        ->where('idTickets', $visita->idTickets)
+        ->first();
+
+    if ($seleccionarVisita) {
+        DB::table('seleccionarvisita')
+            ->where('idTickets', $visita->idTickets)
+            ->update([
+                'idVisitas' => $visita->idVisitas,
+                'vistaseleccionada' => $vistaseleccionada,
+            ]);
+        Log::info('Registro en seleccionarvisita actualizado correctamente');
+    } else {
+        DB::table('seleccionarvisita')->insert([
+            'idTickets' => $visita->idTickets,
+            'idVisitas' => $visita->idVisitas,
+            'vistaseleccionada' => $vistaseleccionada,
+        ]);
+        Log::info('Registro en seleccionarvisita creado correctamente');
+    }
+    
         return response()->json(['success' => true, 'message' => 'Visita guardada exitosamente']);
     }
 

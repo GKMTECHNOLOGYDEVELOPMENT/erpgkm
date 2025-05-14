@@ -334,7 +334,7 @@ document.addEventListener('alpine:init', () => {
     </svg>
 </a>
 
-            </a>
+           
                 </div>`;
         },
 
