@@ -358,7 +358,7 @@
             </div>
             <div>
                 <label class="text-sm font-medium">Direción</label>
-                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->direccion }}"
+                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->direccion ?? '' }}"
                     readonly>
             </div>
 
@@ -444,7 +444,7 @@
             Última modificación:
         </span>
         <span id="ultimaModificacion"
-            class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600 
+            class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600
                rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
         </span>
     </div>
@@ -661,7 +661,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         console.log("DOM completamente cargado y analizado");
-        
+
         // Inicializar NiceSelect2
         document.querySelectorAll('.select2').forEach(function(select) {
             console.log("Inicializando NiceSelect para elemento:", select);
@@ -706,10 +706,10 @@
                     if (response.success) {
                         const ultimaModificacion = response.ultima_modificacion;
                         console.log("Última modificación encontrada:", ultimaModificacion);
-                        
+
                         const fechaUltimaModificacion = formatDate(new Date(ultimaModificacion.created_at));
                         console.log("Fecha formateada:", fechaUltimaModificacion);
-                        
+
                         const usuarioUltimaModificacion = ultimaModificacion.usuario;
                         const campoUltimaModificacion = ultimaModificacion.campo;
                         const oldValueUltimaModificacion = ultimaModificacion.valor_antiguo;
@@ -736,7 +736,7 @@
             console.log("Actualizando log de modificación:", {field, oldValue, newValue});
             const usuario = "{{ auth()->user()->Nombre }}";
             console.log("Usuario:", usuario);
-            
+
             const fecha = formatDate(new Date());
             const idTickets = "{{ $orden->idTickets }}";
             console.log("Fecha:", fecha, "idTickets:", idTickets);
@@ -746,7 +746,7 @@
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             console.log("CSRF Token:", csrfToken);
-            
+
             const data = {
                 field: field,
                 oldValue: oldValue,
@@ -913,7 +913,7 @@ function initializeFieldValues() {
      // Y modifica el manejador de eventos así:
 function handleFieldChange(e) {
     const field = e.target;
-    
+
     // Filtra solo los campos que nos interesan
     if (!field.matches('#tuFormulario input:not([type="hidden"]), #tuFormulario select, #tuFormulario textarea')) {
         return;
@@ -925,18 +925,18 @@ function handleFieldChange(e) {
     }
 
     console.log("Evento detectado en campo:", field.id || field.name, "Tipo:", e.type);
-    
+
     let oldVal = field.dataset.oldValue || '';
     let newVal;
-    
+
     if (field.tagName.toLowerCase() === "select") {
         newVal = field.options[field.selectedIndex].text;
     } else {
         newVal = field.value;
     }
-    
+
     console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
-    
+
     if (oldVal !== newVal) {
         let fieldLabel = "";
         if (field.id) {
@@ -949,7 +949,7 @@ function handleFieldChange(e) {
             fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
         }
         console.log("Etiqueta del campo:", fieldLabel);
-        
+
         updateModificationLog(fieldLabel, oldVal, newVal);
         field.dataset.oldValue = newVal;
         console.log("Valor antiguo actualizado a:", newVal);
@@ -958,7 +958,7 @@ function handleFieldChange(e) {
 
         // Inicialización
         initializeFieldValues();
-        
+
         // Escuchar eventos de cambio (versión mejorada)
         document.addEventListener('input', handleFieldChange, true);
         document.addEventListener('change', handleFieldChange, true);
