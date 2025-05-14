@@ -26,7 +26,7 @@
         }
 
         .indent-paragraph {
-            text-align: left !important;
+            text-align: justify !important;
             /* alineado a la izquierda */
             line-height: 2 !important;
             /* interlineado 2.0 */
