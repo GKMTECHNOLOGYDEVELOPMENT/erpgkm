@@ -513,7 +513,7 @@ Route::get('/ordenes/helpdesk/ejecucion/{idOt}/vista-previa/{idVisita}/{tipo?}',
 
 
 Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 'actualizarHelpdesk'])->name('formActualizarOrdenHelpdesk');
-
+Route::post('/guardar-visita-soporte', [OrdenesHelpdeskController::class, 'guardarVisitaSoporte']);
 Route::put('actualizar-orden-soporte/{id}', [OrdenesHelpdeskController::class, 'actualizarSoporte'])->name('formActualizarOrdenHelpdesk');
 Route::put('actualizar-orden-ejecucion/{id}', [OrdenesHelpdeskController::class, 'actualizarEjecucion'])->name('formActualizarOrdenHelpdesk');
 
