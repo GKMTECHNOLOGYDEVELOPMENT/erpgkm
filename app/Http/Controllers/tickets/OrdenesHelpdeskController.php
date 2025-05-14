@@ -2800,9 +2800,15 @@ class OrdenesHelpdeskController extends Controller
             ];
         });
 
-        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
-            : 'N/A';
+        $fechaCreacion = 'N/A';
+        if ($visitaSeleccionada) {
+            $fechaCreacion = $visitaSeleccionada->fecha_inicio
+                ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+                : ($visitaSeleccionada->fecha_programada
+                    ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada))
+                    : 'N/A');
+        }
+        
 
         $vistaPdf = 'tickets.ordenes-trabajo.helpdesk.levantamiento.informe.pdf.index';
 
@@ -2988,9 +2994,15 @@ class OrdenesHelpdeskController extends Controller
             ];
         });
 
-        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
-            : 'N/A';
+        $fechaCreacion = 'N/A';
+        if ($visitaSeleccionada) {
+            $fechaCreacion = $visitaSeleccionada->fecha_inicio
+                ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+                : ($visitaSeleccionada->fecha_programada
+                    ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada))
+                    : 'N/A');
+        }
+        
 
         $vistaPdf = 'tickets.ordenes-trabajo.helpdesk.levantamiento.informe.pdf.index';
 
@@ -3202,9 +3214,15 @@ class OrdenesHelpdeskController extends Controller
             ];
         });
 
-        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
-            : 'N/A';
+        $fechaCreacion = 'N/A';
+        if ($visitaSeleccionada) {
+            $fechaCreacion = $visitaSeleccionada->fecha_inicio
+                ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+                : ($visitaSeleccionada->fecha_programada
+                    ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada))
+                    : 'N/A');
+        }
+        
 
         $html = view('tickets.ordenes-trabajo.helpdesk.laboratorio.informe.pdf.index', [
             'orden' => $orden,
@@ -3412,9 +3430,15 @@ class OrdenesHelpdeskController extends Controller
             ];
         });
 
-        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
-            : 'N/A';
+        $fechaCreacion = 'N/A';
+        if ($visitaSeleccionada) {
+            $fechaCreacion = $visitaSeleccionada->fecha_inicio
+                ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+                : ($visitaSeleccionada->fecha_programada
+                    ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada))
+                    : 'N/A');
+        }
+        
 
         $html = view('tickets.ordenes-trabajo.helpdesk.laboratorio.informe.pdf.index', [
             'orden' => $orden,
@@ -3629,9 +3653,14 @@ class OrdenesHelpdeskController extends Controller
             ];
         });
 
-        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
-            : 'N/A';
+        $fechaCreacion = 'N/A';
+        if ($visitaSeleccionada) {
+            $fechaCreacion = $visitaSeleccionada->fecha_inicio
+                ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+                : ($visitaSeleccionada->fecha_programada
+                    ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada))
+                    : 'N/A');
+        }
 
         $html = view('tickets.ordenes-trabajo.helpdesk.soporte.informe.pdf.index', [
             'orden' => $orden,
@@ -3847,9 +3876,15 @@ class OrdenesHelpdeskController extends Controller
             ];
         });
 
-        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
-            : 'N/A';
+        $fechaCreacion = 'N/A';
+        if ($visitaSeleccionada) {
+            $fechaCreacion = $visitaSeleccionada->fecha_inicio
+                ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+                : ($visitaSeleccionada->fecha_programada
+                    ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada))
+                    : 'N/A');
+        }
+        
 
         $html = view('tickets.ordenes-trabajo.helpdesk.soporte.informe.pdf.index', [
             'orden' => $orden,
@@ -4053,9 +4088,15 @@ class OrdenesHelpdeskController extends Controller
             ];
         });
 
-        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
-            : 'N/A';
+        $fechaCreacion = 'N/A';
+        if ($visitaSeleccionada) {
+            $fechaCreacion = $visitaSeleccionada->fecha_inicio
+                ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+                : ($visitaSeleccionada->fecha_programada
+                    ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada))
+                    : 'N/A');
+        }
+        
 
         $html = view('tickets.ordenes-trabajo.helpdesk.soporte.informe.pdf.index', [
             'orden' => $orden,
