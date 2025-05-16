@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
     
                 // Lógica de visualización de tiendas
-                if (tipoDocumentoCliente == 8 || esTiendaCliente == 0) {
+                if (tipoDocumentoCliente == 8 || esTiendaCliente == "NO") {
                     // Tipo de documento 8 o tienda es 0, mostrar todas las tiendas
                     console.log("🌍 Cargando todas las tiendas...");
                     mostrarSelectTiendas(clienteId, true);

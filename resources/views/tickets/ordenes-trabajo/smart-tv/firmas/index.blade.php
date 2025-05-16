@@ -205,8 +205,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // console.log(data.message); // Mostrar el mensaje de éxito
+                    
+ // 🔁 Recargar la página después de mostrar el mensaje
+            setTimeout(() => {
+                location.reload();
+            }, 1500);                    // console.log(data.message); // Mostrar el mensaje de éxito
                     toastr.success('Solicitud de entrega guardada correctamente.');
+
                     // Si necesitas hacer algo más (como recargar la página o actualizar la vista), puedes hacerlo aquí
                 } else {
                     toastr.error(data.message || 'Error al guardar la solicitud de entrega.');
