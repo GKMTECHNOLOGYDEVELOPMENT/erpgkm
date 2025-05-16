@@ -2401,7 +2401,7 @@ class OrdenesTrabajoController extends Controller
 
 
 
-    public function guardar(Request $request)
+     public function guardar(Request $request)
     {
         // Validar los datos
         $validator = Validator::make($request->all(), [
@@ -2498,18 +2498,18 @@ class OrdenesTrabajoController extends Controller
                 Log::error('Error al actualizar ticketflujo en tickets.');
                 return response()->json(['error' => 'Error al actualizar el ticketflujo.'], 500);
             }
-        }
 
-        // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
-        $actualizarVisita = DB::table('visitas')
-            ->where('idVisitas', $request->idVisitas)
-            ->update(['estadovisita' => 1]);  // Esto actualiza la variable estadovisita a 1
+            // Ahora actualizamos el campo estadovisita a 1 en la tabla visitas
+            $actualizarVisita = DB::table('visitas')
+                ->where('idVisitas', $request->idVisitas)
+                ->update(['estadovisita' => 1]);  // Esto actualiza la variable estadovisita a 1
 
-        // Verificamos si la actualización de visita fue exitosa
-        if (!$actualizarVisita) {
-            return response()->json(['error' => 'Error al actualizar estadovisita.'], 500);
-        } else {
-            Log::info('estado visita actualizado correctamente a 1 para idVisitas: ' . $request->idVisitas);
+            // Verificamos si la actualización de visita fue exitosa
+            if (!$actualizarVisita) {
+                return response()->json(['error' => 'Error al actualizar estadovisita.'], 500);
+            } else {
+                Log::info('estado visita actualizado correctamente a 1 para idVisitas: ' . $request->idVisitas);
+            }
         }
 
 
@@ -2519,6 +2519,7 @@ class OrdenesTrabajoController extends Controller
             return response()->json(['error' => 'Error al guardar las condiciones.'], 500);
         }
     }
+
 
 
 
