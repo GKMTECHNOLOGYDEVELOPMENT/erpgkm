@@ -8,8 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: "Times New Roman", Times, serif !important;
+            font-family: Arial, sans-serif !important;
             font-size: 10px;
+
         }
 
         .red-bg {
