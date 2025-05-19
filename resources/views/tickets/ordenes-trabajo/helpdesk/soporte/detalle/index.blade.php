@@ -322,10 +322,10 @@
                 <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
                     <option value="">Seleccionar Cliente</option>
                     @foreach ($clientes as $cliente)
-                        <option value="{{ $cliente->idCliente }}"
-                            {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
-                            {{ $cliente->nombre }} - {{ $cliente->documento }}
-                        </option>
+                    <option value="{{ $cliente->idCliente }}"
+                        {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
+                        {{ $cliente->nombre }} - {{ $cliente->documento }}
+                    </option>
                     @endforeach
                 </select>
             </div>
@@ -336,9 +336,9 @@
                 <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
                     <option value="" selected>Seleccionar Cliente General</option>
                     @if ($orden->clienteGeneral)
-                        <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
-                            {{ $orden->clienteGeneral->descripcion }}
-                        </option>
+                    <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+                        {{ $orden->clienteGeneral->descripcion }}
+                    </option>
                     @endif
                 </select>
             </div>
@@ -349,10 +349,10 @@
                 <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
                     <option value="" disabled>Seleccionar Tienda</option>
                     @foreach ($tiendas as $tienda)
-                        <option value="{{ $tienda->idTienda }}"
-                            {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
-                            {{ $tienda->nombre }}
-                        </option>
+                    <option value="{{ $tienda->idTienda }}"
+                        {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
+                        {{ $tienda->nombre }}
+                    </option>
                     @endforeach
                 </select>
             </div>
@@ -364,18 +364,18 @@
 
             <!-- Ejecutar -->
             @if ($existeFlujo25)
-                <div>
-                    <label class="text-sm font-medium">Ejecutor</label>
-                    <select id="ejecutor" name="ejecutor" class="select2 w-full" style="display: none;">
-                        <option value="" disabled>Seleccionar Ejecutador</option>
-                        @foreach ($usuarios as $usuario)
-                            <option value="{{ $usuario->idUsuario }}"
-                                {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
-                                {{ $usuario->Nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+            <div>
+                <label class="text-sm font-medium">Ejecutor</label>
+                <select id="ejecutor" name="ejecutor" class="select2 w-full" style="display: none;">
+                    <option value="" disabled>Seleccionar Ejecutador</option>
+                    @foreach ($usuarios as $usuario)
+                    <option value="{{ $usuario->idUsuario }}"
+                        {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
+                        {{ $usuario->Nombre }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
             @endif
 
 
@@ -389,10 +389,10 @@
                     style="display: none" disabled>
                     <option value="" disabled>Seleccionar Tipo de Servicio</option>
                     @foreach ($tiposServicio as $tipo)
-                        <option value="{{ $tipo->idTipoServicio }}"
-                            {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
-                            {{ $tipo->nombre }}
-                        </option>
+                    <option value="{{ $tipo->idTipoServicio }}"
+                        {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
+                        {{ $tipo->nombre }}
+                    </option>
                     @endforeach
                 </select>
                 <!-- Input oculto para mantener el valor al enviar el formulario -->
@@ -427,11 +427,11 @@
     <div class="mt-3 overflow-x-auto">
         <div id="draggableContainer" class="flex space-x-2 w-max">
             @foreach ($estadosFlujo as $estado)
-                <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
-                    style="background-color: {{ $estado->color }}; color: black;"
-                    data-state-description="{{ $estado->descripcion }}">
-                    {{ $estado->descripcion }}
-                </div>
+            <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
+                style="background-color: {{ $estado->color }}; color: black;"
+                data-state-description="{{ $estado->descripcion }}">
+                {{ $estado->descripcion }}
+            </div>
             @endforeach
         </div>
     </div>
@@ -733,7 +733,11 @@
 
         // Función para actualizar el log de modificación cuando se haga un cambio
         function updateModificationLog(field, oldValue, newValue) {
-            console.log("Actualizando log de modificación:", {field, oldValue, newValue});
+            console.log("Actualizando log de modificación:", {
+                field,
+                oldValue,
+                newValue
+            });
             const usuario = "{{ auth()->user()->Nombre }}";
             console.log("Usuario:", usuario);
 
@@ -796,7 +800,11 @@
                     const usuario = "{{ auth()->user()->id }}";
                     const fecha = formatDate(new Date());
                     const ticketId = "{{ $ticket->idTickets }}";
-                    console.log("Datos para actualización:", {usuario, fecha, ticketId});
+                    console.log("Datos para actualización:", {
+                        usuario,
+                        fecha,
+                        ticketId
+                    });
 
                     let rowClasses = "";
                     if (estadoId === 1) {
@@ -884,77 +892,77 @@
             console.warn("Elemento dropZone no encontrado en el DOM");
         }
 
-// Por esta versión mejorada:
-function initializeFieldValues() {
-    // Selecciona solo los campos dentro del formulario principal
-    const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
-    if (!form) {
-        console.error("Formulario no encontrado");
-        return;
-    }
+        // Por esta versión mejorada:
+        function initializeFieldValues() {
+            // Selecciona solo los campos dentro del formulario principal
+            const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
+            if (!form) {
+                console.error("Formulario no encontrado");
+                return;
+            }
 
-    form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
-        // Ignora campos sin nombre o ID (como los de Alpine.js)
-        if (!field.name && !field.id) {
-            console.log("Ignorando campo sin nombre/ID:", field);
-            return;
+            form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
+                // Ignora campos sin nombre o ID (como los de Alpine.js)
+                if (!field.name && !field.id) {
+                    console.log("Ignorando campo sin nombre/ID:", field);
+                    return;
+                }
+
+                console.log("Inicializando campo:", field.id || field.name);
+                if (field.tagName.toLowerCase() === "select") {
+                    field.dataset.oldValue = field.options[field.selectedIndex].text;
+                } else {
+                    field.dataset.oldValue = field.value;
+                }
+                console.log("Valor inicial guardado:", field.dataset.oldValue);
+            });
         }
 
-        console.log("Inicializando campo:", field.id || field.name);
-        if (field.tagName.toLowerCase() === "select") {
-            field.dataset.oldValue = field.options[field.selectedIndex].text;
-        } else {
-            field.dataset.oldValue = field.value;
-        }
-        console.log("Valor inicial guardado:", field.dataset.oldValue);
-    });
-}
+        // Y modifica el manejador de eventos así:
+        function handleFieldChange(e) {
+            const field = e.target;
 
-     // Y modifica el manejador de eventos así:
-function handleFieldChange(e) {
-    const field = e.target;
+            // Filtra solo los campos que nos interesan
+            if (!field.matches('#tuFormulario input:not([type="hidden"]), #tuFormulario select, #tuFormulario textarea')) {
+                return;
+            }
 
-    // Filtra solo los campos que nos interesan
-    if (!field.matches('#tuFormulario input:not([type="hidden"]), #tuFormulario select, #tuFormulario textarea')) {
-        return;
-    }
+            // Ignora campos sin nombre o ID
+            if (!field.name && !field.id) {
+                return;
+            }
 
-    // Ignora campos sin nombre o ID
-    if (!field.name && !field.id) {
-        return;
-    }
+            console.log("Evento detectado en campo:", field.id || field.name, "Tipo:", e.type);
 
-    console.log("Evento detectado en campo:", field.id || field.name, "Tipo:", e.type);
+            let oldVal = field.dataset.oldValue || '';
+            let newVal;
 
-    let oldVal = field.dataset.oldValue || '';
-    let newVal;
+            if (field.tagName.toLowerCase() === "select") {
+                newVal = field.options[field.selectedIndex].text;
+            } else {
+                newVal = field.value;
+            }
 
-    if (field.tagName.toLowerCase() === "select") {
-        newVal = field.options[field.selectedIndex].text;
-    } else {
-        newVal = field.value;
-    }
+            console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
 
-    console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
+            if (oldVal !== newVal) {
+                let fieldLabel = "";
+                if (field.id) {
+                    const label = document.querySelector('label[for="' + field.id + '"]');
+                    if (label) {
+                        fieldLabel = label.textContent.trim();
+                    }
+                }
+                if (!fieldLabel) {
+                    fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
+                }
+                console.log("Etiqueta del campo:", fieldLabel);
 
-    if (oldVal !== newVal) {
-        let fieldLabel = "";
-        if (field.id) {
-            const label = document.querySelector('label[for="' + field.id + '"]');
-            if (label) {
-                fieldLabel = label.textContent.trim();
+                updateModificationLog(fieldLabel, oldVal, newVal);
+                field.dataset.oldValue = newVal;
+                console.log("Valor antiguo actualizado a:", newVal);
             }
         }
-        if (!fieldLabel) {
-            fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
-        }
-        console.log("Etiqueta del campo:", fieldLabel);
-
-        updateModificationLog(fieldLabel, oldVal, newVal);
-        field.dataset.oldValue = newVal;
-        console.log("Valor antiguo actualizado a:", newVal);
-    }
-}
 
         // Inicialización
         initializeFieldValues();
@@ -1069,7 +1077,7 @@ function handleFieldChange(e) {
 </script>
 <script>
     $(document).ready(function() {
-        var idOrden = @json($orden->idTickets);
+        var idOrden = @json($orden -> idTickets);
 
         $('#guardarFallaReportada').on('click', function(e) {
             e.preventDefault(); // Prevenir que se recargue la página
@@ -1136,4 +1144,3 @@ function handleFieldChange(e) {
         });
     });
 </script>
-

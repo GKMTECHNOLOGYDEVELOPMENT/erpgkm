@@ -38,7 +38,7 @@ document.addEventListener('alpine:init', () => {
                 },
                 columns: [
                     {
-                        title: 'OBSERVACION',
+                        title: 'DETALLE',
                         data: null, // Usamos toda la fila
                         className: 'text-center align-middle',
                         render: function (data, type, row) {
@@ -51,9 +51,9 @@ document.addEventListener('alpine:init', () => {
 
                             if (tieneDelDia) {
                                 html += `<button class="btn btn-sm btn-info ver-observacion" title="Ver observación del día"
-                                    data-observaciones='${encodeURIComponent(JSON.stringify(row.observaciones ?? []))}'>
-                                    📩
-                                </button>`;
+                                            data-observacion="${encodeURIComponent(JSON.stringify(row.observacion))}">
+                                            📩
+                                        </button>`;
                             }
 
                             if (tieneHistorial) {
@@ -220,25 +220,21 @@ document.addEventListener('alpine:init', () => {
             });
             $('#tablaAsistencias tbody').off('click', '.ver-observacion').on('click', '.ver-observacion', function () {
                 try {
-                    const raw = $(this).data('observaciones');
-                    const observaciones = typeof raw === 'string' ? JSON.parse(decodeURIComponent(raw)) : raw;
+                    const json = $(this).data('observacion');
+                    const observacion = typeof json === 'string'
+                        ? JSON.parse(decodeURIComponent(json))
+                        : json;
 
-                    if (Array.isArray(observaciones) && observaciones.length > 0) {
-                        window.abrirObservaciones(observaciones, 0);
-                    } else {
-                        console.warn('No hay observaciones para mostrar');
-                    }
+
+                    window.verObservacion(observacion);
                 } catch (e) {
-                    console.error('Error al parsear observaciones', e);
+                    console.error('Error al parsear observación', e);
                 }
             });
-
 
         }
     }));
     let observacionActual = null;
-    let observacionesLista = [];
-    let indiceActualObs = 0;
 
     function nombreTipoAsunto(id) {
         switch (id) {
@@ -249,28 +245,25 @@ document.addEventListener('alpine:init', () => {
         }
     }
 
-    window.abrirObservaciones = function (observaciones, indexInicial = 0) {
-        observacionesLista = observaciones;
-        indiceActualObs = indexInicial;
-        verObservacion(observacionesLista[indiceActualObs], indiceActualObs, observacionesLista.length);
-    };
-
-    window.verObservacion = function (observacion, index = 0, total = 1) {
+    window.verObservacion = function (observacion) {
         observacionActual = observacion;
-
         const respuestaTextarea = document.getElementById('respuestaTexto');
-        const btnAprobar = document.querySelector('#observacionAcciones .btn-primary');
-        const btnDenegar = document.querySelector('#observacionAcciones .btn-outline-danger');
-
+        const btnAprobar = document.querySelector('#observacionAcciones button.btn-primary');
+        const btnDenegar = document.querySelector('#observacionAcciones button.btn-outline-danger');
+    
         const tipoTexto = nombreTipoAsunto(observacion?.idTipoAsunto);
-        document.querySelector('#modalObservacion h5').textContent = `${tipoTexto} (${index + 1} de ${total})`;
-        document.getElementById('paginadorObs').textContent = `Observación ${index + 1} de ${total}`;
-
+        const total = (observacion.total ?? 1);
+        const index = (observacion.index ?? 1);
+    
+        document.querySelector('#modalObservacion h5').textContent = `${tipoTexto} (${index} de ${total})`;
         document.getElementById('observacionFechaHora').textContent = observacion?.fechaHora ?? 'Fecha no registrada';
         document.getElementById('observacionUbicacion').textContent = observacion?.ubicacion ?? 'Ubicación no registrada';
         document.getElementById('observacionMensaje').textContent = observacion?.mensaje || 'Sin mensaje';
+    
+        // Asignar respuesta
         respuestaTextarea.value = observacion?.respuesta || '';
-
+    
+        // Habilitar/deshabilitar según estado
         if (observacion?.estado === 1 || observacion?.estado === 2) {
             respuestaTextarea.setAttribute('readonly', true);
             btnAprobar.disabled = true;
@@ -280,10 +273,11 @@ document.addEventListener('alpine:init', () => {
             btnAprobar.disabled = false;
             btnDenegar.disabled = false;
         }
-
+    
+        // Cargar imágenes
         const contenedor = document.getElementById('observacionImagenes');
         contenedor.innerHTML = 'Cargando...';
-
+    
         fetch(`/asistencias/observacion/${observacion.idObservaciones}`)
             .then(res => res.json())
             .then(data => {
@@ -295,7 +289,7 @@ document.addEventListener('alpine:init', () => {
                         img.className = 'w-24 h-24 object-contain rounded border cursor-zoom-in';
                         contenedor.appendChild(img);
                     });
-
+    
                     if (window.viewerInstance) window.viewerInstance.destroy();
                     window.viewerInstance = new Viewer(contenedor, {
                         toolbar: true,
@@ -306,26 +300,14 @@ document.addEventListener('alpine:init', () => {
                     contenedor.innerHTML = 'Sin imágenes';
                 }
             });
-
-        // Mostrar modal y botones de navegación
+    
         document.getElementById('modalObservacion').classList.remove('hidden');
-        document.getElementById('btnAnteriorObs').disabled = (indiceActualObs === 0);
-        document.getElementById('btnSiguienteObs').disabled = (indiceActualObs === observacionesLista.length - 1);
     };
-
-    window.navegarObservacion = function (direccion) {
-        const nuevoIndice = indiceActualObs + direccion;
-        if (nuevoIndice >= 0 && nuevoIndice < observacionesLista.length) {
-            indiceActualObs = nuevoIndice;
-            verObservacion(observacionesLista[indiceActualObs], indiceActualObs, observacionesLista.length);
-        }
-    };
+    
 
     window.aprobarObservacion = function () {
         const id = observacionActual?.idObservaciones;
         const respuesta = document.getElementById('respuestaTexto').value.trim();
-        const estado = 1;
-        const esUltima = indiceActualObs === observacionesLista.length - 1;
 
         if (!id) return console.error('ID no definido');
 
@@ -335,7 +317,7 @@ document.addEventListener('alpine:init', () => {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ id, estado, respuesta })
+            body: JSON.stringify({ id, estado: 1, respuesta }) // puede ser ''
         })
             .then(res => res.json())
             .then(() => {
@@ -345,28 +327,20 @@ document.addEventListener('alpine:init', () => {
                     style: { background: "#22c55e" }
                 }).showToast();
 
-                if (esUltima) {
-                    location.reload(); // 🔁 recarga toda la página si es la última
-                } else {
-                    observacionActual.estado = estado;
-                    observacionActual.respuesta = respuesta;
-                    observacionesLista[indiceActualObs] = observacionActual;
-
-                    document.querySelector('#respuestaTexto').setAttribute('readonly', true);
-                    document.querySelector('#observacionAcciones .btn-primary').disabled = true;
-                    document.querySelector('#observacionAcciones .btn-outline-danger').disabled = true;
-
-                    verObservacion(observacionActual, indiceActualObs, observacionesLista.length);
-                }
+                cerrarModalObservacion();
+            })
+            .catch(() => {
+                Toastify({
+                    text: "❌ Error al aprobar la observación.",
+                    duration: 2500,
+                    style: { background: "#ef4444" }
+                }).showToast();
             });
     };
-
 
     window.denegarObservacion = function () {
         const id = observacionActual?.idObservaciones;
         const respuesta = document.getElementById('respuestaTexto').value.trim();
-        const estado = 2;
-        const esUltima = indiceActualObs === observacionesLista.length - 1;
 
         if (!id) return console.error('ID no definido');
 
@@ -376,37 +350,31 @@ document.addEventListener('alpine:init', () => {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ id, estado, respuesta })
+            body: JSON.stringify({ id, estado: 2, respuesta })
         })
             .then(res => res.json())
             .then(() => {
                 Toastify({
                     text: "❌ Observación denegada.",
                     duration: 2500,
-                    style: { background: "#ef4444" }
+                    style: { background: "#f87171" }
                 }).showToast();
 
-                if (esUltima) {
-                    location.reload(); // 🔁 recarga total
-                } else {
-                    observacionActual.estado = estado;
-                    observacionActual.respuesta = respuesta;
-                    observacionesLista[indiceActualObs] = observacionActual;
-
-                    document.querySelector('#respuestaTexto').setAttribute('readonly', true);
-                    document.querySelector('#observacionAcciones .btn-primary').disabled = true;
-                    document.querySelector('#observacionAcciones .btn-outline-danger').disabled = true;
-
-                    verObservacion(observacionActual, indiceActualObs, observacionesLista.length);
-                }
+                cerrarModalObservacion();
+            })
+            .catch(() => {
+                Toastify({
+                    text: "❌ Error al denegar la observación.",
+                    duration: 2500,
+                    style: { background: "#dc2626" }
+                }).showToast();
             });
     };
 
+
+
     window.cerrarModalObservacion = function () {
         document.getElementById('modalObservacion').classList.add('hidden');
-
-        // Emitir evento personalizado para recargar tabla
-        window.dispatchEvent(new CustomEvent('recargar-asistencias'));
     };
 
 

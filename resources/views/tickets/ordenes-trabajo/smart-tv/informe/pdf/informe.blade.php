@@ -8,9 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif !important;
+            font-family: "Times New Roman", Times, serif !important;
             font-size: 10px;
-
         }
 
         .red-bg {
@@ -27,7 +26,7 @@
         }
 
         .indent-paragraph {
-            text-align: justify !important;
+            text-align: left !important;
             /* alineado a la izquierda */
             line-height: 2 !important;
             /* interlineado 2.0 */
@@ -156,14 +155,10 @@
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
                     <div class="flex justify-between flex-wrap gap-4">
-                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> <span
-                                class="uppercase">{{ $producto['categoria'] }}</span></p>
-                        <p><span class="font-bold">MARCA:</span> <span class="uppercase">{{ $producto['marca'] }}</span>
-                        </p>
-                        <p><span class="font-bold">MODELO:</span> <span
-                                class="uppercase">{{ $producto['modelo'] }}</span></p>
-                        <p><span class="font-bold">SERIE:</span> <span
-                                class="uppercase">{{ $producto['serie'] }}</span></p>
+                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> <span class="uppercase">{{ $producto['categoria'] }}</span></p>
+                        <p><span class="font-bold">MARCA:</span> <span class="uppercase">{{ $producto['marca'] }}</span></p>
+                        <p><span class="font-bold">MODELO:</span> <span class="uppercase">{{ $producto['modelo'] }}</span></p>
+                        <p><span class="font-bold">SERIE:</span> <span class="uppercase">{{ $producto['serie'] }}</span></p>                        
                     </div>
                 </div>
             @endif
@@ -336,7 +331,7 @@
                             style="transform: scale(1.5); position: relative; bottom: 10px;">
                     @else
                         <div class="h-full flex items-center justify-center w-full">
-                            <p class="text-xs text-gray-500 font-bold">Cliente no firmó</p>
+                            <p class="text-xs text-gray-500 font-bold"></p>
                         </div>
                     @endif
                 </div>

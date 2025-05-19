@@ -101,8 +101,7 @@ class Ticket extends Model
         'fechaCompra',
         'lat',
         'lng',
-        'nrmcotizacion',
-        'evaluaciontienda'
+        'nrmcotizacion'
     ];
 
     public function tipoticket()

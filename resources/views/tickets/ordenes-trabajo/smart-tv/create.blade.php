@@ -221,50 +221,30 @@
                         placeholder="Describa la falla reportada"></textarea>
                 </div>
 
-<div class="flex gap-12">
-    <div class="flex-1 mb-6">
-        <label for="esRecojo" class="block text-sm font-medium mb-2">Es recojo</label>
-        <div>
-            <label class="w-12 h-6 relative mt-3">
-                <input type="checkbox" id="esRecojo" name="esRecojo"
-                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                <span
-                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-            </label>
-        </div>
-    </div>
 
-<!-- Checkbox Evaluación a Tienda -->
-<div id="evaluacionTiendaContainer" class="flex-1 mb-6 hidden">
-    <label for="evaluaciontienda" class="block text-sm font-medium mb-2">Evaluación a Tienda</label>
-    <div>
-        <label class="w-12 h-6 relative mt-3">
-            <input type="checkbox" id="evaluaciontienda" name="evaluaciontienda"
-                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-            <span
-                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-        </label>
-    </div>
-</div>
+                <div>
+                    <label for="esRecojo" class="block text-sm font-medium mb-2">Es recojo</label>
+                    <div>
+                        <label class="w-12 h-6 relative mt-3">
+                            <input type="checkbox" id="esRecojo" name="esRecojo"
+                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                            <span
+                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                        </label>
+                    </div>
+                </div>
 
-
-    <div class="flex-1 mb-6">
-        <label for="entregaLab" class="block text-sm font-medium mb-2">Entrega a Lab.</label>
-        <div>
-            <label class="w-12 h-6 relative mt-3">
-                <input type="checkbox" id="entregaLab" name="entregaLab"
-                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                <span
-                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-            </label>
-        </div>
-    </div>
-</div>
-
-
-
-
-
+                <div>
+                    <label for="entregaLab" class="block text-sm font-medium mb-2">Entrega a Lab.</label>
+                    <div>
+                        <label class="w-12 h-6 relative mt-3">
+                            <input type="checkbox" id="entregaLab" name="entregaLab"
+                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                            <span
+                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                        </label>
+                    </div>
+                </div>
                 <!-- Falla Reportada -->
                 <div class="col-span-2">
                     <label for="linkubicacion" class="block text-sm font-medium">Link de Ubicacion</label>
@@ -1281,50 +1261,6 @@
             });
         });
     </script>
-
-
-
- <script>
-    const checkboxes = document.querySelectorAll('#esRecojo, #evaluaciontienda, #entregaLab');
-    const evaluacionTiendaDiv = document.getElementById('evaluacionTiendaContainer');
-    const evaluacionTiendaCheckbox = document.getElementById('evaluaciontienda');
-    const clienteSelect = document.getElementById('idCliente');
-
-    // Lógica: solo permitir un checkbox activo a la vez
-    checkboxes.forEach((checkbox) => {
-        checkbox.addEventListener('change', () => {
-            if (checkbox.checked) {
-                console.log(`✅ Activado: ${checkbox.id}`);
-                checkboxes.forEach((cb) => {
-                    if (cb !== checkbox) {
-                        cb.checked = false;
-                        console.log(`⛔ Desactivado: ${cb.id}`);
-                    }
-                });
-            } else {
-                console.log(`❌ Desmarcado: ${checkbox.id}`);
-            }
-        });
-    });
-
-    // Lógica: mostrar u ocultar "evaluacionTienda" según si cliente es tienda
-    clienteSelect.addEventListener('change', function () {
-        const selectedOption = this.options[this.selectedIndex];
-        const esTienda = selectedOption.dataset.tienda;
-        console.log(`👤 Cliente seleccionado: ${selectedOption.textContent.trim()} | esTienda: ${esTienda}`);
-
-        if (esTienda === '1' || esTienda === 1) {
-            evaluacionTiendaDiv.classList.remove('hidden');
-            console.log('🟢 Mostrando checkbox de Evaluación a Tienda');
-        } else {
-            evaluacionTiendaDiv.classList.add('hidden');
-            evaluacionTiendaCheckbox.checked = false;
-            console.log('🔴 Ocultando checkbox de Evaluación a Tienda y desmarcando');
-        }
-    });
-</script> 
-
-
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <script src="{{ asset('assets/js/tickets/smart/configuraciones.js') }}"></script>

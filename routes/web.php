@@ -323,52 +323,14 @@ Route::get('/tickets-por-serie/{serie}', [OrdenesTrabajoController::class, 'getT
 Route::post('/guardar-visita', [OrdenesTrabajoController::class, 'guardarVisita']);
 Route::get('/obtener-visitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 
+Route::post('/guardar-visita-soporte', [OrdenesHelpdeskController::class, 'guardarVisitaSoporte']);
+
+
 Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
-    if (!is_numeric($ticketId)) {
-        return response()->json(['error' => 'ID de ticket no válido'], 400);
-    }
-
-    // Obtener ticket completo
-    $ticket = DB::table('tickets')->where('idTickets', $ticketId)->first();
-
-    if (!$ticket) {
-        return response()->json(['error' => 'Ticket no encontrado'], 404);
-    }
-
-    // Obtener el flujo del ticket
-    $idEstadflujo = DB::table('ticketflujo')
-        ->where('idTicketFlujo', $ticket->idTicketFlujo)
-        ->value('idEstadflujo');
-
-    if ($idEstadflujo === null) {
-        return response()->json(['error' => 'Flujo del ticket no encontrado'], 404);
-    }
-
-    // Lógica del tipo de nombre
-    $nombre = 'Visita';
-
-    if ($idEstadflujo == 8) {
-        $nombre = 'Recojo';
-    } elseif ($idEstadflujo == 1) {
-        if ($ticket->evaluaciontienda == 1) {
-            $nombre = 'EvaluacionTienda';
-        } else {
-            $nombre = 'Visita';
-        }
-    }
-
-    // Si no es Recojo, contar visitas
-    $numeroVisitas = 0;
-    if ($nombre !== 'Recojo') {
-        $numeroVisitas = DB::table('visitas')->where('idTickets', $ticketId)->count();
-    }
-
-    return response()->json([
-        'numeroVisitas' => $numeroVisitas,
-        'idEstadflujo' => $idEstadflujo,
-        'tipoNombre' => $nombre // lo devolvemos para mayor claridad
-    ]);
+    $numeroVisitas = DB::table('visitas')->where('idTickets', $ticketId)->count();
+    return response()->json(['numeroVisitas' => $numeroVisitas]);
 });
+
 
 Route::get('/ticket/{id}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
 
@@ -520,7 +482,7 @@ Route::get('/ordenes/helpdesk/ejecucion/{idOt}/vista-previa/{idVisita}/{tipo?}',
 
 
 Route::put('actualizar-orden-helpdesk/{id}', [OrdenesHelpdeskController::class, 'actualizarHelpdesk'])->name('formActualizarOrdenHelpdesk');
-Route::post('/guardar-visita-soporte', [OrdenesHelpdeskController::class, 'guardarVisitaSoporte']);
+
 Route::put('actualizar-orden-soporte/{id}', [OrdenesHelpdeskController::class, 'actualizarSoporte'])->name('formActualizarOrdenHelpdesk');
 Route::put('actualizar-orden-ejecucion/{id}', [OrdenesHelpdeskController::class, 'actualizarEjecucion'])->name('formActualizarOrdenHelpdesk');
 

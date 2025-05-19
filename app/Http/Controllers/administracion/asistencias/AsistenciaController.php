@@ -103,38 +103,19 @@ class AsistenciaController extends Controller
                     'estado_entrada' => $estadoColor,
                     'tiene_historial' => $tieneHistorial,
                     'idUsuario' => $usuario->idUsuario,
-
-                    // observación principal
                     'observacion' => $obsFinal ? [
                         'idObservaciones' => $obsFinal->idObservaciones,
-                        'mensaje'         => $obsFinal->mensaje,
-                        'estado'          => $obsFinal->estado,
-                        'idTipoAsunto'    => $obsFinal->idTipoAsunto,
-                        'fechaHora'       => $obsFinal->fechaHora,
-                        'ubicacion'       => $obsFinal->ubicacion,
-                        'lat'             => $obsFinal->lat,
-                        'lng'             => $obsFinal->lng,
-                        'respuesta'       => $obsFinal->respuesta,
-                        'total'           => $obsTotal,
-                        'index'           => $obsIndex
-                    ] : null,
-
-                    // TODAS las observaciones del día para navegación
-                    'observaciones' => $obsDelDiaTodas->values()->map(function ($obs, $i) use ($obsDelDiaTodas) {
-                        return [
-                            'idObservaciones' => $obs->idObservaciones,
-                            'mensaje'         => $obs->mensaje,
-                            'estado'          => $obs->estado,
-                            'idTipoAsunto'    => $obs->idTipoAsunto,
-                            'fechaHora'       => $obs->fechaHora,
-                            'ubicacion'       => $obs->ubicacion,
-                            'lat'             => $obs->lat,
-                            'lng'             => $obs->lng,
-                            'respuesta'       => $obs->respuesta,
-                            'total'           => $obsDelDiaTodas->count(),
-                            'index'           => $i + 1
-                        ];
-                    })->toArray()
+                        'mensaje' => $obsFinal->mensaje,
+                        'estado' => $obsFinal->estado,
+                        'idTipoAsunto' => $obsFinal->idTipoAsunto,
+                        'fechaHora' => $obsFinal->fechaHora, // 👈 agregado
+                        'ubicacion' => $obsFinal->ubicacion, // 👈 agregado
+                        'lat' => $obsFinal->lat,             // 👈 agregado
+                        'lng' => $obsFinal->lng,             // 👈 agregado
+                        'respuesta' => $obsFinal->respuesta,
+                        'total' => $obsTotal,
+                        'index' => $obsIndex
+                    ] : null
                 ];
             }
         }
@@ -168,28 +149,28 @@ class AsistenciaController extends Controller
 
         $order = $request->input('order', []);
         $columns = $request->input('columns', []);
-
+        
         if (!empty($order)) {
             foreach ($order as $ord) {
                 $colIdx = $ord['column'];
                 $dir = $ord['dir'];
                 $colName = $columns[$colIdx]['data'] ?? null;
-
+        
                 $filtrados = $filtrados->sortBy(function ($item) use ($colName) {
                     // Orden especial para fecha
                     if ($colName === 'fecha') {
                         return strtotime($item['fecha'] ?? '0000-00-00');
                     }
-
+        
                     // Orden especial para asistencia
                     if ($colName === 'asistencia') {
                         return $item['asistencia'] === 'ASISTIÓ' ? 1 : 0;
                     }
-
+        
                     // Resto
                     return strtolower($item[$colName] ?? '');
                 }, SORT_REGULAR, $dir === 'desc');
-
+        
                 $filtrados = $filtrados->values(); // resetear índices después del sort
             }
         } else {
@@ -199,13 +180,14 @@ class AsistenciaController extends Controller
                 fn($a, $b) => strtotime($b['entrada'] ?? '') <=> strtotime($a['entrada'] ?? '')
             ])->values();
         }
-
+        
         return response()->json([
             'draw' => intval($draw),
             'recordsTotal' => count($datos),
             'recordsFiltered' => $filtrados->count(),
             'data' => $filtrados->slice($start)->take($length)->values()
         ]);
+        
     }
 
 
@@ -219,9 +201,8 @@ class AsistenciaController extends Controller
         $observacion = \App\Models\Observacion::findOrFail($request->id);
         $observacion->estado = $request->estado;
         $observacion->respuesta = $request->respuesta ?? null; // importante: también puede ser cadena vacía
-        $observacion->encargado = auth()->user()->idUsuario;
         $observacion->save();
-
+        
 
         return response()->json(['success' => true]);
     }
@@ -237,7 +218,7 @@ class AsistenciaController extends Controller
     {
         $usuario = \App\Models\Usuario::findOrFail($idUsuario);
 
-        $observaciones = \App\Models\Observacion::with(['anexos', 'encargadoUsuario'])
+        $observaciones = \App\Models\Observacion::with('anexos')
             ->where('idUsuario', $idUsuario)
             ->orderBy('fechaHora', 'desc')
             ->get();

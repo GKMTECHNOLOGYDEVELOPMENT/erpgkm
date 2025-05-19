@@ -1320,30 +1320,38 @@ obtenerSolicitudes() {
 
 
 
-   aceptarNotificacion(id) {
+            aceptarNotificacion(id) {
     console.log(`Enviando solicitud PUT para aceptar la notificación con ID: ${id}`);
 
+    // Obtener el CSRF token
     let csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     fetch(`/solicitudentrega/aceptar/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
+            'X-CSRF-TOKEN': csrfToken,  // Agregar el CSRF token aquí
         },
     })
-    .then(async response => {
-        const data = await response.json();
+    .then(response => {
+        console.log('Respuesta del servidor recibida:', response);
+
+        // Verificar si la respuesta no es exitosa
         if (!response.ok) {
-            throw new Error(data.message || 'Error al aceptar la solicitud');
+            console.log('La respuesta no fue exitosa, mensaje:', response.statusText);
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || 'Error al aceptar la solicitud');
+            });
         }
-        console.log('✅', data.message);  // mensaje de éxito
+        return response.json();
+    })
+    .then(data => {
+        console.log('Solicitud aceptada con éxito:', data);
     })
     .catch(error => {
-        console.error('❌', error.message); // mensaje de error desde el controlador
+        console.error('Error al aceptar la solicitud:', error);
     });
 },
-
 
 
 

@@ -92,7 +92,7 @@
             <table id="tablaAsistencias" class="table whitespace-nowrap">
                 <thead>
                     <tr>
-                        <th class="font-bold text-center">OBSERVACIÓN</th>
+                        <th class="font-bold text-center">DETALLE</th>
                         <th class="font-bold text-center w-[200px] break-words whitespace-normal col-ubicacion">EMPLEADO
                         </th>
                         <th class="font-bold text-center">ASISTENCIA</th>
@@ -178,13 +178,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center px-5 pb-4 mt-2 border-t pt-3">
-                        <button id="btnAnteriorObs" class="btn btn-outline-primary"
-                            onclick="navegarObservacion(-1)">← Anterior</button>
-                        <span id="paginadorObs" class="text-sm font-semibold text-gray-700 dark:text-white"></span>
-                        <button id="btnSiguienteObs" class="btn btn-outline-primary"
-                            onclick="navegarObservacion(1)">Siguiente →</button>
-                    </div>
+
                 </div>
             </div>
         </div>
