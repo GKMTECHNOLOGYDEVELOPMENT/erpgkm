@@ -79,21 +79,14 @@
 
 
         .footer {
-            position: absolute;
-            bottom: 40px;
-            /* Lo sube un poco */
-            left: 0;
-            width: 100%;
-            padding: 6px 10px !important;
-            /* Reducir espacio */
-            page-break-before: avoid;
-            page-break-after: avoid;
+            margin-top: 60px;
+            page-break-inside: avoid;
         }
     </style>
 </head>
 
 <body class="text-gray-900">
-    <div class="first-page-container">
+
         <div class="container mx-auto bg-white p-2">
             <!-- ENCABEZADO -->
 
@@ -407,7 +400,7 @@
         @endif
         @endforeach
         @endif
-    </div>
+
     @endif
 
 

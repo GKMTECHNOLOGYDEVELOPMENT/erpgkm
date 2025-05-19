@@ -8,9 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
+            font-family: Arial, sans-serif !important;
             font-size: 10px;
-            margin: 0;
-            padding: 0;
         }
 
         .red-bg {

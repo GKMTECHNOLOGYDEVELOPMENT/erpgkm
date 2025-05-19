@@ -326,28 +326,25 @@
             </div>
 
             <!-- Firma del Cliente -->
-            <div class="w-1/2 text-center">
-                <div class="inline-block mb-1 h-24 flex justify-center items-end">
-                    @if ($firmaCliente)
+            @if ($firmaCliente)
+                <div class="w-1/2 text-center">
+                    <div class="inline-block mb-1 h-24 flex justify-center items-end">
                         <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                             class="w-[90%] h-20 mx-auto object-contain"
                             style="transform: scale(1.5); position: relative; bottom: 10px;">
-                    @else
-                        <div class="h-full flex items-center justify-center w-full">
-                            <p class="text-xs text-gray-500 font-bold"></p>
-                        </div>
-                    @endif
+                    </div>
+                    <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
+                    <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
+                    <p class="text-xs text-gray-600 uppercase tracking-wide">
+                        {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? '') }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
+                        {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
+                    </p>
                 </div>
-                <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
-                <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                <p class="text-xs text-gray-600 uppercase tracking-wide">
-                    {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? '') }}
-                </p>
-                <p class="text-xs text-gray-500">
-                    {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
-                    {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
-                </p>
-            </div>
+            @endif
+
         </div>
         <br>
     </div>
