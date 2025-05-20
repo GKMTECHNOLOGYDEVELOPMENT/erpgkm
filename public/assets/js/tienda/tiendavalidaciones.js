@@ -206,19 +206,10 @@ $('#nombre').on('input', function () {
         let celular = $(this).val();
         console.log("Verificando Celular: " + celular); // Log para ver el valor del celular
 
-        // Verificar si el celular contiene solo números
-        if (/[^0-9]/.test(celular)) {
-            $('#celular').addClass('border-red-500');
-            $('#celular-error').text('El celular solo debe contener números').show();
-            formValid = false;
-            return;
-        } else {
-            $('#celular').removeClass('border-red-500');
-            $('#celular-error').hide();
-        }
+       
 
         // Verificar que el celular tenga más de 8 dígitos
-        if (celular.length < 9) {  // Esto asegura que el celular tenga al menos 9 dígitos
+        if (celular.length < 30) {  // Esto asegura que el celular tenga al menos 9 dígitos
             $('#celular').addClass('border-red-500');
             $('#celular-error').text('El celular debe tener al menos 9 dígitos').show();
             formValid = false;

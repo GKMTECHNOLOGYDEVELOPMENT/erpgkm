@@ -43,6 +43,16 @@ document.addEventListener('alpine:init', () => {
                                             <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
                                         </svg>
                                     </a>
+                            <a href="/producto/create-producto?modelo=${row.idModelo}" class="ltr:mr-2 rtl:ml-2" x-tooltip="Nuevo producto">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                            <path d="M12 8V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                            <path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        </svg>
+                                    </a>
+
+
                                     <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteModel(${row.idModelo})" x-tooltip="Eliminar">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                             <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />

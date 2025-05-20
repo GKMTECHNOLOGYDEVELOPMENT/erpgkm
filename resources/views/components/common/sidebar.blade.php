@@ -883,6 +883,50 @@
                     </ul>
                 </li> --}}
 
+                      <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'caracteristicas' }"
+                        @click="activeDropdown === 'caracteristicas' ? activeDropdown = null : activeDropdown = 'caracteristicas'">
+                        <div class="flex items-center">
+
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Engranaje -->
+    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M17.5 6.5L19.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M6.5 17.5L4.5 19.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M4.5 4.5L6.5 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M19.5 19.5L17.5 17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Lista -->
+    <path d="M9 12H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M9 16H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Caracteristicas</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'caracteristicas' }">
+
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'caracteristicas'" x-collapse class="sub-menu text-gray-500">
+                        
+                        <li>
+                            <a href="{{ route('modelos.index') }}">Modelos</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('marcas.index') }}">Marcas</a>
+                        </li>
+                        <li>
+                            <a href="{{ route('categorias.index') }}">Categoria</a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'productos' }"
@@ -917,19 +961,105 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('articulos.index') }}">Articulos</a>
+                            <a href="{{ route('articulos.index') }}">Productos</a>
                         </li>
+                 
+                    </ul>
+                </li>
+                <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'Repuesto' }"
+                        @click="activeDropdown === 'Repuesto' ? activeDropdown = null : activeDropdown = 'Repuesto'">
+                    <div class="flex items-center">
+    <svg class="group-hover:!text-primary shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Base de la herramienta/repuesto -->
+        <path d="M12 5L8 9H6C4.34315 9 3 10.3431 3 12V15C3 16.6569 4.34315 18 6 18H9C10.6569 18 12 16.6569 12 15V13L16 9H18C19.6569 9 21 7.65685 21 6V3" 
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Detalle tipo engranaje/ajuste -->
+        <path d="M16 9L19 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M8 9L5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Tornillo/unión -->
+        <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Repuestos</span>
+</div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'Repuesto' }">
+
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'Repuesto'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('modelos.index') }}">Modelos</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('marcas.index') }}">Marcas</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('categorias.index') }}">Categoria</a>
+                            <a href="{{ route('repuestos.index') }}">Repuestos</a>
                         </li>
                     </ul>
                 </li>
+                <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'suministros' }"
+                        @click="activeDropdown === 'suministros' ? activeDropdown = null : activeDropdown = 'suministros'">
+                        <div class="flex items-center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Caja con clip y regla -->
+    <path d="M4 20V8L12 4L20 8V20H4Z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M14 8L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Suministros</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'suministros' }">
+
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'suministros'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('suministros.index') }}">Suministros</a>
+                        </li>
+                    </ul>
+                </li>
+
+                        <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'heramientas' }"
+                        @click="activeDropdown === 'heramientas' ? activeDropdown = null : activeDropdown = 'heramientas'">
+                        <div class="flex items-center">
+
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 21H6C4.34315 21 3 19.6569 3 18V8C3 6.34315 4.34315 5 6 5H18C19.6569 5 21 6.34315 21 8V18C21 19.6569 19.6569 21 18 21Z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M15 9H9V12H15V9Z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M12 5V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Heramientas</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'heramientas' }">
+
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'heramientas'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('heramientas.index') }}">Heramientas</a>
+                        </li>
+                    </ul>
+                </li>
+
 
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
