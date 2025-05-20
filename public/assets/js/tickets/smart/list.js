@@ -131,7 +131,8 @@ document.addEventListener('alpine:init', () => {
             this.datatable1 = $('#myTable1').DataTable({
                 processing: false,
                 serverSide: true,
-                order: [[0, 'desc']], // 👈 ORDENAR POR ID
+                ordering: false,
+                order: [[3, 'desc']], // ✅ columna 3 = "F. TICKET" (fecha_creacion)
                 ajax: {
                     url: "/api/ordenes",
                     type: "GET",
@@ -205,7 +206,7 @@ document.addEventListener('alpine:init', () => {
                 language: {
                     search: 'Buscar...',
                     zeroRecords: 'No se encontraron registros',
-                    lengthMenu: 'Mostrar _MENU_ registros por página',
+                    lengthMenu: 'Mostrar _MENU_',
                     loadingRecords: 'Cargando...',
                     info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
                     paginate: {
@@ -214,7 +215,63 @@ document.addEventListener('alpine:init', () => {
                         next: 'Siguiente',
                         previous: 'Anterior'
                     }
+                    
                 },
+                dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
+                initComplete: function () {
+                    const wrapper = document.querySelector('.dataTables_wrapper');
+                    const scrollTopContainer = document.getElementById('scroll-top');
+                    const scrollTopInner = document.getElementById('scroll-top-inner');
+                
+                    // ✅ Asegura que sea el contenedor que tiene la tabla (no todo el wrapper)
+                    const tableScrollContainer = document.querySelector('.relative.overflow-x-auto.custom-scroll');
+                
+                    if (!tableScrollContainer || !scrollTopContainer || !scrollTopInner) return;
+                
+                    // Mostrar scroll superior
+                    scrollTopContainer.classList.remove('hidden');
+                
+                    // Sincronizar anchos una vez que el layout esté listo
+                    requestAnimationFrame(() => {
+                        scrollTopInner.style.width = tableScrollContainer.scrollWidth + 'px';
+                    });
+                
+                    // Scroll sincronizado
+                    scrollTopContainer.onscroll = () => {
+                        tableScrollContainer.scrollLeft = scrollTopContainer.scrollLeft;
+                    };
+                    tableScrollContainer.onscroll = () => {
+                        scrollTopContainer.scrollLeft = tableScrollContainer.scrollLeft;
+                    };
+                
+                    // Controles flotantes (info + paginación abajo)
+                    const panel = document.querySelector('.panel.mt-6');
+                    const floatingControls = document.createElement('div');
+                    floatingControls.className =
+                        'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
+                    Object.assign(floatingControls.style, {
+                        position: 'sticky',
+                        bottom: '0',
+                        left: '0',
+                        width: '100%',
+                        zIndex: '10'
+                    });
+                
+                    const info = wrapper.querySelector('.dataTables_info');
+                    const length = wrapper.querySelector('.dataTables_length');
+                    const paginate = wrapper.querySelector('.dataTables_paginate');
+                
+                    if (info && length && paginate && panel) {
+                        const existingControls = panel.querySelector('.floating-controls');
+                        if (existingControls) existingControls.remove();
+                
+                        floatingControls.appendChild(info);
+                        floatingControls.appendChild(length);
+                        floatingControls.appendChild(paginate);
+                        panel.appendChild(floatingControls);
+                    }
+                },
+                
                 rowCallback: (row, data) => {
                     const estadoColor = data.ticketflujo?.estadoflujo?.color || '';
                     const estadoId = data.ticketflujo?.estadoflujo?.idEstadflujo;
@@ -236,8 +293,6 @@ document.addEventListener('alpine:init', () => {
 
 
                 },
-
-
                 drawCallback: () => {
                     $('#myTable1 tbody tr.estado-bg').each(function () {
                         const bgColor = $(this).attr('data-bg');

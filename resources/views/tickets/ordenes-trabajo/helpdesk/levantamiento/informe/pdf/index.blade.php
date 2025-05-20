@@ -8,9 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
+            font-family: Arial, sans-serif !important;
             font-size: 10px;
-            margin: 0;
-            padding: 0;
         }
 
         .red-bg {
@@ -26,7 +25,14 @@
             border-radius: 4px !important;
         }
 
-
+        .indent-paragraph {
+            text-align: left !important;
+            /* alineado a la izquierda */
+            line-height: 2 !important;
+            /* interlineado 2.0 */
+            margin-bottom: 0 !important;
+            /* sin espacio entre párrafos */
+        }
 
         .table th,
         .table td {
@@ -150,7 +156,7 @@
                 <!-- Sección de Falla Reportada (Aparte de Datos del Producto) -->
                 <div class="red-bg mt-4 text-left">Falla Reportada</div>
                 <div class="w-full text-xs mt-3">
-                    <p style="text-transform: uppercase">{{ $producto['fallaReportada'] }}</p>
+                    <p class="uppercase indent-paragraph">{{ $producto['fallaReportada'] }}</p>
                 </div>
             @endif
 
@@ -158,7 +164,7 @@
                 <!-- Sección de Motivo de Condición (igual a Falla Reportada) -->
                 <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
                 <div class="w-full text-xs mt-3">
-                    <p>{{ $motivoCondicion }}</p>
+                    <p class="uppercase indent-paragraph">{{ $motivoCondicion }}</p>
                 </div>
             @endif
 
@@ -188,8 +194,10 @@
 
                         <!-- Justificación debajo del estado -->
                         <div class="w-full text-xs">
-                            <p class="text-xs text-gray-700">{{ strtoupper($transicion->justificacion) }}</p>
-                        </div>
+                            <div class="w-full text-xs">
+                                <p class="text-xs uppercase indent-paragraph">
+                                    {{ $transicion->justificacion }}</p>
+                            </div>
                     @endforeach
                 </div>
 
@@ -293,11 +301,8 @@
                         $hayFotosDeVisita = !empty($imagenesAnexos) && count($imagenesAnexos) > 0;
                     @endphp
                     @php
-                    $descripciones = [
-                        'IMAGEN LLEGADA A SERVICIO',
-                        'IMAGEN MOTIVO'
-                    ];
-                    $contador = 0;
+                        $descripciones = ['IMAGEN LLEGADA A SERVICIO', 'IMAGEN MOTIVO'];
+                        $contador = 0;
                     @endphp
                     <!-- Primero las imágenes de la visita (incluye condiciones también) -->
                     @if ($hayFotosDeVisita)

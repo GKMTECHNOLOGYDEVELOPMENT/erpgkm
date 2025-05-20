@@ -5,14 +5,12 @@ document.addEventListener('alpine:init', () => {
         init() {
             flatpickr("#startDate", {
                 dateFormat: "Y-m-d",
-                maxDate: "today",
                 defaultDate: new Date(),
                 onChange: () => this.reloadTable()
             });
 
             flatpickr("#endDate", {
                 dateFormat: "Y-m-d",
-                maxDate: "today",
                 defaultDate: new Date(),
                 onChange: () => this.reloadTable()
             });
@@ -40,12 +38,53 @@ document.addEventListener('alpine:init', () => {
                 },
                 columns: [
                     {
+                        title: 'DETALLE',
+                        data: null, // Usamos toda la fila
+                        className: 'text-center align-middle',
+                        render: function (data, type, row) {
+                            const tieneDelDia = !!row.observacion;
+                            const tieneHistorial = row.tiene_historial; // este campo lo debes enviar desde backend (bool)
+
+                            if (!tieneDelDia && !tieneHistorial) return '-';
+
+                            let html = '<div class="flex justify-center gap-1">';
+
+                            if (tieneDelDia) {
+                                html += `<button class="btn btn-sm btn-info ver-observacion" title="Ver observación del día"
+                                            data-observacion="${encodeURIComponent(JSON.stringify(row.observacion))}">
+                                            📩
+                                        </button>`;
+                            }
+
+                            if (tieneHistorial) {
+                                html += `<a href="/asistencias/historial/${row.idUsuario}" target="_blank" class="btn btn-sm btn-primary" title="Ver todas las observaciones">
+                                    📑
+                                </a>`;
+                            }
+
+
+                            html += '</div>';
+                            return html;
+                        }
+                    },
+                    {
                         data: 'empleado',
                         className: 'text-center align-middle w-[140px]',
                         render: (data, type) => type === 'display'
                             ? `<strong class="block break-words whitespace-normal text-sm uppercase font-semibold">${data}</strong>`
                             : data
                     },
+                    {
+                        data: 'asistencia',
+                        className: 'text-center align-middle',
+                        render: function (d, type) {
+                            if (type !== 'display') return d;
+
+                            const clase = d === 'ASISTIÓ' ? 'bg-success' : 'bg-danger';
+                            return `<span class="badge ${clase}">${d}</span>`;
+                        }
+                    },
+
                     {
                         data: 'fecha',
                         className: 'text-center align-middle',
@@ -104,42 +143,11 @@ document.addEventListener('alpine:init', () => {
                             ? `<div class="whitespace-normal break-words leading-snug text-sm">${d}</div>`
                             : '-'
                     },
-                    {
-                        data: 'asistencia',
-                        className: 'text-center align-middle',
-                        render: function (d, type, row) {
-                            const observacion = row.observacion;
-                            if (observacion) {
-                                const estado = observacion.estado;
-                                let clase = 'bg-warning';
-                                let texto = 'OBSERVACIÓN';
-
-                                if (estado === 1) {
-                                    clase = 'bg-primary';
-                                    texto = 'APROBADO';
-                                } else if (estado === 2) {
-                                    clase = 'bg-danger';
-                                    texto = 'DENEGADO';
-                                }
-
-                                return `
-                                <span class="badge ${clase} cursor-pointer ver-observacion"
-                                    data-observacion="${encodeURIComponent(JSON.stringify(observacion))}">
-                                    ${texto}
-                                </span>`;
-
-                            }
-
-                            const clase = d === 'ASISTIÓ' ? 'bg-success' : 'bg-danger';
-                            return `<span class="badge ${clase}">${d}</span>`;
-                        }
-                    }
-
                 ],
                 responsive: true,
                 autoWidth: false,
                 pageLength: 10,
-                order: [[1, 'desc']],
+                order: [],
                 language: {
                     search: "Buscar...",
                     zeroRecords: "No se encontraron registros",
@@ -156,26 +164,26 @@ document.addEventListener('alpine:init', () => {
                 dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
                 initComplete: function () {
                     const wrapper = document.querySelector('.dataTables_wrapper');
-                    const table = wrapper.querySelector('#tablaAsistencias');
+                    const table = wrapper?.querySelector('#tablaAsistencias');
 
-                    // Envolver la tabla en un contenedor scrollable
+                    if (!table || !wrapper) return; // 💥 Si no existe, detiene ejecución
+
+                    // Crear contenedor scroll horizontal
                     const scrollContainer = document.createElement('div');
                     scrollContainer.className = 'dataTables_scrollable overflow-x-auto border border-gray-200 rounded-md mb-3';
                     table.parentNode.insertBefore(scrollContainer, table);
                     scrollContainer.appendChild(table);
 
-                    // Scroll superior sincronizado (usando div vacío con mismo ancho del scrollContainer)
+                    // Crear scroll superior
                     const scrollTop = document.createElement('div');
                     scrollTop.className = 'dataTables_scrollTop overflow-x-auto mb-2';
                     scrollTop.style.height = '14px';
 
-                    // Usamos un div interno para que tome el mismo ancho que el scroll real
                     const topInner = document.createElement('div');
-                    topInner.style.width = scrollContainer.scrollWidth + 'px'; // ancho real del scroll horizontal
-                    topInner.style.height = '1px'; // invisible
+                    topInner.style.width = scrollContainer.scrollWidth + 'px';
+                    topInner.style.height = '1px';
                     scrollTop.appendChild(topInner);
 
-                    // Sincronizar scroll
                     scrollTop.addEventListener('scroll', () => {
                         scrollContainer.scrollLeft = scrollTop.scrollLeft;
                     });
@@ -183,9 +191,7 @@ document.addEventListener('alpine:init', () => {
                         scrollTop.scrollLeft = scrollContainer.scrollLeft;
                     });
 
-                    // Insertar arriba de la tabla
                     wrapper.insertBefore(scrollTop, scrollContainer);
-
 
                     // Controles flotantes
                     const floatingControls = document.createElement('div');
@@ -210,6 +216,7 @@ document.addEventListener('alpine:init', () => {
                     }
                 }
 
+
             });
             $('#tablaAsistencias tbody').off('click', '.ver-observacion').on('click', '.ver-observacion', function () {
                 try {
@@ -228,6 +235,7 @@ document.addEventListener('alpine:init', () => {
         }
     }));
     let observacionActual = null;
+
     function nombreTipoAsunto(id) {
         switch (id) {
             case 1: return 'TARDANZA';
@@ -236,26 +244,40 @@ document.addEventListener('alpine:init', () => {
             default: return 'OBSERVACIÓN';
         }
     }
+
     window.verObservacion = function (observacion) {
         observacionActual = observacion;
-
-        // 👉 Cambiar título del modal según el tipo de asunto
-        document.querySelector('#modalObservacion h5').textContent = nombreTipoAsunto(observacion?.idTipoAsunto);
-
-        // 👉 Mostrar mensaje
+        const respuestaTextarea = document.getElementById('respuestaTexto');
+        const btnAprobar = document.querySelector('#observacionAcciones button.btn-primary');
+        const btnDenegar = document.querySelector('#observacionAcciones button.btn-outline-danger');
+    
+        const tipoTexto = nombreTipoAsunto(observacion?.idTipoAsunto);
+        const total = (observacion.total ?? 1);
+        const index = (observacion.index ?? 1);
+    
+        document.querySelector('#modalObservacion h5').textContent = `${tipoTexto} (${index} de ${total})`;
+        document.getElementById('observacionFechaHora').textContent = observacion?.fechaHora ?? 'Fecha no registrada';
+        document.getElementById('observacionUbicacion').textContent = observacion?.ubicacion ?? 'Ubicación no registrada';
         document.getElementById('observacionMensaje').textContent = observacion?.mensaje || 'Sin mensaje';
-
-        // 👉 Mostrar u ocultar botones
-        const acciones = document.getElementById('observacionAcciones');
-        if (observacion?.estado === 0) {
-            acciones.classList.remove('hidden');
+    
+        // Asignar respuesta
+        respuestaTextarea.value = observacion?.respuesta || '';
+    
+        // Habilitar/deshabilitar según estado
+        if (observacion?.estado === 1 || observacion?.estado === 2) {
+            respuestaTextarea.setAttribute('readonly', true);
+            btnAprobar.disabled = true;
+            btnDenegar.disabled = true;
         } else {
-            acciones.classList.add('hidden');
+            respuestaTextarea.removeAttribute('readonly');
+            btnAprobar.disabled = false;
+            btnDenegar.disabled = false;
         }
-
+    
+        // Cargar imágenes
         const contenedor = document.getElementById('observacionImagenes');
         contenedor.innerHTML = 'Cargando...';
-
+    
         fetch(`/asistencias/observacion/${observacion.idObservaciones}`)
             .then(res => res.json())
             .then(data => {
@@ -267,7 +289,7 @@ document.addEventListener('alpine:init', () => {
                         img.className = 'w-24 h-24 object-contain rounded border cursor-zoom-in';
                         contenedor.appendChild(img);
                     });
-
+    
                     if (window.viewerInstance) window.viewerInstance.destroy();
                     window.viewerInstance = new Viewer(contenedor, {
                         toolbar: true,
@@ -278,69 +300,82 @@ document.addEventListener('alpine:init', () => {
                     contenedor.innerHTML = 'Sin imágenes';
                 }
             });
-
+    
         document.getElementById('modalObservacion').classList.remove('hidden');
     };
+    
+
+    window.aprobarObservacion = function () {
+        const id = observacionActual?.idObservaciones;
+        const respuesta = document.getElementById('respuestaTexto').value.trim();
+
+        if (!id) return console.error('ID no definido');
+
+        fetch('/asistencias/actualizar-observacion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ id, estado: 1, respuesta }) // puede ser ''
+        })
+            .then(res => res.json())
+            .then(() => {
+                Toastify({
+                    text: "✅ Observación aprobada.",
+                    duration: 2500,
+                    style: { background: "#22c55e" }
+                }).showToast();
+
+                cerrarModalObservacion();
+            })
+            .catch(() => {
+                Toastify({
+                    text: "❌ Error al aprobar la observación.",
+                    duration: 2500,
+                    style: { background: "#ef4444" }
+                }).showToast();
+            });
+    };
+
+    window.denegarObservacion = function () {
+        const id = observacionActual?.idObservaciones;
+        const respuesta = document.getElementById('respuestaTexto').value.trim();
+
+        if (!id) return console.error('ID no definido');
+
+        fetch('/asistencias/actualizar-observacion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ id, estado: 2, respuesta })
+        })
+            .then(res => res.json())
+            .then(() => {
+                Toastify({
+                    text: "❌ Observación denegada.",
+                    duration: 2500,
+                    style: { background: "#f87171" }
+                }).showToast();
+
+                cerrarModalObservacion();
+            })
+            .catch(() => {
+                Toastify({
+                    text: "❌ Error al denegar la observación.",
+                    duration: 2500,
+                    style: { background: "#dc2626" }
+                }).showToast();
+            });
+    };
+
+
 
     window.cerrarModalObservacion = function () {
         document.getElementById('modalObservacion').classList.add('hidden');
     };
 
-    window.aprobarObservacion = function () {
-        const id = observacionActual?.idObservaciones ?? observacionActual?.id;
 
-        if (id) {
-            fetch('/asistencias/actualizar-observacion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    id: id,
-                    estado: 1
-                })
-            })
-                .then(res => res.json())
-                .then(() => {
-                    cerrarModalObservacion();
-                    // ✅ Recargar tabla directamente
-                    if (window.Alpine?.store('usuariosTable')?.datatable) {
-                        window.Alpine.store('usuariosTable').datatable.ajax.reload();
-                    }
-                })
-                .catch(console.error);
-        } else {
-            console.error('❌ ID de observación no definido (aprobación)');
-        }
-    };
-
-    window.denegarObservacion = function () {
-        const id = observacionActual?.idObservaciones ?? observacionActual?.id;
-
-        if (id) {
-            fetch('/asistencias/actualizar-observacion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({
-                    id: id,
-                    estado: 2
-                })
-            })
-                .then(res => res.json())
-                .then(() => {
-                    cerrarModalObservacion();
-                    // ✅ Recargar tabla directamente
-                    if (window.Alpine?.store('usuariosTable')?.datatable) {
-                        window.Alpine.store('usuariosTable').datatable.ajax.reload();
-                    }
-                })
-                .catch(console.error);
-        } else {
-            console.error('❌ ID de observación no definido (denegación)');
-        }
-    };
 });

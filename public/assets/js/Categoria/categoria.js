@@ -11,35 +11,32 @@ document.addEventListener('alpine:init', () => {
         },
 
         async fetchDataAndInitTable() {
-            try {
-                const res = await fetch('/api/categoria');
-                if (!res.ok) throw new Error('Error al obtener datos');
-                const data = await res.json();
-
-                jQuery.fn.DataTable.ext.type.search.string = function (data) {
-                    return !data ? '' : typeof data === 'string' ? data.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase() : data;
-                };
-
-                this.datatable1 = $('#myTable1').DataTable({
-                    data,
-                    columns: [
-                        {
-                            data: 'nombre',
-                            className: 'text-center',
-                        },
-                        {
-                            data: 'estado',
-                            className: 'text-center',
-                            render: estado => estado === 'Activo'
-                                ? '<span class="badge badge-outline-success">Activo</span>'
-                                : '<span class="badge badge-outline-danger">Inactivo</span>'
-                        },
-                        {
-                            data: null,
-                            orderable: false,
-                            searchable: false,
-                            className: 'text-center',
-                            render: (_, __, row) => `
+            this.datatable1 = $('#myTable1').DataTable({
+                serverSide: true,
+                processing: true,
+                ajax: {
+                    url: '/api/categoria',
+                    type: 'GET',
+                    dataSrc: 'data'
+                },
+                columns: [
+                    {
+                        data: 'nombre',
+                        className: 'text-center',
+                    },
+                    {
+                        data: 'estado',
+                        className: 'text-center',
+                        render: estado => estado === 'Activo'
+                            ? '<span class="badge badge-outline-success">Activo</span>'
+                            : '<span class="badge badge-outline-danger">Inactivo</span>'
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center',
+                        render: (_, __, row) => `
                                 <div class="flex justify-center items-center gap-2">
                                     <a href="/categoria/${row.idCategoria}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
@@ -57,77 +54,74 @@ document.addEventListener('alpine:init', () => {
                                         </svg>
                                     </button>
                                 </div>`
-                        }
-                    ],
-                    responsive: true,
-                    autoWidth: false,
-                    pageLength: 10,
-                    language: {
-                        search: 'Buscar...',
-                        zeroRecords: 'No se encontraron registros',
-                        lengthMenu: 'Mostrar _MENU_ registros por página',
-                        loadingRecords: 'Cargando...',
-                        info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
-                        paginate: {
-                            first: 'Primero',
-                            last: 'Último',
-                            next: 'Siguiente',
-                            previous: 'Anterior'
-                        }
-                    },
-                    dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
-                    initComplete: function () {
-                        const wrapper = document.querySelector('.dataTables_wrapper');
-
-                        const scrollContainer = document.createElement('div');
-                        scrollContainer.className = 'dataTables_scrollable overflow-x-auto border border-gray-200 rounded-md mb-3';
-                        const table = wrapper.querySelector('table');
-                        table.parentNode.insertBefore(scrollContainer, table);
-                        scrollContainer.appendChild(table);
-
-                        const scrollTop = document.createElement('div');
-                        scrollTop.className = 'dataTables_scrollTop overflow-x-auto mb-2';
-                        scrollTop.style.height = '14px';
-
-                        const topInner = document.createElement('div');
-                        topInner.style.width = scrollContainer.scrollWidth + 'px';
-                        topInner.style.height = '1px';
-                        scrollTop.appendChild(topInner);
-
-                        scrollTop.addEventListener('scroll', () => {
-                            scrollContainer.scrollLeft = scrollTop.scrollLeft;
-                        });
-                        scrollContainer.addEventListener('scroll', () => {
-                            scrollTop.scrollLeft = scrollContainer.scrollLeft;
-                        });
-
-                        wrapper.insertBefore(scrollTop, scrollContainer);
-
-                        const floatingControls = document.createElement('div');
-                        floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
-                        Object.assign(floatingControls.style, {
-                            position: 'sticky',
-                            bottom: '0',
-                            left: '0',
-                            width: '100%',
-                            zIndex: '10'
-                        });
-
-                        const info = wrapper.querySelector('.dataTables_info');
-                        const length = wrapper.querySelector('.dataTables_length');
-                        const paginate = wrapper.querySelector('.dataTables_paginate');
-
-                        if (info && length && paginate) {
-                            floatingControls.appendChild(info);
-                            floatingControls.appendChild(length);
-                            floatingControls.appendChild(paginate);
-                            wrapper.appendChild(floatingControls);
-                        }
                     }
-                });
-            } catch (e) {
-                console.error('Error al inicializar DataTable:', e);
-            }
+                ],
+                responsive: true,
+                autoWidth: false,
+                pageLength: 10,
+                language: {
+                    search: 'Buscar...',
+                    zeroRecords: 'No se encontraron registros',
+                    lengthMenu: 'Mostrar _MENU_ registros por página',
+                    loadingRecords: 'Cargando...',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                    paginate: {
+                        first: 'Primero',
+                        last: 'Último',
+                        next: 'Siguiente',
+                        previous: 'Anterior'
+                    }
+                },
+                dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
+                initComplete: function () {
+                    const wrapper = document.querySelector('.dataTables_wrapper');
+
+                    const scrollContainer = document.createElement('div');
+                    scrollContainer.className = 'dataTables_scrollable overflow-x-auto border border-gray-200 rounded-md mb-3';
+                    const table = wrapper.querySelector('table');
+                    table.parentNode.insertBefore(scrollContainer, table);
+                    scrollContainer.appendChild(table);
+
+                    const scrollTop = document.createElement('div');
+                    scrollTop.className = 'dataTables_scrollTop overflow-x-auto mb-2';
+                    scrollTop.style.height = '14px';
+
+                    const topInner = document.createElement('div');
+                    topInner.style.width = scrollContainer.scrollWidth + 'px';
+                    topInner.style.height = '1px';
+                    scrollTop.appendChild(topInner);
+
+                    scrollTop.addEventListener('scroll', () => {
+                        scrollContainer.scrollLeft = scrollTop.scrollLeft;
+                    });
+                    scrollContainer.addEventListener('scroll', () => {
+                        scrollTop.scrollLeft = scrollContainer.scrollLeft;
+                    });
+
+                    wrapper.insertBefore(scrollTop, scrollContainer);
+
+                    const floatingControls = document.createElement('div');
+                    floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
+                    Object.assign(floatingControls.style, {
+                        position: 'sticky',
+                        bottom: '0',
+                        left: '0',
+                        width: '100%',
+                        zIndex: '10'
+                    });
+
+                    const info = wrapper.querySelector('.dataTables_info');
+                    const length = wrapper.querySelector('.dataTables_length');
+                    const paginate = wrapper.querySelector('.dataTables_paginate');
+
+                    if (info && length && paginate) {
+                        floatingControls.appendChild(info);
+                        floatingControls.appendChild(length);
+                        floatingControls.appendChild(paginate);
+                        wrapper.appendChild(floatingControls);
+                    }
+                }
+            });
         },
 
         deleteCategory(idCategoria) {

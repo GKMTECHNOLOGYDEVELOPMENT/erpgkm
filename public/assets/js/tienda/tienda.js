@@ -10,13 +10,13 @@ document.addEventListener("alpine:init", () => {
         },
 
         async fetchDataAndInitTable() {
-            try {
-                const res = await fetch("/api/tiendas");
-                if (!res.ok) throw new Error("Error al obtener datos del servidor");
-                const data = await res.json();
-
                 this.datatable1 = $('#myTable1').DataTable({
-                    data,
+                    serverSide: true,
+                    processing: true,
+                    ajax: {
+                        url: '/api/tiendas/paginado',
+                        type: 'GET'
+                    },
                     columns: [
                         { data: 'ruc', className: 'text-center', render: ruc => `<div>${ruc || 'N/A'}</div>` },
                         { data: 'nombre', className: 'text-center', render: nombre => `<div>${nombre || 'N/A'}</div>` },
@@ -123,9 +123,6 @@ document.addEventListener("alpine:init", () => {
                         }
                     }
                 });
-            } catch (error) {
-                console.error("Error al inicializar la DataTable:", error);
-            }
         },
 
         deleteTienda(idTienda) {

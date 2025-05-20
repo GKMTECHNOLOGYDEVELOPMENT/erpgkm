@@ -123,7 +123,14 @@ class ArticulosController extends Controller
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
 
-    return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    // Convertimos las imágenes a base64 si están presentes
+    $fotoCodigobarras = $articulo->foto_codigobarras ? base64_encode($articulo->foto_codigobarras) : null;
+    $fotoSku = $articulo->fotosku ? base64_encode($articulo->fotosku) : null;
+
+    return view('almacen.productos.articulos.edit', compact(
+        'articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas', 
+        'fotoCodigobarras', 'fotoSku'
+    ));
 }
 
 
@@ -139,6 +146,55 @@ public function detalle($id)
     return view('almacen.productos.articulos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
 
+public function imagen($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $unidades = Unidad::all();
+    $tiposArticulo = Tipoarticulo::all();
+    $modelos = Modelo::all();
+    $monedas = Moneda::all();
+    $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
+
+    return view('almacen.productos.articulos.imagen', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+}
+
+
+
+public function updateFoto(Request $request, $id)
+{
+    $articulo = Articulo::findOrFail($id);
+
+    if ($request->hasFile('foto')) {
+        $file = $request->file('foto');
+
+        $request->validate([
+            'foto' => 'image|mimes:jpeg,png|max:3072', // 3MB
+        ]);
+
+        $binary = file_get_contents($file->getRealPath());
+        $articulo->foto = $binary;
+        $articulo->save();
+
+        return response()->json([
+            'success' => true,
+            'preview_url' => 'data:image/jpeg;base64,' . base64_encode($binary)
+        ]);
+    }
+
+    return response()->json(['success' => false]);
+}
+
+public function deleteFoto($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $articulo->foto = null;
+    $articulo->save();
+
+    return response()->json([
+        'success' => true,
+        'preview_url' => asset('assets/images/articulo/producto-default.png')
+    ]);
+}
 
 
 public function update(Request $request, $id)
@@ -249,27 +305,50 @@ public function update(Request $request, $id)
         return $pdf->download('reporte-articulos.pdf');
     }
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        $articulos = Articulo::with(['unidad', 'tipoarticulo', 'modelo'])->get();
+        $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo']);
     
-        $articulosData = $articulos->map(function ($articulo) {
+        $total = $query->count();
+    
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                  ->orWhere('codigo_barras', 'like', "%$search%")
+                  ->orWhere('sku', 'like', "%$search%");
+            });
+        }
+    
+        $filtered = $query->count();
+    
+        $articulos = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+    
+        $data = $articulos->map(function ($articulo) {
             return [
                 'idArticulos' => $articulo->idArticulos,
                 'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
                 'nombre' => $articulo->nombre,
-                'unidad' => $articulo->unidad ? $articulo->unidad->nombre : 'Sin Unidad',
+                'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
                 'codigo_barras' => $articulo->codigo_barras,
                 'stock_total' => $articulo->stock_total,
                 'sku' => $articulo->sku,
-                'tipo_articulo' => $articulo->tipoarticulo ? $articulo->tipoarticulo->nombre : 'Sin Tipo',
-                'modelo' => $articulo->modelo ? $articulo->modelo->nombre : 'Sin Modelo',
+                'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
+                'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
                 'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
             ];
         });
     
-        return response()->json($articulosData);
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+    
 
 
     public function checkNombre(Request $request)

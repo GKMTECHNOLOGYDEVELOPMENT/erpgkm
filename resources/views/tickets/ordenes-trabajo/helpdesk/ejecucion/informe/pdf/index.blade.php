@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: "Times New Roman", Times, serif !important;
+            font-family: Arial, sans-serif !important;
             font-size: 10px;
         }
 
@@ -28,8 +28,6 @@
         .indent-paragraph {
             text-align: left !important;
             /* alineado a la izquierda */
-            text-indent: 2em !important;
-            /* sangría en primera línea */
             line-height: 2 !important;
             /* interlineado 2.0 */
             margin-bottom: 0 !important;

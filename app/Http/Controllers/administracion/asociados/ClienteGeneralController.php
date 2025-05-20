@@ -356,24 +356,41 @@ class ClienteGeneralController extends Controller
         return $pdf->download('reporte-cliente-generales.pdf');
     }
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        // Obtén todos los datos de la tabla clientegeneral
-        $clientes = Clientegeneral::all();
-
-        // Procesa los datos e incluye la columna 'foto'
-        $clientesData = $clientes->map(function ($cliente) {
+        $query = Clientegeneral::query();
+    
+        $total = Clientegeneral::count();
+    
+        // Filtro global de búsqueda
+        if ($search = $request->input('search.value')) {
+            $query->where('descripcion', 'like', "%$search%");
+        }
+    
+        $filtered = $query->count();
+    
+        $clientes = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+    
+        $data = $clientes->map(function ($cliente) {
             return [
                 'idClienteGeneral' => $cliente->idClienteGeneral,
                 'descripcion' => $cliente->descripcion,
-                'estado' => $cliente->estado ? 'Activo' : 'Inactivo', // Convertir estado a texto
-                'foto' => $cliente->foto ? base64_encode($cliente->foto) : null, // Codificar la foto en base64
+                'estado' => $cliente->estado ? 'Activo' : 'Inactivo',
+                'foto' => $cliente->foto ? base64_encode($cliente->foto) : null,
             ];
         });
-
-        // Retorna los datos en formato JSON
-        return response()->json($clientesData);
+    
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
+    
     // futuras validaciones
     public function checkNombre(Request $request)
     {

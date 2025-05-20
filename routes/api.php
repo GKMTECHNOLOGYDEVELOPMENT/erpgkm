@@ -38,6 +38,7 @@ Route::get('/cast', [CastController::class, 'getAll']);
 Route::get('/clientegeneral', [ClienteGeneralController::class, 'getAll']);
 Route::get('/proveedores', [ProveedoresController::class, 'getAll']);
 Route::get('/tiendas', [TiendaController::class, 'getAll']);
+Route::get('/tiendas/paginado', [TiendaController::class, 'getAllPaginado']);
 Route::get('/categoria', [CategoriaController::class, 'getAll']);
 Route::get('/marca', [MarcaController::class, 'getAll']);
 Route::get('/modelo', [ModelosController::class, 'getAll']);

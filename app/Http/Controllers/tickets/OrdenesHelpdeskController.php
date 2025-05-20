@@ -289,8 +289,8 @@ class OrdenesHelpdeskController extends Controller
                 return redirect()->route('ordenes.helpdesk.soporte.edit', ['id' => $ticket->idTickets])
                     ->with('success', 'Orden de trabajo creada correctamente (Soporte On Site).');
             } elseif ($validatedData['tipoServicio'] == 5) {
-                    return redirect()->route('ordenes.helpdesk.ejecucion.edit', ['id' => $ticket->idTickets])
-                        ->with('success', 'Orden de trabajo creada correctamente (Ejecucion).');
+                return redirect()->route('ordenes.helpdesk.ejecucion.edit', ['id' => $ticket->idTickets])
+                    ->with('success', 'Orden de trabajo creada correctamente (Ejecucion).');
             } elseif ($validatedData['tipoServicio'] == 6) {
                 return redirect()->route('ordenes.helpdesk.laboratorio.edit', ['id' => $ticket->idTickets])
                     ->with('success', 'Orden de trabajo creada correctamente (Laboratorio).');
@@ -618,7 +618,7 @@ class OrdenesHelpdeskController extends Controller
 
 
 
-//EJECUCION
+    //EJECUCION
     public function editejecucion($id)
     {
         $usuario = Auth::user();
@@ -944,7 +944,7 @@ class OrdenesHelpdeskController extends Controller
         $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
 
         $estadosOTS = DB::table('estado_ots')
-            ->whereIn('idEstadoots', [2, 3, 4, 6])
+            ->whereIn('idEstadoots', [2, 3, 4, 6, 5])
             ->get();
 
         $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario
@@ -2501,7 +2501,7 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-    
+
 
 
     public function actualizarEjecucion(Request $request, $id)
@@ -2620,25 +2620,25 @@ class OrdenesHelpdeskController extends Controller
     private function optimizeBase64Image($base64String, $calidad = 70, $destinoAncho = 700, $destinoAlto = 450)
     {
         if (!$base64String) return null;
-    
+
         if (!preg_match('#^data:image/(\w+);base64,#i', $base64String, $matches)) {
             return $base64String;
         }
-    
+
         $datosImagen = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $base64String));
         $origen = @imagecreatefromstring($datosImagen);
         if (!$origen) return $base64String;
-    
+
         $anchoOriginal = imagesx($origen);
         $altoOriginal = imagesy($origen);
-    
+
         // 🔁 Rotar si es vertical
         if ($altoOriginal > $anchoOriginal) {
             $origen = imagerotate($origen, -90, 0);
             $anchoOriginal = imagesx($origen);
             $altoOriginal = imagesy($origen);
         }
-    
+
         // 🖼️ Redimensionar directamente al tamaño deseado (aunque deforme un poco si es necesario)
         $resized = imagecreatetruecolor($destinoAncho, $destinoAlto);
         imagealphablending($resized, false);
@@ -2646,14 +2646,14 @@ class OrdenesHelpdeskController extends Controller
         $transparente = imagecolorallocatealpha($resized, 0, 0, 0, 127);
         imagefilledrectangle($resized, 0, 0, $destinoAncho, $destinoAlto, $transparente);
         imagecopyresampled($resized, $origen, 0, 0, 0, 0, $destinoAncho, $destinoAlto, $anchoOriginal, $altoOriginal);
-    
+
         ob_start();
         imagewebp($resized, null, $calidad);
         $contenido = ob_get_clean();
-    
+
         imagedestroy($origen);
         imagedestroy($resized);
-    
+
         return 'data:image/webp;base64,' . base64_encode($contenido);
     }
 
@@ -2825,20 +2825,44 @@ class OrdenesHelpdeskController extends Controller
             'modoVistaPrevia' => false
         ])->render();
 
-        $pdfContent = Browsershot::html($html)
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
             ->format('A4')
             ->fullPage()
             ->noSandbox()
             ->setDelay(2000)
-            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
+            ->margins(2.5, 2.5, 2.5, 2.5)
             ->emulateMedia('screen')
             ->waitUntilNetworkIdle()
             ->showBackground()
-            ->pdf();
+            ->save($tempOriginal);
 
-        return response($pdfContent)
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
+
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
+
+        return response($pdfOutput)
             ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
+            ->header('Content-Disposition', 'inline; filename="LEVANTAMIENTO TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -2989,20 +3013,44 @@ class OrdenesHelpdeskController extends Controller
             'modoVistaPrevia' => false
         ])->render();
 
-        $pdfContent = Browsershot::html($html)
-            ->format('A4')
-            ->fullPage()
-            ->noSandbox()
-            ->setDelay(2000)
-            ->margins(2.5, 2.5, 2.5, 2.5) // Margen superior, derecho, inferior, izquierdo
-            ->emulateMedia('screen')
-            ->waitUntilNetworkIdle()
-            ->showBackground()
-            ->pdf();
+       // 1. Guardar PDF temporal
+       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+       Browsershot::html($html)
+           ->format('A4')
+           ->fullPage()
+           ->noSandbox()
+           ->setDelay(2000)
+           ->margins(2.5, 2.5, 2.5, 2.5)
+           ->emulateMedia('screen')
+           ->waitUntilNetworkIdle()
+           ->showBackground()
+           ->save($tempOriginal);
 
-        return response($pdfContent)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
+       // 2. Comprimir con Ghostscript
+       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+
+       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+       exec($cmd, $output, $exitCode);
+
+       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+           @unlink($tempOriginal);
+           return response()->json([
+               'success' => false,
+               'message' => 'Ghostscript no logró comprimir el PDF.',
+               'command' => $cmd,
+               'output' => $output
+           ], 500);
+       }
+
+       // 3. Enviar el PDF comprimido
+       $pdfOutput = file_get_contents($tempCompressed);
+       @unlink($tempOriginal);
+       @unlink($tempCompressed);
+
+       return response($pdfOutput)
+           ->header('Content-Type', 'application/pdf')
+           ->header('Content-Disposition', 'inline; filename="LEVANTAMIENTO TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -3181,25 +3229,258 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-        $pdf = Browsershot::html($html)
-            ->noSandbox()
-            ->showBackground()
-            ->format('A4')
-            ->fullPage()
-            ->waitUntilNetworkIdle()
-            ->setDelay(2000)
-            ->margins(3, 3, 3, 3)
-            ->emulateMedia('screen')
-            ->pdf();
+       // 1. Guardar PDF temporal
+       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+       Browsershot::html($html)
+           ->format('A4')
+           ->fullPage()
+           ->noSandbox()
+           ->setDelay(2000)
+           ->margins(2.5, 2.5, 2.5, 2.5)
+           ->emulateMedia('screen')
+           ->waitUntilNetworkIdle()
+           ->showBackground()
+           ->save($tempOriginal);
 
-        return response($pdf)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
+       // 2. Comprimir con Ghostscript
+       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+
+       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+       exec($cmd, $output, $exitCode);
+
+       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+           @unlink($tempOriginal);
+           return response()->json([
+               'success' => false,
+               'message' => 'Ghostscript no logró comprimir el PDF.',
+               'command' => $cmd,
+               'output' => $output
+           ], 500);
+       }
+
+       // 3. Enviar el PDF comprimido
+       $pdfOutput = file_get_contents($tempCompressed);
+       @unlink($tempOriginal);
+       @unlink($tempCompressed);
+
+       return response($pdfOutput)
+           ->header('Content-Type', 'application/pdf')
+           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+    }
+
+    public function generateLabPdfVisitaApp($idOt,$idVisita)
+    {
+        $orden = Ticket::with([
+            'cliente.tipodocumento',
+            'clienteGeneral',
+            'tecnico.tipodocumento',
+            'tienda',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot',
+            'visitas.tecnico.tipodocumento',
+            'visitas.anexos_visitas',
+            'visitas.fotostickest',
+        ])->findOrFail($idOt);
+
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+
+        $logoClienteGeneral = null;
+        if ($orden->clienteGeneral && !empty($orden->clienteGeneral->foto)) {
+            $logoClienteGeneral = $this->procesarLogoMarca($orden->clienteGeneral->foto);
+        }
+
+
+        $idVisita = $idVisita;
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisita)->first();
+
+        $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->whereNotNull('justificacion')
+            ->where('justificacion', '!=', '')
+            ->with('estado_ot')
+            ->get();
+
+        $producto = [
+            'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
+            'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
+            'modelo' => $orden->modelo->nombre ?? 'No especificado',
+            'serie' => $orden->serie ?? 'No especificado',
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+        ];
+
+        $suministros = Suministro::with('articulo.tipoArticulo', 'articulo.modelo.marca')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->get();
+
+        $equipos = Equipo::with(['modelo', 'marca', 'categoria'])
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->get();
+
+        Log::debug('Equipos cargados:', ['equipos' => $equipos]);
+
+        $equiposInstalados = $equipos->where('modalidad', 'Instalación')->map(function ($equipo) {
+            return [
+                'tipoProducto' => $equipo->categoria->nombre ?? 'Sin categoría',
+                'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
+                'marca' => $equipo->marca->nombre ?? 'Sin marca',
+                'nserie' => $equipo->nserie ?? 'Sin serie',
+                'observacion'  => $equipo->observaciones ?? 'Sin observación', // ✅ aquí
+            ];
+        });
+
+        $equiposRetirados = $equipos->where('modalidad', 'Retirar')->map(function ($equipo) {
+            return [
+                'tipoProducto' => $equipo->categoria->nombre ?? 'Sin categoría',
+                'modelo' => $equipo->modelo->nombre ?? 'Sin modelo',
+                'marca' => $equipo->marca->nombre ?? 'Sin marca',
+                'nserie' => $equipo->nserie ?? 'Sin serie',
+                'observacion'  => $equipo->observaciones ?? 'Sin observación', // ✅ aquí
+            ];
+        });
+
+        $condicion = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->first();
+
+        $motivoCondicion = $condicion->motivo ?? null;
+
+
+
+
+        $visitas = collect();
+        if ($visitaSeleccionada) {
+            $visitas = collect([[
+                'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                'fecha_programada' => $visitaSeleccionada->fecha_programada ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada)) : 'N/A',
+                'hora_inicio' => $visitaSeleccionada->fecha_inicio ? date('H:i', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A',
+                'hora_final' => $visitaSeleccionada->fecha_final ? date('H:i', strtotime($visitaSeleccionada->fecha_final)) : 'N/A',
+                'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
+                'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
+                'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
+                'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
+                'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+            ]]);
+        }
+
+        $firma = DB::table('firmas')->where('idTickets', $idOt)->where('idVisitas', $idVisita)->first();
+
+        $firmaCliente = $firma && $firma->firma_cliente
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            : null;
+
+        $firmaTecnico = $visitaSeleccionada && $visitaSeleccionada->tecnico && $visitaSeleccionada->tecnico->firma
+            ? 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma)
+            : null;
+
+        $imagenesAnexos = $visitaSeleccionada->anexos_visitas->map(function ($anexo) {
+            return [
+                'foto_base64' => $anexo->foto
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($anexo->foto))
+                    : null,
+                'descripcion' => $anexo->descripcion
+            ];
+        });
+
+        $imagenesCondiciones = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisita)
+            ->whereNotNull('imagen')
+            ->get()
+            ->map(function ($condicion) {
+                return [
+                    'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
+                    'descripcion' => 'CONDICIÓN: ' . ($condicion->motivo ?? 'Sin descripción')
+                ];
+            });
+
+        $imagenesAnexos = $imagenesAnexos->merge($imagenesCondiciones);
+
+
+        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+            return [
+                'foto_base64' => $foto->foto
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                    : null,
+                'descripcion' => $foto->descripcion
+            ];
+        });
+
+        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio))
+            : 'N/A';
+
+        $html = view('tickets.ordenes-trabajo.helpdesk.laboratorio.informe.pdf.index', [
+            'orden' => $orden,
+            'fechaCreacion' => $fechaCreacion,
+            'producto' => $producto,
+            'transicionesStatusOt' => $transicionesStatusOt,
+            'visitas' => $visitas,
+            'firma' => $firma,
+            'firmaTecnico' => $firmaTecnico,
+            'firmaCliente' => $firmaCliente,
+            'imagenesAnexos' => $imagenesAnexos,
+            'imagenesFotosTickets' => $imagenesFotosTickets,
+            'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
+            'logoClienteGeneral' => $logoClienteGeneral,
+            'logoGKM' => $logoGKM,
+            'suministros' => $suministros,
+            'motivoCondicion' => $motivoCondicion,
+            'equiposInstalados' => $equiposInstalados,
+            'equiposRetirados' => $equiposRetirados,
+            'modoVistaPrevia' => false
+
+
+        ])->render();
+
+       // 1. Guardar PDF temporal
+       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+       Browsershot::html($html)
+           ->format('A4')
+           ->fullPage()
+           ->noSandbox()
+           ->setDelay(2000)
+           ->margins(2.5, 2.5, 2.5, 2.5)
+           ->emulateMedia('screen')
+           ->waitUntilNetworkIdle()
+           ->showBackground()
+           ->save($tempOriginal);
+
+       // 2. Comprimir con Ghostscript
+       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+
+       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+       exec($cmd, $output, $exitCode);
+
+       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+           @unlink($tempOriginal);
+           return response()->json([
+               'success' => false,
+               'message' => 'Ghostscript no logró comprimir el PDF.',
+               'command' => $cmd,
+               'output' => $output
+           ], 500);
+       }
+
+       // 3. Enviar el PDF comprimido
+       $pdfOutput = file_get_contents($tempCompressed);
+       @unlink($tempOriginal);
+       @unlink($tempCompressed);
+
+       return response($pdfOutput)
+           ->header('Content-Type', 'application/pdf')
+           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
 
-    
     public function generateSoportePdf($idOt)
     {
         $orden = Ticket::with([
@@ -3375,25 +3656,49 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-        $pdf = Browsershot::html($html)
-            ->noSandbox()
-            ->showBackground()
-            ->format('A4')
-            ->fullPage()
-            ->waitUntilNetworkIdle()
-            ->setDelay(2000)
-            ->margins(3, 3, 3, 3)
-            ->emulateMedia('screen')
-            ->pdf();
+       // 1. Guardar PDF temporal
+       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+       Browsershot::html($html)
+           ->format('A4')
+           ->fullPage()
+           ->noSandbox()
+           ->setDelay(2000)
+           ->margins(2.5, 2.5, 2.5, 2.5)
+           ->emulateMedia('screen')
+           ->waitUntilNetworkIdle()
+           ->showBackground()
+           ->save($tempOriginal);
 
-        return response($pdf)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
+       // 2. Comprimir con Ghostscript
+       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+
+       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+       exec($cmd, $output, $exitCode);
+
+       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+           @unlink($tempOriginal);
+           return response()->json([
+               'success' => false,
+               'message' => 'Ghostscript no logró comprimir el PDF.',
+               'command' => $cmd,
+               'output' => $output
+           ], 500);
+       }
+
+       // 3. Enviar el PDF comprimido
+       $pdfOutput = file_get_contents($tempCompressed);
+       @unlink($tempOriginal);
+       @unlink($tempCompressed);
+
+       return response($pdfOutput)
+           ->header('Content-Type', 'application/pdf')
+           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
 
-    
+
     public function generateEjecucionPdf($idOt)
     {
         $orden = Ticket::with([
@@ -3569,20 +3874,44 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-        $pdf = Browsershot::html($html)
-            ->noSandbox()
-            ->showBackground()
-            ->format('A4')
-            ->fullPage()
-            ->waitUntilNetworkIdle()
-            ->setDelay(2000)
-            ->margins(3, 3, 3, 3)
-            ->emulateMedia('screen')
-            ->pdf();
+       // 1. Guardar PDF temporal
+       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+       Browsershot::html($html)
+           ->format('A4')
+           ->fullPage()
+           ->noSandbox()
+           ->setDelay(2000)
+           ->margins(2.5, 2.5, 2.5, 2.5)
+           ->emulateMedia('screen')
+           ->waitUntilNetworkIdle()
+           ->showBackground()
+           ->save($tempOriginal);
 
-        return response($pdf)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
+       // 2. Comprimir con Ghostscript
+       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+
+       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+       exec($cmd, $output, $exitCode);
+
+       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+           @unlink($tempOriginal);
+           return response()->json([
+               'success' => false,
+               'message' => 'Ghostscript no logró comprimir el PDF.',
+               'command' => $cmd,
+               'output' => $output
+           ], 500);
+       }
+
+       // 3. Enviar el PDF comprimido
+       $pdfOutput = file_get_contents($tempCompressed);
+       @unlink($tempOriginal);
+       @unlink($tempCompressed);
+
+       return response($pdfOutput)
+           ->header('Content-Type', 'application/pdf')
+           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -3751,21 +4080,44 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-        $pdf = Browsershot::html($html)
-            ->noSandbox()
-            ->showBackground()
-            ->format('A4')
-            ->fullPage()
-            ->waitUntilNetworkIdle()
-            ->setDelay(2000)
-            ->margins(3, 3, 3, 3)
-            ->emulateMedia('screen')
-            ->pdf();
+       // 1. Guardar PDF temporal
+       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+       Browsershot::html($html)
+           ->format('A4')
+           ->fullPage()
+           ->noSandbox()
+           ->setDelay(2000)
+           ->margins(2.5, 2.5, 2.5, 2.5)
+           ->emulateMedia('screen')
+           ->waitUntilNetworkIdle()
+           ->showBackground()
+           ->save($tempOriginal);
 
+       // 2. Comprimir con Ghostscript
+       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
 
-        return response($pdf)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->idTickets . '.pdf"');
+       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+       exec($cmd, $output, $exitCode);
+
+       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+           @unlink($tempOriginal);
+           return response()->json([
+               'success' => false,
+               'message' => 'Ghostscript no logró comprimir el PDF.',
+               'command' => $cmd,
+               'output' => $output
+           ], 500);
+       }
+
+       // 3. Enviar el PDF comprimido
+       $pdfOutput = file_get_contents($tempCompressed);
+       @unlink($tempOriginal);
+       @unlink($tempCompressed);
+
+       return response($pdfOutput)
+           ->header('Content-Type', 'application/pdf')
+           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -3999,7 +4351,7 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-  
+
 
 
 
@@ -4048,7 +4400,7 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-    
+
 
     public function firmaclienteEjecucion($id, $idVisitas)
     {

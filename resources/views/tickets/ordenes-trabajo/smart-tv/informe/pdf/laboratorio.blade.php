@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: "Times New Roman", Times, serif !important;
+            font-family: Arial, sans-serif !important;
             font-size: 10px;
         }
 
@@ -26,7 +26,7 @@
         }
 
         .indent-paragraph {
-            text-align: left !important;
+            text-align: justify !important;
             /* alineado a la izquierda */
             line-height: 2 !important;
             /* interlineado 2.0 */
@@ -134,7 +134,6 @@
                 <div class="w-1/2 text-right">
                     <div class="text-xs leading-tight">
                         <p>NRO TICKET: <span class="font-bold">{{ $orden->numero_ticket ?? 'N/A' }}</span></p>
-                        <p>FECHA DE ATENCIÓN: <span class="font-bold">{{ $fechaCreacion }}</span></p>
                     </div>
                     <h2 class="text-xs font-bold mb-1 text-gray-700 mt-2">TÉCNICO / RESPONSABLE</h2>
                     @foreach ($visitas as $visita)
@@ -155,10 +154,14 @@
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
                     <div class="flex justify-between flex-wrap gap-4">
-                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> <span class="uppercase">{{ $producto['categoria'] }}</span></p>
-                        <p><span class="font-bold">MARCA:</span> <span class="uppercase">{{ $producto['marca'] }}</span></p>
-                        <p><span class="font-bold">MODELO:</span> <span class="uppercase">{{ $producto['modelo'] }}</span></p>
-                        <p><span class="font-bold">SERIE:</span> <span class="uppercase">{{ $producto['serie'] }}</span></p>                        
+                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> <span
+                                class="uppercase">{{ $producto['categoria'] }}</span></p>
+                        <p><span class="font-bold">MARCA:</span> <span class="uppercase">{{ $producto['marca'] }}</span>
+                        </p>
+                        <p><span class="font-bold">MODELO:</span> <span
+                                class="uppercase">{{ $producto['modelo'] }}</span></p>
+                        <p><span class="font-bold">SERIE:</span> <span
+                                class="uppercase">{{ $producto['serie'] }}</span></p>
                     </div>
                 </div>
             @endif
@@ -323,28 +326,25 @@
             </div>
 
             <!-- Firma del Cliente -->
-            <div class="w-1/2 text-center">
-                <div class="inline-block mb-1 h-24 flex justify-center items-end">
-                    @if ($firmaCliente)
+            @if ($firmaCliente)
+                <div class="w-1/2 text-center">
+                    <div class="inline-block mb-1 h-24 flex justify-center items-end">
                         <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
                             class="w-[90%] h-20 mx-auto object-contain"
                             style="transform: scale(1.5); position: relative; bottom: 10px;">
-                    @else
-                        <div class="h-full flex items-center justify-center w-full">
-                            <p class="text-xs text-gray-500 font-bold"></p>
-                        </div>
-                    @endif
+                    </div>
+                    <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
+                    <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
+                    <p class="text-xs text-gray-600 uppercase tracking-wide">
+                        {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? '') }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
+                        {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
+                    </p>
                 </div>
-                <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
-                <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                <p class="text-xs text-gray-600 uppercase tracking-wide">
-                    {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
-                </p>
-                <p class="text-xs text-gray-500">
-                    {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
-                    {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
-                </p>
-            </div>
+            @endif
+
         </div>
         <br>
     </div>

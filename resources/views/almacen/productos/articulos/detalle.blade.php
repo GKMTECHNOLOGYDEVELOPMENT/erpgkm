@@ -207,108 +207,152 @@
     <script src="//unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('modalHandler', () => ({
-                isOpen: false,
-                currentCode: '',
-                currentBarcodeImage: '',
-                quantity: 1,
-                
-                openModal(code, barcodeImage = '') {
-                    this.currentCode = code;
-                    this.currentBarcodeImage = barcodeImage;
-                    this.quantity = 1;
-                    this.isOpen = true;
-                },
-                
-                closeModal() {
-                    this.isOpen = false;
-                },
-                
-                printBarcode() {
-                    if (!this.currentCode) {
-                        alert('No hay código para imprimir');
-                        return;
-                    }
+  <script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('modalHandler', () => ({
+        isOpen: false,
+        currentCode: '',
+        currentBarcodeImage: '',
+        quantity: 1,
+        barcodesPerRow: 3, // Número de códigos por fila
+        
+        openModal(code, barcodeImage = '') {
+            this.currentCode = code;
+            this.currentBarcodeImage = barcodeImage;
+            this.quantity = 1;
+            this.isOpen = true;
+        },
+        
+        closeModal() {
+            this.isOpen = false;
+        },
+        
+        printBarcode() {
+            if (!this.currentCode) {
+                alert('No hay código para imprimir');
+                return;
+            }
 
-                    // Crear contenido HTML para la impresión
-                    let printContent = `
-                        <!DOCTYPE html>
-                        <html>
-                        <head>
-                            <title>Impresión de Código de Barras</title>
-                            <style>
-                                body { font-family: Arial, sans-serif; margin: 0; padding: 10px; }
-                                .barcode-container { text-align: center; margin-bottom: 15px; }
-                                .barcode-text { font-size: 12px; margin-top: 5px; }
-                                @page { size: auto; margin: 0mm; }
-                                @media print {
-                                    body { padding: 0; }
-                                }
-                            </style>
-                            <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
-                        </head>
-                        <body>
-                    `;
-
-                    // Agregar múltiples copias según la cantidad
-                    for (let i = 0; i < this.quantity; i++) {
-                        if (this.currentBarcodeImage) {
-                            // Usar la imagen existente del código de barras
-                            printContent += `
-                                <div class="barcode-container">
-                                    <img src="data:image/png;base64,${this.currentBarcodeImage}" style="max-width: 100%; height: auto;">
-                                    <div class="barcode-text">${this.currentCode}</div>
-                                </div>
-                            `;
-                        } else {
-                            // Generar nuevo código de barras (Code128)
-                            printContent += `
-                                <div class="barcode-container">
-                                    <svg id="barcode-${i}"></svg>
-                                    <div class="barcode-text">${this.currentCode}</div>
-                                </div>
-                                <script>
-                                    JsBarcode('#barcode-${i}', '${this.currentCode}', {
-                                        format: "CODE128",
-                                        lineColor: "#000",
-                                        width: 2,
-                                        height: 50,
-                                        displayValue: false
-                                    });
-                                <\/script>
-                            `;
+            // Crear contenido HTML para la impresión
+            let printContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Impresión de Código de Barras</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 10px; }
+                        .barcode-page {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 10px;
                         }
-                    }
-
-                    printContent += `
-                        <script>
-                            window.onload = function() {
-                                setTimeout(function() {
-                                    window.print();
-                                    window.close();
-                                }, 200);
+                        .barcode-row {
+                            display: flex;
+                            justify-content: flex-start;
+                            flex-wrap: nowrap;
+                            gap: 10px;
+                            page-break-inside: avoid;
+                        }
+                        .barcode-container {
+                            flex: 1;
+                            min-width: calc(33.33% - 10px);
+                            max-width: calc(33.33% - 10px);
+                            text-align: center;
+                            page-break-inside: avoid;
+                        }
+                        .barcode-text { 
+                            font-size: 12px; 
+                            margin-top: 5px; 
+                            word-break: break-all;
+                        }
+                        @page { 
+                            size: auto; 
+                            margin: 5mm;
+                        }
+                        @media print {
+                            body { padding: 0; }
+                            .barcode-row {
+                                page-break-inside: avoid;
                             }
-                        <\/script>
-                        </body>
-                        </html>
-                    `;
+                        }
+                    </style>
+                    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
+                </head>
+                <body>
+                    <div class="barcode-page">
+            `;
 
-                    // Obtener el iframe y cargar el contenido
-                    const printFrame = document.getElementById('printFrame');
-                    const frameDoc = printFrame.contentWindow || printFrame.contentDocument;
-                    if (frameDoc.document) {
-                        frameDoc.document.open();
-                        frameDoc.document.write(printContent);
-                        frameDoc.document.close();
+            // Calcular cuántas filas necesitamos
+            const totalRows = Math.ceil(this.quantity / this.barcodesPerRow);
+            
+            // Agregar múltiples copias según la cantidad
+            for (let row = 0; row < totalRows; row++) {
+                printContent += `<div class="barcode-row">`;
+                
+                // Agregar los códigos de barras para esta fila
+                const startIndex = row * this.barcodesPerRow;
+                const endIndex = Math.min(startIndex + this.barcodesPerRow, this.quantity);
+                
+                for (let i = startIndex; i < endIndex; i++) {
+                    if (this.currentBarcodeImage) {
+                        // Usar la imagen existente del código de barras
+                        printContent += `
+                            <div class="barcode-container">
+                                <img src="data:image/png;base64,${this.currentBarcodeImage}" style="max-width: 100%; height: auto;">
+                                <div class="barcode-text">${this.currentCode}</div>
+                            </div>
+                        `;
                     } else {
-                        printFrame.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(printContent);
+                        // Generar nuevo código de barras (Code128)
+                        printContent += `
+                            <div class="barcode-container">
+                                <svg id="barcode-${i}"></svg>
+                                <div class="barcode-text">${this.currentCode}</div>
+                            </div>
+                            <script>
+                                JsBarcode('#barcode-${i}', '${this.currentCode}', {
+                                    format: "CODE128",
+                                    lineColor: "#000",
+                                    width: 2,
+                                    height: 50,
+                                    displayValue: false
+                                });
+                            <\/script>
+                        `;
                     }
-
-                    this.closeModal();
                 }
-            }));
-        });
-    </script>
+                
+                printContent += `</div>`; // Cierre de barcode-row
+            }
+
+            printContent += `
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            setTimeout(function() {
+                                window.print();
+                                window.close();
+                            }, 200);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+
+            // Obtener el iframe y cargar el contenido
+            const printFrame = document.getElementById('printFrame');
+            const frameDoc = printFrame.contentWindow || printFrame.contentDocument;
+            if (frameDoc.document) {
+                frameDoc.document.open();
+                frameDoc.document.write(printContent);
+                frameDoc.document.close();
+            } else {
+                printFrame.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(printContent);
+            }
+
+            this.closeModal();
+        }
+    }));
+});
+</script>
 </x-layout.default>

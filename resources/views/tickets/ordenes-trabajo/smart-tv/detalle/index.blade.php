@@ -101,12 +101,18 @@
                         class="pb-2 font-semibold text-sm uppercase">
                         Estados
                     </button>
-                    <button @click="activeTab = 'historial'"
-                        :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
-                            'text-gray-500 hover:text-gray-700'"
-                        class="pb-2 font-semibold text-sm uppercase">
-                        Historial de Cambios
-                    </button>
+              <button
+  @click="() => { 
+      activeTab = 'historial'; 
+      cargarHistorialModificaciones(ticketId); 
+  }"
+  :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
+                                      'text-gray-500 hover:text-gray-700'"
+  class="pb-2 font-semibold text-sm uppercase"
+>
+  Historial de Cambios
+</button>
+
                 </div>
 
                 <!-- TAB: Estados -->
@@ -758,7 +764,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         console.log("DOM completamente cargado y analizado");
@@ -779,14 +784,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Inicializar Flatpickr en "Fecha de Creación"
-console.log("Inicializando Flatpickr para fechaCreacion");
-flatpickr("#fechaCreacion", {
-    enableTime: true, // Habilita la selección de hora
-    dateFormat: "Y-m-d H:i:S", // Formato con fecha, hora, minutos y segundos
-    time_24hr: true, // Reloj de 24 horas
-    allowInput: true
-});
-
+        console.log("Inicializando Flatpickr para fechaCreacion");
+        flatpickr("#fechaCreacion", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i:S",
+            time_24hr: true,
+            allowInput: true
+        });
 
         // Función para formatear la fecha
         function formatDate(fecha) {
@@ -924,10 +928,10 @@ flatpickr("#fechaCreacion", {
                     const newRow = document.createElement("tr");
                     newRow.className = rowClasses;
                     newRow.innerHTML = `
-                <td class="px-4 py-2 text-center">${stateDescription}</td>
-                <td class="px-4 py-2 text-center">${usuario}</td>
-                <td class="px-4 py-2 text-center">${fecha}</td>
-            `;
+                        <td class="px-4 py-2 text-center">${stateDescription}</td>
+                        <td class="px-4 py-2 text-center">${usuario}</td>
+                        <td class="px-4 py-2 text-center">${fecha}</td>
+                    `;
                     console.log("Nueva fila creada:", newRow);
                     document.getElementById("estadosTableBody").appendChild(newRow);
 
@@ -997,140 +1001,314 @@ flatpickr("#fechaCreacion", {
             console.warn("Elemento dropZone no encontrado en el DOM");
         }
 
-// Por esta versión mejorada:
-function initializeFieldValues() {
-    // Selecciona solo los campos dentro del formulario principal
-    const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
-    if (!form) {
-        console.error("Formulario no encontrado");
-        return;
-    }
+        // Función para inicializar valores de campos
+        function initializeFieldValues() {
+            const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
+            if (!form) {
+                console.error("Formulario no encontrado");
+                return;
+            }
 
-    form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
-        // Ignora campos sin nombre o ID (como los de Alpine.js)
-        if (!field.name && !field.id) {
-            console.log("Ignorando campo sin nombre/ID:", field);
-            return;
+            form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
+                if (!field.name && !field.id) {
+                    console.log("Ignorando campo sin nombre/ID:", field);
+                    return;
+                }
+
+                console.log("Inicializando campo:", field.id || field.name);
+                if (field.tagName.toLowerCase() === "select") {
+                    field.dataset.oldValue = field.options[field.selectedIndex].text;
+                } else {
+                    field.dataset.oldValue = field.value;
+                }
+                console.log("Valor inicial guardado:", field.dataset.oldValue);
+            });
         }
 
-        console.log("Inicializando campo:", field.id || field.name);
-        if (field.tagName.toLowerCase() === "select") {
-            field.dataset.oldValue = field.options[field.selectedIndex].text;
-        } else {
-            field.dataset.oldValue = field.value;
+        // Función para manejar cambios en campos de texto/textarea con debounce
+        function handleInputChange(e) {
+            const field = e.target;
+            
+            // Solo campos de texto y textarea dentro del formulario
+            if (!field.matches('#tuFormulario input[type="text"], #tuFormulario textarea')) {
+                return;
+            }
+
+            if (!field.name && !field.id) {
+                return;
+            }
+
+            console.log("Evento input detectado en campo:", field.id || field.name);
+            
+            let oldVal = field.dataset.oldValue || '';
+            let newVal = field.value;
+            
+            // Debounce para evitar múltiples llamadas mientras se escribe
+            clearTimeout(field.debounceTimer);
+            field.debounceTimer = setTimeout(() => {
+                if (oldVal !== newVal) {
+                    let fieldLabel = "";
+                    if (field.id) {
+                        const label = document.querySelector('label[for="' + field.id + '"]');
+                        if (label) {
+                            fieldLabel = label.textContent.trim();
+                        }
+                    }
+                    if (!fieldLabel) {
+                        fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
+                    }
+                    console.log("Cambio detectado en:", fieldLabel, "de", oldVal, "a", newVal);
+                    
+                    updateModificationLog(fieldLabel, oldVal, newVal);
+                    field.dataset.oldValue = newVal;
+                }
+            }, 500); // 500ms de retraso después de la última tecla presionada
         }
-        console.log("Valor inicial guardado:", field.dataset.oldValue);
-    });
-}
 
-     // Y modifica el manejador de eventos así:
-function handleFieldChange(e) {
-    const field = e.target;
-    
-    // Filtra solo los campos que nos interesan
-    if (!field.matches('#tuFormulario input:not([type="hidden"]), #tuFormulario select, #tuFormulario textarea')) {
-        return;
-    }
+        // Función para manejar cambios en selects y otros campos
+        function handleFieldChange(e) {
+            const field = e.target;
+            
+            // Filtra solo los campos que nos interesan (excepto text/textarea)
+            if (!field.matches('#tuFormulario select, #tuFormulario input:not([type="text"]):not([type="hidden"])')) {
+                return;
+            }
 
-    // Ignora campos sin nombre o ID
-    if (!field.name && !field.id) {
-        return;
-    }
+            if (!field.name && !field.id) {
+                return;
+            }
 
-    console.log("Evento detectado en campo:", field.id || field.name, "Tipo:", e.type);
-    
-    let oldVal = field.dataset.oldValue || '';
-    let newVal;
-    
-    if (field.tagName.toLowerCase() === "select") {
-        newVal = field.options[field.selectedIndex].text;
-    } else {
-        newVal = field.value;
-    }
-    
-    console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
-    
-    if (oldVal !== newVal) {
-        let fieldLabel = "";
-        if (field.id) {
-            const label = document.querySelector('label[for="' + field.id + '"]');
-            if (label) {
-                fieldLabel = label.textContent.trim();
+            console.log("Evento change detectado en campo:", field.id || field.name);
+            
+            let oldVal = field.dataset.oldValue || '';
+            let newVal;
+            
+            if (field.tagName.toLowerCase() === "select") {
+                newVal = field.options[field.selectedIndex].text;
+            } else {
+                newVal = field.value;
+            }
+            
+            console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
+            
+            if (oldVal !== newVal) {
+                let fieldLabel = "";
+                if (field.id) {
+                    const label = document.querySelector('label[for="' + field.id + '"]');
+                    if (label) {
+                        fieldLabel = label.textContent.trim();
+                    }
+                }
+                if (!fieldLabel) {
+                    fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
+                }
+                console.log("Etiqueta del campo:", fieldLabel);
+                
+                updateModificationLog(fieldLabel, oldVal, newVal);
+                field.dataset.oldValue = newVal;
+                console.log("Valor antiguo actualizado a:", newVal);
             }
         }
-        if (!fieldLabel) {
-            fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
-        }
-        console.log("Etiqueta del campo:", fieldLabel);
-        
-        updateModificationLog(fieldLabel, oldVal, newVal);
-        field.dataset.oldValue = newVal;
-        console.log("Valor antiguo actualizado a:", newVal);
-    }
-}
 
         // Inicialización
         initializeFieldValues();
         
-        // Escuchar eventos de cambio (versión mejorada)
-        document.addEventListener('input', handleFieldChange, true);
-        document.addEventListener('change', handleFieldChange, true);
+        // Escuchar eventos
+        document.addEventListener('input', handleInputChange, true); // Para cambios de texto en tiempo real
+        document.addEventListener('change', handleFieldChange, true); // Para selects, checkboxes, etc.
     });
 </script>
-
 
 
 <script>
-    document.getElementById('idCliente').addEventListener('change', function() {
-        var clienteId = this.value; // Obtén el ID del cliente seleccionado
-        console.log('Cliente seleccionado:', clienteId); // Para depurar
+// Cache para marcas
+const marcasCache = {
+    all: null,
+    byClienteGeneral: {}
+};
 
-        // Si se seleccionó un cliente
-        if (clienteId) {
-            console.log('Haciendo la petición para obtener los clientes generales...');
+document.getElementById('idCliente').addEventListener('change', async function() {
+    const clienteId = this.value;
+    const tiendaSelect = document.getElementById('idTienda');
+    const clienteGeneralSelect = document.getElementById('idClienteGeneral');
+    const marcaSelect = document.getElementById('idMarca');
+    const direccionInput = document.getElementById('direccion');
+    
+    // Limpiar selects existentes
+    tiendaSelect.innerHTML = '<option value="" disabled>Seleccionar Tienda</option>';
+    clienteGeneralSelect.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>';
+    marcaSelect.innerHTML = '<option value="" disabled>Seleccionar Marca</option>';
+    
+    if (!clienteId) {
+        tiendaSelect.style.display = 'none';
+        clienteGeneralSelect.style.display = 'none';
+        return;
+    }
 
-            // Realizamos la petición para obtener los clientes generales asociados a este cliente
-            fetch(`/get-clientes-generales/${clienteId}`)
-                .then(response => response.json())
-                .then(data => {
-                    // console.log('Datos recibidos:', data); // Para depurar
-
-                    // Obtener el select de "Cliente General"
-                    var clienteGeneralSelect = document.getElementById('idClienteGeneral');
-
-                    // Limpiar las opciones anteriores del select de Cliente General
-                    clienteGeneralSelect.innerHTML =
-                        '<option value="" selected>Seleccionar Cliente General</option>';
-
-                    // Comprobar si hay datos
-                    if (data.length > 0) {
-                        console.log('Hay clientes generales asociados. Agregando opciones...');
-                        // Si hay clientes generales, agregarlos al select
-                        data.forEach(function(clienteGeneral) {
-                            var option = document.createElement('option');
-                            option.value = clienteGeneral.idClienteGeneral;
-                            option.textContent = clienteGeneral.descripcion;
-                            clienteGeneralSelect.appendChild(option);
-                        });
-                        // Mostrar el select de Cliente General
-                        clienteGeneralSelect.style.display = 'block';
-                    } else {
-                        console.log('No hay clientes generales asociados.');
-                        // Si no hay clientes generales, ocultar el select
-                        clienteGeneralSelect.style.display = 'none';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al obtener los clientes generales:', error);
-                    alert('Hubo un error al cargar los clientes generales.');
-                });
+    try {
+        // 1. Obtener datos del cliente
+        const clienteResponse = await fetch(`/get-cliente-data/${clienteId}`);
+        const clienteData = await clienteResponse.json();
+        
+        // 2. Obtener y procesar clientes generales
+        const clientesGeneralesResponse = await fetch(`/get-clientes-generales/${clienteId}`);
+        const clientesGeneralesData = await clientesGeneralesResponse.json();
+        
+        if (clientesGeneralesData.length > 0) {
+            clientesGeneralesData.forEach(clienteGeneral => {
+                const option = document.createElement('option');
+                option.value = clienteGeneral.idClienteGeneral;
+                option.textContent = clienteGeneral.descripcion;
+                clienteGeneralSelect.appendChild(option);
+            });
+            clienteGeneralSelect.style.display = 'block';
+            
+            // Evento para cuando cambie el cliente general
+            clienteGeneralSelect.addEventListener('change', handleClienteGeneralChange);
         } else {
-            console.log('No se seleccionó ningún cliente. Ocultando el select de Cliente General...');
-            // Si no hay cliente seleccionado, ocultar el select de Cliente General
-            document.getElementById('idClienteGeneral').style.display = 'none';
+            clienteGeneralSelect.style.display = 'none';
+            // Si no hay clientes generales, cargar todas las marcas
+            await loadMarcas('all');
         }
+
+        // 3. Determinar qué tiendas mostrar y actualizar dirección
+        let tiendasEndpoint;
+        if (clienteData.idTipoDocumento == 8 && clienteData.esTienda == 0) {
+            tiendasEndpoint = '/get-all-tiendas';
+            // Actualizar dirección con la del cliente
+            direccionInput.value = clienteData.direccion || '';
+        } else if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
+            tiendasEndpoint = `/get-tiendas-by-cliente/${clienteId}`;
+            // La dirección se actualizará cuando seleccione la tienda
+        } else {
+            tiendasEndpoint = '/get-no-tiendas';
+        }
+
+        // 4. Obtener tiendas (con dirección)
+        const tiendasResponse = await fetch(tiendasEndpoint);
+        const tiendasData = await tiendasResponse.json();
+
+        // 5. Actualizar el select de tiendas
+        tiendasData.forEach(tienda => {
+            const option = document.createElement('option');
+            option.value = tienda.idTienda;
+            option.textContent = tienda.nombre;
+            option.dataset.direccion = tienda.direccion; // Almacenar dirección en el option
+            
+            if (tienda.idTienda == @json($orden->idTienda)) {
+                option.selected = true;
+                // Si es tipo 9 y es tienda, actualizar dirección con la de la tienda seleccionada
+                if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
+                    direccionInput.value = tienda.direccion || '';
+                }
+            }
+            tiendaSelect.appendChild(option);
+        });
+        
+        // 6. Agregar evento para cambiar dirección al seleccionar tienda (solo para tipo 9)
+        if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
+            tiendaSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                direccionInput.value = selectedOption.dataset.direccion || '';
+            });
+        }
+        
+        // 7. Reinicializar NiceSelect para tienda
+        reinicializarNiceSelect(tiendaSelect);
+
+    } catch (error) {
+        console.error('Error:', error);
+        toastr.error('Error al cargar datos');
+    }
+});
+
+// Función para manejar cambio de cliente general
+async function handleClienteGeneralChange() {
+    const clienteGeneralId = this.value;
+    await loadMarcas(clienteGeneralId ? 'byClienteGeneral' : 'all', clienteGeneralId);
+}
+
+// Función para cargar marcas
+async function loadMarcas(type, clienteGeneralId = null) {
+    const marcaSelect = document.getElementById('idMarca');
+    
+    try {
+        // Mostrar loading
+        marcaSelect.innerHTML = '<option value="" disabled>Cargando marcas...</option>';
+        
+        // Obtener marcas según el tipo
+        let marcas = [];
+        
+        if (type === 'all') {
+            if (!marcasCache.all) {
+                const response = await fetch('/get-all-marcas');
+                marcasCache.all = await response.json();
+            }
+            marcas = marcasCache.all;
+        } else {
+            if (!marcasCache.byClienteGeneral[clienteGeneralId]) {
+                const response = await fetch(`/get-marcas-by-cliente-general/${clienteGeneralId}`);
+                marcasCache.byClienteGeneral[clienteGeneralId] = await response.json();
+            }
+            marcas = marcasCache.byClienteGeneral[clienteGeneralId];
+        }
+        
+        // Actualizar select de marcas
+        updateMarcasSelect(marcas);
+        
+    } catch (error) {
+        console.error(`Error al cargar marcas (${type}):`, error);
+        toastr.error('Error al cargar marcas');
+        // Fallback a todas las marcas
+        if (type !== 'all') {
+            await loadMarcas('all');
+        }
+    }
+}
+
+// Función para actualizar select de marcas
+function updateMarcasSelect(marcas) {
+    const marcaSelect = document.getElementById('idMarca');
+    const currentMarcaId = @json($orden->idMarca);
+    
+    marcaSelect.innerHTML = '<option value="" disabled>Seleccionar Marca</option>';
+    
+    marcas.forEach(marca => {
+        const option = new Option(marca.nombre, marca.idMarca);
+        if (marca.idMarca == currentMarcaId) option.selected = true;
+        marcaSelect.add(option);
     });
+    
+    // Reiniciar NiceSelect
+    reinicializarNiceSelect(marcaSelect);
+}
+
+// Función para reinicializar NiceSelect
+function reinicializarNiceSelect(selectElement) {
+    if (typeof NiceSelect !== 'undefined') {
+        // Eliminar instancia anterior si existe
+        const niceSelectInstance = selectElement.nextElementSibling;
+        if (niceSelectInstance?.classList.contains('nice-select')) {
+            niceSelectInstance.remove();
+        }
+        
+        // Mostrar y reinicializar
+        selectElement.style.display = 'block';
+        NiceSelect.bind(selectElement, { searchable: true });
+    } else {
+        selectElement.style.display = 'block';
+    }
+}
+
+// Cargar todas las marcas al inicio (si no hay cliente general seleccionado)
+document.addEventListener('DOMContentLoaded', async () => {
+    const clienteGeneralSelect = document.getElementById('idClienteGeneral');
+    if (clienteGeneralSelect.value === '') {
+        await loadMarcas('all');
+    }
+});
 </script>
+
 
 <script>
     document.getElementById('idMarca').addEventListener('change', function() {
