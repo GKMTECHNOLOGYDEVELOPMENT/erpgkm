@@ -140,32 +140,42 @@
         }
 
         // ✅ Previsualizar imágenes en el modal al seleccionar archivos
-        imagenInput.addEventListener("change", function() {
-            imagePreviewContainer.innerHTML =
-                ""; // Limpiar el contenedor antes de agregar nuevas imágenes
+        imagenInput.addEventListener("change", async function() {
+            imagePreviewContainer.innerHTML = ""; // Limpiar el contenedor
 
-            Array.from(imagenInput.files).forEach((file, index) => {
-                const reader = new FileReader();
+            const files = Array.from(imagenInput.files);
 
-                reader.onload = function(event) {
-                    const imageUrl = event.target.result;
+            // Leer todas las imágenes y mantener el orden
+            const imagenesConUrls = await Promise.all(
+                files.map(file => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            resolve({
+                                url: e.target.result,
+                                file
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                })
+            );
 
-                    let preview = document.createElement("div");
-                    preview.classList.add("preview-item", "flex", "flex-col",
-                        "items-center", "gap-2", "p-2", "rounded-lg", "shadow");
+            imagenesConUrls.forEach((imgData, index) => {
+                const preview = document.createElement("div");
+                preview.classList.add("preview-item", "flex", "flex-col", "items-center",
+                    "gap-2", "p-2", "rounded-lg", "shadow");
 
-                    preview.innerHTML = `
-                    <img src="${imageUrl}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
-                    <input type="text" placeholder="Descripción de la imagen ${index + 1}" 
-                        class="descripcion-input form-input w-full text-sm p-1 rounded border border-gray-300">
-                `;
+                preview.innerHTML = `
+            <img src="${imgData.url}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
+            <input type="text" placeholder="Descripción de la imagen ${index + 1}" 
+                class="descripcion-input form-input w-full text-sm p-1 rounded border border-gray-300">
+        `;
 
-                    imagePreviewContainer.appendChild(preview);
-                };
-
-                reader.readAsDataURL(file);
+                imagePreviewContainer.appendChild(preview);
             });
         });
+
 
         window.eliminarImagen = function(imagenId) {
             fetch(`/api/eliminarImagen/${imagenId}`, {
@@ -253,6 +263,7 @@
                 const descripcionInputs = imagePreviewContainer.querySelectorAll(".descripcion-input");
 
                 let archivosProcesados = 0;
+                const lista = [];
 
                 files.forEach((file, index) => {
                     new Compressor(file, {
@@ -263,13 +274,26 @@
                         success(compressedFile) {
                             const descripcion = descripcionInputs[index]?.value ||
                                 "Sin descripción";
-                            formData.append("imagenes[]", compressedFile,
-                                `imagen${index}.webp`);
-                            formData.append("descripciones[]", descripcion);
+                            lista.push({
+                                index,
+                                file: compressedFile,
+                                name: `imagen${index}.webp`,
+                                descripcion
+                            });
 
                             archivosProcesados++;
 
                             if (archivosProcesados === files.length) {
+                                // Ordenar por índice
+                                lista.sort((a, b) => a.index - b.index);
+
+                                lista.forEach(item => {
+                                    formData.append("imagenes[]", item.file,
+                                        item.name);
+                                    formData.append("descripciones[]", item
+                                        .descripcion);
+                                });
+
                                 formData.append("ticket_id", ticketId);
                                 formData.append("visita_id", visitaId);
 
@@ -292,24 +316,24 @@
                                         if (data.success) {
                                             toastr.success(
                                                 "Imágenes comprimidas y guardadas correctamente."
-                                                );
+                                            );
                                             modalAgregarImagen.classList.add(
                                                 "hidden");
                                             imagenInput.value = "";
                                             imagePreviewContainer.innerHTML = "";
                                             renderizarImagenes
-                                        (); // actualiza el swiper
+                                                (); // actualiza el swiper
                                         } else {
                                             toastr.error(data.message ||
                                                 "Error al guardar las imágenes."
-                                                );
+                                            );
                                         }
                                     })
                                     .catch(error => {
                                         console.error("Error:", error);
                                         toastr.error(
                                             "Hubo un error al guardar las imágenes."
-                                            );
+                                        );
                                     });
                             }
                         },
@@ -320,12 +344,10 @@
                     });
                 });
             });
-
-
-
         } else {
             console.error("guardarImagenBtn no encontrado en el DOM");
         }
+
 
         // ✅ Maneja el cambio del select "Estado"
         estadoSelect.addEventListener("change", toggleCardFotos);
