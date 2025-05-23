@@ -1,5 +1,5 @@
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-
+<link rel="stylesheet" href="https://unpkg.com/viewerjs/dist/viewer.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 
 <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
@@ -11,9 +11,12 @@
 
     <!-- Botón para abrir el modal -->
     <!-- Botón para abrir el modal -->
-    <button id="abrirModalAgregarImagen" class="btn btn-primary mt-4" @click="$dispatch('toggle-modal-agregar-imagen')">
-        Agregar Imagen
-    </button>
+    <div class="flex items-center gap-2 mt-4">
+        <button id="abrirModalAgregarImagen" class="btn btn-primary" @click="$dispatch('toggle-modal-agregar-imagen')">
+            Agregar Imagen
+        </button>
+        <button id="eliminarTodas" class="btn btn-danger hidden">Eliminar Todas</button>
+    </div>
     <!-- Swiper Container -->
     <div class="swiper w-full max-w-4x2 h-80 rounded-lg overflow-hidden mt-4" id="slider5">
         <div class="swiper-wrapper" id="swiperWrapper">
@@ -50,12 +53,12 @@
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
             <div x-show="open" x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl my-8 animate__animated animate__zoomInUp">
 
                 <!-- Header del Modal -->
                 <div class="flex items-center justify-between bg-[#fbfbfb] dark:bg-[#121c2c] px-5 py-3">
                     <h5 class="font-bold text-lg">Agregar Imágenes</h5>
-                    <button id="cerrarModal" class="text-gray-600 hover:text-black">
+                    <button class="text-gray-600 hover:text-black" @click="open = false">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                             stroke-linejoin="round" class="w-6 h-6">
@@ -77,7 +80,7 @@
 
                         <!-- Contenedor de imágenes seleccionadas en el modal -->
                         <div id="imagePreviewContainer"
-                            class="preview-container mt-4 p-2 border rounded-lg overflow-y-auto max-h-40 flex flex-wrap gap-2">
+                            class="preview-container mt-4 p-2 border rounded-lg overflow-y-auto max-h-40 flex flex-wrap justify-center gap-2">
                         </div>
 
                     </form>
@@ -88,7 +91,11 @@
                     <button type="button" class="btn btn-outline-danger" @click="open = false">
                         Cancelar
                     </button>
-                    <button type="submit" class="btn btn-primary" id="guardarImagen">Guardar</button>
+                    <button type="submit" class="btn btn-primary flex items-center gap-2" id="guardarImagen">
+                        <span class="label">Guardar</span>
+                        <span
+                            class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -102,7 +109,7 @@
 <!-- Incluir SignaturePad.js -->
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-
+<script src="https://unpkg.com/viewerjs/dist/viewer.min.js"></script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -124,7 +131,7 @@
          * -------------------------------- */
         const ticketId = "{{ $ticket->idTickets }}";
         const visitaId = "{{ $visitaId ?? 'null' }}";
-
+        let imagenesSeleccionadas = [];
         /** -------------------------------
          *  3️⃣ Funciones
          * -------------------------------- */
@@ -139,42 +146,77 @@
             }
         }
 
-        // ✅ Previsualizar imágenes en el modal al seleccionar archivos
+        // ✅ Previsualizar imágenes en orden garantizado
         imagenInput.addEventListener("change", async function() {
-            imagePreviewContainer.innerHTML = ""; // Limpiar el contenedor
+            imagePreviewContainer.innerHTML = ""; // Limpiar contenedor
+            imagenesSeleccionadas = []; // Reiniciar lista real
 
             const files = Array.from(imagenInput.files);
 
-            // Leer todas las imágenes y mantener el orden
-            const imagenesConUrls = await Promise.all(
+            const imagenes = await Promise.all(
                 files.map(file => {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            resolve({
-                                url: e.target.result,
-                                file
-                            });
-                        };
-                        reader.readAsDataURL(file);
+                    return new Promise(resolve => {
+                        new Compressor(file, {
+                            quality: 0.7,
+                            maxWidth: 1024,
+                            convertTypes: ['image/webp'],
+                            success(compressedFile) {
+                                const reader = new FileReader();
+                                reader.onload = e => resolve({
+                                    file: compressedFile,
+                                    url: e.target.result
+                                });
+                                reader.readAsDataURL(compressedFile);
+                            },
+                            error(err) {
+                                console.error("Error al comprimir:", err);
+                                resolve({
+                                    file,
+                                    url: URL.createObjectURL(file)
+                                });
+                            }
+                        });
                     });
                 })
             );
 
-            imagenesConUrls.forEach((imgData, index) => {
+            imagenes.forEach((imgData, index) => {
+                imagenesSeleccionadas.push(imgData.file); // Guardamos archivo real
+
                 const preview = document.createElement("div");
                 preview.classList.add("preview-item", "flex", "flex-col", "items-center",
                     "gap-2", "p-2", "rounded-lg", "shadow");
+                preview.setAttribute("data-index", index);
 
                 preview.innerHTML = `
-            <img src="${imgData.url}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
+            <div class="relative">
+                <img src="${imgData.url}" alt="Imagen ${index + 1}" class="w-20 h-20 object-cover rounded-lg">
+                <button type="button"
+                    class="absolute top-0 right-0 w-5 h-5 text-white rounded-full text-xs flex items-center justify-center shadow remove-image"
+                    style="background-color: #dc2626;" title="Eliminar imagen">
+                    &times;
+                </button>
+            </div>
             <input type="text" placeholder="Descripción de la imagen ${index + 1}" 
                 class="descripcion-input form-input w-full text-sm p-1 rounded border border-gray-300">
         `;
 
+                // Eliminar también del array real
+                preview.querySelector(".remove-image").addEventListener("click", () => {
+                    const i = Array.from(imagePreviewContainer.children).indexOf(
+                        preview);
+                    if (i > -1) {
+                        imagenesSeleccionadas.splice(i, 1);
+                    }
+                    preview.remove();
+                });
+
                 imagePreviewContainer.appendChild(preview);
             });
         });
+
+
+
 
 
         window.eliminarImagen = function(imagenId) {
@@ -202,22 +244,22 @@
 
         // ✅ Renderizar imágenes existentes en el Swiper
         function renderizarImagenes() {
-            swiperWrapper.innerHTML = ""; // Limpiar el swiper antes de agregar nuevas imágenes
+            swiperWrapper.innerHTML = ""; // Limpiar
 
             fetch(`/api/imagenes/${ticketId}/${visitaId}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.imagenes) {
+                    const btnEliminarTodas = document.getElementById("eliminarTodas");
+                    if (data.imagenes && data.imagenes.length > 0) {
+                        btnEliminarTodas.classList.remove("hidden");
                         data.imagenes.forEach((img, index) => {
                             let swiperSlide = document.createElement("div");
                             swiperSlide.classList.add("swiper-slide", "relative", "flex",
                                 "items-center", "justify-center");
 
                             swiperSlide.innerHTML = `
-                                <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
+                                <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative viewer-item">
                                     <img src="${img.src}" alt="Imagen ${index + 1}" class="w-full h-full object-cover rounded-lg" />
-
-                                    <!-- Botón "X" para eliminar -->
                                     <button onclick="eliminarImagen(${img.id})"
                                         class="absolute top-2 right-2 w-8 h-8 bg-danger hover:bg-red-700 text-white transition-colors duration-200
                                             rounded-full shadow-md flex items-center justify-center z-10">
@@ -225,12 +267,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
                                     </button>
-
-
-
-                                    <!-- Descripción -->
-                                    <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium 
-                                                max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
+                                    <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
                                         <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
                                             ${img.description ? img.description : "Sin descripción"}
                                         </div>
@@ -241,8 +278,27 @@
                             swiperWrapper.appendChild(swiperSlide);
                         });
 
-                        // 🔹 Asegurar que el Swiper se actualiza correctamente
-                        setTimeout(() => swiper5.update(), 100);
+                        setTimeout(() => {
+                            swiper5.update();
+
+                            const container = document.getElementById('swiperWrapper');
+                            if (window.swiperViewer) {
+                                window.swiperViewer.destroy();
+                            }
+                            window.swiperViewer = new Viewer(container, {
+                                navbar: false,
+                                toolbar: true,
+                                title: false,
+                                transition: true,
+                                zoomable: true,
+                                movable: true,
+                                scalable: false,
+                                fullscreen: false
+                            });
+                        }, 100);
+
+                    } else {
+                        btnEliminarTodas.classList.add("hidden");
                     }
                 })
                 .catch(error => {
@@ -250,104 +306,108 @@
                 });
         }
 
+
         // ✅ Guardar imágenes en la base de datos
         if (guardarImagenBtn) {
             guardarImagenBtn.addEventListener("click", function() {
-                if (imagenInput.files.length === 0) {
+                if (imagenesSeleccionadas.length === 0) {
                     toastr.error("Debe seleccionar al menos una imagen.");
                     return;
                 }
 
+                const label = guardarImagenBtn.querySelector(".label");
+                const spinner = guardarImagenBtn.querySelector(".spinner");
+                label.textContent = "Guardando...";
+                spinner.classList.remove("hidden");
+                guardarImagenBtn.disabled = true;
+
                 const formData = new FormData();
-                const files = Array.from(imagenInput.files);
-                const descripcionInputs = imagePreviewContainer.querySelectorAll(".descripcion-input");
+                const descripcionInputs = [...imagePreviewContainer.querySelectorAll(".preview-item")];
 
-                let archivosProcesados = 0;
-                const lista = [];
+                imagenesSeleccionadas.forEach((file, index) => {
+                    const descripcionInput = descripcionInputs[index]?.querySelector(
+                        ".descripcion-input");
+                    const descripcion = descripcionInput?.value || "Sin descripción";
 
-                files.forEach((file, index) => {
-                    new Compressor(file, {
-                        quality: 0.8, // 80% calidad
-                        maxWidth: 1024,
-                        convertTypes: ['image/webp'],
-                        convertSize: 0, // convierte todo a webp
-                        success(compressedFile) {
-                            const descripcion = descripcionInputs[index]?.value ||
-                                "Sin descripción";
-                            lista.push({
-                                index,
-                                file: compressedFile,
-                                name: `imagen${index}.webp`,
-                                descripcion
-                            });
-
-                            archivosProcesados++;
-
-                            if (archivosProcesados === files.length) {
-                                // Ordenar por índice
-                                lista.sort((a, b) => a.index - b.index);
-
-                                lista.forEach(item => {
-                                    formData.append("imagenes[]", item.file,
-                                        item.name);
-                                    formData.append("descripciones[]", item
-                                        .descripcion);
-                                });
-
-                                formData.append("ticket_id", ticketId);
-                                formData.append("visita_id", visitaId);
-
-                                fetch("/api/guardarImagen", {
-                                        method: "POST",
-                                        headers: {
-                                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                        },
-                                        body: formData
-                                    })
-                                    .then(response => {
-                                        if (!response.ok) {
-                                            return response.text().then(text => {
-                                                throw new Error(text);
-                                            });
-                                        }
-                                        return response.json();
-                                    })
-                                    .then(data => {
-                                        if (data.success) {
-                                            toastr.success(
-                                                "Imágenes comprimidas y guardadas correctamente."
-                                            );
-                                            modalAgregarImagen.classList.add(
-                                                "hidden");
-                                            imagenInput.value = "";
-                                            imagePreviewContainer.innerHTML = "";
-                                            renderizarImagenes
-                                                (); // actualiza el swiper
-                                        } else {
-                                            toastr.error(data.message ||
-                                                "Error al guardar las imágenes."
-                                            );
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error("Error:", error);
-                                        toastr.error(
-                                            "Hubo un error al guardar las imágenes."
-                                        );
-                                    });
-                            }
-                        },
-                        error(err) {
-                            toastr.error("Error al comprimir imagen: " + err.message);
-                            console.error("❌ Compresión fallida:", err);
-                        }
-                    });
+                    formData.append("imagenes[]", file, `imagen_${index}.webp`);
+                    formData.append("descripciones[]", descripcion);
                 });
+
+                formData.append("ticket_id", ticketId);
+                formData.append("visita_id", visitaId);
+
+                fetch('/api/guardarImagen', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(text);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success("Imágenes guardadas correctamente.");
+                            modalAgregarImagen.classList.add("hidden");
+                            imagenInput.value = "";
+                            imagePreviewContainer.innerHTML = "";
+                            renderizarImagenes();
+                        } else {
+                            toastr.error("Error al guardar las imágenes.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        toastr.error("Hubo un error al guardar las imágenes.");
+                    })
+                    .finally(() => {
+                        label.textContent = "Guardar";
+                        spinner.classList.add("hidden");
+                        guardarImagenBtn.disabled = false;
+                    });
             });
+
         } else {
             console.error("guardarImagenBtn no encontrado en el DOM");
         }
 
+
+        document.getElementById("eliminarTodas").addEventListener("click", function() {
+            if (!confirm(
+                    "¿Estás seguro de eliminar TODAS las imágenes? Esta acción no se puede deshacer."))
+                return;
+
+            fetch(`/api/eliminarImagenesMasivo`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ticket_id: ticketId,
+                        visita_id: visitaId
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        toastr.success("Todas las imágenes fueron eliminadas.");
+                        renderizarImagenes();
+                    } else {
+                        toastr.error("Error al eliminar las imágenes.");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    toastr.error("Error en la petición.");
+                });
+        });
 
         // ✅ Maneja el cambio del select "Estado"
         estadoSelect.addEventListener("change", toggleCardFotos);
