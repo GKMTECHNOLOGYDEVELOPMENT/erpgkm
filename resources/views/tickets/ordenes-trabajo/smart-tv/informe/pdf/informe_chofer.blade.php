@@ -140,8 +140,10 @@
                         <div class="text-right text-xs leading-tight space-y-1 mt-1">
                             <p><span class="font-bold">NOMBRE:</span> {{ strtoupper($visita['tecnico']) }}</p>
                             <p>
-                                <span class="font-bold">{{ strtoupper($visita['tipo_documento']) }}:</span>
-                                {{ $visita['documento'] }}
+                                <span class="font-bold">
+                                    {{ strtoupper($visita['tipo_documento'] ?? 'DOCUMENTO') }}:
+                                </span>
+                                {{ $visita['documento'] ?? 'N/A' }}
                             </p>
                             <p><span class="font-bold">PLACA:</span> {{ $visita['vehiculo_placa'] }}</p>
                         </div>
