@@ -554,8 +554,7 @@ class UsuarioController extends Controller
         // Filtramos los usuarios por tipoUsuario, tipoArea y estado
         $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])
             ->where('estado', 1) // Estado activo
-            ->where('idTipoUsuario', 1) // Tipo de usuario igual a 1
-            ->where('idTipoArea', 4) // Tipo de área igual a 4
+        
             ->get()
             ->map(function ($usuario) {
                 return [

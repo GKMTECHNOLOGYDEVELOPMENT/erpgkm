@@ -49,27 +49,26 @@ class RepuestosController extends Controller
         try {
             // Validación de datos
             $validatedData = $request->validate([
-                'codigo_barras' => 'nullable|string|max:255',
-                'nombre' => 'nullable|string|max:255',
-                'stock_total' => 'nullable|integer',
-                'stock_minimo' => 'nullable|integer',
-                'moneda_compra' => 'nullable|integer',
-                'moneda_venta' => 'nullable|integer',
-                'precio_compra' => 'nullable|numeric',
-                'precio_venta' => 'nullable|numeric',
-                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'sku' => 'nullable|string|max:255',
-                'peso' => 'nullable|numeric',
-                'mostrarWeb' => 'nullable|string|max:255',
-                'estado' => 'nullable|boolean',
-                'idUnidad' => 'nullable|integer',
-                'idTipoArticulo' => 'nullable|integer',
-                'idModelo' => 'nullable|integer',
+                'codigo_barras' => 'required|string|max:255|unique:articulos,codigo_barras',
+                'sku' => 'required|string|max:255|unique:articulos,sku',
+                'codigo_repuesto' => 'required|string|max:255|unique:articulos,codigo_repuesto',
+                'stock_total' => 'required|nullable|integer',
+                'stock_minimo' => 'required|nullable|integer',
+                'moneda_compra' => 'required|nullable|integer',
+                'moneda_venta' => 'required|nullable|integer',
+                'precio_compra' => 'required|nullable|numeric',
+                'precio_venta' => 'required|nullable|numeric',
+                'foto' => 'required|nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'pulgadas' => 'required|nullable|string|max:255',
+                'idUnidad' => 'required|nullable|integer',
+                'idModelo' => 'required|nullable|integer',
             ]);
             
             // Asignación de valores por defecto
             $dataArticulo = $validatedData;
             $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
+            $dataArticulo['idTipoArticulo'] = 2; // Tipo de artículo por defecto
+            $dataArticulo['fecha_ingreso'] = now(); // Fecha de ingreso con valor actual
             
             // Crear el artículo
             $articulo = Articulo::create($dataArticulo);
@@ -123,7 +122,7 @@ class RepuestosController extends Controller
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
 
-    return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    return view('almacen.repuestos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
 
 
@@ -136,67 +135,72 @@ public function detalle($id)
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
 
-    return view('almacen.productos.articulos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    return view('almacen.repuestos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
-
-
-
 public function update(Request $request, $id)
 {
     DB::beginTransaction();
+
+    Log::info("Inicio de actualización del artículo con ID: {$id}");
+
     try {
+        // Log de entrada de datos
+        Log::debug("Datos recibidos para actualización:", $request->except(['foto', 'foto_codigobarras', 'fotosku']));
+
         // Validar datos
         $validatedData = $request->validate([
-            'codigo_barras' => 'nullable|string|max:255',
-            'nombre' => 'required|string|max:255',
-            'stock_total' => 'nullable|integer',
-            'stock_minimo' => 'nullable|integer',
-            'precio_compra' => 'nullable|numeric',
-            'precio_venta' => 'nullable|numeric',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Aumenté a 5MB
-            'sku' => 'nullable|string|max:255',
-            'peso' => 'nullable|numeric',
-            'mostrarWeb' => 'nullable|boolean',
-            'estado' => 'nullable|boolean',
+            'codigo_barras' => 'required|string|max:255',
+            'sku' => 'required|string|max:255',
+            'codigo_repuesto' => 'required|string|max:255',
+            'stock_total' => 'required|integer|min:0',
+            'stock_minimo' => 'nullable|integer|min:1',
+            'moneda_compra' => 'required|integer',
+            'moneda_venta' => 'required|integer',
+            'precio_compra' => 'required|numeric|min:0.01',
+            'precio_venta' => 'required|numeric|min:0.01|gt:precio_compra',
+            'pulgadas' => 'required|string|max:255',
             'idUnidad' => 'required|integer',
-            'idTipoArticulo' => 'required|integer',
             'idModelo' => 'required|integer',
         ]);
 
+        Log::info("Validación completada correctamente para artículo ID: {$id}");
+
         $articulo = Articulo::findOrFail($id);
+        Log::debug("Artículo encontrado:", $articulo->makeHidden(['foto', 'fotosku', 'foto_codigobarras'])->toArray());
 
-        // Manejar imagen solo si es válida
-        if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
-            $foto = $request->file('foto');
-            
-            // Verificar tamaño mínimo (1KB)
-            if ($foto->getSize() < 1024) {
-                throw new \Exception('La imagen es demasiado pequeña (mínimo 1KB requerido)');
-            }
-            
-            $fotoBinario = file_get_contents($foto->getRealPath());
-            if ($fotoBinario === false) {
-                throw new \Exception('No se pudo leer el archivo de imagen');
-            }
-            
-            $validatedData['foto'] = $fotoBinario;
-            $validatedData['foto_mime'] = $foto->getClientMimeType();
-        } else {
-            unset($validatedData['foto']);
-        }
+        // Campos que sí deben actualizarse
+        $camposActualizar = collect($request->only([
+            'codigo_barras',
+            'sku',
+            'codigo_repuesto',
+            'stock_total',
+            'stock_minimo',
+            'moneda_compra',
+            'moneda_venta',
+            'precio_compra',
+            'precio_venta',
+            'pulgadas',
+            'idUnidad',
+            'idModelo',
+        ]));
 
-        // Actualizar artículo
-        $articulo->update($validatedData);
+        $articulo->update($camposActualizar->toArray());
+
         DB::commit();
+
+        Log::info("Artículo ID {$id} actualizado exitosamente.");
+        Log::debug("Datos actualizados del artículo:", $articulo->makeHidden(['foto', 'fotosku', 'foto_codigobarras'])->toArray());
 
         return response()->json([
             'success' => true,
             'message' => 'Artículo actualizado exitosamente.',
-            'data' => $articulo
+            'data' => $articulo->makeHidden(['foto', 'fotosku', 'foto_codigobarras'])
         ]);
 
     } catch (\Illuminate\Validation\ValidationException $e) {
         DB::rollBack();
+        Log::warning("Error de validación al actualizar artículo ID {$id}: ", $e->errors());
+
         return response()->json([
             'success' => false,
             'message' => 'Error de validación',
@@ -204,7 +208,12 @@ public function update(Request $request, $id)
         ], 422);
     } catch (\Exception $e) {
         DB::rollBack();
-        Log::error('Error actualizando artículo ID '.$id.': '.$e->getMessage()."\n".$e->getTraceAsString());
+        Log::error("Excepción al actualizar artículo ID {$id}: ".$e->getMessage(), [
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
         return response()->json([
             'success' => false,
             'message' => 'Error: '.$e->getMessage(),
@@ -212,6 +221,58 @@ public function update(Request $request, $id)
             'line' => $e->getLine()
         ], 500);
     }
+}
+
+
+
+public function imagen($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $unidades = Unidad::all();
+    $tiposArticulo = Tipoarticulo::all();
+    $modelos = Modelo::all();
+    $monedas = Moneda::all();
+    $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
+
+    return view('almacen.repuestos.imagen', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+}
+
+
+
+public function updateFoto(Request $request, $id)
+{
+    $articulo = Articulo::findOrFail($id);
+
+    if ($request->hasFile('foto')) {
+        $file = $request->file('foto');
+
+        $request->validate([
+            'foto' => 'image|mimes:jpeg,png|max:3072', // 3MB
+        ]);
+
+        $binary = file_get_contents($file->getRealPath());
+        $articulo->foto = $binary;
+        $articulo->save();
+
+        return response()->json([
+            'success' => true,
+            'preview_url' => 'data:image/jpeg;base64,' . base64_encode($binary)
+        ]);
+    }
+
+    return response()->json(['success' => false]);
+}
+
+public function deleteFoto($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $articulo->foto = null;
+    $articulo->save();
+
+    return response()->json([
+        'success' => true,
+        'preview_url' => asset('assets/images/articulo/producto-default.png')
+    ]);
 }
 
     public function destroy($id)
@@ -249,28 +310,51 @@ public function update(Request $request, $id)
         return $pdf->download('reporte-articulos.pdf');
     }
 
-    public function getAll()
+  public function getAll(Request $request)
     {
-        $articulos = Articulo::with(['unidad', 'tipoarticulo', 'modelo'])->get();
+        $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo'])
+        ->where('idTipoArticulo', 2); // ✅ Filtrar solo tipo de artículo = 2
     
-        $articulosData = $articulos->map(function ($articulo) {
+        $total = $query->count();
+    
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                  ->orWhere('codigo_barras', 'like', "%$search%")
+                  ->orWhere('sku', 'like', "%$search%");
+            });
+        }
+    
+        $filtered = $query->count();
+    
+        $articulos = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+    
+        $data = $articulos->map(function ($articulo) {
             return [
                 'idArticulos' => $articulo->idArticulos,
                 'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
                 'nombre' => $articulo->nombre,
-                'unidad' => $articulo->unidad ? $articulo->unidad->nombre : 'Sin Unidad',
+                'codigo_repuesto' => $articulo->codigo_repuesto,
+                'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
                 'codigo_barras' => $articulo->codigo_barras,
                 'stock_total' => $articulo->stock_total,
                 'sku' => $articulo->sku,
-                'tipo_articulo' => $articulo->tipoarticulo ? $articulo->tipoarticulo->nombre : 'Sin Tipo',
-                'modelo' => $articulo->modelo ? $articulo->modelo->nombre : 'Sin Modelo',
+                'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
+                'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
                 'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
             ];
         });
     
-        return response()->json($articulosData);
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
-
 
     public function checkNombre(Request $request)
     {

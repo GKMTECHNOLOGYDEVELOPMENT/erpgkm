@@ -83,7 +83,9 @@ class Articulo extends Model
 		'idTipoArticulo',
 		'idModelo',
 		'foto_codigobarras',
-		'fotosku'
+		'fotosku',
+		'pulgadas',
+		'codigo_repuesto'
 	];
 
 	public function unidad()
