@@ -10,9 +10,11 @@ use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
+use App\Http\Controllers\almacen\repuestos\RepuestosController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
+use App\Models\Articulo;
 use App\Models\CuentasBancarias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +47,8 @@ Route::get('/modelo', [ModelosController::class, 'getAll']);
 Route::get('/articulos', [ArticulosController::class, 'getAll']);
 Route::get('/ordenes', [OrdenesTrabajoController::class, 'getAll']);
 Route::get('/ordenes/helpdesk', [OrdenesHelpdeskController::class, 'getAll']);
+Route::get('/repuestos', [RepuestosController::class, 'getAll']);
+
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);
@@ -221,3 +225,20 @@ Route::get('/tienda/{id}', function ($id) {
 
 Route::get('/constancias/por-ticket/{ticketId}', [OrdenesTrabajoController::class, 'porTicket']);
 Route::delete('/constancias/fotos/{fotoId}', [OrdenesTrabajoController::class, 'eliminarFoto']);
+
+Route::get('/validar-codigo_barras', function (Request $request) {
+    $exists = Articulo::where('codigo_barras', $request->valor)->exists();
+    return response()->json(['exists' => $exists]);
+});
+
+Route::get('/validar-sku', function (Request $request) {
+    $exists = Articulo::where('sku', $request->valor)->exists();
+    return response()->json(['exists' => $exists]);
+});
+
+Route::get('/validar-codigo_repuesto', function (Request $request) {
+    $exists = Articulo::where('codigo_repuesto', $request->valor)->exists();
+    return response()->json(['exists' => $exists]);
+});
+
+

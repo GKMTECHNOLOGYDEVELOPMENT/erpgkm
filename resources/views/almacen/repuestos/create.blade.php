@@ -5,10 +5,10 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="{{ route('articulos.index') }}" class="text-primary hover:underline">Repuestos</a>
+                <a href="{{ route('repuestos.index') }}" class="text-primary hover:underline">Repuestos</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                <span>Crear Repuesto</span>
+                <span>Crear Repuesto nuevo</span>
             </li>
         </ul>
     </div>
@@ -16,7 +16,7 @@
     <div class="panel mt-6 p-5 max-w-4xl mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Nuevo Repuesto</h2>
 
-        <form id="articuloForm" method="POST" action="{{ route('articulos.store') }}" enctype="multipart/form-data">
+        <form id="articuloForm" method="POST" action="{{ route('repuestos.store') }}" enctype="multipart/form-data">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -24,7 +24,7 @@
                 <div>
                     <label for="codigo_barras" class="block text-sm font-medium">Código de Barras *</label>
                     <input id="codigo_barras" name="codigo_barras" type="text" class="form-input w-full"
-                        placeholder="Ingrese código de barras" required>
+                        placeholder="Ingrese código de barras" >
                 </div>
 
                 <!-- SKU -->
@@ -43,13 +43,15 @@
                 <!-- Modelo -->
                 <div>
                     <label for="idModelo" class="block text-sm font-medium">Modelo *</label>
-                    <select id="idModelo" name="idModelo" class="select2 w-full" style="display: none" required>
+                    <select id="idModelo" name="idModelo" class="select2 w-full" style="display: none" >
                         <option value="" disabled selected>Seleccionar Modelo</option>
                         @foreach ($modelos as $modelo)
                             <option value="{{ $modelo->idModelo }}" 
                                 {{ (isset($modeloSeleccionado) && $modeloSeleccionado == $modelo->idModelo) ? 'selected' : '' }}>
                                 {{ $modelo->nombre }} - 
-                                {{ $modelo->marca->nombre ?? 'Sin Marca' }}
+                                {{ $modelo->marca->nombre ?? 'Sin Marca' }} -
+                                {{ $modelo->categoria->nombre ?? 'Sin Marca' }}
+
                             </option>
                         @endforeach
                     </select>
@@ -64,7 +66,7 @@
                             <span id="precio_compra_symbol">S/</span>
                         </button>
                         <input id="precio_compra" name="precio_compra" type="number" step="0.01" 
-                            class="form-input flex-1" placeholder="0.00" required>
+                            class="form-input flex-1" placeholder="0.00" >
                         <input type="hidden" id="moneda_compra" name="moneda_compra" value="0">
                     </div>
                 </div>
@@ -78,7 +80,7 @@
                             <span id="precio_venta_symbol">S/</span>
                         </button>
                         <input id="precio_venta" name="precio_venta" type="number" step="0.01" 
-                            class="form-input flex-1" placeholder="0.00" required>
+                            class="form-input flex-1" placeholder="0.00" >
                         <input type="hidden" id="moneda_venta" name="moneda_venta" value="0">
                     </div>
                 </div>
@@ -87,7 +89,7 @@
                 <div>
                     <label for="stock_total" class="block text-sm font-medium">Stock Total *</label>
                     <input id="stock_total" name="stock_total" type="number" class="form-input w-full"
-                        placeholder="Ingrese stock total" required>
+                        placeholder="Ingrese stock total" >
                 </div>
 
                 <!-- Stock Mínimo -->
@@ -100,7 +102,7 @@
                 <!-- Unidad de Medida -->
                 <div>
                     <label for="idUnidad" class="block text-sm font-medium">Unidad de Medida *</label>
-                    <select id="idUnidad" name="idUnidad" class="select2 w-full" style="display: none" required>
+                    <select id="idUnidad" name="idUnidad" class="select2 w-full" style="display: none" >
                         <option value="" disabled selected>Seleccionar Unidad</option>
                         @foreach ($unidades as $unidad)
                             <option value="{{ $unidad->idUnidad }}">{{ $unidad->nombre }}</option>
@@ -153,35 +155,57 @@
         </form>
     </div>
 
-    <!-- Scripts -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar select2
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
-            });
-
-            // Alternar moneda de compra
-            document.getElementById("toggleMonedaCompra").addEventListener("click", function() {
-                let symbol = document.getElementById("precio_compra_symbol");
-                let monedaInput = document.getElementById("moneda_compra");
-                symbol.textContent = symbol.textContent === "S/" ? "$" : "S/";
-                monedaInput.value = symbol.textContent === "$" ? "0" : "1";
-            });
-
-            // Alternar moneda de venta
-            document.getElementById("toggleMonedaVenta").addEventListener("click", function() {
-                let symbol = document.getElementById("precio_venta_symbol");
-                let monedaInput = document.getElementById("moneda_venta");
-                symbol.textContent = symbol.textContent === "S/" ? "$" : "S/";
-                monedaInput.value = symbol.textContent === "$" ? "0" : "1";
+   <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Inicializar select2
+        document.querySelectorAll('.select2').forEach(function (select) {
+            NiceSelect.bind(select, {
+                searchable: true
             });
         });
-    </script>
+
+        // MONEDAS
+        const monedas = @json($monedas);
+        let monedaCompraIndex = 0;
+        let monedaVentaIndex = 0;
+        const btnCompra = document.getElementById("toggleMonedaCompra");
+        const btnVenta = document.getElementById("toggleMonedaVenta");
+        const symbolCompra = document.getElementById("precio_compra_symbol");
+        const symbolVenta = document.getElementById("precio_venta_symbol");
+        const monedaInputCompra = document.getElementById("moneda_compra");
+        const monedaInputVenta = document.getElementById("moneda_venta");
+
+        if (monedas.length > 0) {
+            symbolCompra.textContent = monedas[monedaCompraIndex].nombre;
+            monedaInputCompra.value = monedas[monedaCompraIndex].idMonedas;
+            symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
+            monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
+
+            btnCompra.addEventListener("click", function () {
+                monedaCompraIndex = (monedaCompraIndex + 1) % monedas.length;
+                symbolCompra.textContent = monedas[monedaCompraIndex].nombre;
+                monedaInputCompra.value = monedas[monedaCompraIndex].idMonedas;
+            });
+
+            btnVenta.addEventListener("click", function () {
+                monedaVentaIndex = (monedaVentaIndex + 1) % monedas.length;
+                symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
+                monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
+            });
+        } else {
+            btnCompra.disabled = true;
+            btnVenta.disabled = true;
+            symbolCompra.textContent = '';
+            symbolVenta.textContent = '';
+        }
+       
+    });
+</script>
+
+
+
     
-    <script src="{{ asset('assets/js/articulos/articulosStore.js') }}"></script>
+    <script src="{{ asset('assets/js/almacen/repuesto/repuestoValidaciones.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </x-layout.default>
