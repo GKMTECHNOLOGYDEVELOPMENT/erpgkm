@@ -4467,4 +4467,41 @@ class OrdenesTrabajoController extends Controller
             abort(500, 'Error generando PDF');
         }
     }
+
+    public function eliminarImagenesMasivo(Request $request)
+    {
+        $ticketId = $request->ticket_id;
+        $visitaId = $request->visita_id;
+
+        try {
+            Log::info('Intentando eliminar imágenes', [
+                'ticket_id' => $ticketId,
+                'visita_id' => $visitaId,
+            ]);
+
+            $query = Fotostickest::where('idTickets', $ticketId);
+
+            if ($visitaId === null || $visitaId === 'null') {
+                $query->whereNull('idVisitas');
+            } else {
+                $query->where('idVisitas', $visitaId);
+            }
+
+            $deleted = $query->delete();
+
+            Log::info('Resultado eliminación', ['deleted' => $deleted]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar imágenes', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

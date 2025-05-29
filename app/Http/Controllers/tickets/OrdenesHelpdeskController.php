@@ -38,6 +38,7 @@ use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Str;
 use App\Exports\OrdenesHelpdeskExport;
+use App\Models\Fotostickest;
 
 class OrdenesHelpdeskController extends Controller
 {
@@ -944,7 +945,7 @@ class OrdenesHelpdeskController extends Controller
         $colorEstado = $orden->ticketflujo && $orden->ticketflujo->estadoFlujo ? $orden->ticketflujo->estadoFlujo->color : '#FFFFFF';  // color por defecto si no se encuentra
 
         $estadosOTS = DB::table('estado_ots')
-            ->whereIn('idEstadoots', [2, 3, 4, 6, 5])
+            ->whereIn('idEstadoots', [2, 4, 5, 3])
             ->get();
 
         $tipoUsuario = null;  // Inicializamos la variable para el tipo de usuario

@@ -132,6 +132,8 @@ Route::post('/guardar-cuenta', [UsuarioController::class, 'guardarCuenta']);
 Route::get('/solicitudentrega', [OrdenesTrabajoController::class, 'obtenerSolicitudes']);
 Route::put('/solicitudentrega/denegar/{id}', [OrdenesTrabajoController::class, 'denegarSolicitud']);
 
+// routes/api.php
+Route::delete('/eliminarImagenesMasivo', [OrdenesTrabajoController::class, 'eliminarImagenesMasivo']);
 
 // Ruta para obtener los datos de un cliente específico
 Route::get('/cliente/{idCliente}', [ClientesController::class, 'obtenerCliente']);
