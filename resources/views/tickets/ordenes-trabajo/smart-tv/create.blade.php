@@ -37,7 +37,8 @@
 
 
     <!-- Contenedor principal -->
-    <div x-data="{ openClienteModal: false, openClienteGeneralModal: false, openMarcaModal: false, openModeloModal: false }" class="panel mt-6 p-5 max-w-4x2 mx-auto">
+    <div x-data="{ openClienteModal: false, openClienteGeneralModal: false, openMarcaModal: false, openModeloModal: false }"
+        class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Orden de Trabajo</h2>
 
 
@@ -149,8 +150,8 @@
                     <div class="flex items-center space-x-2">
                         <label for="idMarca" class="block text-sm font-medium">Marca</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openMarcaModal = true">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
@@ -177,8 +178,8 @@
                     <div class="flex items-center space-x-2">
                         <label for="idModelo" class="block text-sm font-medium">Modelo</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openModeloModal = true">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
@@ -191,12 +192,10 @@
                     </div>
                 </div>
 
-
                 <!-- Serie -->
                 <div>
                     <label for="serie" class="block text-sm font-medium">N. Serie</label>
-                    <input id="serie" name="serie" type="text" class="form-input w-full"
-                        placeholder="Ingrese la serie">
+                    <input id="serie" name="serie" type="text" class="form-input w-full" placeholder="Ingrese la serie">
                 </div>
 
 
@@ -204,8 +203,7 @@
                 <div id="ticketSelectionContainer">
                     <label for="selectTickets" class="block text-sm font-medium" style="display: none;">Tickets
                         Relacionados</label>
-                    <select id="selectTickets" name="selectTickets" class="form-input w-full"
-                        style="display: none;">
+                    <select id="selectTickets" name="selectTickets" class="form-input w-full" style="display: none;">
                         <option value="" selected>Seleccionar Ticket</option>
                     </select>
                 </div>
@@ -222,27 +220,41 @@
                 </div>
 
 
-                <div>
-                    <label for="esRecojo" class="block text-sm font-medium mb-2">Es recojo</label>
-                    <div>
-                        <label class="w-12 h-6 relative mt-3">
-                            <input type="checkbox" id="esRecojo" name="esRecojo"
-                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                            <span
-                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-                        </label>
+                <div class="flex gap-12">
+                    <div class="flex-1 mb-6">
+                        <label for="esRecojo" class="block text-sm font-medium mb-2">Es recojo</label>
+                        <div>
+                            <label class="w-12 h-6 relative mt-3">
+                                <input type="checkbox" id="esRecojo" name="esRecojo"
+                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                                <span
+                                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                            </label>
+                        </div>
                     </div>
-                </div>
 
-                <div>
-                    <label for="entregaLab" class="block text-sm font-medium mb-2">Entrega a Lab.</label>
-                    <div>
-                        <label class="w-12 h-6 relative mt-3">
-                            <input type="checkbox" id="entregaLab" name="entregaLab"
-                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                            <span
-                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-                        </label>
+                    <div id="evaluacionTiendaContainer" class="flex-1 mb-6 hidden">
+                        <label for="evaluaciontienda" class="block text-sm font-medium mb-2">Evaluación a Tienda</label>
+                        <div>
+                            <label class="w-12 h-6 relative mt-3">
+                                <input type="checkbox" id="evaluaciontienda" name="evaluaciontienda"
+                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                                <span
+                                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 mb-6">
+                        <label for="entregaLab" class="block text-sm font-medium mb-2">Entrega a Lab.</label>
+                        <div>
+                            <label class="w-12 h-6 relative mt-3">
+                                <input type="checkbox" id="entregaLab" name="entregaLab"
+                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                                <span
+                                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 <!-- Falla Reportada -->
@@ -255,18 +267,17 @@
                 <!-- Latitud -->
                 <div>
                     <label for="latitud" class="block text-sm font-medium">Latitud</label>
-                    <input id="latitud" type="text" name="lat" class="form-input w-full"
-                        placeholder="Latitud">
+                    <input id="latitud" type="text" name="lat" class="form-input w-full" placeholder="Latitud">
                 </div>
 
                 <!-- Longitud -->
                 <div>
                     <label for="longitud" class="block text-sm font-medium">Longitud</label>
-                    <input id="longitud" type="text" name="lng" class="form-input w-full"
-                        placeholder="Longitud">
+                    <input id="longitud" type="text" name="lng" class="form-input w-full" placeholder="Longitud">
                 </div>
 
-                <input id="mapSearchBox" class="form-control" type="text" placeholder="Buscar lugar..." style="width: 100%; max-width: 400px; margin-bottom: 10px;">
+                <input id="mapSearchBox" class="form-control" type="text" placeholder="Buscar lugar..."
+                    style="width: 100%; max-width: 400px; margin-bottom: 10px;">
                 <!-- Mapa -->
                 <div class="col-span-1 md:col-span-2">
                     <label class="block text-sm font-medium">Mapa</label>
@@ -292,11 +303,10 @@
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Cliente</h5>
-                        <button type="button" class="text-white-dark hover:text-dark"
-                            @click="openClienteModal = false">
+                        <button type="button" class="text-white-dark hover:text-dark" @click="openClienteModal = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-6 h-6">
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                class="w-6 h-6">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -306,7 +316,8 @@
                         <!-- Formulario para nuevo Cliente -->
                         <!-- Formulario -->
                         <form class="p-5 space-y-4" id="clienteForm" method="POST" enctype="multipart/form-data">
-                            @csrf <!-- Asegúrate de incluir el token CSRF -->
+                            @csrf
+                            <!-- Asegúrate de incluir el token CSRF -->
                             <!-- ClienteGeneral -->
                             <div>
                                 <label for="idClienteGeneral" class="block text-sm font-medium">Cliente
@@ -314,9 +325,9 @@
                                 <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
                                     placeholder="Seleccionar Cliente General" multiple style="display:none">
                                     @foreach ($clientesGenerales as $clienteGeneral)
-                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">
-                                            {{ $clienteGeneral->descripcion }}
-                                        </option>
+                                    <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                        {{ $clienteGeneral->descripcion }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -349,9 +360,9 @@
                                         style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
-                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}
-                                            </option>
+                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                            {{ $tipoDocumento->nombre }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -397,9 +408,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                            <option value="{{ $departamento['id_ubigeo'] }}">
-                                                {{ $departamento['nombre_ubigeo'] }}
-                                            </option>
+                                        <option value="{{ $departamento['id_ubigeo'] }}">
+                                            {{ $departamento['nombre_ubigeo'] }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -447,9 +458,9 @@
 
 
         <!-- Modal para crear nuevo Cliente GENERAL(opcional) -->
-        <div x-data="{ open: false, imagenPreview: null, imagenActual: '/assets/images/file-preview.svg' }" x-show="openClienteGeneralModal"
-            class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" style="display: none;"
-            @click.self="openClienteGeneralModal = false">
+        <div x-data="{ open: false, imagenPreview: null, imagenActual: '/assets/images/file-preview.svg' }"
+            x-show="openClienteGeneralModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
+            style="display: none;" @click.self="openClienteGeneralModal = false">
             <div class="flex items-start justify-center min-h-screen px-4"
                 @click.self="openClienteGeneralModal = false">
                 <div x-show="openClienteGeneralModal" x-transition.duration.300
@@ -460,8 +471,8 @@
                         <button type="button" class="text-white-dark hover:text-dark"
                             @click="openClienteGeneralModal = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-6 h-6">
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                class="w-6 h-6">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -470,9 +481,9 @@
                     <div class="modal-scroll">
                         <!-- Formulario para nuevo Cliente -->
 
-                        <form class="p-5 space-y-4" id="clientGeneralForm" enctype="multipart/form-data"
-                            method="post">
-                            @csrf <!-- Asegúrate de incluir el token CSRF -->
+                        <form class="p-5 space-y-4" id="clientGeneralForm" enctype="multipart/form-data" method="post">
+                            @csrf
+                            <!-- Asegúrate de incluir el token CSRF -->
                             <!-- Descripción -->
                             <div>
                                 <label for="descripcion" class="block text-sm font-medium">Nombre</label>
@@ -526,11 +537,10 @@
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Marca</h5>
-                        <button type="button" class="text-white-dark hover:text-dark"
-                            @click="openMarcaModal = false">
+                        <button type="button" class="text-white-dark hover:text-dark" @click="openMarcaModal = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-6 h-6">
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                class="w-6 h-6">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -540,7 +550,8 @@
                         <!-- Formulario para nuevo Cliente -->
 
                         <form class="p-5 space-y-4" id="marcaForm" enctype="multipart/form-data" method="post">
-                            @csrf <!-- Asegúrate de incluir el token CSRF -->
+                            @csrf
+                            <!-- Asegúrate de incluir el token CSRF -->
                             <!-- Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -565,19 +576,18 @@
 
 
         <!-- Modal para crear nueva Marca(opcional) -->
-        <div x-show="openModeloModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
-            style="display: none;" @click.self="openModeloModal = false">
+        <div x-show="openModeloModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" style="display: none;"
+            @click.self="openModeloModal = false">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="openModeloModal = false">
                 <div x-show="openModeloModal" x-transition.duration.300
                     class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Modelo</h5>
-                        <button type="button" class="text-white-dark hover:text-dark"
-                            @click="openModeloModal = false">
+                        <button type="button" class="text-white-dark hover:text-dark" @click="openModeloModal = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" class="w-6 h-6">
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                class="w-6 h-6">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -587,7 +597,8 @@
                         <!-- Formulario para nuevo Cliente -->
 
                         <form class="p-5 space-y-4" id="modeloForm" enctype="multipart/form-data" method="post">
-                            @csrf <!-- Asegúrate de incluir el token CSRF -->
+                            @csrf
+                            <!-- Asegúrate de incluir el token CSRF -->
                             <!-- Nombre -->
                             <div>
                                 <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -614,7 +625,8 @@
                                         .then(response => response.json()) // Convertir la respuesta en formato JSON
                                         .then(data => {
                                             // Limpiar las opciones actuales del select
-                                            select.innerHTML = '<option value="" disabled selected>Seleccione la Marca</option>';
+                                            select.innerHTML =
+                                                '<option value="" disabled selected>Seleccione la Marca</option>';
 
                                             // Llenar el select con las marcas obtenidas
                                             data.forEach(marca => {
@@ -653,12 +665,12 @@
                             <!-- Categoría -->
                             <div>
                                 <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
-                                <select id="idCategoria" name="idCategoria" class="select2 w-full"
-                                    style="display:none" required>
+                                <select id="idCategoria" name="idCategoria" class="select2 w-full" style="display:none"
+                                    required>
                                     <option value="" disabled selected>Seleccione la Categoría</option>
                                     @foreach ($categorias as $categoria)
-                                        <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
-                                        </option>
+                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -684,169 +696,192 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
-</script>
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
+    </script>
 
 
 
-<!-- SCRIPT FINAL -->
-<script>
-    let map, marker, geocoder, autocomplete;
+    <!-- SCRIPT FINAL -->
+    <script>
+        let map, marker, geocoder, autocomplete;
 
-    function initMap() {
-        const latInput = document.getElementById("latitud");
-        const lngInput = document.getElementById("longitud");
-        const linkInput = document.getElementById("linkubicacion");
-        const direccionInput = document.getElementById("direccion");
-        const mapContainer = document.getElementById("map");
-        const input = document.getElementById("mapSearchBox");
+        function initMap() {
+            const latInput = document.getElementById("latitud");
+            const lngInput = document.getElementById("longitud");
+            const linkInput = document.getElementById("linkubicacion");
+            const direccionInput = document.getElementById("direccion");
+            const mapContainer = document.getElementById("map");
+            const input = document.getElementById("mapSearchBox");
 
-        const initialLat = parseFloat(latInput.value) || -11.957242;
-        const initialLng = parseFloat(lngInput.value) || -77.0731862;
+            const initialLat = parseFloat(latInput.value) || -11.957242;
+            const initialLng = parseFloat(lngInput.value) || -77.0731862;
 
-        map = new google.maps.Map(mapContainer, {
-            center: { lat: initialLat, lng: initialLng },
-            zoom: 15,
-        });
+            map = new google.maps.Map(mapContainer, {
+                center: {
+                    lat: initialLat,
+                    lng: initialLng
+                },
+                zoom: 15,
+            });
 
-        marker = new google.maps.Marker({
-            position: { lat: initialLat, lng: initialLng },
-            map: map,
-            draggable: true,
-        });
+            marker = new google.maps.Marker({
+                position: {
+                    lat: initialLat,
+                    lng: initialLng
+                },
+                map: map,
+                draggable: true,
+            });
 
-        geocoder = new google.maps.Geocoder();
+            geocoder = new google.maps.Geocoder();
 
-        // 🔄 Actualiza inputs + dirección
-        function updateInputs(lat, lng, direccion = "") {
-            latInput.value = lat.toFixed(6);
-            lngInput.value = lng.toFixed(6);
-            linkInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
-            if (direccion) {
-                direccionInput.value = direccion;
-            } else {
-                getAddressFromCoords(lat, lng);
-            }
-        }
-
-        // 🔁 Geocodificación inversa
-        function getAddressFromCoords(lat, lng) {
-            geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-                if (status === "OK" && results[0]) {
-                    const direccion = results[0].formatted_address;
+            // 🔄 Actualiza inputs + dirección
+            function updateInputs(lat, lng, direccion = "") {
+                latInput.value = lat.toFixed(6);
+                lngInput.value = lng.toFixed(6);
+                linkInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
+                if (direccion) {
                     direccionInput.value = direccion;
-                    marker.setTitle(direccion);
                 } else {
-                    console.warn("⚠️ Dirección no encontrada:", status);
+                    getAddressFromCoords(lat, lng);
+                }
+            }
+
+            // 🔁 Geocodificación inversa
+            function getAddressFromCoords(lat, lng) {
+                geocoder.geocode({
+                    location: {
+                        lat,
+                        lng
+                    }
+                }, (results, status) => {
+                    if (status === "OK" && results[0]) {
+                        const direccion = results[0].formatted_address;
+                        direccionInput.value = direccion;
+                        marker.setTitle(direccion);
+                    } else {
+                        console.warn("⚠️ Dirección no encontrada:", status);
+                    }
+                });
+            }
+
+            // 🖱 Clic en el mapa
+            map.addListener("click", function(event) {
+                const lat = event.latLng.lat();
+                const lng = event.latLng.lng();
+                marker.setPosition({
+                    lat,
+                    lng
+                });
+                updateInputs(lat, lng);
+            });
+
+            // 📍 Drag marker
+            marker.addListener("dragend", () => {
+                const pos = marker.getPosition();
+                updateInputs(pos.lat(), pos.lng());
+            });
+
+            // 🔍 Autocompletado
+            autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.bindTo("bounds", map);
+
+            autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) return;
+
+                const loc = place.geometry.location;
+                map.panTo(loc);
+                map.setZoom(17);
+                marker.setPosition(loc);
+                updateInputs(loc.lat(), loc.lng(), place.formatted_address || "");
+            });
+
+            // ✏️ Inputs de coordenadas
+            function updateMarker() {
+                const lat = parseFloat(latInput.value);
+                const lng = parseFloat(lngInput.value);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const newPos = {
+                        lat,
+                        lng
+                    };
+                    marker.setPosition(newPos);
+                    map.setCenter(newPos);
+                    getAddressFromCoords(lat, lng);
+                }
+            }
+
+            latInput.addEventListener("change", updateMarker);
+            lngInput.addEventListener("change", updateMarker);
+
+            // URL Maps -> Coordenadas
+            function extractCoordinates(url) {
+                let lat, lng;
+                if (url.includes("/search/")) {
+                    let clean = url.split("/search/")[1].split("?")[0].replace(/\+/g, " ");
+                    let coords = clean.split(",").map(c => c.trim());
+                    if (coords.length === 2) {
+                        lat = parseFloat(coords[0]);
+                        lng = parseFloat(coords[1]);
+                    }
+                }
+                if (!lat || !lng) {
+                    let regex = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g;
+                    let matches = [...url.matchAll(regex)];
+                    if (matches.length > 0) {
+                        let last = matches[matches.length - 1];
+                        lat = parseFloat(last[1]);
+                        lng = parseFloat(last[2]);
+                    }
+                }
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    marker.setPosition({
+                        lat,
+                        lng
+                    });
+                    map.setCenter({
+                        lat,
+                        lng
+                    });
+                    updateInputs(lat, lng);
+                } else {
+                    console.warn("⚠️ Coordenadas inválidas en el link");
+                }
+            }
+
+            async function expandShortURL(shortURL) {
+                try {
+                    const response = await fetch(
+                        `https://beyritech.com/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+                    const data = await response.json();
+                    if (data.expanded_url) {
+                        extractCoordinates(data.expanded_url);
+                    }
+                } catch (err) {
+                    console.error("❌ Error al expandir URL:", err);
+                }
+            }
+
+            linkInput.addEventListener("change", () => {
+                const link = linkInput.value.trim();
+                if (link.includes("maps.app.goo.gl")) {
+                    expandShortURL(link);
+                } else {
+                    extractCoordinates(link);
                 }
             });
+
+            // Primera carga
+            updateInputs(initialLat, initialLng);
         }
-
-        // 🖱 Clic en el mapa
-        map.addListener("click", function (event) {
-            const lat = event.latLng.lat();
-            const lng = event.latLng.lng();
-            marker.setPosition({ lat, lng });
-            updateInputs(lat, lng);
-        });
-
-        // 📍 Drag marker
-        marker.addListener("dragend", () => {
-            const pos = marker.getPosition();
-            updateInputs(pos.lat(), pos.lng());
-        });
-
-        // 🔍 Autocompletado
-        autocomplete = new google.maps.places.Autocomplete(input);
-        autocomplete.bindTo("bounds", map);
-
-        autocomplete.addListener("place_changed", () => {
-            const place = autocomplete.getPlace();
-            if (!place.geometry || !place.geometry.location) return;
-
-            const loc = place.geometry.location;
-            map.panTo(loc);
-            map.setZoom(17);
-            marker.setPosition(loc);
-            updateInputs(loc.lat(), loc.lng(), place.formatted_address || "");
-        });
-
-        // ✏️ Inputs de coordenadas
-        function updateMarker() {
-            const lat = parseFloat(latInput.value);
-            const lng = parseFloat(lngInput.value);
-            if (!isNaN(lat) && !isNaN(lng)) {
-                const newPos = { lat, lng };
-                marker.setPosition(newPos);
-                map.setCenter(newPos);
-                getAddressFromCoords(lat, lng);
-            }
-        }
-
-        latInput.addEventListener("change", updateMarker);
-        lngInput.addEventListener("change", updateMarker);
-
-        // URL Maps -> Coordenadas
-        function extractCoordinates(url) {
-            let lat, lng;
-            if (url.includes("/search/")) {
-                let clean = url.split("/search/")[1].split("?")[0].replace(/\+/g, " ");
-                let coords = clean.split(",").map(c => c.trim());
-                if (coords.length === 2) {
-                    lat = parseFloat(coords[0]);
-                    lng = parseFloat(coords[1]);
-                }
-            }
-            if (!lat || !lng) {
-                let regex = /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g;
-                let matches = [...url.matchAll(regex)];
-                if (matches.length > 0) {
-                    let last = matches[matches.length - 1];
-                    lat = parseFloat(last[1]);
-                    lng = parseFloat(last[2]);
-                }
-            }
-
-            if (!isNaN(lat) && !isNaN(lng)) {
-                marker.setPosition({ lat, lng });
-                map.setCenter({ lat, lng });
-                updateInputs(lat, lng);
-            } else {
-                console.warn("⚠️ Coordenadas inválidas en el link");
-            }
-        }
-
-        async function expandShortURL(shortURL) {
-            try {
-                const response = await fetch(`http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
-                const data = await response.json();
-                if (data.expanded_url) {
-                    extractCoordinates(data.expanded_url);
-                }
-            } catch (err) {
-                console.error("❌ Error al expandir URL:", err);
-            }
-        }
-
-        linkInput.addEventListener("change", () => {
-            const link = linkInput.value.trim();
-            if (link.includes("maps.app.goo.gl")) {
-                expandShortURL(link);
-            } else {
-                extractCoordinates(link);
-            }
-        });
-
-        // Primera carga
-        updateInputs(initialLat, initialLng);
-    }
 
         //     // ✅ Select2 personalizado
         //     document.querySelectorAll('.select2').forEach(function (select) {
         //     NiceSelect.bind(select, { searchable: true });
         // });
-    
-</script>
+    </script>
     <script>
         // document.addEventListener("DOMContentLoaded", function() {
         //     console.log("🔹 DOM completamente cargado");
@@ -1259,6 +1294,47 @@
                     window.open(`/ordenes/smart/${ticketId}/edit`, '_blank');
                 }
             });
+        });
+    </script>
+
+
+    <script>
+        const checkboxes = document.querySelectorAll('#esRecojo, #evaluaciontienda, #entregaLab');
+        const evaluacionTiendaDiv = document.getElementById('evaluacionTiendaContainer');
+        const evaluacionTiendaCheckbox = document.getElementById('evaluaciontienda');
+        const clienteSelect = document.getElementById('idCliente');
+
+        // Lógica: solo permitir un checkbox activo a la vez
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    console.log(`✅ Activado: ${checkbox.id}`);
+                    checkboxes.forEach((cb) => {
+                        if (cb !== checkbox) {
+                            cb.checked = false;
+                            console.log(`⛔ Desactivado: ${cb.id}`);
+                        }
+                    });
+                } else {
+                    console.log(`❌ Desmarcado: ${checkbox.id}`);
+                }
+            });
+        });
+
+        // Lógica: mostrar u ocultar "evaluacionTienda" según si cliente es tienda
+        clienteSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const esTienda = selectedOption.dataset.tienda;
+            console.log(`👤 Cliente seleccionado: ${selectedOption.textContent.trim()} | esTienda: ${esTienda}`);
+
+            if (esTienda === '1' || esTienda === 1) {
+                evaluacionTiendaDiv.classList.remove('hidden');
+                console.log('🟢 Mostrando checkbox de Evaluación a Tienda');
+            } else {
+                evaluacionTiendaDiv.classList.add('hidden');
+                evaluacionTiendaCheckbox.checked = false;
+                console.log('🔴 Ocultando checkbox de Evaluación a Tienda y desmarcando');
+            }
         });
     </script>
 
