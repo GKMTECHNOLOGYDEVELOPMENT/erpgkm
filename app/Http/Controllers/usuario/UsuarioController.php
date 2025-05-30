@@ -497,9 +497,20 @@ class UsuarioController extends Controller
                   ->orWhere('apellidoPaterno', 'like', "%$search%")
                   ->orWhere('documento', 'like', "%$search%")
                   ->orWhere('telefono', 'like', "%$search%")
-                  ->orWhere('correo', 'like', "%$search%");
+                  ->orWhere('correo', 'like', "%$search%")
+                  ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
+                      $q2->where('nombre', 'like', "%$search%");
+                  })
+                  ->orWhereHas('rol', function ($q3) use ($search) {
+                      $q3->where('nombre', 'like', "%$search%");
+                  })
+                  ->orWhereHas('tipoArea', function ($q4) use ($search) {
+                      $q4->where('nombre', 'like', "%$search%");
+                  });
             });
         }
+        
+        
     
         $filtered = $query->count();
     

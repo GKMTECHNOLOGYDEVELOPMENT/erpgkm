@@ -11,23 +11,26 @@ document.addEventListener('alpine:init', () => {
         isLoading: false,
 
         init() {
-            this.$nextTick(() => {
+            this.$nextTick(async () => {
                 this.injectStyles();
-                this.fetchMarcas();
+
+                await this.fetchClientes(); // ✅ Llamada controlada
+                await this.fetchMarcas();   // ✅ Luego marcas
+
                 this.fetchDataAndInitTable();
+
                 this.$watch('marcaFilter', () => this.fetchDataAndInitTable());
                 this.$watch('startDate', () => this.fetchDataAndInitTable());
                 this.$watch('endDate', () => this.fetchDataAndInitTable());
-                // ✅ Escuchar filtro de cliente general
+
                 document.addEventListener('cliente-general-cambio', (e) => {
                     this.clienteGeneralFilter = e.detail;
-                    this.isLoading = true; // ✅ Mostrar preloader
+                    this.isLoading = true;
                     this.fetchDataAndInitTable();
                 });
-
-
             });
         },
+
 
         injectStyles() {
             const style = document.createElement("style");
@@ -67,35 +70,53 @@ document.addEventListener('alpine:init', () => {
             document.head.appendChild(style);
         },
 
-        onClienteGeneralChange(clienteId) {
+        async onClienteGeneralChange(clienteId) {
             this.isLoading = true;
             this.clienteGeneralFilter = clienteId;
 
             if (!clienteId) {
-                // 🔁 Si selecciona "Todos", traer todas las marcas
-                this.fetchMarcas();
+                await this.fetchMarcas();
                 this.marcaFilter = '';
                 this.fetchDataAndInitTable();
                 return;
             }
 
-            fetch(`/api/marcasporcliente/${clienteId}`)
-                .then(res => res.json())
-                .then(data => {
-                    this.marcas = data;
-                    this.marcaFilter = '';
-                    this.fetchDataAndInitTable();
-                });
+            try {
+                const res = await fetch(`/api/marcasporcliente/${clienteId}`);
+                if (!res.ok) throw new Error('Error al obtener marcas por cliente');
+                const data = await res.json();
+                this.marcas = data;
+                this.marcaFilter = '';
+                this.fetchDataAndInitTable();
+            } catch (error) {
+                console.error('Error al cargar marcas por cliente:', error);
+            }
+        },
+
+        async fetchClientes() {
+            try {
+                const res = await fetch('/api/clientegeneralfiltros/1');
+                if (!res.ok) throw new Error('Error al obtener clientes');
+                const data = await res.json();
+                this.clienteGenerales = data;
+            } catch (error) {
+                console.error('Error al cargar cliente generales:', error);
+            }
         },
 
 
 
-        fetchMarcas() {
-            fetch('/api/marcas')
-                .then(response => response.json())
-                .then(data => { this.marcas = data; })
-                .catch(error => console.error('Error al cargar marcas:', error));
+        async fetchMarcas() {
+            try {
+                const res = await fetch('/api/marcas');
+                if (!res.ok) throw new Error('Error al obtener marcas');
+                const data = await res.json();
+                this.marcas = data;
+            } catch (error) {
+                console.error('Error al cargar marcas:', error);
+            }
         },
+
 
         fetchDataAndInitTable() {
             this.isLoading = true;

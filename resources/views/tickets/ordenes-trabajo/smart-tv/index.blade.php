@@ -120,11 +120,8 @@
             </div>
 
             <!-- Cliente General -->
-            <div class="w-[260px]" x-init="fetch('/api/clientegeneralfiltros/1')
-                .then(res => res.json())
-                .then(data => clienteGenerales = data)">
-                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente
-                    General</label>
+            <div class="w-[260px]">
+                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente General</label>
                 <select id="clienteGeneralFilter" x-model="clienteGeneralFilter"
                     @change="onClienteGeneralChange($event.target.value)"
                     class="form-select w-full px-3 py-2 text-sm border-gray-300 rounded">
@@ -134,6 +131,7 @@
                     </template>
                 </select>
             </div>
+            
 
             <!-- Marca -->
             <div class="w-[260px]">
