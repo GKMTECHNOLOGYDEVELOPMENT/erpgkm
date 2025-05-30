@@ -168,6 +168,10 @@ class OrdenesTrabajoController extends Controller
     {
         try {
             Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
+            // Manejar los checkboxes para que siempre estén presentes
+            $request->merge([
+                'evaluaciontienda' => $request->has('evaluaciontienda') ? 1 : 0,
+            ]);
 
             // Validación de los datos
             $validatedData = $request->validate([
@@ -185,6 +189,7 @@ class OrdenesTrabajoController extends Controller
                 'linkubicacion' => 'required|string',
                 'lat' => 'nullable|string|max:255',
                 'lng' => 'nullable|string|max:255',
+                'evaluaciontienda' => 'required|in:0,1'
             ]);
 
             Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
@@ -226,6 +231,7 @@ class OrdenesTrabajoController extends Controller
                 'fecha_creacion' => $fechaCreacion,  // Aseguramos que se guarda correctamente
                 'idTipotickets' => 1,
                 'tipoServicio' => 1,
+                'evaluaciontienda' => $validatedData['evaluaciontienda']
             ]);
 
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
@@ -360,9 +366,13 @@ class OrdenesTrabajoController extends Controller
         // Obtener el cliente correspondiente
         $cliente = $orden->cliente;  // Asumimos que 'cliente' está relacionado con el Ticket.
 
-        // Verificar si el cliente tiene la propiedad 'tienda' y si es igual a 1 o 0
-        $esTiendacliente = ($cliente && isset($cliente->esTienda) && $cliente->esTienda == 1) ? 1 : 0;
-        Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacliente: {$esTiendacliente}");
+        if ($cliente) {
+            $esTiendacliente = (isset($cliente->esTienda) && $cliente->esTienda == 1) ? 1 : 0;
+            Log::info("Cliente ID: {$cliente->id}, Tienda: {$cliente->esTienda}, esTiendacliente: {$esTiendacliente}");
+        } else {
+            $esTiendacliente = 0;
+            Log::info("Cliente no encontrado. esTiendacliente: {$esTiendacliente}");
+        }
 
 
 
@@ -440,7 +450,7 @@ class OrdenesTrabajoController extends Controller
         // $colorEstado = '#B5FA37'; // Este color lo puedes obtener dinámicamente según lo que estés trabajando
 
         // Filtrar los encargados según el color del estado
-        if ($colorEstado == '#B5FA37') {
+        if ($colorEstado == '#B5FA37' || $colorEstado == '#FA4DF4') {
             // Si el colorEstado es #B5FA37, solo obtener los usuarios de tipo 1 (TÉCNICO)
             $encargado = Usuario::where('idTipoUsuario', 4)->get();
         } elseif ($colorEstado == '#FBCACD') {
@@ -496,12 +506,12 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 12) {
                     // Si el id Estado flujo es 12 tiene que salir
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [18, 35])
+                        ->whereIn('idEstadflujo', [35])
                         ->get();
                 } elseif ($idEstadflujo == 18) {
                     // Si el id Estado flujo es 12 tiene que salir
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3, 2, 35])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [3, 35])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 10) {
                     // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
@@ -526,7 +536,7 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 19) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [18, 35])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [35])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 15) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
@@ -536,7 +546,7 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 20) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [18, 35])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [35])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 16) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
@@ -546,7 +556,7 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 21) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [18, 35])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [35])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 17) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
@@ -556,7 +566,7 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 22) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [18, 35])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [35])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 8) {
                     // Si el idEstadflujo es 8, solo mostrar los estados con idEstadflujo 3
@@ -3541,7 +3551,7 @@ class OrdenesTrabajoController extends Controller
         Log::info("Estado recibido: " . $validated['estado']);
 
         // Verificamos si el estado es uno de los valores válidos
-        $estadosValidos = [7, 8, 6, 5]; // Estos son los estados válidos: finalizar, coordinar recojo, fuera de garantía, pendiente repuestos
+        $estadosValidos = [7, 8, 6, 5, 18]; // Estos son los estados válidos: finalizar, coordinar recojo, fuera de garantía, pendiente repuestos
 
         if (!in_array($validated['estado'], $estadosValidos)) {
             Log::error("Estado inválido recibido: " . $validated['estado']);

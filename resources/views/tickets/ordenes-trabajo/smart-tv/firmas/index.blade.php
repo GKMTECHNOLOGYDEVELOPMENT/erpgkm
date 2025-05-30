@@ -1,4 +1,5 @@
-<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success" style="background-color: {{ $colorEstado }};">Firmas</span>
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+    style="background-color: {{ $colorEstado }};">Firmas</span>
 
 <!-- Contenedor general -->
 <div class="flex flex-col md:flex-row md:justify-center md:space-x-4 space-y-6 md:space-y-0">
@@ -46,38 +47,47 @@
 
 
 <!-- Verificar si la visita está activa (estadovisita no es 1) -->
-@if ($estadovisita != 1 && $idtipoServicio != 7)
-    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        @if ($idtipoServicio == 1)
-            <!-- Mostrar estos botones solo si idtipoServicio es 1 -->
-            <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-                    style="background-color: #BDB762; border: none; box-shadow: none;" value="7" onclick="finalizarServicio()">
-                ✅ Visita finaliza correctamente
-            </button>
+@if ($estadovisita != 1)
+<div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    @if ($idtipoServicio == 1)
+    <!-- Mostrar estos botones solo si idtipoServicio es 1 -->
+    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+        style="background-color: #BDB762; border: none; box-shadow: none;" value="7" onclick="finalizarServicio()">
+        ✅ Visita finaliza correctamente
+    </button>
 
-            <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-                    style="background-color: #B5FA37; border: none; box-shadow: none;" value="8" onclick="coordinarRecojo()">
-                📅 Pendiente recojo
-            </button>
+    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+        style="background-color: #B5FA37; border: none; box-shadow: none;" value="8" onclick="coordinarRecojo()">
+        📅 Pendiente recojo
+    </button>
 
-            <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-                    style="background-color: #ADADAD; border: none; box-shadow: none;" value="6" onclick="fueraDeGarantia()">
-                ⚠️ Fuera de Garantía
-            </button>
+    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+        style="background-color: #ADADAD; border: none; box-shadow: none;" value="6" onclick="fueraDeGarantia()">
+        ⚠️ Fuera de Garantía
+    </button>
 
-            <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-                    style="background-color: #FFFF00; border: none; box-shadow: none;" value="5" onclick="pendienteRepuestos()">
-                ⏳ Pendiente de solicitud de repuesto
-            </button>
+    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+        style="background-color: #FFFF00; border: none; box-shadow: none;" value="5" onclick="pendienteRepuestos()">
+        ⏳ Pendiente de solicitud de repuesto
+    </button>
 
-        @elseif ($idtipoServicio == 3)
-            <!-- Mostrar solo este botón si idtipoServicio es 3 -->
-            <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-                    style="background-color:rgb(98, 104, 189); border: none; box-shadow: none;" value="7" onclick="solicitudEntrega()">
-                ✅ Solicitud de Entrega
-            </button>
-        @endif
-    </div>
+    @elseif ($idtipoServicio == 3)
+    <!-- Mostrar solo este botón si idtipoServicio es 3 -->
+    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+        style="background-color:rgb(98, 104, 189); border: none; box-shadow: none;" value="7"
+        onclick="solicitudEntrega()">
+        ✅ Solicitud de Entrega
+    </button>
+    @elseif ($idtipoServicio == 7)
+    <!-- Mostrar solo este botón si idtipoServicio es 7 -->
+    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+        style="background-color: #FA4DF4; border: none; box-shadow: none;" value="9" onclick="coordinarEntrega()">
+        📦 COORDINAR ENTREGA
+    </button>
+    @endif
+
+
+</div>
 @endif
 
 
@@ -186,7 +196,8 @@
 
     function solicitudEntrega() {
         const ticketId = document.getElementById('ticketId').value; // Obtener el id del ticket
-        const visitaId = document.getElementById('visitaId').value; // Obtener el id de la visita (puedes pasarlo como un input oculto o extraerlo de otra parte)
+        const visitaId = document.getElementById('visitaId')
+            .value; // Obtener el id de la visita (puedes pasarlo como un input oculto o extraerlo de otra parte)
 
         console.log("Enviando solicitud de entrega para el ticket ID:", ticketId, "y visita ID:", visitaId);
 
@@ -275,6 +286,10 @@
 
     function pendienteRepuestos() {
         actualizarEstado(5); // Estado "13" para pendiente de repuestos
+    }
+
+    function coordinarEntrega() {
+        actualizarEstado(18)
     }
 
     // Inicializar las firmas cuando el DOM esté listo

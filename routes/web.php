@@ -410,10 +410,58 @@ Route::post('/guardar-visita-soporte', [OrdenesHelpdeskController::class, 'guard
 
 
 Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
-    $numeroVisitas = DB::table('visitas')->where('idTickets', $ticketId)->count();
-    return response()->json(['numeroVisitas' => $numeroVisitas]);
-});
+    if (!is_numeric($ticketId)) {
+        return response()->json(['error' => 'ID de ticket no válido'], 400);
+    }
 
+    // Obtener ticket completo
+    $ticket = DB::table('tickets')->where('idTickets', $ticketId)->first();
+
+    if (!$ticket) {
+        return response()->json(['error' => 'Ticket no encontrado'], 404);
+    }
+
+    // Obtener el flujo del ticket
+    $idEstadflujo = DB::table('ticketflujo')
+        ->where('idTicketFlujo', $ticket->idTicketFlujo)
+        ->value('idEstadflujo');
+
+    if ($idEstadflujo === null) {
+        return response()->json(['error' => 'Flujo del ticket no encontrado'], 404);
+    }
+
+    // Lógica del tipo de nombre
+    $nombre = 'Visita';
+
+    if ($idEstadflujo == 8) {
+        $nombre = 'Recojo';
+    } elseif ($idEstadflujo == 18) {
+        $nombre = 'Entrega';
+    } elseif ($idEstadflujo == 1) {
+        if ($ticket->evaluaciontienda == 1) {
+            $nombre = 'EvaluacionTienda';
+        } else {
+            $nombre = 'Visita';
+        }
+    }
+
+
+    // Si no es Recojo, contar visitas
+    $numeroVisitas = 0;
+    if ($nombre !== 'Recojo') {
+        $numeroVisitas = DB::table('visitas')
+            ->where('idTickets', $ticketId)
+            ->where('nombre', $nombre) // aquí filtras solo por el tipo actual
+            ->count();
+    }
+
+
+    return response()->json([
+        'numeroVisitas' => $numeroVisitas,
+        'idEstadflujo' => $idEstadflujo,
+        'tipoNombre' => $nombre // lo devolvemos para mayor claridad
+    ]);
+});
 
 Route::get('/ticket/{id}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);
 
@@ -517,10 +565,10 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
 
     Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLaboratorioPdf'])
         ->name('helpdesk.pdf.laboratorio');
-        
+
     Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])
         ->name('helpdesk.pdf.laboratorio');
-    
+
     //EJECUCION
     Route::get('/helpdesk/ejecucion/{id}/edit', [OrdenesHelpdeskController::class, 'editejecucion'])
         ->name('helpdesk.ejecucion.edit');
@@ -772,27 +820,27 @@ Route::delete('/eliminar-producto/{id}', [OrdenesHelpdeskController::class, 'eli
 
 
 // Obtener datos del cliente
-Route::get('/get-cliente-data/{id}', function($id) {
+Route::get('/get-cliente-data/{id}', function ($id) {
     $cliente = Cliente::find($id);
-    
+
     if (!$cliente) {
         return response()->json(['error' => 'Cliente no encontrado'], 404);
     }
-    
+
     return response()->json([
         'idTipoDocumento' => $cliente->idTipoDocumento,
         'esTienda' => $cliente->esTienda,
         'direccion' => $cliente->direccion
     ]);
 });
-Route::get('/get-all-tiendas', function() {
+Route::get('/get-all-tiendas', function () {
     return response()->json(
         Tienda::select('idTienda', 'nombre', 'direccion')
             ->get()
     );
 });
 
-Route::get('/get-tiendas-by-cliente/{clienteId}', function($clienteId) {
+Route::get('/get-tiendas-by-cliente/{clienteId}', function ($clienteId) {
     return response()->json(
         Tienda::where('idCliente', $clienteId)
             ->select('idTienda', 'nombre', 'direccion')
@@ -801,20 +849,20 @@ Route::get('/get-tiendas-by-cliente/{clienteId}', function($clienteId) {
 });
 
 
-Route::get('/get-tiendas/{clienteId?}', function($clienteId = null) {
+Route::get('/get-tiendas/{clienteId?}', function ($clienteId = null) {
     try {
         // 1. Si no viene clienteId, devolver todas las tiendas
         if (!$clienteId) {
             return response()->json(
                 Tienda::select('idTienda', 'nombre', 'direccion', 'idCliente')
-                     ->orderBy('nombre')
-                     ->get()
+                    ->orderBy('nombre')
+                    ->get()
             );
         }
 
         // 2. Obtener datos del cliente para determinar el filtro
         $cliente = Cliente::find($clienteId);
-        
+
         if (!$cliente) {
             return response()->json([], 404);
         }
@@ -825,19 +873,18 @@ Route::get('/get-tiendas/{clienteId?}', function($clienteId = null) {
         if ($cliente->idTipoDocumento == 8 && $cliente->esTienda == 0) {
             // Mostrar todas las tiendas
             $query->select('idTienda', 'nombre', 'direccion', 'idCliente')
-                 ->orderBy('nombre');
+                ->orderBy('nombre');
         } elseif ($cliente->idTipoDocumento == 9 && $cliente->esTienda == 1) {
             // Mostrar solo tiendas asociadas a este cliente
             $query->where('idCliente', $clienteId)
-                 ->select('idTienda', 'nombre', 'direccion')
-                 ->orderBy('nombre');
+                ->select('idTienda', 'nombre', 'direccion')
+                ->orderBy('nombre');
         } else {
             // Caso por defecto (no debería ocurrir según tu lógica)
             return response()->json([], 200);
         }
 
         return response()->json($query->get());
-
     } catch (\Exception $e) {
         return response()->json([
             'error' => 'Error al obtener tiendas',
@@ -846,15 +893,15 @@ Route::get('/get-tiendas/{clienteId?}', function($clienteId = null) {
     }
 });
 
-Route::get('/get-no-tiendas', function() {
+Route::get('/get-no-tiendas', function () {
     // Log para depuración
     Log::info('Solicitud de tiendas vacías recibida');
-    
+
     return response()->json([]);
 })->middleware('auth'); // Opcional: proteger la ruta
 
 
-Route::get('/get-marcas-by-cliente-general/{clienteGeneralId}', function($clienteGeneralId) {
+Route::get('/get-marcas-by-cliente-general/{clienteGeneralId}', function ($clienteGeneralId) {
     try {
         // Obtener marcas relacionadas con el cliente general
         $marcas = DB::table('marca_clientegeneral')
@@ -866,7 +913,6 @@ Route::get('/get-marcas-by-cliente-general/{clienteGeneralId}', function($client
             ->get();
 
         return response()->json($marcas);
-        
     } catch (\Exception $e) {
         return response()->json([
             'error' => 'Error al obtener marcas',
@@ -877,7 +923,7 @@ Route::get('/get-marcas-by-cliente-general/{clienteGeneralId}', function($client
 
 
 // Obtener modelos por marca
-Route::get('/get-modelos-by-marca/{marcaId}', function($marcaId) {
+Route::get('/get-modelos-by-marca/{marcaId}', function ($marcaId) {
     return response()->json(
         DB::table('modelo')
             ->where('idMarca', $marcaId)
@@ -889,7 +935,7 @@ Route::get('/get-modelos-by-marca/{marcaId}', function($marcaId) {
 });
 
 // Obtener todas las marcas (actualizada para incluir solo activas)
-Route::get('/get-all-marcas', function() {
+Route::get('/get-all-marcas', function () {
     return response()->json(
         DB::table('marca')
             ->where('estado', 1)
