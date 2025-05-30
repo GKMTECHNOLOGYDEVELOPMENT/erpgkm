@@ -90,9 +90,9 @@
                     <select id="tipoServicio" name="tipoServicio" class="select2 w-full" style="display:none">
                         <option value="" disabled selected>Seleccionar Tipo de Servicio</option>
                         @foreach ($tiposServicio as $tipo)
-                            <option value="{{ $tipo->idTipoServicio }}" data-nombre="{{ $tipo->nombre }}">
-                                {{ $tipo->nombre }}
-                            </option>
+                        <option value="{{ $tipo->idTipoServicio }}" data-nombre="{{ $tipo->nombre }}">
+                            {{ $tipo->nombre }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -130,7 +130,7 @@
                             <select id="tipoProductoLab" name="tipoProducto" class="form-select select2 w-full">
                                 <option value="" disabled selected>Seleccionar Tipo de Producto</option>
                                 @foreach ($categorias as $categoria)
-                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                                <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -141,7 +141,7 @@
                             <select id="marcaLab" name="marca" class="form-select select2 w-full">
                                 <option value="" disabled selected>Seleccionar Marca</option>
                                 @foreach ($marcas as $marca)
-                                    <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                                <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -166,17 +166,17 @@
                         <!-- Observaciones (ocupa ambas columnas internas) -->
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium">Observaciones</label>
-                            <textarea id="observacionesRetirar" name="observaciones" class="form-textarea w-full" rows="3"
-                                placeholder="Ingrese observaciones (opcional)"></textarea>
+                            <textarea id="observacionesRetirar" name="observaciones" class="form-textarea w-full"
+                                rows="3" placeholder="Ingrese observaciones (opcional)"></textarea>
                         </div>
                     </div>
 
-               <!-- numero cotizacion -->
-              <div id="numeroCotizacionContainer" style="display: none;">
+                    <!-- numero cotizacion -->
+                    <div id="numeroCotizacionContainer" style="display: none;">
                         <label class="block text-sm font-medium mb-2">Numero Cotizacion</label>
-                       
+
                         <input type="text" id="numerocotizacion" name="nrmcotizacion" class="form-input w-full"
-                        placeholder="Ingrese Nro. Cotizacion">
+                            placeholder="Ingrese Nro. Cotizacion">
                         </label>
                     </div>
 
@@ -201,8 +201,7 @@
                     <!-- Agencia -->
                     <div>
                         <label class="block text-sm font-medium">Corruir</label>
-                        <input type="text" name="agencia" class="form-input w-full"
-                            placeholder="Ingrese el Agencia">
+                        <input type="text" name="agencia" class="form-input w-full" placeholder="Ingrese el Agencia">
                     </div>
                     <!-- Técnico -->
                     <div>
@@ -210,7 +209,7 @@
                         <select id="idTecnico" name="idTecnico" class="select2 w-full mb-2" style="display: none">
                             <option value="" disabled selected>Seleccionar Técnico</option>
                             @foreach ($usuarios as $usuario)
-                                <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
+                            <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -221,7 +220,7 @@
                         <select id="tipoRecojo" name="tipoRecojo" class="select2 w-full mb-2" style="display: none">
                             <option value="" disabled selected>Seleccionar Tipo de Recojo</option>
                             @foreach ($tiposRecojo as $tipo)
-                                <option value="{{ $tipo->idtipoRecojo }}">{{ $tipo->nombre }}</option>
+                            <option value="{{ $tipo->idtipoRecojo }}">{{ $tipo->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -232,7 +231,7 @@
                         <select id="tipoEnvio" name="tipoEnvio" class="select2 w-full mb-2" style="display: none">
                             <option value="" disabled selected>Seleccionar Tipo de Envío</option>
                             @foreach ($tiposEnvio as $tipoEnvio)
-                                <option value="{{ $tipoEnvio->idtipoenvio }}">{{ $tipoEnvio->nombre }}</option>
+                            <option value="{{ $tipoEnvio->idtipoenvio }}">{{ $tipoEnvio->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -285,7 +284,8 @@
                         const selectTienda = document.getElementById("idTienda");
                         const esEnvioContainer = document.getElementById("esEnvioContainer");
                         const esEnvioCheckbox = document.getElementById("esEnvio");
-                        const selectTipoServicio = document.getElementById("tipoServicio"); // Selección de tipo de servicio
+                        const selectTipoServicio = document.getElementById(
+                            "tipoServicio"); // Selección de tipo de servicio
                         const tecnicoContainer = document.getElementById("tecnicoContainer");
                         const tecnicoDatosContainer = document.getElementById("tecnicoDatosContainer");
                         const tecnicoFields = document.getElementById("tecnicoFields");
@@ -302,38 +302,42 @@
                         let selectsInicializados = false;
 
                         function verificarTipoServicio() {
-    const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
-    const esEquipoContainer = document.getElementById("esEquipoContainer");
-    const numeroCotizacionContainer = document.getElementById("numeroCotizacionContainer");
+                            const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]
+                                ?.value;
+                            const esEquipoContainer = document.getElementById("esEquipoContainer");
+                            const numeroCotizacionContainer = document.getElementById("numeroCotizacionContainer");
 
-    if (parseInt(tipoServicio) === 6) {
-        esEquipoContainer.classList.remove("hidden");
+                            if (parseInt(tipoServicio) === 6) {
+                                esEquipoContainer.classList.remove("hidden");
 
-        if (!selectsInicializados) {
-            esEquipoContainer.querySelectorAll('select.select2').forEach(function(select) {
-                const prevNiceSelect = select.nextElementSibling;
-                if (prevNiceSelect && prevNiceSelect.classList.contains('nice-select')) {
-                    prevNiceSelect.remove();
-                }
-                NiceSelect.bind(select, { searchable: true });
-                select.classList.add('hidden');
-            });
-            selectsInicializados = true;
-        }
-        console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
-    } else {
-        esEquipoContainer.classList.add("hidden");
-        console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
-    }
+                                if (!selectsInicializados) {
+                                    esEquipoContainer.querySelectorAll('select.select2').forEach(function(select) {
+                                        const prevNiceSelect = select.nextElementSibling;
+                                        if (prevNiceSelect && prevNiceSelect.classList.contains(
+                                                'nice-select')) {
+                                            prevNiceSelect.remove();
+                                        }
+                                        NiceSelect.bind(select, {
+                                            searchable: true
+                                        });
+                                        select.classList.add('hidden');
+                                    });
+                                    selectsInicializados = true;
+                                }
+                                console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
+                            } else {
+                                esEquipoContainer.classList.add("hidden");
+                                console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
+                            }
 
-    if (parseInt(tipoServicio) === 5) {
-        numeroCotizacionContainer.style.display = "block";
-        console.log("✅ Mostrando numeroCotizacionContainer (Tipo Servicio = 5)");
-    } else {
-        numeroCotizacionContainer.style.display = "none";
-        console.log("❌ Ocultando numeroCotizacionContainer (Tipo Servicio ≠ 5)");
-    }
-}
+                            if (parseInt(tipoServicio) === 5) {
+                                numeroCotizacionContainer.style.display = "block";
+                                console.log("✅ Mostrando numeroCotizacionContainer (Tipo Servicio = 5)");
+                            } else {
+                                numeroCotizacionContainer.style.display = "none";
+                                console.log("❌ Ocultando numeroCotizacionContainer (Tipo Servicio ≠ 5)");
+                            }
+                        }
 
 
 
@@ -344,9 +348,11 @@
 
 
                         function verificarEnvioContainer() {
-                            const selectedDepartamento = selectTienda.options[selectTienda.selectedIndex]?.getAttribute(
-                                "data-departamento");
-                            const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]?.value;
+                            const selectedDepartamento = selectTienda.options[selectTienda.selectedIndex]
+                                ?.getAttribute(
+                                    "data-departamento");
+                            const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]
+                                ?.value;
 
                             console.log("Departamento:", selectedDepartamento, "| Tipo de Servicio:", tipoServicio);
 
@@ -384,7 +390,8 @@
 
                         function actualizarBotonEliminar() {
                             const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
-                            console.log("Número de técnicos:", tecnicos.length); // Debugging: Ver número de técnicos
+                            console.log("Número de técnicos:", tecnicos
+                                .length); // Debugging: Ver número de técnicos
                             if (tecnicos.length > 1) {
                                 eliminarTecnicoBtn.classList.remove("hidden");
                             } else {
@@ -393,9 +400,11 @@
                         }
 
                         function agregarTecnico() {
-                            console.log("Agregando un nuevo técnico"); // Debugging: Cuando se agrega un nuevo técnico
+                            console.log(
+                                "Agregando un nuevo técnico"); // Debugging: Cuando se agrega un nuevo técnico
                             const tecnicoEntry = document.createElement("div");
-                            tecnicoEntry.classList.add("tecnico-entry", "grid", "grid-cols-1", "md:grid-cols-2", "gap-4");
+                            tecnicoEntry.classList.add("tecnico-entry", "grid", "grid-cols-1", "md:grid-cols-2",
+                                "gap-4");
 
                             tecnicoEntry.innerHTML = `
             <div>
@@ -438,7 +447,8 @@
                         });
                         selectTipoServicio.addEventListener("change", function() {
                             console.log(
-                                "Cambiando tipo de servicio."); // Debugging: Ver cuando se cambia el tipo de servicio
+                                "Cambiando tipo de servicio."
+                            ); // Debugging: Ver cuando se cambia el tipo de servicio
                             verificarEnvioContainer();
 
                             verificarTipoServicio(); // Agrega esta línea

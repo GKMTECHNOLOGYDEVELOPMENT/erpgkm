@@ -6,64 +6,66 @@
 
 <style>
     .boton-tachado {
-    text-decoration: line-through;
-    opacity: 0.6;
-    pointer-events: none;
-    position: relative;
-}
+        text-decoration: line-through;
+        opacity: 0.6;
+        pointer-events: none;
+        position: relative;
+    }
 
-.boton-tachado::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 2px,
-        rgba(255,0,0,0.2) 2px,
-        rgba(255,0,0,0.2) 4px
-    );
-}
+    .boton-tachado::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(45deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 0, 0, 0.2) 2px,
+                rgba(255, 0, 0, 0.2) 4px);
+    }
 </style>
 <div class="flex gap-1 sm:gap-2 justify-center mt-2" id="botonCoordinacionContainer">
     @if($idEstadflujo != 33)
-        <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
-            Coordinación
-        </button>
+    <button id="crearCordinacionBtn"
+        class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
+        Coordinación
+    </button>
     @else
-        <button disabled class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base" style="text-decoration: line-through; opacity: 0.6; pointer-events: none;">
-            <s>Coordinación</s>
-        </button>
+    <button disabled
+        class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base"
+        style="text-decoration: line-through; opacity: 0.6; pointer-events: none;">
+        <s>Coordinación</s>
+    </button>
     @endif
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    const idEstadflujo = @json($idEstadflujo);
-    const boton = document.getElementById('crearCordinacionBtn');
-    
-    if(idEstadflujo === 33 && boton) {
-        boton.style.textDecoration = 'line-through';
-        boton.style.opacity = '0.6';
-        boton.disabled = true;
-        boton.innerHTML = '<s>' + boton.textContent + '</s>';
-        
-        // Opcional: agregar rayado diagonal
-        const rayado = document.createElement('div');
-        rayado.style.position = 'absolute';
-        rayado.style.top = '0';
-        rayado.style.left = '0';
-        rayado.style.right = '0';
-        rayado.style.bottom = '0';
-        rayado.style.background = 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,0,0,0.2) 2px, rgba(255,0,0,0.2) 4px)';
-        rayado.style.pointerEvents = 'none';
-        
-        boton.style.position = 'relative';
-        boton.appendChild(rayado);
-    }
-});
+        const idEstadflujo = @json($idEstadflujo);
+        const boton = document.getElementById('crearCordinacionBtn');
+
+        if (idEstadflujo === 33 && boton) {
+            boton.style.textDecoration = 'line-through';
+            boton.style.opacity = '0.6';
+            boton.disabled = true;
+            boton.innerHTML = '<s>' + boton.textContent + '</s>';
+
+            // Opcional: agregar rayado diagonal
+            const rayado = document.createElement('div');
+            rayado.style.position = 'absolute';
+            rayado.style.top = '0';
+            rayado.style.left = '0';
+            rayado.style.right = '0';
+            rayado.style.bottom = '0';
+            rayado.style.background =
+                'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,0,0,0.2) 2px, rgba(255,0,0,0.2) 4px)';
+            rayado.style.pointerEvents = 'none';
+
+            boton.style.position = 'relative';
+            boton.appendChild(rayado);
+        }
+    });
 </script>
 
 
@@ -77,8 +79,7 @@
     if (!ultimaVisitaConEstado1) {
         // Si es falso (es 0 o null), ocultamos el botón
         document.getElementById('botonCoordinacionContainer').style.display = 'none';
-    }
-    else {
+    } else {
         // Si la última visita tiene estado 1 o si no hay visitas, mostramos el botón
         document.getElementById('botonCoordinacionContainer').style.display = 'flex';
     }
@@ -95,10 +96,11 @@
 
 
 <!-- Modal de Detalles con nuevo estilo y cierre al hacer clic fuera -->
-<div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-[999] flex items-start justify-center bg-[black]/60 overflow-y-auto"
-     onclick="if(event.target === this) this.classList.add('hidden')">
+<div id="modalDetallesVisita"
+    class="modal hidden fixed inset-0 z-[999] flex items-start justify-center bg-[black]/60 overflow-y-auto"
+    onclick="if(event.target === this) this.classList.add('hidden')">
     <div class="modal-content panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl bg-white shadow-lg">
-        
+
         <!-- Cabecera del Modal -->
         <div class="flex items-center justify-between px-5 py-3 border-b">
             <h2 id="detalleNombre" class="font-bold text-lg text-gray-800 dark:text-white"></h2>
@@ -109,23 +111,26 @@
 
         <!-- Cuerpo del Modal -->
         <div class="p-5 max-h-[70vh] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-             <!-- Fecha única -->
-    <div class="sm:col-span-2">
-        <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha:</h3>
-        <input type="date" id="detalleFecha" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
-    </div>
-    
-    <!-- Hora de inicio -->
-    <div>
-        <h3 class="font-semibold text-sm text-gray-600 mb-1">Hora Inicio:</h3>
-        <input type="time" id="detalleHoraInicio" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
-    </div>
-    
-    <!-- Hora de fin -->
-    <div>
-        <h3 class="font-semibold text-sm text-gray-600 mb-1">Hora Fin:</h3>
-        <input type="time" id="detalleHoraFin" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
-    </div>
+            <!-- Fecha única -->
+            <div class="sm:col-span-2">
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha:</h3>
+                <input type="date" id="detalleFecha"
+                    class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+            </div>
+
+            <!-- Hora de inicio -->
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Hora Inicio:</h3>
+                <input type="time" id="detalleHoraInicio"
+                    class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+            </div>
+
+            <!-- Hora de fin -->
+            <div>
+                <h3 class="font-semibold text-sm text-gray-600 mb-1">Hora Fin:</h3>
+                <input type="time" id="detalleHoraFin"
+                    class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+            </div>
             <div>
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnico:</h3>
                 <select id="detalleUsuario" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
@@ -142,8 +147,10 @@
 
                 <!-- Agregar técnico de apoyo -->
                 <div class="mt-4">
-                    <label for="detalleTecnicoApoyo" class="font-semibold text-sm text-gray-600 mb-1">Agregar Técnico de Apoyo:</label>
-                    <select id="detalleTecnicoApoyo" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                    <label for="detalleTecnicoApoyo" class="font-semibold text-sm text-gray-600 mb-1">Agregar Técnico de
+                        Apoyo:</label>
+                    <select id="detalleTecnicoApoyo"
+                        class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
                         <!-- Opciones con JS -->
                     </select>
                     <button id="addTecnicoApoyoButton" class="btn btn-success mt-2 w-full">Agregar</button>
@@ -153,12 +160,14 @@
             <!-- Datos de cliente -->
             <div id="clienteTiendaContainer" class="hidden sm:col-span-2">
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Cliente Tienda:</h3>
-                <input type="text" id="detalleClienteTienda" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                <input type="text" id="detalleClienteTienda"
+                    class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
             </div>
 
             <div id="celularClienteContainer" class="hidden sm:col-span-2">
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Celular Cliente Tienda:</h3>
-                <input type="text" id="detalleCelularClienteTienda" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                <input type="text" id="detalleCelularClienteTienda"
+                    class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
             </div>
         </div>
 
@@ -351,10 +360,8 @@
                 toastr.error('Hubo un error al guardar las condiciones.');
             });
     }
-}" class="mb-5"
-    @set-visita-id.window="visitaId = $event.detail"
-    @toggle-modal-condiciones.window="openCondiciones = !openCondiciones"
-    x-init="obtenerUbicacion()">
+}" class="mb-5" @set-visita-id.window="visitaId = $event.detail"
+    @toggle-modal-condiciones.window="openCondiciones = !openCondiciones" x-init="obtenerUbicacion()">
     <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
             <div x-show="openCondiciones" x-transition:enter="transition ease-out duration-300 transform"
@@ -438,15 +445,15 @@
                         <div x-show="condiciones.noAtiende" class="space-y-3 mt-2">
                             <div>
                                 <label class="block text-sm font-medium">Motivo</label>
-                                <textarea x-model="condiciones.motivoNoAtiende" class="form-textarea w-full" rows="3"></textarea>
+                                <textarea x-model="condiciones.motivoNoAtiende" class="form-textarea w-full"
+                                    rows="3"></textarea>
                             </div>
 
                             <!-- Campo para cargar la imagen -->
                             <!-- Campo para cargar la imagen -->
                             <div class="space-y-4 mt-4">
                                 <label class="block text-lg font-semibold text-gray-700">Selecciona una Imagen</label>
-                                <input type="file" x-ref="imagen"
-                                    @change="condiciones.imagen = $refs.imagen.files[0]"
+                                <input type="file" x-ref="imagen" @change="condiciones.imagen = $refs.imagen.files[0]"
                                     class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
                             </div>
 
@@ -515,8 +522,7 @@
             reader.readAsDataURL(file);
         }
     }
-}"
-    class="mb-5" @toggle-modal.window="open = !open">
+}" class="mb-5" @toggle-modal.window="open = !open">
 
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
@@ -536,7 +542,7 @@
                 </div>
                 <div class="modal-scroll">
                     <!-- Formulario -->
-                    <form class="p-5 space-y-4" enctype="multipart/form-data" >
+                    <form class="p-5 space-y-4" enctype="multipart/form-data">
                         <!-- Nombre de la visita -->
                         <div class="flex space-x-2">
                             <div class="w-1/2">
@@ -564,16 +570,18 @@
                         </div>
 
                         @if($esTiendacliente == 1)
-                            <div class="space-y-4 mt-2">
-                                <div>
-                                    <label class="block text-sm font-medium">Nombre cliente tienda</label>
-                                    <input type="text" id="nombreclientetienda" name="nombreclientetienda" class="form-input w-full" placeholder="Nombre del Cliente (Opcional)">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium">Celular cliente tienda</label>
-                                    <input type="text" id="celularclientetienda" name="celularclientetienda" class="form-input w-full" placeholder="Celular del Cliente (Opcional)">
-                                </div>
+                        <div class="space-y-4 mt-2">
+                            <div>
+                                <label class="block text-sm font-medium">Nombre cliente tienda</label>
+                                <input type="text" id="nombreclientetienda" name="nombreclientetienda"
+                                    class="form-input w-full" placeholder="Nombre del Cliente (Opcional)">
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium">Celular cliente tienda</label>
+                                <input type="text" id="celularclientetienda" name="celularclientetienda"
+                                    class="form-input w-full" placeholder="Celular del Cliente (Opcional)">
+                            </div>
+                        </div>
                         @endif
 
 
@@ -602,8 +610,8 @@
                         <!-- Mostrar checkbox "¿Necesita Apoyo?" solo si el encargado es Técnico -->
                         <div x-show="encargadoTipo == 1" class="mt-4">
                             <label class="inline-flex items-center">
-                                <input type="checkbox" id="necesitaApoyo" name="necesita_apoyo"
-                                    class="form-checkbox" x-model="necesitaApoyo">
+                                <input type="checkbox" id="necesitaApoyo" name="necesita_apoyo" class="form-checkbox"
+                                    x-model="necesitaApoyo">
                                 <span class="ml-2 text-sm font-medium">¿Necesita Apoyo?</span>
                             </label>
                         </div>
@@ -630,8 +638,8 @@
                         <!-- Campo para cargar la imagen -->
                         <div class="space-y-4 mt-2">
                             <label class="block text-sm font-medium">Subir Imagen</label>
-                            <input type="file" x-ref="imagen" id="imagenVisita" @change="previewImage" name="imagenVisita"
-                                class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 
+                            <input type="file" x-ref="imagen" id="imagenVisita" @change="previewImage"
+                                name="imagenVisita" class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 
         file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
 
                             <!-- PREVISUALIZACIÓN DE LA IMAGEN -->
@@ -644,8 +652,7 @@
 
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
-                            <button type="button" class="btn btn-outline-danger"
-                                @click="open = false">Cancelar</button>
+                            <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
                             <button type="button" id="guardarBtn" class="btn btn-primary ltr:ml-4 rtl:mr-4">
                                 Guardar
                             </button>
@@ -814,41 +821,29 @@
         const crearCordinacionBtn = document.getElementById('crearCordinacionBtn');
 
         crearCordinacionBtn.addEventListener("click", function(event) {
+            const ticketId = '{{ $ticket->idTickets }}';
 
-            // Si la validación es correcta, proceder con la llamada AJAX
-            const ticketId =
-                '{{ $ticket->idTickets }}'; // El ID del ticket, que lo obtienes desde el backend
-
-            console.log("ID del ticket:", ticketId);
-
-            // Realizar consulta AJAX para obtener el número de visitas existentes para ese ticket
             $.ajax({
-                url: `/obtener-numero-visitas/${ticketId}`, // Endpoint que te dará el número de visitas actuales para ese ticket
+                url: `/obtener-numero-visitas/${ticketId}`,
                 type: 'GET',
                 success: function(response) {
-                    // Supongamos que la respuesta es el número de visitas asociadas al ticket
-                    let numeroVisitas = response
-                        .numeroVisitas; // Esto lo deberías ajustar según lo que devuelvas desde el backend
+                    let numeroVisitas = response.numeroVisitas || 0;
+                    let tipoNombre = response.tipoNombre || 'Visita';
 
-                    // El siguiente ID de visita sería el número de visitas + 1
                     let siguienteIdVisita = numeroVisitas + 1;
+                    nombreVisitaInput.value = `${tipoNombre} ${siguienteIdVisita}`;
 
-                    // Usamos el siguiente ID de visita para el nombre de la visita
-                    nombreVisitaInput.value = `Visita ${siguienteIdVisita}`;
-
-                    // Limpiar los campos de fecha y hora
+                    // Limpiar campos
                     fechaVisitaInput.value = "";
                     horaInicioInput.value = "";
                     horaFinInput.value = "";
 
-                    // Abrir el modal
+                    // Mostrar modal
                     window.dispatchEvent(new Event('toggle-modal'));
-
-                    console.log("Siguiente ID de visita:", siguienteIdVisita);
+                    console.log("Nombre de la visita:", nombreVisitaInput.value);
                 },
                 error: function(xhr, status, error) {
-                    console.log("Error al obtener el número de visitas para el ticket:",
-                        error);
+                    console.log("Error al obtener el número de visitas:", error);
                 }
             });
         });
@@ -870,12 +865,13 @@
             const ticketId = '{{ $ticket->idTickets }}'; // El ID del ticket
 
             // Obtener la imagen seleccionada
-            const imagenVisita = document.getElementById('imagenVisita').files[0]; // Obtener el primer archivo seleccionado
+            const imagenVisita = document.getElementById('imagenVisita').files[
+                0]; // Obtener el primer archivo seleccionado
 
             let nombreClienteTienda = '';
             let celularClienteTienda = '';
 
-                // Verificar si los campos adicionales existen en el DOM y obtener sus valores
+            // Verificar si los campos adicionales existen en el DOM y obtener sus valores
             const nombreClienteTiendaElement = document.getElementById('nombreclientetienda');
             const celularClienteTiendaElement = document.getElementById('celularclientetienda');
 
@@ -884,7 +880,7 @@
             }
             if (celularClienteTiendaElement) {
                 celularClienteTienda = celularClienteTiendaElement.value;
-    }
+            }
 
 
 
@@ -932,17 +928,18 @@
             // Si 'necesita_apoyo' está marcado, agregar técnicos de apoyo al FormData
             if (necesitaApoyo && tecnicosApoyo.length > 0) {
                 tecnicosApoyo.forEach((tecnicoId) => {
-                    formData.append('tecnicos_apoyo[]', tecnicoId); // Asegúrate de enviar como array
+                    formData.append('tecnicos_apoyo[]',
+                        tecnicoId); // Asegúrate de enviar como array
                 });
             }
 
-             // Agregar los campos opcionales de cliente tienda si están presentes
-    if (nombreClienteTienda) {
-        formData.append('nombreclientetienda', nombreClienteTienda);
-    }
-    if (celularClienteTienda) {
-        formData.append('celularclientetienda', celularClienteTienda);
-    }
+            // Agregar los campos opcionales de cliente tienda si están presentes
+            if (nombreClienteTienda) {
+                formData.append('nombreclientetienda', nombreClienteTienda);
+            }
+            if (celularClienteTienda) {
+                formData.append('celularclientetienda', celularClienteTienda);
+            }
 
 
             formData.append('idTickets', ticketId);
@@ -962,7 +959,8 @@
                 contentType: false, // No enviar un tipo de contenido
                 processData: false, // No procesar los datos
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Añadir el token CSRF a los encabezados
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                        'content') // Añadir el token CSRF a los encabezados
                 },
                 success: function(response) {
                     if (response.success) {

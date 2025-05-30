@@ -233,7 +233,7 @@
                         </div>
                     </div>
 
-                    <div id="evaluacionTiendaContainer" class="flex-1 mb-6 hidden">
+                    <div id="evaluacionTiendaContainer" class="flex-1 mb-6  ">
                         <label for="evaluaciontienda" class="block text-sm font-medium mb-2">Evaluación a Tienda</label>
                         <div>
                             <label class="w-12 h-6 relative mt-3">
@@ -1321,21 +1321,21 @@
             });
         });
 
-        // Lógica: mostrar u ocultar "evaluacionTienda" según si cliente es tienda
-        clienteSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const esTienda = selectedOption.dataset.tienda;
-            console.log(`👤 Cliente seleccionado: ${selectedOption.textContent.trim()} | esTienda: ${esTienda}`);
+        // // Lógica: mostrar u ocultar "evaluacionTienda" según si cliente es tienda
+        // clienteSelect.addEventListener('change', function() {
+        //     const selectedOption = this.options[this.selectedIndex];
+        //     const esTienda = selectedOption.dataset.tienda;
+        //     console.log(`👤 Cliente seleccionado: ${selectedOption.textContent.trim()} | esTienda: ${esTienda}`);
 
-            if (esTienda === '1' || esTienda === 1) {
-                evaluacionTiendaDiv.classList.remove('hidden');
-                console.log('🟢 Mostrando checkbox de Evaluación a Tienda');
-            } else {
-                evaluacionTiendaDiv.classList.add('hidden');
-                evaluacionTiendaCheckbox.checked = false;
-                console.log('🔴 Ocultando checkbox de Evaluación a Tienda y desmarcando');
-            }
-        });
+        //     if (esTienda === '1' || esTienda === 1) {
+        //         evaluacionTiendaDiv.classList.remove('hidden');
+        //         console.log('🟢 Mostrando checkbox de Evaluación a Tienda');
+        //     } else {
+        //         evaluacionTiendaDiv.classList.add('hidden');
+        //         evaluacionTiendaCheckbox.checked = false;
+        //         console.log('🔴 Ocultando checkbox de Evaluación a Tienda y desmarcando');
+        //     }
+        // });
     </script>
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
