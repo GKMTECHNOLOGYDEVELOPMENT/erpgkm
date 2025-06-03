@@ -521,7 +521,7 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 1) {
                     // Si el ticket tiene un idTicketFlujo con idEstadflujo = 1, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3, 8, 33, 35])  // Solo obtener el estado con idEstadflujo 3
+                        ->whereIn('idEstadflujo', [3, 8, 33, 35, 10])  // Solo obtener el estado con idEstadflujo 3
                         ->get();
                 } elseif ($idEstadflujo == 9) {
                     // Si el idEstadflujo del ticketflujo es 9, solo mostrar los estados con idEstadflujo 3
@@ -1779,6 +1779,14 @@ class OrdenesTrabajoController extends Controller
         // Asignar tipoServicio basado en el tipo de usuario
         if ($encargado->idTipoUsuario == 4) {
             $tipoServicio = 3; // Si el tipo de usuario es 4, asignamos 3 (por ejemplo, Chofer)
+        }
+
+      // Obtener la primera palabra del nombre
+        $primeraPalabra = explode(' ', trim($request->nombre))[0];
+
+        // Validar si la primera palabra es 'Entrega' (sin importar mayúsculas/minúsculas)
+        if (strcasecmp($primeraPalabra, 'Entrega') === 0) {
+            $tipoServicio = 4;
         }
 
         // Crear la nueva visita
@@ -3617,17 +3625,16 @@ class OrdenesTrabajoController extends Controller
         $request->validate([
             'idTicket' => 'required|integer|exists:tickets,idTickets',
             'idEstadflujo' => 'required|integer|exists:estado_flujo,idEstadflujo',
-            // No necesitas validar el idUsuario aquí, ya que lo vamos a obtener del usuario autenticado
         ]);
 
         // Obtener el ID del usuario autenticado
-        $idUsuario = auth()->user()->idUsuario;  // Asegúrate de usar auth()->user()->id
+        $idUsuario = auth()->user()->idUsuario;
 
         // Insertar el registro en la tabla ticketflujo
         DB::table('ticketflujo')->insert([
             'idTicket' => $request->idTicket,
             'idEstadflujo' => $request->idEstadflujo,
-            'idUsuario' => $idUsuario,  // Usamos el ID del usuario autenticado
+            'idUsuario' => $idUsuario,
             'fecha_creacion' => now(),
             'comentarioflujo' => $request->comentarioflujo ?? '',
         ]);
@@ -3639,11 +3646,77 @@ class OrdenesTrabajoController extends Controller
         DB::table('tickets')
             ->where('idTickets', $request->idTicket)
             ->update([
-                'idTicketFlujo' => $idTicketFlujo,  // Asignamos el idTicketFlujo al ticket
+                'idTicketFlujo' => $idTicketFlujo,
             ]);
+
+        // Si el estado de flujo es 10, crear una visita
+        if ($request->idEstadflujo == 10) {
+            $idUsuarioAleatorio = rand(0, 1) ? 139 : 140;
+
+            DB::table('visitas')->insert([
+                'nombre' => 'Laboratorio',
+                'fecha_programada' => now(),
+                'fecha_asignada' => now(),
+                'fechas_desplazamiento' => null,
+                'fecha_llegada' => null,
+                'fecha_inicio' => null,
+                'fecha_final' => null,
+                'estado' => 1,
+                'idTickets' => $request->idTicket,
+                'idUsuario' => $idUsuarioAleatorio,
+                'fecha_inicio_hora' => null,
+                'fecha_final_hora' => null,
+                'necesita_apoyo' => 0,
+                'tipoServicio' => 7,
+                'visto' => 0,
+                'recojo' => null,
+                'estadovisita' => null,
+                'nombreclientetienda' => null,
+                'celularclientetienda' => null,
+                'dniclientetienda' => null,
+            ]);
+        }
 
         return response()->json(['success' => true]);
     }
+
+
+    public function eliminarflujo($id)
+    {
+        try {
+            $flujo = DB::table('ticketflujo')->where('idTicketFlujo', $id)->first();
+
+            if (!$flujo) {
+                return response()->json(['success' => false, 'message' => 'Estado de flujo no encontrado'], 404);
+            }
+
+            DB::table('ticketflujo')->where('idTicketFlujo', $id)->delete();
+
+            return response()->json(['success' => true, 'message' => 'Estado de flujo eliminado']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error eliminando: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+    public function relacionarFlujo(Request $request, $ticketId)
+{
+    $request->validate([
+        'flujoId' => 'required|integer|exists:ticketflujo,idTicketFlujo',
+    ]);
+
+    try {
+        DB::table('tickets')
+            ->where('idTickets', $ticketId)
+            ->update([
+                'idTicketFlujo' => $request->flujoId
+            ]);
+
+        return response()->json(['success' => true]);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+}
 
 
 

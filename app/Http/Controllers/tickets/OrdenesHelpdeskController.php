@@ -3014,44 +3014,44 @@ class OrdenesHelpdeskController extends Controller
             'modoVistaPrevia' => false
         ])->render();
 
-       // 1. Guardar PDF temporal
-       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
-       Browsershot::html($html)
-           ->format('A4')
-           ->fullPage()
-           ->noSandbox()
-           ->setDelay(2000)
-           ->margins(2.5, 2.5, 2.5, 2.5)
-           ->emulateMedia('screen')
-           ->waitUntilNetworkIdle()
-           ->showBackground()
-           ->save($tempOriginal);
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
 
-       // 2. Comprimir con Ghostscript
-       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
-       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
 
-       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
-       exec($cmd, $output, $exitCode);
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
 
-       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
-           @unlink($tempOriginal);
-           return response()->json([
-               'success' => false,
-               'message' => 'Ghostscript no logró comprimir el PDF.',
-               'command' => $cmd,
-               'output' => $output
-           ], 500);
-       }
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
 
-       // 3. Enviar el PDF comprimido
-       $pdfOutput = file_get_contents($tempCompressed);
-       @unlink($tempOriginal);
-       @unlink($tempCompressed);
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
 
-       return response($pdfOutput)
-           ->header('Content-Type', 'application/pdf')
-           ->header('Content-Disposition', 'inline; filename="LEVANTAMIENTO TECNICO ' . $orden->numero_ticket . '.pdf"');
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="LEVANTAMIENTO TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -3230,47 +3230,47 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-       // 1. Guardar PDF temporal
-       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
-       Browsershot::html($html)
-           ->format('A4')
-           ->fullPage()
-           ->noSandbox()
-           ->setDelay(2000)
-           ->margins(2.5, 2.5, 2.5, 2.5)
-           ->emulateMedia('screen')
-           ->waitUntilNetworkIdle()
-           ->showBackground()
-           ->save($tempOriginal);
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
 
-       // 2. Comprimir con Ghostscript
-       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
-       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
 
-       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
-       exec($cmd, $output, $exitCode);
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
 
-       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
-           @unlink($tempOriginal);
-           return response()->json([
-               'success' => false,
-               'message' => 'Ghostscript no logró comprimir el PDF.',
-               'command' => $cmd,
-               'output' => $output
-           ], 500);
-       }
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
 
-       // 3. Enviar el PDF comprimido
-       $pdfOutput = file_get_contents($tempCompressed);
-       @unlink($tempOriginal);
-       @unlink($tempCompressed);
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
 
-       return response($pdfOutput)
-           ->header('Content-Type', 'application/pdf')
-           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
-    public function generateLabPdfVisitaApp($idOt,$idVisita)
+    public function generateLabPdfVisitaApp($idOt, $idVisita)
     {
         $orden = Ticket::with([
             'cliente.tipodocumento',
@@ -3440,44 +3440,44 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-       // 1. Guardar PDF temporal
-       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
-       Browsershot::html($html)
-           ->format('A4')
-           ->fullPage()
-           ->noSandbox()
-           ->setDelay(2000)
-           ->margins(2.5, 2.5, 2.5, 2.5)
-           ->emulateMedia('screen')
-           ->waitUntilNetworkIdle()
-           ->showBackground()
-           ->save($tempOriginal);
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
 
-       // 2. Comprimir con Ghostscript
-       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
-       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
 
-       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
-       exec($cmd, $output, $exitCode);
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
 
-       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
-           @unlink($tempOriginal);
-           return response()->json([
-               'success' => false,
-               'message' => 'Ghostscript no logró comprimir el PDF.',
-               'command' => $cmd,
-               'output' => $output
-           ], 500);
-       }
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
 
-       // 3. Enviar el PDF comprimido
-       $pdfOutput = file_get_contents($tempCompressed);
-       @unlink($tempOriginal);
-       @unlink($tempCompressed);
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
 
-       return response($pdfOutput)
-           ->header('Content-Type', 'application/pdf')
-           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -3657,44 +3657,44 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-       // 1. Guardar PDF temporal
-       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
-       Browsershot::html($html)
-           ->format('A4')
-           ->fullPage()
-           ->noSandbox()
-           ->setDelay(2000)
-           ->margins(2.5, 2.5, 2.5, 2.5)
-           ->emulateMedia('screen')
-           ->waitUntilNetworkIdle()
-           ->showBackground()
-           ->save($tempOriginal);
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
 
-       // 2. Comprimir con Ghostscript
-       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
-       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
 
-       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
-       exec($cmd, $output, $exitCode);
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
 
-       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
-           @unlink($tempOriginal);
-           return response()->json([
-               'success' => false,
-               'message' => 'Ghostscript no logró comprimir el PDF.',
-               'command' => $cmd,
-               'output' => $output
-           ], 500);
-       }
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
 
-       // 3. Enviar el PDF comprimido
-       $pdfOutput = file_get_contents($tempCompressed);
-       @unlink($tempOriginal);
-       @unlink($tempCompressed);
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
 
-       return response($pdfOutput)
-           ->header('Content-Type', 'application/pdf')
-           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -3875,44 +3875,44 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-       // 1. Guardar PDF temporal
-       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
-       Browsershot::html($html)
-           ->format('A4')
-           ->fullPage()
-           ->noSandbox()
-           ->setDelay(2000)
-           ->margins(2.5, 2.5, 2.5, 2.5)
-           ->emulateMedia('screen')
-           ->waitUntilNetworkIdle()
-           ->showBackground()
-           ->save($tempOriginal);
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
 
-       // 2. Comprimir con Ghostscript
-       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
-       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
 
-       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
-       exec($cmd, $output, $exitCode);
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
 
-       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
-           @unlink($tempOriginal);
-           return response()->json([
-               'success' => false,
-               'message' => 'Ghostscript no logró comprimir el PDF.',
-               'command' => $cmd,
-               'output' => $output
-           ], 500);
-       }
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
 
-       // 3. Enviar el PDF comprimido
-       $pdfOutput = file_get_contents($tempCompressed);
-       @unlink($tempOriginal);
-       @unlink($tempCompressed);
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
 
-       return response($pdfOutput)
-           ->header('Content-Type', 'application/pdf')
-           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 
@@ -4081,44 +4081,44 @@ class OrdenesHelpdeskController extends Controller
 
         ])->render();
 
-       // 1. Guardar PDF temporal
-       $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
-       Browsershot::html($html)
-           ->format('A4')
-           ->fullPage()
-           ->noSandbox()
-           ->setDelay(2000)
-           ->margins(2.5, 2.5, 2.5, 2.5)
-           ->emulateMedia('screen')
-           ->waitUntilNetworkIdle()
-           ->showBackground()
-           ->save($tempOriginal);
+        // 1. Guardar PDF temporal
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(2.5, 2.5, 2.5, 2.5)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
 
-       // 2. Comprimir con Ghostscript
-       $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
-       $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        // 2. Comprimir con Ghostscript
+        $gs = 'C:\Program Files\gs\gs10.05.1\bin\gswin64c.exe'; // ruta exacta de tu instalación Ghostscript
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
 
-       $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
-       exec($cmd, $output, $exitCode);
+        $cmd = "\"{$gs}\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
 
-       if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
-           @unlink($tempOriginal);
-           return response()->json([
-               'success' => false,
-               'message' => 'Ghostscript no logró comprimir el PDF.',
-               'command' => $cmd,
-               'output' => $output
-           ], 500);
-       }
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghostscript no logró comprimir el PDF.',
+                'command' => $cmd,
+                'output' => $output
+            ], 500);
+        }
 
-       // 3. Enviar el PDF comprimido
-       $pdfOutput = file_get_contents($tempCompressed);
-       @unlink($tempOriginal);
-       @unlink($tempCompressed);
+        // 3. Enviar el PDF comprimido
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
 
-       return response($pdfOutput)
-           ->header('Content-Type', 'application/pdf')
-           ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
 

@@ -78,6 +78,13 @@
         onclick="solicitudEntrega()">
         ✅ Solicitud de Entrega
     </button>
+    @elseif ($idtipoServicio == 4)
+        <!-- Mostrar solo este botón si idtipoServicio es 4 -->
+    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+        style="background-color: #4CAF50; border: none; box-shadow: none;" value="7"
+        onclick="finalizarServicio()">
+        ✅ Visita finaliza correctamente
+    </button>
     @elseif ($idtipoServicio == 7)
     <!-- Mostrar solo este botón si idtipoServicio es 7 -->
     <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
@@ -85,8 +92,6 @@
         📦 COORDINAR ENTREGA
     </button>
     @endif
-
-
 </div>
 @endif
 

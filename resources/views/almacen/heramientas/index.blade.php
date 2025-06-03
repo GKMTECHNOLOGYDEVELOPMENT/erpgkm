@@ -57,7 +57,7 @@
                     </button>
 
                     <!-- Botón Agregar -->
-                    <a href="{{ route('heramientas.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
+                    <a href="{{ route('herramientas.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                             fill="none">
                             <path

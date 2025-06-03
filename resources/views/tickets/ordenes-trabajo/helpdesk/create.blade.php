@@ -476,239 +476,229 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Inicializa Select2 solo una vez para otros selects si es necesario
-            const allSelects = document.querySelectorAll('.select2');
-            allSelects.forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
+            // 1. Inicialización de NiceSelect con sincronización automática
+            const initializeNiceSelect = (selectElement) => {
+                if (selectElement.niceSelectInstance) {
+                    selectElement.niceSelectInstance.destroy();
+                }
+
+                return NiceSelect.bind(selectElement, {
+                    searchable: true,
+                    callback: function(instance) {
+                        // Sincronizar valor con el select original
+                        selectElement.value = instance.selected.value;
+                        console.log(`Select ${selectElement.id} cambiado a:`, selectElement.value);
+                    }
                 });
+            };
+
+            // Inicializar todos los selects con clase .select2
+            document.querySelectorAll('.select2').forEach(select => {
+                select.niceSelectInstance = initializeNiceSelect(select);
             });
 
-
-
-
-
-
-            // Función para crear el errorText debajo de cada campo
-            function createErrorText(inputId, message) {
+            // 2. Funciones para manejo de errores
+            const createErrorText = (inputId, message) => {
                 const input = document.getElementById(inputId);
-                // Verificar si el mensaje de error ya existe para evitar duplicados
+                if (!input) return;
+
                 if (!document.getElementById(`${inputId}Error`)) {
-                    let errorText = document.createElement('p');
+                    const errorText = document.createElement('p');
                     errorText.id = `${inputId}Error`;
-                    errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
+                    errorText.className = 'text-sm text-red-500 mt-1';
                     errorText.textContent = message;
                     input.parentNode.appendChild(errorText);
                 }
-            }
+            };
 
-            // Función para eliminar el errorText si el campo es completado
-            function removeErrorText(inputId) {
+            const removeErrorText = (inputId) => {
                 const errorText = document.getElementById(`${inputId}Error`);
-                if (errorText) {
-                    errorText.remove(); // Elimina el mensaje de error
-                }
-            }
+                if (errorText) errorText.remove();
+            };
 
+            // 3. Validación en tiempo real para campos
+            const setupFieldValidation = () => {
+                // Campos de texto
+                const textFields = [
+                    'numero_ticket',
+                    'fallaReportada'
+                ];
 
-            // Validación antes de enviar el formulario
-            document.getElementById("ordenTrabajoForm").addEventListener("submit", function(event) {
-
-
-                let isValid = true;
-
-                // Obtener los valores de los campos
-                const numeroTicket = document.getElementById("numero_ticket").value.trim();
-                const idClienteGeneral = document.getElementById("idClienteGeneral").value;
-                // const idTecnico = document.getElementById("idTecnico").value;
-                const idCliente = document.getElementById("idCliente").value;
-                const tipoServicio = document.getElementById("tipoServicio").value;
-                const idTienda = document.getElementById("idTienda").value;
-                const fallaReportada = document.getElementById("fallaReportada").value.trim();
-
-                console.log("Valor del idCliente seleccionado:", idCliente); // Verifica el valor aquí
-
-
-                // Verificar si algún campo está vacío
-                if (!numeroTicket) {
-                    isValid = false; // Si está vacío, no se puede enviar el formulario
-                    createErrorText('numero_ticket', 'Campo ticket vacío');
-                }
-
-                if (!idClienteGeneral) {
-                    isValid = false;
-                    createErrorText('idClienteGeneral', 'Campo cliente general vacío');
-                }
-
-                if (!idCliente) {
-                    isValid = false;
-                    createErrorText('idCliente', 'Campo cliente vacío');
-                }
-
-                if (!tipoServicio) {
-                    isValid = false;
-                    createErrorText('tipoServicio', 'Campo servicio vacío');
-                }
-
-                if (!fallaReportada) {
-                    isValid = false;
-                    createErrorText('fallaReportada', 'Campo falla vacío');
-                }
-
-                // if (!idTecnico) {
-                //     isValid = false;
-                //     createErrorText('idTecnico', 'Campo tecnico vacío');
-                // }
-
-                if (!idTienda) {
-                    isValid = false;
-                    createErrorText('idTienda', 'Campo Tienda vacío');
-                }
-
-                // Si algún campo está vacío, mostrar mensaje global de Toastr
-                if (!isValid) {
-                    event.preventDefault(); // Evitar que el formulario se envíe
-                    toastr.error('Por favor, complete todos los campos obligatorios.');
-                }
-            });
-
-            // Agregar un event listener a cada campo para eliminar el error cuando se complete
-            const fields = [
-                'numero_ticket',
-                'idClienteGeneral',
-                'idCliente',
-                'tipoServicio',
-                'fallaReportada',
-                'idTienda'
-            ];
-
-            fields.forEach(function(fieldId) {
-                const field = document.getElementById(fieldId);
-                field.addEventListener('input', function() {
-                    if (field.value.trim() !== '') {
-                        removeErrorText(
-                            fieldId); // Eliminar el mensaje de error si el campo no está vacío
-                    }
-                });
-            });
-
-            // Para los selects, validar que el valor seleccionado no sea vacío (o el primer valor por defecto)
-            const selectFields = [
-                'idClienteGeneral',
-                'idCliente',
-                'tipoServicio',
-                // 'idTecnico',
-                'idTienda'
-            ];
-
-            selectFields.forEach(function(selectId) {
-                const select = document.getElementById(selectId);
-                select.addEventListener('change', function() {
-                    if (select.value !== '') {
-                        removeErrorText(
-                            selectId
-                        ); // Eliminar el mensaje de error si el select tiene una opción válida seleccionada
-                    }
-                });
-            });
-
-
-
-            // Lógica para obtener clientes relacionados con el Cliente General
-            const selectClienteGeneral = document.getElementById('idClienteGeneral');
-            const selectCliente = document.getElementById('idCliente');
-
-            selectClienteGeneral.addEventListener('change', function() {
-                const idClienteGeneral = this.value;
-
-                // Limpiar las opciones del select de Cliente, pero no el select entero
-                selectCliente.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
-
-                // Hacer la solicitud AJAX solo si se selecciona un Cliente General
-                if (idClienteGeneral) {
-                    fetch(`/clientes/${idClienteGeneral}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            // Asegúrate de que el array de clientes sea válido y tenga elementos
-                            if (data.length > 0) {
-                                // Iterar sobre los datos para agregar las opciones
-                                data.forEach(cliente => {
-                                    const option = document.createElement('option');
-                                    option.value = cliente.idCliente;
-                                    option.textContent =
-                                        `${cliente.nombre} - ${cliente.documento}`;
-                                    selectCliente.appendChild(option);
-                                });
-                            } else {
-                                // Si no hay clientes relacionados, mostrar una opción vacía
-                                const option = document.createElement('option');
-                                option.value = '';
-                                option.textContent = 'No hay clientes disponibles';
-                                selectCliente.appendChild(option);
+                textFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.addEventListener('input', function() {
+                            if (this.value.trim() !== '') {
+                                removeErrorText(fieldId);
+                                this.classList.remove('border-red-500');
+                                this.classList.add('border-green-500');
                             }
-                        })
-                        .catch(error => console.error('Error al obtener los clientes:', error));
-                }
-            });
+                        });
+                    }
+                });
 
-            // Validación en tiempo real para el número de ticket
-            document.getElementById('numero_ticket').addEventListener('input', function() {
+                // Campos select
+                const selectFields = [
+                    'idClienteGeneral',
+                    'idCliente',
+                    'tipoServicio',
+                    'idTienda'
+                ];
+
+                selectFields.forEach(selectId => {
+                    const select = document.getElementById(selectId);
+                    if (select) {
+                        select.addEventListener('change', function() {
+                            if (this.value !== '') {
+                                removeErrorText(selectId);
+                            }
+                        });
+                    }
+                });
+            };
+
+            setupFieldValidation();
+
+            // 4. Validación del número de ticket
+            const validateTicket = () => {
                 const inputTicket = document.getElementById('numero_ticket');
                 const errorTicket = document.getElementById('errorTicket');
-                const numero_ticketValue = inputTicket.value.trim();
 
-                if (numero_ticketValue === "") {
-                    inputTicket.classList.remove('border-red-500', 'border-green-500');
-                    errorTicket.textContent = "Campo vacío"; // Mostrar mensaje de campo vacío
-                    errorTicket.classList.remove('hidden');
-                } else {
-                    fetch(`/validar-ticket/${numero_ticketValue}`)
+                if (!inputTicket) return;
+
+                inputTicket.addEventListener('input', function() {
+                    const value = this.value.trim();
+
+                    if (value === "") {
+                        this.classList.remove('border-green-500');
+                        errorTicket.textContent = "Campo vacío";
+                        errorTicket.classList.remove('hidden');
+                        return;
+                    }
+
+                    fetch(`/validar-ticket/${value}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.existe) {
-                                inputTicket.classList.add('border-red-500');
-                                inputTicket.classList.remove('border-green-500');
-                                errorTicket.textContent =
-                                    'El número de ticket ya está en uso. Por favor, ingrese otro número.';
+                                this.classList.add('border-red-500');
+                                this.classList.remove('border-green-500');
+                                errorTicket.textContent = 'Número de ticket ya en uso';
                                 errorTicket.classList.remove('hidden');
-                                // Mostrar toastr
-                                toastr.error(
-                                    'El número de ticket ya está en uso. Por favor, ingrese otro número.'
-                                );
+                                toastr.error('Número de ticket ya en uso');
                             } else {
-                                inputTicket.classList.remove('border-red-500');
-                                inputTicket.classList.add('border-green-500');
+                                this.classList.remove('border-red-500');
+                                this.classList.add('border-green-500');
                                 errorTicket.classList.add('hidden');
                             }
                         })
                         .catch(error => {
-                            console.error('Error al verificar el ticket:', error);
-                            inputTicket.classList.add('border-red-500');
-                            errorTicket.textContent =
-                                'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.';
+                            console.error('Error:', error);
+                            this.classList.add('border-red-500');
+                            errorTicket.textContent = 'Error al verificar ticket';
                             errorTicket.classList.remove('hidden');
-                            // Mostrar toastr
-                            toastr.error(
-                                'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.'
-                            );
+                            toastr.error('Error al verificar ticket');
                         });
-                }
-            });
+                });
+            };
 
-            // Validación cuando se intente enviar el formulario
-            document.getElementById("ordenTrabajoForm").addEventListener("submit", function(event) {
-                const numeroTicket = document.getElementById("numero_ticket").value.trim();
+            validateTicket();
 
-                // Validar que el número de ticket no esté vacío o no esté en uso
-                if (!numeroTicket || document.getElementById('errorTicket').classList.contains('hidden') ===
-                    false) {
-                    event.preventDefault(); // Evitar que el formulario se envíe
+            // 5. Lógica para clientes y clientes generales
+            const setupClientesLogic = () => {
+                const selectClienteGeneral = document.getElementById('idClienteGeneral');
+                const selectCliente = document.getElementById('idCliente');
 
-                    // Mostrar mensaje de error si el número de ticket es vacío o ya está en uso
+                if (!selectClienteGeneral || !selectCliente) return;
+
+                selectClienteGeneral.addEventListener('change', function() {
+                    const idClienteGeneral = this.value;
+                    console.log('Cliente general seleccionado:', idClienteGeneral);
+
+                    // Reiniciar select de cliente
+                    selectCliente.innerHTML =
+                        '<option value="" disabled selected>Seleccionar Cliente</option>';
+
+                    if (idClienteGeneral) {
+                        fetch(`/clientes/${idClienteGeneral}`)
+                            .then(response => {
+                                if (!response.ok) throw new Error('Error en la respuesta');
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data?.length > 0) {
+                                    data.forEach(cliente => {
+                                        const option = new Option(
+                                            `${cliente.nombre} - ${cliente.documento}`,
+                                            cliente.idCliente
+                                        );
+                                        selectCliente.add(option);
+                                    });
+
+                                    // Re-inicializar NiceSelect para mantener sincronización
+                                    selectCliente.niceSelectInstance = initializeNiceSelect(
+                                        selectCliente);
+                                } else {
+                                    selectCliente.add(new Option('No hay clientes disponibles',
+                                        ''));
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                selectCliente.add(new Option('Error al cargar clientes', ''));
+                            });
+                    }
+                });
+            };
+
+            setupClientesLogic();
+
+            // 6. Validación final del formulario
+            document.getElementById("ordenTrabajoForm")?.addEventListener("submit", function(event) {
+                // Sincronizar valores de NiceSelect antes de validar
+                document.querySelectorAll('.select2').forEach(select => {
+                    const niceSelect = select.nextElementSibling;
+                    if (niceSelect?.classList.contains('nice-select')) {
+                        const selected = niceSelect.querySelector('.option.selected');
+                        if (selected) select.value = selected.dataset.value;
+                    }
+                });
+
+                // Validar campos requeridos
+                const camposRequeridos = {
+                    'numero_ticket': 'Campo ticket vacío',
+                    'idClienteGeneral': 'Campo cliente general vacío',
+                    'idCliente': 'Campo cliente vacío',
+                    'tipoServicio': 'Campo servicio vacío',
+                    'fallaReportada': 'Campo falla vacío',
+                    'idTienda': 'Campo Tienda vacío'
+                };
+
+                let isValid = true;
+                Object.entries(camposRequeridos).forEach(([id, mensaje]) => {
+                    const campo = document.getElementById(id);
+                    if (!campo || !campo.value.trim()) {
+                        isValid = false;
+                        createErrorText(id, mensaje);
+                        console.error(`Campo requerido vacío: ${id}`);
+                    }
+                });
+
+                // Validación especial del ticket
+                const ticketError = document.getElementById('errorTicket');
+                if (!document.getElementById('numero_ticket').value.trim() ||
+                    (ticketError && !ticketError.classList.contains('hidden'))) {
+                    isValid = false;
                     toastr.error('Por favor, ingrese un número de ticket válido.');
                 }
-            });
 
+                if (!isValid) {
+                    event.preventDefault();
+                    toastr.error('Complete todos los campos obligatorios');
+                } else {
+                    console.log('Formulario válido. Enviando...');
+                    console.log('idCliente:', document.getElementById('idCliente').value);
+                }
+            });
         });
     </script>
 
@@ -724,60 +714,80 @@
                 fetch('/clientesdatoscliente')
                     .then(response => response.json())
                     .then(data => {
-                        console.log("🚀 Datos de clientes recibidos:",
-                            data); // Aquí estamos haciendo el log de los datos recibidos
+                        console.log("🚀 Datos de clientes recibidos:", data);
 
-                        const select = document.getElementById(
-                            'idCliente'); // Aquí aún usas 'idCliente' para obtener el select
+                        // Obtener o crear el select
+                        let select = document.getElementById('idCliente');
 
-                        // Puedes agregar un 'name' también, si lo deseas:
-                        select.setAttribute('name', 'idCliente'); // Aquí le asignas el 'name' que quieres
+                        // Si no existe, lo creamos
+                        if (!select) {
+                            select = document.createElement('select');
+                            select.id = 'idCliente';
+                            select.name = 'idCliente';
+                            select.className = 'form-input w-full';
+                            // Agregarlo al DOM donde corresponda
+                            document.querySelector('#contenedor-select-cliente').appendChild(select);
+                        }
+
+                        // Configurar atributos (por si acaso)
+                        select.id = 'idCliente'; // Asegurar el id
+                        select.name = 'idCliente'; // Asegurar el name
+                        select.setAttribute('data-test', 'select-cliente'); // Atributo adicional para testing
 
                         // Vaciar y llenar el select con las opciones
-                        select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente</option>';
+                        select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente 2</option>';
+
                         data.forEach(cliente => {
-                            console.log(
-                                `Cliente: ${cliente.nombre} - ${cliente.documento}`
-                            ); // Mostrar el cliente en el log
+                            console.log(`Cliente: ${cliente.nombre} - ${cliente.documento}`);
 
                             const option = document.createElement('option');
                             option.value = cliente.idCliente;
                             option.textContent = `${cliente.nombre} - ${cliente.documento}`;
                             option.dataset.tienda = cliente.esTienda;
-                            option.dataset.direccion = cliente.direccion; // <--- AÑADIDO
+                            option.dataset.direccion = cliente.direccion;
                             select.appendChild(option);
                         });
 
-                        // Si ya existe una instancia previa de nice-select, la destruye
+                        // Manejo de NiceSelect
                         if (select.niceSelectInstance) {
                             select.niceSelectInstance.destroy();
                         }
 
-                        // Inicializa nice-select y guarda la instancia en el select
+                        // Inicializar NiceSelect con configuración mejorada
                         select.niceSelectInstance = NiceSelect.bind(select, {
-                            searchable: true
+                            searchable: true,
+                            placeholder: 'Seleccionar Cliente',
+                            callback: function(select) {
+                                // Sincronizar el valor con el select original
+                                document.getElementById('idCliente').value = select.value;
+                            }
                         });
 
-                        // Mostrar el select después de cargar los datos
-                        select.style.display = 'block'; // O 'inline-block' según tu diseño
-                        // ✅ Estilo para alinear verticalmente el texto
+                        // Estilos para NiceSelect
+                        select.style.display = 'block';
                         setTimeout(() => {
                             const nice = $(select).next(".nice-select");
-                            nice.css({
-                                'line-height': '2.2rem !important',
-                                'height': '2.4rem',
-                                'padding-top': '0.2rem',
-                                'padding-bottom': '0.2rem'
-                            });
-                            nice.find('.current').css({
-                                'line-height': '2.2rem !important',
-                                'padding-top': '0 !important',
-                                'padding-bottom': '0 !important'
-                            });
+                            if (nice.length) {
+                                nice.css({
+                                    'line-height': '2.2rem',
+                                    'height': '2.4rem',
+                                    'padding-top': '0.2rem',
+                                    'padding-bottom': '0.2rem',
+                                    'display': 'flex',
+                                    'align-items': 'center'
+                                });
+                                nice.find('.current').css({
+                                    'line-height': '2.2rem',
+                                    'padding-top': '0',
+                                    'padding-bottom': '0'
+                                });
+                            }
                         }, 50);
+
                     })
                     .catch(error => {
                         console.error('Error al cargar clientes:', error);
+                        toastr.error('Error al cargar la lista de clientes');
                     });
             }
 
@@ -819,123 +829,148 @@
             $(document).ready(function() {
                 console.log("🔹 DOM completamente cargado");
 
-                // Elementos
-                const clienteSelect = $("#idCliente");
-                const tiendaSelectContainer = $(
-                    "#selectTiendaContainer"); // Contenedor del select de tiendas
-                const tiendaSelect = $("#idTienda"); // Select de tiendas
+                // 1. Configuración inicial del select de Cliente
+                const clienteSelect = $("#idCliente")
+                    .attr('id', 'idCliente') // Asegurar id
+                    .attr('name', 'idCliente') // Asegurar name
+                    .removeAttr("class style")
+                    .addClass("form-input w-full");
 
-                // ✅ 🔥 Eliminamos cualquier clase o estilo raro en el select
-                tiendaSelect.removeAttr("class style").addClass("form-input w-full");
+                // 2. Configuración inicial del select de Tienda
+                const tiendaSelectContainer = $("#selectTiendaContainer");
+                const tiendaSelect = $("#idTienda")
+                    .attr('id', 'idTienda') // Asegurar id
+                    .attr('name', 'idTienda') // Asegurar name
+                    .removeAttr("class style")
+                    .addClass("form-input w-full");
 
                 // Ocultar select de tiendas al inicio
                 tiendaSelectContainer.hide();
 
-                // 🔹 Escuchar cambios en el select de cliente
-                clienteSelect.on("change", function() {
-                    let clienteId = clienteSelect.val();
-
-                    if (!clienteId) {
-                        console.warn("⚠️ No se ha seleccionado un cliente.");
-                        return;
-                    }
-
-                    console.log(`🔍 Cliente seleccionado: ${clienteId}`);
-
-                    // Llamar a la API para obtener los datos del cliente y su tipo de documento
-                    $.get(`/api/cliente/${clienteId}`, function(data) {
-                        console.log("📌 Datos del cliente:", data);
-
-                        // Establecer dirección automáticamente
-                        $("#direccion").val(data.direccion || "");
-
-                        // Verificamos el tipo de documento del cliente
-                        if (data.idTipoDocumento == 8) {
-                            // Si el cliente tiene idTipoDocumento == 2, traer todas las tiendas
-                            console.log(
-                                "🌍 Cliente con idTipoDocumento == 2, cargando todas las tiendas..."
-                            );
-                            mostrarSelectTiendas(clienteId,
-                                true); // True para todas las tiendas
-                        } else {
-                            // Si el cliente tiene idTipoDocumento == 1, traer solo las tiendas relacionadas
-                            console.log(
-                                "🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas..."
-                            );
-                            mostrarSelectTiendas(clienteId,
-                                false); // False para tiendas relacionadas
-                        }
-
-                    }).fail(function() {
-                        console.error("❌ Error al obtener los datos del cliente.");
-                    });
-                });
-
-                // Función para mostrar el select de tiendas
+                // 3. Función mejorada para mostrar tiendas
                 function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
                     tiendaSelectContainer.show();
-                    tiendaSelect.show();
 
-                    tiendaSelect.empty().append(
-                        '<option value="" selected disabled>Seleccionar Tienda</option>');
+                    // Asegurar atributos antes de llenar
+                    tiendaSelect.attr('id', 'idTienda')
+                        .attr('name', 'idTienda')
+                        .empty()
+                        .append('<option value="" selected disabled>Seleccionar Tienda</option>');
 
-                    const urlTiendas = cargarTodasTiendas ?
-                        `/api/tiendas` :
+                    const urlTiendas = cargarTodasTiendas ? `/api/tiendas` :
                         `/api/cliente/${clienteId}/tiendas`;
 
-                    $.get(urlTiendas, function(data) {
-                        console.log("🏪 Tiendas obtenidas:", data);
+                    $.get(urlTiendas)
+                        .done(function(data) {
+                            console.log("🏪 Tiendas obtenidas:", data);
 
-                        if (data.length > 0) {
-                            data.forEach(tienda => {
-                                tiendaSelect.append(`
-                    <option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">
-                        ${tienda.nombre}
-                    </option>
-                `);
-                            });
-                        } else {
-                            tiendaSelect.append(
-                                '<option value="">No hay tiendas registradas</option>');
-                        }
+                            if (data.length > 0) {
+                                data.forEach(tienda => {
+                                    tiendaSelect.append(`
+                            <option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">
+                                ${tienda.nombre}
+                            </option>
+                        `);
+                                });
+                            } else {
+                                tiendaSelect.append(
+                                    '<option value="">No hay tiendas registradas</option>');
+                            }
 
-                        // Reemplazar el Nice Select anterior si existe
-                        tiendaSelect.next(".nice-select").remove();
-                        tiendaSelect.show(); // Mostrar original para inicializar
-
-                        // Inicializar Nice Select 2 con buscador
-                        NiceSelect.bind(tiendaSelect[0], {
-                            searchable: true
+                            // Inicializar NiceSelect con sincronización
+                            inicializarNiceSelectTienda();
+                        })
+                        .fail(function(error) {
+                            console.error("❌ Error al obtener tiendas:", error);
+                            tiendaSelect.append('<option value="">Error al cargar tiendas</option>');
+                            inicializarNiceSelectTienda();
                         });
-                        tiendaSelect.hide(); // Ocultar el original
+                }
 
-                        // Aplicar estilos solo al nice-select de tienda
-                        setTimeout(() => {
-                            const nice = tiendaSelect.next(".nice-select");
+                // 4. Función para inicializar NiceSelect en tienda
+                function inicializarNiceSelectTienda() {
+                    // Destruir instancia previa si existe
+                    if (tiendaSelect[0].niceSelectInstance) {
+                        tiendaSelect[0].niceSelectInstance.destroy();
+                    }
+
+                    // Mostrar select original para inicialización
+                    tiendaSelect.show();
+
+                    // Inicializar NiceSelect con sincronización
+                    tiendaSelect[0].niceSelectInstance = NiceSelect.bind(tiendaSelect[0], {
+                        searchable: true,
+                        placeholder: 'Seleccionar Tienda',
+                        callback: function(select) {
+                            // Sincronizar valor con el select original
+                            document.getElementById('idTienda').value = select.value;
+                        }
+                    });
+
+                    // Ocultar select original
+                    tiendaSelect.hide();
+
+                    // Aplicar estilos
+                    setTimeout(() => {
+                        const nice = tiendaSelect.next(".nice-select");
+                        if (nice.length) {
                             nice.css({
                                 'height': '2.5rem',
                                 'padding': '0 0.75rem',
-                                'line-height': '2.5rem'
+                                'line-height': '2.5rem',
+                                'display': 'flex',
+                                'align-items': 'center'
                             });
                             nice.find('.current').css({
                                 'line-height': '2.5rem',
                                 'padding': '0 !important'
                             });
-                        }, 50);
-
-                    }).fail(function() {
-                        console.error("❌ Error al obtener tiendas.");
-                    });
+                        }
+                    }, 50);
                 }
 
+                // 5. Evento change para cliente (con validación de atributos)
+                clienteSelect.on("change", function() {
+                    // Asegurar atributos en cada cambio
+                    $(this).attr('id', 'idCliente').attr('name', 'idCliente');
 
+                    const clienteId = $(this).val();
+                    console.log(`🔍 Cliente seleccionado: ${clienteId}`);
 
-                // Ejecutar la validación al cargar la página por si hay un cliente seleccionado
+                    if (!clienteId) {
+                        console.warn("⚠️ No se ha seleccionado un cliente.");
+                        tiendaSelectContainer.hide();
+                        return;
+                    }
+
+                    $.get(`/api/cliente/${clienteId}`)
+                        .done(function(data) {
+                            console.log("📌 Datos del cliente:", data);
+                            $("#direccion").val(data.direccion || "");
+
+                            // Verificar tipo de documento
+                            if (data.idTipoDocumento == 8) {
+                                console.log(
+                                    "🌍 Cliente con idTipoDocumento == 8, cargando todas las tiendas..."
+                                );
+                                mostrarSelectTiendas(clienteId, true);
+                            } else {
+                                console.log(
+                                    "🏪 Cliente con idTipoDocumento == 1, cargando tiendas relacionadas..."
+                                );
+                                mostrarSelectTiendas(clienteId, false);
+                            }
+                        })
+                        .fail(function(error) {
+                            console.error("❌ Error al obtener datos del cliente:", error);
+                        });
+                });
+
+                // 6. Ejecutar validación inicial si hay cliente seleccionado
                 if (clienteSelect.val()) {
                     clienteSelect.trigger("change");
                 }
             });
-
 
 
 

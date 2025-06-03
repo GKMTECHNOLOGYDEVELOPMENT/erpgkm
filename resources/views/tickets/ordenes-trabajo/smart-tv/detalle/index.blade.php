@@ -562,30 +562,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
-        const rowsPerPage = 15; // Número de filas por página
-        let currentPage = 1; // Página actual
+        const rowsPerPage = 15;
+        let currentPage = 1;
 
         function cargarEstados() {
             fetch(`/ticket/${ticketId}/estados`)
                 .then(response => response.json())
                 .then(data => {
                     const estadosTableBody = document.getElementById("estadosTableBody");
-                    estadosTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar los nuevos estados
+                    estadosTableBody.innerHTML = "";
 
                     if (Array.isArray(data.estadosFlujo)) {
                         const estados = data.estadosFlujo;
                         renderTable(estados, currentPage);
                         setupPagination(estados.length);
                     } else {
-                        console.error('La respuesta no contiene un array de estados de flujo:', data
-                            .estadosFlujo);
+                        console.error('Respuesta inválida:', data.estadosFlujo);
                     }
                 })
-                .catch(error => {
-                    console.error('Error cargando los estados:', error);
-                });
+                .catch(error => console.error('Error cargando estados:', error));
         }
 
         function renderTable(estados, page) {
@@ -597,48 +594,60 @@ document.addEventListener('DOMContentLoaded', function() {
             const estadosPaginados = estados.slice(start, end);
 
             estadosPaginados.forEach(ticketFlujo => {
-                const estado = ticketFlujo.estado_descripcion; // Cambié a 'estado_descripcion'
-                const usuario = ticketFlujo.usuario_nombre; // Cambié a 'usuario_nombre'
+                const estado = ticketFlujo.estado_descripcion;
+                const usuario = ticketFlujo.usuario_nombre;
 
-                // Fila principal
                 const row = document.createElement("tr");
 
                 const estadoCell = document.createElement("td");
                 estadoCell.classList.add("px-4", "py-2", "text-center", "text-black");
-                estadoCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
+                estadoCell.style.backgroundColor = ticketFlujo.estado_color;
                 estadoCell.textContent = estado;
 
                 const usuarioCell = document.createElement("td");
                 usuarioCell.classList.add("px-4", "py-2", "text-center", "text-black");
                 usuarioCell.textContent = usuario ? usuario : 'Sin Nombre';
-                usuarioCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
+                usuarioCell.style.backgroundColor = ticketFlujo.estado_color;
 
                 const fechaCell = document.createElement("td");
                 fechaCell.classList.add("px-4", "py-2", "text-center", "text-black");
                 fechaCell.textContent = ticketFlujo.fecha_creacion;
-                fechaCell.style.backgroundColor = ticketFlujo.estado_color; // Usar 'estado_color'
+                fechaCell.style.backgroundColor = ticketFlujo.estado_color;
 
-                // Botón "Más" y "Guardar" en la misma celda
                 const masCell = document.createElement("td");
                 masCell.classList.add("px-4", "py-2", "text-center", "space-x-2");
-                masCell.style.backgroundColor = ticketFlujo.estado_color; // Aplica el color del estado
+                masCell.style.backgroundColor = ticketFlujo.estado_color;
 
-                // Botón "Más" (⋮)
+                // Botón "Más" ⋮
                 const masBtn = document.createElement("button");
                 masBtn.classList.add("toggle-comment", "px-3", "py-1", "rounded", "bg-gray-300");
                 masBtn.textContent = "⋮";
                 masBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
 
-                // Botón "Guardar" como icono de check ✅ verde
+                // Botón "Guardar" ✔
                 const saveIconBtn = document.createElement("button");
-                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success",
-                    "text-white");
+                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success", "text-white");
                 saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
-                saveIconBtn.innerHTML = "✔"; // Ícono de check verde
+                saveIconBtn.innerHTML = "✔";
 
-                // Agregar botones a la celda
+                // Botón "Eliminar" ❌
+                const deleteBtn = document.createElement("button");
+                deleteBtn.classList.add("delete-flujo", "px-3", "py-1", "rounded", "bg-red-500", "text-white");
+                deleteBtn.textContent = "❌";
+                deleteBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
+
+                // Botón "Relacionar" 🔗
+                const relacionarBtn = document.createElement("button");
+                relacionarBtn.classList.add("relacionar-flujo", "px-3", "py-1", "rounded", "bg-blue-500", "text-white");
+                relacionarBtn.textContent = "🔗";
+                relacionarBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
+
                 masCell.appendChild(masBtn);
                 masCell.appendChild(saveIconBtn);
+                masCell.appendChild(deleteBtn);
+                masCell.appendChild(relacionarBtn); // 👉 lo agregas al final
+
+   
 
                 row.appendChild(estadoCell);
                 row.appendChild(usuarioCell);
@@ -650,19 +659,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 const commentRow = document.createElement("tr");
                 commentRow.classList.add("hidden");
                 const commentCell = document.createElement("td");
-                commentCell.setAttribute("colspan",
-                    "4"); // Ajustado el colspan a la cantidad de columnas
+                commentCell.setAttribute("colspan", "4");
                 commentCell.classList.add("p-4");
-                commentCell.style.backgroundColor = ticketFlujo
-                    .estado_color; // Aplica el color del estado
+                commentCell.style.backgroundColor = ticketFlujo.estado_color;
 
                 const textArea = document.createElement("textarea");
-                textArea.classList.add("w-full", "p-2", "rounded", "border",
-                    "border-black"); // 🔥 Borde negro
+                textArea.classList.add("w-full", "p-2", "rounded", "border", "border-black");
                 textArea.textContent = ticketFlujo.comentarioflujo;
                 textArea.placeholder = "Escribe un comentario...";
-                textArea.style.backgroundColor = ticketFlujo
-                    .estado_color; // 🔥 Color de fondo del estado
+                textArea.style.backgroundColor = ticketFlujo.estado_color;
 
                 commentCell.appendChild(textArea);
                 commentRow.appendChild(commentCell);
@@ -675,7 +680,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function setupPagination(totalRows) {
             const paginationContainer = document.getElementById("paginationControls");
-            paginationContainer.innerHTML = ""; // Limpiar paginación previa
+            paginationContainer.innerHTML = "";
 
             const totalPages = Math.ceil(totalRows / rowsPerPage);
 
@@ -709,31 +714,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function agregarEventosComentarios() {
             document.querySelectorAll('.toggle-comment').forEach(button => {
-                button.addEventListener('click', function() {
-                    let parentCell = this.closest('td'); // Celda donde están los elementos
+                button.addEventListener('click', function () {
                     let row = this.closest('tr').nextElementSibling;
-                    row.classList.toggle('hidden'); // Mostrar/ocultar la fila de comentario
+                    row.classList.toggle('hidden');
                 });
             });
 
             document.querySelectorAll('.save-comment').forEach(button => {
-                button.addEventListener('click', function() {
-                    let flujoId = this.dataset.flujoId; // Obtener idTicketFlujo
+                button.addEventListener('click', function () {
+                    let flujoId = this.dataset.flujoId;
                     let row = this.closest('tr').nextElementSibling;
                     let textArea = row.querySelector("textarea");
                     let comentario = textArea.value;
 
                     fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRF-TOKEN": document.querySelector(
-                                    'meta[name="csrf-token"]').getAttribute("content")
-                            },
-                            body: JSON.stringify({
-                                comentario
-                            })
-                        })
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                        },
+                        body: JSON.stringify({ comentario })
+                    })
                         .then(response => response.json())
                         .then(result => {
                             if (result.success) {
@@ -742,16 +743,76 @@ document.addEventListener('DOMContentLoaded', function() {
                                 toastr.error("Error al actualizar el estado.");
                             }
                         })
-                        .catch(error => console.error("Error al actualizar el estado:", error));
+                        .catch(error => console.error("Error al actualizar:", error));
                 });
             });
+
+            document.querySelectorAll('.delete-flujo').forEach(button => {
+                button.addEventListener('click', function () {
+                    const flujoId = this.dataset.flujoId;
+
+                    if (confirm("¿Estás seguro que quieres eliminar este estado de flujo?")) {
+                        fetch(`/ticketflujo/${flujoId}/eliminar`, {
+                            method: "DELETE",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    toastr.success("Estado de flujo eliminado correctamente.");
+                                    cargarEstados();
+                                } else {
+                                    toastr.error("Error al eliminar el estado de flujo.");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error al eliminar:", error);
+                                toastr.error("Error inesperado al eliminar.");
+                            });
+                    }
+                });
+            });
+
+            document.querySelectorAll('.relacionar-flujo').forEach(button => {
+    button.addEventListener('click', function () {
+        const flujoId = this.dataset.flujoId;
+
+        if (confirm("¿Deseas relacionar este estado de flujo con el ticket?")) {
+            fetch(`/ticket/${ticketId}/relacionarflujo`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+                },
+                body: JSON.stringify({ flujoId: flujoId })
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        toastr.success("Estado de flujo relacionado con el ticket.");
+                        cargarEstados();
+                    } else {
+                        toastr.error("No se pudo relacionar el flujo.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error al relacionar flujo:", error);
+                    toastr.error("Error inesperado al relacionar.");
+                });
+        }
+    });
+});
+
         }
 
-        // Cargar estados al iniciar
         cargarEstados();
         setInterval(cargarEstados, 30000);
     });
 </script>
+
 
 
 

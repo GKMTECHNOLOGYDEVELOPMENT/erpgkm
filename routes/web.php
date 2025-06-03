@@ -749,6 +749,8 @@ Route::get('/visita/{ticketId}', [OrdenesTrabajoController::class, 'mostrarDetal
 Route::post('/tickets/{idTicket}/actualizar-estado', [OrdenesTrabajoController::class, 'actualizarEstado']);
 
 Route::post('/guardar-estado', [OrdenesTrabajoController::class, 'guardarEstadoflujo'])->name('guardarEstado');
+Route::delete('/ticketflujo/{id}/eliminar', [OrdenesTrabajoController::class, 'eliminarflujo']);
+Route::post('/ticket/{ticketId}/relacionarflujo', [OrdenesTrabajoController::class, 'relacionarFlujo']);
 
 //politicas
 
