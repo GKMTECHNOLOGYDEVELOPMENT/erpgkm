@@ -20,15 +20,14 @@ document.addEventListener('alpine:init', () => {
                             className: 'text-center',
                             render: foto => foto
                                 ? `<img src="${foto}" class="w-12 h-12 object-cover rounded mx-auto" alt="Foto">`
-                                : `<div class="text-gray-400">Sin Imagen</div>`,
+                                : `<img src="/assets/images/articulo/producto-default.png" class="w-12 h-12 object-cover rounded mx-auto" alt="Imagen por defecto">`,
                         },
-                        { data: 'codigo_barras', className: 'text-center' },
-                        { data: 'sku', className: 'text-center', render: sku => sku || 'N/A' },
                         { data: 'codigo_repuesto', className: 'text-center' },
-                        { data: 'unidad', className: 'text-center' },
-                        { data: 'stock_total', className: 'text-center' },
-                        { data: 'tipo_articulo', className: 'text-center' },
+                        { data: 'categoria_modelo', className: 'text-center' },
                         { data: 'modelo', className: 'text-center' },
+                        { data: 'stock_total', className: 'text-center' },
+                        { data: 'stock_total', className: 'text-center' },
+                        { data: 'stock_total', className: 'text-center' },
                         {
                             data: 'estado',
                             className: 'text-center',
@@ -36,6 +35,7 @@ document.addEventListener('alpine:init', () => {
                                 ? '<span class="badge badge-outline-success">Activo</span>'
                                 : '<span class="badge badge-outline-danger">Inactivo</span>',
                         },
+                        
                         {
                             data: null,
                             orderable: false,

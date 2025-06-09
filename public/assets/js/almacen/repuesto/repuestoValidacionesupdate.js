@@ -89,6 +89,8 @@ document.addEventListener("DOMContentLoaded", function () {
             input.classList.remove("border-red-500");
         });
     });
+
+
     function validarCampos() {
         let todosValidos = true;
 

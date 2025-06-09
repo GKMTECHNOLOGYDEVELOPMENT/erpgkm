@@ -84,8 +84,10 @@ class Articulo extends Model
 		'idModelo',
 		'foto_codigobarras',
 		'fotosku',
+		'br-codigo-repuesto',
 		'pulgadas',
-		'codigo_repuesto'
+		'codigo_repuesto',
+		'ficha_tecnica'
 	];
 
 	public function unidad()
@@ -139,4 +141,9 @@ class Articulo extends Model
 	{
 		return $this->hasMany(Ordenesarticulo::class, 'idArticulos');
 	}
+	public function modelos()
+	{
+		return $this->belongsToMany(Modelo::class, 'articulo_modelo', 'articulo_id', 'modelo_id');
+	}
+
 }

@@ -124,7 +124,7 @@ Route::get('/cuentas-bancarias/{idUsuario}', function ($idUsuario) {
     // Obtener las cuentas bancarias para el usuario especificado
     $cuentasBancarias = CuentasBancarias::where('idUsuario', $idUsuario)->get();
 
-    // Retornar las cuentas bancarias en formato JSON
+    // Retornar las cuentas bancarias en formato repuestos
     return response()->json($cuentasBancarias);
 });
 
@@ -229,17 +229,29 @@ Route::get('/constancias/por-ticket/{ticketId}', [OrdenesTrabajoController::clas
 Route::delete('/constancias/fotos/{fotoId}', [OrdenesTrabajoController::class, 'eliminarFoto']);
 
 Route::get('/validar-codigo_barras', function (Request $request) {
-    $exists = Articulo::where('codigo_barras', $request->valor)->exists();
+    $query = Articulo::where('codigo_barras', $request->valor);
+    if ($request->has('id')) {
+        $query->where('idArticulos', '!=', $request->id);
+    }
+    $exists = $query->exists();
     return response()->json(['exists' => $exists]);
 });
 
 Route::get('/validar-sku', function (Request $request) {
-    $exists = Articulo::where('sku', $request->valor)->exists();
+    $query = Articulo::where('sku', $request->valor);
+    if ($request->has('id')) {
+        $query->where('idArticulos', '!=', $request->id);
+    }
+    $exists = $query->exists();
     return response()->json(['exists' => $exists]);
 });
 
 Route::get('/validar-codigo_repuesto', function (Request $request) {
-    $exists = Articulo::where('codigo_repuesto', $request->valor)->exists();
+    $query = Articulo::where('codigo_repuesto', $request->valor);
+    if ($request->has('id')) {
+        $query->where('idArticulos', '!=', $request->id);
+    }
+    $exists = $query->exists();
     return response()->json(['exists' => $exists]);
 });
 

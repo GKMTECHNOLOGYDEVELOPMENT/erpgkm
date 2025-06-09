@@ -81,14 +81,13 @@
                 <thead>
                     <tr>
                         <th>Foto</th>
-                        <th>Código de Barras</th>
-                        <th>SKU</th>
                         <th>Código de Repuestos</th>
-                        <th>Unidad</th>
-                        <th>Stock Total</th>
-                        <th>Tipo Artículo</th>
+                        <th>Categoria</th>
                         <th>Modelo</th>
-                        <th>Estados</th>
+                        <th>Stock Total</th>
+                        <th>Entradas</th>
+                        <th>Salidas</th>
+                        <th>Estado</th>
                         <th>Acción</th>
                     </tr>
                 </thead>

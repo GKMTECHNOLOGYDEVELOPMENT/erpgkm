@@ -213,7 +213,7 @@
                     </div>
                 </div>
 
-                <!-- Ficha Técnica -->
+                      <!-- Ficha Técnica -->
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700">Ficha Técnica (PDF)</label>
                     <label for="ficha_tecnica" class="file-input-label">Seleccionar archivo</label>
@@ -221,11 +221,18 @@
                         <input id="ficha_tecnica" name="ficha_tecnica" type="file" accept=".pdf"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                         <div class="border-b border-gray-300 pb-2 flex justify-between items-center">
-                            <span class="text-gray-500 text-sm">Ningún archivo seleccionado</span>
+                            <span id="nombre_archivo" class="text-gray-500 text-sm">Ningún archivo seleccionado</span>
                             <i class="fas fa-file-pdf text-gray-400"></i>
                         </div>
                     </div>
+
+                    <!-- Vista previa del PDF -->
+                <div id="preview_pdf" class="mt-4 max-w-full">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Vista previa:</label>
+                <iframe id="pdf_viewer" class="w-full h-[600px] border rounded" type="application/pdf"></iframe>
+                    </div>
                 </div>
+
 
             </div>
 
@@ -278,6 +285,25 @@
                 symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
                 monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
             });
+        }
+    });
+    </script>
+    <script>
+    document.getElementById('ficha_tecnica').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        const fileName = document.getElementById('nombre_archivo');
+        const previewContainer = document.getElementById('preview_pdf');
+        const pdfViewer = document.getElementById('pdf_viewer');
+
+        if (file && file.type === 'application/pdf') {
+            fileName.textContent = file.name;
+
+            const fileURL = URL.createObjectURL(file);
+            pdfViewer.src = fileURL;
+            previewContainer.classList.remove('hidden');
+        } else {
+            fileName.textContent = 'Archivo no válido';
+            previewContainer.classList.add('hidden');
         }
     });
     </script>

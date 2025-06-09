@@ -56,6 +56,6 @@ class Modelo extends Model
 
 	public function articulos()
 	{
-		return $this->hasMany(Articulo::class, 'idModelo');
+		return $this->hasMany(Articulo::class, 'articulo_modelo','idModelo', 'modelo_id', 'articulo_id');
 	}
 }

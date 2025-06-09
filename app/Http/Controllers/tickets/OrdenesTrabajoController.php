@@ -769,7 +769,7 @@ class OrdenesTrabajoController extends Controller
         } elseif ($tipoUsuario == 4) {
             // Si el tipo de usuario es 5, obtener solo los estados con idEstadoots 1 o 2
             $estadosOTS = DB::table('estado_ots')
-                ->whereIn('idEstadoots', [1, 2, 3, 4, 7])  // Filtrar solo por los estados 1 y 2
+                ->whereIn('idEstadoots', [1, 3, 4])  // Filtrar solo por los estados 1 y 2
                 ->get();
         } else {
             // Si el tipo de usuario no es ni 4 ni 5, obtener todos los estados (o un filtro predeterminado)

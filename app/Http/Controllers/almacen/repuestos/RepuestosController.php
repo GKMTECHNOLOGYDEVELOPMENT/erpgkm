@@ -4,6 +4,7 @@ namespace App\Http\Controllers\almacen\repuestos;
 
 use App\Http\Controllers\Controller;
 use App\Models\Articulo;
+use App\Models\ArticuloModelo;
 use App\Models\Modelo;
 use App\Models\Moneda;
 use App\Models\Tipoarea;
@@ -58,14 +59,18 @@ class RepuestosController extends Controller
                 'moneda_venta' => 'required|nullable|integer',
                 'precio_compra' => 'required|nullable|numeric',
                 'precio_venta' => 'required|nullable|numeric',
-                'foto' => 'required|nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120', // <= validación del PDF
                 'pulgadas' => 'required|nullable|string|max:255',
                 'idUnidad' => 'required|nullable|integer',
-                'idModelo' => 'required|nullable|integer',
+                'idModelo' => 'nullable|array', // Select multiple
+                'idModelo.*' => 'integer|exists:modelo,idModelo', 
             ]);
             
             // Asignación de valores por defecto
             $dataArticulo = $validatedData;
+            unset($dataArticulo['idModelo']); // 👈 EXCLUÍS el array antes de crear el artículo
+
             $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
             $dataArticulo['idTipoArticulo'] = 2; // Tipo de artículo por defecto
             $dataArticulo['fecha_ingreso'] = now(); // Fecha de ingreso con valor actual
@@ -88,6 +93,14 @@ class RepuestosController extends Controller
                 $fotoSkuBinario = $barcode; // El código de barras ya es binario
                 $articulo->update(['fotosku' => $fotoSkuBinario]);
             }
+
+               // Generar y guardar el código de barras para 'codigo_repuesto' como binario
+            if (!empty($dataArticulo['codigo_repuesto'])) {
+                $barcodeGenerator = new BarcodeGeneratorPNG();
+                $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_repuesto'], BarcodeGeneratorPNG::TYPE_CODE_128);
+                $fotoCrBinario = $barcode; // El código de barras ya es binario
+                $articulo->update(['br-codigo-repuesto' => $fotoCrBinario]);
+            }
     
             // Subir la foto del artículo y convertirla a binario
             if ($request->hasFile('foto')) {
@@ -95,6 +108,26 @@ class RepuestosController extends Controller
                 $photoData = file_get_contents($photoPath); // Leer el archivo como binario
                 $articulo->update(['foto' => $photoData]); // Guardar la foto como binario
             }
+
+           if ($request->hasFile('ficha_tecnica')) {
+                $pdf = $request->file('ficha_tecnica');
+                $pdfPath = $pdf->store('fichas', 'public'); // guarda: fichas/nombreArchivo.pdf
+                $fileName = basename($pdfPath); // extrae solo "nombreArchivo.pdf"
+                $articulo->update(['ficha_tecnica' => $fileName]); // guarda solo el nombre en BD
+            }
+
+            // Guardar modelos múltiples (relación muchos a muchos)
+        if ($request->has('idModelo') && is_array($request->idModelo)) {
+            foreach ($request->idModelo as $modeloId) {
+                ArticuloModelo::create([
+                    'articulo_id' => $articulo->idArticulos,
+                    'modelo_id' => $modeloId,
+                ]);
+            }
+        }
+
+
+
     
             // Respuesta de éxito
             return response()->json([
@@ -131,97 +164,127 @@ public function detalle($id)
     $articulo = Articulo::findOrFail($id);
     $unidades = Unidad::all();
     $tiposArticulo = Tipoarticulo::all();
-    $modelos = Modelo::all();
+// Cargar los modelos relacionados al artículo (muchos a muchos)
+$modelos = \App\Models\Modelo::whereIn('idModelo', function($query) use ($articulo) {
+    $query->select('modelo_id')
+          ->from('articulo_modelo')
+          ->where('articulo_id', $articulo->idArticulos);
+})->with('categoria')->get();
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
 
     return view('almacen.repuestos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
+
+
 public function update(Request $request, $id)
 {
-    DB::beginTransaction();
-
-    Log::info("Inicio de actualización del artículo con ID: {$id}");
-
     try {
-        // Log de entrada de datos
-        Log::debug("Datos recibidos para actualización:", $request->except(['foto', 'foto_codigobarras', 'fotosku']));
-
-        // Validar datos
+        // ✅ Validación igual que en store, sin UNIQUE
         $validatedData = $request->validate([
             'codigo_barras' => 'required|string|max:255',
             'sku' => 'required|string|max:255',
             'codigo_repuesto' => 'required|string|max:255',
-            'stock_total' => 'required|integer|min:0',
-            'stock_minimo' => 'nullable|integer|min:1',
-            'moneda_compra' => 'required|integer',
-            'moneda_venta' => 'required|integer',
-            'precio_compra' => 'required|numeric|min:0.01',
-            'precio_venta' => 'required|numeric|min:0.01|gt:precio_compra',
-            'pulgadas' => 'required|string|max:255',
-            'idUnidad' => 'required|integer',
-            'idModelo' => 'required|integer',
+            'stock_total' => 'required|nullable|integer',
+            'stock_minimo' => 'required|nullable|integer',
+            'moneda_compra' => 'required|nullable|integer',
+            'moneda_venta' => 'required|nullable|integer',
+            'precio_compra' => 'required|nullable|numeric',
+            'precio_venta' => 'required|nullable|numeric',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120',
+            'pulgadas' => 'required|nullable|string|max:255',
+            'idUnidad' => 'required|nullable|integer',
+            'idModelo' => 'nullable|array',
+            'idModelo.*' => 'integer|exists:modelo,idModelo',
         ]);
 
-        Log::info("Validación completada correctamente para artículo ID: {$id}");
-
+        // ✅ Buscar el artículo
         $articulo = Articulo::findOrFail($id);
-        Log::debug("Artículo encontrado:", $articulo->makeHidden(['foto', 'fotosku', 'foto_codigobarras'])->toArray());
 
-        // Campos que sí deben actualizarse
-        $camposActualizar = collect($request->only([
-            'codigo_barras',
-            'sku',
-            'codigo_repuesto',
-            'stock_total',
-            'stock_minimo',
-            'moneda_compra',
-            'moneda_venta',
-            'precio_compra',
-            'precio_venta',
-            'pulgadas',
-            'idUnidad',
-            'idModelo',
-        ]));
+        // ✅ Actualizar datos principales
+        $dataArticulo = $validatedData;
+        unset($dataArticulo['idModelo']); // 👈 Removés idModelo (relación aparte)
 
-        $articulo->update($camposActualizar->toArray());
+        $articulo->update($dataArticulo);
 
-        DB::commit();
+        // ✅ Código de barras para 'codigo_barras'
+        if (!empty($dataArticulo['codigo_barras'])) {
+            $barcodeGenerator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_barras'], $barcodeGenerator::TYPE_CODE_128);
+            $articulo->update(['foto_codigobarras' => $barcode]);
+        }
 
-        Log::info("Artículo ID {$id} actualizado exitosamente.");
-        Log::debug("Datos actualizados del artículo:", $articulo->makeHidden(['foto', 'fotosku', 'foto_codigobarras'])->toArray());
+        // ✅ Código de barras para 'sku'
+        if (!empty($dataArticulo['sku'])) {
+            $barcodeGenerator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['sku'], $barcodeGenerator::TYPE_CODE_128);
+            $articulo->update(['fotosku' => $barcode]);
+        }
 
+
+        
+        // ✅ Código de barras para 'sku'
+        if (!empty($dataArticulo['codigo_repuesto'])) {
+            $barcodeGenerator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_repuesto'], $barcodeGenerator::TYPE_CODE_128);
+            $articulo->update(['br-codigo-repuesto' => $barcode]);
+        }
+
+        // ✅ Subir nueva imagen (si viene)
+        if ($request->hasFile('foto')) {
+            $photoPath = $request->file('foto')->getRealPath();
+            $photoData = file_get_contents($photoPath);
+            $articulo->update(['foto' => $photoData]);
+        }
+
+      // ✅ Reemplazar el PDF anterior si viene uno nuevo
+        if ($request->hasFile('ficha_tecnica')) {
+            // Eliminar el anterior si existe
+            if ($articulo->ficha_tecnica) {
+                $rutaAnterior = storage_path('app/public/fichas/' . $articulo->ficha_tecnica);
+                if (file_exists($rutaAnterior)) {
+                    unlink($rutaAnterior);
+                }
+            }
+
+            // Subir el nuevo
+            $pdf = $request->file('ficha_tecnica');
+            $pdfPath = $pdf->store('fichas', 'public');
+            $fileName = basename($pdfPath);
+            $articulo->update(['ficha_tecnica' => $fileName]);
+        }
+
+
+        // ✅ Actualizar modelos relacionados (relación muchos-a-muchos)
+        if ($request->has('idModelo') && is_array($request->idModelo)) {
+            // Primero borrar los antiguos
+            \App\Models\ArticuloModelo::where('articulo_id', $articulo->idArticulos)->delete();
+
+            // Insertar los nuevos
+            foreach ($request->idModelo as $modeloId) {
+                \App\Models\ArticuloModelo::create([
+                    'articulo_id' => $articulo->idArticulos,
+                    'modelo_id' => $modeloId,
+                ]);
+            }
+        }
+
+        // ✅ Respuesta de éxito
         return response()->json([
             'success' => true,
-            'message' => 'Artículo actualizado exitosamente.',
-            'data' => $articulo->makeHidden(['foto', 'fotosku', 'foto_codigobarras'])
+            'message' => 'Artículo actualizado correctamente',
         ]);
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        DB::rollBack();
-        Log::warning("Error de validación al actualizar artículo ID {$id}: ", $e->errors());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Error de validación',
-            'errors' => $e->errors()
-        ], 422);
     } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error("Excepción al actualizar artículo ID {$id}: ".$e->getMessage(), [
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
         return response()->json([
             'success' => false,
-            'message' => 'Error: '.$e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
+            'message' => 'Ocurrió un error al actualizar el artículo.',
+            'error' => $e->getMessage(),
         ], 500);
     }
 }
+
 
 
 
@@ -310,51 +373,60 @@ public function deleteFoto($id)
         return $pdf->download('reporte-articulos.pdf');
     }
 
-  public function getAll(Request $request)
-    {
-        $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo'])
-        ->where('idTipoArticulo', 2); // ✅ Filtrar solo tipo de artículo = 2
-    
-        $total = $query->count();
-    
-        if ($search = $request->input('search.value')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nombre', 'like', "%$search%")
-                  ->orWhere('codigo_barras', 'like', "%$search%")
-                  ->orWhere('sku', 'like', "%$search%");
-            });
-        }
-    
-        $filtered = $query->count();
-    
-        $articulos = $query
-            ->skip($request->start)
-            ->take($request->length)
-            ->get();
-    
-        $data = $articulos->map(function ($articulo) {
-            return [
-                'idArticulos' => $articulo->idArticulos,
-                'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
-                'nombre' => $articulo->nombre,
-                'codigo_repuesto' => $articulo->codigo_repuesto,
-                'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
-                'codigo_barras' => $articulo->codigo_barras,
-                'stock_total' => $articulo->stock_total,
-                'sku' => $articulo->sku,
-                'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
-                'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
-                'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
-            ];
+public function getAll(Request $request)
+{
+    $query = Articulo::with(['unidad', 'tipoarticulo', 'modelos.categoria']) // <= Aquí
+        ->where('idTipoArticulo', 2); // Solo repuestos
+
+    $total = $query->count();
+
+    if ($search = $request->input('search.value')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('nombre', 'like', "%$search%")
+              ->orWhere('codigo_barras', 'like', "%$search%")
+              ->orWhere('sku', 'like', "%$search%");
         });
-    
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $total,
-            'recordsFiltered' => $filtered,
-            'data' => $data,
-        ]);
     }
+
+    $filtered = $query->count();
+
+    $articulos = $query
+        ->skip($request->start)
+        ->take($request->length)
+        ->get();
+
+    $data = $articulos->map(function ($articulo) {
+        $modeloNombres = $articulo->modelos->pluck('nombre')->join(' / ');
+        $categoriaNombres = $articulo->modelos
+            ->pluck('categoria.nombre')
+            ->unique()
+            ->filter()
+            ->join(' / ');
+
+        return [
+            'idArticulos' => $articulo->idArticulos,
+            'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
+            'nombre' => $articulo->nombre,
+            'codigo_repuesto' => $articulo->codigo_repuesto,
+            'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
+            'codigo_barras' => $articulo->codigo_barras,
+            'stock_total' => $articulo->stock_total,
+            'sku' => $articulo->sku,
+            'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
+            'modelo' => $modeloNombres ?: 'Sin Modelo',
+            'categoria_modelo' => $categoriaNombres ?: 'Sin Categoría',
+            'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
+        ];
+    });
+
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $total,
+        'recordsFiltered' => $filtered,
+        'data' => $data,
+    ]);
+}
+
 
     public function checkNombre(Request $request)
     {

@@ -42,20 +42,21 @@
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="{{ route('articulos.index') }}" class="text-primary hover:underline">
-                    <i class="fas fa-arrow-left mr-1"></i> Artículos
+                <a href="{{ route('heramientas.index') }}" class="text-primary hover:underline">
+                    <i class="fas fa-arrow-left mr-1"></i> Heramientas
                 </a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                <span>Crear Artículo nuevo</span>
+                <span>Crear Heramienta nueva</span>
             </li>
         </ul>
     </div>
 
     <div class="panel mt-6 p-5 max-w-4xl mx-auto">
         <h2 class="text-xl font-bold mb-5 flex items-center">
-            <i class="fas fa-box text-primary mr-2"></i> Agregar Nuevo Artículo
+           <i class="fas fa-wrench text-primary mr-2"></i> Agregar Nueva Herramienta
         </h2>
+
 
         <form id="articuloForm" method="POST" action="{{ route('articulos.store') }}" enctype="multipart/form-data">
             @csrf
@@ -212,19 +213,25 @@
                     </div>
                 </div>
 
-                <!-- Ficha Técnica -->
-                <div class="mb-5">
-                    <label class="block text-sm font-medium text-gray-700">Ficha Técnica (PDF)</label>
-                    <label for="ficha_tecnica" class="file-input-label">Seleccionar archivo</label>
-                    <div class="relative mt-1">
-                        <input id="ficha_tecnica" name="ficha_tecnica" type="file" accept=".pdf"
-                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                        <div class="border-b border-gray-300 pb-2 flex justify-between items-center">
-                            <span class="text-gray-500 text-sm">Ningún archivo seleccionado</span>
-                            <i class="fas fa-file-pdf text-gray-400"></i>
-                        </div>
-                    </div>
-                </div>
+      <!-- Ficha Técnica -->
+<div class="mb-5">
+    <label class="block text-sm font-medium text-gray-700">Ficha Técnica (PDF)</label>
+    <label for="ficha_tecnica" class="file-input-label">Seleccionar archivo</label>
+    <div class="relative mt-1">
+        <input id="ficha_tecnica" name="ficha_tecnica" type="file" accept=".pdf"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+        <div class="border-b border-gray-300 pb-2 flex justify-between items-center">
+            <span id="nombre_archivo" class="text-gray-500 text-sm">Ningún archivo seleccionado</span>
+            <i class="fas fa-file-pdf text-gray-400"></i>
+        </div>
+    </div>
+
+    <!-- Vista previa del PDF -->
+<div id="preview_pdf" class="mt-4 max-w-full">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Vista previa:</label>
+<iframe id="pdf_viewer" class="w-full h-[600px] border rounded" type="application/pdf"></iframe>
+    </div>
+</div>
 
             </div>
 
@@ -280,4 +287,43 @@
         }
     });
     </script>
+
+    <script>
+    document.getElementById('ficha_tecnica').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        const fileName = document.getElementById('nombre_archivo');
+        const previewContainer = document.getElementById('preview_pdf');
+        const pdfViewer = document.getElementById('pdf_viewer');
+
+        if (file && file.type === 'application/pdf') {
+            fileName.textContent = file.name;
+
+            const fileURL = URL.createObjectURL(file);
+            pdfViewer.src = fileURL;
+            previewContainer.classList.remove('hidden');
+        } else {
+            fileName.textContent = 'Archivo no válido';
+            previewContainer.classList.add('hidden');
+        }
+    });
+</script>
+   <script>
+    document.getElementById('ficha_tecnica').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        const fileName = document.getElementById('nombre_archivo');
+        const previewContainer = document.getElementById('preview_pdf');
+        const pdfViewer = document.getElementById('pdf_viewer');
+
+        if (file && file.type === 'application/pdf') {
+            fileName.textContent = file.name;
+
+            const fileURL = URL.createObjectURL(file);
+            pdfViewer.src = fileURL;
+            previewContainer.classList.remove('hidden');
+        } else {
+            fileName.textContent = 'Archivo no válido';
+            previewContainer.classList.add('hidden');
+        }
+    });
+</script>
 </x-layout.default>
