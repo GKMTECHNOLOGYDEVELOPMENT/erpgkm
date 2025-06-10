@@ -398,7 +398,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                toastr.success("Repuesto guardado correctamente");
+                toastr.success("Producto guardado correctamente");
 
                 // ✅ Limpiar el formulario
                 form.reset();
