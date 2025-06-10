@@ -961,7 +961,7 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            <a href="{{ route('articulos.index') }}">Productos</a>
+                            <a href="{{ route('producto.index') }}">Productos</a>
                         </li>
                  
                     </ul>

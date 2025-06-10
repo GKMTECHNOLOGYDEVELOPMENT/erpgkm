@@ -10,6 +10,7 @@ use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
+use App\Http\Controllers\almacen\productos\ProductoController;
 use App\Http\Controllers\almacen\repuestos\RepuestosController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
@@ -48,6 +49,7 @@ Route::get('/articulos', [ArticulosController::class, 'getAll']);
 Route::get('/ordenes', [OrdenesTrabajoController::class, 'getAll']);
 Route::get('/ordenes/helpdesk', [OrdenesHelpdeskController::class, 'getAll']);
 Route::get('/repuestos', [RepuestosController::class, 'getAll']);
+Route::get('/productos', [ProductoController::class, 'getAll']);
 
 
 

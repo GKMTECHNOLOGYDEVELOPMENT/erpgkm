@@ -361,13 +361,15 @@ Route::prefix('producto')->name('producto.')->group(function () {
     Route::get('/create', [ProductoController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [ProductoController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [ProductoController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
     Route::get('/{id}/detalles', [ProductoController::class, 'detalle'])->name('detalles'); // Editar un artículo
     Route::put('/update/{id}', [ProductoController::class, 'update'])->name('update'); // Actualizar un artículo
     Route::delete('/{id}', [ProductoController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
     Route::get('/export-pdf', [ProductoController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
     Route::get('/get-all', [ProductoController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
     Route::post('/check-nombre', [ProductoController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
-    Route::get('/create-producto', [ProductoController::class, 'createproducto'])->name('create'); // Crear un nuevo kit
+    Route::get('/create-producto', [ProductoController::class, 'createproducto'])->name('create.producto'); // Crear un nuevo kit
 
     Route::get('/exportar-excel', function () {
         return Excel::download(new ArticuloExport, 'producto.xlsx');

@@ -3,24 +3,34 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
         <style>
-        .clean-input {
+       .clean-input {
             border: none;
             border-bottom: 1px solid #e0e6ed;
             border-radius: 0;
-            padding-left: 30px;
+            padding-left: 35px; /* asegúrate de dejar espacio al ícono */
             padding-bottom: 8px;
+            padding-top: 8px;
             background-color: transparent;
+            height: 40px; /* controla la altura si es necesario */
+            line-height: 1.25rem;
         }
+
         .clean-input:focus {
             border-bottom: 2px solid #3b82f6;
             box-shadow: none;
         }
         .input-icon {
             position: absolute;
-            left: 0;
-            bottom: 8px;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
             color: #6b7280;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 10;
         }
         .select2-container--default .select2-selection--single {
             border: none;
@@ -31,18 +41,55 @@
         .select2-container--default.select2-container--focus .select2-selection--single {
             border-bottom: 2px solid #3b82f6;
         }
+          
         .file-input-label {
             display: block;
             margin-top: 5px;
             color: #6b7280;
             font-size: 0.875rem;
         }
+
+        /* Estilos para inputs con íconos */
+        .input-with-icon {
+            position: relative;
+            margin-bottom: 1.5rem; /* Espacio para mensajes de error */
+        }
+
+        .input-with-icon .clean-input {
+            padding-left: 35px !important; /* Forzar espacio para el ícono */
+        }
+
+        .input-with-icon .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Estilos para mensajes de error */
+        .error-msg, .error-msg-duplicado {
+            position: absolute;
+            bottom: -1.25rem;
+            left: 0;
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Estilos para campos inválidos */
+        .border-red-500 {
+            border-color: #ef4444 !important;
+        }
+
+
     </style>
 
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="{{ route('heramientas.index') }}" class="text-primary hover:underline">
+                <a href="producto/create" class="text-primary hover:underline">
                     <i class="fas fa-arrow-left mr-1"></i> Producto
                 </a>
             </li>
@@ -58,7 +105,7 @@
         </h2>
 
 
-      <form id="articuloForm" method="POST" action="{{ route('articulos.store') }}" enctype="multipart/form-data">
+       <form id="productoForm" method="POST"  enctype="multipart/form-data">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -129,12 +176,12 @@
                 <div>
                     <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelo *</label>
                     <div class="relative mt-1">
-                        <i class="fas fa-toolbox input-icon"></i>
+                        <!-- <i class="fas fa-toolbox input-icon"></i> -->
                         <select id="idModelo" name="idModelo" class="select2-single w-full" required>
                             <option value="" disabled selected>Seleccionar modelo</option>
                             @foreach ($modelos as $modelo)
                                 <option value="{{ $modelo->idModelo }}">
-                                    {{ $modelo->nombre }} - {{ $modelo->marca->nombre ?? 'Sin Marca' }}
+                                    {{ $modelo->nombre }} - {{ $modelo->marca->nombre ?? 'Sin Marca' }} - {{ $modelo->categoria->nombre ?? 'Sin Categoría' }}
                                 </option>
                             @endforeach
                         </select>
@@ -182,36 +229,33 @@
                     </div>
                 </div>
 
-                <!-- Foto -->
-                <div class="mb-5" x-data="{ fotoPreview: '' }">
+                 <!-- Foto -->
+                <div class="mb-5" x-data="{ 
+                    fotoPreview: '/assets/images/articulo/producto-default.png', 
+                    defaultImage: '/assets/images/articulo/producto-default.png' 
+                }">
                     <label class="block text-sm font-medium text-gray-700">Foto</label>
                     <label for="foto" class="file-input-label">Seleccionar archivo</label>
                     <div class="relative mt-1">
                         <input id="foto" name="foto" type="file" accept="image/*"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : ''">
+                            @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : defaultImage">
                         <div class="border-b border-gray-300 pb-2 flex justify-between items-center">
-                            <span x-text="fotoPreview ? 'Archivo seleccionado' : 'Ningún archivo seleccionado'" 
-                                  class="text-gray-500 text-sm"></span>
+                            <span x-text="fotoPreview !== defaultImage ? 'Archivo seleccionado' : 'Imagen por defecto'" 
+                                class="text-gray-500 text-sm"></span>
                             <i class="fas fa-camera text-gray-400"></i>
                         </div>
                     </div>
 
+                    <!-- Previsualización de imagen -->
                     <div class="flex justify-center mt-4">
                         <div class="w-full max-w-xs h-40 flex justify-center items-center bg-gray-50 rounded">
-                            <template x-if="fotoPreview">
-                                <img :src="fotoPreview" alt="Previsualización de la imagen"
-                                    class="w-full h-full object-contain">
-                            </template>
-                            <template x-if="!fotoPreview">
-                                <div class="flex flex-col items-center justify-center text-gray-400">
-                                    <i class="fas fa-image text-3xl mb-2"></i>
-                                    <span class="text-sm">Vista previa de imagen</span>
-                                </div>
-                            </template>
+                            <img :src="fotoPreview" alt="Previsualización de la imagen"
+                                class="w-full h-full object-contain">
                         </div>
                     </div>
                 </div>
+
 
                       <!-- Ficha Técnica -->
                 <div class="mb-5">
@@ -235,14 +279,21 @@
 
 
             </div>
+   <div class="flex justify-end mt-6 gap-4">
+            <!-- Cancelar -->
+            <a href="{{ route('producto.index') }}" class="btn btn-outline-danger flex items-center">
+                <i class="fas fa-times mr-2"></i> Cancelar
+            </a>
 
-            <div class="flex justify-end mt-6">
-                <a href="{{ route('articulos.index') }}" class="btn btn-outline-danger flex items-center">
-                    <i class="fas fa-times mr-1"></i> Cancelar
-                </a>
-                <button type="submit" class="btn btn-primary ml-4 flex items-center">
-                    <i class="fas fa-save mr-1"></i> Guardar Artículo
-                </button>
+            <!-- Limpiar -->
+            <button type="button" id="btnLimpiar" class="btn btn-outline-warning flex items-center">
+                <i class="fas fa-eraser mr-2"></i> Limpiar
+            </button>
+
+            <!-- Guardar -->
+            <button type="button" id="btnGuardar" class="btn btn-primary flex items-center">
+                <i class="fas fa-save mr-2"></i> Guardar Producto
+            </button>
             </div>
         </form>
     </div>
@@ -258,53 +309,145 @@
             minimumResultsForSearch: 5
         });
 
-        const monedas = @json($monedas);
-        let monedaCompraIndex = 0;
-        let monedaVentaIndex = 0;
+      
+    // ---------------------------
+    // 2. Manejo de monedas
+    // ---------------------------
+    const monedas = @json($monedas);
+    let monedaCompraIndex = 0;
+    let monedaVentaIndex = 0;
+    const btnCompra = document.getElementById("toggleMonedaCompra");
+    const btnVenta = document.getElementById("toggleMonedaVenta");
+    const symbolCompra = document.getElementById("precio_compra_symbol");
+    const symbolVenta = document.getElementById("precio_venta_symbol");
+    const monedaInputCompra = document.getElementById("moneda_compra");
+    const monedaInputVenta = document.getElementById("moneda_venta");
 
-        const symbolCompra = document.getElementById("precio_compra_symbol");
-        const symbolVenta = document.getElementById("precio_venta_symbol");
-        const monedaInputCompra = document.getElementById("moneda_compra");
-        const monedaInputVenta = document.getElementById("moneda_venta");
+    if (monedas.length > 0) {
+        symbolCompra.textContent = monedas[monedaCompraIndex].nombre;
+        monedaInputCompra.value = monedas[monedaCompraIndex].idMonedas;
+        symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
+        monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
 
-        if (monedas.length > 0) {
+        btnCompra.addEventListener("click", function () {
+            monedaCompraIndex = (monedaCompraIndex + 1) % monedas.length;
             symbolCompra.textContent = monedas[monedaCompraIndex].nombre;
             monedaInputCompra.value = monedas[monedaCompraIndex].idMonedas;
+        });
 
+        btnVenta.addEventListener("click", function () {
+            monedaVentaIndex = (monedaVentaIndex + 1) % monedas.length;
             symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
             monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
+        });
+    } else {
+        btnCompra.disabled = true;
+        btnVenta.disabled = true;
+        symbolCompra.textContent = '';
+        symbolVenta.textContent = '';
+    }
 
-            document.getElementById("toggleMonedaCompra").addEventListener("click", function () {
-                monedaCompraIndex = (monedaCompraIndex + 1) % monedas.length;
-                symbolCompra.textContent = monedas[monedaCompraIndex].nombre;
-                monedaInputCompra.value = monedas[monedaCompraIndex].idMonedas;
-            });
+    // ---------------------------
+    // 3. Vista previa de PDF
+    // ---------------------------
+    const inputFicha = document.getElementById('ficha_tecnica');
+    if (inputFicha) {
+        inputFicha.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const fileName = document.getElementById('nombre_archivo');
+            const previewContainer = document.getElementById('preview_pdf');
+            const pdfViewer = document.getElementById('pdf_viewer');
 
-            document.getElementById("toggleMonedaVenta").addEventListener("click", function () {
-                monedaVentaIndex = (monedaVentaIndex + 1) % monedas.length;
-                symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
-                monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
-            });
+            if (file && file.type === 'application/pdf') {
+                fileName.textContent = file.name;
+                const fileURL = URL.createObjectURL(file);
+                pdfViewer.src = fileURL;
+                previewContainer.classList.remove('hidden');
+            } else {
+                fileName.textContent = 'Archivo no válido';
+                previewContainer.classList.add('hidden');
+            }
+        });
+    }
+
+    // ---------------------------
+    // 4. Envío del formulario por AJAX
+    // ---------------------------
+    document.getElementById("btnGuardar").addEventListener("click", function () {
+        const form = document.getElementById("productoForm");
+
+        // Ejecutar validaciones manuales
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+
+        // Verificar errores
+        const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
+        if (errores.length > 0) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
         }
+
+        const formData = new FormData(form);
+
+        fetch("/producto/store", {
+            method: "POST",
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success("Repuesto guardado correctamente");
+
+                // ✅ Limpiar el formulario
+                form.reset();
+
+                // ✅ Limpiar Select2
+                $('#idModelo').val(null).trigger('change');
+
+                // ✅ Limpiar preview imagen (usando Alpine.js)
+                if (window.Alpine && Alpine.store) {
+                    // Si estás usando Alpine v3 con store, podrías resetearlo así (opcional)
+                    Alpine.store('fotoPreview', '');
+                } else {
+                    // Alternativamente, puedes resetear manualmente el contenedor de preview
+                    document.querySelector('[x-data]').__x.$data.fotoPreview = '';
+                }
+
+                // ✅ Limpiar vista previa PDF
+                document.getElementById('pdf_viewer').src = '';
+                document.getElementById('nombre_archivo').textContent = 'Ningún archivo seleccionado';
+                document.getElementById('preview_pdf').classList.add('hidden');
+
+            } else {
+                toastr.error("Ocurrió un error al guardar el repuesto.");
+                console.error(data);
+            }
+        })
+        .catch(error => {
+            toastr.error("Error en la comunicación con el servidor.");
+            console.error(error);
+        });
+    });
+
     });
     </script>
+
     <script>
-    document.getElementById('ficha_tecnica').addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        const fileName = document.getElementById('nombre_archivo');
-        const previewContainer = document.getElementById('preview_pdf');
-        const pdfViewer = document.getElementById('pdf_viewer');
-
-        if (file && file.type === 'application/pdf') {
-            fileName.textContent = file.name;
-
-            const fileURL = URL.createObjectURL(file);
-            pdfViewer.src = fileURL;
-            previewContainer.classList.remove('hidden');
-        } else {
-            fileName.textContent = 'Archivo no válido';
-            previewContainer.classList.add('hidden');
-        }
-    });
-    </script>
+document.getElementById("btnLimpiar").addEventListener("click", function () {
+    const form = document.getElementById("productoForm");
+    // Limpiar todos los campos
+    form.reset();
+    // Limpiar Select2
+    $('#idModelo').val(null).trigger('change');
+    // Limpiar PDF
+    document.getElementById('pdf_viewer').src = '';
+    document.getElementById('nombre_archivo').textContent = 'Ningún archivo seleccionado';
+    document.getElementById('preview_pdf').classList.add('hidden');
+});
+</script>
+    <script src="{{ asset('assets/js/almacen/productos/productosValidaciones.js') }}"></script>
+   <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </x-layout.default>

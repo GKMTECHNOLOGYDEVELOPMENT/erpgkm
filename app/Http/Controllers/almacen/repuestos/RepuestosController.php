@@ -352,7 +352,7 @@ public function deleteFoto($id)
 
             return response()->json([
                 'success' => true,
-                'message' => 'Artículo eliminado con éxito',
+                'message' => 'Repuesto eliminado con éxito',
             ]);
         } catch (\Exception $e) {
             Log::error('Error al eliminar el artículo: ' . $e->getMessage());

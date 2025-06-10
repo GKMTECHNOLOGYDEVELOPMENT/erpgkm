@@ -294,7 +294,7 @@
             </div>
            <div class="flex justify-end mt-6 gap-4">
             <!-- Cancelar -->
-            <a href="{{ route('articulos.index') }}" class="btn btn-outline-danger flex items-center">
+            <a href="{{ route('repuestos.index') }}" class="btn btn-outline-danger flex items-center">
                 <i class="fas fa-times mr-2"></i> Cancelar
             </a>
 
