@@ -201,7 +201,7 @@
 
                 <!-- Precio Venta -->
                 <div>
-                    <label for="precio_venta" class="block text-sm font-medium text-gray-700">Precio de Venta *</label>
+                    <label for="precio_venta" class="block text-sm font-medium text-gray-700">Precio de Venta</label>
                     <div class="flex items-center mt-1">
                         <button type="button" id="toggleMonedaVenta"
                             class="text-gray-500 px-2 h-10 border-b border-gray-300">
