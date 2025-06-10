@@ -19,25 +19,21 @@
             line-height: 1.25rem;
         }
 
-        .clean-input:focus {
-            border-bottom: 2px solid #3b82f6;
-            box-shadow: none;
-        }
-
         .input-icon {
             position: absolute;
             top: 50%;
             left: 10px;
             transform: translateY(-50%);
             color: #6b7280;
-            font-size: 14px;
+            font-size: 12px;
             pointer-events: none;
             z-index: 10;
         }
 
         .select2-container--default .select2-selection--multiple {
-            border: none;
-            border-bottom: 1px solid #e0e6ed;
+            background-color: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid #e0e6ed !important;
             border-radius: 0;
             padding-left: 5px;
             padding-bottom: 5px;
@@ -46,7 +42,10 @@
         .select2-container--default.select2-container--focus .select2-selection--multiple {
             border-bottom: 2px solid #3b82f6;
         }
-        
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            color: #000 !important;
+        }
 
         /* Estilos para inputs con íconos */
         .input-with-icon {
@@ -94,22 +93,21 @@
         .select2-container--default .select2-selection--multiple .select2-selection__rendered {
             padding-left: 0;
         }
-/* Quita el overflow del contenedor externo */
-.select2-container--default .select2-selection--multiple {
-    max-height: none;
-    overflow: visible;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-}
 
-/* Mantén el scroll solo aquí */
-.select2-container--default .select2-selection--multiple .select2-selection__rendered {
-    max-height: 80px;
-    overflow-y: auto;
-}
+        /* Quita el overflow del contenedor externo */
+        .select2-container--default .select2-selection--multiple {
+            max-height: none;
+            overflow: visible;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
 
-
+        /* Mantén el scroll solo aquí */
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            max-height: 80px;
+            overflow-y: auto;
+        }
     </style>
 
     <div>
