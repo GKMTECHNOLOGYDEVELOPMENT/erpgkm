@@ -218,7 +218,7 @@
 
                 <!-- Stock Total -->
                 <div class="relative">
-                    <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total *</label>
+                    <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total</label>
                     <div class="relative mt-1">
                         <i class="fas fa-boxes input-icon"></i>
                         <input id="stock_total" name="stock_total" type="number" class="clean-input w-full"
