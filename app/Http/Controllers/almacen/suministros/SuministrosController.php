@@ -44,32 +44,34 @@ class SuministrosController extends Controller
     }
 
 
-    public function store(Request $request)
+   
+      public function store(Request $request)
     {
         try {
             // Validación de datos
             $validatedData = $request->validate([
-                'codigo_barras' => 'nullable|string|max:255',
-                'nombre' => 'nullable|string|max:255',
-                'stock_total' => 'nullable|integer',
-                'stock_minimo' => 'nullable|integer',
-                'moneda_compra' => 'nullable|integer',
-                'moneda_venta' => 'nullable|integer',
-                'precio_compra' => 'nullable|numeric',
-                'precio_venta' => 'nullable|numeric',
+                'codigo_barras' => 'required|string|max:255|unique:articulos,codigo_barras',
+                'sku' => 'required|string|max:255|unique:articulos,sku',
+                'nombre' => 'required|string|max:255|unique:articulos,nombre',
+                'stock_total' => 'required|nullable|integer',
+                'stock_minimo' => 'required|nullable|integer',
+                'moneda_compra' => 'required|nullable|integer',
+                'moneda_venta' => 'required|nullable|integer',
+                'precio_compra' => 'required|nullable|numeric',
+                'precio_venta' => 'required|nullable|numeric',
+                'peso' => 'required|nullable|numeric',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'sku' => 'nullable|string|max:255',
-                'peso' => 'nullable|numeric',
-                'mostrarWeb' => 'nullable|string|max:255',
-                'estado' => 'nullable|boolean',
-                'idUnidad' => 'nullable|integer',
-                'idTipoArticulo' => 'nullable|integer',
-                'idModelo' => 'nullable|integer',
+                'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120', // <= validación del PDF
+                'idUnidad' => 'required|nullable|integer',
+                'idModelo' => 'integer|exists:modelo,idModelo', 
             ]);
             
             // Asignación de valores por defecto
             $dataArticulo = $validatedData;
+
             $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
+            $dataArticulo['idTipoArticulo'] = 4; // Tipo de artículo por defecto
+            $dataArticulo['fecha_ingreso'] = now(); // Fecha de ingreso con valor actual
             
             // Crear el artículo
             $articulo = Articulo::create($dataArticulo);
@@ -96,11 +98,19 @@ class SuministrosController extends Controller
                 $photoData = file_get_contents($photoPath); // Leer el archivo como binario
                 $articulo->update(['foto' => $photoData]); // Guardar la foto como binario
             }
+
+           if ($request->hasFile('ficha_tecnica')) {
+                $pdf = $request->file('ficha_tecnica');
+                $pdfPath = $pdf->store('fichas', 'public'); // guarda: fichas/nombreArchivo.pdf
+                $fileName = basename($pdfPath); // extrae solo "nombreArchivo.pdf"
+                $articulo->update(['ficha_tecnica' => $fileName]); // guarda solo el nombre en BD
+            }
+
     
             // Respuesta de éxito
             return response()->json([
                 'success' => true,
-                'message' => 'Artículo agregado correctamente',
+                'message' => 'Suministro agregado correctamente',
             ]);
     
         } catch (\Exception $e) {

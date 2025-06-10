@@ -22,7 +22,7 @@
                     <a href="javascript:;" class="text-primary hover:underline">Almacen</a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                    <span>Articulos</span>
+                    <span>Herramientas</span>
                 </li>
             </ul>
         </div>
@@ -57,7 +57,7 @@
                     </button>
 
                     <!-- Botón Agregar -->
-                    <a href="{{ route('herramientas.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
+                    <a href="{{ route('heramientas.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
                             fill="none">
                             <path
@@ -85,9 +85,12 @@
                         <th>SKU</th>
                         <th>Nombre</th>
                         <th>Unidad</th>
-                        <th>Stock Total</th>
-                        <th>Tipo Artículo</th>
+                        <th>Marca</th>
+                        <th>Categoria</th>
                         <th>Modelo</th>
+                        <th>Stock Total</th>
+                        <!-- <th>Entradas</th>
+                        <th>Salidas</th> -->
                         <th>Estados</th>
                         <th>Acción</th>
                     </tr>
@@ -172,7 +175,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-    <script src="{{ asset('assets/js/articulos/articulos.js') }}"></script>
+    <script src="{{ asset('assets/js/almacen/heramientas/heramientas.js') }}"></script>
     <!-- <script src="{{ asset('assets/js/articulos/articulosValidaciones.js') }}"></script> -->
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

@@ -6,6 +6,7 @@ use App\Http\Controllers\administracion\asociados\ClientesController;
 use App\Http\Controllers\administracion\asociados\ProveedoresController;
 use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
+use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
@@ -50,6 +51,7 @@ Route::get('/ordenes', [OrdenesTrabajoController::class, 'getAll']);
 Route::get('/ordenes/helpdesk', [OrdenesHelpdeskController::class, 'getAll']);
 Route::get('/repuestos', [RepuestosController::class, 'getAll']);
 Route::get('/productos', [ProductoController::class, 'getAll']);
+Route::get('/heramientas', [HeramientasController::class, 'getAll']);
 
 
 

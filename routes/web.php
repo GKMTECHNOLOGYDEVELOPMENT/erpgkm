@@ -324,6 +324,8 @@ Route::prefix('heramientas')->name('heramientas.')->group(function () {
     Route::get('/', [HeramientasController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [HeramientasController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [HeramientasController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+      Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
     Route::get('/{id}/edit', [HeramientasController::class, 'edit'])->name('edit'); // Editar un artículo
     Route::get('/{id}/detalles', [HeramientasController::class, 'detalle'])->name('detalles'); // Editar un artículo
     Route::put('/update/{id}', [HeramientasController::class, 'update'])->name('update'); // Actualizar un artículo

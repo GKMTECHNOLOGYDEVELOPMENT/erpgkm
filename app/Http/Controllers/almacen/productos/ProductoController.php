@@ -101,7 +101,6 @@ class ProductoController extends Controller
             
             // Asignación de valores por defecto
             $dataArticulo = $validatedData;
-            unset($dataArticulo['idModelo']); // 👈 EXCLUÍS el array antes de crear el artículo
 
             $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
             $dataArticulo['idTipoArticulo'] = 1; // Tipo de artículo por defecto
