@@ -382,11 +382,15 @@ public function getAll(Request $request)
 
     if ($search = $request->input('search.value')) {
         $query->where(function ($q) use ($search) {
-            $q->where('nombre', 'like', "%$search%")
-              ->orWhere('codigo_barras', 'like', "%$search%")
-              ->orWhere('sku', 'like', "%$search%");
+            $q->where('codigo_repuesto', 'like', "%$search%")
+              ->orWhere('stock_total', 'like', "%$search%")
+              ->orWhere('estado', 'like', "%$search%")
+              ->orWhereHas('modelos', fn($sub) => $sub->where('nombre', 'like', "%$search%"))
+              ->orWhereHas('modelos.categoria', fn($sub) => $sub->where('nombre', 'like', "%$search%"));
         });
     }
+    
+    
 
     $filtered = $query->count();
 
