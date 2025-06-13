@@ -22,7 +22,7 @@
                     <a href="javascript:;" class="text-primary hover:underline">Almacen</a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                    <span>Articulos</span>
+                    <span>Suministros</span>
                 </li>
             </ul>
         </div>
@@ -85,9 +85,12 @@
                         <th>SKU</th>
                         <th>Nombre</th>
                         <th>Unidad</th>
-                        <th>Stock Total</th>
-                        <th>Tipo Artículo</th>
+                        <th>Marca</th>
+                        <th>Categoria</th>
                         <th>Modelo</th>
+                        <th>Stock Total</th>
+                        <!-- <th>Entradas</th>
+                        <th>Salidas</th> -->
                         <th>Estados</th>
                         <th>Acción</th>
                     </tr>
@@ -169,10 +172,34 @@
             });
         });
     </script>
+
+    <script>
+function cambiarEstadoArticulo(id) {
+    fetch(`/suministros/${id}/cambiar-estado`, {
+        method: 'PUT',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (res.ok) {
+            Swal.fire('¡Listo!', data.message, 'success').then(() => location.reload());
+        } else {
+            Swal.fire('Error', data.message || 'No se pudo actualizar el estado.', 'error');
+        }
+    })
+    .catch(error => {
+        Swal.fire('Error', error.message || 'Algo salió mal.', 'error');
+    });
+}
+</script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-    <script src="{{ asset('assets/js/articulos/articulos.js') }}"></script>
+    <script src="{{ asset('assets/js/almacen/suministros/suministros.js') }}"></script>
     <!-- <script src="{{ asset('assets/js/articulos/articulosValidaciones.js') }}"></script> -->
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

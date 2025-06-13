@@ -78,6 +78,14 @@ document.addEventListener('alpine:init', () => {
                                         <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                         </svg>
                                     </button>
+
+                                    <button 
+            class="btn btn-sm ${row.estado === 'Activo' ? 'btn-danger' : 'btn-success'}"
+            onclick="cambiarEstadoArticulo(${row.idArticulos})"
+            x-tooltip="${row.estado === 'Activo' ? 'Desactivar' : 'Activar'}"
+        >
+            ${row.estado === 'Activo' ? 'Desactivar' : 'Activar'}
+        </button>
                                 </div>`; 
                             }
                         }
@@ -150,36 +158,41 @@ document.addEventListener('alpine:init', () => {
                 });
         },
 
-        deleteArticulo(idArticulos) {
-            Swal.fire({
-                icon: 'warning',
-                title: '¿Estás seguro?',
-                text: '¡No podrás revertir esta acción!',
-                showCancelButton: true,
-                confirmButtonText: 'Eliminar',
-                cancelButtonText: 'Cancelar',
-                padding: '2em',
-                customClass: 'sweet-alerts',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/repuestos/${idArticulos}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json',
-                        },
-                    })
-                        .then(async res => {
-                            const data = await res.json();
-                            if (!res.ok) throw new Error(data.error || 'Error al eliminar artículo');
+ deleteArticulo(idArticulos) {
+    Swal.fire({
+        icon: 'warning',
+        title: '¿Estás seguro?',
+        text: '¡No podrás revertir esta acción!',
+        showCancelButton: true,
+        confirmButtonText: 'Eliminar',
+        cancelButtonText: 'Cancelar',
+        padding: '2em',
+        customClass: 'sweet-alerts',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/suministros/${idArticulos}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(async res => {
+                    const data = await res.json();
 
-                            Swal.fire('¡Eliminado!', data.message, 'success').then(() => location.reload());
-                        })
-                        .catch(error => {
-                            Swal.fire('Error', error.message || 'Ocurrió un error.', 'error');
-                        });
-                }
-            });
-        },
+                    if (res.ok) {
+                        Swal.fire('¡Eliminado!', data.message, 'success').then(() => location.reload());
+                    } else {
+                        // Mostrar el mensaje del backend aunque sea error
+                        Swal.fire('Atención', data.message || 'No se pudo eliminar.', 'warning');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('Error', error.message || 'Ocurrió un error.', 'error');
+                });
+        }
+    });
+},
+
     }));
 });
