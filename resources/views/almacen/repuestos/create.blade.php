@@ -123,6 +123,11 @@
             top: 6px !important;
             right: 10px !important;
         }
+        .clean-input::placeholder {
+            font-size: 0.85rem;
+            /* o 0.75rem si lo quieres aún más pequeño */
+
+        }
     </style>
 
     <div>

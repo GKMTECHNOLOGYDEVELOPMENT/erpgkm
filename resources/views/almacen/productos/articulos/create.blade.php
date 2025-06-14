@@ -33,14 +33,25 @@
             z-index: 10;
         }
         .select2-container--default .select2-selection--single {
-            border: none;
-            border-bottom: 1px solid #e0e6ed;
-            border-radius: 0;
-            height: 38px;
+            background-color: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid #e0e6ed !important;
+            border-radius: 0 !important;
+            height: 40px !important;
+            padding-left: 35px !important;
+            display: flex;
+            align-items: center;
         }
+
         .select2-container--default.select2-container--focus .select2-selection--single {
             border-bottom: 2px solid #3b82f6;
         }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            top: 6px !important;
+            right: 10px !important;
+        }
+
           
         .file-input-label {
             display: block;
@@ -68,6 +79,9 @@
             pointer-events: none;
         }
 
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: inherit !important;
+        }
         /* Estilos para mensajes de error */
         .error-msg, .error-msg-duplicado {
             position: absolute;
@@ -82,16 +96,21 @@
         .border-red-500 {
             border-color: #ef4444 !important;
         }
+        .clean-input::placeholder {
+            font-size: 0.85rem;
+            /* o 0.75rem si lo quieres aún más pequeño */
 
+        }
 
     </style>
 
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="producto/create" class="text-primary hover:underline">
+                <a href="{{ route('producto.index') }}" class="text-primary hover:underline">
                     <i class="fas fa-arrow-left mr-1"></i> Producto
                 </a>
+                
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Crear Producto nuevo</span>
@@ -99,7 +118,7 @@
         </ul>
     </div>
 
-    <div class="panel mt-6 p-5 max-w-4xl mx-auto">
+    <div class="panel mt-6 p-5 max-w-6x2 mx-auto">
         <h2 class="text-xl font-bold mb-5 flex items-center">
             <i class="fas fa-box text-primary mr-2"></i> Agregar Nuevo Producto
         </h2>
@@ -112,7 +131,7 @@
 
                 <!-- Código de Barras -->
                 <div class="relative">
-                    <label for="codigo_barras" class="block text-sm font-medium text-gray-700">Código de Barras *</label>
+                    <label for="codigo_barras" class="block text-sm font-medium text-gray-700">Código de Barras</label>
                     <div class="relative mt-1">
                         <i class="fas fa-barcode input-icon"></i>
                         <input id="codigo_barras" name="codigo_barras" type="text" class="clean-input w-full"
@@ -131,7 +150,7 @@
 
                 <!-- Nombre -->
                 <div class="relative">
-                    <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre *</label>
+                    <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
                     <div class="relative mt-1">
                         <i class="fas fa-cogs input-icon"></i>
                         <input id="nombre" name="nombre" type="text" class="clean-input w-full" placeholder="Ingrese nombre" required>
@@ -140,7 +159,7 @@
 
                 <!-- Stock Total -->
                 <div class="relative">
-                    <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total *</label>
+                    <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total</label>
                     <div class="relative mt-1">
                         <i class="fas fa-boxes input-icon"></i>
                         <input id="stock_total" name="stock_total" type="number" min="0" class="clean-input w-full"
@@ -150,7 +169,7 @@
 
                 <!-- Stock Mínimo -->
                 <div class="relative">
-                    <label for="stock_minimo" class="block text-sm font-medium text-gray-700">Stock Mínimo *</label>
+                    <label for="stock_minimo" class="block text-sm font-medium text-gray-700">Stock Mínimo</label>
                     <div class="relative mt-1">
                         <i class="fas fa-boxes input-icon"></i>
                         <input id="stock_minimo" name="stock_minimo" type="number" min="0" class="clean-input w-full"
@@ -158,12 +177,12 @@
                     </div>
                 </div>
 
-                <!-- Unidad de Medida -->
                 <div class="relative">
-                    <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida *</label>
+                    <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
                     <div class="relative mt-1">
                         <i class="fas fa-balance-scale input-icon"></i>
-                        <select id="idUnidad" name="idUnidad" class="clean-input w-full pl-8" style="appearance: none;" required>
+                        <select id="idUnidad" name="idUnidad" class="select2-single clean-input w-full pl-10" required>
+
                             <option value="" disabled selected>Seleccionar Unidad</option>
                             @foreach ($unidades as $unidad)
                                 <option value="{{ $unidad->idUnidad }}">{{ $unidad->nombre }}</option>
@@ -174,8 +193,9 @@
 
                 <!-- Modelo -->
                 <div>
-                    <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelo *</label>
+                    <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelo</label>
                     <div class="relative mt-1">
+                        <i class="fas fa-cubes input-icon"></i>
                         <!-- <i class="fas fa-toolbox input-icon"></i> -->
                         <select id="idModelo" name="idModelo" class="select2-single w-full" required>
                             <option value="" disabled selected>Seleccionar modelo</option>
@@ -190,7 +210,7 @@
 
                 <!-- Peso -->
                 <div>
-                    <label for="peso" class="block text-sm font-medium text-gray-700">Peso (kg) *</label>
+                    <label for="peso" class="block text-sm font-medium text-gray-700">Peso (kg)</label>
                     <div class="relative mt-1">
                         <i class="fas fa-weight input-icon"></i>
                         <input id="peso" name="peso" type="number" step="0.01" min="0" class="clean-input w-full" placeholder="Ingrese peso" required>
@@ -199,7 +219,7 @@
 
                 <!-- Precio de Compra -->
                 <div>
-                    <label for="precio_compra" class="block text-sm font-medium text-gray-700">Precio de Compra *</label>
+                    <label for="precio_compra" class="block text-sm font-medium text-gray-700">Precio de Compra</label>
                     <div class="flex items-center mt-1">
                         <button type="button" id="toggleMonedaCompra"
                             class="text-gray-500 px-2 h-10 border-b border-gray-300">
@@ -215,7 +235,7 @@
 
                 <!-- Precio de Venta -->
                 <div>
-                    <label for="precio_venta" class="block text-sm font-medium text-gray-700">Precio de Venta *</label>
+                    <label for="precio_venta" class="block text-sm font-medium text-gray-700">Precio de Venta</label>
                     <div class="flex items-center mt-1">
                         <button type="button" id="toggleMonedaVenta"
                             class="text-gray-500 px-2 h-10 border-b border-gray-300">
@@ -235,7 +255,10 @@
                     defaultImage: '/assets/images/articulo/producto-default.png' 
                 }">
                     <label class="block text-sm font-medium text-gray-700">Foto</label>
-                    <label for="foto" class="file-input-label">Seleccionar archivo</label>
+                    <label for="foto"
+                        class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
+                        <i class="fas fa-upload mr-1"></i> Seleccionar archivo
+                    </label>
                     <div class="relative mt-1">
                         <input id="foto" name="foto" type="file" accept="image/*"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -260,7 +283,8 @@
                       <!-- Ficha Técnica -->
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700">Ficha Técnica (PDF)</label>
-                    <label for="ficha_tecnica" class="file-input-label">Seleccionar archivo</label>
+                    <label for="ficha_tecnica" class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
+                        <i class="fas fa-upload mr-1"></i> Seleccionar archivo</label>
                     <div class="relative mt-1">
                         <input id="ficha_tecnica" name="ficha_tecnica" type="file" accept=".pdf"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
@@ -304,7 +328,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         // Inicializar Select2
         $('.select2-single').select2({
-            placeholder: "Seleccione un modelo",
+            placeholder: "Seleccione una opción",
             width: '100%',
             minimumResultsForSearch: 5
         });
