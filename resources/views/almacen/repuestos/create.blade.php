@@ -108,6 +108,21 @@
             max-height: 80px;
             overflow-y: auto;
         }
+
+        .select2-container--default .select2-selection--single {
+            background-color: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid #e0e6ed !important;
+            border-radius: 0 !important;
+            height: 40px !important;
+            padding-left: 35px !important;
+            display: flex;
+            align-items: center;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            top: 6px !important;
+            right: 10px !important;
+        }
     </style>
 
     <div>
@@ -237,11 +252,11 @@
                 </div>
 
                 <!-- Unidad de Medida -->
-                <div class="relative">
+                <div class="relative input-with-icon">
                     <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
                     <div class="relative mt-1">
                         <i class="fas fa-balance-scale input-icon"></i>
-                        <select id="idUnidad" name="idUnidad" class="clean-input w-full pl-8"
+                        <select id="idUnidad" name="idUnidad" class="select2-single clean-input w-full pl-10"
                             style="appearance: none;">
                             <option value="" disabled selected>Seleccionar Unidad</option>
                             @foreach ($unidades as $unidad)
@@ -250,6 +265,7 @@
                         </select>
                     </div>
                 </div>
+
 
                 <!-- Pulgadas -->
                 <div class="relative">
@@ -351,6 +367,14 @@
                 width: '100%',
                 minimumResultsForSearch: 5
             });
+
+            $('.select2-single').select2({
+                placeholder: "Seleccionar Unidad",
+                allowClear: true,
+                width: '100%',
+                minimumResultsForSearch: Infinity // desactiva el buscador
+            });
+
 
             // ---------------------------
             // 2. Manejo de monedas
