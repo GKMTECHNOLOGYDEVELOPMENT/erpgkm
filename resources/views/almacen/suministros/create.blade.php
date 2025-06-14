@@ -86,11 +86,11 @@
 
     </style>
 
-   <div>
+<div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
                 <a href="{{ route('suministros.index') }}" class="text-primary hover:underline">
-                    <i class="fas fa-arrow-left mr-1"></i> Suministros
+                    <i class="fas fa-arrow-left mr-1"></i> Suministro
                 </a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
@@ -101,10 +101,10 @@
 
     <div class="panel mt-6 p-5 max-w-4xl mx-auto">
         <h2 class="text-xl font-bold mb-5 flex items-center">
-           <i class="fas fa-wrench text-primary mr-2"></i> Agregar Nuevo Suministro
+          <i class="fas fa-screwdriver-wrench text-primary mr-2"></i>  Agregar Nuevo Suministro
         </h2>
 
-       <form id="suministroForm" method="POST"  enctype="multipart/form-data">
+       <form id="sumiForm" method="POST"  enctype="multipart/form-data">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -280,7 +280,7 @@
             </div>
    <div class="flex justify-end mt-6 gap-4">
             <!-- Cancelar -->
-            <a href="{{ route('suministros.index') }}" class="btn btn-outline-danger flex items-center">
+            <a href="{{ route('producto.index') }}" class="btn btn-outline-danger flex items-center">
                 <i class="fas fa-times mr-2"></i> Cancelar
             </a>
 
@@ -372,70 +372,80 @@
     // ---------------------------
     // 4. Envío del formulario por AJAX
     // ---------------------------
-    document.getElementById("btnGuardar").addEventListener("click", function () {
-        const form = document.getElementById("suministroForm");
+   document.getElementById("btnGuardar").addEventListener("click", function () {
+    const form = document.getElementById("sumiForm");
 
-        // Ejecutar validaciones manuales
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    // Ejecutar validaciones manuales
+    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 
-        // Verificar errores
-        const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
-        if (errores.length > 0) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-        }
+    // Verificar errores
+    const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
+    if (errores.length > 0) {
+        console.warn("Hay errores de validación en el formulario:", errores);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
 
-        const formData = new FormData(form);
+    const formData = new FormData(form);
 
-        fetch("/suministros/store", {
-            method: "POST",
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                toastr.success("Suministro guardado correctamente");
+    // 🔍 LOG FormData para ver qué se está enviando
+    console.group("Datos enviados (FormData)");
+    for (const [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+    }
+    console.groupEnd();
 
-                // ✅ Limpiar el formulario
-                form.reset();
+    fetch("/suministros/store/suministro", {
+        method: "POST",
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: formData
+    })
+    .then(response => {
+        console.log("Respuesta cruda del servidor:", response);
+        return response.json();
+    })
+    .then(data => {
+        console.log("Respuesta parseada (JSON):", data);
 
-                // ✅ Limpiar Select2
-                $('#idModelo').val(null).trigger('change');
+        if (data.success) {
+            toastr.success("Suministro guardada correctamente");
 
-                // ✅ Limpiar preview imagen (usando Alpine.js)
-                if (window.Alpine && Alpine.store) {
-                    // Si estás usando Alpine v3 con store, podrías resetearlo así (opcional)
-                    Alpine.store('fotoPreview', '');
-                } else {
-                    // Alternativamente, puedes resetear manualmente el contenedor de preview
-                    document.querySelector('[x-data]').__x.$data.fotoPreview = '';
-                }
+            // ✅ Limpiar el formulario
+            form.reset();
 
-                // ✅ Limpiar vista previa PDF
-                document.getElementById('pdf_viewer').src = '';
-                document.getElementById('nombre_archivo').textContent = 'Ningún archivo seleccionado';
-                document.getElementById('preview_pdf').classList.add('hidden');
+            // ✅ Limpiar Select2
+            $('#idModelo').val(null).trigger('change');
 
+            // ✅ Limpiar preview imagen (usando Alpine.js)
+            if (window.Alpine && Alpine.store) {
+                Alpine.store('fotoPreview', '');
             } else {
-                toastr.error("Ocurrió un error al guardar el repuesto.");
-                console.error(data);
+                document.querySelector('[x-data]').__x.$data.fotoPreview = '';
             }
-        })
-        .catch(error => {
-            toastr.error("Error en la comunicación con el servidor.");
-            console.error(error);
-        });
+
+            // ✅ Limpiar vista previa PDF
+            document.getElementById('pdf_viewer').src = '';
+            document.getElementById('nombre_archivo').textContent = 'Ningún archivo seleccionado';
+            document.getElementById('preview_pdf').classList.add('hidden');
+        } else {
+            toastr.error("Ocurrió un error al guardar el repuesto.");
+            console.error("Error desde Laravel:", data);
+        }
+    })
+    .catch(error => {
+        toastr.error("Error en la comunicación con el servidor.");
+        console.error("Error en el fetch:", error);
     });
+});
 
     });
     </script>
 
     <script>
 document.getElementById("btnLimpiar").addEventListener("click", function () {
-    const form = document.getElementById("heramientasForm");
+    const form = document.getElementById("sumiForm");
     // Limpiar todos los campos
     form.reset();
     // Limpiar Select2

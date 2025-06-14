@@ -45,7 +45,7 @@ class SuministrosController extends Controller
 
 
    
-      public function store(Request $request)
+     public function store(Request $request)
     {
         try {
             // Validación de datos
@@ -133,7 +133,7 @@ class SuministrosController extends Controller
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
 
-    return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    return view('almacen.suministros.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
 
 
@@ -150,105 +150,147 @@ public function detalle($id)
 }
 
 
-
 public function update(Request $request, $id)
 {
-    DB::beginTransaction();
     try {
-        // Validar datos
+        // ✅ Validación igual que en store, sin UNIQUE
         $validatedData = $request->validate([
-            'codigo_barras' => 'nullable|string|max:255',
-            'nombre' => 'required|string|max:255',
-            'stock_total' => 'nullable|integer',
-            'stock_minimo' => 'nullable|integer',
-            'precio_compra' => 'nullable|numeric',
-            'precio_venta' => 'nullable|numeric',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // Aumenté a 5MB
-            'sku' => 'nullable|string|max:255',
-            'peso' => 'nullable|numeric',
-            'mostrarWeb' => 'nullable|boolean',
-            'estado' => 'nullable|boolean',
-            'idUnidad' => 'required|integer',
-            'idTipoArticulo' => 'required|integer',
-            'idModelo' => 'required|integer',
+                'codigo_barras' => 'required|string|max:255',
+                'sku' => 'required|string|max:255',
+                'nombre' => 'required|string|max:255',
+                'stock_total' => 'required|nullable|integer',
+                'stock_minimo' => 'required|nullable|integer',
+                'moneda_compra' => 'required|nullable|integer',
+                'moneda_venta' => 'required|nullable|integer',
+                'precio_compra' => 'required|nullable|numeric',
+                'precio_venta' => 'required|nullable|numeric',
+                'peso' => 'required|nullable|numeric',
+                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+                'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120', // <= validación del PDF
+                'idUnidad' => 'required|nullable|integer',
+                'idModelo' => 'integer|exists:modelo,idModelo', 
         ]);
 
+        // ✅ Buscar el artículo
         $articulo = Articulo::findOrFail($id);
 
-        // Manejar imagen solo si es válida
-        if ($request->hasFile('foto') && $request->file('foto')->isValid()) {
-            $foto = $request->file('foto');
-            
-            // Verificar tamaño mínimo (1KB)
-            if ($foto->getSize() < 1024) {
-                throw new \Exception('La imagen es demasiado pequeña (mínimo 1KB requerido)');
-            }
-            
-            $fotoBinario = file_get_contents($foto->getRealPath());
-            if ($fotoBinario === false) {
-                throw new \Exception('No se pudo leer el archivo de imagen');
-            }
-            
-            $validatedData['foto'] = $fotoBinario;
-            $validatedData['foto_mime'] = $foto->getClientMimeType();
-        } else {
-            unset($validatedData['foto']);
+        // ✅ Actualizar datos principales
+        $dataArticulo = $validatedData;
+    
+        $articulo->update($dataArticulo);
+
+        // ✅ Código de barras para 'codigo_barras'
+        if (!empty($dataArticulo['codigo_barras'])) {
+            $barcodeGenerator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_barras'], $barcodeGenerator::TYPE_CODE_128);
+            $articulo->update(['foto_codigobarras' => $barcode]);
         }
 
-        // Actualizar artículo
-        $articulo->update($validatedData);
-        DB::commit();
+        // ✅ Código de barras para 'sku'
+        if (!empty($dataArticulo['sku'])) {
+            $barcodeGenerator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['sku'], $barcodeGenerator::TYPE_CODE_128);
+            $articulo->update(['fotosku' => $barcode]);
+        }
 
+        // ✅ Subir nueva imagen (si viene)
+        if ($request->hasFile('foto')) {
+            $photoPath = $request->file('foto')->getRealPath();
+            $photoData = file_get_contents($photoPath);
+            $articulo->update(['foto' => $photoData]);
+        }
+
+      // ✅ Reemplazar el PDF anterior si viene uno nuevo
+        if ($request->hasFile('ficha_tecnica')) {
+            // Eliminar el anterior si existe
+            if ($articulo->ficha_tecnica) {
+                $rutaAnterior = storage_path('app/public/fichas/' . $articulo->ficha_tecnica);
+                if (file_exists($rutaAnterior)) {
+                    unlink($rutaAnterior);
+                }
+            }
+
+            // Subir el nuevo
+            $pdf = $request->file('ficha_tecnica');
+            $pdfPath = $pdf->store('fichas', 'public');
+            $fileName = basename($pdfPath);
+            $articulo->update(['ficha_tecnica' => $fileName]);
+        }
+
+
+        // ✅ Respuesta de éxito
         return response()->json([
             'success' => true,
-            'message' => 'Artículo actualizado exitosamente.',
-            'data' => $articulo
+            'message' => 'Suministro actualizado correctamente',
         ]);
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        DB::rollBack();
-        return response()->json([
-            'success' => false,
-            'message' => 'Error de validación',
-            'errors' => $e->errors()
-        ], 422);
     } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error actualizando artículo ID '.$id.': '.$e->getMessage()."\n".$e->getTraceAsString());
         return response()->json([
             'success' => false,
-            'message' => 'Error: '.$e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
+            'message' => 'Ocurrió un error al actualizar el artículo.',
+            'error' => $e->getMessage(),
         ], 500);
     }
 }
 
-    public function destroy($id)
-    {
-        try {
-            $articulo = Articulo::findOrFail($id);
+  public function destroy($id)
+{
+    try {
+        $articulo = Articulo::findOrFail($id);
 
-            if ($articulo->foto) {
-                $fotoPath = str_replace('storage/', '', $articulo->foto);
-                Storage::disk('public')->delete($fotoPath);
-            }
-
-            $articulo->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Artículo eliminado con éxito',
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error al eliminar el artículo: ' . $e->getMessage());
+        // Verificar si el artículo tiene estado = 1
+        if ($articulo->estado == 1) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ocurrió un error al eliminar el artículo.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'Este suministro no puede ser eliminado porque está activo.',
+            ], 403); // 403 Forbidden
         }
+
+        // Eliminar la foto si existe y es un path (en caso usas archivos, no blobs)
+        if ($articulo->foto && !is_null($articulo->foto) && !is_resource($articulo->foto)) {
+            $fotoPath = str_replace('storage/', '', $articulo->foto);
+            Storage::disk('public')->delete($fotoPath);
+        }
+
+        $articulo->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Suministro eliminado con éxito',
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al eliminar el artículo: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al eliminar el artículo.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
+
+public function cambiarEstado($id)
+{
+    try {
+        $articulo = Articulo::findOrFail($id);
+        $articulo->estado = $articulo->estado == 1 ? 0 : 1;
+        $articulo->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'El estado del artículo ha sido actualizado correctamente.',
+            'nuevoEstado' => $articulo->estado == 1 ? 'Activo' : 'Inactivo',
+        ]);
+    } catch (\Exception $e) {
+        Log::error("Error al cambiar estado del artículo: " . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'No se pudo cambiar el estado del artículo.',
+        ], 500);
+    }
+}
+
 
     public function exportAllPDF()
     {
@@ -259,27 +301,57 @@ public function update(Request $request, $id)
         return $pdf->download('reporte-articulos.pdf');
     }
 
-    public function getAll()
-    {
-        $articulos = Articulo::with(['unidad', 'tipoarticulo', 'modelo'])->get();
-    
-        $articulosData = $articulos->map(function ($articulo) {
-            return [
-                'idArticulos' => $articulo->idArticulos,
-                'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
-                'nombre' => $articulo->nombre,
-                'unidad' => $articulo->unidad ? $articulo->unidad->nombre : 'Sin Unidad',
-                'codigo_barras' => $articulo->codigo_barras,
-                'stock_total' => $articulo->stock_total,
-                'sku' => $articulo->sku,
-                'tipo_articulo' => $articulo->tipoarticulo ? $articulo->tipoarticulo->nombre : 'Sin Tipo',
-                'modelo' => $articulo->modelo ? $articulo->modelo->nombre : 'Sin Modelo',
-                'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
-            ];
+   public function getAll(Request $request)
+{
+    $query = Articulo::with(['unidad', 'tipoarticulo',   'modelo.marca', 'modelo.categoria']) // <= Aquí
+        ->where('idTipoArticulo', 4); // Solo repuestos
+
+    $total = $query->count();
+
+    if ($search = $request->input('search.value')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('nombre', 'like', "%$search%")
+              ->orWhere('codigo_barras', 'like', "%$search%")
+              ->orWhere('sku', 'like', "%$search%");
         });
-    
-        return response()->json($articulosData);
     }
+
+    $filtered = $query->count();
+
+    $articulos = $query
+        ->skip($request->start)
+        ->take($request->length)
+        ->get();
+
+    $data = $articulos->map(function ($articulo) {
+     
+
+        return [
+            'idArticulos' => $articulo->idArticulos,
+            'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
+            'codigo_barras' => $articulo->codigo_barras,
+            'sku' => $articulo->nombre,
+            'nombre' => $articulo->nombre,
+            'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
+            'codigo_barras' => $articulo->codigo_barras,
+            'stock_total' => $articulo->stock_total,
+            'sku' => $articulo->sku,
+            'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
+            'modelo' => $articulo->modelo ? $articulo->modelo->nombre : 'Sin Modelo',
+            'marca' => $articulo->modelo->marca->nombre ?? 'Sin Marca',
+            'categoria' => $articulo->modelo->categoria->nombre ?? 'Sin Categoría',
+            'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
+        ];
+    });
+
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $total,
+        'recordsFiltered' => $filtered,
+        'data' => $data,
+    ]);
+}
+
 
 
     public function checkNombre(Request $request)

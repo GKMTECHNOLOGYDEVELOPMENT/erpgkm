@@ -266,31 +266,41 @@ public function update(Request $request, $id)
     }
 }
 
-    public function destroy($id)
-    {
-        try {
-            $articulo = Articulo::findOrFail($id);
+     public function destroy($id)
+{
+    try {
+        $articulo = Articulo::findOrFail($id);
 
-            if ($articulo->foto) {
-                $fotoPath = str_replace('storage/', '', $articulo->foto);
-                Storage::disk('public')->delete($fotoPath);
-            }
-
-            $articulo->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Artículo eliminado con éxito',
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error al eliminar el artículo: ' . $e->getMessage());
+        // Verificar si el artículo tiene estado = 1
+        if ($articulo->estado == 1) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ocurrió un error al eliminar el artículo.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'Este suministro no puede ser eliminado porque está activo.',
+            ], 403); // 403 Forbidden
         }
+
+        // Eliminar la foto si existe y es un path (en caso usas archivos, no blobs)
+        if ($articulo->foto && !is_null($articulo->foto) && !is_resource($articulo->foto)) {
+            $fotoPath = str_replace('storage/', '', $articulo->foto);
+            Storage::disk('public')->delete($fotoPath);
+        }
+
+        $articulo->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Suministro eliminado con éxito',
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al eliminar el artículo: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al eliminar el artículo.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
     public function exportAllPDF()
     {

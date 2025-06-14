@@ -14,12 +14,9 @@ document.addEventListener("DOMContentLoaded", function () {
         { id: "precio_compra", name: "Precio de Compra" },
         { id: "precio_venta", name: "Precio de Venta" },
         { id: "stock_total", name: "Stock Total" },
-        { id: "idUnidad", name: "Unidad de Medida" },
-        { id: "nombre", name: "Nombre" },
-        { id: "peso", name: "Peso" },
         { id: "stock_minimo", name: "Stock Mínimo" },
-
-
+        { id: "idUnidad", name: "Unidad de Medida" },
+        { id: "pulgadas", name: "Pulgadas" },
     ];
 
     const camposUnicos = ["codigo_barras", "sku", "codigo_repuesto"];
@@ -92,6 +89,8 @@ document.addEventListener("DOMContentLoaded", function () {
             input.classList.remove("border-red-500");
         });
     });
+
+
     function validarCampos() {
         let todosValidos = true;
 
@@ -178,16 +177,16 @@ if (input.tagName === "SELECT") {
                 ? input.parentElement.parentElement
                 : input.parentElement;
 
-            let isInvalid = false;
-            if (input.tagName === "SELECT") {
-                if (input.multiple) {
-                    isInvalid = input.selectedOptions.length === 0;
-                } else {
-                    isInvalid = input.selectedIndex === 0 || !value;
-                }
-            } else {
-                isInvalid = !value;
-            }
+let isInvalid = false;
+if (input.tagName === "SELECT") {
+    if (input.multiple) {
+        isInvalid = input.selectedOptions.length === 0;
+    } else {
+        isInvalid = input.selectedIndex === 0 || !value;
+    }
+} else {
+    isInvalid = !value;
+}
 
             if (campo.id !== 'stock_minimo' && isInvalid) {
                 valid = false;

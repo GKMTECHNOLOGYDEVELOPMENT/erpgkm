@@ -343,7 +343,7 @@ Route::prefix('heramientas')->name('heramientas.')->group(function () {
 Route::prefix('suministros')->name('suministros.')->group(function () {
     Route::get('/', [SuministrosController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [SuministrosController::class, 'create'])->name('create'); // Formulario de creación
-    Route::post('/store', [SuministrosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::post('/store/suministro', [SuministrosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [SuministrosController::class, 'edit'])->name('edit'); // Editar un artículo
     Route::get('/{id}/detalles', [SuministrosController::class, 'detalle'])->name('detalles'); // Editar un artículo
     Route::put('/update/{id}', [SuministrosController::class, 'update'])->name('update'); // Actualizar un artículo
@@ -351,6 +351,7 @@ Route::prefix('suministros')->name('suministros.')->group(function () {
     Route::get('/export-pdf', [SuministrosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
     Route::get('/get-all', [SuministrosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
     Route::post('/check-nombre', [SuministrosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::put('/{id}/cambiar-estado', [SuministrosController::class, 'cambiarEstado']);
     Route::get('/exportar-excel', function () {
         return Excel::download(new ArticuloExport, 'suministros.xlsx');
     })->name('exportExcel');
