@@ -340,6 +340,24 @@
                     </script>
                 @endif
 
+                   <!-- Estado del Artículo -->
+                <div>
+                    <label for="estado" class="block text-sm font-medium">Estado</label>
+                    <div class="ml-4 w-12 h-6 relative">
+                        <input type="hidden" name="estado" value="0">
+                        <input type="checkbox" id="estado" name="estado"
+                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" value="1"
+                            {{ old('estado', isset($articulo) ? $articulo->estado : 1) ? 'checked' : '' }} />
+                        <span
+                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full 
+                            before:absolute before:left-1 before:bg-white dark:before:bg-white-dark 
+                            dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 
+                            before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary 
+                            before:transition-all before:duration-300">
+                        </span>
+                    </div>
+                </div>
+
 
 
             </div>

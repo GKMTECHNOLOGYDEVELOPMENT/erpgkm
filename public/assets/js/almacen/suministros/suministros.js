@@ -69,13 +69,7 @@ document.addEventListener('alpine:init', () => {
                                             <path d="M20 15L15 10L5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
                                     </a>
-                                        <button 
-                                        class="btn btn-sm ${row.estado === 'Activo' ? 'btn-danger' : 'btn-success'}"
-                                        onclick="cambiarEstadoArticulo(${row.idArticulos})"
-                                        x-tooltip="${row.estado === 'Activo' ? 'Desactivar' : 'Activar'}"
-                                    >
-                                        ${row.estado === 'Activo' ? 'Desactivar' : 'Activar'}
-                                    </button>
+                                      
                                                 <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteArticulo(${row.idArticulos})" x-tooltip="Eliminar">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                         <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />

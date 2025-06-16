@@ -62,6 +62,7 @@ use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Cliente;
 use App\Models\Marca;
 use App\Models\Modelo;
+use App\Models\Suministro;
 use App\Models\Tienda;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -346,6 +347,7 @@ Route::prefix('suministros')->name('suministros.')->group(function () {
     Route::post('/store/suministro', [SuministrosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [SuministrosController::class, 'edit'])->name('edit'); // Editar un artículo
     Route::get('/{id}/detalles', [SuministrosController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::get('/{id}/imagen', [SuministrosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::put('/update/{id}', [SuministrosController::class, 'update'])->name('update'); // Actualizar un artículo
     Route::delete('/{id}', [SuministrosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
     Route::get('/export-pdf', [SuministrosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF

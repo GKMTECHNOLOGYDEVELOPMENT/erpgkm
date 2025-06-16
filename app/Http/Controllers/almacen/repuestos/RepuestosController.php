@@ -195,6 +195,7 @@ public function update(Request $request, $id)
             'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120',
             'pulgadas' => 'required|nullable|string|max:255',
             'idUnidad' => 'required|nullable|integer',
+            'estado' => 'required|boolean',
             'idModelo' => 'nullable|array',
             'idModelo.*' => 'integer|exists:modelo,idModelo',
         ]);

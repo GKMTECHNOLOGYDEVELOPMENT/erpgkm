@@ -146,8 +146,9 @@ public function detalle($id)
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
 
-    return view('almacen.productos.articulos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    return view('almacen.suministros.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
+
 
 
 public function update(Request $request, $id)
@@ -165,6 +166,7 @@ public function update(Request $request, $id)
                 'precio_compra' => 'required|nullable|numeric',
                 'precio_venta' => 'required|nullable|numeric',
                 'peso' => 'required|nullable|numeric',
+                'estado' => 'required|boolean',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120', // <= validación del PDF
                 'idUnidad' => 'required|nullable|integer',
@@ -231,6 +233,18 @@ public function update(Request $request, $id)
             'error' => $e->getMessage(),
         ], 500);
     }
+}
+
+public function imagen($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    $unidades = Unidad::all();
+    $tiposArticulo = Tipoarticulo::all();
+    $modelos = Modelo::all();
+    $monedas = Moneda::all();
+    $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
+
+    return view('almacen.suministros.imagen', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
 
   public function destroy($id)

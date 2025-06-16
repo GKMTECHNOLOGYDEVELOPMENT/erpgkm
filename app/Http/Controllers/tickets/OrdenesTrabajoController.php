@@ -3932,6 +3932,8 @@ class OrdenesTrabajoController extends Controller
             $visita->nombre = 'Laboratorio';
             $visita->fecha_programada = now();
             $visita->fecha_asignada = now();
+            $visita->fecha_inicio_hora = now();
+            $visita->fecha_final_hora = now();
             $visita->estado = 0;
             $visita->tipoServicio = 7;
             $visita->idTickets = $solicitud->idTickets;

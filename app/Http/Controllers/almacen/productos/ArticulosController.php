@@ -215,6 +215,7 @@ public function update(Request $request, $id)
             'mostrarWeb' => 'nullable|boolean',
             'estado' => 'nullable|boolean',
             'idUnidad' => 'required|integer',
+            'estado' => 'required|boolean',
             'idTipoArticulo' => 'required|integer',
             'idModelo' => 'required|integer',
         ]);
