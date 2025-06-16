@@ -317,48 +317,57 @@ public function update(Request $request, $id)
     }
 
     public function getAll(Request $request)
-    {
-        $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo']);
-    
-        $total = $query->count();
-    
-        if ($search = $request->input('search.value')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nombre', 'like', "%$search%")
-                  ->orWhere('codigo_barras', 'like', "%$search%")
-                  ->orWhere('sku', 'like', "%$search%");
-            });
-        }
-    
-        $filtered = $query->count();
-    
-        $articulos = $query
-            ->skip($request->start)
-            ->take($request->length)
-            ->get();
-    
-        $data = $articulos->map(function ($articulo) {
-            return [
-                'idArticulos' => $articulo->idArticulos,
-                'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
-                'nombre' => $articulo->nombre,
-                'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
-                'codigo_barras' => $articulo->codigo_barras,
-                'stock_total' => $articulo->stock_total,
-                'sku' => $articulo->sku,
-                'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
-                'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
-                'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
-            ];
+{
+    $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo.marca', 'modelo.categoria'])
+        ->where('idTipoArticulo', '!=', 2);
+
+    $total = $query->count();
+
+    if ($search = $request->input('search.value')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('nombre', 'like', "%$search%")
+              ->orWhere('codigo_barras', 'like', "%$search%")
+              ->orWhere('sku', 'like', "%$search%")
+              ->orWhereHas('modelo', function ($m) use ($search) {
+                  $m->where('nombre', 'like', "%$search%")
+                    ->orWhereHas('marca', fn($q) => $q->where('nombre', 'like', "%$search%"))
+                    ->orWhereHas('categoria', fn($q) => $q->where('nombre', 'like', "%$search%"));
+              });
         });
-    
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $total,
-            'recordsFiltered' => $filtered,
-            'data' => $data,
-        ]);
     }
+
+    $filtered = $query->count();
+
+    $articulos = $query
+        ->skip($request->start)
+        ->take($request->length)
+        ->get();
+
+    $data = $articulos->map(function ($articulo) {
+        return [
+            'idArticulos' => $articulo->idArticulos,
+            'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
+            'nombre' => $articulo->nombre,
+            'codigo_barras' => $articulo->codigo_barras,
+            'sku' => $articulo->sku,
+            'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
+            'stock_total' => $articulo->stock_total,
+            'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
+            'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
+            'marca' => $articulo->modelo->marca->nombre ?? 'Sin Marca',
+            'categoria' => $articulo->modelo->categoria->nombre ?? 'Sin Categoría',
+            'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
+        ];
+    });
+
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $total,
+        'recordsFiltered' => $filtered,
+        'data' => $data,
+    ]);
+}
+
     
 
 

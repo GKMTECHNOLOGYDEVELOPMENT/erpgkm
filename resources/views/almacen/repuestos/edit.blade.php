@@ -18,11 +18,7 @@
             height: 40px;
             /* controla la altura si es necesario */
             line-height: 1.25rem;
-        }
-
-        .clean-input:focus {
-            border-bottom: 2px solid #3b82f6;
-            box-shadow: none;
+            font-size: 0.875rem;
         }
 
         .input-icon {
@@ -31,14 +27,15 @@
             left: 10px;
             transform: translateY(-50%);
             color: #6b7280;
-            font-size: 14px;
+            font-size: 12px;
             pointer-events: none;
             z-index: 10;
         }
 
         .select2-container--default .select2-selection--multiple {
-            border: none;
-            border-bottom: 1px solid #e0e6ed;
+            background-color: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid #e0e6ed !important;
             border-radius: 0;
             padding-left: 5px;
             padding-bottom: 5px;
@@ -48,11 +45,8 @@
             border-bottom: 2px solid #3b82f6;
         }
 
-        .file-input-label {
-            display: block;
-            margin-top: 5px;
-            color: #6b7280;
-            font-size: 0.875rem;
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            color: #000 !important;
         }
 
         /* Estilos para inputs con íconos */
@@ -101,6 +95,41 @@
         .select2-container--default .select2-selection--multiple .select2-selection__rendered {
             padding-left: 0;
         }
+
+        /* Quita el overflow del contenedor externo */
+        .select2-container--default .select2-selection--multiple {
+            max-height: none;
+            overflow: visible;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+        }
+
+        /* Mantén el scroll solo aquí */
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .select2-container--default .select2-selection--single {
+            background-color: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid #e0e6ed !important;
+            border-radius: 0 !important;
+            height: 40px !important;
+            padding-left: 35px !important;
+            display: flex;
+            align-items: center;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            top: 6px !important;
+            right: 10px !important;
+        }
+        .clean-input::placeholder {
+            font-size: 0.85rem;
+            /* o 0.75rem si lo quieres aún más pequeño */
+
+        }
     </style>
 
     <div>
@@ -116,7 +145,7 @@
         </ul>
     </div>
 
-    <div class="panel mt-6 p-5 max-w-4xl mx-auto">
+    <div class="panel mt-6 p-5 max-w-6x2 mx-auto">
         <h2 class="text-xl font-bold mb-5 flex items-center">
             <i class="fas fa-edit text-primary mr-2"></i> Editar Repuesto
         </h2>
@@ -131,7 +160,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Código de Barras -->
                 <div class="relative">
-                    <label for="codigo_barras" class="block text-sm font-medium text-gray-700">Código de Barras *</label>
+                    <label for="codigo_barras" class="block text-sm font-medium text-gray-700">Código de Barras</label>
                     <div class="relative mt-1">
                         <i class="fas fa-barcode input-icon"></i>
                         <input id="codigo_barras" name="codigo_barras" type="text" class="clean-input w-full"
@@ -171,8 +200,9 @@
 
                 <!-- Modelo (Multiple Select) -->
                 <div>
-                    <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelos *</label>
+                    <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelos</label>
                     <div class="relative mt-1">
+                        <i class="fas fa-cubes input-icon"></i>
                         <!-- <i class="fas fa-car input-icon"></i> -->
                         <select id="idModelo" name="idModelo[]" class="select2-multiple w-full" multiple="multiple">
                             @foreach ($modelos as $modelo)
@@ -192,7 +222,7 @@
 
                 <!-- Precio Compra -->
                 <div>
-                    <label for="precio_compra" class="block text-sm font-medium text-gray-700">Precio de Compra *</label>
+                    <label for="precio_compra" class="block text-sm font-medium text-gray-700">Precio de Compra</label>
                     <div class="flex items-center mt-1">
                         <button type="button" id="toggleMonedaCompra"
                             class="text-gray-500 px-2 h-10 border-b border-gray-300">
@@ -212,7 +242,7 @@
 
                 <!-- Precio Venta -->
                 <div>
-                    <label for="precio_venta" class="block text-sm font-medium text-gray-700">Precio de Venta *</label>
+                    <label for="precio_venta" class="block text-sm font-medium text-gray-700">Precio de Venta</label>
                     <div class="flex items-center mt-1">
                         <button type="button" id="toggleMonedaVenta"
                             class="text-gray-500 px-2 h-10 border-b border-gray-300">
@@ -231,7 +261,7 @@
 
                 <!-- Stock Total -->
                 <div class="relative">
-                    <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total *</label>
+                    <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total</label>
                     <div class="relative mt-1">
                         <i class="fas fa-boxes input-icon"></i>
                         <input id="stock_total" name="stock_total" type="number" class="clean-input w-full"
@@ -255,7 +285,7 @@
 
                 <!-- Unidad de Medida -->
                 <div class="relative">
-                    <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida *</label>
+                    <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
                     <div class="relative mt-1">
                         <i class="fas fa-balance-scale input-icon"></i>
                         <select id="idUnidad" name="idUnidad" class="clean-input w-full pl-8" style="appearance: none;">
@@ -289,7 +319,8 @@
                     defaultImage: '/assets/images/articulo/producto-default.png' 
                 }">
                     <label class="block text-sm font-medium text-gray-700">Foto</label>
-                    <label for="foto" class="file-input-label">Seleccionar archivo</label>
+                    <label for="foto" class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
+                        <i class="fas fa-upload mr-1"></i> Seleccionar archivo</label>
                     <div class="relative mt-1">
                         <input id="foto" name="foto" type="file" accept="image/*"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -316,7 +347,8 @@
                 <!-- Ficha Técnica -->
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700">Ficha Técnica (PDF)</label>
-                    <label for="ficha_tecnica" class="file-input-label">Seleccionar archivo</label>
+                    <label for="ficha_tecnica" class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
+                        <i class="fas fa-upload mr-1"></i> Seleccionar archivo</label>
                     <div class="relative mt-1">
                         <input id="ficha_tecnica" name="ficha_tecnica" type="file" accept=".pdf"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">

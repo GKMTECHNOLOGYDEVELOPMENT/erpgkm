@@ -16,6 +16,7 @@
             background-color: transparent;
             height: 40px; /* controla la altura si es necesario */
             line-height: 1.25rem;
+            font-size: 0.875rem;
         }
 
         .clean-input:focus {

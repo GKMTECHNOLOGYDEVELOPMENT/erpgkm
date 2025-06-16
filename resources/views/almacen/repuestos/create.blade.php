@@ -17,6 +17,7 @@
             height: 40px;
             /* controla la altura si es necesario */
             line-height: 1.25rem;
+            font-size: 0.875rem;
         }
 
         .input-icon {
