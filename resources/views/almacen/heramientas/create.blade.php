@@ -30,7 +30,10 @@
             pointer-events: none;
             z-index: 10;
         }
-
+        .clean-input:focus {
+            border-bottom: 2px solid #3b82f6;
+            box-shadow: none;
+        }
         .select2-container--default .select2-selection--single {
             background-color: transparent !important;
             border: none !important;
@@ -50,6 +53,7 @@
             top: 6px !important;
             right: 10px !important;
         }
+
 
         .file-input-label {
             display: block;
@@ -131,8 +135,7 @@
 
                 <!-- Código de Barras -->
                 <div class="relative">
-                    <label for="codigo_barras" class="block text-sm font-medium text-gray-700">Código de Barras
-                        *</label>
+                    <label for="codigo_barras" class="block text-sm font-medium text-gray-700">Código de Barras</label>
                     <div class="relative mt-1">
                         <i class="fas fa-barcode input-icon"></i>
                         <input id="codigo_barras" name="codigo_barras" type="text" class="clean-input w-full"
@@ -198,8 +201,8 @@
                 <div>
                     <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelo</label>
                     <div class="relative mt-1">
-                        <!-- <i class="fas fa-toolbox input-icon"></i> -->
                         <i class="fas fa-cubes input-icon"></i>
+                        <!-- <i class="fas fa-toolbox input-icon"></i> -->
                         <select id="idModelo" name="idModelo" class="select2-single clean-input w-full pl-10" required>
                             <option value="" disabled selected>Seleccionar modelo</option>
                             @foreach ($modelos as $modelo)

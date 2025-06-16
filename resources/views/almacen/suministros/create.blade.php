@@ -30,7 +30,10 @@
             pointer-events: none;
             z-index: 10;
         }
-
+        .clean-input:focus {
+            border-bottom: 2px solid #3b82f6;
+            box-shadow: none;
+        }
         .select2-container--default .select2-selection--single {
             background-color: transparent !important;
             border: none !important;

@@ -62,13 +62,6 @@ document.addEventListener('alpine:init', () => {
                                             <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
                                     </a>
-                                    <a href="/heramientas/${row.idArticulos}/imagen" class="ltr:mr-2 rtl:ml-2" x-tooltip="Gestionar Imagen">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                                            <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <circle cx="8.5" cy="9.5" r="1.5" fill="currentColor"/>
-                                            <path d="M20 15L15 10L5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </a>
                                     <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteArticulo(${row.idArticulos})" x-tooltip="Eliminar">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                         <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
