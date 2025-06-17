@@ -14,6 +14,7 @@ use App\Http\Controllers\almacen\productos\ModelosController;
 use App\Http\Controllers\almacen\productos\ProductoController;
 use App\Http\Controllers\almacen\repuestos\RepuestosController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
+use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
@@ -54,6 +55,7 @@ Route::get('/repuestos', [RepuestosController::class, 'getAll']);
 Route::get('/productos', [ProductoController::class, 'getAll']);
 Route::get('/heramientas', [HeramientasController::class, 'getAll']);
 Route::get('/suministros', [SuministrosController::class, 'getAll']);
+Route::get('/ubicaciones', [UbicacionesController::class, 'getAllUbicaciones']);
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);

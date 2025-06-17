@@ -996,6 +996,13 @@
                         <li>
                             <a href="{{ route('repuestos.index') }}">Repuestos</a>
                         </li>
+                        <li>
+                            <a href="{{ route('repuestos.index') }}">Entradas</a>
+                        </li>
+                         <li>
+                            <a href="{{ route('repuestos.index') }}">Salidas</a>
+                        </li>
+                         
                     </ul>
                 </li>
                 <li class="menu nav-item">
@@ -1059,6 +1066,37 @@
                         </li>
                     </ul>
                 </li>
+
+
+
+                      <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'ubicaciones' }"
+                        @click="activeDropdown === 'ubicaciones' ? activeDropdown = null : activeDropdown = 'ubicaciones'">
+                        <div class="flex items-center">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C8.686 2 6 4.686 6 8C6 12.6667 12 21 12 21C12 21 18 12.6667 18 8C18 4.686 15.314 2 12 2Z" 
+                                        stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                <circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            </svg>
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ubicaciones</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'ubicaciones' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'ubicaciones'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('ubicaciones.index') }}">Ubicaciones</a>
+                        </li>
+                    </ul>
+                </li>
+
 
 
                 <h2
