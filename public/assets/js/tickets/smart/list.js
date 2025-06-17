@@ -117,7 +117,6 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-
         fetchDataAndInitTable() {
             this.isLoading = true;
 
@@ -153,7 +152,6 @@ document.addEventListener('alpine:init', () => {
                 processing: false,
                 serverSide: true,
                 ordering: false,
-                order: [[3, 'desc']], // ✅ columna 3 = "F. TICKET" (fecha_creacion)
                 ajax: {
                     url: "/api/ordenes",
                     type: "GET",
@@ -223,7 +221,6 @@ document.addEventListener('alpine:init', () => {
                 searching: true,
                 paging: true,
                 pageLength: 10,
-                order: [[0, 'desc']], // ✅ ORDENA POR ID
                 language: {
                     search: 'Buscar...',
                     zeroRecords: 'No se encontraron registros',
@@ -350,6 +347,12 @@ document.addEventListener('alpine:init', () => {
                     <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" />
                 </svg>
                     </a>
+
+                    <a href="/ordenes/smart/informe/${data.idTickets}/pdf" target="_blank" x-tooltip="Ver PDF">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 block mx-auto text-red-600 hover:text-red-800" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8.828a2 2 0 00-.586-1.414l-4.828-4.828A2 2 0 0013.172 2H6zm7 1.414L18.586 9H14a1 1 0 01-1-1V3.414zM8.75 11a.75.75 0 01.75.75v.5a.75.75 0 01-.75.75H8v1h.75a.75.75 0 010 1.5H8a.75.75 0 01-.75-.75v-4A.75.75 0 018 11h.75zM11 11.75a.75.75 0 011.5 0v.25a.75.75 0 01-1.5 0v-.25zm0 2.25a.75.75 0 011.5 0v.25a.75.75 0 01-1.5 0v-.25zm3.25-2.25h.5a.75.75 0 01.75.75v2a.75.75 0 01-1.5 0v-.25h-.25a.75.75 0 010-1.5h.25v-.25z" />
+    </svg>
+</a>
                 </div>`;
         },
 
