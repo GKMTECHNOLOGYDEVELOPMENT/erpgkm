@@ -5,6 +5,9 @@ namespace App\Http\Controllers\almacen\kits;
 use App\Http\Controllers\Controller;
 use App\Models\Kit;
 use App\Models\Articulo;
+use App\Models\Modelo;
+use App\Models\Moneda;
+use App\Models\Unidad;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use PDF;
@@ -17,17 +20,21 @@ class KitsController extends Controller
         // Obtener todos los kits
         $kits = Kit::with('articulos')->get();
 
+        $unidades = Unidad::all();
         // Cargar la vista index
-        return view('almacen.kits-articulos.index', compact('kits'));
+        return view('almacen.kits-articulos.index', compact('kits', 'unidades'));
     }
 
     public function create()
     {
         // Obtener los artículos activos para el select
         $articulos = Articulo::where('estado', 1)->get();
-
+        $unidades = Unidad::all();
+        $modelos = Modelo::all();
+    $monedas = Moneda::all();
+    $productos = Articulo::all();
         // Cargar la vista de creación
-        return view('almacen.kits-articulos.create', compact('articulos'));
+        return view('almacen.kits-articulos.create', compact('articulos', 'unidades', 'modelos', 'monedas', 'productos'));
     }
 
     public function store(Request $request)

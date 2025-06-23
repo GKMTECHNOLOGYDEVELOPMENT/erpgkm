@@ -51,6 +51,7 @@ use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
+use App\Http\Controllers\almacen\kardex\KardexController;
 use App\Http\Controllers\almacen\productos\ProductoController;
 use App\Http\Controllers\almacen\repuestos\RepuestosController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
@@ -338,6 +339,106 @@ Route::prefix('repuestos')->name('repuestos.')->group(function () {
 });
 
 
+
+/// INICIO KARDEX ///
+Route::prefix('kardex')->name('kardex.')->group(function () {
+    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
+    Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
+    Route::get('/{id}/edit', [RepuestosController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/detalles', [RepuestosController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::put('/update/{id}', [RepuestosController::class, 'update'])->name('update'); // Actualizar un artículo
+    Route::delete('/{id}', [RepuestosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/export-pdf', [RepuestosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
+    Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
+    Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new ArticuloExport, 'kardex.xlsx');
+    })->name('exportExcel');
+});
+
+
+/// INICIO DESPACHO ///
+Route::prefix('despacho')->name('despacho.')->group(function () {
+    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
+    Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
+    Route::get('/{id}/edit', [RepuestosController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/detalles', [RepuestosController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::put('/update/{id}', [RepuestosController::class, 'update'])->name('update'); // Actualizar un artículo
+    Route::delete('/{id}', [RepuestosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/export-pdf', [RepuestosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
+    Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
+    Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new ArticuloExport, 'despacho.xlsx');
+    })->name('exportExcel');
+});
+
+/// INICIO VENTAS ///
+Route::prefix('ventas')->name('ventas.')->group(function () {
+    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
+    Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
+    Route::get('/{id}/edit', [RepuestosController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/detalles', [RepuestosController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::put('/update/{id}', [RepuestosController::class, 'update'])->name('update'); // Actualizar un artículo
+    Route::delete('/{id}', [RepuestosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/export-pdf', [RepuestosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
+    Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
+    Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new ArticuloExport, 'ventas.xlsx');
+    })->name('exportExcel');
+});
+
+/// INICIO COMPRAS ///
+Route::prefix('compras')->name('compras.')->group(function () {
+    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
+    Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
+    Route::get('/{id}/edit', [RepuestosController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/detalles', [RepuestosController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::put('/update/{id}', [RepuestosController::class, 'update'])->name('update'); // Actualizar un artículo
+    Route::delete('/{id}', [RepuestosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/export-pdf', [RepuestosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
+    Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
+    Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new ArticuloExport, 'compras.xlsx');
+    })->name('exportExcel');
+});
+
+/// INICIO DEVOLUCIONES ///
+Route::prefix('devoluciones')->name('devoluciones.')->group(function () {
+    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
+    Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
+    Route::get('/{id}/edit', [RepuestosController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/detalles', [RepuestosController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::put('/update/{id}', [RepuestosController::class, 'update'])->name('update'); // Actualizar un artículo
+    Route::delete('/{id}', [RepuestosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/export-pdf', [RepuestosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
+    Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
+    Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new ArticuloExport, 'devoluciones.xlsx');
+    })->name('exportExcel');
+});
+
+
+
+
 /// INICIO ARTICULOS ///
 Route::prefix('heramientas')->name('heramientas.')->group(function () {
     Route::get('/', [HeramientasController::class, 'index'])->name('index'); // Mostrar la vista principal
@@ -416,6 +517,9 @@ Route::prefix('kits')->name('almacen.kits.')->group(function () {
     Route::get('/export-pdf', [KitsController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar a PDF
     Route::get('/get-all', [KitsController::class, 'getAll'])->name('getAll'); // Obtener datos en JSON
 });
+
+
+
 
 // Ruta para obtener los clientes generales asociados a un cliente
 Route::get('/clientes-generales/{idCliente}', [OrdenesTrabajoController::class, 'getClientesGeneraless']);

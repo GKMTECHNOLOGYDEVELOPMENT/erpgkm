@@ -695,33 +695,7 @@
                     </a>
                 </li> --}}
 
-                <li class="menu nav-item">
-                    <a href="{{ route('almacen.kits.index') }}" class="nav-link group">
-                        <div class="flex items-center">
-
-                            <svg class="group-hover:!text-primary shrink-0" xmlns="http://www.w3.org/2000/svg"
-                                width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                <path
-                                    d="M4 9L2 12V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V12L20 9H4Z"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M2 12H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M7 12V7C7 5.89543 7.89543 5 9 5H15C16.1046 5 17 5.89543 17 7V12"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M12 15V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M10 15H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-
-                            <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Kits
-                                de Articulos</span>
-                        </div>
-                    </a>
-                </li>
+            
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -889,20 +863,16 @@
                         @click="activeDropdown === 'caracteristicas' ? activeDropdown = null : activeDropdown = 'caracteristicas'">
                         <div class="flex items-center">
 
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Engranaje -->
-    <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M17.5 6.5L19.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M6.5 17.5L4.5 19.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M4.5 4.5L6.5 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M19.5 19.5L17.5 17.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <!-- Lista -->
-    <path d="M9 12H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    <path d="M9 16H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-</svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <rect x="3" y="4" width="18" height="2" rx="1" fill="currentColor"/>
+                            <rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor"/>
+                            <rect x="3" y="18" width="18" height="2" rx="1" fill="currentColor"/>
+                            </svg>
+
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Caracteristicas</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Detalles del producto</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'caracteristicas' }">
 
@@ -926,6 +896,38 @@
                         </li>
                     </ul>
                 </li>
+
+
+
+                    <li class="menu nav-item">
+                    <a href="{{ route('almacen.kits.index') }}" class="nav-link group">
+                        <div class="flex items-center">
+
+                            <svg class="group-hover:!text-primary shrink-0" xmlns="http://www.w3.org/2000/svg"
+                                width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M4 9L2 12V18C2 19.1046 2.89543 20 4 20H20C21.1046 20 22 19.1046 22 18V12L20 9H4Z"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M2 12H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M7 12V7C7 5.89543 7.89543 5 9 5H15C16.1046 5 17 5.89543 17 7V12"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M12 15V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M10 15H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Kits
+                                de Articulos</span>
+                        </div>
+                    </a>
+                </li>
+
+
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -1096,6 +1098,189 @@
                         </li>
                     </ul>
                 </li>
+
+
+
+
+                 <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'ventas' }"
+                        @click="activeDropdown === 'ventas' ? activeDropdown = null : activeDropdown = 'ventas'">
+                        <div class="flex items-center">
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+
+
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ventas</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'ventas' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'ventas'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('ventas.index') }}">Ventas</a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                 <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'compras' }"
+                        @click="activeDropdown === 'compras' ? activeDropdown = null : activeDropdown = 'compras'">
+                        <div class="flex items-center">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 7L6 6C6 4.34315 7.34315 3 9 3H15C16.6569 3 18 4.34315 18 6V7" 
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M4 7H20L19 21H5L4 7Z" 
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 11V13" 
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M15 11V13" 
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+
+
+
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Compras</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'compras' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'compras'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('compras.index') }}">Compras</a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                 <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'devoluciones' }"
+                        @click="activeDropdown === 'devoluciones' ? activeDropdown = null : activeDropdown = 'devoluciones'">
+                        <div class="flex items-center">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 7L12 2L21 7V17L12 22L3 17V7Z" 
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 12L5 15L8 18" 
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5 15H13" 
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+
+
+
+
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Devoluciones</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'devoluciones' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'devoluciones'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('devoluciones.index') }}">Devoluciones</a>
+                        </li>
+                    </ul>
+                </li>
+
+
+
+                  <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'despacho' }"
+                        @click="activeDropdown === 'despacho' ? activeDropdown = null : activeDropdown = 'despacho'">
+                        <div class="flex items-center">
+                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 6H16V17H3V6Z" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M16 10H20L21.5 13V17H16V10Z" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round"/>
+                                <circle cx="6.5" cy="18.5" r="1.5" fill="currentColor"/>
+                                <circle cx="18" cy="18.5" r="1.5" fill="currentColor"/>
+                           </svg>
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Despacho</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'despacho' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'despacho'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('despacho.index') }}">Despacho</a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                  <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'kardex' }"
+                        @click="activeDropdown === 'kardex' ? activeDropdown = null : activeDropdown = 'kardex'">
+                        <div class="flex items-center">
+                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 7L12 2L21 7V17L12 22L3 17V7Z" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M3 7L12 12L21 7" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 12V22" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Kardex</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'kardex' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'kardex'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('kardex.index') }}">Kardex General</a>
+                        </li>
+                    </ul>
+                </li>
+
+
 
 
 
