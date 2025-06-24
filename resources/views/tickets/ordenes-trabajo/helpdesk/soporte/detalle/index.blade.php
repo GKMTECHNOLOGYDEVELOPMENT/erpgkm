@@ -312,8 +312,7 @@
             <!-- Ticket -->
             <div>
                 <label class="text-sm font-medium">Ticket</label>
-                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}"
-                    readonly>
+                <input type="text" id="numero_ticket" name="numero_ticket" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}">
             </div>
 
             <!-- Cliente -->
@@ -1087,6 +1086,7 @@
                 idCliente: $('#idCliente').val(),
                 idClienteGeneral: $('#idClienteGeneral').val(),
                 idTienda: $('#idTienda').val(),
+                numero_ticket: $('#numero_ticket').val(),
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
                 ejecutor: $('#ejecutor').val(), // Capturar el valor del ejecutor
 

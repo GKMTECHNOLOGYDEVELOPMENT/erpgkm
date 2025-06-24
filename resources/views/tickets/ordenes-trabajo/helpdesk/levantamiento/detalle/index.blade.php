@@ -310,8 +310,8 @@
             <!-- Ticket -->
             <div>
                 <label class="text-sm font-medium">Ticket</label>
-                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}"
-                    readonly>
+                                <input type="text" id="numero_ticket" name="numero_ticket" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}">
+
             </div>
 
             <!-- Cliente -->

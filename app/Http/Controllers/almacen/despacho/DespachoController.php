@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\almacen\kits;
+namespace App\Http\Controllers\almacen\despacho;
 
 use App\Http\Controllers\Controller;
 use App\Models\Kit;
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 use PDF;
 use Maatwebsite\Excel\Facades\Excel;
 
-class KitsController extends Controller
+class DespachoController extends Controller
 {
     public function index()
     {
@@ -24,7 +24,7 @@ class KitsController extends Controller
 
         $unidades = Unidad::all();
         // Cargar la vista index
-        return view('almacen.kits-articulos.index', compact('kits', 'unidades'));
+        return view('almacen.despacho.index', compact('kits', 'unidades'));
     }
 
     public function create()

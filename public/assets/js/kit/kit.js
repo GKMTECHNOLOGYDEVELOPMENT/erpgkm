@@ -1,231 +1,126 @@
 document.addEventListener('alpine:init', () => {
-    Alpine.data('kitManager', () => ({
-        // Datos del Kit
-        kit: {
-            codigo: '',
-            nombre: '',
-            descripcion: '',
-            fecha: '',
-            moneda_compra: 'S/',
-            precio_compra: 0,
-            moneda_venta: 'S/',
-            precio_venta: 0,
-            symbol_compra: 'S/',
-            symbol_venta: 'S/',
+    Alpine.data('multipleTable', () => ({
+        datatable1: null,
+
+        init() {
+            this.fetchDataAndInitTable();
         },
-        kits: [], // Lista de kits
-        kitArticulos: [], // Artículos asignados al kit
-        availableArticulos: [
-            // Artículos disponibles
-            {
-                id: 1,
-                codigo: 'A001',
-                nombre: 'Artículo 1',
-                cantidad: 0,
-                showInput: false,
-            },
-            {
-                id: 2,
-                codigo: 'A002',
-                nombre: 'Artículo 2',
-                cantidad: 0,
-                showInput: false,
-            },
-            {
-                id: 3,
-                codigo: 'A003',
-                nombre: 'Artículo 3',
-                cantidad: 0,
-                showInput: false,
-            },
-            {
-                id: 4,
-                codigo: 'A004',
-                nombre: 'Artículo 4',
-                cantidad: 0,
-                showInput: false,
-            },
-            {
-                id: 5,
-                codigo: 'A005',
-                nombre: 'Artículo 5',
-                cantidad: 0,
-                showInput: false,
-            },
-        ],
-        searchQuery: '', // Query del buscador
-        showArticlesSection: false, // Control para mostrar la sección de artículos
-        currentKitName: '', // Nombre actual del kit
-        showModal: false, // Control para mostrar el modal
-        selectedArticle: {}, // Artículo seleccionado para el modal
 
-        // Función para agregar un nuevo kit
-        addKit() {
-            // Crear el objeto del kit con un ID único
-            this.kits.push({
-                ...this.kit,
-                id: Date.now(),
-            });
-
-            // Actualizar el nombre del kit actual
-            this.currentKitName = this.kit.nombre;
-
-            // Vaciar los artículos del kit
-            this.kitArticulos = [];
-
-            // Mostrar la sección de artículos
-            this.showArticlesSection = true;
-
-            // Configurar Sortable.js
-            this.initializeSortable();
-
-            // Obtener el formulario por su ID
-            const formulario = document.getElementById('kitForm'); // Asegúrate de tener un formulario con este ID
-
-            // Crear un FormData a partir del formulario
-            let formData = new FormData(formulario);
-
-            // Agregar datos adicionales si es necesario
-            formData.append('nombre', this.kit.nombre);
-            formData.append('descripcion', this.kit.descripcion);
-            formData.append('precio_compra', this.kit.precio_compra);
-            formData.append('precio', this.kit.precio);
-
-            // Realizar el envío del formulario
-            fetch('/kits/store', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    Accept: 'application/json',
+        async fetchDataAndInitTable() {
+            this.datatable1 = $('#myTable1').DataTable({
+                serverSide: true,
+                processing: true,
+                ajax: {
+                    url: '/api/kits',
+                    type: 'GET'
                 },
-                body: formData, // Enviar los datos del kit
-            })
-                .then((response) => response.json()) // Espera una respuesta JSON
-                .then((data) => {
-                    if (data.success) {
-                        // Mostrar mensaje de éxito
-                        showMessage('Kit agregado correctamente.', 'top-end');
+                columns: [
+                    {
+                        data: 'foto',
+                        className: 'text-center',
+                        render: foto => foto
+                            ? `<img src="${foto}" class="w-12 h-12 object-cover rounded mx-auto" alt="Foto">`
+                            : `<img src="/assets/images/articulo/producto-default.png" class="w-12 h-12 object-cover rounded mx-auto" alt="Imagen por defecto">`,
+                    },
+                    { data: 'codigo', className: 'text-center' },
+                    { data: 'nombre', className: 'text-center' },
+                    // { data: 'descripcion', className: 'text-center' },
+                    { data: 'precio_venta', className: 'text-center' },
+                    // { data: 'precio', className: 'text-center' },
+                    {
+                        data: 'estado',
+                        className: 'text-center',
+                        render: estado => estado === 'Activo'
+                            ? '<span class="badge badge-outline-success">Activo</span>'
+                            : '<span class="badge badge-outline-danger">Inactivo</span>',
+                    },
+                    {
+                        data: null,
+                        className: 'text-center',
+                        render: (__, ___, row) => {
+                            return `
+                                    <div class="flex justify-center items-center gap-2">
+                                    <a href="/kits/${row.idKit}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                                        <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
+                                        <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
+                                        </svg>
+                                    </a>
+                                    
+                                       <a href="/kits/${row.idKit}/imagen" class="ltr:mr-2 rtl:ml-2" x-tooltip="Gestionar Imagen">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                                            <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <circle cx="8.5" cy="9.5" r="1.5" fill="currentColor"/>
+                                            <path d="M20 15L15 10L5 20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </a>
+                                    <a href="/kits/${row.idKit}/detalles" class="ltr:mr-2 rtl:ml-2" x-tooltip="Información detallada">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </a>
+                              
 
-                        // Limpiar el formulario después del envío
-                        formulario.reset();
-                    } else {
-                        // Mostrar alerta de error
-                        showMessage('Hubo un error al guardar el kit.', 'top-end', true, '', 3000, 'error');
+
+                                    <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteKit(${row.idKit})" x-tooltip="Eliminar">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                        <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                        <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                        <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                        <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                        <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                        </svg>
+                                    </button>
+                                </div>`; 
+                        }
                     }
-                })
-                .catch((error) => {
-                    console.error('Error en la solicitud:', error);
-                    // Mostrar mensaje de error
-                    showMessage('Ocurrió un error, por favor intenta de nuevo.', 'top-end', true, '', 3000, 'error');
-                });
+                ],
+                responsive: true,
+                autoWidth: false,
+                pageLength: 10,
+                language: {
+                    search: 'Buscar...',
+                    zeroRecords: 'No se encontraron kits',
+                    lengthMenu: 'Mostrar _MENU_ registros',
+                    info: 'Mostrando _START_ a _END_ de _TOTAL_ kits',
+                    paginate: {
+                        first: 'Primero',
+                        last: 'Último',
+                        next: 'Siguiente',
+                        previous: 'Anterior'
+                    }
+                }
+            });
         },
 
-        // Función para guardar los artículos en el kit
-        saveArticles() {
-            alert(`Artículos guardados en el kit "${this.currentKitName}"!`);
-        },
-
-        // Función para ver los detalles de un artículo en el modal
-        viewArticle(article) {
-            this.selectedArticle = article; // Asignar el artículo seleccionado
-            this.showModal = true; // Mostrar el modal
-        },
-
-        // Actualizar la cantidad de un artículo
-        updateQuantity(article) {
-            const index = this.kitArticulos.findIndex((a) => a.id === article.id);
-            if (index !== -1) {
-                this.kitArticulos[index].cantidad = article.cantidad;
-            }
-        },
-
-        // Función para actualizar el símbolo de la moneda de compra
-        updateMonedaCompra() {
-            this.kit.symbol_compra = this.kit.moneda_compra;
-        },
-
-        // Función para actualizar el símbolo de la moneda de venta
-        updateMonedaVenta() {
-            this.kit.symbol_venta = this.kit.moneda_venta;
-        },
-
-        // Filtrar artículos disponibles en base al buscador
-        get filteredAvailableArticulos() {
-            const query = this.searchQuery.toLowerCase();
-            return this.availableArticulos.filter((art) => art.nombre.toLowerCase().includes(query) || art.codigo.toLowerCase().includes(query));
-        },
-
-        // Configurar Sortable.js
-        initializeSortable() {
-            // Lista izquierda (kit)
-            Sortable.create(document.getElementById('kitItemsList'), {
-                animation: 150,
-                group: 'shared',
-                onAdd: (evt) => {
-                    const itemId = parseInt(evt.item.dataset.id, 10);
-                    const item = this.availableArticulos.find((art) => art.id === itemId);
-                    if (item) {
-                        this.kitArticulos.push({
-                            ...item,
-                            cantidad: 0,
-                            showInput: false,
+        deleteKit(idKit) {
+            Swal.fire({
+                icon: 'warning',
+                title: '¿Estás seguro?',
+                text: '¡No podrás revertir esta acción!',
+                showCancelButton: true,
+                confirmButtonText: 'Eliminar',
+                cancelButtonText: 'Cancelar',
+            }).then(result => {
+                if (result.isConfirmed) {
+                    fetch(`/kits/${idKit}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            Swal.fire('¡Eliminado!', data.message, 'success').then(() => location.reload());
+                        })
+                        .catch(error => {
+                            Swal.fire('Error', error.message || 'Ocurrió un error.', 'error');
                         });
-                        this.availableArticulos = this.availableArticulos.filter((art) => art.id !== itemId);
-                    }
-                },
-                onRemove: (evt) => {
-                    const itemId = parseInt(evt.item.dataset.id, 10);
-                    const item = this.kitArticulos.find((art) => art.id === itemId);
-                    if (item) {
-                        this.availableArticulos.push(item);
-                        this.kitArticulos = this.kitArticulos.filter((art) => art.id !== itemId);
-                    }
-                },
+                }
             });
-
-            // Lista derecha (disponibles)
-            Sortable.create(document.getElementById('availableItemsList'), {
-                animation: 150,
-                group: 'shared',
-            });
-        },
+        }
     }));
-});
-// Función para mostrar la alerta con SweetAlert
-function showMessage(
-    msg = 'Example notification text.',
-    position = 'top-end',
-    showCloseButton = true,
-    closeButtonHtml = '',
-    duration = 3000,
-    type = 'success',
-) {
-    const toast = window.Swal.mixin({
-        toast: true,
-        position: position || 'top-end',
-        showConfirmButton: false,
-        timer: duration,
-        showCloseButton: showCloseButton,
-        icon: type === 'success' ? 'success' : 'error', // Cambia el icono según el tipo
-        background: type === 'success' ? '#28a745' : '#dc3545', // Verde para éxito, Rojo para error
-        iconColor: 'white', // Color del icono
-        customClass: {
-            title: 'text-white', // Asegura que el texto sea blanco
-        },
-    });
-
-    toast.fire({
-        title: msg,
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    // Inicializa flatpickr en el campo de fecha
-    flatpickr('#fecha', {
-        dateFormat: 'Y-m-d', // Formato de fecha
-        defaultDate: new Date(), // Fecha predeterminada: hoy
-        altInput: true, // Mostrar campo alternativo amigable
-        altFormat: 'F j, Y', // Formato amigable para el usuario
-        locale: 'es', // Localización en español
-    });
 });

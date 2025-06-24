@@ -7,6 +7,7 @@ use App\Http\Controllers\administracion\asociados\ProveedoresController;
 use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
+use App\Http\Controllers\almacen\kits\KitsController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
 use App\Http\Controllers\almacen\productos\CategoriaController;
 use App\Http\Controllers\almacen\productos\MarcaController;
@@ -56,6 +57,7 @@ Route::get('/productos', [ProductoController::class, 'getAll']);
 Route::get('/heramientas', [HeramientasController::class, 'getAll']);
 Route::get('/suministros', [SuministrosController::class, 'getAll']);
 Route::get('/ubicaciones', [UbicacionesController::class, 'getAllUbicaciones']);
+Route::get('/kits', [KitsController::class, 'getAll']);
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);
@@ -259,6 +261,23 @@ Route::get('/validar-codigo_repuesto', function (Request $request) {
         $query->where('idArticulos', '!=', $request->id);
     }
     $exists = $query->exists();
+    return response()->json(['exists' => $exists]);
+});
+
+
+Route::get('/validar-codigo_barras-kit', function (Request $request) {
+    $exists = DB::table('kit')
+        ->where('codigo', $request->valor)
+        ->exists();
+    
+    return response()->json(['exists' => $exists]);
+});
+
+Route::get('/validar-sku-kit', function (Request $request) {
+    $exists = DB::table('kit')
+        ->where('sku', $request->valor)
+        ->exists();
+    
     return response()->json(['exists' => $exists]);
 });
 

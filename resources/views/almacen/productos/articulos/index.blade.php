@@ -89,8 +89,7 @@
                         <th>Categoria</th>
                         <th>Modelo</th>
                         <th>Stock Total</th>
-                        <!-- <th>Entradas</th>
-                        <th>Salidas</th> -->
+                 
                         <th>Estados</th>
                         <th>Acción</th>
                     </tr>
@@ -104,75 +103,7 @@
 
 
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Seleccionar el input de fecha
-            const fechaIngresoInput = document.getElementById("fechaIngreso");
 
-            // Obtener la fecha actual en formato YYYY-MM-DD
-            const today = new Date().toISOString().split('T')[0];
-
-            // Establecer la fecha actual como valor predeterminado
-            fechaIngresoInput.value = today;
-        });
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const monedaCompraSelect = document.getElementById("moneda_compra");
-            const precioCompraSymbol = document.getElementById("precio_compra_symbol");
-
-            const monedaVentaSelect = document.getElementById("moneda_venta");
-            const precioVentaSymbol = document.getElementById("precio_venta_symbol");
-
-            // Cambiar el símbolo para el precio de compra
-            monedaCompraSelect.addEventListener("change", function() {
-                precioCompraSymbol.textContent = monedaCompraSelect.value == 1 ? "S/" : "$";
-            });
-
-            // Cambiar el símbolo para el precio de venta
-            monedaVentaSelect.addEventListener("change", function() {
-                precioVentaSymbol.textContent = monedaVentaSelect.value == 1 ? "S/" : "$";
-            });
-        });
-    </script>
-    <script>
-        // Inicializar Select2
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar todos los select con la clase "select2"
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
-            });
-        });
-        document.addEventListener("alpine:init", () => {
-            Alpine.data("form", () => ({
-                date1: '', // Variable para almacenar la fecha seleccionada
-                init() {
-                    // Establece la fecha actual como valor inicial
-                    this.date1 = new Date().toISOString().split('T')[0]; // Formato 'YYYY-MM-DD'
-
-                    // Inicializa el flatpickr con la fecha de hoy por defecto
-                    flatpickr(document.getElementById('fechaIngreso'), {
-                        dateFormat: 'Y-m-d',
-                        defaultDate: this.date1, // Asigna la fecha por defecto
-                        onChange: (selectedDates, dateStr) => {
-                            this.date1 = dateStr; // Sincroniza el valor con Alpine.js
-                        }
-                    });
-                }
-            }));
-        });
-
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('formData', {
-                moneda_compra: 'sol', // Valor inicial para Moneda Compra
-                moneda_venta: 'sol', // Valor inicial para Moneda Venta
-                precio_compra: '', // Valor inicial para Precio Compra
-                precio_venta: '', // Valor inicial para Precio Venta
-            });
-        });
-    </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>

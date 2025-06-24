@@ -48,7 +48,10 @@ class Kit extends Model
 		'precio',
 		'fecha',
 		'monedaCompra',
-		'monedaVenta'
+		'monedaVenta',
+		'sku',
+		'stock_total',
+		'stock_minimo'
 	];
 
 	public function detalle_cotizacions()

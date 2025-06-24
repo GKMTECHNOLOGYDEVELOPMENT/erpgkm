@@ -50,6 +50,7 @@ use App\Exports\MarcasExport;
 use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
+use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kardex\KardexController;
 use App\Http\Controllers\almacen\productos\ProductoController;
@@ -58,6 +59,7 @@ use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\GuiaController;
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
@@ -362,7 +364,7 @@ Route::prefix('kardex')->name('kardex.')->group(function () {
 
 /// INICIO DESPACHO ///
 Route::prefix('despacho')->name('despacho.')->group(function () {
-    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/', [DespachoController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
@@ -942,6 +944,9 @@ Route::get('/obtener-productos-retirados', [OrdenesHelpdeskController::class, 'o
 // Rutas en routes/web.php
 Route::delete('/eliminar-producto/{id}', [OrdenesHelpdeskController::class, 'eliminarProducto']);
 
+
+
+Route::get('/enviar-guia', [GuiaController::class, 'enviar']);
 
 // Ruta para mostrar el formulario de recuperación de contraseña
 // Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
