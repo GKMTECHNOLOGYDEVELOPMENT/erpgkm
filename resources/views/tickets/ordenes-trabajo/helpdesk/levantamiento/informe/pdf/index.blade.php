@@ -78,16 +78,15 @@
 
 
         .footer {
-            position: absolute;
+            margin-top: 40px;
+            page-break-inside: avoid;
             bottom: 40px;
             /* Lo sube un poco */
             left: 0;
             width: 100%;
             padding: 6px 10px !important;
             /* Reducir espacio */
-            background-color: white;
-            page-break-before: avoid;
-            page-break-after: avoid;
+
         }
     </style>
 </head>
@@ -196,7 +195,9 @@
                         <div class="w-full text-xs">
                             <div class="w-full text-xs">
                                 <p class="text-xs uppercase indent-paragraph">
-                                    {{ $transicion->justificacion }}</p>
+                                    {!! nl2br(e($transicion->justificacion)) !!}
+                                </p>
+                                                             
                             </div>
                     @endforeach
                 </div>
