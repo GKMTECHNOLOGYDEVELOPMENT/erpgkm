@@ -196,8 +196,7 @@
                             <div class="w-full text-xs">
                                 <p class="text-xs uppercase indent-paragraph">
                                     {!! nl2br(e($transicion->justificacion)) !!}
-                                </p>
-                                                             
+                                </p>                        
                             </div>
                     @endforeach
                 </div>
