@@ -33,13 +33,13 @@ class KitsController extends Controller
         $articulos = Articulo::where('estado', 1)->get();
         $unidades = Unidad::all();
         $modelos = Modelo::all();
-    $monedas = Moneda::all();
-    $productos = Articulo::all();
+        $monedas = Moneda::all();
+        $productos = Articulo::all();
         // Cargar la vista de creación
         return view('almacen.kits-articulos.create', compact('articulos', 'unidades', 'modelos', 'monedas', 'productos'));
     }
 
-     public function store(Request $request)
+    public function store(Request $request)
     {
         // Validar los datos del formulario
         $request->validate([
@@ -69,7 +69,7 @@ class KitsController extends Controller
             $kit->precio_venta = $request->precio_venta;
             $kit->monedaVenta = $request->moneda_venta;
             $kit->fecha = now();
-            
+
             // Manejar la foto si se subió (guardar en binario)
             if ($request->hasFile('foto')) {
                 $foto = $request->file('foto');
@@ -103,13 +103,12 @@ class KitsController extends Controller
                 'message' => 'Kit creado correctamente',
                 'kit_id' => $kit->idKit
             ]);
-
         } catch (\Exception $e) {
             // Revertir la transacción en caso de error
             DB::rollBack();
-            
+
             Log::error('Error al crear kit: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al crear el kit: ' . $e->getMessage()
@@ -117,109 +116,108 @@ class KitsController extends Controller
         }
     }
 
-public function edit($id)
-{
-    // Buscar el kit por ID con sus artículos
-    $kit = Kit::with(['articulos' => function($query) {
-        $query->select('articulos.*', 'kit_articulo.cantidad');
-    }])->findOrFail($id);
+    public function edit($id)
+    {
+        // Buscar el kit por ID con sus artículos
+        $kit = Kit::with(['articulos' => function ($query) {
+            $query->select('articulos.*', 'kit_articulo.cantidad');
+        }])->findOrFail($id);
 
-    // Obtener los artículos activos para el select
-    $productos = Articulo::where('estado', 1)->get();
-    $unidades = Unidad::all();
-    $modelos = Modelo::all();
-    $monedas = Moneda::all();
+        // Obtener los artículos activos para el select
+        $productos = Articulo::where('estado', 1)->get();
+        $unidades = Unidad::all();
+        $modelos = Modelo::all();
+        $monedas = Moneda::all();
 
-    // Preparar los productos del kit para JavaScript
-    $productosKit = $kit->articulos->map(function($articulo) {
-        return [
-            'id' => $articulo->idArticulos,
-            'nombre' => $articulo->nombre,
-            'codigo' => $articulo->codigo_barras,
-            'unidad' => $articulo->unidad->nombre ?? '',
-            'cantidad' => $articulo->pivot->cantidad,
-            'precio' => $articulo->precio_venta,
-            'subtotal' => $articulo->pivot->cantidad * $articulo->precio_venta
-        ];
-    });
+        // Preparar los productos del kit para JavaScript
+        $productosKit = $kit->articulos->map(function ($articulo) {
+            return [
+                'id' => $articulo->idArticulos,
+                'nombre' => $articulo->nombre,
+                'codigo' => $articulo->codigo_barras,
+                'unidad' => $articulo->unidad->nombre ?? '',
+                'cantidad' => $articulo->pivot->cantidad,
+                'precio' => $articulo->precio_venta,
+                'subtotal' => $articulo->pivot->cantidad * $articulo->precio_venta
+            ];
+        });
 
-    // Cargar la vista de edición
-    return view('almacen.kits-articulos.edit', compact('kit', 'productos', 'unidades', 'modelos', 'monedas', 'productosKit'));
-}
-
-
+        // Cargar la vista de edición
+        return view('almacen.kits-articulos.edit', compact('kit', 'productos', 'unidades', 'modelos', 'monedas', 'productosKit'));
+    }
 
 
-  public function update(Request $request, $id)
-{
-    // Validar los datos del formulario
-    $request->validate([
-        'codigo_barras' => 'required|string|max:255|unique:kit,codigo,'.$id.',idKit',
-        'sku' => 'required|string|max:255|unique:kit,sku,'.$id.',idkit',
-        'nombre' => 'required|string|max:255',
-        'stock_total' => 'required|integer|min:0',
-        'stock_minimo' => 'required|integer|min:0',
-        'precio_venta' => 'required|numeric|min:0',
-        'moneda_venta' => 'required|integer',
-        'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'productos_kit' => 'required|json'
-    ]);
 
-    // Iniciar transacción
-    DB::beginTransaction();
 
-    try {
-        // Buscar el kit a actualizar
-        $kit = Kit::findOrFail($id);
-        $kit->codigo = $request->codigo_barras;
-        $kit->sku = $request->sku;
-        $kit->nombre = $request->nombre;
-        $kit->precio_venta = $request->precio_venta;
-        $kit->monedaVenta = $request->moneda_venta;
-        $kit->stock_total = $request->stock_total;
-        $kit->stock_minimo = $request->stock_minimo;
-
-        // Manejar la foto si se subió
-        if ($request->hasFile('foto')) {
-            $foto = $request->file('foto');
-            $kit->foto = file_get_contents($foto->getRealPath());
-        }
-
-        $kit->save();
-
-        // Eliminar relaciones anteriores
-        KitArticulo::where('idKit', $kit->idKit)->delete();
-
-        // Guardar los nuevos productos del kit
-        $productosKit = json_decode($request->productos_kit, true);
-
-        foreach ($productosKit as $producto) {
-            KitArticulo::create([
-                'idKit' => $kit->idKit,
-                'idArticulos' => $producto['id'],
-                'cantidad' => $producto['cantidad'],
-                'estado' => 1
-            ]);
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Kit actualizado correctamente',
-            'kit_id' => $kit->idKit
+    public function update(Request $request, $id)
+    {
+        // Validar los datos del formulario
+        $request->validate([
+            'codigo_barras' => 'required|string|max:255|unique:kit,codigo,' . $id . ',idKit',
+            'sku' => 'required|string|max:255|unique:kit,sku,' . $id . ',idkit',
+            'nombre' => 'required|string|max:255',
+            'stock_total' => 'required|integer|min:0',
+            'stock_minimo' => 'required|integer|min:0',
+            'precio_venta' => 'required|numeric|min:0',
+            'moneda_venta' => 'required|integer',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'productos_kit' => 'required|json'
         ]);
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error al actualizar kit: ' . $e->getMessage());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar el kit: ' . $e->getMessage()
-        ], 500);
+        // Iniciar transacción
+        DB::beginTransaction();
+
+        try {
+            // Buscar el kit a actualizar
+            $kit = Kit::findOrFail($id);
+            $kit->codigo = $request->codigo_barras;
+            $kit->sku = $request->sku;
+            $kit->nombre = $request->nombre;
+            $kit->precio_venta = $request->precio_venta;
+            $kit->monedaVenta = $request->moneda_venta;
+            $kit->stock_total = $request->stock_total;
+            $kit->stock_minimo = $request->stock_minimo;
+
+            // Manejar la foto si se subió
+            if ($request->hasFile('foto')) {
+                $foto = $request->file('foto');
+                $kit->foto = file_get_contents($foto->getRealPath());
+            }
+
+            $kit->save();
+
+            // Eliminar relaciones anteriores
+            KitArticulo::where('idKit', $kit->idKit)->delete();
+
+            // Guardar los nuevos productos del kit
+            $productosKit = json_decode($request->productos_kit, true);
+
+            foreach ($productosKit as $producto) {
+                KitArticulo::create([
+                    'idKit' => $kit->idKit,
+                    'idArticulos' => $producto['id'],
+                    'cantidad' => $producto['cantidad'],
+                    'estado' => 1
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Kit actualizado correctamente',
+                'kit_id' => $kit->idKit
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al actualizar kit: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el kit: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
 
 
 
@@ -237,60 +235,46 @@ public function edit($id)
         }
     }
 
-    public function exportAllPDF()
+    public function getAll(Request $request)
     {
-        try {
-            $kits = Kit::with('articulos')->get();
+        $query = Kit::query();
 
-            $pdf = PDF::loadView('almacen.kits-articulos.pdf.kits', compact('kits'))
-                ->setPaper('a4', 'landscape');
+        $total = $query->count();
 
-            return $pdf->download('reporte-kits.pdf');
-        } catch (\Exception $e) {
-            Log::error('Error al generar el PDF: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Hubo un problema al generar el PDF.');
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nombre', 'like', "%$search%")
+                    ->orWhere('codigo', 'like', "%$search%")
+                    ->orWhere('descripcion', 'like', "%$search%");
+            });
         }
-    }
-public function getAll(Request $request)
-{
-    $query = Kit::query();
 
-    $total = $query->count();
+        $filtered = $query->count();
 
-    if ($search = $request->input('search.value')) {
-        $query->where(function ($q) use ($search) {
-            $q->where('nombre', 'like', "%$search%")
-              ->orWhere('codigo', 'like', "%$search%")
-              ->orWhere('descripcion', 'like', "%$search%");
+        $kits = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+
+        $data = $kits->map(function ($kit) {
+            return [
+                'idKit' => $kit->idKit,
+                'foto' => $kit->foto
+                    ? 'data:image/jpeg;base64,' . base64_encode($kit->foto)
+                    : '/assets/images/articulo/producto-default.png',
+                'codigo' => $kit->codigo,
+                'nombre' => $kit->nombre,
+                'descripcion' => $kit->descripcion,
+                'precio_venta' => $kit->precio_venta,
+                'estado' => $kit->estado == 1 ? 'Activo' : 'Inactivo',
+            ];
         });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
-
-    $filtered = $query->count();
-
-    $kits = $query
-        ->skip($request->start)
-        ->take($request->length)
-        ->get();
-
-    $data = $kits->map(function ($kit) {
-        return [
-            'idKit' => $kit->idKit,
-            'foto' => $kit->foto ? 'data:image/jpeg;base64,' . base64_encode($kit->foto) : null,
-            'codigo' => $kit->codigo,
-            'nombre' => $kit->nombre,
-            'descripcion' => $kit->descripcion,
-            'precio_venta' => $kit->precio_venta,
-            'precio' => $kit->precio,
-            'estado' => 'Activo', // Puedes cambiar esto según tu lógica
-        ];
-    });
-
-    return response()->json([
-        'draw' => intval($request->draw),
-        'recordsTotal' => $total,
-        'recordsFiltered' => $filtered,
-        'data' => $data,
-    ]);
-}
-
 }
