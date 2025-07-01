@@ -18,15 +18,16 @@
         <!-- Panel principal -->
         <div class="panel mt-6 p-6 max-w-4xl mx-auto">
            <div class="text-center mb-6">
-                <h1 class="text-xl font-bold uppercase">
-                    {{ $articulo->codigo_repuesto }} /
-                    @if($modelos->isNotEmpty())
-                        {{ $modelos->first()->categoria->nombre ?? 'Sin categoría' }} /
-                        {{ $modelos->first()->nombre ?? 'Sin modelo' }}
-                    @else
-                        Sin modelo / Sin categoría
-                    @endif
-                </h1>
+            <h1 class="text-xl font-bold uppercase">
+                {{ $articulo->codigo_repuesto }} /
+                {{ $articulo->subcategoria->nombre ?? 'Sin subcategoría' }} /
+                @if($modelos->isNotEmpty())
+                    {{ $modelos->first()->nombre ?? 'Sin modelo' }}
+                @else
+                    Sin modelo
+                @endif
+            </h1>
+
             </div>
 
 
@@ -34,20 +35,21 @@
 <div class="mb-6">
     <div class="border rounded-lg p-4 max-w-md mx-auto">
         <div class="space-y-3">
-          @php
+       @php
     $textDisplay = $articulo->codigo_repuesto;
     $marcaNombre = '';
-    $categoriaNombre = '';
+    $subcategoriaNombre = '';
     $modeloNombre = '';
 
     if ($articulo->modelos->isNotEmpty()) {
         $modelo = $articulo->modelos->first();
         $modeloNombre = $modelo->nombre ?? 'Sin modelo';
-        $categoriaNombre = $modelo->categoria->nombre ?? 'Sin categoría';
         $marcaNombre = $modelo->marca->nombre ?? 'Sin marca';
-        $textDisplay = "$marcaNombre / $categoriaNombre / $modeloNombre";
+        $subcategoriaNombre = $articulo->subcategoria->nombre ?? 'Sin subcategoría';
+        $textDisplay = "$marcaNombre / $subcategoriaNombre / $modeloNombre";
     }
 @endphp
+
 
 <div class="text-center">
     {{-- NOMBRE DE LA MARCA --}}
@@ -79,13 +81,14 @@
             <div class="border-t pt-3">
                 <button 
     type="button" 
-    @click="openModal(
-        '{{ $articulo->codigo_repuesto }}',
-        '{{ base64_encode($articulo->{'br-codigo-repuesto'}) }}',
-        '{{ $articulo->modelos->first()->marca->nombre ?? '' }}',
-        '{{ $articulo->modelos->first()->categoria->nombre ?? '' }}',
-        '{{ $articulo->modelos->first()->nombre ?? '' }}'
-    )" 
+  @click="openModal(
+    '{{ $articulo->codigo_repuesto }}',
+    '{{ base64_encode($articulo->{'br-codigo-repuesto'}) }}',
+    '{{ $articulo->modelos->first()->marca->nombre ?? '' }}',
+    '{{ $articulo->subcategoria->nombre ?? '' }}',  // <- Subcategoría en vez de categoría del modelo
+    '{{ $articulo->modelos->first()->nombre ?? '' }}'
+)"
+
     class="w-full flex justify-between items-center text-base text-gray-600 hover:text-primary py-2 px-1"
 >
     <span>IMPRIMIR</span>

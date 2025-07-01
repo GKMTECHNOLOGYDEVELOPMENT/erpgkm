@@ -23,42 +23,50 @@ class ModelosController extends Controller
     }
 
 
-    public function store(Request $request)
-    {
-        try {
-            // Validar los datos del formulario
-            $validatedData = $request->validate([
-                'nombre' => 'required|string|max:255',
-                'idMarca' => 'required|integer|exists:marca,idMarca',
-                'idCategoria' => 'required|integer|exists:categoria,idCategoria',
-            ]);
+   public function store(Request $request)
+{
+    try {
+        // Validar datos básicos
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'idMarca' => 'required|integer|exists:marca,idMarca',
+            'idCategoria' => 'required|integer|exists:categoria,idCategoria',
+        ]);
 
-            // Datos básicos del modelo
-            $dataModelo = [
-                'nombre' => $validatedData['nombre'],
-                'idMarca' => $validatedData['idMarca'],
-                'idCategoria' => $validatedData['idCategoria'],
-                'estado' => 1,
-            ];
+        // Definir valores de checkboxes (si no están marcados, son 0)
+        $repuesto = $request->has('repuesto') ? 1 : 0;
+        $producto = $request->has('producto') ? 1 : 0;
+        $heramientas = $request->has('heramientas') ? 1 : 0;
+        $suministros = $request->has('suministros') ? 1 : 0;
 
-            // Guardar el modelo en la base de datos
-            Log::info('Insertando modelo:', $dataModelo);
-            Modelo::create($dataModelo);
+        $dataModelo = [
+            'nombre' => $validatedData['nombre'],
+            'idMarca' => $validatedData['idMarca'],
+            'idCategoria' => $validatedData['idCategoria'],
+            'estado' => 1,
+            'repuesto' => $repuesto,
+            'producto' => $producto,
+            'heramientas' => $heramientas,
+            'suministros' => $suministros,
+        ];
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Modelo agregado correctamente',
-                'data' => $dataModelo,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error al guardar el modelo: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Ocurrió un error al guardar el modelo.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        Modelo::create($dataModelo);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Modelo agregado correctamente',
+            'data' => $dataModelo,
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al guardar el modelo: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al guardar el modelo.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
 
     public function edit($id)
     {
@@ -69,31 +77,41 @@ class ModelosController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        try {
-            // Validar los datos del formulario
-            $validatedData = $request->validate([
-                'nombre' => 'required|string|max:255',
-                'idMarca' => 'required|integer|exists:marca,idMarca',
-                'idCategoria' => 'required|integer|exists:categoria,idCategoria',
-                'estado' => 'nullable|boolean',
-            ]);
+{
+    try {
+        // Validar los datos del formulario
+        $validatedData = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'idMarca' => 'required|integer|exists:marca,idMarca',
+            'idCategoria' => 'required|integer|exists:categoria,idCategoria',
+            'estado' => 'nullable|boolean',
+        ]);
 
-            // Obtener el modelo
-            $modelo = Modelo::findOrFail($id);
-            Log::info("Actualizando modelo con ID: $id");
+        // Obtener el modelo
+        $modelo = Modelo::findOrFail($id);
+        Log::info("Actualizando modelo con ID: $id");
 
-            // Actualizar los datos del modelo
-            $modelo->update($validatedData);
+        // Determinar qué checkboxes están marcados
+        $validatedData['repuesto'] = $request->has('repuesto') ? 1 : 0;
+        $validatedData['producto'] = $request->has('producto') ? 1 : 0;
+        $validatedData['heramientas'] = $request->has('heramientas') ? 1 : 0;
+        $validatedData['suministros'] = $request->has('suministros') ? 1 : 0;
 
-            return redirect()->route('modelos.index')
-                ->with('success', 'Modelo actualizado exitosamente.');
-        } catch (\Exception $e) {
-            Log::error('Error al actualizar el modelo: ' . $e->getMessage());
-            return redirect()->route('modelos.index')
-                ->with('error', 'Ocurrió un error al actualizar el modelo.');
-        }
+        // Si no se marca el estado, se asegura que sea 0
+        $validatedData['estado'] = $request->has('estado') ? 1 : 0;
+
+        // Actualizar los datos del modelo
+        $modelo->update($validatedData);
+
+        return redirect()->route('modelos.index')
+            ->with('success', 'Modelo actualizado exitosamente.');
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar el modelo: ' . $e->getMessage());
+        return redirect()->route('modelos.index')
+            ->with('error', 'Ocurrió un error al actualizar el modelo.');
     }
+}
+
 
     public function destroy($id)
     {

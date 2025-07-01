@@ -14,6 +14,7 @@ use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
 use App\Http\Controllers\almacen\productos\ProductoController;
 use App\Http\Controllers\almacen\repuestos\RepuestosController;
+use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Articulo;
 use App\Models\CuentasBancarias;
+use App\Models\Subcategoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +60,7 @@ Route::get('/heramientas', [HeramientasController::class, 'getAll']);
 Route::get('/suministros', [SuministrosController::class, 'getAll']);
 Route::get('/ubicaciones', [UbicacionesController::class, 'getAllUbicaciones']);
 Route::get('/kits', [KitsController::class, 'getAll']);
+Route::get('subcategoria', [SubcategoriaController::class, 'getAll']);
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);
@@ -280,5 +283,8 @@ Route::get('/validar-sku-kit', function (Request $request) {
     
     return response()->json(['exists' => $exists]);
 });
+
+Route::get('/api/validar-nombre-subcategoria', [SubcategoriaController::class, 'validarNombre']);
+
 
 

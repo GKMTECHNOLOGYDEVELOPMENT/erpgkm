@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Articulo;
 use App\Models\ArticuloModelo;
 use App\Models\Categoria;
+use App\Models\Kardex;
 use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\Moneda;
@@ -39,13 +40,19 @@ class ProductoController extends Controller
         // Obtener datos para los selects
         $unidades = Unidad::all();
         $tiposArticulo = Tipoarticulo::all();
-        $modelos = Modelo::with(['marca', 'categoria'])->where('estado', 1)->get();
+        $modelos = Modelo::with(['marca', 'categoria'])
+            ->where('estado', 1)
+            ->where('producto', 1)
+            ->get();
+        $monedas = Moneda::all();
+        $marcas = Marca::all();
+        $categorias = Categoria::all();
         $monedas = Moneda::all();
 
         
 
         // Retornar la vista con los datos necesarios
-        return view('almacen.productos.articulos.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
+        return view('almacen.productos.articulos.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas', 'marcas', 'categorias'));
     }
 
      public function createproducto(Request $request)
@@ -55,7 +62,10 @@ class ProductoController extends Controller
 
         $unidades = Unidad::all();
         $tiposArticulo = Tipoarticulo::all();
-        $modelos = Modelo::with(['marca', 'categoria'])->where('estado', 1)->get();
+        $modelos = Modelo::with(['marca', 'categoria'])
+            ->where('estado', 1)
+            ->where('producto', 1)
+            ->get();
         $monedas = Moneda::all();
         $marcas = Marca::all();
         $categorias = Categoria::all();
@@ -78,83 +88,105 @@ class ProductoController extends Controller
 
 
 
-    public function store(Request $request)
-    {
-        try {
-            // Validación de datos
-            $validatedData = $request->validate([
-                'codigo_barras' => 'required|string|max:255|unique:articulos,codigo_barras',
-                'sku' => 'required|string|max:255|unique:articulos,sku',
-                'nombre' => 'required|string|max:255|unique:articulos,nombre',
-                'stock_total' => 'required|nullable|integer',
-                'stock_minimo' => 'required|nullable|integer',
-                'moneda_compra' => 'required|nullable|integer',
-                'moneda_venta' => 'required|nullable|integer',
-                'precio_compra' => 'required|nullable|numeric',
-                'precio_venta' => 'required|nullable|numeric',
-                'peso' => 'required|nullable|numeric',
-                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120', // <= validación del PDF
-                'idUnidad' => 'required|nullable|integer',
-                'idModelo' => 'integer|exists:modelo,idModelo', 
+  public function store(Request $request)
+{
+    DB::beginTransaction(); // Iniciar transacción para operaciones atómicas
+
+    try {
+        // Validación de datos
+        $validatedData = $request->validate([
+            'codigo_barras' => 'required|string|max:255|unique:articulos,codigo_barras',
+            'sku' => 'required|string|max:255|unique:articulos,sku',
+            'nombre' => 'required|string|max:255|unique:articulos,nombre',
+            'stock_total' => 'required|nullable|integer',
+            'stock_minimo' => 'required|nullable|integer',
+            'moneda_compra' => 'required|nullable|integer',
+            'moneda_venta' => 'required|nullable|integer',
+            'precio_compra' => 'required|nullable|numeric',
+            'precio_venta' => 'required|nullable|numeric',
+            'peso' => 'required|nullable|numeric',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120',
+            'idUnidad' => 'required|nullable|integer',
+            'idModelo' => 'integer|exists:modelo,idModelo', 
+        ]);
+        
+        // Asignación de valores por defecto
+        $dataArticulo = $validatedData;
+        $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
+        $dataArticulo['idTipoArticulo'] = 1; // Tipo de artículo por defecto
+        $dataArticulo['fecha_ingreso'] = now(); // Fecha de ingreso actual
+        $dataArticulo['stock_total'] = $dataArticulo['stock_total'] ?? 0; // Asegurar valor por defecto
+        $dataArticulo['precio_compra'] = $dataArticulo['precio_compra'] ?? 0; // Asegurar valor por defecto
+        
+        // Crear el artículo
+        $articulo = Articulo::create($dataArticulo);
+
+        // Registrar movimiento inicial en el Kardex (solo si hay stock)
+        if ($dataArticulo['stock_total'] > 0) {
+            Kardex::create([
+                'fecha' => now(),
+                'idArticulo' => $articulo->idArticulos,
+                'unidades_entrada' => $dataArticulo['stock_total'],
+                'costo_unitario_entrada' => $dataArticulo['precio_compra'],
+                'unidades_salida' => 0,
+                'costo_unitario_salida' => 0,
+                'inventario_inicial' => $dataArticulo['stock_total'], 
+                'inventario_actual' => $dataArticulo['stock_total'],
+                'costo_inventario' => $dataArticulo['stock_total'] * $dataArticulo['precio_compra']
             ]);
-            
-            // Asignación de valores por defecto
-            $dataArticulo = $validatedData;
-
-            $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
-            $dataArticulo['idTipoArticulo'] = 1; // Tipo de artículo por defecto
-            $dataArticulo['fecha_ingreso'] = now(); // Fecha de ingreso con valor actual
-            
-            // Crear el artículo
-            $articulo = Articulo::create($dataArticulo);
-    
-            // Generar y guardar el código de barras para 'codigo_barras' como binario
-            if (!empty($dataArticulo['codigo_barras'])) {
-                $barcodeGenerator = new BarcodeGeneratorPNG();
-                $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
-                $fotoCodigobarrasBinario = $barcode; // El código de barras ya es binario
-                $articulo->update(['foto_codigobarras' => $fotoCodigobarrasBinario]);
-            }
-    
-            // Generar y guardar el código de barras para 'sku' como binario
-            if (!empty($dataArticulo['sku'])) {
-                $barcodeGenerator = new BarcodeGeneratorPNG();
-                $barcode = $barcodeGenerator->getBarcode($dataArticulo['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
-                $fotoSkuBinario = $barcode; // El código de barras ya es binario
-                $articulo->update(['fotosku' => $fotoSkuBinario]);
-            }
-    
-            // Subir la foto del artículo y convertirla a binario
-            if ($request->hasFile('foto')) {
-                $photoPath = $request->file('foto')->getRealPath(); // Obtener la ruta del archivo
-                $photoData = file_get_contents($photoPath); // Leer el archivo como binario
-                $articulo->update(['foto' => $photoData]); // Guardar la foto como binario
-            }
-
-           if ($request->hasFile('ficha_tecnica')) {
-                $pdf = $request->file('ficha_tecnica');
-                $pdfPath = $pdf->store('fichas', 'public'); // guarda: fichas/nombreArchivo.pdf
-                $fileName = basename($pdfPath); // extrae solo "nombreArchivo.pdf"
-                $articulo->update(['ficha_tecnica' => $fileName]); // guarda solo el nombre en BD
-            }
-
-    
-            // Respuesta de éxito
-            return response()->json([
-                'success' => true,
-                'message' => 'Artículo agregado correctamente',
-            ]);
-    
-        } catch (\Exception $e) {
-            // Respuesta de error en caso de excepción
-            return response()->json([
-                'success' => false,
-                'message' => 'Ocurrió un error al guardar el artículo.',
-                'error' => $e->getMessage(),
-            ], 500);
         }
+
+        // Generar códigos de barras
+        if (!empty($dataArticulo['codigo_barras'])) {
+            $barcodeGenerator = new BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
+            $articulo->update(['foto_codigobarras' => $barcode]);
+        }
+
+        if (!empty($dataArticulo['sku'])) {
+            $barcodeGenerator = new BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
+            $articulo->update(['fotosku' => $barcode]);
+        }
+
+        // Manejo de archivos
+        if ($request->hasFile('foto')) {
+            $photoPath = $request->file('foto')->getRealPath();
+            $photoData = file_get_contents($photoPath);
+            $articulo->update(['foto' => $photoData]);
+        }
+
+        if ($request->hasFile('ficha_tecnica')) {
+            $pdf = $request->file('ficha_tecnica');
+            $pdfPath = $pdf->store('fichas', 'public');
+            $fileName = basename($pdfPath);
+            $articulo->update(['ficha_tecnica' => $fileName]);
+        }
+
+        DB::commit(); // Confirmar todas las operaciones
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artículo agregado correctamente',
+            'data' => [
+                'articulo_id' => $articulo->idArticulos,
+                'kardex_created' => $dataArticulo['stock_total'] > 0,
+                'stock_inicial' => $dataArticulo['stock_total']
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack(); // Revertir en caso de error
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al guardar el artículo.',
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString() // Solo para desarrollo, quitar en producción
+        ], 500);
     }
+}
     
 
     public function edit($id)
@@ -169,6 +201,18 @@ class ProductoController extends Controller
     return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
 
+
+public function kardex($id)
+{
+    $articulo = Articulo::findOrFail($id);
+    
+    // Obtener todos los movimientos del kardex para este artículo ordenados por fecha descendente
+    $movimientos = Kardex::where('idArticulo', $id)
+                        ->orderBy('fecha', 'desc')
+                        ->paginate(10);
+    
+    return view('almacen.productos.articulos.kardex.index', compact('articulo', 'movimientos'));
+}
 
 public function detalle($id)
 {

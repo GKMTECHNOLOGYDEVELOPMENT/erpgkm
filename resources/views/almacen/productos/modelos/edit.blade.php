@@ -79,6 +79,39 @@
                 </div>
             </div>
 
+
+            <!-- Tipo de Modelo (Checkboxes) -->
+<div class="md:col-span-2">
+    <label class="block text-sm font-medium mb-1">Tipo de Modelo</label>
+    <div class="space-y-2">
+        <label class="inline-flex items-center">
+            <input type="checkbox" name="repuesto" value="1"
+                class="form-checkbox text-primary"
+                {{ old('repuesto', $modelo->repuesto) ? 'checked' : '' }}>
+            <span class="ml-2">Repuestos</span>
+        </label>
+        <label class="inline-flex items-center">
+            <input type="checkbox" name="producto" value="1"
+                class="form-checkbox text-primary"
+                {{ old('producto', $modelo->producto) ? 'checked' : '' }}>
+            <span class="ml-2">Productos</span>
+        </label>
+        <label class="inline-flex items-center">
+            <input type="checkbox" name="heramientas" value="1"
+                class="form-checkbox text-primary"
+                {{ old('heramientas', $modelo->heramientas) ? 'checked' : '' }}>
+            <span class="ml-2">Herramientas</span>
+        </label>
+        <label class="inline-flex items-center">
+            <input type="checkbox" name="suministros" value="1"
+                class="form-checkbox text-primary"
+                {{ old('suministros', $modelo->suministros) ? 'checked' : '' }}>
+            <span class="ml-2">Suministros</span>
+        </label>
+    </div>
+</div>
+
+
             <!-- Botones -->
             <div class="md:col-span-2 flex justify-end mt-4">
                 <a href="{{ route('modelos.index') }}" class="btn btn-outline-danger">Cancelar</a>

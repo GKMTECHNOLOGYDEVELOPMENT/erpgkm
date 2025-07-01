@@ -62,7 +62,8 @@ class Articulo extends Model
 		'estado' => 'bool',
 		'idUnidad' => 'int',
 		'idTipoArticulo' => 'int',
-		'idModelo' => 'int'
+		'idModelo' => 'int',
+		'idsubcategoria' => 'int'
 	];
 
 	protected $fillable = [
@@ -87,7 +88,8 @@ class Articulo extends Model
 		'br-codigo-repuesto',
 		'pulgadas',
 		'codigo_repuesto',
-		'ficha_tecnica'
+		'ficha_tecnica',
+		'idsubcategoria'
 	];
 
 	public function unidad()
@@ -145,5 +147,24 @@ class Articulo extends Model
 	{
 		return $this->belongsToMany(Modelo::class, 'articulo_modelo', 'articulo_id', 'modelo_id');
 	}
+
+
+	public function subcategoria()
+	{
+		return $this->belongsTo(Subcategoria::class, 'idsubcategoria');
+	}
+
+	  public function kardex()
+    {
+        return $this->hasMany(Kardex::class, 'idArticulo', 'idArticulos');
+    }
+
+	 public function ultimoMovimiento()
+    {
+        return $this->hasOne(Kardex::class, 'idArticulo', 'idArticulos')
+                   ->latest('fecha');
+    }
+
+
 
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\almacen\suministros;
 
 use App\Http\Controllers\Controller;
 use App\Models\Articulo;
+use App\Models\Categoria;
+use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\Moneda;
 use App\Models\Tipoarea;
@@ -36,11 +38,16 @@ class SuministrosController extends Controller
         // Obtener datos para los selects
         $unidades = Unidad::all();
         $tiposArticulo = Tipoarticulo::all();
-        $modelos = Modelo::with(['marca', 'categoria'])->where('estado', 1)->get();
+        $modelos = Modelo::with(['marca', 'categoria'])
+            ->where('estado', 1)
+            ->where('suministros', 1)
+            ->get();      
         $monedas = Moneda::all();
+         $marcas = Marca::all();
+        $categorias = Categoria::all();
 
         // Retornar la vista con los datos necesarios
-        return view('almacen.suministros.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
+        return view('almacen.suministros.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas','marcas', 'categorias' ));
     }
 
 

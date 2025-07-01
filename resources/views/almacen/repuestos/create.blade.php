@@ -183,20 +183,49 @@
                     </div>
                 </div>
 
-                <!-- Modelo (Multiple Select) -->
+               <!-- Modelo (Multiple Select) -->
                 <div class="relative input-with-icon">
-                    <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelos</label>
+                    <div class="flex justify-between items-center">
+                        <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelos</label>
+                        <button type="button" class="btn btn-primary btn-sm flex items-center gap-2" @click="$dispatch('toggle-modal')">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+
+                        </button>
+                    </div>
                     <div class="relative mt-1">
                         <i class="fas fa-cubes input-icon"></i> <!-- Ícono a la izquierda -->
-                        <select id="idModelo" name="idModelo[]" class="select2-multiple clean-input w-full pl-10"
-                            multiple="multiple">
+                        <select id="idModelo" name="idModelo[]" class="select2-multiple clean-input w-full pl-10" multiple="multiple">
                             @foreach ($modelos as $modelo)
-                                <option value="{{ $modelo->idModelo }}" data-marca="{{ $modelo->idMarca }}"
-                                    data-categoria="{{ $modelo->idCategoria }}">
+                                <option value="{{ $modelo->idModelo }}" data-marca="{{ $modelo->idMarca }}" 
+                                        data-categoria="{{ $modelo->idCategoria }}">
                                     {{ $modelo->nombre }} -
                                     {{ $modelo->marca->nombre ?? 'Sin Marca' }} -
                                     {{ $modelo->categoria->nombre ?? 'Sin Categoría' }}
                                 </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+
+                            <!-- Sub Categoria -->
+                <div class="relative input-with-icon">
+                    <div class="flex justify-between items-center">
+                        <label for="idsubcategoria" class="block text-sm font-medium text-gray-700">Sub Categoría</label>
+                        <button type="button" class="btn btn-primary btn-sm flex items-center gap-2" @click="$dispatch('toggle-subcategoria-modal')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                        </button>
+                    </div>
+                    <div class="relative mt-1">
+                        <i class="fas fa-folder input-icon"></i>
+                        <select id="idsubcategoria" name="idsubcategoria" class="select2-single clean-input w-full pl-10">
+                            <option value="" disabled selected>Seleccionar Sub Categoría</option>
+                            @foreach ($subcategorias as $subcategoria)
+                                <option value="{{ $subcategoria->id }}">{{ $subcategoria->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -256,21 +285,26 @@
                             placeholder="Ingrese stock mínimo">
                     </div>
                 </div>
-
-                <!-- Unidad de Medida -->
-                <div class="relative input-with-icon">
-                    <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
-                    <div class="relative mt-1">
-                        <i class="fas fa-balance-scale input-icon"></i>
-                        <select id="idUnidad" name="idUnidad" class="select2-single clean-input w-full pl-10"
-                            style="appearance: none;">
-                            <option value="" disabled selected>Seleccionar Unidad</option>
-                            @foreach ($unidades as $unidad)
-                                <option value="{{ $unidad->idUnidad }}">{{ $unidad->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+<!-- Unidad de Medida -->
+<div class="relative input-with-icon">
+    <div class="flex justify-between items-center">
+        <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
+        <button type="button" class="btn btn-primary btn-sm flex items-center gap-2" @click="$dispatch('toggle-unidad-modal')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+        </button>
+    </div>
+    <div class="relative mt-1">
+        <i class="fas fa-balance-scale input-icon"></i>
+        <select id="idUnidad" name="idUnidad" class="select2-single clean-input w-full pl-10">
+            <option value="" disabled selected>Seleccionar Unidad</option>
+            @foreach ($unidades as $unidad)
+                <option value="{{ $unidad->idUnidad }}">{{ $unidad->nombre }}</option>
+            @endforeach
+        </select>
+    </div>
+</div>
 
 
                 <!-- Pulgadas -->
@@ -359,6 +393,180 @@
 
         </form>
     </div>
+
+
+    <!-- Modal para agregar modelo -->
+<div x-data="{ open: false }" class="mb-5" @toggle-modal.window="open = !open">
+    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
+        <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
+            <div x-show="open" x-transition.duration.300
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
+                <!-- Header del Modal -->
+                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                    <h5 class="font-bold text-lg">Agregar Modelo</h5>
+                    <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Formulario -->
+                <div class="modal-scroll">
+                    <form class="p-5 space-y-4" id="modeloForm" enctype="multipart/form-data" method="post">
+                        @csrf
+                        <!-- Nombre -->
+                        <div>
+                            <label for="nombre" class="block text-sm font-medium">Nombre</label>
+                            <input id="nombre" name="nombre" class="clean-input w-full"
+                                placeholder="Ingrese el nombre del modelo" required>
+                        </div>
+                        <!-- Marca -->
+                        <div>
+                            <label for="idMarca" class="block text-sm font-medium">Marca</label>
+                            <select id="idMarca" name="idMarca" class="select2-single" required>
+                                <option value="" disabled selected>Seleccione la Marca</option>
+                                @foreach ($marcas as $marca)
+                                    <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <!-- Categoría -->
+                        <div>
+                            <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
+                            <select id="idCategoria" name="idCategoria" class="select2-single" required>
+                                <option value="" disabled selected>Seleccione la Categoría</option>
+                                @foreach ($categorias as $categoria)
+                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                   <!-- Tipo de Modelo (Checkboxes) -->
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Tipo de Modelo</label>
+                        <div class="space-y-2">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="repuesto" value="1" class="form-checkbox text-primary" checked>
+                                <span class="ml-2">Repuestos</span>
+                            </label>
+                            <!-- Ocultamos los otros checkboxes pero los mantenemos en el formulario -->
+                            <input type="hidden" name="producto" value="0">
+                            <input type="hidden" name="heramientas" value="0">
+                            <input type="hidden" name="suministros" value="0">
+                        </div>
+                    </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end items-center mt-4">
+                            <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
+                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal para agregar subcategoría -->
+<div x-data="{ subcategoriaOpen: false }" class="mb-5" @toggle-subcategoria-modal.window="subcategoriaOpen = !subcategoriaOpen">
+    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="subcategoriaOpen && '!block'">
+        <div class="flex items-start justify-center min-h-screen px-4" @click.self="subcategoriaOpen = false">
+            <div x-show="subcategoriaOpen" x-transition.duration.300
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
+                <!-- Header del Modal -->
+                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                    <h5 class="font-bold text-lg">Agregar Sub Categoría</h5>
+                    <button type="button" class="text-white-dark hover:text-dark" @click="subcategoriaOpen = false">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Formulario -->
+                <div class="modal-scroll">
+                    <form class="p-5 space-y-4" id="subcategoriaForm" enctype="multipart/form-data" method="post">
+                        @csrf
+                        <!-- Nombre -->
+                        <div>
+                            <label for="nombre_subcategoria" class="block text-sm font-medium">Nombre</label>
+                            <input id="nombre_subcategoria" name="nombre" class="form-input w-full"
+                                placeholder="Ingrese el nombre de la subcategoría" required>
+                        </div>
+                        
+                        <!-- Descripción -->
+                        <div>
+                            <label for="descripcion_subcategoria" class="block text-sm font-medium">Descripción</label>
+                            <textarea id="descripcion_subcategoria" name="descripcion" class="form-input w-full"
+                                placeholder="Ingrese una descripción (opcional)" rows="3"></textarea>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end items-center mt-4">
+                            <button type="button" class="btn btn-outline-danger" @click="subcategoriaOpen = false">Cancelar</button>
+                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal para agregar unidad -->
+<div x-data="{ unidadOpen: false }" class="mb-5" @toggle-unidad-modal.window="unidadOpen = !unidadOpen">
+    <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="unidadOpen && '!block'">
+        <div class="flex items-start justify-center min-h-screen px-4" @click.self="unidadOpen = false">
+            <div x-show="unidadOpen" x-transition.duration.300
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
+                <!-- Header del Modal -->
+                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                    <h5 class="font-bold text-lg">Agregar Unidad de Medida</h5>
+                    <button type="button" class="text-white-dark hover:text-dark" @click="unidadOpen = false; $dispatch('modal-unidad-closed')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Formulario -->
+                <div class="modal-scroll">
+                    <form class="p-5 space-y-4" id="unidadForm" enctype="multipart/form-data" method="post">
+                        @csrf
+                        <!-- Nombre -->
+                        <div class="input-with-icon">
+                            <label for="nombre_unidad" class="block text-sm font-medium">Nombre</label>
+                            <div class="relative mt-1">
+                                <i class="fas fa-balance-scale input-icon"></i>
+                                <input id="nombre_unidad" name="nombre" class="clean-input w-full pl-10"
+                                    placeholder="Ej: Kilogramos, Litros, Unidades" required>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end items-center mt-4">
+                            <button type="button" class="btn btn-outline-danger" @click="unidadOpen = false; $dispatch('modal-unidad-closed')">Cancelar</button>
+                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -483,6 +691,8 @@
 
                             // ✅ Limpiar Select2
                             $('#idModelo').val(null).trigger('change');
+                            $('#idsubcategoria').val(null).trigger('change');
+                            $('#idUnidad').val(null).trigger('change');
 
                             // ✅ Limpiar preview imagen (usando Alpine.js)
                             if (window.Alpine && Alpine.store) {
@@ -512,7 +722,6 @@
 
         });
     </script>
-
     <script>
         document.getElementById("btnLimpiar").addEventListener("click", function() {
             const form = document.getElementById("repuestosForm");
@@ -526,12 +735,8 @@
             document.getElementById('preview_pdf').classList.add('hidden');
         });
     </script>
-
-
-
-
-
     <script src="{{ asset('assets/js/almacen/repuesto/repuestoValidaciones.js') }}"></script>
+    <script src="{{ asset('assets/js/almacen/productos/modal.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>

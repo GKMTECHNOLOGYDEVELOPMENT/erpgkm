@@ -4,6 +4,8 @@ namespace App\Http\Controllers\almacen\heramientas;
 
 use App\Http\Controllers\Controller;
 use App\Models\Articulo;
+use App\Models\Categoria;
+use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\Moneda;
 use App\Models\Tipoarea;
@@ -36,11 +38,17 @@ class HeramientasController extends Controller
         // Obtener datos para los selects
         $unidades = Unidad::all();
         $tiposArticulo = Tipoarticulo::all();
-        $modelos = Modelo::with(['marca', 'categoria'])->where('estado', 1)->get();
-        $monedas = Moneda::all();
+        $modelos = Modelo::with(['marca', 'categoria'])
+            ->where('estado', 1)
+            ->where('heramientas', 1)
+            ->get();           
+             $monedas = Moneda::all();
+
+             $marcas = Marca::all();
+             $categorias = Categoria::all();
 
         // Retornar la vista con los datos necesarios
-        return view('almacen.heramientas.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
+        return view('almacen.heramientas.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas', 'marcas', 'categorias'));
     }
 
 

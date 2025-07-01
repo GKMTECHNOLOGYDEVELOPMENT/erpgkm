@@ -220,6 +220,28 @@
                     </div>
                 </div>
 
+                <!-- Subcategoría -->
+                <div class="relative input-with-icon">
+                    <label for="idsubcategoria" class="block text-sm font-medium text-gray-700">Sub Categoría</label>
+                    <div class="relative mt-1">
+                        <i class="fas fa-folder input-icon"></i>
+                        <select id="idsubcategoria" name="idsubcategoria" class="select2-single clean-input w-full pl-10"
+                            style="appearance: none;">
+                            <option value="" disabled>Seleccionar Subcategoría</option>
+                            @foreach ($subcategorias as $subcategoria)
+                                <option value="{{ $subcategoria->id }}"
+                                    {{ $subcategoria->id == $articulo->idsubcategoria ? 'selected' : '' }}>
+                                    {{ $subcategoria->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+
+
+                   
+
                 <!-- Precio Compra -->
                 <div>
                     <label for="precio_compra" class="block text-sm font-medium text-gray-700">Precio de Compra</label>

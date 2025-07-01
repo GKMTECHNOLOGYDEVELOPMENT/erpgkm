@@ -894,6 +894,9 @@
                         <li>
                             <a href="{{ route('categorias.index') }}">Categoria</a>
                         </li>
+                        <li>
+                            <a href="{{ route('subcategoria.index') }}">Sub Categoria</a>
+                        </li>
                     </ul>
                 </li>
 

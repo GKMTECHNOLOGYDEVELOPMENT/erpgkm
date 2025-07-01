@@ -5,8 +5,11 @@ namespace App\Http\Controllers\almacen\repuestos;
 use App\Http\Controllers\Controller;
 use App\Models\Articulo;
 use App\Models\ArticuloModelo;
+use App\Models\Categoria;
+use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\Moneda;
+use App\Models\Subcategoria;
 use App\Models\Tipoarea;
 use App\Models\Tipoarticulo;
 use App\Models\Unidad;
@@ -28,8 +31,11 @@ class RepuestosController extends Controller
             ->get();
 
         $monedas = Moneda::all();
+
+        $marcas = Marca::all();
+
         // Retorna la vista para artículos
-        return view('almacen.repuestos.index', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
+        return view('almacen.repuestos.index', compact('unidades', 'tiposArticulo', 'modelos', 'monedas', 'marcas'));
     }
 
     public function create()
@@ -37,13 +43,118 @@ class RepuestosController extends Controller
         // Obtener datos para los selects
         $unidades = Unidad::all();
         $tiposArticulo = Tipoarticulo::all();
-        $modelos = Modelo::with(['marca', 'categoria'])->where('estado', 1)->get();
+        $modelos = Modelo::with(['marca', 'categoria'])
+            ->where('estado', 1)
+            ->where('repuesto', 1)
+            ->get();       
         $monedas = Moneda::all();
+        $subcategorias = Subcategoria::all();
+        $marcas = Marca::all();
+        $categorias = Categoria::all();
+
+
 
         // Retornar la vista con los datos necesarios
-        return view('almacen.repuestos.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
+        return view('almacen.repuestos.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas', 'subcategorias', 'marcas','categorias'));
     }
 
+
+
+    // En UnidadController.php
+public function storeunidad(Request $request)
+{
+    $request->validate([
+        'nombre' => 'required|string|max:255|unique:unidad,nombre'
+    ]);
+
+    $unidad = Unidad::create([
+        'nombre' => $request->nombre
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'unidad' => $unidad
+    ]);
+}
+
+
+// En tu controlador
+public function storesubcategoria(Request $request)
+{
+    $request->validate([
+        'nombre' => 'required|string|max:100|unique:subcategorias,nombre',
+        'descripcion' => 'nullable|string'
+    ]);
+
+    $subcategoria = SubCategoria::create([
+        'nombre' => $request->nombre,
+        'descripcion' => $request->descripcion
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'subcategoria' => [
+            'id' => $subcategoria->id,
+            'nombre' => $subcategoria->nombre
+        ]
+    ]);
+}
+
+ public function storerepuestomodelo(Request $request)
+    {
+        // Validación de datos
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255|unique:modelo,nombre',
+            'idMarca' => 'required|exists:marca,idMarca',
+            'idCategoria' => 'required|exists:categoria,idCategoria',
+            'repuesto' => 'nullable|boolean',
+            'producto' => 'nullable|boolean',
+            'heramientas' => 'nullable|boolean',
+            'suministros' => 'nullable|boolean'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Crear el modelo
+            $modelo = Modelo::create([
+                'nombre' => $request->nombre,
+                'idMarca' => $request->idMarca,
+                'idCategoria' => $request->idCategoria,
+                'estado' => 1, // Activo por defecto
+                'repuesto' => $request->repuesto ?? 0,
+                'producto' => $request->producto ?? 0,
+                'heramientas' => $request->heramientas ?? 0,
+                'suministros' => $request->suministros ?? 0
+            ]);
+
+            // Obtener datos relacionados para la respuesta
+            $marca = Marca::find($request->idMarca);
+            $categoria = Categoria::find($request->idCategoria);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'modelo' => [
+                    'idModelo' => $modelo->idModelo,
+                    'nombre' => $modelo->nombre
+                ],
+                'marca' => [
+                    'nombre' => $marca->nombre
+                ],
+                'categoria' => [
+                    'nombre' => $categoria->nombre
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear el modelo: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function store(Request $request)
     {
@@ -64,7 +175,8 @@ class RepuestosController extends Controller
                 'pulgadas' => 'required|nullable|string|max:255',
                 'idUnidad' => 'required|nullable|integer',
                 'idModelo' => 'nullable|array', // Select multiple
-                'idModelo.*' => 'integer|exists:modelo,idModelo', 
+                'idModelo.*' => 'integer|exists:modelo,idModelo',
+                'idsubcategoria' => 'required|nullable|integer'
             ]);
             
             // Asignación de valores por defecto
@@ -154,8 +266,9 @@ class RepuestosController extends Controller
     $modelos = Modelo::all();
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
+        $subcategorias = Subcategoria::all();
 
-    return view('almacen.repuestos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    return view('almacen.repuestos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas', 'subcategorias'));
 }
 
 
@@ -172,8 +285,9 @@ $modelos = \App\Models\Modelo::whereIn('idModelo', function($query) use ($articu
 })->with('categoria')->get();
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
+    $subcategorias = Subcategoria::all();
 
-    return view('almacen.repuestos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    return view('almacen.repuestos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas','subcategorias'));
 }
 
 
@@ -198,6 +312,8 @@ public function update(Request $request, $id)
             'estado' => 'required|boolean',
             'idModelo' => 'nullable|array',
             'idModelo.*' => 'integer|exists:modelo,idModelo',
+            'idsubcategoria' => 'required|nullable|integer'
+
         ]);
 
         // ✅ Buscar el artículo
@@ -385,9 +501,10 @@ public function deleteFoto($id)
         return $pdf->download('reporte-articulos.pdf');
     }
 
+
 public function getAll(Request $request)
 {
-    $query = Articulo::with(['unidad', 'tipoarticulo', 'modelos.categoria']) // <= Aquí
+    $query = Articulo::with(['unidad', 'tipoarticulo', 'subcategoria', 'modelos']) // 👈 cambiamos modelos.categoria por subcategoria
         ->where('idTipoArticulo', 2); // Solo repuestos
 
     $total = $query->count();
@@ -398,11 +515,9 @@ public function getAll(Request $request)
               ->orWhere('stock_total', 'like', "%$search%")
               ->orWhere('estado', 'like', "%$search%")
               ->orWhereHas('modelos', fn($sub) => $sub->where('nombre', 'like', "%$search%"))
-              ->orWhereHas('modelos.categoria', fn($sub) => $sub->where('nombre', 'like', "%$search%"));
+              ->orWhereHas('subcategoria', fn($sub) => $sub->where('nombre', 'like', "%$search%")); // 👈 buscar por subcategoría
         });
     }
-    
-    
 
     $filtered = $query->count();
 
@@ -413,11 +528,7 @@ public function getAll(Request $request)
 
     $data = $articulos->map(function ($articulo) {
         $modeloNombres = $articulo->modelos->pluck('nombre')->join(' / ');
-        $categoriaNombres = $articulo->modelos
-            ->pluck('categoria.nombre')
-            ->unique()
-            ->filter()
-            ->join(' / ');
+        $subcategoriaNombre = $articulo->subcategoria->nombre ?? 'Sin Subcategoría';
 
         return [
             'idArticulos' => $articulo->idArticulos,
@@ -430,7 +541,7 @@ public function getAll(Request $request)
             'sku' => $articulo->sku,
             'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
             'modelo' => $modeloNombres ?: 'Sin Modelo',
-            'categoria_modelo' => $categoriaNombres ?: 'Sin Categoría',
+            'subcategoria' => $subcategoriaNombre, // 👈 nuevo campo
             'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
         ];
     });

@@ -23,7 +23,7 @@ document.addEventListener('alpine:init', () => {
                                 : `<img src="/assets/images/articulo/producto-default.png" class="w-12 h-12 object-cover rounded mx-auto" alt="Imagen por defecto">`,
                         },
                         { data: 'codigo_repuesto', className: 'text-center' },
-                        { data: 'categoria_modelo', className: 'text-center' },
+                        { data: 'subcategoria', className: 'text-center' },
                         { data: 'modelo', className: 'text-center' },
                         { data: 'stock_total', className: 'text-center' },
                         { data: 'stock_total', className: 'text-center' },

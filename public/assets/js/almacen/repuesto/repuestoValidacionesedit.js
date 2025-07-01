@@ -13,6 +13,8 @@ document.addEventListener("DOMContentLoaded", function () {
         { id: "stock_minimo", name: "Stock Mínimo" },
         { id: "idUnidad", name: "Unidad de Medida" },
         { id: "pulgadas", name: "Pulgadas" },
+        { id: "idsubcategoria", name: "Sub Categoria" },
+
     ];
 
     const camposUnicos = ["codigo_barras", "sku", "codigo_repuesto"];

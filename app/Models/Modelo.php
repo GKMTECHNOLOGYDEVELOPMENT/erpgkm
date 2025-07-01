@@ -40,7 +40,11 @@ class Modelo extends Model
 		'nombre',
 		'idMarca',
 		'idCategoria',
-		'estado'
+		'estado',
+		'producto',
+		'repuesto',
+		'heramientas',
+		'suministros'
 	];
 
 	public function marca()

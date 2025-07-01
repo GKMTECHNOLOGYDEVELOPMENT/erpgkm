@@ -152,6 +152,31 @@
                                     @endforeach
                                 </select>
                             </div>
+
+                          <!-- Tipo de Modelo (Checkboxes) -->
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Tipo de Modelo</label>
+                                <div class="space-y-2">
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" name="repuesto" value="1" class="form-checkbox text-primary">
+                                        <span class="ml-2">Repuestos</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" name="producto" value="1" class="form-checkbox text-primary">
+                                        <span class="ml-2">Productos</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" name="heramientas" value="1" class="form-checkbox text-primary">
+                                        <span class="ml-2">Herramientas</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" name="suministros" value="1" class="form-checkbox text-primary">
+                                        <span class="ml-2">Suministros</span>
+                                    </label>
+                                </div>
+                            </div>
+
+
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"

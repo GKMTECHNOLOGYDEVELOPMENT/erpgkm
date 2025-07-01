@@ -4,6 +4,7 @@ namespace App\Http\Controllers\almacen\productos;
 
 use App\Http\Controllers\Controller;
 use App\Models\Articulo;
+use App\Models\Kardex;
 use App\Models\Modelo;
 use App\Models\Moneda;
 use App\Models\Tipoarea;
@@ -31,12 +32,42 @@ class ArticulosController extends Controller
         return view('almacen.productos.articulos.index', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
     }
 
+
+    public function buscar(Request $request)
+    {
+        $codigo = $request->query('codigo');
+
+        $articulo = DB::table('articulos')
+            ->where('codigo_barras', $codigo)
+            ->first();
+
+        if ($articulo) {
+            return response()->json([
+                'existe' => true,
+                'articulo' => [
+                    'idArticulos'    => $articulo->idArticulos,
+                    'codigo_barras'  => $articulo->codigo_barras,
+                    'nombre'         => $articulo->nombre,
+                    'stock_total'    => $articulo->stock_total,
+                    'precio_compra'  => $articulo->precio_compra,
+                    'precio_venta'   => $articulo->precio_venta,
+                    'foto'           => $articulo->foto ? base64_encode($articulo->foto) : null
+                ]
+            ]);
+        } else {
+            return response()->json(['existe' => false]);
+        }
+    }
+
     public function create()
     {
         // Obtener datos para los selects
         $unidades = Unidad::all();
         $tiposArticulo = Tipoarticulo::all();
-        $modelos = Modelo::with(['marca', 'categoria'])->where('estado', 1)->get();
+        $modelos = Modelo::with(['marca', 'categoria'])
+            ->where('estado', 1)
+            ->where('producto', 1)
+            ->get();
         $monedas = Moneda::all();
 
         // Retornar la vista con los datos necesarios
@@ -44,75 +75,95 @@ class ArticulosController extends Controller
     }
 
 
-    public function store(Request $request)
-    {
-        try {
-            // Validación de datos
-            $validatedData = $request->validate([
-                'codigo_barras' => 'nullable|string|max:255',
-                'nombre' => 'nullable|string|max:255',
-                'stock_total' => 'nullable|integer',
-                'stock_minimo' => 'nullable|integer',
-                'moneda_compra' => 'nullable|integer',
-                'moneda_venta' => 'nullable|integer',
-                'precio_compra' => 'nullable|numeric',
-                'precio_venta' => 'nullable|numeric',
-                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'sku' => 'nullable|string|max:255',
-                'peso' => 'nullable|numeric',
-                'mostrarWeb' => 'nullable|string|max:255',
-                'estado' => 'nullable|boolean',
-                'idUnidad' => 'nullable|integer',
-                'idTipoArticulo' => 'nullable|integer',
-                'idModelo' => 'nullable|integer',
+ public function store(Request $request)
+{
+    try {
+        // Validación de datos
+        $validatedData = $request->validate([
+            'codigo_barras' => 'nullable|string|max:255',
+            'nombre' => 'nullable|string|max:255',
+            'stock_total' => 'nullable|integer',
+            'stock_minimo' => 'nullable|integer',
+            'moneda_compra' => 'nullable|integer',
+            'moneda_venta' => 'nullable|integer',
+            'precio_compra' => 'nullable|numeric',
+            'precio_venta' => 'nullable|numeric',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'sku' => 'nullable|string|max:255',
+            'peso' => 'nullable|numeric',
+            'mostrarWeb' => 'nullable|string|max:255',
+            'estado' => 'nullable|boolean',
+            'idUnidad' => 'nullable|integer',
+            'idTipoArticulo' => 'nullable|integer',
+            'idModelo' => 'nullable|integer',
+        ]);
+        
+        // Asignación de valores por defecto
+        $dataArticulo = $validatedData;
+        $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
+        $dataArticulo['stock_total'] = $dataArticulo['stock_total'] ?? 0;
+        $dataArticulo['precio_compra'] = $dataArticulo['precio_compra'] ?? 0;
+        
+        // Crear el artículo
+        $articulo = Articulo::create($dataArticulo);
+
+        // Registrar movimiento inicial en el Kardex
+        if ($dataArticulo['stock_total'] > 0) {
+            Kardex::create([
+                'fecha' => now(),
+                'idArticulo' => $articulo->idArticulos,
+                'unidades_entrada' => $dataArticulo['stock_total'],
+                'costo_unitario_entrada' => $dataArticulo['precio_compra'],
+                'unidades_salida' => 0,
+                'costo_unitario_salida' => 0,
+                'inventario_inicial' => 0,
+                'inventario_actual' => $dataArticulo['stock_total'],
+                'costo_inventario' => $dataArticulo['stock_total'] * $dataArticulo['precio_compra']
             ]);
-            
-            // Asignación de valores por defecto
-            $dataArticulo = $validatedData;
-            $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
-            
-            // Crear el artículo
-            $articulo = Articulo::create($dataArticulo);
-    
-            // Generar y guardar el código de barras para 'codigo_barras' como binario
-            if (!empty($dataArticulo['codigo_barras'])) {
-                $barcodeGenerator = new BarcodeGeneratorPNG();
-                $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
-                $fotoCodigobarrasBinario = $barcode; // El código de barras ya es binario
-                $articulo->update(['foto_codigobarras' => $fotoCodigobarrasBinario]);
-            }
-    
-            // Generar y guardar el código de barras para 'sku' como binario
-            if (!empty($dataArticulo['sku'])) {
-                $barcodeGenerator = new BarcodeGeneratorPNG();
-                $barcode = $barcodeGenerator->getBarcode($dataArticulo['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
-                $fotoSkuBinario = $barcode; // El código de barras ya es binario
-                $articulo->update(['fotosku' => $fotoSkuBinario]);
-            }
-    
-            // Subir la foto del artículo y convertirla a binario
-            if ($request->hasFile('foto')) {
-                $photoPath = $request->file('foto')->getRealPath(); // Obtener la ruta del archivo
-                $photoData = file_get_contents($photoPath); // Leer el archivo como binario
-                $articulo->update(['foto' => $photoData]); // Guardar la foto como binario
-            }
-    
-            // Respuesta de éxito
-            return response()->json([
-                'success' => true,
-                'message' => 'Artículo agregado correctamente',
-            ]);
-    
-        } catch (\Exception $e) {
-            // Respuesta de error en caso de excepción
-            return response()->json([
-                'success' => false,
-                'message' => 'Ocurrió un error al guardar el artículo.',
-                'error' => $e->getMessage(),
-            ], 500);
         }
+
+        // Generar y guardar el código de barras para 'codigo_barras' como binario
+        if (!empty($dataArticulo['codigo_barras'])) {
+            $barcodeGenerator = new BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
+            $fotoCodigobarrasBinario = $barcode; // El código de barras ya es binario
+            $articulo->update(['foto_codigobarras' => $fotoCodigobarrasBinario]);
+        }
+
+        // Generar y guardar el código de barras para 'sku' como binario
+        if (!empty($dataArticulo['sku'])) {
+            $barcodeGenerator = new BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($dataArticulo['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
+            $fotoSkuBinario = $barcode; // El código de barras ya es binario
+            $articulo->update(['fotosku' => $fotoSkuBinario]);
+        }
+
+        // Subir la foto del artículo y convertirla a binario
+        if ($request->hasFile('foto')) {
+            $photoPath = $request->file('foto')->getRealPath(); // Obtener la ruta del archivo
+            $photoData = file_get_contents($photoPath); // Leer el archivo como binario
+            $articulo->update(['foto' => $photoData]); // Guardar la foto como binario
+        }
+
+        // Respuesta de éxito
+        return response()->json([
+            'success' => true,
+            'message' => 'Artículo agregado correctamente',
+            'data' => [
+                'articulo' => $articulo,
+                'kardex_initial' => $dataArticulo['stock_total'] > 0 ? 'Registro de kardex creado' : 'Sin stock inicial, no se creó registro en kardex'
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        // Respuesta de error en caso de excepción
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al guardar el artículo.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
-    
+}
 
     public function edit($id)
 {

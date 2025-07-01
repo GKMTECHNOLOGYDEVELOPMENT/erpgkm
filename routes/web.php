@@ -50,11 +50,13 @@ use App\Exports\MarcasExport;
 use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
+use App\Http\Controllers\administracion\compras\ComprasController;
 use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kardex\KardexController;
 use App\Http\Controllers\almacen\productos\ProductoController;
 use App\Http\Controllers\almacen\repuestos\RepuestosController;
+use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -66,6 +68,7 @@ use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Cliente;
 use App\Models\Marca;
 use App\Models\Modelo;
+use App\Models\Subcategoria;
 use App\Models\Suministro;
 use App\Models\Tienda;
 use Illuminate\Support\Facades\DB;
@@ -98,7 +101,7 @@ Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->mi
 // Ruta para Administración de Usuarios
 Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
 // Ruta para Administración de Compras
-Route::get('/administracion/compras', [CompraController::class, 'index'])->name('administracion.compra')->middleware('auth');
+Route::get('/administracion/compras', [ComprasController::class, 'index'])->name('administracion.compra')->middleware('auth');
 //Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
@@ -345,7 +348,7 @@ Route::prefix('ventas')->name('ventas.')->group(function () {
 });
 /// INICIO COMPRAS ///
 Route::prefix('compras')->name('compras.')->group(function () {
-    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/', [ComprasController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
@@ -361,6 +364,9 @@ Route::prefix('compras')->name('compras.')->group(function () {
         return Excel::download(new ArticuloExport, 'compras.xlsx');
     })->name('exportExcel');
 });
+
+Route::get('/buscar-articulo', [ArticulosController::class, 'buscar']);
+
 /// INICIO DEVOLUCIONES ///
 Route::prefix('devoluciones')->name('devoluciones.')->group(function () {
     Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
@@ -421,6 +427,7 @@ Route::prefix('producto')->name('producto.')->group(function () {
     Route::get('/create', [ProductoController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [ProductoController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [ProductoController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/kardex', [ProductoController::class, 'kardex'])->name('kardex'); // Editar un artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
     Route::get('/{id}/detalles', [ProductoController::class, 'detalle'])->name('detalles'); // Editar un artículo
@@ -434,6 +441,12 @@ Route::prefix('producto')->name('producto.')->group(function () {
         return Excel::download(new ArticuloExport, 'producto.xlsx');
     })->name('exportExcel');
 });
+
+
+Route::post('/unidades/store', [RepuestosController::class, 'storeunidad'])->name('unidades.store');
+Route::post('/subcategoriarepuesto/store', [RepuestosController::class, 'storesubcategoria'])->name('subcategoria.store');
+Route::post('/modelorepuesto/store', [RepuestosController::class, 'storerepuestomodelo'])->name('modelo.store');
+
 /// FIN ARTICULO ///
 /// KITS DE ARTICULOS ///
 Route::prefix('kits')->name('almacen.kits.')->group(function () {
@@ -445,6 +458,22 @@ Route::prefix('kits')->name('almacen.kits.')->group(function () {
     Route::delete('/{id}', [KitsController::class, 'destroy'])->name('destroy'); // Eliminar un kit
     Route::get('/export-pdf', [KitsController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar a PDF
     Route::get('/get-all', [KitsController::class, 'getAll'])->name('getAll'); // Obtener datos en JSON
+});
+// INICIO CATEGORIA ///
+Route::prefix('subcategoria')->name('subcategoria.')->group(function () {
+    Route::get('/', [SubcategoriaController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [SubcategoriaController::class, 'create'])->name('create'); // Guardar una nueva categoría
+    Route::post('/store', [SubcategoriaController::class, 'store'])->name('store'); // Guardar una nueva categoría
+    Route::get('/{id}/edit', [SubcategoriaController::class, 'edit'])->name('edit'); // Editar una categoría
+    Route::put('/update/{id}', [SubcategoriaController::class, 'update'])->name('update'); // Actualizar una categoría
+    // Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
+    Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
+    Route::get('/get-all', [UbicacionesController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
+    Route::post('/check-nombre', [UbicacionesController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::delete('destroy/{id}', [SubcategoriaController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
+    })->name('exportExcel');
 });
 // Ruta para obtener los clientes generales asociados a un cliente
 Route::get('/clientes-generales/{idCliente}', [OrdenesTrabajoController::class, 'getClientesGeneraless']);
