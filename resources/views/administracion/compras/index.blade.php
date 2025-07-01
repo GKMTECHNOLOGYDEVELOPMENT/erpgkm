@@ -289,7 +289,7 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="modalAbierto" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition>
+        <div x-show="modalAbierto" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition style="display: none;">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModal">
                 <div x-show="open" x-transition x-transition.duration.300
                     class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
