@@ -185,34 +185,41 @@
                                         Remover</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 <template x-if="productos.length === 0">
                                     <tr>
-                                        <td colspan="7" class="px-4 py-4 text-center text-gray-500">No hay productos
-                                            agregados</td>
+                                        <td colspan="7"
+                                            class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                                            No hay productos agregados
+                                        </td>
                                     </tr>
                                 </template>
 
                                 <template x-for="(producto, index) in productos" :key="producto.id">
-                                    <tr>
-                                        <td class="px-4 py-4 whitespace-nowrap" x-text="index + 1"></td>
-                                        <td class="px-4 py-4 whitespace-nowrap" x-text="producto.codigo_barras"></td>
-                                        <td class="px-4 py-4 whitespace-nowrap" x-text="producto.nombre"></td>
+                                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                            x-text="index + 1"></td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                            x-text="producto.codigo_barras"></td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                            x-text="producto.nombre"></td>
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <input type="number"
-                                                class="w-20 border border-gray-300 rounded px-2 py-1 text-center"
+                                                class="w-20 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-center bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
                                                 x-model="producto.cantidad" @change="actualizarSubtotal(producto)"
                                                 min="1">
                                         </td>
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <input type="number" step="0.01"
-                                                class="w-24 border border-gray-300 rounded px-2 py-1 text-right"
+                                                class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
                                                 x-model="producto.precio" @change="actualizarSubtotal(producto)">
                                         </td>
-                                        <td class="px-4 py-4 whitespace-nowrap text-right"
-                                            x-text="formatCurrency(producto.subtotal)"></td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-right text-gray-800 dark:text-gray-100"
+                                            x-text="formatCurrency(producto.subtotal)">
+                                        </td>
                                         <td class="px-4 py-4 whitespace-nowrap text-center">
-                                            <button class="text-red-500 hover:text-red-700"
+                                            <button
+                                                class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                                                 @click="removerProducto(index)">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
                                                     viewBox="0 0 20 20" fill="currentColor">
@@ -225,6 +232,7 @@
                                     </tr>
                                 </template>
                             </tbody>
+
                         </table>
                     </div>
                 </div>
@@ -239,8 +247,9 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
                             <input type="text" x-ref="fechaInput" x-model="fecha"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
                                 placeholder="Selecciona una fecha" />
+
                         </div>
 
 
@@ -248,13 +257,14 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor <span
                                     class="text-red-500">*</span></label>
                             <select
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
                                 x-model="proveedorId">
                                 <option value="">Seleccione una opción</option>
                                 <template x-for="proveedor in proveedores" :key="proveedor.id">
                                     <option :value="proveedor.id" x-text="proveedor.nombre"></option>
                                 </template>
                             </select>
+
                         </div>
 
                         <div class="border-t border-gray-200 pt-4">
@@ -289,7 +299,8 @@
         </div>
 
         <!-- MODAL -->
-        <div x-show="modalAbierto" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition style="display: none;">
+        <div x-show="modalAbierto" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition
+            style="display: none;">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModal">
                 <div x-show="open" x-transition x-transition.duration.300
                     class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
