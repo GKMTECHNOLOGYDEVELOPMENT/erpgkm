@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Articulo;
 use App\Models\ArticuloModelo;
 use App\Models\Categoria;
+use App\Models\Kardex;
 use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\Moneda;
@@ -56,6 +57,20 @@ class RepuestosController extends Controller
 
         // Retornar la vista con los datos necesarios
         return view('almacen.repuestos.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas', 'subcategorias', 'marcas','categorias'));
+    }
+
+
+    public function kardex ($id){
+
+
+   $articulo = Articulo::findOrFail($id);
+    
+    // Obtener todos los movimientos del kardex para este artículo ordenados por fecha descendente
+    $movimientos = Kardex::where('idArticulo', $id)
+                        ->orderBy('fecha', 'desc')
+                        ->paginate(10);
+
+        return view('almacen.repuestos.kardex.index', compact('articulo', 'movimientos'));
     }
 
 
@@ -158,6 +173,8 @@ public function storesubcategoria(Request $request)
 
     public function store(Request $request)
     {
+            DB::beginTransaction(); // Iniciar transacción para operaciones atómicas
+
         try {
             // Validación de datos
             $validatedData = $request->validate([
@@ -189,6 +206,22 @@ public function storesubcategoria(Request $request)
             
             // Crear el artículo
             $articulo = Articulo::create($dataArticulo);
+
+            // Registrar movimiento inicial en el Kardex (solo si hay stock)
+            if ($dataArticulo['stock_total'] > 0) {
+                Kardex::create([
+                    'fecha' => now(),
+                    'idArticulo' => $articulo->idArticulos,
+                    'unidades_entrada' => $dataArticulo['stock_total'],
+                    'costo_unitario_entrada' => $dataArticulo['precio_compra'],
+                    'unidades_salida' => 0,
+                    'costo_unitario_salida' => 0,
+                    'inventario_inicial' => $dataArticulo['stock_total'], 
+                    'inventario_actual' => $dataArticulo['stock_total'],
+                    'costo_inventario' => $dataArticulo['stock_total'] * $dataArticulo['precio_compra']
+                ]);
+            }
+
     
             // Generar y guardar el código de barras para 'codigo_barras' como binario
             if (!empty($dataArticulo['codigo_barras'])) {
@@ -239,22 +272,32 @@ public function storesubcategoria(Request $request)
         }
 
 
+                DB::commit(); // Confirmar todas las operaciones
+
+
+
 
     
-            // Respuesta de éxito
-            return response()->json([
-                'success' => true,
-                'message' => 'Artículo agregado correctamente',
-            ]);
-    
-        } catch (\Exception $e) {
-            // Respuesta de error en caso de excepción
-            return response()->json([
-                'success' => false,
-                'message' => 'Ocurrió un error al guardar el artículo.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+                return response()->json([
+            'success' => true,
+            'message' => 'Repuesto agregado correctamente',
+            'data' => [
+                'articulo_id' => $articulo->idArticulos,
+                'kardex_created' => $dataArticulo['stock_total'] > 0,
+                'stock_inicial' => $dataArticulo['stock_total']
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack(); // Revertir en caso de error
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al guardar el artículo.',
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString() // Solo para desarrollo, quitar en producción
+        ], 500);
+    }
     }
     
 
