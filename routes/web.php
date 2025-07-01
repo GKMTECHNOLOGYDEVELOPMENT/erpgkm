@@ -281,6 +281,7 @@ Route::prefix('repuestos')->name('repuestos.')->group(function () {
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
+    Route::get('/{id}/kardex', [RepuestosController::class, 'kardex'])->name('kardex'); // Editar un artículo
     Route::get('/{id}/edit', [RepuestosController::class, 'edit'])->name('edit'); // Editar un artículo
     Route::get('/{id}/detalles', [RepuestosController::class, 'detalle'])->name('detalles'); // Editar un artículo
     Route::put('/update/{id}', [RepuestosController::class, 'update'])->name('update'); // Actualizar un artículo
