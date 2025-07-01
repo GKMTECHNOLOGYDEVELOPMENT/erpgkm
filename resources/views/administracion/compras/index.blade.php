@@ -377,7 +377,7 @@
                                             <div class="input-with-icon">
                                                 <i class="fas fa-tags input-icon"></i>
                                                 <input type="number" step="0.01" class="clean-input"
-                                                    x-model="productoEncontrado.precio_venta" disabled>
+                                                    x-model="productoEncontrado.precio_venta">
                                             </div>
                                         </div>
                                         <div>
@@ -386,7 +386,7 @@
                                             <div class="input-with-icon">
                                                 <i class="fas fa-hand-holding-usd input-icon"></i>
                                                 <input type="number" step="0.01" class="clean-input"
-                                                    value="0.00" disabled>
+                                                    value="0.00">
                                             </div>
                                         </div>
                                     </div>
