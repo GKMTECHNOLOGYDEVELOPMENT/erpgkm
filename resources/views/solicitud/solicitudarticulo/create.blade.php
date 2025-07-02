@@ -18,7 +18,7 @@
     </div>
 
     <!-- Form Container -->
-    <div class="max-w-4xl mx-auto px-4 py-8 -mt-10">
+    <div class="max-w-6x1 mx-auto px-4 py-8 -mt-10">
         <div class="bg-white rounded-xl shadow-lg overflow-hidden dark:bg-gray-800">
             <!-- Progress Steps -->
             <div class="flex border-b border-gray-200 dark:border-gray-700">
