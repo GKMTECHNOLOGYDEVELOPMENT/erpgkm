@@ -63,6 +63,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GuiaController;
 use App\Http\Controllers\PasswordRecoveryController;
+use App\Http\Controllers\solicitud\SolicitudarticuloController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Cliente;
@@ -476,6 +477,27 @@ Route::prefix('subcategoria')->name('subcategoria.')->group(function () {
         return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
     })->name('exportExcel');
 });
+
+
+// INICIO CATEGORIA ///
+Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function () {
+    Route::get('/', [SolicitudarticuloController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [SolicitudarticuloController::class, 'create'])->name('create'); // Guardar una nueva categoría
+    Route::post('/store', [SolicitudarticuloController::class, 'store'])->name('store'); // Guardar una nueva categoría
+    Route::get('/{id}/edit', [SolicitudarticuloController::class, 'edit'])->name('edit'); // Editar una categoría
+    Route::put('/update/{id}', [SolicitudarticuloController::class, 'update'])->name('update'); // Actualizar una categoría
+    // Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
+    Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
+    Route::get('/get-all', [UbicacionesController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
+    Route::post('/check-nombre', [UbicacionesController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::delete('destroy/{id}', [SolicitudarticuloController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
+    })->name('exportExcel');
+});
+
+
+
 // Ruta para obtener los clientes generales asociados a un cliente
 Route::get('/clientes-generales/{idCliente}', [OrdenesTrabajoController::class, 'getClientesGeneraless']);
 Route::get('/clientesdatos', [OrdenesTrabajoController::class, 'getClientes'])->name('clientes.get');

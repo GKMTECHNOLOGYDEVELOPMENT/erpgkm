@@ -1105,6 +1105,44 @@
 
 
 
+                    
+                 <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'solicitud' }"
+                        @click="activeDropdown === 'solicitud' ? activeDropdown = null : activeDropdown = 'solicitud'">
+                        <div class="flex items-center">
+                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+
+
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Solicitudes</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'solicitud' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'solicitud'" x-collapse class="sub-menu text-gray-500">
+                        <li>
+                            <a href="{{ route('solicitudarticulo.index') }}">Solicitud de Articulo</a>
+                        </li>
+                    </ul>
+                </li>
+
+
+
+
+
                  <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'ventas' }"
