@@ -485,6 +485,8 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     Route::get('/create', [SolicitudarticuloController::class, 'create'])->name('create'); // Guardar una nueva categoría
     Route::post('/store', [SolicitudarticuloController::class, 'store'])->name('store'); // Guardar una nueva categoría
     Route::get('/{id}/edit', [SolicitudarticuloController::class, 'edit'])->name('edit'); // Editar una categoría
+        Route::get('/{id}/show', [SolicitudarticuloController::class, 'show'])->name('show'); // Editar una categoría
+
     Route::put('/update/{id}', [SolicitudarticuloController::class, 'update'])->name('update'); // Actualizar una categoría
     // Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
     Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
