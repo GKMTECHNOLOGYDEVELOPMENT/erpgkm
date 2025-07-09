@@ -38,11 +38,18 @@ class Solicitud extends Model
 		'dias' => 'int',
 		'idTipoSolicitud' => 'int',
 		'idTenico' => 'int',
-		'idEncargado' => 'int'
+		'idEncargado' => 'int',
+		
 	];
 
 	protected $fillable = [
 		'dias',
+		'diasrestantes',
+        'codigoSolicitud',
+        'comentario',
+        'fecharequerida',
+        'idUsuariosoli',
+        'nivelUrgencia',
 		'codigo',
 		'estado',
 		'idTipoSolicitud',
@@ -74,4 +81,23 @@ class Solicitud extends Model
 	{
 		return $this->hasMany(Prestamosherramienta::class, 'idSolicitud');
 	}
+
+	public function solicitante()
+{
+    return $this->belongsTo(Usuario::class, 'idUsuariosoli', 'idUsuario');
+}
+
+public function encargado()
+{
+    return $this->belongsTo(Usuario::class, 'idEncargado', 'idUsuario');
+}
+
+
+public function articulos() {
+    return $this->belongsToMany(Articulo::class, 'solicitud_articulos', 'idSolicitud', 'idArticulo')
+                ->withPivot('cantidad', 'descripcion');
+}
+
+
+
 }

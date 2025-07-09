@@ -20,36 +20,8 @@
     <!-- Form Container -->
     <div class="max-w-6x2 mx-auto px-4 py-8 -mt-10">
         <div class="bg-white rounded-xl shadow-lg overflow-hidden dark:bg-gray-800">
-            <!-- Progress Steps -->
-            <div class="flex border-b border-gray-200 dark:border-gray-700">
-                <div class="w-1/3 py-4 px-6 text-center border-b-2 border-blue-500">
-                    <div class="flex items-center justify-center space-x-2">
-                        <div class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center dark:bg-blue-800 dark:text-blue-200">
-                            <span>1</span>
-                        </div>
-                        <span class="text-sm font-medium text-blue-600 dark:text-blue-300">Información</span>
-                    </div>
-                </div>
-                <div class="w-1/3 py-4 px-6 text-center border-b-2 border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-center space-x-2">
-                        <div class="bg-gray-100 text-gray-600 w-6 h-6 rounded-full flex items-center justify-center dark:bg-gray-700 dark:text-gray-300">
-                            <span>2</span>
-                        </div>
-                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Artículos</span>
-                    </div>
-                </div>
-                <div class="w-1/3 py-4 px-6 text-center border-b-2 border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-center space-x-2">
-                        <div class="bg-gray-100 text-gray-600 w-6 h-6 rounded-full flex items-center justify-center dark:bg-gray-700 dark:text-gray-300">
-                            <span>3</span>
-                        </div>
-                        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Confirmación</span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Form Content -->
-            <form action="{{ route('solicitudarticulo.store') }}" method="POST" class="p-6 space-y-8">
+            <form id="solicitudForm" method="POST" class="p-6 space-y-8">
                 @csrf
 
                 <!-- Sección 1: Información del Solicitante -->
@@ -64,6 +36,39 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  <!-- Campo Código de Solicitud con botón para regenerar -->
+<div class="relative">
+    <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+        <span class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m9 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Código de Solicitud
+        </span>
+    </label>
+
+    <div class="flex space-x-2">
+        <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m9 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <input type="text" readonly
+                class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                id="codigoSolicitud" name="codigoSolicitud" value="">
+        </div>
+
+        <button type="button" id="regenerarCodigo"
+            class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition dark:bg-blue-500 dark:hover:bg-blue-600"
+            title="Generar nuevo código">
+            🔁
+        </button>
+    </div>
+</div>
+
+
                         <!-- Campo Nombre (solo lectura) -->
                         <div class="relative">
                             <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
@@ -171,7 +176,7 @@
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 000 4zM10 18a2 2 0 110-4 2 2 0 000 4z" />
                                         </svg>
                                     </div>
                                     <input type="number" id="cantidad" name="cantidad" min="1" value="1" required
@@ -362,7 +367,7 @@
                     </div>
                 </div>
 
-                <!-- Botones de Acción -->
+                 <!-- Botones de Acción - Actualiza el botón de enviar -->
                 <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
                     <button type="button" class="px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
                         <span class="flex items-center justify-center">
@@ -372,7 +377,7 @@
                             Cancelar
                         </span>
                     </button>
-                    <button type="submit" class="px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    <button type="submit" id="submitBtn" class="px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                         <span class="flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -384,8 +389,30 @@
             </form>
         </div>
     </div>
+
+    <!-- Agrega este modal para mostrar mensajes -->
+<div id="responseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full dark:bg-gray-800">
+        <div id="modalContent" class="text-center">
+            <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h3 id="modalTitle" class="text-lg font-medium text-gray-900 dark:text-white mb-2">Éxito</h3>
+            <p id="modalMessage" class="text-sm text-gray-500 dark:text-gray-300">La solicitud se ha enviado correctamente.</p>
+            <div class="mt-4">
+                <button id="modalCloseBtn" type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
 
     <script>
         // Definir funciones en el ámbito global
@@ -561,5 +588,136 @@
             });
         });
     </script>
+<script>
+// 1. Definimos las funciones en el ámbito global (fuera de DOMContentLoaded)
+function generarCodigoSolicitud() {
+    const nombre = "{{ auth()->user()->Nombre }}{{ auth()->user()->apellidoPaterno }}{{ auth()->user()->apellidoMaterno }}".replace(/\s+/g, '').toUpperCase();
+    const fecha = new Date().toISOString().slice(0,10).replace(/-/g, '');
+    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `${nombre.slice(0,3)}-${fecha}-${randomStr}`;
+}
+
+function actualizarCodigo() {
+    document.getElementById("codigoSolicitud").value = generarCodigoSolicitud();
+}
+
+// 2. Evento principal
+document.addEventListener('DOMContentLoaded', function() {
+    const codigoInput = document.getElementById("codigoSolicitud");
+
+    // Solo genera un nuevo código si el campo está vacío
+    if (!codigoInput.value.trim()) {
+        actualizarCodigo();
+    }
+
+    // Botón para regenerar código manualmente
+    document.getElementById("regenerarCodigo").addEventListener("click", actualizarCodigo);
+
+    // Función para mostrar el modal de respuesta
+    function showModal(title, message, isSuccess) {
+        const modal = document.getElementById('responseModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalIcon = document.getElementById('modalIcon');
+        
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        
+        // Cambiar el icono según si es éxito o error
+        modalIcon.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4';
+        if (isSuccess) {
+            modalIcon.classList.add('bg-green-100');
+            modalIcon.innerHTML = '<svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
+        } else {
+            modalIcon.classList.add('bg-red-100');
+            modalIcon.innerHTML = '<svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
+        }
+        
+        modal.classList.remove('hidden');
+    }
+
+    // Cerrar modal
+    document.getElementById('modalCloseBtn').addEventListener('click', function() {
+        document.getElementById('responseModal').classList.add('hidden');
+    });
+
+    // Manejar el envío del formulario
+    document.getElementById('solicitudForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <span class="flex items-center justify-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Procesando...
+            </span>
+        `;
+        
+        // Recolectar datos del formulario
+        const formData = new FormData(this);
+        
+        // Recolectar artículos adicionales
+        const articulosAdicionales = [];
+        document.querySelectorAll('#articulos-adicionales .articulo-adicional').forEach((articulo, index) => {
+            const articuloId = articulo.querySelector(`select[name^="articulos_adicionales"]`).value;
+            const cantidad = articulo.querySelector(`input[name^="articulos_adicionales"][name$="[cantidad]"]`).value;
+            const descripcion = articulo.querySelector(`textarea[name^="articulos_adicionales"][name$="[descripcion]"]`).value;
+            
+            if (articuloId) {
+                articulosAdicionales.push({
+                    articulo_id: articuloId,
+                    cantidad: cantidad,
+                    descripcion: descripcion
+                });
+            }
+        });
+        
+        // Convertir a JSON y agregar al formData
+        formData.append('articulos_adicionales', JSON.stringify(articulosAdicionales));
+        
+        // Enviar la solicitud AJAX
+        fetch("{{ route('solicitudarticulo.store') }}", {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showModal('Éxito', data.message, true);
+                // Limpiar formulario si es necesario
+                document.getElementById('solicitudForm').reset();
+                document.getElementById('articulos-adicionales').innerHTML = '';
+                // No regeneramos el código automáticamente
+                // actualizarCodigo(); ❌ eliminado
+            } else {
+                showModal('Error', data.message || 'Ocurrió un error al procesar la solicitud', false);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showModal('Error', 'Ocurrió un error al enviar la solicitud', false);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `
+                <span class="flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Enviar Solicitud
+                </span>
+            `;
+        });
+    });
+});
+</script>
 
 </x-layout.default>
