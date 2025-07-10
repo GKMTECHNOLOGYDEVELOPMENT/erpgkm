@@ -18,7 +18,7 @@
     </div>
 
     <!-- Form Container -->
-    <div class="max-w-6xl mx-auto px-4 py-8 -mt-10">
+    <div class="max-w-6x2 mx-auto px-4 py-8 -mt-10">
         <div class="bg-white rounded-xl shadow-lg overflow-hidden dark:bg-gray-800">
             <!-- Form Content -->
             <form id="solicitudForm" method="POST" class="p-6 space-y-8">
