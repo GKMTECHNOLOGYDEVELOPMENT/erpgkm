@@ -2431,6 +2431,7 @@ class OrdenesHelpdeskController extends Controller
         $validated = $request->validate([
             'idCliente' => 'required|exists:cliente,idCliente',
             'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+            'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
             'idTienda' => 'required|exists:tienda,idTienda',
 
             'fallaReportada' => 'nullable|string',
@@ -2446,6 +2447,7 @@ class OrdenesHelpdeskController extends Controller
         $orden->idCliente = $request->idCliente;
         $orden->idClienteGeneral = $request->idClienteGeneral;
         $orden->idTienda = $request->idTienda;
+        $orden->tipoServicio = $request->tipoServicio;
 
         $orden->fallaReportada = $request->fallaReportada;
 

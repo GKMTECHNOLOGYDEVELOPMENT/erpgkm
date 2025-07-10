@@ -385,7 +385,7 @@
             <div>
                 <label class="text-sm font-medium">Tipo de Servicio</label>
                 <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100"
-                    style="display: none" disabled>
+                    style="display: none" >
                     <option value="" disabled>Seleccionar Tipo de Servicio</option>
                     @foreach ($tiposServicio as $tipo)
                     <option value="{{ $tipo->idTipoServicio }}"

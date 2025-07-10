@@ -125,7 +125,8 @@ public function storesubcategoria(Request $request)
             'repuesto' => 'nullable|boolean',
             'producto' => 'nullable|boolean',
             'heramientas' => 'nullable|boolean',
-            'suministros' => 'nullable|boolean'
+            'suministros' => 'nullable|boolean',
+            'pulgadas' => 'nullable|string|max:255'
         ]);
 
         DB::beginTransaction();
@@ -139,7 +140,8 @@ public function storesubcategoria(Request $request)
                 'repuesto' => $request->repuesto ?? 0,
                 'producto' => $request->producto ?? 0,
                 'heramientas' => $request->heramientas ?? 0,
-                'suministros' => $request->suministros ?? 0
+                'suministros' => $request->suministros ?? 0,
+                'pulgadas' => $request->pulgadas
             ]);
 
             // Obtener datos relacionados para la respuesta
@@ -604,5 +606,14 @@ public function getAll(Request $request)
         $exists = Articulo::where('nombre', $nombre)->exists();
 
         return response()->json(['unique' => !$exists]);
+    }
+
+
+
+
+
+    public function entrada(Request $request)
+    {
+        return view('almacen.repuestos.entrada');
     }
 }

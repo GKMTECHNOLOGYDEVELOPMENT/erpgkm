@@ -33,31 +33,49 @@ class ArticulosController extends Controller
     }
 
 
-    public function buscar(Request $request)
-    {
-        $codigo = $request->query('codigo');
+public function buscar(Request $request)
+{
+    $codigo = $request->query('codigo');
 
-        $articulo = DB::table('articulos')
-            ->where('codigo_barras', $codigo)
-            ->first();
+    $articulo = DB::table('articulos')
+        ->where('codigo_repuesto', $codigo)
+        ->where('idTipoArticulo', 2)
+        ->first();
 
-        if ($articulo) {
-            return response()->json([
-                'existe' => true,
-                'articulo' => [
-                    'idArticulos'    => $articulo->idArticulos,
-                    'codigo_barras'  => $articulo->codigo_barras,
-                    'nombre'         => $articulo->nombre,
-                    'stock_total'    => $articulo->stock_total,
-                    'precio_compra'  => $articulo->precio_compra,
-                    'precio_venta'   => $articulo->precio_venta,
-                    'foto'           => $articulo->foto ? base64_encode($articulo->foto) : null
-                ]
-            ]);
-        } else {
-            return response()->json(['existe' => false]);
-        }
+    if (!$articulo) {
+        return response()->json(['existe' => false]);
     }
+
+    // Obtener nombre de la subcategoría
+    $subcategoria = DB::table('subcategorias')
+        ->where('id', $articulo->idsubcategoria)
+        ->value('nombre');
+
+    // Obtener los modelos asociados
+    $modelos = DB::table('articulo_modelo')
+        ->join('modelo', 'articulo_modelo.modelo_id', '=', 'modelo.idModelo')
+        ->where('articulo_modelo.articulo_id', $articulo->idArticulos)
+        ->pluck('modelo.nombre');
+
+    return response()->json([
+        'existe' => true,
+        'articulo' => [
+            'idArticulos'     => $articulo->idArticulos,
+            'codigo_repuesto' => $articulo->codigo_repuesto,
+            'codigo_barras'   => $articulo->codigo_barras,
+            'stock_total'     => $articulo->stock_total,
+            'stock_minimo'    => $articulo->stock_minimo,
+            'precio_compra'   => $articulo->precio_compra,
+            'precio_venta'    => $articulo->precio_venta,
+            'pulgadas'        => $articulo->pulgadas,
+            'foto'            => $articulo->foto ? base64_encode($articulo->foto) : null,
+            'idModelo'        => $articulo->idModelo,
+            'idTipoArea'      => $articulo->idTipoArea,
+        ],
+        'subcategoria' => $subcategoria,
+        'modelos' => $modelos,
+    ]);
+}
 
     public function create()
     {

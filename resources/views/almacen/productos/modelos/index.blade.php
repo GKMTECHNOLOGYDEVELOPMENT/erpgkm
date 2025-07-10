@@ -176,6 +176,13 @@
                                 </div>
                             </div>
 
+                            <!-- Campo Pulgadas (oculto por defecto) -->
+                            <div id="pulgadasField" class="hidden">
+                                <label for="pulgadas" class="block text-sm font-medium">Pulgadas</label>
+                                <input type="text" id="pulgadas" name="pulgadas" class="form-input w-full" placeholder="Ingrese las pulgadas">
+                            </div>
+
+
 
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-4">
@@ -217,6 +224,23 @@
             }));
         });
     </script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const repuestoCheckbox = document.querySelector('input[name="repuesto"]');
+        const pulgadasField = document.getElementById('pulgadasField');
+
+        // Mostrar/ocultar el campo según el estado del checkbox
+        repuestoCheckbox.addEventListener("change", function () {
+            if (this.checked) {
+                pulgadasField.classList.remove("hidden");
+            } else {
+                pulgadasField.classList.add("hidden");
+            }
+        });
+    });
+</script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>

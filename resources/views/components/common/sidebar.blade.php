@@ -872,7 +872,7 @@
 
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Detalles del producto</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Detalles del Articulo</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'caracteristicas' }">
 
@@ -931,7 +931,7 @@
                 </li>
 
 
-
+<!--nuevo--->
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'productos' }"
@@ -953,7 +953,7 @@
                             </svg>
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Productos</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Articulos</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'productos' }">
 
@@ -966,11 +966,27 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
                         <li>
+                            
                             <a href="{{ route('producto.index') }}">Productos</a>
                         </li>
+                        <li>  <a href="{{ route('repuestos.index') }}">Repuestos</a></li>
+                          <li>
+                            <a href="{{ route('suministros.index') }}">Suministros</a>
+                        </li>
+                            
+                          <li>
+                            <a href="{{ route('heramientas.index') }}">Heramientas</a>
+                          </li>
+
+                                                        
+
+
+
                  
                     </ul>
                 </li>
+
+ {{--
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'Repuesto' }"
@@ -1002,14 +1018,19 @@
                             <a href="{{ route('repuestos.index') }}">Repuestos</a>
                         </li>
                         <li>
-                            <a href="{{ route('repuestos.index') }}">Entradas</a>
+                            <a href="{{ route('repuestos.entrada') }}">Entradas</a>
                         </li>
                          <li>
                             <a href="{{ route('repuestos.index') }}">Salidas</a>
                         </li>
+                        
                          
                     </ul>
-                </li>
+                </li> 
+
+
+
+
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'suministros' }"
@@ -1041,6 +1062,8 @@
                     </ul>
                 </li>
 
+
+
                         <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'heramientas' }"
@@ -1048,10 +1071,10 @@
                         <div class="flex items-center">
 
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 21H6C4.34315 21 3 19.6569 3 18V8C3 6.34315 4.34315 5 6 5H18C19.6569 5 21 6.34315 21 8V18C21 19.6569 19.6569 21 18 21Z" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M15 9H9V12H15V9Z" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M12 5V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-</svg>
+                        <path d="M18 21H6C4.34315 21 3 19.6569 3 18V8C3 6.34315 4.34315 5 6 5H18C19.6569 5 21 6.34315 21 8V18C21 19.6569 19.6569 21 18 21Z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M15 9H9V12H15V9Z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M12 5V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
 
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Heramientas</span>
@@ -1071,6 +1094,9 @@
                         </li>
                     </ul>
                 </li>
+
+--}}
+
 
 
 
@@ -1101,6 +1127,9 @@
                         </li>
                     </ul>
                 </li>
+
+
+
 
 
 
@@ -1139,6 +1168,8 @@
                     </ul>
                 </li>
 
+
+                
 
 
 

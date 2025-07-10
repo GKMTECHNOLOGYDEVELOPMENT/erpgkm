@@ -155,6 +155,8 @@ public function create()
         }
     }
 
+    
+
 public function show($id)
 {
 $solicitud = Solicitud::with([
@@ -165,6 +167,18 @@ $solicitud = Solicitud::with([
 
 
     return view('solicitud.solicitudarticulo.show', compact('solicitud'));
+}
+
+public function opciones($id)
+{
+$solicitud = Solicitud::with([
+    'encargado',
+    'solicitante',
+    'articulos'
+])->findOrFail($id);
+
+
+    return view('solicitud.solicitudarticulo.opciones', compact('solicitud'));
 }
 
     

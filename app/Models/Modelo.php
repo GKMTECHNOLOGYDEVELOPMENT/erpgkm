@@ -44,7 +44,8 @@ class Modelo extends Model
 		'producto',
 		'repuesto',
 		'heramientas',
-		'suministros'
+		'suministros',
+		'pulgadas'
 	];
 
 	public function marca()

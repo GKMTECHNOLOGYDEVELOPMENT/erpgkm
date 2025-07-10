@@ -51,6 +51,7 @@ use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
 use App\Http\Controllers\administracion\compras\ComprasController;
+use App\Http\Controllers\administracion\movimiento\entrada\EntradaController;
 use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kardex\KardexController;
@@ -240,6 +241,8 @@ Route::prefix('marcas')->name('marcas.')->group(function () {
         return Excel::download(new MarcasExport, 'marcas.xlsx');
     })->name('exportExcel');
 });
+
+/// FI
 /// FIN MARCA ///
 /// INICIO MODELO ///
 Route::prefix('modelos')->name('modelos.')->group(function () {
@@ -280,6 +283,7 @@ Route::prefix('repuestos')->name('repuestos.')->group(function () {
     Route::get('/', [RepuestosController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/entrada', [EntradaController::class, 'entrada'])->name('entrada');
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
     Route::get('/{id}/kardex', [RepuestosController::class, 'kardex'])->name('kardex'); // Editar un artículo
@@ -367,7 +371,8 @@ Route::prefix('compras')->name('compras.')->group(function () {
     })->name('exportExcel');
 });
 
-Route::get('/buscar-articulo', [ArticulosController::class, 'buscar']);
+Route::get('/buscar-repuesto', [ArticulosController::class, 'buscar']);
+Route::post('/guardar-repuesto', [ArticulosController::class, 'store']);
 
 /// INICIO DEVOLUCIONES ///
 Route::prefix('devoluciones')->name('devoluciones.')->group(function () {
@@ -486,6 +491,7 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     Route::post('/store', [SolicitudarticuloController::class, 'store'])->name('store'); // Guardar una nueva categoría
     Route::get('/{id}/edit', [SolicitudarticuloController::class, 'edit'])->name('edit'); // Editar una categoría
         Route::get('/{id}/show', [SolicitudarticuloController::class, 'show'])->name('show'); // Editar una categoría
+        Route::get('/{id}/opciones', [SolicitudarticuloController::class, 'opciones'])->name('opciones'); // Editar una categoría
 
     Route::put('/update/{id}', [SolicitudarticuloController::class, 'update'])->name('update'); // Actualizar una categoría
     // Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar una categoría

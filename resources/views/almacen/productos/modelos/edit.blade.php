@@ -111,6 +111,17 @@
     </div>
 </div>
 
+<!-- Campo Pulgadas (se muestra solo si "Repuestos" está marcado) -->
+<div id="pulgadasField" class="{{ old('repuesto', $modelo->repuesto) ? '' : 'hidden' }}">
+    <label for="pulgadas" class="block text-sm font-medium">Pulgadas</label>
+    <input type="text" id="pulgadas" name="pulgadas" class="form-input w-full"
+        value="{{ old('pulgadas', $modelo->pulgadas) }}" placeholder="Ingrese las pulgadas">
+    @error('pulgadas')
+        <span class="text-red-500 text-sm">{{ $message }}</span>
+    @enderror
+</div>
+
+
 
             <!-- Botones -->
             <div class="md:col-span-2 flex justify-end mt-4">
@@ -130,5 +141,27 @@
             });
         });
     </script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const repuestoCheckbox = document.querySelector('input[name="repuesto"]');
+        const pulgadasField = document.getElementById('pulgadasField');
+
+        function togglePulgadasField() {
+            if (repuestoCheckbox.checked) {
+                pulgadasField.classList.remove("hidden");
+            } else {
+                pulgadasField.classList.add("hidden");
+            }
+        }
+
+        // Al cargar por si ya viene seleccionado
+        togglePulgadasField();
+
+        // Al cambiar estado del checkbox
+        repuestoCheckbox.addEventListener("change", togglePulgadasField);
+    });
+</script>
+
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 </x-layout.default>

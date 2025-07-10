@@ -31,6 +31,7 @@ class ModelosController extends Controller
             'nombre' => 'required|string|max:255',
             'idMarca' => 'required|integer|exists:marca,idMarca',
             'idCategoria' => 'required|integer|exists:categoria,idCategoria',
+            'pulgadas' => 'nullable|string|max:255',
         ]);
 
         // Definir valores de checkboxes (si no están marcados, son 0)
@@ -48,6 +49,7 @@ class ModelosController extends Controller
             'producto' => $producto,
             'heramientas' => $heramientas,
             'suministros' => $suministros,
+            'pulgadas' => $validatedData['pulgadas'],
         ];
 
         Modelo::create($dataModelo);
@@ -85,6 +87,8 @@ class ModelosController extends Controller
             'idMarca' => 'required|integer|exists:marca,idMarca',
             'idCategoria' => 'required|integer|exists:categoria,idCategoria',
             'estado' => 'nullable|boolean',
+            'pulgadas' => 'nullable|string|max:255',
+
         ]);
 
         // Obtener el modelo

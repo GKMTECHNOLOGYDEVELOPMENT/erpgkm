@@ -379,8 +379,7 @@
             <!-- Tipo de Servicio -->
             <div>
                 <label class="text-sm font-medium">Tipo de Servicio</label>
-                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display: none"
-                    disabled>
+                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100" style="display: none">
                     <option value="" disabled>Seleccionar Tipo de Servicio</option>
                     @foreach ($tiposServicio as $tipo)
                         <option value="{{ $tipo->idTipoServicio }}"
@@ -1066,69 +1065,67 @@ function handleFieldChange(e) {
     });
 </script>
 
+
+
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var idOrden = @json($orden->idTickets);
+        var tipoServicioOriginal = $('#tipoServicio').val(); // Guardamos el valor original
 
-        $('#guardarFallaReportada').on('click', function(e) {
-            e.preventDefault(); // Prevenir que se recargue la página
+        $('#guardarFallaReportada').on('click', function (e) {
+            e.preventDefault();
 
-            // Recoger los datos del formulario
             var formData = {
+
+            
                 idCliente: $('#idCliente').val(),
+                tipoServicio: $('#tipoServicio').val(),
                 idClienteGeneral: $('#idClienteGeneral').val(),
                 idTienda: $('#idTienda').val(),
                 idTecnico: $('#idTecnico').val(),
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
             };
 
-            // Mostrar los datos del formulario en la consola
-            console.log("Datos del formulario:", formData);
-
-            // Verificar si algún campo obligatorio está vacío
             for (var key in formData) {
                 if (formData[key] === '' || formData[key] === null) {
-                    toastr.error('El campo "' + key +
-                        '" está vacío. Por favor, complete todos los campos.');
-                    return; // Detener el envío si algún campo está vacío
+                    toastr.error('El campo "' + key + '" está vacío. Por favor, complete todos los campos.');
+                    return;
                 }
             }
 
-            // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
-            console.log("Token CSRF obtenido:",
-                csrfToken); // Asegúrate de que el token se obtiene correctamente
 
-            // Verificar si el token CSRF es válido
             if (!csrfToken) {
                 console.error("Token CSRF no encontrado.");
                 toastr.error('Hubo un error con el CSRF token.');
-                return; // Detener el envío si el CSRF token no es válido
+                return;
             }
 
-            // Enviar datos por AJAX
             $.ajax({
-                url: '/actualizar-orden-helpdesk/' +
-                    idOrden, // Pasar el id de la orden en la URL
-                method: 'PUT', // Usar PUT para la actualización
+                url: '/actualizar-orden-helpdesk/' + idOrden,
+                method: 'PUT',
                 data: formData,
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken // Agregar el token CSRF
+                    'X-CSRF-TOKEN': csrfToken
                 },
-                success: function(response) {
-                    console.log("Respuesta del servidor:", response);
-
-                    // Mostrar un mensaje de éxito con Toastr
+                success: function (response) {
                     toastr.success('Orden actualizada con éxito');
-                },
-                error: function(xhr, status, error) {
-                    console.log("Error al actualizar:", error);
-                    console.log("Detalles de la respuesta del error:", xhr.responseText);
 
-                    // Mostrar un mensaje de error con Toastr
+                    // Verificamos si cambió el tipo de servicio
+                    if (formData.tipoServicio !== tipoServicioOriginal) {
+                        // Esperamos un poco para que el mensaje se vea
+                        setTimeout(function () {
+                            window.location.href = 'http://127.0.0.1:8000/ordenes/helpdesk';
+                        }, 1000);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log("Error al actualizar:", error);
+                    console.log("Detalles del error:", xhr.responseText);
                     toastr.error('Hubo un error al actualizar la orden');
                 }
             });
         });
     });
 </script>
+

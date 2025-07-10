@@ -199,7 +199,7 @@
                         <select id="idModelo" name="idModelo[]" class="select2-multiple clean-input w-full pl-10" multiple="multiple">
                             @foreach ($modelos as $modelo)
                                 <option value="{{ $modelo->idModelo }}" data-marca="{{ $modelo->idMarca }}" 
-                                        data-categoria="{{ $modelo->idCategoria }}">
+                                        data-categoria="{{ $modelo->idCategoria }}" data-pulgadas="{{ $modelo->pulgadas }}">
                                     {{ $modelo->nombre }} -
                                     {{ $modelo->marca->nombre ?? 'Sin Marca' }} -
                                     {{ $modelo->categoria->nombre ?? 'Sin Categoría' }}
@@ -459,6 +459,13 @@
                             <input type="hidden" name="suministros" value="0">
                         </div>
                     </div>
+                    
+                        <!-- Campo Pulgadas (oculto por defecto) -->
+                            <div id="pulgadasField">
+                                <label for="pulgadas" class="block text-sm font-medium">Pulgadas</label>
+                                <input type="text" id="pulgadas" name="pulgadas" class="clean-input w-full" placeholder="Ingrese las pulgadas">
+                            </div>
+
 
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
@@ -722,6 +729,25 @@
 
         });
     </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectModelos = document.getElementById('idModelo');
+        const pulgadasInput = document.getElementById('pulgadas');
+
+        selectModelos.addEventListener('change', function () {
+            const selectedOptions = Array.from(selectModelos.selectedOptions);
+
+            if (selectedOptions.length > 0) {
+                const lastSelected = selectedOptions[selectedOptions.length - 1];
+                const pulgadas = lastSelected.getAttribute('data-pulgadas');
+                pulgadasInput.value = pulgadas || '';
+            } else {
+                pulgadasInput.value = '';
+            }
+        });
+    });
+</script>
+
     <script>
         document.getElementById("btnLimpiar").addEventListener("click", function() {
             const form = document.getElementById("repuestosForm");
