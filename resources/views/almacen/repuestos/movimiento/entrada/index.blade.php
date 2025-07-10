@@ -100,29 +100,85 @@
         .clean-input::placeholder {
             font-size: 0.85rem;
         }
-        /* Asegurar que el texto se muestre completo */
-.select2-container--default .select2-results__option {
-    white-space: normal !important;
-    padding: 8px 12px !important;
-    line-height: 1.5 !important;
-}
 
-/* Estilo para las selecciones múltiples */
-.select2-container--default .select2-selection--multiple .select2-selection__rendered {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
+        /* 🔹 Elimina borde exterior del contenedor select2 */
+        .select2-container {
+            border: none !important;
+            outline: none !important;
+        }
 
-/* Cada item seleccionado */
-.select2-container--default .select2-selection--multiple .select2-selection__choice {
-    background-color: #3b82f6;
-    border: 1px solid #2563eb;
-    color: white;
-    border-radius: 4px;
-    padding: 0 8px;
-    margin: 2px;
-}
+        /* 🔹 Elimina bordes internos del contenedor activo */
+        .select2-container--default .select2-selection--multiple {
+            border: none !important;
+            border-bottom: 1px solid #e0e6ed !important;
+            box-shadow: none !important;
+        }
+
+        /* 🔹 En foco */
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-bottom: 2px solid #3b82f6 !important;
+            box-shadow: none !important;
+        }
+
+        /* 🔹 Elimina borde al hacer clic */
+        .select2-container--default .select2-selection--multiple:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 🔹 Elimina scroll doble en selección */
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered::-webkit-scrollbar {
+            display: none;
+            /* Chrome */
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid #e0e6ed;
+            border-radius: 0;
+            padding-left: 35px;
+            min-height: 40px;
+            max-height: 90px;
+            /* evita que se agrande */
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 0;
+            padding: 4px 0;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #3b82f6;
+            border: none;
+            /* elimina borde */
+            color: white;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            box-shadow: none;
+        }
+
+        .select2-selection__choice__remove {
+            border-right: none !important;
+        }
     </style>
 
     <div class="container mx-auto px-4 py-6" x-data="repuestos">
@@ -148,14 +204,17 @@
                 <div class="panel mt-6 p-5 max-w-7xl mx-auto">
                     <h2 class="text-lg font-semibold mb-4">Registro de Repuestos</h2>
                     <p class="text-gray-600 mb-6">
-                        Ingrese el código de repuesto o código de barras y luego haga clic en "Verificar repuesto" para cargar
-                        los datos en caso el repuesto ya esté registrado, en caso contrario se cargará el formulario para registrar un nuevo repuesto.
+                        Ingrese el código de repuesto o código de barras y luego haga clic en "Verificar repuesto" para
+                        cargar
+                        los datos en caso el repuesto ya esté registrado, en caso contrario se cargará el formulario
+                        para registrar un nuevo repuesto.
                     </p>
 
                     <div class="flex items-end gap-4 mb-8">
                         <!-- Input con ancho forzado -->
                         <div class="w-full">
-                            <label class="block text-sm text-gray-500 mb-1">Código de repuesto / Código de barras</label>
+                            <label class="block text-sm text-gray-500 mb-1">Código de repuesto / Código de
+                                barras</label>
                             <input type="text" class="clean-input w-full text-xl" placeholder="Código de repuesto"
                                 x-model="codigoRepuesto" @keyup.enter="abrirModalVerificacion" />
                         </div>
@@ -172,22 +231,39 @@
                     <!-- Tabla de repuestos -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                           <thead class="bg-gray-50">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sub Categoria</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th> <!-- Nueva columna -->
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remover</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        #</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Código</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Sub Categoria</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Modelo</th> <!-- Nueva columna -->
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Cantidad</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Precio</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Subtotal</th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Remover</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 <template x-if="repuestos.length === 0">
                                     <tr>
-                                        <td colspan="7" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                                        <td colspan="7"
+                                            class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
                                             No hay repuestos agregados
                                         </td>
                                     </tr>
@@ -195,10 +271,14 @@
 
                                 <template x-for="(repuesto, index) in repuestos" :key="repuesto.id">
                                     <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100" x-text="index + 1"></td>
-                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100" x-text="repuesto.codigo_repuesto || repuesto.codigo_barras"></td>
-                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100" x-text="repuesto.nombre"></td>
-                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100" x-text="repuesto.modelo"></td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                            x-text="index + 1"></td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                            x-text="repuesto.codigo_repuesto || repuesto.codigo_barras"></td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                            x-text="repuesto.nombre"></td>
+                                        <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                            x-text="repuesto.modelo"></td>
                                         <td class="px-4 py-4 whitespace-nowrap">
                                             <input type="number"
                                                 class="w-20 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-center bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
@@ -246,17 +326,15 @@
                                 placeholder="Selecciona una fecha" />
                         </div>
 
-                       <div x-data x-init="
-                            $('#proveedor-select').select2().on('change', function () {
-                                $dispatch('input', this.value);
-                            });
-                        ">
+                        <div x-data x-init="$('#proveedor-select').select2().on('change', function() {
+                            $dispatch('input', this.value);
+                        });">
                             <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Proveedor <span class="text-red-500">*</span>
                             </label>
                             <select id="proveedor-select" class="w-full" x-model="proveedorId">
                                 <option value="">Seleccione una opción</option>
-                                @foreach($proveedores as $proveedor)
+                                @foreach ($proveedores as $proveedor)
                                     <option value="{{ $proveedor->id }}">{{ $proveedor->nombre }}</option>
                                 @endforeach
                             </select>
@@ -315,7 +393,8 @@
                     class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
 
                     <!-- Header -->
-                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10">
+                    <div
+                        class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10">
                         <h5 class="font-semibold text-lg text-gray-800 dark:text-white">Agregar repuesto TCL</h5>
                         <button @click="cerrarModal" class="text-gray-500 hover:text-gray-800 dark:hover:text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
@@ -345,7 +424,8 @@
                                             <div class="input-with-icon">
                                                 <i class="fas fa-barcode input-icon"></i>
                                                 <input type="text" class="clean-input"
-                                                    x-model="repuestoEncontrado.codigo_repuesto" :value="codigoRepuesto" disabled>
+                                                    x-model="repuestoEncontrado.codigo_repuesto"
+                                                    :value="codigoRepuesto" disabled>
                                             </div>
                                         </div>
                                         <div>
@@ -398,7 +478,8 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="block text-gray-600 text-sm mb-1">Precio de compra (Con IGV)</label>
+                                            <label class="block text-gray-600 text-sm mb-1">Precio de compra (Con
+                                                IGV)</label>
                                             <div class="input-with-icon">
                                                 <i class="fas fa-money-bill-wave input-icon"></i>
                                                 <input type="number" step="0.01" class="clean-input"
@@ -406,7 +487,8 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="block text-gray-600 text-sm mb-1">Precio de venta (Con IGV)</label>
+                                            <label class="block text-gray-600 text-sm mb-1">Precio de venta (Con
+                                                IGV)</label>
                                             <div class="input-with-icon">
                                                 <i class="fas fa-tags input-icon"></i>
                                                 <input type="number" step="0.01" class="clean-input"
@@ -476,16 +558,40 @@
                                         <input type="text" class="clean-input" x-model="nuevoRepuesto.nombre">
                                     </div>
 
-<div class="mb-4">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Modelos compatibles</label>
-    <select id="modelosSelect" name="modelos[]" class="select2-multiple clean-input w-full" multiple="multiple">
-        @foreach ($modelos as $modelo)
-            <option value="{{ $modelo->idModelo }}">
-                {{ $modelo->nombre }} - {{ $modelo->marca->nombre ?? 'Sin Marca' }} - {{ $modelo->categoria->nombre ?? 'Sin Categoria' }}
-            </option>
-        @endforeach
-    </select>
-</div>
+                                    <div class="input-with-icon mb-4 relative">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Modelos
+                                            compatibles</label>
+
+                                        <select id="modelosSelect" name="modelos[]" class="w-full"
+                                            multiple="multiple" x-init="$nextTick(() => {
+                                                const select = $('#modelosSelect');
+                                                select.select2({
+                                                    placeholder: 'Seleccione modelos compatibles',
+                                                    allowClear: true,
+                                                    templateResult(modelo) {
+                                                        if (!modelo.id) return modelo.text;
+                                                        const parts = modelo.text.split(' - ');
+                                                        return $('<span>').text(`${parts[0]} - ${parts[1]} - ${parts[2]}`);
+                                                    },
+                                                    templateSelection(modelo) {
+                                                        if (!modelo.id) return modelo.text;
+                                                        const parts = modelo.text.split(' - ');
+                                                        return parts[0];
+                                                    },
+                                                    escapeMarkup: m => m
+                                                }).on('change', function() {
+                                                    nuevoRepuesto.idModelo = $(this).val();
+                                                });
+                                                select.val(nuevoRepuesto.idModelo).trigger('change');
+                                            });">
+                                            @foreach ($modelos as $modelo)
+                                                <option value="{{ $modelo->idModelo }}">
+                                                    {{ $modelo->nombre }} - {{ $modelo->marca->nombre ?? 'Sin Marca' }}
+                                                    - {{ $modelo->categoria->nombre ?? 'Sin Categoria' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
 
 
@@ -502,7 +608,8 @@
                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
                                             <i class="fas fa-boxes"></i> Stock Total
                                         </label>
-                                        <input type="number" class="clean-input" x-model="nuevoRepuesto.stock_total">
+                                        <input type="number" class="clean-input"
+                                            x-model="nuevoRepuesto.stock_total">
                                     </div>
 
                                     <!-- Stock Mínimo -->
@@ -549,14 +656,16 @@
                                 </div>
 
                                 <div class="pt-6 flex justify-end">
-                                    <button @click="guardarNuevoRepuesto" class="btn btn-primary">Guardar repuesto</button>
+                                    <button @click="guardarNuevoRepuesto" class="btn btn-primary">Guardar
+                                        repuesto</button>
                                 </div>
                             </div>
                         </template>
                     </div>
 
                     <!-- Footer -->
-                    <div class="flex justify-end items-center gap-4 px-6 py-4 border-t border-gray-200 dark:border-white/10">
+                    <div
+                        class="flex justify-end items-center gap-4 px-6 py-4 border-t border-gray-200 dark:border-white/10">
                         <button @click="cerrarModal" class="text-sm btn btn-outline-danger">CERRAR</button>
                         <button x-show="repuestoEncontrado" @click="agregarAlRegistro"
                             class="text-sm btn btn-primary flex items-center gap-2">
@@ -585,20 +694,44 @@
                 fecha: '',
                 proveedorId: '',
                 areaId: '',
-                proveedores: [
-                    { id: 1, nombre: 'Proveedor A' },
-                    { id: 2, nombre: 'Proveedor B' },
-                    { id: 3, nombre: 'Proveedor C' },
+                proveedores: [{
+                        id: 1,
+                        nombre: 'Proveedor A'
+                    },
+                    {
+                        id: 2,
+                        nombre: 'Proveedor B'
+                    },
+                    {
+                        id: 3,
+                        nombre: 'Proveedor C'
+                    },
                 ],
-                areas: [
-                    { id: 1, nombre: 'Taller' },
-                    { id: 2, nombre: 'Almacén' },
-                    { id: 3, nombre: 'Soporte Técnico' },
+                areas: [{
+                        id: 1,
+                        nombre: 'Taller'
+                    },
+                    {
+                        id: 2,
+                        nombre: 'Almacén'
+                    },
+                    {
+                        id: 3,
+                        nombre: 'Soporte Técnico'
+                    },
                 ],
-                modelos: [
-                    { id: 1, nombre: 'Modelo TCL 1' },
-                    { id: 2, nombre: 'Modelo TCL 2' },
-                    { id: 3, nombre: 'Modelo TCL 3' },
+                modelos: [{
+                        id: 1,
+                        nombre: 'Modelo TCL 1'
+                    },
+                    {
+                        id: 2,
+                        nombre: 'Modelo TCL 2'
+                    },
+                    {
+                        id: 3,
+                        nombre: 'Modelo TCL 3'
+                    },
                 ],
                 repuestos: [],
                 modalAbierto: false,
@@ -619,9 +752,9 @@
                     idTipoArea: ''
                 },
 
-                  modelos: @json($modelos),
-                  subcategorias: @json($subcategorias),
-                  areas: @json($areas),
+                modelos: @json($modelos),
+                subcategorias: @json($subcategorias),
+                areas: @json($areas),
 
                 // Computadas
                 get subtotal() {
@@ -649,26 +782,28 @@
                             `/buscar-repuesto?codigo=${this.codigoRepuesto}`);
                         const data = await response.json();
 
-                     if (data.existe) {
-                        this.repuestoEncontrado = {
-                            id: data.articulo.idArticulos,
-                            codigo_repuesto: data.articulo.codigo_repuesto,
-                            codigo_barras: data.articulo.codigo_barras,
-                            nombre: data.subcategoria, // Subcategoría mostrada como "nombre"
-                            stock_total: data.articulo.stock_total,
-                            stock_minimo: data.articulo.stock_minimo,
-                            precio_compra: data.articulo.precio_compra,
-                            precio_venta: data.articulo.precio_venta,
-                            modelo: data.modelos.length ? data.modelos.join(' / ') : '', // modelos separados por coma
-                            pulgadas: data.articulo.pulgadas,
-                            idModelo: data.articulo.idModelo,
-                            idTipoArea: data.articulo.idTipoArea,
-                            subcategoria: data.subcategoria
-                        };
-                        this.precioCompra = data.articulo.precio_compra;
-                    } else {
-                        this.repuestoEncontrado = null;
-                    }
+                        if (data.existe) {
+                            this.repuestoEncontrado = {
+                                id: data.articulo.idArticulos,
+                                codigo_repuesto: data.articulo.codigo_repuesto,
+                                codigo_barras: data.articulo.codigo_barras,
+                                nombre: data
+                                    .subcategoria, // Subcategoría mostrada como "nombre"
+                                stock_total: data.articulo.stock_total,
+                                stock_minimo: data.articulo.stock_minimo,
+                                precio_compra: data.articulo.precio_compra,
+                                precio_venta: data.articulo.precio_venta,
+                                modelo: data.modelos.length ? data.modelos.join(' / ') :
+                                '', // modelos separados por coma
+                                pulgadas: data.articulo.pulgadas,
+                                idModelo: data.articulo.idModelo,
+                                idTipoArea: data.articulo.idTipoArea,
+                                subcategoria: data.subcategoria
+                            };
+                            this.precioCompra = data.articulo.precio_compra;
+                        } else {
+                            this.repuestoEncontrado = null;
+                        }
 
 
                         this.modalAbierto = true;
@@ -684,66 +819,67 @@
                     this.repuestoEncontrado = null;
                 },
 
-             agregarAlRegistro() {
-    if (!this.repuestoEncontrado) return;
+                agregarAlRegistro() {
+                    if (!this.repuestoEncontrado) return;
 
-    // Validación 1: Cantidad no puede ser menor o igual a cero
-    if (this.repuestoEncontrado.stock_total <= 0) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Cantidad inválida',
-            text: 'La cantidad debe ser mayor que cero'
-        });
-        return;
-    }
+                    // Validación 1: Cantidad no puede ser menor o igual a cero
+                    if (this.repuestoEncontrado.stock_total <= 0) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Cantidad inválida',
+                            text: 'La cantidad debe ser mayor que cero'
+                        });
+                        return;
+                    }
 
-    // Validación 2: Precio de compra no puede ser mayor al precio de venta
-    if (parseFloat(this.precioCompra) > parseFloat(this.repuestoEncontrado.precio_venta)) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Precio inválido',
-            text: 'El precio de compra no puede ser mayor al precio de venta'
-        });
-        return;
-    }
+                    // Validación 2: Precio de compra no puede ser mayor al precio de venta
+                    if (parseFloat(this.precioCompra) > parseFloat(this.repuestoEncontrado
+                            .precio_venta)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Precio inválido',
+                            text: 'El precio de compra no puede ser mayor al precio de venta'
+                        });
+                        return;
+                    }
 
-    // Validación 3: Precio de compra no puede ser negativo
-    if (this.precioCompra < 0) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Precio inválido',
-            text: 'El precio de compra no puede ser negativo'
-        });
-        return;
-    }
+                    // Validación 3: Precio de compra no puede ser negativo
+                    if (this.precioCompra < 0) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Precio inválido',
+                            text: 'El precio de compra no puede ser negativo'
+                        });
+                        return;
+                    }
 
-    const nuevoRepuesto = {
-        id: this.repuestoEncontrado.id,
-        codigo_repuesto: this.repuestoEncontrado.codigo_repuesto,
-        codigo_barras: this.repuestoEncontrado.codigo_barras,
-        nombre: this.repuestoEncontrado.nombre,
-        cantidad: this.repuestoEncontrado.stock_total,
-        precio: this.precioCompra,
-        subtotal: this.repuestoEncontrado.stock_total * this.precioCompra,
-        stock_total: this.repuestoEncontrado.stock_total,
-        precio_venta: this.repuestoEncontrado.precio_venta,
-        modelo: this.repuestoEncontrado.modelo,
-        pulgadas: this.repuestoEncontrado.pulgadas
-    };
+                    const nuevoRepuesto = {
+                        id: this.repuestoEncontrado.id,
+                        codigo_repuesto: this.repuestoEncontrado.codigo_repuesto,
+                        codigo_barras: this.repuestoEncontrado.codigo_barras,
+                        nombre: this.repuestoEncontrado.nombre,
+                        cantidad: this.repuestoEncontrado.stock_total,
+                        precio: this.precioCompra,
+                        subtotal: this.repuestoEncontrado.stock_total * this.precioCompra,
+                        stock_total: this.repuestoEncontrado.stock_total,
+                        precio_venta: this.repuestoEncontrado.precio_venta,
+                        modelo: this.repuestoEncontrado.modelo,
+                        pulgadas: this.repuestoEncontrado.pulgadas
+                    };
 
-    this.repuestos.push(nuevoRepuesto);
+                    this.repuestos.push(nuevoRepuesto);
 
-    Swal.fire({
-        icon: 'success',
-        title: 'Repuesto agregado',
-        text: 'El repuesto fue agregado al registro correctamente',
-        timer: 1500,
-        showConfirmButton: false
-    });
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Repuesto agregado',
+                        text: 'El repuesto fue agregado al registro correctamente',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
 
-    this.cerrarModal();
-    this.codigoRepuesto = '';
-},
+                    this.cerrarModal();
+                    this.codigoRepuesto = '';
+                },
 
                 actualizarPrecioCompra() {
                     if (this.repuestoEncontrado) {
@@ -755,7 +891,7 @@
                     repuesto.subtotal = repuesto.cantidad * repuesto.precio;
                 },
 
-               removerRepuesto(index) {
+                removerRepuesto(index) {
                     Swal.fire({
                         title: '¿Estás seguro?',
                         text: 'Este repuesto será eliminado del registro.',
@@ -784,65 +920,68 @@
                     return 'S/ ' + value.toFixed(2);
                 },
 
-          async guardarNuevoRepuesto() {
-    if (!this.nuevoRepuesto.codigo_repuesto || !this.nuevoRepuesto.nombre) {
-        alert('Por favor complete los campos obligatorios');
-        return;
-    }
+                async guardarNuevoRepuesto() {
+                    if (!this.nuevoRepuesto.codigo_repuesto || !this.nuevoRepuesto.nombre) {
+                        alert('Por favor complete los campos obligatorios');
+                        return;
+                    }
 
-    try {
-        const response = await fetch('/guardar-repuesto', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(this.nuevoRepuesto)
-        });
+                    try {
+                        const response = await fetch('/guardar-repuesto', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(this.nuevoRepuesto)
+                        });
 
-        const data = await response.json();
+                        const data = await response.json();
 
-        if (data.success) {
-            // Agregar directamente a la tabla
-              const nuevoRepuesto = {
-        id: data.repuesto.idArticulos,
-        codigo_repuesto: data.repuesto.codigo_repuesto,
-        codigo_barras: data.repuesto.codigo_barras,
-        nombre: data.repuesto.nombre,
-        cantidad: data.repuesto.stock_total,
-        precio: data.repuesto.precio_compra,
-        subtotal: data.repuesto.stock_total * data.repuesto.precio_compra,
-        stock_total: data.repuesto.stock_total,
-        precio_venta: data.repuesto.precio_venta,
-        modelo: this.nuevoRepuesto.idModelo.map(id => this.modelos.find(m => m.id == id)?.nombre).join(', '),
-        pulgadas: this.nuevoRepuesto.pulgadas
-    };
+                        if (data.success) {
+                            // Agregar directamente a la tabla
+                            const nuevoRepuesto = {
+                                id: data.repuesto.idArticulos,
+                                codigo_repuesto: data.repuesto.codigo_repuesto,
+                                codigo_barras: data.repuesto.codigo_barras,
+                                nombre: data.repuesto.nombre,
+                                cantidad: data.repuesto.stock_total,
+                                precio: data.repuesto.precio_compra,
+                                subtotal: data.repuesto.stock_total * data.repuesto
+                                    .precio_compra,
+                                stock_total: data.repuesto.stock_total,
+                                precio_venta: data.repuesto.precio_venta,
+                                modelo: this.nuevoRepuesto.idModelo.map(id => this.modelos.find(
+                                    m => m.id == id)?.nombre).join(', '),
+                                pulgadas: this.nuevoRepuesto.pulgadas
+                            };
 
-            this.repuestos.push(nuevoRepuesto);
-    this.cerrarModal();
-    this.resetNuevoRepuesto(); // reset a estado inicial
-            
-            this.cerrarModal();
-            this.nuevoRepuesto = {
-                codigo_repuesto: '',
-                codigo_barras: '',
-                nombre: '',
-                stock_total: 0,
-                stock_minimo: 0,
-                precio_compra: 0,
-                precio_venta: 0,
-                idModelo: '',
-                pulgadas: '',
-                idTipoArea: ''
-            };
-        } else {
-            alert('Error al registrar el repuesto: ' + data.message);
-        }
-    } catch (error) {
-        console.error('Error al guardar repuesto:', error);
-        alert('Error al guardar el repuesto');
-    }
-},
+                            this.repuestos.push(nuevoRepuesto);
+                            this.cerrarModal();
+                            this.resetNuevoRepuesto(); // reset a estado inicial
+
+                            this.cerrarModal();
+                            this.nuevoRepuesto = {
+                                codigo_repuesto: '',
+                                codigo_barras: '',
+                                nombre: '',
+                                stock_total: 0,
+                                stock_minimo: 0,
+                                precio_compra: 0,
+                                precio_venta: 0,
+                                idModelo: '',
+                                pulgadas: '',
+                                idTipoArea: ''
+                            };
+                        } else {
+                            alert('Error al registrar el repuesto: ' + data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error al guardar repuesto:', error);
+                        alert('Error al guardar el repuesto');
+                    }
+                },
 
                 guardarRegistro() {
                     if (!this.puedeGuardar) return;
@@ -866,7 +1005,7 @@
                     this.proveedorId = '';
                     this.areaId = '';
                 },
-                
+
                 init() {
                     flatpickr(this.$refs.fechaInput, {
                         defaultDate: new Date(),
@@ -884,31 +1023,31 @@
     </script>
 
     <script>
-   $(document).ready(function() {
-    $('#modelosSelect').select2({
-        placeholder: "Seleccione modelos compatibles",
-        allowClear: true,
-        templateResult: function(modelo) {
-            if (!modelo.id) return modelo.text;
-            
-            var text = modelo.text;
-            // Extraemos las partes
-            var parts = text.split(' - ');
-            // Formateamos como en tu imagen
-            return $('<span>').text(parts[0] + ' - ' + parts[1] + ' - ' + parts[2]);
-        },
-        templateSelection: function(modelo) {
-            if (!modelo.id) return modelo.text;
-            
-            // Solo mostrar el nombre del modelo en la selección
-            var text = modelo.text;
-            var parts = text.split(' - ');
-            return parts[0];
-        },
-        escapeMarkup: function(m) {
-            return m;
-        }
-    });
-});
+        $(document).ready(function() {
+            $('#modelosSelect').select2({
+                placeholder: "Seleccione modelos compatibles",
+                allowClear: true,
+                templateResult: function(modelo) {
+                    if (!modelo.id) return modelo.text;
+
+                    var text = modelo.text;
+                    // Extraemos las partes
+                    var parts = text.split(' - ');
+                    // Formateamos como en tu imagen
+                    return $('<span>').text(parts[0] + ' - ' + parts[1] + ' - ' + parts[2]);
+                },
+                templateSelection: function(modelo) {
+                    if (!modelo.id) return modelo.text;
+
+                    // Solo mostrar el nombre del modelo en la selección
+                    var text = modelo.text;
+                    var parts = text.split(' - ');
+                    return parts[0];
+                },
+                escapeMarkup: function(m) {
+                    return m;
+                }
+            });
+        });
     </script>
 </x-layout.default>
