@@ -75,7 +75,7 @@
                         dateFormat: 'Y-m-d',
                         onChange: function(selectedDates, dateStr) {
                             startDate = dateStr;
-                            fetchDataAndInitTable();
+                            debouncedFetch(); // 👈 aquí
                         }
                     })" />
             </div>
@@ -88,7 +88,7 @@
                         dateFormat: 'Y-m-d',
                         onChange: function(selectedDates, dateStr) {
                             endDate = dateStr;
-                            fetchDataAndInitTable();
+                            debouncedFetch(); // 👈 aquí
                         }
                     })" />
             </div>
@@ -165,7 +165,7 @@
 
                 <!-- Botón Refrescar -->
                 <button class="btn btn-secondary btn-sm"
-                    @click="
+                @click="
                 startDate = '';
                 endDate = '';
                 marcaFilter = '';
@@ -173,7 +173,8 @@
                 document.getElementById('clienteGeneralFilter').value = '';
                 NiceSelect.destroy(document.getElementById('clienteGeneralFilter'));
                 NiceSelect.bind(document.getElementById('clienteGeneralFilter'));
-                fetchDataAndInitTable()">
+                debouncedFetch();
+            ">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <polyline points="23 4 23 10 17 10" stroke-linecap="round" stroke-linejoin="round" />

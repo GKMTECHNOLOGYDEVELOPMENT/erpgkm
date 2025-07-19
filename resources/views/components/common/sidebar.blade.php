@@ -203,7 +203,7 @@
                                 </div>
                             </a>
                         </li> --}}
-                        <!-- <li class="menu nav-item">
+                        <li class="menu nav-item">
                             <button type="button" class="nav-link group"
                                 :class="{ 'active': activeDropdown === 'invoice' }"
                                 @click="activeDropdown === 'invoice' ? activeDropdown = null : activeDropdown = 'invoice'">
@@ -230,8 +230,7 @@
                                     </svg>
                                 </div>
                             </button>
-                            <ul x-cloak x-show="activeDropdown === 'invoice'" x-collapse
-                                class="sub-menu text-gray-500">
+                            <ul x-cloak x-show="activeDropdown === 'invoice'" x-collapse class="sub-menu text-gray-500">
                                 <li>
                                     <a href="/apps/invoice/list">List</a>
                                 </li>
@@ -246,7 +245,7 @@
                                 </li>
                             </ul>
                         </li> -->
-                        {{-- <li class="nav-item">
+                        <li class="nav-item">
                             <a href="{{ route('apps.calendar') }}" class="group">
                                 <div class="flex items-center">
 
@@ -263,15 +262,15 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Calendario</span>
                                 </div>
                             </a>
-                        </li> --}}
+                        </li>
                     </ul>
                 </li>
 
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
-                    <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"
-                        fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                     <span>Administracion</span>
@@ -354,7 +353,8 @@
                 </li>
 
                 <li class="menu nav-item">
-                    <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'asociados' }"
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'asociados' }"
                         @click="activeDropdown === 'asociados' ? activeDropdown = null : activeDropdown = 'asociados'">
                         <div class="flex items-center">
 
@@ -695,7 +695,7 @@
                     </a>
                 </li> --}}
 
-            
+
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -857,22 +857,26 @@
                     </ul>
                 </li> --}}
 
-                      <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'caracteristicas' }"
                         @click="activeDropdown === 'caracteristicas' ? activeDropdown = null : activeDropdown = 'caracteristicas'">
                         <div class="flex items-center">
 
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <rect x="3" y="4" width="18" height="2" rx="1" fill="currentColor"/>
-                            <rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor"/>
-                            <rect x="3" y="18" width="18" height="2" rx="1" fill="currentColor"/>
+                                xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3" y="4" width="18" height="2" rx="1"
+                                    fill="currentColor" />
+                                <rect x="3" y="11" width="18" height="2" rx="1"
+                                    fill="currentColor" />
+                                <rect x="3" y="18" width="18" height="2" rx="1"
+                                    fill="currentColor" />
                             </svg>
 
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Detalles del Articulo</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Detalles
+                                del Articulo</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'caracteristicas' }">
 
@@ -883,8 +887,9 @@
                             </svg>
                         </div>
                     </button>
-                    <ul x-cloak x-show="activeDropdown === 'caracteristicas'" x-collapse class="sub-menu text-gray-500">
-                        
+                    <ul x-cloak x-show="activeDropdown === 'caracteristicas'" x-collapse
+                        class="sub-menu text-gray-500">
+
                         <li>
                             <a href="{{ route('modelos.index') }}">Modelos</a>
                         </li>
@@ -902,7 +907,7 @@
 
 
 
-                    <li class="menu nav-item">
+                <li class="menu nav-item">
                     <a href="{{ route('almacen.kits.index') }}" class="nav-link group">
                         <div class="flex items-center">
 
@@ -931,7 +936,7 @@
                 </li>
 
 
-<!--nuevo--->
+                <!--nuevo--->
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'productos' }"
@@ -966,27 +971,27 @@
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
                         <li>
-                            
+
                             <a href="{{ route('producto.index') }}">Productos</a>
                         </li>
-                        <li>  <a href="{{ route('repuestos.index') }}">Repuestos</a></li>
-                          <li>
+                        <li> <a href="{{ route('repuestos.index') }}">Repuestos</a></li>
+                        <li>
                             <a href="{{ route('suministros.index') }}">Suministros</a>
                         </li>
-                            
-                          <li>
+
+                        <li>
                             <a href="{{ route('heramientas.index') }}">Heramientas</a>
-                          </li>
-
-                                                        
+                        </li>
 
 
 
-                 
+
+
+
                     </ul>
                 </li>
 
- {{--
+                {{--
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'Repuesto' }"
@@ -1100,15 +1105,18 @@
 
 
 
-                      <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'ubicaciones' }"
                         @click="activeDropdown === 'ubicaciones' ? activeDropdown = null : activeDropdown = 'ubicaciones'">
                         <div class="flex items-center">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2C8.686 2 6 4.686 6 8C6 12.6667 12 21 12 21C12 21 18 12.6667 18 8C18 4.686 15.314 2 12 2Z" 
-                                        stroke="currentColor" stroke-width="1.5" fill="none"/>
-                                <circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 2C8.686 2 6 4.686 6 8C6 12.6667 12 21 12 21C12 21 18 12.6667 18 8C18 4.686 15.314 2 12 2Z"
+                                    stroke="currentColor" stroke-width="1.5" fill="none" />
+                                <circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.5"
+                                    fill="none" />
                             </svg>
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ubicaciones</span>
@@ -1134,18 +1142,18 @@
 
 
 
-                    
-                 <li class="menu nav-item">
+
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'solicitud' }"
                         @click="activeDropdown === 'solicitud' ? activeDropdown = null : activeDropdown = 'solicitud'">
                         <div class="flex items-center">
-                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round"/>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
                             </svg>
 
 
@@ -1169,22 +1177,22 @@
                 </li>
 
 
-                
 
 
 
 
-                 <li class="menu nav-item">
+
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'ventas' }"
                         @click="activeDropdown === 'ventas' ? activeDropdown = null : activeDropdown = 'ventas'">
                         <div class="flex items-center">
-                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round"/>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
                             </svg>
 
 
@@ -1208,22 +1216,23 @@
                 </li>
 
 
-                 <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'compras' }"
                         @click="activeDropdown === 'compras' ? activeDropdown = null : activeDropdown = 'compras'">
                         <div class="flex items-center">
-                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 7L6 6C6 4.34315 7.34315 3 9 3H15C16.6569 3 18 4.34315 18 6V7" 
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M4 7H20L19 21H5L4 7Z" 
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M9 11V13" 
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M15 11V13" 
-                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 7L6 6C6 4.34315 7.34315 3 9 3H15C16.6569 3 18 4.34315 18 6V7"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M4 7H20L19 21H5L4 7Z" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M9 11V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M15 11V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
 
 
 
@@ -1247,20 +1256,20 @@
                 </li>
 
 
-                 <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'devoluciones' }"
                         @click="activeDropdown === 'devoluciones' ? activeDropdown = null : activeDropdown = 'devoluciones'">
                         <div class="flex items-center">
-               <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 7L12 2L21 7V17L12 22L3 17V7Z" 
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M8 12L5 15L8 18" 
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M5 15H13" 
-                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 7L12 2L21 7V17L12 22L3 17V7Z" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M8 12L5 15L8 18" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M5 15H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
 
 
 
@@ -1286,20 +1295,20 @@
 
 
 
-                  <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'despacho' }"
                         @click="activeDropdown === 'despacho' ? activeDropdown = null : activeDropdown = 'despacho'">
                         <div class="flex items-center">
-                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 6H16V17H3V6Z" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round"/>
+                                    stroke-linecap="round" stroke-linejoin="round" />
                                 <path d="M16 10H20L21.5 13V17H16V10Z" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round"/>
-                                <circle cx="6.5" cy="18.5" r="1.5" fill="currentColor"/>
-                                <circle cx="18" cy="18.5" r="1.5" fill="currentColor"/>
-                           </svg>
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <circle cx="6.5" cy="18.5" r="1.5" fill="currentColor" />
+                                <circle cx="18" cy="18.5" r="1.5" fill="currentColor" />
+                            </svg>
 
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Despacho</span>
@@ -1320,20 +1329,20 @@
                 </li>
 
 
-                  <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'kardex' }"
                         @click="activeDropdown === 'kardex' ? activeDropdown = null : activeDropdown = 'kardex'">
                         <div class="flex items-center">
-                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
                                 <path d="M3 7L12 2L21 7V17L12 22L3 17V7Z" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round"/>
+                                    stroke-linecap="round" stroke-linejoin="round" />
                                 <path d="M3 7L12 12L21 7" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round"/>
-                                <path d="M12 12V22" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M12 12V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Kardex</span>
                         </div>

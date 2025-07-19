@@ -9,26 +9,41 @@ document.addEventListener('alpine:init', () => {
         startDate: '',
         endDate: '',
         isLoading: false,
+        debouncedFetch: null, // ✅ para almacenar la función debounced
 
         init() {
             this.$nextTick(async () => {
                 this.injectStyles();
 
-                await this.fetchClientes(); // ✅ Llamada controlada
-                await this.fetchMarcas();   // ✅ Luego marcas
+                await this.fetchClientes();
+                await this.fetchMarcas();
 
-                this.fetchDataAndInitTable();
+                // ✅ Crear versión debounced
+                this.debouncedFetch = this.debounce(this.fetchDataAndInitTable, 300);
 
-                this.$watch('marcaFilter', () => this.fetchDataAndInitTable());
-                this.$watch('startDate', () => this.fetchDataAndInitTable());
-                this.$watch('endDate', () => this.fetchDataAndInitTable());
+                this.fetchDataAndInitTable(); // Primera carga
+
+                this.$watch('marcaFilter', () => this.debouncedFetch());
+                this.$watch('startDate', () => this.debouncedFetch());
+                this.$watch('endDate', () => this.debouncedFetch());
 
                 document.addEventListener('cliente-general-cambio', (e) => {
                     this.clienteGeneralFilter = e.detail;
                     this.isLoading = true;
-                    this.fetchDataAndInitTable();
+                    this.debouncedFetch();
                 });
             });
+        },
+
+        // ✅ Función debounce integrada
+        debounce(func, delay) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
         },
 
 
@@ -149,6 +164,7 @@ document.addEventListener('alpine:init', () => {
 
 
             this.datatable1 = $('#myTable1').DataTable({
+                searchDelay: 600,
                 processing: false,
                 serverSide: true,
                 ordering: false,
@@ -233,27 +249,27 @@ document.addEventListener('alpine:init', () => {
                         next: 'Siguiente',
                         previous: 'Anterior'
                     }
-                    
+
                 },
                 dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
                 initComplete: function () {
                     const wrapper = document.querySelector('.dataTables_wrapper');
                     const scrollTopContainer = document.getElementById('scroll-top');
                     const scrollTopInner = document.getElementById('scroll-top-inner');
-                
+
                     // ✅ Asegura que sea el contenedor que tiene la tabla (no todo el wrapper)
                     const tableScrollContainer = document.querySelector('.relative.overflow-x-auto.custom-scroll');
-                
+
                     if (!tableScrollContainer || !scrollTopContainer || !scrollTopInner) return;
-                
+
                     // Mostrar scroll superior
                     scrollTopContainer.classList.remove('hidden');
-                
+
                     // Sincronizar anchos una vez que el layout esté listo
                     requestAnimationFrame(() => {
                         scrollTopInner.style.width = tableScrollContainer.scrollWidth + 'px';
                     });
-                
+
                     // Scroll sincronizado
                     scrollTopContainer.onscroll = () => {
                         tableScrollContainer.scrollLeft = scrollTopContainer.scrollLeft;
@@ -261,7 +277,7 @@ document.addEventListener('alpine:init', () => {
                     tableScrollContainer.onscroll = () => {
                         scrollTopContainer.scrollLeft = tableScrollContainer.scrollLeft;
                     };
-                
+
                     // Controles flotantes (info + paginación abajo)
                     const panel = document.querySelector('.panel.mt-6');
                     const floatingControls = document.createElement('div');
@@ -274,22 +290,22 @@ document.addEventListener('alpine:init', () => {
                         width: '100%',
                         zIndex: '10'
                     });
-                
+
                     const info = wrapper.querySelector('.dataTables_info');
                     const length = wrapper.querySelector('.dataTables_length');
                     const paginate = wrapper.querySelector('.dataTables_paginate');
-                
+
                     if (info && length && paginate && panel) {
                         const existingControls = panel.querySelector('.floating-controls');
                         if (existingControls) existingControls.remove();
-                
+
                         floatingControls.appendChild(info);
                         floatingControls.appendChild(length);
                         floatingControls.appendChild(paginate);
                         panel.appendChild(floatingControls);
                     }
                 },
-                
+
                 rowCallback: (row, data) => {
                     const estadoColor = data.ticketflujo?.estadoflujo?.color || '';
                     const estadoId = data.ticketflujo?.estadoflujo?.idEstadflujo;

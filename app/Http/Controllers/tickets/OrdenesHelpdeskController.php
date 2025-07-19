@@ -2072,8 +2072,15 @@ class OrdenesHelpdeskController extends Controller
     public function getAll(Request $request)
     {
         Log::info("📥 Entrando al método getAll (HELPDESK)");
-
-        $query = Ticket::with([
+    
+        $tipoTicket = 2; // Forzar tipo Helpdesk
+    
+        // Base para contar registros totales reales del tipo Helpdesk
+        $baseQuery = Ticket::query()->where('idTipotickets', $tipoTicket);
+        $recordsTotal = $baseQuery->count();
+    
+        // Base extendida con relaciones
+        $query = $baseQuery->with([
             'tecnico:idUsuario,Nombre',
             'usuario:idUsuario,Nombre',
             'cliente:idCliente,nombre',
@@ -2087,35 +2094,30 @@ class OrdenesHelpdeskController extends Controller
             'manejoEnvio:idmanejo_envio,idTickets,tipo',
             'visitas' => function ($q) {
                 $q->select('idVisitas', 'idTickets', 'fecha_programada')
-                    ->orderBy('fecha_programada', 'desc')
-                    ->limit(1);
+                  ->latest('fecha_programada')->limit(1);
             },
-
             'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
             'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
             'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
+            'visitas:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
             'visitas.tecnico:idUsuario,Nombre',
-            'transicion_status_tickets' => function ($query) use ($request) {
+            'transicion_status_tickets' => function ($q) use ($request) {
                 if ($request->has('idVisita')) {
-                    $query->whereHas('seleccionarVisita', function ($q) use ($request) {
-                        $q->where('idVisitas', $request->idVisita);
+                    $q->whereHas('seleccionarVisita', function ($subquery) use ($request) {
+                        $subquery->where('idVisitas', $request->idVisita);
                     })->where('idEstadoots', 3);
                 }
             }
         ]);
-
-        if ($request->has('tipoTicket') && in_array($request->tipoTicket, [1, 2])) {
-            $query->where('idTipotickets', $request->tipoTicket);
-        }
-
+    
         if ($request->has('marca') && $request->marca != '') {
             $query->where('idMarca', $request->marca);
         }
-
+    
         if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
             $query->where('idClienteGeneral', $request->clienteGeneral);
         }
-
+    
         if ($request->filled('startDate') && $request->filled('endDate')) {
             $query->whereBetween('fecha_creacion', [
                 $request->startDate . ' 00:00:00',
@@ -2126,69 +2128,51 @@ class OrdenesHelpdeskController extends Controller
         } elseif ($request->filled('endDate')) {
             $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
         }
-
-
+    
         if ($request->has('search') && !empty($request->input('search.value'))) {
             $searchValue = trim($request->input('search.value'));
             $normalized = Str::lower(Str::ascii($searchValue));
-
+    
             $query->where(function ($q) use ($searchValue, $normalized) {
-                $q->orWhereRaw("CAST(idTickets AS CHAR) LIKE ?", ["%{$searchValue}%"])
-                    ->orWhere('serie', $searchValue)
-                    ->orWhere('numero_ticket', $searchValue)
-                    ->orWhere('serie', 'LIKE', "%{$searchValue}%")
-                    ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
-                    ->orWhereRaw("DATE_FORMAT(fecha_creacion, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"])
-                    ->orWhereHas('visitas', function ($q) use ($searchValue) {
-                        $q->whereRaw("DATE_FORMAT(fecha_programada, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"]);
-                    })
-                    ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                    ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('ticketflujo.estadoFlujo', function ($q) use ($normalized) {
-                        $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]);
-                    })
-                    ->orWhere(function ($q) use ($searchValue) {
-                        if (stripos('soporte', $searchValue) !== false || strtolower($searchValue) === 's') {
-                            $q->orWhere('tipoServicio', 1);
-                        }
-                        if (stripos('levantamiento', $searchValue) !== false || strtolower($searchValue) === 'l') {
-                            $q->orWhere('tipoServicio', 2);
-                        }
-                    });
+                $q->orWhere('serie', $searchValue)
+                  ->orWhere('numero_ticket', $searchValue)
+                  ->orWhere('serie', 'LIKE', "%{$searchValue}%")
+                  ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
+                  ->orWhereRaw("DATE_FORMAT(fecha_creacion, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"])
+                  ->orWhereHas('visitas', fn($q) => $q->whereRaw("DATE_FORMAT(fecha_programada, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"]))
+                  ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                  ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                  ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
+                  ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                  ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                  ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                  ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                  ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                  ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                  ->orWhereHas('ticketflujo.estadoFlujo', fn($q) => $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]))
+                  ->orWhere(function ($q) use ($searchValue) {
+                      if (stripos('soporte', $searchValue) !== false || strtolower($searchValue) === 's') {
+                          $q->orWhere('tipoServicio', 1);
+                      }
+                      if (stripos('levantamiento', $searchValue) !== false || strtolower($searchValue) === 'l') {
+                          $q->orWhere('tipoServicio', 2);
+                      }
+                  });
             });
-
-            $query->orderByRaw("
-            CASE
-                WHEN CAST(idTickets AS CHAR) = ? THEN 0
-                WHEN serie = ? THEN 1
-                WHEN numero_ticket = ? THEN 2
-                ELSE 3
-            END
-        ", [$searchValue, $searchValue, $searchValue]);
         }
-
-
-        $recordsTotal = Ticket::count();
+    
         $query->orderBy('idTickets', 'desc');
         $recordsFiltered = (clone $query)->count();
-
+    
         $ordenes = $query->skip($request->input('start', 0))
             ->take($request->input('length', 10))
-            ->get();
-
-        $ordenes = $ordenes->map(function ($item) {
-            $arr = json_decode(json_encode($item), true);
-            array_walk_recursive($arr, fn(&$v) => $v = is_string($v) ? mb_convert_encoding($v, 'UTF-8', 'UTF-8') : $v);
-            return $arr;
-        });
-
+            ->get()
+            ->map(function ($item) {
+                $arr = json_decode(json_encode($item), true);
+                array_walk_recursive($arr, fn(&$v) => $v = is_string($v) ? mb_convert_encoding($v, 'UTF-8', 'UTF-8') : $v);
+                return $arr;
+            });
+    
         return response()->json([
             "draw" => intval($request->input('draw')),
             "recordsTotal" => $recordsTotal,
@@ -2196,7 +2180,7 @@ class OrdenesHelpdeskController extends Controller
             "data" => $ordenes
         ]);
     }
-
+    
 
     public function verEnvio($id)
     {

@@ -101,7 +101,7 @@
                         dateFormat: 'Y-m-d',
                         onChange: function(selectedDates, dateStr) {
                             startDate = dateStr;
-                            fetchDataAndInitTable();
+                            debouncedFetch(); // ✅ corregido
                         }
                     })" />
             </div>
@@ -114,14 +114,15 @@
                         dateFormat: 'Y-m-d',
                         onChange: function(selectedDates, dateStr) {
                             endDate = dateStr;
-                            fetchDataAndInitTable();
+                            debouncedFetch(); // ✅ corregido
                         }
                     })" />
             </div>
 
             <!-- Cliente General -->
             <div class="w-[260px]">
-                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente General</label>
+                <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">Filtrar por Cliente
+                    General</label>
                 <select id="clienteGeneralFilter" x-model="clienteGeneralFilter"
                     @change="onClienteGeneralChange($event.target.value)"
                     class="form-select w-full px-3 py-2 text-sm border-gray-300 rounded">
@@ -131,12 +132,11 @@
                     </template>
                 </select>
             </div>
-            
 
             <!-- Marca -->
             <div class="w-[260px]">
                 <label for="marcaFilter" class="block text-sm font-medium text-gray-700">Filtrar por Marca</label>
-                <select x-model="marcaFilter" @change="fetchDataAndInitTable()" id="marcaFilter"
+                <select x-model="marcaFilter" @change="debouncedFetch()" id="marcaFilter"
                     class="form-select w-full px-3 py-2 text-sm border-gray-300 rounded">
                     <option value="">Todas las marcas</option>
                     <template x-for="marca in marcas" :key="marca.idMarca">
@@ -168,13 +168,15 @@
                 </a>
 
                 <!-- Refrescar -->
+                <!-- Limpiar Filtros -->
                 <button class="btn btn-secondary btn-sm px-3 py-2"
                     @click="
-                startDate = '';
-                endDate = '';
-                marcaFilter = '';
-                clienteGeneralFilter = '';
-                fetchDataAndInitTable();">
+                        startDate = '';
+                        endDate = '';
+                        marcaFilter = '';
+                        clienteGeneralFilter = '';
+                        debouncedFetch();
+                    ">
                     <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5 block mx-auto' fill='none'
                         viewBox='0 0 24 24' stroke='currentColor'>
                         <polyline points='23 4 23 10 17 10' stroke-linecap='round' />
@@ -183,9 +185,9 @@
                         <path d='M20.49 15a9 9 0 01-14.36 3.36L1 14' stroke-linecap='round' />
                     </svg>
                 </button>
+
             </div>
         </div>
-
 
 
 

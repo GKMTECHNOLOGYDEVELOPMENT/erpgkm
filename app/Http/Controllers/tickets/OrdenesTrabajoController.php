@@ -1186,7 +1186,17 @@ class OrdenesTrabajoController extends Controller
 
     public function getAll(Request $request)
     {
-        $query = Ticket::with([
+        // ⚠️ Asegúrate de que siempre llegue un tipo válido
+        $tipoTicket = $request->input('tipoTicket', 1);
+
+        // 🟩 Define la base ya filtrada por tipo de ticket
+        $baseQuery = Ticket::query()->where('idTipotickets', $tipoTicket);
+
+        // 🟩 Usa la misma base para contar el total real (con tipoTicket filtrado)
+        $recordsTotal = $baseQuery->count();
+
+        // 🟩 Reutiliza la base con relaciones
+        $query = $baseQuery->with([
             'tecnico:idUsuario,Nombre',
             'usuario:idUsuario,Nombre',
             'cliente:idCliente,nombre',
@@ -1215,10 +1225,7 @@ class OrdenesTrabajoController extends Controller
             }
         ]);
 
-        if ($request->has('tipoTicket') && in_array($request->tipoTicket, [1, 2])) {
-            $query->where('idTipotickets', $request->tipoTicket);
-        }
-
+        // 🔁 Aplica todos los filtros adicionales sobre $query (marca, clienteGeneral, fechas, búsqueda, etc)
         if ($request->has('marca') && $request->marca != '') {
             $query->where('idMarca', $request->marca);
         }
@@ -1237,8 +1244,6 @@ class OrdenesTrabajoController extends Controller
         } elseif ($request->filled('endDate')) {
             $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
         }
-
-
 
         if ($request->has('search') && !empty($request->input('search.value'))) {
             $searchValue = trim($request->input('search.value'));
@@ -1287,8 +1292,9 @@ class OrdenesTrabajoController extends Controller
             });
         }
 
-        $recordsTotal = Ticket::count();
         $query->orderBy('fecha_creacion', 'desc');
+
+        // 🔁 recordsFiltered sí debe aplicarse después de filtros completos
         $recordsFiltered = (clone $query)->count();
 
         $ordenes = $query->skip($request->input('start', 0))
@@ -1312,6 +1318,7 @@ class OrdenesTrabajoController extends Controller
             "data" => $ordenes
         ]);
     }
+
 
 
 
@@ -1781,7 +1788,7 @@ class OrdenesTrabajoController extends Controller
             $tipoServicio = 3; // Si el tipo de usuario es 4, asignamos 3 (por ejemplo, Chofer)
         }
 
-      // Obtener la primera palabra del nombre
+        // Obtener la primera palabra del nombre
         $primeraPalabra = explode(' ', trim($request->nombre))[0];
 
         // Validar si la primera palabra es 'Entrega' (sin importar mayúsculas/minúsculas)
@@ -3700,23 +3707,23 @@ class OrdenesTrabajoController extends Controller
 
 
     public function relacionarFlujo(Request $request, $ticketId)
-{
-    $request->validate([
-        'flujoId' => 'required|integer|exists:ticketflujo,idTicketFlujo',
-    ]);
+    {
+        $request->validate([
+            'flujoId' => 'required|integer|exists:ticketflujo,idTicketFlujo',
+        ]);
 
-    try {
-        DB::table('tickets')
-            ->where('idTickets', $ticketId)
-            ->update([
-                'idTicketFlujo' => $request->flujoId
-            ]);
+        try {
+            DB::table('tickets')
+                ->where('idTickets', $ticketId)
+                ->update([
+                    'idTicketFlujo' => $request->flujoId
+                ]);
 
-        return response()->json(['success' => true]);
-    } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
-}
 
 
 
