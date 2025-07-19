@@ -60,6 +60,8 @@ use App\Http\Controllers\almacen\repuestos\RepuestosController;
 use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
+use App\Http\Controllers\Apps\ActividadController;
+use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GuiaController;
@@ -374,6 +376,7 @@ Route::prefix('compras')->name('compras.')->group(function () {
 Route::get('/buscar-repuesto', [ArticulosController::class, 'buscar']);
 Route::post('/guardar-repuesto', [ArticulosController::class, 'store']);
 
+Route::post('/articulosmodal', [ArticulosController::class, 'storeModal'])->name('articulos.store');
 /// INICIO DEVOLUCIONES ///
 Route::prefix('devoluciones')->name('devoluciones.')->group(function () {
     Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
@@ -982,3 +985,20 @@ Route::view('/pages/error404', 'pages.error404');
 Route::view('/pages/error500', 'pages.error500');
 Route::view('/pages/error503', 'pages.error503');
 Route::view('/pages/maintenence', 'pages.maintenence');
+
+
+
+Route::middleware('auth')->group(function () {
+    // Rutas para actividades
+    Route::get('actividades', [ActividadController::class, 'index'])->name('actividades.index');
+    Route::post('actividades', [ActividadController::class, 'store'])->name('actividades.store');
+    Route::put('actividades/{id}', [ActividadController::class, 'update'])->name('actividades.update');
+    Route::delete('actividades/{id}', [ActividadController::class, 'destroy'])->name('actividades.destroy');
+
+    // Rutas para etiquetas
+    Route::get('etiquetas', [EtiquetaController::class, 'index'])->name('etiquetas.index');
+    Route::post('etiquetas', [EtiquetaController::class, 'store'])->name('etiquetas.store');
+    Route::put('etiquetas/{id}', [EtiquetaController::class, 'update'])->name('etiquetas.update');
+    Route::delete('etiquetas/{id}', [EtiquetaController::class, 'destroy'])->name('etiquetas.destroy');
+});
+

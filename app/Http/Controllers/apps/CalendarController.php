@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Apps;
 
 use App\Http\Controllers\Controller;
+use App\Models\Etiqueta;
+use App\Models\Usuario;
+use Google\Service\ServiceControl\Auth;
+use Illuminate\Http\Request;
 
 class CalendarController extends Controller
 {
@@ -10,4 +14,46 @@ class CalendarController extends Controller
     {
         return view('apps.calendar'); // Vista para calendar
     }
+
+
+public function usuariov1()
+{
+    try {
+        $usuarios = Usuario::query()
+            ->select([
+                'idUsuario as id',
+                'Nombre',
+                'apellidoPaterno',
+                'apellidoMaterno',
+                'correo as email',
+                'idRol'
+            ])
+            ->where('estado', 1)
+            ->orderBy('apellidoPaterno')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $usuarios->map(function($user) {
+                return [
+                    'id' => $user->id,
+                    'Nombre' => $user->Nombre,
+                    'apellidoPaterno' => $user->apellidoPaterno,
+                    'email' => $user->email,
+                    'idRol' => $user->idRol,
+                    'text' => "{$user->Nombre} {$user->apellidoPaterno}" // Campo adicional para TomSelect
+                ];
+            })
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar usuarios',
+            'data' => []
+        ], 500);
+    }
 }
+
+    }
+

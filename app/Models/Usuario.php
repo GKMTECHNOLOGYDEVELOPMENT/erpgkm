@@ -233,4 +233,14 @@ class Usuario extends Authenticatable implements CanResetPassword
 	{
 		return $this->hasOne(Vehiculo::class, 'idUsuario', 'idUsuario');
 	}
+
+	public function etiquetas()
+	{
+		return $this->hasMany(Etiqueta::class, 'user_id', 'idUsuario');
+	}
+	public function actividades(): \Illuminate\Database\Eloquent\Relations\HasMany
+	{
+		return $this->hasMany(Actividad::class, 'user_id', 'idUsuario');
+	}
+
 }

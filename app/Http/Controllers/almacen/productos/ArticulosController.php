@@ -4,6 +4,7 @@ namespace App\Http\Controllers\almacen\productos;
 
 use App\Http\Controllers\Controller;
 use App\Models\Articulo;
+use App\Models\ArticuloModelo;
 use App\Models\Kardex;
 use App\Models\Modelo;
 use App\Models\Moneda;
@@ -32,6 +33,108 @@ class ArticulosController extends Controller
         return view('almacen.productos.articulos.index', compact('unidades', 'tiposArticulo', 'modelos', 'monedas'));
     }
 
+
+
+    public function storeModal(Request $request)
+{
+    DB::beginTransaction();
+
+    try {
+        // Validación de datos adaptada para el modal
+        $validatedData = $request->validate([
+            'codigo_barras' => 'nullable|string|max:255|unique:articulos,codigo_barras',
+            'sku' => 'nullable|string|max:255|unique:articulos,sku',
+            'codigo_repuesto' => 'required|string|max:255|unique:articulos,codigo_repuesto',
+            'nombre' => 'required|string|max:255',
+            'stock_total' => 'required|integer|min:0',
+            'stock_minimo' => 'required|integer|min:0',
+            'precio_compra' => 'required|numeric|min:0',
+            'precio_venta' => 'required|numeric|min:0',
+            'pulgadas' => 'nullable|string|max:11',
+            'idModelo' => 'required|array',
+            'idModelo.*' => 'integer|exists:modelo,idModelo',
+            'idTipoArea' => 'required|integer|exists:tipo_area,id',
+            'idsubcategoria' => 'required|integer|exists:subcategoria,idsubcategoria'
+        ]);
+
+        // Asignación de valores por defecto
+        $dataArticulo = $validatedData;
+        unset($dataArticulo['idModelo']); // Excluimos el array de modelos antes de crear el artículo
+
+        $dataArticulo['estado'] = 1; // Activo por defecto
+        $dataArticulo['idTipoArticulo'] = 2; // Tipo de artículo por defecto (repuesto)
+        $dataArticulo['fecha_ingreso'] = now();
+        $dataArticulo['moneda_compra'] = 1; // PEN por defecto
+        $dataArticulo['moneda_venta'] = 1; // PEN por defecto
+
+        // Crear el artículo
+        $articulo = Articulo::create($dataArticulo);
+
+        // Registrar movimiento inicial en el Kardex (solo si hay stock)
+        if ($dataArticulo['stock_total'] > 0) {
+            Kardex::create([
+                'fecha' => now(),
+                'idArticulo' => $articulo->idArticulos,
+                'unidades_entrada' => $dataArticulo['stock_total'],
+                'costo_unitario_entrada' => $dataArticulo['precio_compra'],
+                'unidades_salida' => 0,
+                'costo_unitario_salida' => 0,
+                'inventario_inicial' => $dataArticulo['stock_total'], 
+                'inventario_actual' => $dataArticulo['stock_total'],
+                'costo_inventario' => $dataArticulo['stock_total'] * $dataArticulo['precio_compra']
+            ]);
+        }
+
+        // Generar códigos de barras si existen
+        $this->generarCodigosBarras($articulo, $dataArticulo);
+
+        // Guardar modelos múltiples (relación muchos a muchos)
+        foreach ($request->idModelo as $modeloId) {
+            ArticuloModelo::create([
+                'articulo_id' => $articulo->idArticulos,
+                'modelo_id' => $modeloId,
+            ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Repuesto agregado correctamente',
+            'repuesto' => $articulo,
+            'modelos' => $request->idModelo
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al guardar el repuesto: ' . $e->getMessage(),
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+// Método auxiliar para generar códigos de barras
+private function generarCodigosBarras($articulo, $data)
+{
+    $barcodeGenerator = new BarcodeGeneratorPNG();
+    
+    if (!empty($data['codigo_barras'])) {
+        $barcode = $barcodeGenerator->getBarcode($data['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
+        $articulo->update(['foto_codigobarras' => $barcode]);
+    }
+
+    if (!empty($data['sku'])) {
+        $barcode = $barcodeGenerator->getBarcode($data['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
+        $articulo->update(['fotosku' => $barcode]);
+    }
+
+    if (!empty($data['codigo_repuesto'])) {
+        $barcode = $barcodeGenerator->getBarcode($data['codigo_repuesto'], BarcodeGeneratorPNG::TYPE_CODE_128);
+        $articulo->update(['br-codigo-repuesto' => $barcode]);
+    }
+}
 
 public function buscar(Request $request)
 {

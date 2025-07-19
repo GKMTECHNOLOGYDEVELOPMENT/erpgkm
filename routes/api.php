@@ -17,6 +17,9 @@ use App\Http\Controllers\almacen\repuestos\RepuestosController;
 use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
+use App\Http\Controllers\Apps\ActividadController;
+use App\Http\Controllers\Apps\CalendarController;
+use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
@@ -288,3 +291,19 @@ Route::get('/api/validar-nombre-subcategoria', [SubcategoriaController::class, '
 
 
 
+// Route::middleware('auth:sanctum')->group(function () {
+//     // Rutas para actividades
+//     Route::get('actividades', [ActividadController::class, 'index']);
+//     Route::post('actividades', [ActividadController::class, 'store']);
+//     Route::put('actividades/{id}', [ActividadController::class, 'update']);
+//     Route::delete('actividades/{id}', [ActividadController::class, 'destroy']);
+
+//     // Rutas para etiquetas
+//     Route::get('etiquetas', [EtiquetaController::class, 'index']);
+//     Route::post('etiquetas', [EtiquetaController::class, 'store']);
+//     Route::put('etiquetas/{id}', [EtiquetaController::class, 'update']);
+//     Route::delete('etiquetas/{id}', [EtiquetaController::class, 'destroy']);
+// });
+
+
+Route::get('/usuarios', [CalendarController::class, 'usuariov1']);
