@@ -23,6 +23,11 @@ document.addEventListener("alpine:init", () => {
             invitados: []
         },
 
+
+        isSaving: false,
+        isDeleting: false,
+        isSavingTag: false,
+        isDeletingTag: false,
         isAddEventModal: false,
         minStartDate: '',
         minEndDate: '',
@@ -32,6 +37,13 @@ document.addEventListener("alpine:init", () => {
         etiquetas: [],
         usuarios: [],
         tomSelect: null,
+         isEtiquetaModal: false,
+        etiquetaParams: {
+            id: null,
+            nombre: '',
+            color: '',
+            icono: ''
+        },
 
         async init() {
             // Cargar etiquetas y usuarios
@@ -120,19 +132,104 @@ getColorForEtiqueta(nombreEtiqueta) {
     }
 },
 
-    async fetchEventos() {
+    // Métodos para gestión de etiquetas
+        showEtiquetaModal(etiqueta = null) {
+            this.etiquetaParams = etiqueta ? 
+                JSON.parse(JSON.stringify(etiqueta)) : 
+                { id: null, nombre: '', color: '', icono: '' };
+            this.isEtiquetaModal = true;
+        },
+        
+        editEtiqueta(etiqueta) {
+            this.showEtiquetaModal(etiqueta);
+        },
+        
+        async saveEtiqueta() {
+            if (!this.etiquetaParams.nombre || !this.etiquetaParams.color) {
+                this.showMessage('Nombre y color son requeridos', 'error');
+                return;
+            }
+
+                this.isSavingTag = true; // Activar estado de carga
+
+            
+            try {
+                let response;
+                if (this.etiquetaParams.id) {
+                    // Actualizar etiqueta
+                    response = await axios.put(`/etiquetas/${this.etiquetaParams.id}`, this.etiquetaParams);
+                    const index = this.etiquetas.findIndex(e => e.id === this.etiquetaParams.id);
+                    if (index !== -1) {
+                        this.etiquetas[index] = response.data;
+                    }
+                } else {
+                    // Crear nueva etiqueta
+                    response = await axios.post('/etiquetas', this.etiquetaParams);
+                    this.etiquetas.push(response.data);
+                }
+                
+                // Actualizar eventos para reflejar cambios en colores
+                await this.fetchEventos();
+                this.calendar.refetchEvents();
+                
+               this.showMessage('Etiqueta guardada exitosamente');
+        this.isEtiquetaModal = false;
+    } catch (error) {
+        console.error('Error saving tag:', error);
+        this.showMessage('Error al guardar la etiqueta', 'error');
+    } finally {
+        this.isSavingTag = false; // Desactivar estado de carga
+    }
+        },
+        
+        async deleteEtiqueta(id) {
+            if (!id) return;
+                this.isDeletingTag = true; // Activar estado de carga
+
+            try {
+                // Verificar si la etiqueta está en uso
+                const etiqueta = this.etiquetas.find(t => t.id === id);
+                const eventosConEstaEtiqueta = this.events.filter(
+                    e => e.extendedProps?.etiqueta === etiqueta?.nombre
+                );
+                
+                if (eventosConEstaEtiqueta.length > 0) {
+                    this.showMessage('No puedes eliminar una etiqueta en uso', 'error');
+                    return;
+                }
+                
+                await axios.delete(`/etiquetas/${id}`);
+                this.etiquetas = this.etiquetas.filter(e => e.id !== id);
+                
+                // Actualizar eventos
+                await this.fetchEventos();
+                this.calendar.refetchEvents();
+                
+                this.showMessage('Etiqueta eliminada exitosamente');
+        this.isEtiquetaModal = false;
+    } catch (error) {
+        console.error('Error deleting tag:', error);
+        this.showMessage('Error al eliminar la etiqueta', 'error');
+    } finally {
+        this.isDeletingTag = false; // Desactivar estado de carga
+    }
+        },
+
+async fetchEventos() {
     try {
         const response = await axios.get('/actividades');
         this.events = response.data.map(event => {
             // Buscar la etiqueta completa en el array de etiquetas
             const etiquetaCompleta = this.etiquetas.find(e => e.nombre === event.etiqueta);
+            const colorClase = etiquetaCompleta ? `bg-${etiquetaCompleta.color}` : 'bg-primary';
             
             return {
                 id: event.actividad_id,
                 title: event.titulo,
                 start: event.fechainicio,
                 end: event.fechafin,
-                className: etiquetaCompleta ? `bg-${etiquetaCompleta.color}` : 'bg-primary',
+                allDay: this.isAllDayEvent(event.fechainicio, event.fechafin),
+                className: colorClase,
                 description: event.descripcion,
                 enlaceevento: event.enlaceevento,
                 ubicacion: event.ubicacion,
@@ -140,13 +237,60 @@ getColorForEtiqueta(nombreEtiqueta) {
                 extendedProps: {
                     etiqueta: event.etiqueta,
                     color: etiquetaCompleta?.color || 'primary'
-                }
+                },
+                display: 'block', // Fuerza el mismo estilo para todos los eventos
+                backgroundColor: this.getBackgroundColor(etiquetaCompleta?.color),
+                borderColor: this.getBorderColor(etiquetaCompleta?.color)
             };
         });
     } catch (error) {
         console.error('Error fetching eventos:', error);
         this.showMessage('Error al cargar eventos', 'error');
     }
+},
+
+// Verifica si el evento es de todo el día
+isAllDayEvent(start, end) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    
+    // Si no tiene hora (es medianoche) o dura exactamente 24 horas
+    return (startDate.getHours() === 0 && startDate.getMinutes() === 0) || 
+           (endDate - startDate) === 86400000;
+},
+
+// Obtiene el color de fondo en formato hexadecimal
+getBackgroundColor(colorName) {
+    const colors = {
+        'primary': '#3b82f6',
+        'success': '#10b981',
+        'danger': '#ef4444',
+        'warning': '#f59e0b',
+        'info': '#06b6d4',
+        'secondary': '#64748b',
+        'dark': '#1e293b',
+        'indigo': '#6366f1',
+        'purple': '#8b5cf6',
+        'pink': '#ec4899'
+    };
+    return colors[colorName] || colors['primary'];
+},
+
+// Obtiene el color del borde (puede ser igual al de fondo o un tono más oscuro)
+getBorderColor(colorName) {
+    const colors = {
+        'primary': '#2563eb',
+        'success': '#059669',
+        'danger': '#dc2626',
+        'warning': '#d97706',
+        'info': '#0891b2',
+        'secondary': '#475569',
+        'dark': '#0f172a',
+        'indigo': '#4f46e5',
+        'purple': '#7c3aed',
+        'pink': '#db2777'
+    };
+    return colors[colorName] || colors['primary'];
 },
 
      initTomSelect() {
@@ -268,8 +412,11 @@ editEvent(data) {
         return;
     }
 
-    try {
-        // Obtener invitados seleccionados (asegurando que sean strings)
+        this.isSaving= true; // Activar estado de carga
+
+
+ try {
+        // Obtener invitados seleccionados
         this.params.invitados = this.tomSelect.getValue().map(id => id.toString());
 
         let response;
@@ -290,6 +437,10 @@ editEvent(data) {
             const eventObj = this.calendar.getEventById(this.params.id);
             
             if (eventObj) {
+                // Obtener la etiqueta completa
+                const etiquetaCompleta = this.etiquetas.find(e => e.nombre === this.params.etiqueta);
+                const colorClase = this.getColorForEtiqueta(this.params.etiqueta);
+                
                 // Actualizar todas las propiedades del evento
                 eventObj.setProp('title', this.params.title);
                 eventObj.setDates(this.params.start, this.params.end);
@@ -298,11 +449,12 @@ editEvent(data) {
                 eventObj.setExtendedProp('enlaceevento', this.params.enlaceevento);
                 eventObj.setExtendedProp('ubicacion', this.params.ubicacion);
                 eventObj.setExtendedProp('invitados', this.params.invitados);
-                eventObj.setProp('classNames', [this.getColorForEtiqueta(this.params.etiqueta)]);
-
-                // Actualizar el color basado en la etiqueta
-                const colorClase = this.getColorForEtiqueta(this.params.etiqueta);
+                
+                // Actualizar estilos visuales
                 eventObj.setProp('classNames', [colorClase]);
+                eventObj.setProp('backgroundColor', this.getBackgroundColor(etiquetaCompleta?.color));
+                eventObj.setProp('borderColor', this.getBorderColor(etiquetaCompleta?.color));
+                eventObj.setProp('allDay', this.isAllDayEvent(this.params.start, this.params.end));
             }
         } else {
             // CREAR NUEVO EVENTO
@@ -317,37 +469,50 @@ editEvent(data) {
                 invitados: this.params.invitados
             });
 
+            // Obtener la etiqueta completa
+            const etiquetaCompleta = this.etiquetas.find(e => e.nombre === this.params.etiqueta);
+            const colorClase = this.getColorForEtiqueta(this.params.etiqueta);
+            
             // Agregar el nuevo evento al calendario
             this.calendar.addEvent({
                 id: response.data.actividad_id,
                 title: this.params.title,
                 start: this.params.start,
                 end: this.params.end,
-                className: this.getColorForEtiqueta(this.params.etiqueta),
+                allDay: this.isAllDayEvent(this.params.start, this.params.end),
+                className: colorClase,
+                backgroundColor: this.getBackgroundColor(etiquetaCompleta?.color),
+                borderColor: this.getBorderColor(etiquetaCompleta?.color),
+                display: 'block',
                 extendedProps: {
                     description: this.params.description,
                     etiqueta: this.params.etiqueta,
                     enlaceevento: this.params.enlaceevento,
                     ubicacion: this.params.ubicacion,
                     invitados: this.params.invitados,
-                    color: this.getColorForEtiqueta(this.params.etiqueta)
-
+                    color: etiquetaCompleta?.color || 'primary'
                 }
             });
         }
 
-        this.showMessage('Evento guardado exitosamente');
+     this.showMessage('Evento guardado exitosamente');
         this.isAddEventModal = false;
     } catch (error) {
         console.error('Error saving event:', error);
         this.showMessage('Error al guardar el evento', 'error');
+    } finally {
+        this.isSaving= false; // Desactivar estado de carga
     }
 },
        async deleteEvent() {
     if (!this.params.id) return;
+
+        this.isDeleting = true; // Activar estado de carga
+
     
     try {
         await axios.delete(`/actividades/${this.params.id}`);
+        
         
         // Eliminar el evento localmente sin recargar
         this.events = this.events.filter(e => e.id != this.params.id);
@@ -356,9 +521,11 @@ editEvent(data) {
         
         this.showMessage('Evento eliminado exitosamente');
         this.isAddEventModal = false;
-    } catch (error) {
+  } catch (error) {
         console.error('Error deleting event:', error);
         this.showMessage('Error al eliminar el evento', 'error');
+    } finally {
+        this.isDeleting = false; // Desactivar estado de carga
     }
 },
         startDateChange(event) {
