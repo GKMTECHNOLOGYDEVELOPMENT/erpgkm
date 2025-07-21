@@ -184,10 +184,13 @@
     <div class="container mx-auto px-4 py-6" x-data="repuestos">
         <!-- Encabezado -->
         <div class="mb-8">
-            <h1 class="text-2xl font-bold mb-2">REGISTRO DE REPUESTOS TCL - USO INTERNO</h1>
+            <h1 class="text-2xl font-bold mb-2">SALIDAS - USO INTERNO</h1>
             <p class="text-gray-600">
-                En este módulo podrá registrar repuestos TCL, ya sean nuevos o ya registrados en el sistema.
-                También puede ver la lista de todos los repuestos registrados y buscar repuestos específicos.
+                Para agregar productos debe de digitar el código de barras en el campo "Código de producto" y luego
+                presionar Agregar producto o presionar la tecla enter. También puede agregar el producto mediante la
+                opción Buscar producto. Si está utilizando lector de códigos de barras, debe de conectar un lector de
+                código de barras a su computadora, luego seleccionar el campo "Código de producto" y escanear el código
+                con el lector.
             </p>
 
             <!-- Pestañas -->
@@ -208,23 +211,32 @@
                         para registrar un nuevo repuesto.
                     </p>
 
-                    <div class="flex items-end gap-4 mb-8">
-                        <!-- Input con ancho forzado -->
-                        <div class="w-full">
-                            <label class="block text-sm mb-1">Código de repuesto / Código de
-                                barras</label>
-                            <input type="text" class="clean-input w-full text-xl" placeholder="Código de repuesto"
+                    <div class="grid grid-cols-1 md:grid-cols-3 items-end gap-4 mb-8">
+                        <!-- Botones con separación -->
+                        <div class="flex flex-col md:block md:col-span-1 gap-3">
+                            <button type="button" @click="abrirModalBusqueda"
+                                class="btn btn-sm btn-secondary w-full flex items-center justify-center gap-2">
+                                <i class="fas fa-search"></i>
+                                BUSCAR
+                            </button>
+                            <button type="button" @click="abrirModalVerificacion"
+                                class="btn btn-sm btn-primary w-full flex items-center justify-center gap-2">
+                                <i class="fas fa-check-circle"></i>
+                                AGREGAR
+                            </button>
+                        </div>
+                    
+                        <!-- Input ancho completo -->
+                        <div class="md:col-span-2">
+                            <label class="block text-sm mb-1">Código de producto</label>
+                            <input type="text" class="clean-input w-full text-xl" placeholder="Código de producto"
                                 x-model="codigoRepuesto" @keyup.enter="abrirModalVerificacion" />
                         </div>
-
-                        <!-- Botón fijo -->
-                        <button
-                            class="shrink-0 bg-primary text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
-                            @click="abrirModalVerificacion">
-                            <i class="fas fa-check-circle"></i>
-                            VERIFICAR REPUESTO
-                        </button>
                     </div>
+                    
+                    
+                    
+
 
                     <!-- Tabla de repuestos -->
                     <div class="overflow-x-auto">
@@ -239,13 +251,10 @@
                                         Código</th>
                                     <th
                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Sub Categoria</th>
+                                        Producto</th>
                                     <th
                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Modelo</th> <!-- Nueva columna -->
-                                    <th
-                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Cantidad</th>
+                                        Cant</th> <!-- Nueva columna -->
                                     <th
                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Precio</th>
@@ -254,16 +263,37 @@
                                         Subtotal</th>
                                     <th
                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <div class="flex items-center gap-1">
+                                            Cantidad
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 6h16M4 12h16M4 18h16" />
+                                            </svg>
+                                        </div>
+                                    </th>
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <div class="flex items-center gap-1">
+                                            Precio
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3m-3-9v2m0 16v2m-4-4h8" />
+                                            </svg>
+                                        </div>
+                                    </th>
+
+                                    <th
+                                        class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Remover</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                 <template x-if="repuestos.length === 0">
                                     <tr>
-                                        <td colspan="7"
-                                            class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                                            No hay repuestos agregados
-                                        </td>
+                                        <td colspan="9" class="text-center font-semibold text-gray-600 py-4">No hay
+                                            productos agregados</td>
                                     </tr>
                                 </template>
 
@@ -511,109 +541,128 @@
                             </div>
                         </template>
 
-                         <template x-if="!repuestoEncontrado && codigoRepuesto">
-                    <!-- Contenido para nuevo repuesto -->
-                    <div class="p-6 space-y-8">
-                        <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            Repuesto no encontrado: Registrar nuevo repuesto TCL
-                        </h4>
+                        <template x-if="!repuestoEncontrado && codigoRepuesto">
+                            <!-- Contenido para nuevo repuesto -->
+                            <div class="p-6 space-y-8">
+                                <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Repuesto no encontrado: Registrar nuevo repuesto TCL
+                                </h4>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Código de Repuesto -->
-                            <div>
-                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                    <i class="fas fa-barcode"></i> Código de Repuesto TCL <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" class="clean-input" x-model="nuevoRepuesto.codigo_repuesto" :value="codigoRepuesto" required>
-                            </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Código de Repuesto -->
+                                    <div>
+                                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <i class="fas fa-barcode"></i> Código de Repuesto TCL <span
+                                                class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" class="clean-input"
+                                            x-model="nuevoRepuesto.codigo_repuesto" :value="codigoRepuesto" required>
+                                    </div>
 
-                            <!-- Código de Barras -->
-                            <div>
-                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                    <i class="fas fa-barcode"></i> Código de Barras
-                                </label>
-                                <input type="text" class="clean-input" x-model="nuevoRepuesto.codigo_barras">
-                            </div>
+                                    <!-- Código de Barras -->
+                                    <div>
+                                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <i class="fas fa-barcode"></i> Código de Barras
+                                        </label>
+                                        <input type="text" class="clean-input"
+                                            x-model="nuevoRepuesto.codigo_barras">
+                                    </div>
 
-                            <!-- SKU -->
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">SKU</label>
-                                <input type="text" class="clean-input" x-model="nuevoRepuesto.sku">
-                            </div>
+                                    <!-- SKU -->
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700">SKU</label>
+                                        <input type="text" class="clean-input" x-model="nuevoRepuesto.sku">
+                                    </div>
 
-                            <!-- Nombre -->
-                            <div>
-                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                    <i class="fas fa-cog"></i> Nombre del Repuesto <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" id="nombre" class="clean-input" x-model="nuevoRepuesto.nombre" required>
-                            </div>
+                                    <!-- Nombre -->
+                                    <div>
+                                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <i class="fas fa-cog"></i> Nombre del Repuesto <span
+                                                class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" id="nombre" class="clean-input"
+                                            x-model="nuevoRepuesto.nombre" required>
+                                    </div>
 
-                            <!-- Modelos compatibles -->
-                            <div class="col-span-1 md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelos compatibles <span class="text-red-500">*</span></label>
-                                <select id="modelosSelect" name="modelos[]" class="w-full" multiple="multiple">
-                                    @foreach ($modelos as $modelo)
-                                        <option value="{{ $modelo->idModelo }}">
-                                            {{ $modelo->nombre }} - {{ $modelo->marca->nombre ?? 'Sin Marca' }} - {{ $modelo->categoria->nombre ?? 'Sin Categoria' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                    <!-- Modelos compatibles -->
+                                    <div class="col-span-1 md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Modelos compatibles
+                                            <span class="text-red-500">*</span></label>
+                                        <select id="modelosSelect" name="modelos[]" class="w-full"
+                                            multiple="multiple">
+                                            @foreach ($modelos as $modelo)
+                                                <option value="{{ $modelo->idModelo }}">
+                                                    {{ $modelo->nombre }} - {{ $modelo->marca->nombre ?? 'Sin Marca' }}
+                                                    - {{ $modelo->categoria->nombre ?? 'Sin Categoria' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                            <!-- Pulgadas -->
-                            <div>
-                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                    <i class="fas fa-ruler"></i> Pulgadas
-                                </label>
-                                <input type="text" class="clean-input" x-model="nuevoRepuesto.pulgadas">
-                            </div>
+                                    <!-- Pulgadas -->
+                                    <div>
+                                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <i class="fas fa-ruler"></i> Pulgadas
+                                        </label>
+                                        <input type="text" class="clean-input" x-model="nuevoRepuesto.pulgadas">
+                                    </div>
 
-                            <!-- Stock Total -->
-                            <div>
-                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                    <i class="fas fa-boxes"></i> Stock Total <span class="text-red-500">*</span>
-                                </label>
-                                <input type="number" class="clean-input" x-model="nuevoRepuesto.stock_total" min="0" required>
-                            </div>
+                                    <!-- Stock Total -->
+                                    <div>
+                                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <i class="fas fa-boxes"></i> Stock Total <span
+                                                class="text-red-500">*</span>
+                                        </label>
+                                        <input type="number" class="clean-input" x-model="nuevoRepuesto.stock_total"
+                                            min="0" required>
+                                    </div>
 
-                            <!-- Stock Mínimo -->
-                            <div>
-                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                    <i class="fas fa-exclamation-triangle"></i> Stock Mínimo <span class="text-red-500">*</span>
-                                </label>
-                                <input type="number" class="clean-input" x-model="nuevoRepuesto.stock_minimo" min="0" required>
-                            </div>
+                                    <!-- Stock Mínimo -->
+                                    <div>
+                                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                            <i class="fas fa-exclamation-triangle"></i> Stock Mínimo <span
+                                                class="text-red-500">*</span>
+                                        </label>
+                                        <input type="number" class="clean-input"
+                                            x-model="nuevoRepuesto.stock_minimo" min="0" required>
+                                    </div>
 
-                            <!-- Precio Compra -->
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Precio de Compra <span class="text-red-500">*</span></label>
-                                <div class="flex items-center gap-2">
-                                    <span>S/</span>
-                                    <input type="number" step="0.01" class="clean-input" x-model="nuevoRepuesto.precio_compra" min="0" required>
+                                    <!-- Precio Compra -->
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700">Precio de Compra <span
+                                                class="text-red-500">*</span></label>
+                                        <div class="flex items-center gap-2">
+                                            <span>S/</span>
+                                            <input type="number" step="0.01" class="clean-input"
+                                                x-model="nuevoRepuesto.precio_compra" min="0" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Precio Venta -->
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700">Precio de Venta <span
+                                                class="text-red-500">*</span></label>
+                                        <div class="flex items-center gap-2">
+                                            <span>S/</span>
+                                            <input type="number" step="0.01" class="clean-input"
+                                                x-model="nuevoRepuesto.precio_venta" min="0" required>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="pt-6 flex justify-end">
+                                    <button @click="guardarNuevoRepuesto" class="btn btn-primary">Guardar
+                                        repuesto</button>
                                 </div>
                             </div>
-
-                            <!-- Precio Venta -->
-                            <div>
-                                <label class="text-sm font-medium text-gray-700">Precio de Venta <span class="text-red-500">*</span></label>
-                                <div class="flex items-center gap-2">
-                                    <span>S/</span>
-                                    <input type="number" step="0.01" class="clean-input" x-model="nuevoRepuesto.precio_venta" min="0" required>
-                                </div>
-                            </div>
-
-                         
-                        </div>
-
-                        <div class="pt-6 flex justify-end">
-                            <button @click="guardarNuevoRepuesto" class="btn btn-primary">Guardar repuesto</button>
-                        </div>
-                    </div>
-                </template>
+                        </template>
                     </div>
 
                     <!-- Footer -->
@@ -871,130 +920,137 @@
                     return 'S/ ' + value.toFixed(2);
                 },
 
-           async guardarNuevoRepuesto() {
-            // Validación mejorada
-            if (!this.nuevoRepuesto.codigo_repuesto) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Campo requerido',
-                    text: 'El código de repuesto es obligatorio'
-                });
-                return;
-            }
+                async guardarNuevoRepuesto() {
+                    // Validación mejorada
+                    if (!this.nuevoRepuesto.codigo_repuesto) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Campo requerido',
+                            text: 'El código de repuesto es obligatorio'
+                        });
+                        return;
+                    }
 
-            if (!this.nuevoRepuesto.nombre) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Campo requerido',
-                    text: 'El nombre del repuesto es obligatorio'
-                });
-                return;
-            }
+                    if (!this.nuevoRepuesto.nombre) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Campo requerido',
+                            text: 'El nombre del repuesto es obligatorio'
+                        });
+                        return;
+                    }
 
-            // Obtener modelos seleccionados directamente de Select2
-            const modelosSeleccionados = $('#modelosSelect').val();
-            if (!modelosSeleccionados || modelosSeleccionados.length === 0) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Campo requerido',
-                    text: 'Debe seleccionar al menos un modelo compatible'
-                });
-                return;
-            }
+                    // Obtener modelos seleccionados directamente de Select2
+                    const modelosSeleccionados = $('#modelosSelect').val();
+                    if (!modelosSeleccionados || modelosSeleccionados.length === 0) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Campo requerido',
+                            text: 'Debe seleccionar al menos un modelo compatible'
+                        });
+                        return;
+                    }
 
-            // Validar precios
-            if (parseFloat(this.nuevoRepuesto.precio_compra) > parseFloat(this.nuevoRepuesto.precio_venta)) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Precios inválidos',
-                    text: 'El precio de compra no puede ser mayor al precio de venta'
-                });
-                return;
-            }
+                    // Validar precios
+                    if (parseFloat(this.nuevoRepuesto.precio_compra) > parseFloat(this.nuevoRepuesto
+                            .precio_venta)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Precios inválidos',
+                            text: 'El precio de compra no puede ser mayor al precio de venta'
+                        });
+                        return;
+                    }
 
-            try {
-                const response = await fetch('/articulosmodal', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        ...this.nuevoRepuesto,
-                        idModelo: modelosSeleccionados,
-                        stock_total: parseInt(this.nuevoRepuesto.stock_total),
-                        stock_minimo: parseInt(this.nuevoRepuesto.stock_minimo),
-                        precio_compra: parseFloat(this.nuevoRepuesto.precio_compra),
-                        precio_venta: parseFloat(this.nuevoRepuesto.precio_venta)
-                    })
-                });
+                    try {
+                        const response = await fetch('/articulosmodal', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                ...this.nuevoRepuesto,
+                                idModelo: modelosSeleccionados,
+                                stock_total: parseInt(this.nuevoRepuesto
+                                    .stock_total),
+                                stock_minimo: parseInt(this.nuevoRepuesto
+                                    .stock_minimo),
+                                precio_compra: parseFloat(this.nuevoRepuesto
+                                    .precio_compra),
+                                precio_venta: parseFloat(this.nuevoRepuesto
+                                    .precio_venta)
+                            })
+                        });
 
-                const data = await response.json();
+                        const data = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(data.message || 'Error al guardar el repuesto');
-                }
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Error al guardar el repuesto');
+                        }
 
-                if (data.success) {
-                    // Obtener nombres de los modelos seleccionados
-                    const nombresModelos = this.modelos
-                        .filter(m => modelosSeleccionados.includes(m.idModelo.toString()))
-                        .map(m => m.nombre)
-                        .join(', ');
+                        if (data.success) {
+                            // Obtener nombres de los modelos seleccionados
+                            const nombresModelos = this.modelos
+                                .filter(m => modelosSeleccionados.includes(m.idModelo.toString()))
+                                .map(m => m.nombre)
+                                .join(', ');
 
-                    // Agregar el nuevo repuesto a la lista
-                    this.repuestos.push({
-                        id: data.repuesto.idArticulos,
-                        codigo_repuesto: data.repuesto.codigo_repuesto,
-                        codigo_barras: data.repuesto.codigo_barras,
-                        nombre: data.repuesto.nombre,
-                        cantidad: data.repuesto.stock_total,
-                        precio: data.repuesto.precio_compra,
-                        subtotal: data.repuesto.stock_total * data.repuesto.precio_compra,
-                        stock_total: data.repuesto.stock_total,
-                        precio_venta: data.repuesto.precio_venta,
-                        modelo: nombresModelos,
-                        pulgadas: data.repuesto.pulgadas
-                    });
+                            // Agregar el nuevo repuesto a la lista
+                            this.repuestos.push({
+                                id: data.repuesto.idArticulos,
+                                codigo_repuesto: data.repuesto.codigo_repuesto,
+                                codigo_barras: data.repuesto.codigo_barras,
+                                nombre: data.repuesto.nombre,
+                                cantidad: data.repuesto.stock_total,
+                                precio: data.repuesto.precio_compra,
+                                subtotal: data.repuesto.stock_total * data.repuesto
+                                    .precio_compra,
+                                stock_total: data.repuesto.stock_total,
+                                precio_venta: data.repuesto.precio_venta,
+                                modelo: nombresModelos,
+                                pulgadas: data.repuesto.pulgadas
+                            });
 
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Éxito!',
-                        text: 'Repuesto guardado correctamente',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Éxito!',
+                                text: 'Repuesto guardado correctamente',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
 
-                    // Resetear el formulario
-                    this.nuevoRepuesto = {
-                        codigo_repuesto: '',
-                        codigo_barras: '',
-                        nombre: '',
-                        stock_total: 0,
-                        stock_minimo: 0,
-                        precio_compra: 0,
-                        precio_venta: 0,
-                        idModelo: [],
-                        pulgadas: '',
-                        sku: '',
-                        idsubcategoria: 1
-                    };
+                            // Resetear el formulario
+                            this.nuevoRepuesto = {
+                                codigo_repuesto: '',
+                                codigo_barras: '',
+                                nombre: '',
+                                stock_total: 0,
+                                stock_minimo: 0,
+                                precio_compra: 0,
+                                precio_venta: 0,
+                                idModelo: [],
+                                pulgadas: '',
+                                sku: '',
+                                idsubcategoria: 1
+                            };
 
-                    // Resetear Select2
-                    $('#modelosSelect').val(null).trigger('change');
+                            // Resetear Select2
+                            $('#modelosSelect').val(null).trigger('change');
 
-                    this.cerrarModal();
-                }
-            } catch (error) {
-                console.error('Error al guardar repuesto:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: error.message || 'Ocurrió un error al guardar el repuesto'
-                });
-            }
-        },
+                            this.cerrarModal();
+                        }
+                    } catch (error) {
+                        console.error('Error al guardar repuesto:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message || 'Ocurrió un error al guardar el repuesto'
+                        });
+                    }
+                },
                 guardarRegistro() {
                     if (!this.puedeGuardar) return;
 
