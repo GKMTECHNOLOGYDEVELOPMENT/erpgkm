@@ -201,14 +201,14 @@
                                         <label for="dateStart">Inicio :</label>
                                         <input id="dateStart" type="datetime-local" name="start" id="start"
                                             class="form-input" placeholder="Event Start Date" x-model="params.start"
-                                            :min="minStartDate" @change="startDateChange($event)" required />
+                                            :min="getNowDateTime()" @change="startDateChange($event)" required />
                                         <div class="text-danger mt-2" id="startDateErr"></div>
                                     </div>
                                     <div class="mb-5">
                                         <label for="dateEnd">Fin :</label>
                                         <input id="dateEnd" type="datetime-local" name="end" id="end"
                                             class="form-input" placeholder="Event End Date" x-model="params.end"
-                                            :min="minEndDate" required />
+                                            :min="getNowDateTime()" required />
                                         <div class="text-danger mt-2" id="endDateErr"></div>
                                     </div>
                                     <div class="mb-5">
