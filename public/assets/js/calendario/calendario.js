@@ -184,9 +184,20 @@ document.addEventListener("alpine:init", () => {
                 this.showMessage('Etiqueta guardada exitosamente');
                 this.isEtiquetaModal = false;
             } catch (error) {
-                console.error('Error saving tag:', error);
-                this.showMessage('Error al guardar la etiqueta', 'error');
-            } finally {
+    console.error('Error saving tag:', error);
+
+    let msg = 'Error al guardar la etiqueta';
+
+    if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors;
+
+        if (errors?.nombre) {
+            msg = errors.nombre[0]; // ← Mensaje de Laravel
+        }
+    }
+
+    this.showMessage(msg, 'error');
+} finally {
                 this.isSavingTag = false; // Desactivar estado de carga
             }
         },
