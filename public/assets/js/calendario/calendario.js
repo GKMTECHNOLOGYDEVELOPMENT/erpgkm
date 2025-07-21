@@ -59,6 +59,7 @@ document.addEventListener("alpine:init", () => {
             var calendarEl = document.getElementById('calendar');
             this.calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
+                locale: 'es', // ← 👈 AÑADE ESTA LÍNEA
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',

@@ -244,7 +244,7 @@
                                     <a href="/apps/invoice/edit">Edit</a>
                                 </li>
                             </ul>
-                        </li> -->
+                        </li> 
                         <li class="nav-item">
                             <a href="{{ route('apps.calendar') }}" class="group">
                                 <div class="flex items-center">
