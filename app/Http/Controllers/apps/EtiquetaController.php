@@ -37,12 +37,18 @@ class EtiquetaController extends Controller
 
     public function update(Request $request, $id)
     {
-        $etiqueta = Etiqueta::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+             $etiqueta = Etiqueta::find($id);
 
-        $request->validate([
-            'nombre' => 'required|string|max:255',
+if (!$etiqueta) {
+    return response()->json(['message' => 'Etiqueta no encontrada.'], 404);
+}
+
+if ($etiqueta->user_id !== Auth::id()) {
+    return response()->json(['message' => 'No tienes permiso para actualizar esta etiqueta.'], 403);
+}
+
+      $request->validate([
+            'nombre' => 'required|string|max:255|unique:etiquetas,nombre,' . $etiqueta->id,
             'color' => 'required|string|max:255',
             'icono' => 'nullable|string|max:255',
         ]);
@@ -55,6 +61,8 @@ class EtiquetaController extends Controller
 
         return response()->json($etiqueta);
     }
+
+
 
     public function destroy($id)
     {

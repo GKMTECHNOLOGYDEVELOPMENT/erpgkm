@@ -194,23 +194,26 @@ document.addEventListener("alpine:init", () => {
 
                 this.showMessage('Etiqueta guardada exitosamente');
                 this.isEtiquetaModal = false;
-            } catch (error) {
+        } catch (error) {
     console.error('Error saving tag:', error);
 
     let msg = 'Error al guardar la etiqueta';
 
-    if (error.response && error.response.status === 422) {
-        const errors = error.response.data.errors;
+    if (error.response) {
+        const status = error.response.status;
 
-        if (errors?.nombre) {
-            msg = errors.nombre[0]; // ← Mensaje de Laravel
+        if (status === 422 && error.response.data.errors?.nombre) {
+            msg = error.response.data.errors.nombre[0]; // ← Validación Laravel
+        } else if (status === 403 || status === 404) {
+            msg = error.response.data.message; // ← Mensaje personalizado del backend
         }
     }
 
     this.showMessage(msg, 'error');
-} finally {
-                this.isSavingTag = false; // Desactivar estado de carga
-            }
+}
+ finally {
+        this.isSavingTag = false;
+    }
         },
         
        async deleteEtiqueta(id) {
@@ -550,15 +553,15 @@ document.addEventListener("alpine:init", () => {
      this.showMessage('Evento guardado exitosamente');
         this.isAddEventModal = false;
     } catch (error) {
-        console.error('Error saving event:', error);
-let msg = 'Error al guardar el evento';
-if (error.response) {
-    if (error.response.status === 403 || error.response.status === 404) {
-        msg = error.response.data.message;
+    let msg = 'Error al guardar el evento';
+
+    if (error.response?.status === 422) {
+        msg = error.response.data.message || msg;
     }
+
+    this.showMessage(msg, 'error');
 }
-this.showMessage(msg, 'error');
-    } finally {
+ finally {
         this.isSaving= false; // Desactivar estado de carga
     }
 },
