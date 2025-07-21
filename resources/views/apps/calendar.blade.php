@@ -10,7 +10,13 @@
             text-transform: uppercase;
             font-weight: 600;
         }
-        
+
+        @layer utilities {
+            .max-h-3-rows {
+                max-height: 7rem;
+                /* o ajusta según alto de tus ítems */
+            }
+        }
     </style>
 
     <script src='/assets/js/fullcalendar.min.js'></script>
@@ -21,32 +27,34 @@
                     <div class="sm:mb-0 mb-4">
                         <div class="text-lg font-semibold ltr:sm:text-left rtl:sm:text-right text-center">Calendario
                         </div>
-                        <div class="flex items-center mt-2 flex-wrap sm:justify-start justify-center">
-                            <template x-for="etiqueta in etiquetas" :key="etiqueta.id">
-                                <div class="flex items-center ltr:mr-4 rtl:ml-4 group">
-                                    <div class="h-2.5 w-2.5 rounded-sm ltr:mr-2 rtl:ml-2"
-                                        :class="`bg-${etiqueta.color}`"></div>
-                                    <div x-text="etiqueta.nombre" class="mr-1"></div>
-                                    <!-- Botones de acción para cada etiqueta -->
-                                    <button @click="editEtiqueta(etiqueta)"
-                                        class="text-gray-400 hover:text-blue-500 invisible group-hover:visible">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
-                                    <button @click="deleteEtiqueta(etiqueta.id)"
-                                        class="text-gray-400 hover:text-red-500 invisible group-hover:visible">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </template>
+                        <!-- Contenedor externo visible con scroll -->
+                        <div class="border rounded-lg p-3 max-h-3-rows overflow-y-auto text-sm">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2">
+                                <template x-for="etiqueta in etiquetas" :key="etiqueta.id">
+                                    <div class="flex items-center group">
+                                        <div class="h-2 w-2 rounded-sm mr-2" :class="`bg-${etiqueta.color}`"></div>
+                                        <div x-text="etiqueta.nombre" class="mr-1 truncate max-w-[5rem]"></div>
+                                        <button @click="editEtiqueta(etiqueta)"
+                                            class="text-gray-400 hover:text-blue-500 invisible group-hover:visible">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button @click="deleteEtiqueta(etiqueta.id)"
+                                            class="text-gray-400 hover:text-red-500 invisible group-hover:visible ml-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
+
                     </div>
                     <div class="flex gap-2">
                         <button type="button" class="btn btn-primary" @click="editEvent()">
@@ -102,16 +110,13 @@
                                         <select id="etiquetaColor" class="form-select" x-model="etiquetaParams.color"
                                             required>
                                             <option value="">Selecciona un color</option>
-                                            <option value="primary">Azul (Primary)</option>
-                                            <option value="success">Verde (Success)</option>
-                                            <option value="danger">Rojo (Danger)</option>
-                                            <option value="warning">Amarillo (Warning)</option>
-                                            <option value="info">Cian (Info)</option>
-                                            <option value="secondary">Gris (Secondary)</option>
-                                            <option value="dark">Negro (Dark)</option>
-                                            <option value="indigo">Indigo</option>
-                                            <option value="purple">Morado</option>
-                                            <option value="pink">Rosa</option>
+                                            <option value="primary">Azul</option>
+                                            <option value="success">Verde</option>
+                                            <option value="danger">Rojo</option>
+                                            <option value="warning">Amarillo</option>
+                                            <option value="info">Celeste</option>
+                                            <option value="secondary">Morado </option>
+                                            <option value="dark">Negro</option>
                                         </select>
                                     </div>
 
