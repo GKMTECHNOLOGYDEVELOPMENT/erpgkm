@@ -206,7 +206,7 @@
                                         <button type="button" class="btn btn-outline-danger"
                                             @click="isAddEventModal = false">Cancelar</button>
                                        <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4" 
-    x-text="params.id ? (isSaving ? 'Procesando...' : 'Actualizar Actividad') : (isSaving ? 'Procesando...' : 'Crear Actividads')"
+    x-text="params.id ? (isSaving ? 'Procesando...' : 'Actualizar Actividad') : (isSaving ? 'Procesando...' : 'Crear Actividad')"
     :disabled="isSaving">
     <span x-show="isSaving" class="animate-spin -ml-1 mr-2 h-4 w-4">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
