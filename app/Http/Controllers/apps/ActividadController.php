@@ -10,6 +10,7 @@ use App\Models\Invitado;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class ActividadController extends Controller
@@ -47,6 +48,53 @@ public function store(Request $request)
             'fechafin' => 'required|date|after_or_equal:fechainicio',
             'etiqueta' => 'required',
         ]);
+
+        $usuarioId = Auth::id();
+
+    // 1️⃣ VALIDAR CRUCE DE HORARIO DEL USUARIO AUTENTICADO
+    $conflictoUsuario = DB::table('actividades')
+        ->where('user_id', $usuarioId)
+        ->where(function ($query) use ($request) {
+            $query->whereBetween('fechainicio', [$request->fechainicio, $request->fechafin])
+                  ->orWhereBetween('fechafin', [$request->fechainicio, $request->fechafin])
+                  ->orWhere(function ($q) use ($request) {
+                      $q->where('fechainicio', '<=', $request->fechainicio)
+                        ->where('fechafin', '>=', $request->fechafin);
+                  });
+        })
+        ->exists();
+
+    if ($conflictoUsuario) {
+        return response()->json([
+            'message' => 'Ya tienes una actividad en ese rango de fechas y horas.'
+        ], 422);
+    }
+
+    // 2️⃣ VALIDAR CRUCE DE HORARIO PARA INVITADOS (si existen)
+    if ($request->has('invitados') && is_array($request->invitados)) {
+        $invitadoEnConflicto = DB::table('invitados')
+            ->join('actividades', 'invitados.actividad_id', '=', 'actividades.actividad_id')
+            ->whereIn('invitados.id_usuarios', $request->invitados)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('actividades.fechainicio', [$request->fechainicio, $request->fechafin])
+                      ->orWhereBetween('actividades.fechafin', [$request->fechainicio, $request->fechafin])
+                      ->orWhere(function ($q) use ($request) {
+                          $q->where('actividades.fechainicio', '<=', $request->fechainicio)
+                            ->where('actividades.fechafin', '>=', $request->fechafin);
+                      });
+            })
+            ->select('invitados.id_usuarios')
+            ->first();
+
+        if ($invitadoEnConflicto) {
+            $usuario = \App\Models\Usuario::find($invitadoEnConflicto->id_usuarios);
+            return response()->json([
+                'message' => 'El usuario ' . ($usuario->Nombre ?? 'invitado') . ' ya tiene una actividad en ese horario.'
+            ], 422);
+        }
+    }
+
+
 
         $actividad = Actividad::create([
             'titulo' => $request->titulo,
@@ -93,6 +141,9 @@ public function store(Request $request)
             'descripcion' => $actividad->descripcion,
         ], 201);
     }
+
+
+
 
     public function update(Request $request, $id)
     {
