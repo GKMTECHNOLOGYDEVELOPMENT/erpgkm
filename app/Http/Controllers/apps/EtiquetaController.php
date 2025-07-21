@@ -13,7 +13,7 @@ class EtiquetaController extends Controller
 {
     public function index()
     {
-        $etiquetas = Etiqueta::where('user_id', Auth::id())->get();
+        $etiquetas = Etiqueta::all();
         return response()->json($etiquetas);
     }
 
@@ -58,9 +58,16 @@ class EtiquetaController extends Controller
 
     public function destroy($id)
     {
-        $etiqueta = Etiqueta::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+      $etiqueta = Etiqueta::find($id);
+
+if (!$etiqueta) {
+    return response()->json(['message' => 'Etiqueta no encontrada.'], 404);
+}
+
+if ($etiqueta->user_id !== Auth::id()) {
+    return response()->json(['message' => 'No tienes permiso para eliminar esta etiqueta.'], 403);
+}
+
 
         $etiqueta->delete();
 

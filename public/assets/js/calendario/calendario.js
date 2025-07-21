@@ -183,38 +183,59 @@ getColorForEtiqueta(nombreEtiqueta) {
     }
         },
         
-        async deleteEtiqueta(id) {
-            if (!id) return;
-                this.isDeletingTag = true; // Activar estado de carga
+       async deleteEtiqueta(id) {
+    if (!id) return;
 
-            try {
-                // Verificar si la etiqueta está en uso
-                const etiqueta = this.etiquetas.find(t => t.id === id);
-                const eventosConEstaEtiqueta = this.events.filter(
-                    e => e.extendedProps?.etiqueta === etiqueta?.nombre
-                );
-                
-                if (eventosConEstaEtiqueta.length > 0) {
-                    this.showMessage('No puedes eliminar una etiqueta en uso', 'error');
-                    return;
-                }
-                
-                await axios.delete(`/etiquetas/${id}`);
-                this.etiquetas = this.etiquetas.filter(e => e.id !== id);
-                
-                // Actualizar eventos
-                await this.fetchEventos();
-                this.calendar.refetchEvents();
-                
-                this.showMessage('Etiqueta eliminada exitosamente');
+    const confirm = await Swal.fire({
+        title: '¿Eliminar etiqueta?',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    this.isDeletingTag = true;
+
+    try {
+        // Verificar si la etiqueta está en uso
+        const etiqueta = this.etiquetas.find(t => t.id === id);
+        const eventosConEstaEtiqueta = this.events.filter(
+            e => e.extendedProps?.etiqueta === etiqueta?.nombre
+        );
+
+        if (eventosConEstaEtiqueta.length > 0) {
+            this.showMessage('No puedes eliminar una etiqueta en uso', 'error');
+            return;
+        }
+
+        await axios.delete(`/etiquetas/${id}`);
+        this.etiquetas = this.etiquetas.filter(e => e.id !== id);
+
+        await this.fetchEventos();
+        this.calendar.refetchEvents();
+
+        this.showMessage('Etiqueta eliminada exitosamente');
         this.isEtiquetaModal = false;
     } catch (error) {
+        let msg = 'Error al eliminar la etiqueta';
+
+        if (error.response) {
+            if (error.response.status === 403 || error.response.status === 404) {
+                msg = error.response.data.message;
+            }
+        }
+
         console.error('Error deleting tag:', error);
-        this.showMessage('Error al eliminar la etiqueta', 'error');
+        this.showMessage(msg, 'error');
     } finally {
-        this.isDeletingTag = false; // Desactivar estado de carga
+        this.isDeletingTag = false;
     }
-        },
+},
 
 async fetchEventos() {
     try {
@@ -500,35 +521,63 @@ editEvent(data) {
         this.isAddEventModal = false;
     } catch (error) {
         console.error('Error saving event:', error);
-        this.showMessage('Error al guardar el evento', 'error');
+let msg = 'Error al guardar el evento';
+if (error.response) {
+    if (error.response.status === 403 || error.response.status === 404) {
+        msg = error.response.data.message;
+    }
+}
+this.showMessage(msg, 'error');
     } finally {
         this.isSaving= false; // Desactivar estado de carga
     }
 },
-       async deleteEvent() {
+async deleteEvent() {
     if (!this.params.id) return;
 
-        this.isDeleting = true; // Activar estado de carga
+    const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción eliminará el evento de forma permanente.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
 
-    
+    if (!result.isConfirmed) {
+        return; // El usuario canceló
+    }
+
+    this.isDeleting = true;
+
     try {
         await axios.delete(`/actividades/${this.params.id}`);
-        
-        
-        // Eliminar el evento localmente sin recargar
+
         this.events = this.events.filter(e => e.id != this.params.id);
         this.calendar.removeAllEvents();
         this.calendar.addEventSource(this.events);
-        
+
         this.showMessage('Evento eliminado exitosamente');
         this.isAddEventModal = false;
-  } catch (error) {
+    } catch (error) {
+        let msg = 'Error al eliminar el evento';
+
+        if (error.response) {
+            if (error.response.status === 403 || error.response.status === 404) {
+                msg = error.response.data.message;
+            }
+        }
+
         console.error('Error deleting event:', error);
-        this.showMessage('Error al eliminar el evento', 'error');
+        this.showMessage(msg, 'error');
     } finally {
-        this.isDeleting = false; // Desactivar estado de carga
+        this.isDeleting = false;
     }
 },
+
+
         startDateChange(event) {
             const dateStr = event.target.value;
             if (dateStr) {

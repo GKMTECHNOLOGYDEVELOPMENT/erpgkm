@@ -96,9 +96,15 @@ public function store(Request $request)
 
     public function update(Request $request, $id)
     {
-        $actividad = Actividad::where('actividad_id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+     $actividad = Actividad::find($id);
+
+if (!$actividad) {
+    return response()->json(['message' => 'Actividad no encontrada.'], 404);
+}
+
+if ($actividad->user_id !== Auth::id()) {
+    return response()->json(['message' => 'No tienes permiso para actualizar esta actividad.'], 403);
+}
 
         $request->validate([
             'titulo' => 'required',
@@ -174,37 +180,44 @@ public function store(Request $request)
         ]);
     }
 
-    public function destroy($id)
-    {
-        $actividad = Actividad::where('actividad_id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+ public function destroy($id)
+{
+    $actividad = Actividad::where('actividad_id', $id)->first();
 
-        // Obtener invitados antes de eliminar
-        $invitados = Invitado::where('actividad_id', $actividad->actividad_id)
-            ->with('usuario')
-            ->get();
-
-        // Notificar al creador
-        $creador = Usuario::find(Auth::id());
-        Mail::to($creador->correo)->send(
-            new ActividadNotification($actividad, 'eliminacion', $creador)
-        );
-
-        // Notificar a los invitados
-        foreach ($invitados as $invitado) {
-            if ($invitado->usuario) {
-                Mail::to($invitado->usuario->correo)->send(
-                    new ActividadNotification($actividad, 'eliminacion', $invitado->usuario)
-                );
-            }
-        }
-
-        // Eliminar invitados primero
-        Invitado::where('actividad_id', $actividad->actividad_id)->delete();
-        
-        $actividad->delete();
-
-        return response()->json(null, 204);
+    if (!$actividad) {
+        return response()->json(['message' => 'Actividad no encontrada.'], 404);
     }
+
+    if ($actividad->user_id !== Auth::id()) {
+        return response()->json(['message' => 'No tienes permiso para eliminar esta actividad.'], 403);
+    }
+
+    // Obtener invitados antes de eliminar
+    $invitados = Invitado::where('actividad_id', $actividad->actividad_id)
+        ->with('usuario')
+        ->get();
+
+    // Notificar al creador
+    $creador = Usuario::find(Auth::id());
+    Mail::to($creador->correo)->send(
+        new ActividadNotification($actividad, 'eliminacion', $creador)
+    );
+
+    // Notificar a los invitados
+    foreach ($invitados as $invitado) {
+        if ($invitado->usuario) {
+            Mail::to($invitado->usuario->correo)->send(
+                new ActividadNotification($actividad, 'eliminacion', $invitado->usuario)
+            );
+        }
+    }
+
+    // Eliminar invitados primero
+    Invitado::where('actividad_id', $actividad->actividad_id)->delete();
+
+    $actividad->delete();
+
+    return response()->json(null, 204);
+}
+
 }
