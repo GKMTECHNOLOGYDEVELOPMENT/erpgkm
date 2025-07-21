@@ -3,12 +3,14 @@
     <link href="{{ Vite::asset('resources/css/fullcalendar.min.css') }}" rel='stylesheet' />
     <!-- TomSelect CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <!-- Agrega estos estilos -->
     <style>
         .fc {
             text-transform: uppercase;
             font-weight: 600;
         }
+        
     </style>
 
     <script src='/assets/js/fullcalendar.min.js'></script>
@@ -178,12 +180,17 @@
                                             placeholder="Av Sta Elvira E Mz B Lt 8, Los Olivos 15306"
                                             x-model="params.ubicacion" />
                                     </div>
+                                    <div class="mb-5">
+                                        <label for="invitados">Seleccione Invitados (Opcional) :</label>
+                                        <select id="invitados" name="invitados[]" multiple
+                                            class="tom-select"></select>
 
+                                    </div>
                                     <div class="mb-5">
                                         <label for="etiqueta">Etiqueta:</label>
                                         <select id="etiqueta" class="form-select" x-model="params.etiqueta"
                                             required>
-                                            <option value="">Select a Etiqueta</option>
+                                            <option value="">Selecciona la Etiqueta</option>
                                             <template x-for="etiqueta in etiquetas" :key="etiqueta.id">
                                                 <option :value="etiqueta.nombre" x-text="etiqueta.nombre"></option>
                                             </template>
@@ -208,12 +215,6 @@
                                         <label for="description">Descripción de Actividad (Opcional) :</label>
                                         <textarea id="description" name="description" id="description" class="form-textarea min-h-[130px]"
                                             placeholder="Ingrese Descripción" x-model="params.description"></textarea>
-                                    </div>
-                                    <div class="mb-5">
-                                        <label for="invitados">Seleccione Invitados (Opcional) :</label>
-                                        <select id="invitados" name="invitados[]" multiple
-                                            class="tom-select"></select>
-
                                     </div>
 
                                     <div class="flex justify-end items-center mt-8">
@@ -262,5 +263,6 @@
     <script src="{{ asset('assets/js/calendario/calendario.js') }}"></script>
     <!-- JS de NiceSelect -->
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js"></script>
 </x-layout.default>
