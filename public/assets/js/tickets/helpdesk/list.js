@@ -98,7 +98,7 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.datatable1 = $('#myTable1').DataTable({
-                processing: false,
+                processing: true,
                 serverSide: true,
                 ordering: false,
                 order: [[0, 'desc']], // 👈 ORDENAR POR ID
@@ -112,13 +112,6 @@ document.addEventListener('alpine:init', () => {
                         d.endDate = this.endDate;
                     },
 
-
-                    beforeSend: () => {
-                        this.isLoading = true; // 🔹 Muestra el preloader antes de la petición
-                    },
-                    complete: () => {
-                        this.isLoading = false; // 🔹 Oculta el preloader después de recibir datos
-                    },
                     dataSrc: (json) => {
                         console.log("📦 Data completa:", json.data);
                         console.log("📦 manejoEnvio:", json.data[0]?.manejoEnvio); // 🔥 Debería llegar aquí
@@ -219,7 +212,7 @@ document.addEventListener('alpine:init', () => {
                         previous: 'Anterior'
                     }
                 },
-                dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
+                dom: 'rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
                 initComplete: function () {
                     setTimeout(() => {
                         const wrapper = document.querySelector('.dataTables_wrapper');
