@@ -11,7 +11,7 @@ document.addEventListener('alpine:init', () => {
                 serverSide: true,
                 processing: true,
                 ajax: {
-                    url: '/api/usuarios',
+                    url: '/api/usuarios-datatable',
                     type: 'GET'
                 },
                 columns: [
