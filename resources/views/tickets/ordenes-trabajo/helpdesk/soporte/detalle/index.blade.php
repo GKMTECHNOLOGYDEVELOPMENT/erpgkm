@@ -1104,8 +1104,6 @@
                 }
             }
 
-
-
             // Obtener el token CSRF desde la página
             var csrfToken = $('meta[name="csrf-token"]').attr('content');
             console.log("Token CSRF obtenido:",
