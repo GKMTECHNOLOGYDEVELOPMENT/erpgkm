@@ -15,11 +15,16 @@ use Illuminate\Support\Facades\Mail;
 
 class ActividadController extends Controller
 {
+
 public function index()
 {
+    $user = auth()->user();
     $actividades = Actividad::with(['invitados'])->get();
     
-    return response()->json($actividades->map(function ($actividad) {
+    return response()->json($actividades->map(function ($actividad) use ($user) {
+        // Verificar si el usuario actual es invitado a esta actividad
+        $esInvitado = $actividad->invitados->contains('id_usuarios', $user->id);
+        
         return [
             'actividad_id' => $actividad->actividad_id,
             'titulo' => $actividad->titulo,
@@ -29,10 +34,11 @@ public function index()
             'enlaceevento' => $actividad->enlaceevento,
             'ubicacion' => $actividad->ubicacion,
             'descripcion' => $actividad->descripcion,
+            'es_creador' => $actividad->id_usuario === $user->id, // Asume que hay un campo id_usuario en Actividad
+            'es_invitado' => $esInvitado,
             'invitados' => $actividad->invitados->map(function ($invitado) {
                 return [
                     'id_usuarios' => $invitado->id_usuarios,
-                    // Agrega otros campos si los necesitas
                 ];
             })->toArray()
         ];

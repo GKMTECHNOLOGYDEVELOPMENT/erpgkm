@@ -404,53 +404,52 @@
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
-            <!-- Botón de Guardar -->
-            <div class="md:col-span-2 flex justify-end space-x-4">
-                <a href="{{ route('ordenes.helpdesk') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
-                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
-            </div>
+               @if ($idRol != 6)
+    <!-- Botón de Guardar -->
+    <div class="md:col-span-2 flex justify-end space-x-4">
+        <a href="{{ route('ordenes.helpdesk') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
+        <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
+    </div>
+@endif
+
         </div>
     </form>
 </div>
 
+@if ($idRol != 6)
+    <!-- Nueva Card: Historial de Estados -->
+    <div id="estadosCard" class="mt-4 p-4">
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+            style="background-color: {{ $colorEstado }};">Historial de Estados</span>
 
-<!-- Nueva Card: Historial de Estados -->
-<div id="estadosCard" class="mt-4 p-4">
-    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
-        style="background-color: {{ $colorEstado }};">Historial de Estados</span>
-    <!-- Tabla con scroll horizontal -->
-
-
-
-    <!-- Contenedor de Estados -->
-    <div class="mt-3 overflow-x-auto">
-        <div id="draggableContainer" class="flex space-x-2 w-max">
-            @foreach ($estadosFlujo as $estado)
-            <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
-                style="background-color: {{ $estado->color }}; color: black;"
-                data-state-description="{{ $estado->descripcion }}">
-                {{ $estado->descripcion }}
+        <!-- Contenedor de Estados -->
+        <div class="mt-3 overflow-x-auto">
+            <div id="draggableContainer" class="flex space-x-2 w-max">
+                @foreach ($estadosFlujo as $estado)
+                    <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
+                        style="background-color: {{ $estado->color }}; color: black;"
+                        data-state-description="{{ $estado->descripcion }}">
+                        {{ $estado->descripcion }}
+                    </div>
+                @endforeach
             </div>
-            @endforeach
+        </div>
+
+        <!-- Última modificación -->
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
+                Última modificación:
+            </span>
+            <span id="ultimaModificacion"
+                class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600 
+                   rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
+            </span>
         </div>
     </div>
+@endif
 
 
 
-    <!-- Div para mostrar la última modificación (Responsive) -->
-    <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
-        <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
-            Última modificación:
-        </span>
-        <span id="ultimaModificacion"
-            class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600
-               rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
-        </span>
-    </div>
-
-
-
-</div>
 
 
 

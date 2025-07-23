@@ -270,39 +270,40 @@ document.addEventListener("alpine:init", () => {
     }
 },
 
-        async fetchEventos() {
-            try {
-                const response = await axios.get('/actividades');
-                this.events = response.data.map(event => {
-                    // Buscar la etiqueta completa en el array de etiquetas
-                    const etiquetaCompleta = this.etiquetas.find(e => e.nombre === event.etiqueta);
-                    const colorClase = etiquetaCompleta ? `bg-${etiquetaCompleta.color}` : 'bg-primary';
+       async fetchEventos() {
+    try {
+        const response = await axios.get('/actividades');
+        this.events = response.data.map(event => {
+            const etiquetaCompleta = this.etiquetas.find(e => e.nombre === event.etiqueta);
+            const colorClase = etiquetaCompleta ? `bg-${etiquetaCompleta.color}` : 'bg-primary';
 
-                    return {
-                        id: event.actividad_id,
-                        title: event.titulo,
-                        start: event.fechainicio,
-                        end: event.fechafin,
-                        allDay: this.isAllDayEvent(event.fechainicio, event.fechafin),
-                        className: colorClase,
-                        description: event.descripcion,
-                        enlaceevento: event.enlaceevento,
-                        ubicacion: event.ubicacion,
-                        invitados: event.invitados?.map(i => i.id_usuarios) || [],
-                        extendedProps: {
-                            etiqueta: event.etiqueta,
-                            color: etiquetaCompleta?.color || 'primary'
-                        },
-                        display: 'block', // Fuerza el mismo estilo para todos los eventos
-                        backgroundColor: this.getBackgroundColor(etiquetaCompleta?.color),
-                        borderColor: this.getBorderColor(etiquetaCompleta?.color)
-                    };
-                });
-            } catch (error) {
-                console.error('Error fetching eventos:', error);
-                this.showMessage('Error al cargar eventos', 'error');
-            }
-        },
+            return {
+                id: event.actividad_id,
+                title: event.titulo,
+                start: event.fechainicio,
+                end: event.fechafin,
+                allDay: this.isAllDayEvent(event.fechainicio, event.fechafin),
+                className: colorClase,
+                description: event.descripcion,
+                enlaceevento: event.enlaceevento,
+                ubicacion: event.ubicacion,
+                invitados: event.invitados?.map(i => i.id_usuarios) || [],
+                extendedProps: {
+                    etiqueta: event.etiqueta,
+                    color: etiquetaCompleta?.color || 'primary',
+                    es_creador: event.es_creador, // Nuevo campo
+                    es_invitado: event.es_invitado // Nuevo campo
+                },
+                display: 'block',
+                backgroundColor: this.getBackgroundColor(etiquetaCompleta?.color),
+                borderColor: this.getBorderColor(etiquetaCompleta?.color)
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching eventos:', error);
+        this.showMessage('Error al cargar eventos', 'error');
+    }
+},
 
         // Verifica si el evento es de todo el día
         isAllDayEvent(start, end) {
@@ -384,50 +385,61 @@ document.addEventListener("alpine:init", () => {
             let month = dt.getMonth() + 1 + add;
             return dt.getMonth() < 10 ? '0' + month : month;
         },
-        editEvent(data) {
-            // Reiniciar parámetros
-            this.params = JSON.parse(JSON.stringify(this.defaultParams));
-            this.tomSelect.clear();
+ editEvent(data) {
+    // Reiniciar parámetros
+    this.params = JSON.parse(JSON.stringify(this.defaultParams));
+    this.tomSelect.clear();
 
-            if (data) {
-                let eventObj = data.event;
+    if (data) {
+        let eventObj = data.event;
+        const extendedProps = eventObj.extendedProps || {};
+        
+        // Verificar permisos
+        const esInvitado = extendedProps.es_invitado;
+        const esCreador = extendedProps.es_creador;
+        
+        // Si es solo invitado, mostrar mensaje y no permitir edición
+        if (esInvitado && !esCreador) {
+            this.showMessage('Solo puedes ver esta actividad, no tienes permisos para editarla', 'warning');
+            return;
+        }
 
-                // Obtener invitados del evento (asegurando formato correcto)
-                let invitados = eventObj.extendedProps?.invitados || [];
-                invitados = invitados.map(id => id.toString()); // Convertir a strings
+        // Obtener invitados del evento
+        let invitados = extendedProps.invitados || [];
+        invitados = invitados.map(id => id.toString());
 
-                // Configurar parámetros del formulario
-                this.params = {
-                    id: eventObj.id,
-                    title: eventObj.title,
-                    start: this.dateFormat(eventObj.start),
-                    end: this.dateFormat(eventObj.end),
-                    etiqueta: eventObj.extendedProps?.etiqueta || '',
-                    description: eventObj.extendedProps?.description || '',
-                    enlaceevento: eventObj.extendedProps?.enlaceevento || '',
-                    ubicacion: eventObj.extendedProps?.ubicacion || '',
-                    invitados: invitados
-                };
+        // Configurar parámetros del formulario
+        this.params = {
+            id: eventObj.id,
+            title: eventObj.title,
+            start: this.dateFormat(eventObj.start),
+            end: this.dateFormat(eventObj.end),
+            etiqueta: extendedProps.etiqueta || '',
+            description: extendedProps.description || '',
+            enlaceevento: extendedProps.enlaceevento || '',
+            ubicacion: extendedProps.ubicacion || '',
+            invitados: invitados
+        };
 
-                // Cargar invitados en TomSelect (con retraso para asegurar renderizado)
-                setTimeout(() => {
-                    if (this.params.invitados && this.params.invitados.length > 0) {
-                        this.tomSelect.setValue(this.params.invitados);
-                    }
-                }, 100);
-
-                // Configurar fechas mínimas
-                this.minStartDate = new Date();
-                this.minEndDate = this.dateFormat(eventObj.start);
-            } else {
-                // Nuevo evento - configurar fechas mínimas
-                this.minStartDate = new Date();
-                this.minEndDate = new Date();
+        // Cargar invitados en TomSelect
+        setTimeout(() => {
+            if (this.params.invitados && this.params.invitados.length > 0) {
+                this.tomSelect.setValue(this.params.invitados);
             }
+        }, 100);
 
-            // Mostrar modal
-            this.isAddEventModal = true;
-        },
+        // Configurar fechas mínimas
+        this.minStartDate = new Date();
+        this.minEndDate = this.dateFormat(eventObj.start);
+    } else {
+        // Nuevo evento - configurar fechas mínimas
+        this.minStartDate = new Date();
+        this.minEndDate = new Date();
+    }
+
+    // Mostrar modal
+    this.isAddEventModal = true;
+},
         editDate(data) {
             let obj = {
                 event: {
@@ -437,6 +449,16 @@ document.addEventListener("alpine:init", () => {
             };
             this.editEvent(obj);
         },
+
+        isInvitadoOnly() {
+    if (!this.params.id) return false;
+    
+    const event = this.calendar.getEventById(this.params.id);
+    if (!event) return false;
+    
+    const extendedProps = event.extendedProps || {};
+    return extendedProps.es_invitado && !extendedProps.es_creador;
+},
 
         dateFormat(dt) {
             dt = new Date(dt);

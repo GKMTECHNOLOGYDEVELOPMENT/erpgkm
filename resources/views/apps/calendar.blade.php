@@ -166,9 +166,11 @@
                                 <form @submit.prevent="saveEvent">
                                     <div class="mb-5">
                                         <label for="title">Titulo de Actividad :</label>
-                                        <input id="title" type="text" name="title" id="title"
-                                            class="form-input" placeholder="Reunión" x-model="params.title"
-                                            required />
+                                      <input id="title" type="text" name="title" id="title" class="form-input" 
+    placeholder="Reunión" x-model="params.title" 
+    :disabled="isInvitadoOnly()" required />
+
+<!-- Repite para los otros campos -->
                                         <div class="text-danger mt-2" id="titleErr"></div>
                                     </div>
 
@@ -176,14 +178,14 @@
                                         <label for="enlaceevento">Link de Actividad (Opcional) :</label>
                                         <input id="enlaceevento" type="url" name="enlaceevento"
                                             class="form-input" placeholder="https://erp.beyritech.com/actividad"
-                                            x-model="params.enlaceevento" />
+                                            x-model="params.enlaceevento" :disabled="isInvitadoOnly()" />
                                     </div>
 
                                     <div class="mb-5">
                                         <label for="ubicacion">Ubicacion (Opcional) :</label>
                                         <input id="ubicacion" type="text" name="ubicacion" class="form-input"
                                             placeholder="Av Sta Elvira E Mz B Lt 8, Los Olivos 15306"
-                                            x-model="params.ubicacion" />
+                                            x-model="params.ubicacion" :disabled="isInvitadoOnly()" />
                                     </div>
                                     <div class="mb-5">
                                         <label for="invitados">Seleccione Invitados (Opcional) :</label>
@@ -206,13 +208,13 @@
                                         <label for="dateStart">Inicio :</label>
                                         <input id="dateStart" type="datetime-local" name="start" id="start"
                                             class="form-input" placeholder="Event Start Date" x-model="params.start"
-                                            :min="getNowDateTime()" @change="startDateChange($event)" required />
+                                            :min="getNowDateTime()" @change="startDateChange($event)" :disabled="isInvitadoOnly()" required />
                                         <div class="text-danger mt-2" id="startDateErr"></div>
                                     </div>
                                     <div class="mb-5">
                                         <label for="dateEnd">Fin :</label>
                                         <input id="dateEnd" type="datetime-local" name="end" id="end"
-                                            class="form-input" placeholder="Event End Date" x-model="params.end"
+                                            class="form-input"  :disabled="isInvitadoOnly()" placeholder="Event End Date" x-model="params.end"
                                             :min="getNowDateTime()" required />
                                         <div class="text-danger mt-2" id="endDateErr"></div>
                                     </div>
@@ -223,36 +225,32 @@
                                     </div>
 
                                     <div class="flex justify-end items-center mt-8">
-                                        <button type="button" x-show="params.id" @click="deleteEvent()"
-                                            class="btn btn-outline-danger ltr:mr-2 rtl:ml-2" :disabled="isDeleting">
-                                            <span x-show="isDeleting" class="animate-spin -ml-1 mr-2 h-4 w-4">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                        stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                    </path>
-                                                </svg>
-                                            </span>
-                                            <span x-text="isDeleting ? 'Eliminando...' : 'Eliminar'"></span>
-                                        </button>
+                                        <button type="button" x-show="params.id && !isInvitadoOnly()" @click="deleteEvent()"
+    class="btn btn-outline-danger ltr:mr-2 rtl:ml-2" :disabled="isDeleting">
+    <span x-show="isDeleting" class="animate-spin -ml-1 mr-2 h-4 w-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+        </svg>
+    </span>
+    <span x-text="isDeleting ? 'Eliminando...' : 'Eliminar'"></span>
+</button>
                                         <button type="button" class="btn btn-outline-danger"
                                             @click="isAddEventModal = false">Cancelar</button>
-                                        <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                                            x-text="params.id ? (isSaving ? 'Procesando...' : 'Actualizar Actividad') : (isSaving ? 'Procesando...' : 'Crear Actividad')"
-                                            :disabled="isSaving">
-                                            <span x-show="isSaving" class="animate-spin -ml-1 mr-2 h-4 w-4">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                                        stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor"
-                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                                    </path>
-                                                </svg>
-                                            </span>
-                                        </button>
+                                       <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4"
+    x-text="params.id ? (isSaving ? 'Procesando...' : 'Actualizar Actividad') : (isSaving ? 'Procesando...' : 'Crear Actividad')"
+    :disabled="isSaving || isInvitadoOnly()">
+    <span x-show="isSaving" class="animate-spin -ml-1 mr-2 h-4 w-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+            </path>
+        </svg>
+    </span>
+</button>
                                     </div>
                                 </form>
                             </div>

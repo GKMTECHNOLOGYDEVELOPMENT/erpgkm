@@ -62,6 +62,7 @@ use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
 use App\Http\Controllers\Apps\ActividadController;
 use App\Http\Controllers\Apps\EtiquetaController;
+use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GuiaController;
@@ -1000,5 +1001,18 @@ Route::middleware('auth')->group(function () {
     Route::post('etiquetas', [EtiquetaController::class, 'store'])->name('etiquetas.store');
     Route::put('etiquetas/{id}', [EtiquetaController::class, 'update'])->name('etiquetas.update');
     Route::delete('etiquetas/{id}', [EtiquetaController::class, 'destroy'])->name('etiquetas.destroy');
+});
+
+
+Route::middleware('auth')->group(function () {
+    // Rutas para tickets
+    Route::get('Seguimiento-Cliente/', [ClienteSeguimientoController::class, 'index'])->name('Seguimiento.index');
+    Route::get('Seguimiento-Cliente/create', [ClienteSeguimientoController::class, 'create'])->name('Seguimiento.create');
+    Route::post('Seguimiento-Cliente/store', [ClienteSeguimientoController::class, 'store'])->name('Seguimiento.store');
+    Route::get('Seguimiento-Cliente/{id}/edit', [ClienteSeguimientoController::class, 'edit'])->name('Seguimiento.edit');
+    Route::get('Seguimiento-Cliente/{id}', [ClienteSeguimientoController::class, 'show'])->name('Seguimiento.show');
+    Route::post('Seguimiento-Cliente/{id}/update', [ClienteSeguimientoController::class, 'update'])->name('Seguimiento.update');
+    Route::delete('Seguimiento-Cliente/{id}', [ClienteSeguimientoController::class, 'destroy'])->name('Seguimiento.destroy'); 
+    Route::get('Seguimiento-Cliente/{id}/historial', [ClienteSeguimientoController::class, 'historial'])->name('Seguimiento.historial');  
 });
 

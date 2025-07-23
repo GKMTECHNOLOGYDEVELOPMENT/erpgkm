@@ -64,6 +64,7 @@ class OrdenesHelpdeskController extends Controller
         $carpetaVista = match ($rol) {
             'COORDINACION SMART' => 'smart-tv',
             'COORDINACION HELP DESK' => 'helpdesk',
+            'INVITADO' => 'invitado',
             default => '',
         };
 

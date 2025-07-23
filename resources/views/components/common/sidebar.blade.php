@@ -203,6 +203,11 @@
                                 </div>
                             </a>
                         </li> --}}
+                        @php
+                            use Illuminate\Support\Facades\Auth;
+                        @endphp
+                        @if(Auth::check() && Auth::user()->idRol != 6)
+
                         <li class="menu nav-item">
                             <button type="button" class="nav-link group"
                                 :class="{ 'active': activeDropdown === 'invoice' }"
@@ -245,6 +250,8 @@
                                 </li>
                             </ul>
                         </li> 
+
+
                         <li class="nav-item">
                             <a href="{{ route('apps.calendar') }}" class="group">
                                 <div class="flex items-center">
@@ -1363,6 +1370,7 @@
 
 
 
+                        @endif
 
 
                 <h2
@@ -1401,9 +1409,13 @@
                         </div>
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
+                        @if(Auth::check() && Auth::user()->idRol != 6)
+
                         <li>
                             <a href="{{ route('ordenes.smart') }}">Smart-Tv</a>
                         </li>
+                        @endif
+
                         <li>
                             <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
                         </li>
@@ -1414,6 +1426,54 @@
                         <li>
                             <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
                         </li> --}}
+                    </ul>
+                </li>
+
+
+
+
+                
+                <h2
+                    class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
+
+                    <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>AREA COMERCIAL</span>
+                </h2>
+
+                <li class="menu nav-item">
+                    <button type="button" class="nav-link group"
+                        :class="{ 'active': activeDropdown === 'seguimiento' }"
+                        @click="activeDropdown === 'seguimiento' ? activeDropdown = null : activeDropdown = 'seguimiento'">
+                        <div class="flex items-center">
+
+                            <!-- Icono relacionado con Ordenes de Trabajo (Martillo - Trabajo manual) -->
+                            <svg class="group-hover:!text-primary shrink-0 w-6 h-6" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 2l6 6-10 10-6-6L16 2z" />
+                            </svg>
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">SEGUIMIENTO CLIENTE</span>
+                        </div>
+                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'seguimiento' }">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                    </button>
+                    <ul x-cloak x-show="activeDropdown === 'seguimiento'" x-collapse class="sub-menu text-gray-500">
+                        @if(Auth::check() && Auth::user()->idRol != 6)
+
+                        <li>
+                            <a href="{{ route('Seguimiento.index') }}">Clientes</a>
+                        </li>
+                        @endif
                     </ul>
                 </li>
 
@@ -1569,6 +1629,9 @@
                         </li>
                     </ul>
                 </li> --}}
+
+                @if(Auth::check() && Auth::user()->idRol != 6)
+
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
@@ -1594,6 +1657,9 @@
                         </div>
                     </a>
                 </li>
+
+                @endif
+
 
                 {{-- <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">

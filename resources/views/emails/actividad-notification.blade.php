@@ -188,7 +188,7 @@
             
             <div class="footer">
                 <p>Gracias por usar nuestra plataforma</p>
-                <p><small>© {{ date('Y') }} Nombre de tu App. Todos los derechos reservados.</small></p>
+                <p><small>© {{ date('Y') }} GKM TECHNOLOGY. Todos los derechos reservados.</small></p>
                 <p><small><a href="#" style="color: #64748b;">Configurar notificaciones</a></small></p>
             </div>
         </div>
