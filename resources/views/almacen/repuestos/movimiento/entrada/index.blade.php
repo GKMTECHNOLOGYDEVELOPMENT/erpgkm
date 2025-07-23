@@ -184,7 +184,7 @@
     <div class="container mx-auto px-4 py-6" x-data="repuestos">
         <!-- Encabezado -->
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">REGISTRO DE REPUESTOS TCL - USO INTERNO</h1>
+            <h1 class="text-2xl font-bold mb-2">REGISTRO DE REPUESTOS TCL - USO INTERNO</h1>
             <p class="text-gray-600">
                 En este módulo podrá registrar repuestos TCL, ya sean nuevos o ya registrados en el sistema.
                 También puede ver la lista de todos los repuestos registrados y buscar repuestos específicos.
@@ -193,8 +193,6 @@
             <!-- Pestañas -->
             <div class="flex border-b border-gray-200 mt-6">
                 <button class="px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">NUEVO REGISTRO</button>
-                <button class="px-4 py-2 font-medium text-gray-500 hover:text-blue-500">REPUESTOS REGISTRADOS</button>
-                <button class="px-4 py-2 font-medium text-gray-500 hover:text-blue-500">BUSCAR REPUESTO</button>
             </div>
         </div>
 
@@ -213,7 +211,7 @@
                     <div class="flex items-end gap-4 mb-8">
                         <!-- Input con ancho forzado -->
                         <div class="w-full">
-                            <label class="block text-sm text-gray-500 mb-1">Código de repuesto / Código de
+                            <label class="block text-sm mb-1">Código de repuesto / Código de
                                 barras</label>
                             <input type="text" class="clean-input w-full text-xl" placeholder="Código de repuesto"
                                 x-model="codigoRepuesto" @keyup.enter="abrirModalVerificacion" />
@@ -221,7 +219,7 @@
 
                         <!-- Botón fijo -->
                         <button
-                            class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
+                            class="shrink-0 bg-primary text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
                             @click="abrirModalVerificacion">
                             <i class="fas fa-check-circle"></i>
                             VERIFICAR REPUESTO

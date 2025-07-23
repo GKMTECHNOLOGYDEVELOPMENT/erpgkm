@@ -52,6 +52,7 @@ use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
 use App\Http\Controllers\administracion\compras\ComprasController;
 use App\Http\Controllers\administracion\movimiento\entrada\EntradaController;
+use App\Http\Controllers\administracion\movimiento\salida\SalidaController;
 use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kardex\KardexController;
@@ -287,6 +288,7 @@ Route::prefix('repuestos')->name('repuestos.')->group(function () {
     Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/entrada', [EntradaController::class, 'entrada'])->name('entrada');
+    Route::get('/salida', [SalidaController::class, 'salida'])->name('salida');
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
     Route::get('/{id}/kardex', [RepuestosController::class, 'kardex'])->name('kardex'); // Editar un artículo
