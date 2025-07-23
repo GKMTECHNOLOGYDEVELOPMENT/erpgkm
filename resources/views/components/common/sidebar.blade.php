@@ -202,7 +202,16 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Contactos</span>
                                 </div>
                             </a>
+<<<<<<< HEAD
+                        </li> --}}
+                        @php
+                            use Illuminate\Support\Facades\Auth;
+                        @endphp
+                        @if(Auth::check() && Auth::user()->idRol != 6)
+
+=======
                         </li>
+>>>>>>> cc8535ca2979f26e5e0c8e73d5b50a2ba5e03e39
                         <li class="menu nav-item">
                             <button type="button" class="nav-link group"
                                 :class="{ 'active': activeDropdown === 'invoice' }"
