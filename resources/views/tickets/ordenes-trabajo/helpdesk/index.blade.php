@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <style>
@@ -165,7 +168,7 @@
 
                 <!-- Botón Refrescar -->
                 <button class="btn btn-secondary btn-sm"
-                @click="
+                    @click="
                 startDate = '';
                 endDate = '';
                 marcaFilter = '';
@@ -203,6 +206,24 @@
                     </span>
                 </div>
 
+                <div class="mb-4 flex justify-end items-center gap-3">
+                    <!-- Input con ícono para limpiar -->
+                    <div class="relative w-64">
+                        <input type="text" id="searchInput" placeholder="Buscar..."
+                            class="pr-10 pl-4 py-2 text-sm w-full border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary">
+                        <!-- Botón de limpiar -->
+                        <button type="button" id="clearInput"
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 hidden">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                    </div>
+
+                    <!-- Botón Buscar -->
+                    <button id="btnSearch"
+                        class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm">
+                        Buscar
+                    </button>
+                </div>
 
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
                 <table id="myTable1" class="display table table-striped table-bordered dt-responsive nowrap">
@@ -229,6 +250,36 @@
             <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Evento click
+            $('#btnSearch').off('click').on('click', function() {
+                const value = $('#searchInput').val();
+                $('#myTable1').DataTable().search(value).draw();
+            });
+
+            // Evento Enter
+            $(document).on('keypress', '#searchInput', function(e) {
+                if (e.which === 13) {
+                    $('#btnSearch').click();
+                }
+            });
+        });
+
+        const input = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearInput');
+
+        input.addEventListener('input', () => {
+            clearBtn.classList.toggle('hidden', input.value.length === 0);
+        });
+
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            clearBtn.classList.add('hidden');
+            $('#myTable1').DataTable().search('').draw(); // limpiar filtro si deseas
+        });
+    </script>
+
 
     <!-- Scripts adicionales -->
     <script src="{{ asset('assets/js/tickets/helpdesk/list.js') }}"></script>

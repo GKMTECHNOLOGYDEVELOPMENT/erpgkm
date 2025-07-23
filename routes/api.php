@@ -128,7 +128,9 @@ Route::get('/visita-seleccionada-levantamiento/{idVisita}', [OrdenesTrabajoContr
 Route::get('/suministros/{idseleccionvisita}', [OrdenesHelpdeskController::class, 'getSuministros']);
 
 
-Route::get('/usuarios', [UsuarioController::class, 'getUsuarios']);
+// api.php
+Route::get('/usuarios-datatable', [UsuarioController::class, 'getUsuarios']);
+
 
 Route::get('/usuarios/tecnico', [UsuarioController::class, 'getUsuariostecnico']);
 Route::get('/usuarios/tecnico/help', [UsuarioController::class, 'getUsuariostecnicohelp']);
