@@ -2,6 +2,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         .dataTables_length select {
             appearance: none;
@@ -76,7 +78,23 @@
 
                 </div>
             </div>
+            <div class="mb-4 flex justify-end items-center gap-3">
+                <!-- Input de búsqueda -->
+                <div class="relative w-64">
+                    <input type="text" id="searchInput" placeholder="Buscar modelo..."
+                        class="pr-10 pl-4 py-2 text-sm w-full border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary">
+                    <button type="button" id="clearInput"
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 hidden">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
 
+                <!-- Botón Buscar -->
+                <button id="btnSearch"
+                    class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm">
+                    Buscar
+                </button>
+            </div>
             <table id="myTable1" class="w-full min-w-[1000px] table whitespace-nowrap">
                 <thead>
                     <tr>
@@ -99,9 +117,6 @@
             </table>
         </div>
     </div>
-
-
-
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -171,30 +186,59 @@
                 precio_venta: '', // Valor inicial para Precio Venta
             });
         });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Botón buscar
+            $('#btnSearch').off('click').on('click', function() {
+                const value = $('#searchInput').val();
+                $('#myTable1').DataTable().search(value).draw();
+            });
+
+            // Enter para buscar
+            $(document).on('keypress', '#searchInput', function(e) {
+                if (e.which === 13) {
+                    $('#btnSearch').click();
+                }
+            });
+
+            // Mostrar botón limpiar si hay texto
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearInput');
+
+            input.addEventListener('input', () => {
+                clearBtn.classList.toggle('hidden', input.value.trim() === '');
+            });
+
+            // Botón limpiar
+            clearBtn.addEventListener('click', () => {
+                input.value = '';
+                clearBtn.classList.add('hidden');
+                $('#myTable1').DataTable().search('').draw();
+            });
+        });
     </script>
 
     <script>
-function cambiarEstadoArticulo(id) {
-    fetch(`/suministros/${id}/cambiar-estado`, {
-        method: 'PUT',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Content-Type': 'application/json'
+        function cambiarEstadoArticulo(id) {
+            fetch(`/suministros/${id}/cambiar-estado`, {
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(async res => {
+                    const data = await res.json();
+                    if (res.ok) {
+                        Swal.fire('¡Listo!', data.message, 'success').then(() => location.reload());
+                    } else {
+                        Swal.fire('Error', data.message || 'No se pudo actualizar el estado.', 'error');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('Error', error.message || 'Algo salió mal.', 'error');
+                });
         }
-    })
-    .then(async res => {
-        const data = await res.json();
-        if (res.ok) {
-            Swal.fire('¡Listo!', data.message, 'success').then(() => location.reload());
-        } else {
-            Swal.fire('Error', data.message || 'No se pudo actualizar el estado.', 'error');
-        }
-    })
-    .catch(error => {
-        Swal.fire('Error', error.message || 'Algo salió mal.', 'error');
-    });
-}
-</script>
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>

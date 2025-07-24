@@ -91,7 +91,7 @@ document.addEventListener('alpine:init', () => {
                             previous: 'Anterior'
                         }
                     },
-                    dom: '<"flex flex-wrap justify-end mb-4"f>rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
+                    dom: 'rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
                     initComplete: function () {
                         const wrapper = document.querySelector('.dataTables_wrapper');
                         const table = wrapper.querySelector('#myTable1');
