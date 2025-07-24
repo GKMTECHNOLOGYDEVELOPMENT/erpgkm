@@ -55,4 +55,9 @@ class Servicio extends Model
 	{
 		return $this->hasMany(DetalleCotizacion::class, 'idServicios');
 	}
+
+	 public function clientes()
+    {
+        return $this->hasMany(Cliente::class, 'idservicio', 'idServicios');
+    }
 }

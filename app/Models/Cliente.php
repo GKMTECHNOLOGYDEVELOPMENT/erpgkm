@@ -62,7 +62,9 @@ class Cliente extends Model
 		'idTipoDocumento',
 		'distrito',
 		'clientecol',
-		'esTienda'
+		'esTienda',
+		'idservicio',
+		'idtipoarea'
 	];
 
 	public function tipodocumento()
@@ -74,6 +76,11 @@ class Cliente extends Model
 	{
 		return $this->hasMany(Cotizacione::class, 'idCliente');
 	}
+
+	 public function servicio()
+    {
+        return $this->belongsTo(Servicio::class, 'idservicio', 'idServicios');
+    }
 
 	public function firmas()
 	{

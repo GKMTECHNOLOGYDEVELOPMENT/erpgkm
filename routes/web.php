@@ -1013,7 +1013,7 @@ Route::middleware('auth')->group(function () {
     Route::post('Seguimiento-Cliente/store', [ClienteSeguimientoController::class, 'store'])->name('Seguimiento.store');
     Route::get('Seguimiento-Cliente/{id}/edit', [ClienteSeguimientoController::class, 'edit'])->name('Seguimiento.edit');
     Route::get('Seguimiento-Cliente/{id}', [ClienteSeguimientoController::class, 'show'])->name('Seguimiento.show');
-    Route::post('Seguimiento-Cliente/{id}/update', [ClienteSeguimientoController::class, 'update'])->name('Seguimiento.update');
+    Route::put('Seguimiento-Cliente/{id}/update', [ClienteSeguimientoController::class, 'update'])->name('Seguimiento.update');
     Route::delete('Seguimiento-Cliente/{id}', [ClienteSeguimientoController::class, 'destroy'])->name('Seguimiento.destroy'); 
     Route::get('Seguimiento-Cliente/{id}/historial', [ClienteSeguimientoController::class, 'historial'])->name('Seguimiento.historial');  
 });
