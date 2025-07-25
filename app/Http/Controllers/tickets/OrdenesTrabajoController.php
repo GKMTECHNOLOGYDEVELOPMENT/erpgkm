@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File; // Asegúrate de usar esta clase
 use Illuminate\Support\Facades\Validator;
 use Spatie\Browsershot\Browsershot;
+use Yajra\DataTables\DataTables;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
@@ -1190,10 +1191,8 @@ class OrdenesTrabajoController extends Controller
             Log::info('🔍 Filtros recibidos en getAll', $request->all());
     
             $tipoTicket = $request->input('tipoTicket', 1);
-            $baseQuery = Ticket::query()->where('idTipotickets', $tipoTicket);
-            $recordsTotal = $baseQuery->count();
     
-            $query = $baseQuery->with([
+            $query = Ticket::with([
                 'tecnico:idUsuario,Nombre',
                 'usuario:idUsuario,Nombre',
                 'cliente:idCliente,nombre',
@@ -1203,30 +1202,24 @@ class OrdenesTrabajoController extends Controller
                 'marca:idMarca,nombre',
                 'modelo.categoria:idCategoria,nombre',
                 'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
-                'visitas' => function ($query) {
-                    $query->select('idVisitas', 'idTickets', 'fecha_programada')
-                        ->latest('fecha_programada')
-                        ->limit(1);
-                },
+                'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')->latest('fecha_programada')->limit(1),
                 'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
                 'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
                 'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
-                'visitas:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
                 'visitas.tecnico:idUsuario,Nombre',
-                'transicion_status_tickets' => function ($query) use ($request) {
-                    if ($request->filled('idVisita')) {
-                        $query->whereHas('seleccionarVisita', function ($subquery) use ($request) {
-                            $subquery->where('idVisitas', $request->idVisita);
-                        })->where('idEstadoots', 3);
-                    }
-                }
-            ]);
+                'transicion_status_tickets' => fn($q) => $q->when($request->filled('idVisita'), function ($q2) use ($request) {
+                    $q2->whereHas('seleccionarVisita', fn($q3) => $q3->where('idVisitas', $request->idVisita))
+                       ->where('idEstadoots', 3);
+                }),
+            ])
+            ->where('idTipotickets', $tipoTicket);
     
-            if ($request->has('marca') && $request->marca != '') {
+            // Filtros adicionales
+            if ($request->filled('marca')) {
                 $query->where('idMarca', $request->marca);
             }
     
-            if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
+            if ($request->filled('clienteGeneral')) {
                 $query->where('idClienteGeneral', $request->clienteGeneral);
             }
     
@@ -1240,53 +1233,34 @@ class OrdenesTrabajoController extends Controller
             } elseif ($request->filled('endDate')) {
                 $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
             }
+            $query->orderBy('fecha_creacion', 'desc'); // ✅ Mueve el orderBy aquí
+            return DataTables::of($query)
+                ->filter(function ($query) use ($request) {
+                    if ($request->has('search') && !empty($request->input('search.value'))) {
+                        $searchValue = trim($request->input('search.value'));
+                        $normalized = Str::lower(Str::ascii($searchValue));
     
-            if ($request->has('search') && !empty($request->input('search.value'))) {
-                $searchValue = trim($request->input('search.value'));
-                $normalized = Str::lower(Str::ascii($searchValue));
-            
-                $query->where(function ($q) use ($searchValue, $normalized) {
-                    $q->where('serie', $searchValue)
-                        ->orWhere('numero_ticket', $searchValue)
-                        ->orWhere('serie', 'LIKE', "%{$searchValue}%")
-                        ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
-                        ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                        ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('ticketflujo.estadoFlujo', fn($q) =>
-                            $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
-                });
-            }
-            
-    
-            $query->orderBy('fecha_creacion', 'desc');
-            $recordsFiltered = (clone $query)->count();
-    
-            $ordenes = $query->skip($request->input('start', 0))
-                ->take($request->input('length', 10))
-                ->get();
-    
-            $ordenes = $ordenes->map(function ($item) {
-                $arr = json_decode(json_encode($item), true);
-                array_walk_recursive($arr, function (&$v) {
-                    if (is_string($v)) {
-                        $v = mb_convert_encoding($v, 'UTF-8', 'UTF-8');
+                        $query->where(function ($q) use ($searchValue, $normalized) {
+                            $q->where('serie', $searchValue)
+                                ->orWhere('numero_ticket', $searchValue)
+                                ->orWhere('serie', 'LIKE', "%{$searchValue}%")
+                                ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
+                                ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                                ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                                ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                                ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
+                                ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                                ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                                ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                                ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                                ->orWhereHas('ticketflujo.estadoFlujo', fn($q) =>
+                                    $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
+                        });
                     }
-                });
-                return $arr;
-            });
+                })
+
+                ->toJson();
     
-            return response()->json([
-                "draw" => intval($request->input('draw')),
-                "recordsTotal" => $recordsTotal,
-                "recordsFiltered" => $recordsFiltered,
-                "data" => $ordenes
-            ]);
         } catch (\Throwable $e) {
             Log::error('❌ Error en getAll()', [
                 'message' => $e->getMessage(),
@@ -1303,6 +1277,7 @@ class OrdenesTrabajoController extends Controller
             ], 500);
         }
     }
+    
     
 
 

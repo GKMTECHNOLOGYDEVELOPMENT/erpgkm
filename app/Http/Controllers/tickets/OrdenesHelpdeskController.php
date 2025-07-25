@@ -2133,35 +2133,24 @@ class OrdenesHelpdeskController extends Controller
         if ($request->has('search') && !empty($request->input('search.value'))) {
             $searchValue = trim($request->input('search.value'));
             $normalized = Str::lower(Str::ascii($searchValue));
-
+        
             $query->where(function ($q) use ($searchValue, $normalized) {
                 $q->orWhere('idTickets', $searchValue)
                     ->orWhere('serie', $searchValue)
                     ->orWhere('numero_ticket', $searchValue)
                     ->orWhere('serie', 'LIKE', "%{$searchValue}%")
                     ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
-                    ->orWhereRaw("DATE_FORMAT(fecha_creacion, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"])
-                    ->orWhereHas('visitas', fn($q) => $q->whereRaw("DATE_FORMAT(fecha_programada, '%d/%m/%Y') LIKE ?", ["%{$searchValue}%"]))
-                    ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                     ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('ticketflujo.estadoFlujo', fn($q) => $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]))
-                    ->orWhere(function ($q) use ($searchValue) {
-                        if (stripos('soporte', $searchValue) !== false || strtolower($searchValue) === 's') {
-                            $q->orWhere('tipoServicio', 1);
-                        }
-                        if (stripos('levantamiento', $searchValue) !== false || strtolower($searchValue) === 'l') {
-                            $q->orWhere('tipoServicio', 2);
-                        }
-                    });
+                    ->orWhereHas('ticketflujo.estadoFlujo', fn($q) =>
+                        $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
             });
         }
+        
 
         $query->orderBy('idTickets', 'desc');
         $recordsFiltered = (clone $query)->count();
