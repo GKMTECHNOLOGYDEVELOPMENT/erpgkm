@@ -20,6 +20,13 @@ class ClienteSeguimientoController extends Controller
     return view('areacomercial.index', compact('clientes'));
 }
 
+public function tabsseguimiento(){
+
+    return view('areacomercial.tabsseguimiento');
+}
+
+
+
     public function show(string $id)
     {
         $cliente = Cliente::with(['servicio', 'tipoDocumento'])->find($id);
