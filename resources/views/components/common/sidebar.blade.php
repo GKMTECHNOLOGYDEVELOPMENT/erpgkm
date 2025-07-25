@@ -208,7 +208,6 @@
                         @endphp
                         @if(Auth::check() && Auth::user()->idRol != 6)
 
-                        </li>
                         <li class="menu nav-item">
                             <button type="button" class="nav-link group"
                                 :class="{ 'active': activeDropdown === 'invoice' }"
@@ -1458,7 +1457,7 @@
                             </svg>
 
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">S. CLIENTE</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Seguimiento Cliente</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'seguimiento' }">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
