@@ -26,8 +26,11 @@ class AsistenciaController extends Controller
         $search = $request->input('search.value');
 
         $usuarios = \App\Models\Usuario::where('estado', 1)
-            ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno')
-            ->get();
+        ->where('departamento', 3926) // Solo departamento Lima
+        ->where('idTipoUsuario', '!=', 7) // Excluir tipo Invitado
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno')
+        ->get();
+    
 
         $usuarioIds = $usuarios->pluck('idUsuario');
 
