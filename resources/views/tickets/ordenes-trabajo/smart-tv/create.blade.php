@@ -1,7 +1,7 @@
 <x-layout.default>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
@@ -37,8 +37,7 @@
 
 
     <!-- Contenedor principal -->
-    <div x-data="{ openClienteModal: false, openClienteGeneralModal: false, openMarcaModal: false, openModeloModal: false }"
-        class="panel mt-6 p-5 max-w-4x2 mx-auto">
+    <div x-data="{ openClienteModal: false, openClienteGeneralModal: false, openMarcaModal: false, openModeloModal: false }" class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Orden de Trabajo</h2>
 
 
@@ -63,7 +62,8 @@
                         </button>
                     </div>
                     <!-- Se usa nice-select2 (clase select2) -->
-                    <select id="idCliente" name="idCliente">
+                    <select id="idCliente" name="idCliente" style="width: 100%"></select>
+
                     </select>
                 </div>
 
@@ -85,7 +85,7 @@
 
                     <!-- <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label> -->
 
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full ">
+                    <select id="idClienteGeneral" name="idClienteGeneral" style="width: 100%">
                         <option value="" selected>Seleccionar Cliente General</option>
                     </select>
                 </div>
@@ -114,7 +114,7 @@
 
                     <!-- Select para tiendas (solo si el cliente es tienda) -->
                     <div id="selectTiendaContainer">
-                        <select id="idTienda" name="idTienda" style="display: none;">
+                        <select id="idTienda" name="idTienda">
                             <option value="">Seleccionar Tienda</option>
                         </select>
 
@@ -150,8 +150,8 @@
                     <div class="flex items-center space-x-2">
                         <label for="idMarca" class="block text-sm font-medium">Marca</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openMarcaModal = true">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
@@ -165,11 +165,11 @@
                             <span>Cargando...</span>
                         </div>
 
-                        <!-- Select para las marcas -->
-                        <select style="display: none;" id="idMarca" name="idMarca">
-
+                        <select id="idMarca" name="idMarca" class="w-full">
+                            <option value="" disabled selected>Seleccionar Marca</option>
                         </select>
                     </div>
+
                 </div>
 
 
@@ -178,16 +178,16 @@
                     <div class="flex items-center space-x-2">
                         <label for="idModelo" class="block text-sm font-medium">Modelo</label>
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openModeloModal = true">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
                     </div>
                     <!-- Select para los modelos con preload -->
                     <div class="relative">
-                        <select style="display: none;" id="idModelo" name="idModelo">
-                            <!-- Opciones dinámicas se insertarán vía JS -->
+                        <select id="idModelo" name="idModelo" class="w-full"></select>
+                        <!-- Opciones dinámicas se insertarán vía JS -->
                         </select>
                     </div>
                 </div>
@@ -195,7 +195,8 @@
                 <!-- Serie -->
                 <div>
                     <label for="serie" class="block text-sm font-medium">N. Serie</label>
-                    <input id="serie" name="serie" type="text" class="form-input w-full" placeholder="Ingrese la serie">
+                    <input id="serie" name="serie" type="text" class="form-input w-full"
+                        placeholder="Ingrese la serie">
                 </div>
 
 
@@ -203,7 +204,8 @@
                 <div id="ticketSelectionContainer">
                     <label for="selectTickets" class="block text-sm font-medium" style="display: none;">Tickets
                         Relacionados</label>
-                    <select id="selectTickets" name="selectTickets" class="form-input w-full" style="display: none;">
+                    <select id="selectTickets" name="selectTickets" class="form-input w-full"
+                        style="display: none;">
                         <option value="" selected>Seleccionar Ticket</option>
                     </select>
                 </div>
@@ -234,7 +236,8 @@
                     </div>
 
                     <div id="evaluacionTiendaContainer" class="flex-1 mb-6  ">
-                        <label for="evaluaciontienda" class="block text-sm font-medium mb-2">Evaluación a Tienda</label>
+                        <label for="evaluaciontienda" class="block text-sm font-medium mb-2">Evaluación a
+                            Tienda</label>
                         <div>
                             <label class="w-12 h-6 relative mt-3">
                                 <input type="checkbox" id="evaluaciontienda" name="evaluaciontienda"
@@ -267,13 +270,15 @@
                 <!-- Latitud -->
                 <div>
                     <label for="latitud" class="block text-sm font-medium">Latitud</label>
-                    <input id="latitud" type="text" name="lat" class="form-input w-full" placeholder="Latitud">
+                    <input id="latitud" type="text" name="lat" class="form-input w-full"
+                        placeholder="Latitud">
                 </div>
 
                 <!-- Longitud -->
                 <div>
                     <label for="longitud" class="block text-sm font-medium">Longitud</label>
-                    <input id="longitud" type="text" name="lng" class="form-input w-full" placeholder="Longitud">
+                    <input id="longitud" type="text" name="lng" class="form-input w-full"
+                        placeholder="Longitud">
                 </div>
 
                 <input id="mapSearchBox" class="form-control" type="text" placeholder="Buscar lugar..."
@@ -303,10 +308,11 @@
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Cliente</h5>
-                        <button type="button" class="text-white-dark hover:text-dark" @click="openClienteModal = false">
+                        <button type="button" class="text-white-dark hover:text-dark"
+                            @click="openClienteModal = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                class="w-6 h-6">
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" class="w-6 h-6">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -325,9 +331,9 @@
                                 <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
                                     placeholder="Seleccionar Cliente General" multiple style="display:none">
                                     @foreach ($clientesGenerales as $clienteGeneral)
-                                    <option value="{{ $clienteGeneral->idClienteGeneral }}">
-                                        {{ $clienteGeneral->descripcion }}
-                                    </option>
+                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                            {{ $clienteGeneral->descripcion }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -360,9 +366,9 @@
                                         style="display:none">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
-                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                            {{ $tipoDocumento->nombre }}
-                                        </option>
+                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                                {{ $tipoDocumento->nombre }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -408,9 +414,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                        <option value="{{ $departamento['id_ubigeo'] }}">
-                                            {{ $departamento['nombre_ubigeo'] }}
-                                        </option>
+                                            <option value="{{ $departamento['id_ubigeo'] }}">
+                                                {{ $departamento['nombre_ubigeo'] }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -458,9 +464,9 @@
 
 
         <!-- Modal para crear nuevo Cliente GENERAL(opcional) -->
-        <div x-data="{ open: false, imagenPreview: null, imagenActual: '/assets/images/file-preview.svg' }"
-            x-show="openClienteGeneralModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
-            style="display: none;" @click.self="openClienteGeneralModal = false">
+        <div x-data="{ open: false, imagenPreview: null, imagenActual: '/assets/images/file-preview.svg' }" x-show="openClienteGeneralModal"
+            class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" style="display: none;"
+            @click.self="openClienteGeneralModal = false">
             <div class="flex items-start justify-center min-h-screen px-4"
                 @click.self="openClienteGeneralModal = false">
                 <div x-show="openClienteGeneralModal" x-transition.duration.300
@@ -471,8 +477,8 @@
                         <button type="button" class="text-white-dark hover:text-dark"
                             @click="openClienteGeneralModal = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                class="w-6 h-6">
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" class="w-6 h-6">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -481,7 +487,8 @@
                     <div class="modal-scroll">
                         <!-- Formulario para nuevo Cliente -->
 
-                        <form class="p-5 space-y-4" id="clientGeneralForm" enctype="multipart/form-data" method="post">
+                        <form class="p-5 space-y-4" id="clientGeneralForm" enctype="multipart/form-data"
+                            method="post">
                             @csrf
                             <!-- Asegúrate de incluir el token CSRF -->
                             <!-- Descripción -->
@@ -537,10 +544,11 @@
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Marca</h5>
-                        <button type="button" class="text-white-dark hover:text-dark" @click="openMarcaModal = false">
+                        <button type="button" class="text-white-dark hover:text-dark"
+                            @click="openMarcaModal = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                class="w-6 h-6">
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" class="w-6 h-6">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -576,18 +584,19 @@
 
 
         <!-- Modal para crear nueva Marca(opcional) -->
-        <div x-show="openModeloModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" style="display: none;"
-            @click.self="openModeloModal = false">
+        <div x-show="openModeloModal" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto"
+            style="display: none;" @click.self="openModeloModal = false">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="openModeloModal = false">
                 <div x-show="openModeloModal" x-transition.duration.300
                     class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Modelo</h5>
-                        <button type="button" class="text-white-dark hover:text-dark" @click="openModeloModal = false">
+                        <button type="button" class="text-white-dark hover:text-dark"
+                            @click="openModeloModal = false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                                class="w-6 h-6">
+                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" class="w-6 h-6">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -665,12 +674,12 @@
                             <!-- Categoría -->
                             <div>
                                 <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
-                                <select id="idCategoria" name="idCategoria" class="select2 w-full" style="display:none"
-                                    required>
+                                <select id="idCategoria" name="idCategoria" class="select2 w-full"
+                                    style="display:none" required>
                                     <option value="" disabled selected>Seleccione la Categoría</option>
                                     @foreach ($categorias as $categoria)
-                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
-                                    </option>
+                                        <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -690,8 +699,9 @@
 
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
@@ -1320,22 +1330,6 @@
                 }
             });
         });
-
-        // // Lógica: mostrar u ocultar "evaluacionTienda" según si cliente es tienda
-        // clienteSelect.addEventListener('change', function() {
-        //     const selectedOption = this.options[this.selectedIndex];
-        //     const esTienda = selectedOption.dataset.tienda;
-        //     console.log(`👤 Cliente seleccionado: ${selectedOption.textContent.trim()} | esTienda: ${esTienda}`);
-
-        //     if (esTienda === '1' || esTienda === 1) {
-        //         evaluacionTiendaDiv.classList.remove('hidden');
-        //         console.log('🟢 Mostrando checkbox de Evaluación a Tienda');
-        //     } else {
-        //         evaluacionTiendaDiv.classList.add('hidden');
-        //         evaluacionTiendaCheckbox.checked = false;
-        //         console.log('🔴 Ocultando checkbox de Evaluación a Tienda y desmarcando');
-        //     }
-        // });
     </script>
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
