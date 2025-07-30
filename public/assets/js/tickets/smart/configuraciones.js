@@ -1,11 +1,8 @@
 $(document).ready(function () {
-    document.querySelectorAll('.select2').forEach(function (select) {
-        NiceSelect.bind(select, { searchable: true });
-    });
-
-    // Ocultar inicialmente el contenedor del select modelo
+    // Ocultar inicialmente el contenedor
     $('.select-modelo-container').hide();
 
+    // Inicializar select2 para Marca (con AJAX)
     $('#idMarca').select2({
         placeholder: 'Buscar marca...',
         width: '100%',
@@ -23,30 +20,53 @@ $(document).ready(function () {
         },
     });
 
+    // Inicializar select2 para Modelo (vacío hasta que se seleccione una marca)
     $('#idModelo').select2({
-        placeholder: 'Seleccione una marca primero...',
+        placeholder: 'Seleccionar Modelo',
         width: '100%',
-        ajax: {
-            url: function () {
-                const marcaId = $('#idMarca').val();
-                return `/api/modelos?marca_id=${marcaId}`;
-            },
-            dataType: 'json',
-            delay: 250,
-            processResults: (data) => ({
-                results: data.map((m) => ({
-                    id: m.id,
-                    text: m.nombre,
-                })),
-            }),
-            cache: true,
-        },
+        data: [] // vacío al inicio
     });
 
+    // Evento al cambiar marca
     $('#idMarca').on('change', function () {
-        $('#idModelo').val(null).trigger('change');
+        const idMarca = $(this).val();
+
+        if (idMarca) {
+            $('#preload-modelo').show();
+
+            $.ajax({
+                url: '/modelos/' + idMarca,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    const $modelo = $('#idModelo');
+                    $modelo.empty(); // limpiar opciones previas
+
+                    $modelo.append('<option value="" disabled selected>Seleccionar Modelo</option>');
+
+                    data.forEach(modelo => {
+                        $modelo.append(new Option(modelo.nombre, modelo.idModelo));
+                    });
+
+                    // Forzar recarga de Select2
+                    $modelo.trigger('change');
+
+                    $('.select-modelo-container').show();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error al cargar modelos:", error);
+                },
+                complete: function () {
+                    $('#preload-modelo').hide();
+                }
+            });
+        } else {
+            $('#idModelo').empty().append('<option value="" disabled selected>Seleccionar Modelo</option>').trigger('change');
+            $('.select-modelo-container').hide();
+        }
     });
 });
+
 
 document.addEventListener('DOMContentLoaded', function () {
     // Configuración para la fecha de compra (solo fecha, sin hora)
@@ -365,7 +385,16 @@ function cargarMarcasPorClienteGeneral(clienteGeneralId) {
     }
 });
 
-
+$(document).ready(function () {
+    // ✅ Inicializar Select2 para Cliente General al cargar la página
+    const $selectClienteGeneral = $('#idClienteGeneral');
+    if (!$selectClienteGeneral.hasClass('select2-hidden-accessible')) {
+        $selectClienteGeneral.select2({
+            placeholder: 'Seleccionar Cliente General',
+            width: '100%',
+        });
+    }
+});
 $('#idCliente').on('change', function () {
     const clienteId = $(this).val();
     const select = document.getElementById('idClienteGeneral');
@@ -558,32 +587,35 @@ $('#idCliente').on('change', function () {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Inicializar nice-select2
-    NiceSelect.bind(document.getElementById('idClienteGeneraloption'));
-
-    const select = document.getElementById('idClienteGeneraloption');
+    const $select = $('#idClienteGeneraloption');
     const selectedItemsContainer = document.getElementById('selected-items-list');
 
-    // Función para actualizar los seleccionados
+    // Inicializar Select2
+    $select.select2({
+        placeholder: 'Seleccionar Cliente General',
+        width: '100%',
+    });
+
+    // Función para mostrar los seleccionados como badges
     function updateSelectedItems() {
-        selectedItemsContainer.innerHTML = ''; // Limpiar el contenedor
+        selectedItemsContainer.innerHTML = '';
+        const selectedOptions = $select.find('option:selected');
 
-        const selectedOptions = Array.from(select.selectedOptions); // Obtener las opciones seleccionadas
-
-        selectedOptions.forEach((option) => {
+        selectedOptions.each(function () {
             const badge = document.createElement('span');
-            badge.textContent = option.textContent;
-            badge.className = 'badge bg-primary'; // Aplicar el estilo del badge
-            selectedItemsContainer.appendChild(badge); // Agregar el badge al contenedor
+            badge.textContent = $(this).text();
+            badge.className = 'badge bg-primary me-1 mb-1';
+            selectedItemsContainer.appendChild(badge);
         });
     }
 
-    // Escuchar cambios en el select
-    select.addEventListener('change', updateSelectedItems);
+    // Actualizar al cambiar selección
+    $select.on('change', updateSelectedItems);
 
-    // Actualizar los seleccionados al cargar la página
+    // Actualizar al cargar
     updateSelectedItems();
 });
+
 document.addEventListener('DOMContentLoaded', function () {
     const tipoDocumento = document.getElementById('idTipoDocumento');
     const esTiendaContainer = document.getElementById('esTiendaContainer');

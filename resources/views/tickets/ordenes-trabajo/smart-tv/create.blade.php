@@ -329,7 +329,7 @@
                                 <label for="idClienteGeneral" class="block text-sm font-medium">Cliente
                                     General</label>
                                 <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
-                                    placeholder="Seleccionar Cliente General" multiple style="display:none">
+                                    placeholder="Seleccionar Cliente General" multiple>
                                     @foreach ($clientesGenerales as $clienteGeneral)
                                         <option value="{{ $clienteGeneral->idClienteGeneral }}">
                                             {{ $clienteGeneral->descripcion }}
@@ -627,39 +627,34 @@
 
                                 // Función para cargar las marcas desde el servidor
                                 function cargarMarcass() {
-                                    const select = document.getElementById('idMarcas');
+                                    const $select = $('#idMarcas');
 
-                                    // Realizamos la solicitud fetch para obtener las marcas
                                     fetch('/get-marcas')
-                                        .then(response => response.json()) // Convertir la respuesta en formato JSON
+                                        .then(response => response.json())
                                         .then(data => {
-                                            // Limpiar las opciones actuales del select
-                                            select.innerHTML =
-                                                '<option value="" disabled selected>Seleccione la Marca</option>';
+                                            // Limpiar opciones
+                                            $select.empty();
+                                            $select.append('<option value="" disabled selected>Seleccione la Marca</option>');
 
-                                            // Llenar el select con las marcas obtenidas
                                             data.forEach(marca => {
-                                                const option = document.createElement('option');
-                                                option.value = marca.idMarca;
-                                                option.textContent = marca.nombre;
-                                                select.appendChild(option);
+                                                $select.append(new Option(marca.nombre, marca.idMarca));
                                             });
 
-                                            // Si ya existe una instancia previa de nice-select, la destruye
-                                            if (select.niceSelectInstance) {
-                                                select.niceSelectInstance.destroy();
+                                            // Destruir e inicializar Select2
+                                            if ($select.hasClass('select2-hidden-accessible')) {
+                                                $select.select2('destroy');
                                             }
 
-                                            // Inicializar nice-select (si usas nice-select) y guardar la instancia
-                                            select.niceSelectInstance = NiceSelect.bind(select, {
-                                                searchable: true
+                                            $select.select2({
+                                                placeholder: 'Seleccione la Marca',
+                                                width: '100%',
                                             });
 
-                                            // Mostrar el select después de cargar las marcas
-                                            select.style.display = 'block'; // O 'inline-block' según tu diseño
+                                            $select.show();
                                         })
                                         .catch(error => console.error('Error al cargar las marcas:', error));
                                 }
+
 
                                 // Ocultar el select de marcas inicialmente
                                 let selectMarca = document.getElementById('idMarcas');
@@ -708,6 +703,7 @@
     <script async
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
     </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 
 
