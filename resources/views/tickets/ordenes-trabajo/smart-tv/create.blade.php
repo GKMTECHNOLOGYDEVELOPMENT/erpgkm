@@ -703,7 +703,7 @@
     <script async
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
     </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
 
 
@@ -1080,7 +1080,7 @@
 
             if (nroTicketValue === "") {
                 inputTicket.classList.remove('border-red-500', 'border-green-500');
-                errorTicket.textContent = "Campo vacío"; // Mostrar mensaje de campo vacío
+                errorTicket.textContent = "Campo vacío";
                 errorTicket.classList.remove('hidden');
             } else {
                 fetch(`/validar-ticket/${nroTicketValue}`)
@@ -1092,7 +1092,6 @@
                             errorTicket.textContent =
                                 'El número de ticket ya está en uso. Por favor, ingrese otro número.';
                             errorTicket.classList.remove('hidden');
-                            // Mostrar toastr
                             showToast('El número de ticket ya está en uso. Por favor, ingrese otro número.');
                         } else {
                             inputTicket.classList.remove('border-red-500');
@@ -1106,51 +1105,48 @@
                         errorTicket.textContent =
                             'Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.';
                         errorTicket.classList.remove('hidden');
-                        // Mostrar toastr
                         showToast('Ocurrió un error al verificar el ticket. Inténtelo de nuevo más tarde.');
                     });
             }
         });
 
-        // Validación en tiempo real para campos obligatorios
+        // Lista de campos obligatorios
         const camposObligatorios = [
             'idCliente', 'idClienteGeneral',
-            'direccion', 'fechaCompra', 'idMarca', 'idTienda', 'idModelo', 'serie', 'fallaReportada', 'fechaTicket',
-            'linkubicacion'
+            'direccion', 'fechaCompra', 'idMarca', 'idTienda', 'idModelo',
+            'serie', 'fallaReportada', 'fechaTicket', 'linkubicacion'
         ];
 
+        // Validación en tiempo real para campos obligatorios
         camposObligatorios.forEach(campo => {
             const input = document.getElementById(campo);
 
-            // Agregar evento de "input" o "change" para validación en tiempo real
-            input.addEventListener('input', function() {
-                validateCampo(input);
-            });
-
-            // Para campos de tipo "select" o "date", se usa el evento "change"
+            // Para selects (Select2), usar change
             if (input.tagName === 'SELECT' || input.type === 'date') {
                 input.addEventListener('change', function() {
                     validateCampo(input);
-                    // Validación específica para la fecha de compra
                     if (campo === 'fechaCompra') {
                         validateFechaCompra(input);
                     }
                 });
-            }
+            } else {
+                input.addEventListener('input', function() {
+                    validateCampo(input);
+                });
 
-            // También puedes agregar evento "focusout" para perder foco (cuando el usuario termina de escribir)
-            input.addEventListener('focusout', function() {
-                validateCampo(input);
-            });
+                input.addEventListener('focusout', function() {
+                    validateCampo(input);
+                });
+            }
         });
 
-        // Función para validar el campo y mostrar/ocultar el mensaje "Campo vacío"
+        // Función para validar un campo (compatible con Select2)
         function validateCampo(input) {
             const errorId = `error-${input.id}`;
             let errorText = document.getElementById(errorId);
+            const valor = $(input).val(); // soporte para select2
 
-            if (!input.value.trim()) {
-                // Si está vacío
+            if (!valor || valor.length === 0) {
                 input.classList.add('border-red-500');
                 if (!errorText) {
                     errorText = document.createElement('p');
@@ -1160,7 +1156,6 @@
                 }
                 errorText.textContent = "Campo vacío";
             } else {
-                // Si tiene contenido
                 input.classList.remove('border-red-500');
                 if (errorText) {
                     errorText.remove();
@@ -1168,13 +1163,11 @@
             }
         }
 
-        // Función para validar la fecha de compra (no debe ser mayor que la fecha actual)
+        // Validación específica para fecha de compra
         function validateFechaCompra(input) {
             const fechaCompra = new Date(input.value);
             const fechaHoy = new Date();
-
-            // Restamos un día de la fecha actual para no permitir fechas futuras
-            fechaHoy.setHours(0, 0, 0, 0); // Aseguramos que solo se compare la fecha sin la hora
+            fechaHoy.setHours(0, 0, 0, 0);
 
             if (fechaCompra > fechaHoy) {
                 input.classList.add('border-red-500');
@@ -1186,7 +1179,6 @@
                     input.parentNode.appendChild(errorText);
                 }
                 errorText.textContent = "La fecha de compra no puede ser mayor a la fecha actual.";
-
                 showToast('La fecha de compra no puede ser mayor a la fecha actual.');
             } else {
                 input.classList.remove('border-red-500');
@@ -1200,23 +1192,22 @@
         // Validación al enviar el formulario
         document.getElementById('ordenTrabajoForm').addEventListener('submit', function(event) {
             let errorFound = false;
-            let errorMessages = []; // Para almacenar los mensajes de error
+            let errorMessages = [];
 
             camposObligatorios.forEach(campo => {
                 const input = document.getElementById(campo);
                 const label = document.querySelector(`label[for="${campo}"]`);
                 const nombreCampo = label ? label.innerText.trim() : campo;
+                const valor = $(input).val(); // soporte para Select2
 
-                if (input.value.trim() === "") {
+                if (!valor || valor.length === 0) {
                     errorFound = true;
-                    validateCampo(input); // Ejecuta la validación visual
+                    validateCampo(input);
                     errorMessages.push(
                         `El campo "${nombreCampo}" está vacío. Por favor, complete el campo.`);
                 }
             });
 
-
-            // Validación específica para nroTicket (si está vacío o con error)
             const nroTicketInput = document.getElementById('nroTicket');
             const errorTicket = document.getElementById('errorTicket');
             if (nroTicketInput.value.trim() === "" || nroTicketInput.classList.contains('border-red-500')) {
@@ -1225,10 +1216,8 @@
                 errorMessages.push('El número de ticket está vacío o inválido.');
             }
 
-            // Si hay errores, mostrar solo el primer mensaje de error
             if (errorFound) {
                 event.preventDefault();
-                // Mostrar el primer mensaje de error en el toastr
                 showToast(errorMessages[0]);
             }
         });
