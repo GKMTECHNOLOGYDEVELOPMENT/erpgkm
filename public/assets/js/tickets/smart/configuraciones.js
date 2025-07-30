@@ -267,17 +267,16 @@ function cargarMarcasPorClienteGeneral(clienteGeneralId) {
 
 
 
-    // Evento para cuando se selecciona un cliente general
-    document.getElementById('idClienteGeneral').addEventListener('change', function () {
-        let clienteGeneralId = this.value;
-        if (clienteGeneralId) {
-            console.log('Cliente General seleccionado:', clienteGeneralId);
-            cargarMarcasPorClienteGeneral(clienteGeneralId); // Llamamos la función para cargar las marcas según el cliente general
-        } else {
-            // Si no hay cliente general seleccionado, cargar todas las marcas
-            cargarTodasLasMarcas();
-        }
-    });
+  $(document).on('change', '#idClienteGeneral', function () {
+    let clienteGeneralId = this.value;
+    if (clienteGeneralId) {
+        console.log('Cliente General seleccionado:', clienteGeneralId);
+        cargarMarcasPorClienteGeneral(clienteGeneralId);
+    } else {
+        cargarTodasLasMarcas();
+    }
+});
+
 
     // Cargar todas las marcas inicialmente si no hay cliente general seleccionado
     window.onload = function () {
