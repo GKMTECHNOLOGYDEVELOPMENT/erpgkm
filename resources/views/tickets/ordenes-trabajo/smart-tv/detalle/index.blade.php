@@ -24,12 +24,12 @@
     .formulario-tachado {
         position: relative;
     }
-    
+
     .formulario-tachado * {
         text-decoration: line-through;
         color: #999 !important;
     }
-    
+
     /* Opcional: Efecto de rayado diagonal en el fondo */
     .formulario-tachado::before {
         content: "";
@@ -38,11 +38,11 @@
         left: 0;
         right: 0;
         bottom: 0;
-   
+
         pointer-events: none;
         z-index: 1;
     }
-    
+
     /* Deshabilitar interacción */
     .formulario-tachado form {
         pointer-events: none;
@@ -101,17 +101,16 @@
                         class="pb-2 font-semibold text-sm uppercase">
                         Estados
                     </button>
-              <button
-  @click="() => { 
+                    <button
+                        @click="() => { 
       activeTab = 'historial'; 
       cargarHistorialModificaciones(ticketId); 
   }"
-  :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
-                                      'text-gray-500 hover:text-gray-700'"
-  class="pb-2 font-semibold text-sm uppercase"
->
-  Historial de Cambios
-</button>
+                        :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
+                            'text-gray-500 hover:text-gray-700'"
+                        class="pb-2 font-semibold text-sm uppercase">
+                        Historial de Cambios
+                    </button>
 
                 </div>
 
@@ -349,7 +348,7 @@
 
 
 
-<div class="p-6 mt-4 @if($idEstadflujo == 33) formulario-tachado @endif">
+<div class="p-6 mt-4 @if ($idEstadflujo == 33) formulario-tachado @endif">
     <form id="tuFormulario" action="formActualizarOrden" enctype="multipart/form-data" method="POST">
         @CSRF
 
@@ -364,7 +363,7 @@
             <!-- Cliente -->
             <div>
                 <label class="text-sm font-medium">Cliente</label>
-                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
+                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100">
                     <option value="">Seleccionar Cliente</option> <!-- Permite seleccionar un valor vacío -->
                     @foreach ($clientes as $cliente)
                         <option value="{{ $cliente->idCliente }}"
@@ -393,7 +392,7 @@
             <!-- Tienda -->
             <div>
                 <label class="text-sm font-medium">Tienda</label>
-                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none">
+                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Tienda</option>
                     @foreach ($tiendas as $tienda)
                         <option value="{{ $tienda->idTienda }}"
@@ -414,7 +413,7 @@
             <!-- Marca -->
             <div>
                 <label class="text-sm font-medium">Marca</label>
-                <select name="idMarca" id="idMarca" class="select2 w-full bg-gray-100" style="display: none">
+                <select id="idMarca" name="idMarca" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Marca</option>
                     @foreach ($marcas as $marca)
                         <option value="{{ $marca->idMarca }}"
@@ -477,42 +476,43 @@
                 <a href="{{ route('ordenes.smart') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
 
                 <!-- Botón de Modificar -->
-                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto" 
-        @if($idEstadflujo == 33) disabled @endif>
-    Modificar
-</button>            </div>
+                <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto"
+                    @if ($idEstadflujo == 33) disabled @endif>
+                    Modificar
+                </button>
+            </div>
         </div>
     </form>
 </div>
 
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const idEstadflujo = @json($idEstadflujo);
-    
-    if(idEstadflujo === 33) {
-        const form = document.getElementById('tuFormulario');
-        
-        // Aplicar tachado a todos los elementos de texto
-        const textElements = form.querySelectorAll('label, input, select, textarea, button, span, div');
-        textElements.forEach(el => {
-            el.style.textDecoration = 'line-through';
-            el.style.color = '#999';
-        });
-        
-        // Deshabilitar todos los inputs
-        const inputs = form.querySelectorAll('input, select, textarea, button');
-        inputs.forEach(input => {
-            input.disabled = true;
-        });
-        
-        // Agregar mensaje
-        const warning = document.createElement('div');
-        warning.className = 'text-center mt-4 text-red-500 font-bold';
-        warning.textContent = '⚠️ Este formulario no puede ser modificado';
-        form.parentNode.insertBefore(warning, form.nextSibling);
-    }
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        const idEstadflujo = @json($idEstadflujo);
+
+        if (idEstadflujo === 33) {
+            const form = document.getElementById('tuFormulario');
+
+            // Aplicar tachado a todos los elementos de texto
+            const textElements = form.querySelectorAll('label, input, select, textarea, button, span, div');
+            textElements.forEach(el => {
+                el.style.textDecoration = 'line-through';
+                el.style.color = '#999';
+            });
+
+            // Deshabilitar todos los inputs
+            const inputs = form.querySelectorAll('input, select, textarea, button');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+
+            // Agregar mensaje
+            const warning = document.createElement('div');
+            warning.className = 'text-center mt-4 text-red-500 font-bold';
+            warning.textContent = '⚠️ Este formulario no puede ser modificado';
+            form.parentNode.insertBefore(warning, form.nextSibling);
+        }
+    });
 </script>
 
 
@@ -562,7 +562,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const ticketId = "{{ $ticket->idTickets }}"; // ID del ticket
         const rowsPerPage = 15;
         let currentPage = 1;
@@ -626,19 +626,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Botón "Guardar" ✔
                 const saveIconBtn = document.createElement("button");
-                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success", "text-white");
+                saveIconBtn.classList.add("save-comment", "px-3", "py-1", "rounded", "bg-success",
+                    "text-white");
                 saveIconBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
                 saveIconBtn.innerHTML = "✔";
 
                 // Botón "Eliminar" ❌
                 const deleteBtn = document.createElement("button");
-                deleteBtn.classList.add("delete-flujo", "px-3", "py-1", "rounded", "bg-red-500", "text-white");
+                deleteBtn.classList.add("delete-flujo", "px-3", "py-1", "rounded", "bg-red-500",
+                    "text-white");
                 deleteBtn.textContent = "❌";
                 deleteBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
 
                 // Botón "Relacionar" 🔗
                 const relacionarBtn = document.createElement("button");
-                relacionarBtn.classList.add("relacionar-flujo", "px-3", "py-1", "rounded", "bg-blue-500", "text-white");
+                relacionarBtn.classList.add("relacionar-flujo", "px-3", "py-1", "rounded",
+                    "bg-blue-500", "text-white");
                 relacionarBtn.textContent = "🔗";
                 relacionarBtn.dataset.flujoId = ticketFlujo.idTicketFlujo;
 
@@ -647,7 +650,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 masCell.appendChild(deleteBtn);
                 masCell.appendChild(relacionarBtn); // 👉 lo agregas al final
 
-   
+
 
                 row.appendChild(estadoCell);
                 row.appendChild(usuarioCell);
@@ -714,27 +717,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function agregarEventosComentarios() {
             document.querySelectorAll('.toggle-comment').forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     let row = this.closest('tr').nextElementSibling;
                     row.classList.toggle('hidden');
                 });
             });
 
             document.querySelectorAll('.save-comment').forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     let flujoId = this.dataset.flujoId;
                     let row = this.closest('tr').nextElementSibling;
                     let textArea = row.querySelector("textarea");
                     let comentario = textArea.value;
 
                     fetch(`/ticket/${ticketId}/ticketflujo/${flujoId}/update`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-                        },
-                        body: JSON.stringify({ comentario })
-                    })
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute("content")
+                            },
+                            body: JSON.stringify({
+                                comentario
+                            })
+                        })
                         .then(response => response.json())
                         .then(result => {
                             if (result.success) {
@@ -748,21 +754,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             document.querySelectorAll('.delete-flujo').forEach(button => {
-                button.addEventListener('click', function () {
+                button.addEventListener('click', function() {
                     const flujoId = this.dataset.flujoId;
 
                     if (confirm("¿Estás seguro que quieres eliminar este estado de flujo?")) {
                         fetch(`/ticketflujo/${flujoId}/eliminar`, {
-                            method: "DELETE",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-                            }
-                        })
+                                method: "DELETE",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute(
+                                        "content")
+                                }
+                            })
                             .then(response => response.json())
                             .then(result => {
                                 if (result.success) {
-                                    toastr.success("Estado de flujo eliminado correctamente.");
+                                    toastr.success(
+                                        "Estado de flujo eliminado correctamente.");
                                     cargarEstados();
                                 } else {
                                     toastr.error("Error al eliminar el estado de flujo.");
@@ -777,34 +786,39 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             document.querySelectorAll('.relacionar-flujo').forEach(button => {
-    button.addEventListener('click', function () {
-        const flujoId = this.dataset.flujoId;
+                button.addEventListener('click', function() {
+                    const flujoId = this.dataset.flujoId;
 
-        if (confirm("¿Deseas relacionar este estado de flujo con el ticket?")) {
-            fetch(`/ticket/${ticketId}/relacionarflujo`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-                },
-                body: JSON.stringify({ flujoId: flujoId })
-            })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        toastr.success("Estado de flujo relacionado con el ticket.");
-                        cargarEstados();
-                    } else {
-                        toastr.error("No se pudo relacionar el flujo.");
+                    if (confirm("¿Deseas relacionar este estado de flujo con el ticket?")) {
+                        fetch(`/ticket/${ticketId}/relacionarflujo`, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute(
+                                        "content")
+                                },
+                                body: JSON.stringify({
+                                    flujoId: flujoId
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    toastr.success(
+                                        "Estado de flujo relacionado con el ticket.");
+                                    cargarEstados();
+                                } else {
+                                    toastr.error("No se pudo relacionar el flujo.");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error al relacionar flujo:", error);
+                                toastr.error("Error inesperado al relacionar.");
+                            });
                     }
-                })
-                .catch(error => {
-                    console.error("Error al relacionar flujo:", error);
-                    toastr.error("Error inesperado al relacionar.");
                 });
-        }
-    });
-});
+            });
 
         }
 
@@ -828,12 +842,20 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         console.log("DOM completamente cargado y analizado");
-        
-        // Inicializar NiceSelect2
-        document.querySelectorAll('.select2').forEach(function(select) {
-            console.log("Inicializando NiceSelect para elemento:", select);
-            NiceSelect.bind(select, {
-                searchable: true
+
+        $(document).ready(function() {
+            console.log("Inicializando Select2 para todos los .select2");
+            $('.select2').each(function() {
+                const $select = $(this);
+                if ($select.hasClass("select2-hidden-accessible")) {
+                    $select.select2('destroy');
+                }
+                $select.select2({
+                    placeholder: 'Seleccionar una opción',
+                    allowClear: true,
+                    width: 'resolve',
+                    dropdownParent: $select.parent() // por si está en un modal
+                });
             });
         });
 
@@ -882,10 +904,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (response.success) {
                         const ultimaModificacion = response.ultima_modificacion;
                         console.log("Última modificación encontrada:", ultimaModificacion);
-                        
-                        const fechaUltimaModificacion = formatDate(new Date(ultimaModificacion.created_at));
+
+                        const fechaUltimaModificacion = formatDate(new Date(
+                            ultimaModificacion.created_at));
                         console.log("Fecha formateada:", fechaUltimaModificacion);
-                        
+
                         const usuarioUltimaModificacion = ultimaModificacion.usuario;
                         const campoUltimaModificacion = ultimaModificacion.campo;
                         const oldValueUltimaModificacion = ultimaModificacion.valor_antiguo;
@@ -909,10 +932,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Función para actualizar el log de modificación cuando se haga un cambio
         function updateModificationLog(field, oldValue, newValue) {
-            console.log("Actualizando log de modificación:", {field, oldValue, newValue});
+            console.log("Actualizando log de modificación:", {
+                field,
+                oldValue,
+                newValue
+            });
             const usuario = "{{ auth()->user()->Nombre }}";
             console.log("Usuario:", usuario);
-            
+
             const fecha = formatDate(new Date());
             const idTickets = "{{ $orden->idTickets }}";
             console.log("Fecha:", fecha, "idTickets:", idTickets);
@@ -922,7 +949,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             console.log("CSRF Token:", csrfToken);
-            
+
             const data = {
                 field: field,
                 oldValue: oldValue,
@@ -974,7 +1001,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     const usuario = "{{ auth()->user()->id }}";
                     const fecha = formatDate(new Date());
                     const ticketId = "{{ $ticket->idTickets }}";
-                    console.log("Datos para actualización:", {usuario, fecha, ticketId});
+                    console.log("Datos para actualización:", {
+                        usuario,
+                        fecha,
+                        ticketId
+                    });
 
                     let rowClasses = "";
                     if (estadoId === 1) {
@@ -1038,7 +1069,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const state = row.querySelector("td").textContent.trim();
                     console.log("Estado a eliminar:", state);
                     row.remove();
-                    if (!document.querySelector("#draggableContainer .draggable-state[data-state='" + state + "']")) {
+                    if (!document.querySelector("#draggableContainer .draggable-state[data-state='" +
+                            state + "']")) {
                         console.log("Recreando elemento draggable para:", state);
                         const container = document.getElementById("draggableContainer");
                         const newDraggable = document.createElement("div");
@@ -1050,7 +1082,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         } else if (state === "Operativo") {
                             colorClass = "bg-success/20";
                         }
-                        newDraggable.className = `draggable-state ${colorClass} px-3 py-1 rounded cursor-move`;
+                        newDraggable.className =
+                            `draggable-state ${colorClass} px-3 py-1 rounded cursor-move`;
                         newDraggable.dataset.state = state;
                         newDraggable.textContent = state;
                         reinitializeDraggable(newDraggable);
@@ -1064,32 +1097,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Función para inicializar valores de campos
         function initializeFieldValues() {
-            const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
+            const form = document.getElementById(
+                'tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
             if (!form) {
                 console.error("Formulario no encontrado");
                 return;
             }
 
-            form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
-                if (!field.name && !field.id) {
-                    console.log("Ignorando campo sin nombre/ID:", field);
-                    return;
-                }
+            form.querySelectorAll(
+                    "input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea")
+                .forEach(function(field) {
+                    if (!field.name && !field.id) {
+                        console.log("Ignorando campo sin nombre/ID:", field);
+                        return;
+                    }
 
-                console.log("Inicializando campo:", field.id || field.name);
-                if (field.tagName.toLowerCase() === "select") {
-                    field.dataset.oldValue = field.options[field.selectedIndex].text;
-                } else {
-                    field.dataset.oldValue = field.value;
-                }
-                console.log("Valor inicial guardado:", field.dataset.oldValue);
-            });
+                    console.log("Inicializando campo:", field.id || field.name);
+                    if (field.tagName.toLowerCase() === "select") {
+                        field.dataset.oldValue = field.options[field.selectedIndex].text;
+                    } else {
+                        field.dataset.oldValue = field.value;
+                    }
+                    console.log("Valor inicial guardado:", field.dataset.oldValue);
+                });
         }
 
         // Función para manejar cambios en campos de texto/textarea con debounce
         function handleInputChange(e) {
             const field = e.target;
-            
+
             // Solo campos de texto y textarea dentro del formulario
             if (!field.matches('#tuFormulario input[type="text"], #tuFormulario textarea')) {
                 return;
@@ -1100,10 +1136,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             console.log("Evento input detectado en campo:", field.id || field.name);
-            
+
             let oldVal = field.dataset.oldValue || '';
             let newVal = field.value;
-            
+
             // Debounce para evitar múltiples llamadas mientras se escribe
             clearTimeout(field.debounceTimer);
             field.debounceTimer = setTimeout(() => {
@@ -1116,10 +1152,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                     if (!fieldLabel) {
-                        fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
+                        fieldLabel = field.getAttribute("name") || field.getAttribute("id") ||
+                            "campo desconocido";
                     }
                     console.log("Cambio detectado en:", fieldLabel, "de", oldVal, "a", newVal);
-                    
+
                     updateModificationLog(fieldLabel, oldVal, newVal);
                     field.dataset.oldValue = newVal;
                 }
@@ -1129,9 +1166,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Función para manejar cambios en selects y otros campos
         function handleFieldChange(e) {
             const field = e.target;
-            
+
             // Filtra solo los campos que nos interesan (excepto text/textarea)
-            if (!field.matches('#tuFormulario select, #tuFormulario input:not([type="text"]):not([type="hidden"])')) {
+            if (!field.matches(
+                    '#tuFormulario select, #tuFormulario input:not([type="text"]):not([type="hidden"])')) {
                 return;
             }
 
@@ -1140,18 +1178,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             console.log("Evento change detectado en campo:", field.id || field.name);
-            
+
             let oldVal = field.dataset.oldValue || '';
             let newVal;
-            
+
             if (field.tagName.toLowerCase() === "select") {
                 newVal = field.options[field.selectedIndex].text;
             } else {
                 newVal = field.value;
             }
-            
+
             console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
-            
+
             if (oldVal !== newVal) {
                 let fieldLabel = "";
                 if (field.id) {
@@ -1164,7 +1202,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
                 }
                 console.log("Etiqueta del campo:", fieldLabel);
-                
+
                 updateModificationLog(fieldLabel, oldVal, newVal);
                 field.dataset.oldValue = newVal;
                 console.log("Valor antiguo actualizado a:", newVal);
@@ -1173,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Inicialización
         initializeFieldValues();
-        
+
         // Escuchar eventos
         document.addEventListener('input', handleInputChange, true); // Para cambios de texto en tiempo real
         document.addEventListener('change', handleFieldChange, true); // Para selects, checkboxes, etc.
@@ -1182,192 +1220,194 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script>
-// Cache para marcas
-const marcasCache = {
-    all: null,
-    byClienteGeneral: {}
-};
+    // Cache para marcas
+    const marcasCache = {
+        all: null,
+        byClienteGeneral: {}
+    };
 
-document.getElementById('idCliente').addEventListener('change', async function() {
-    const clienteId = this.value;
-    const tiendaSelect = document.getElementById('idTienda');
-    const clienteGeneralSelect = document.getElementById('idClienteGeneral');
-    const marcaSelect = document.getElementById('idMarca');
-    const direccionInput = document.getElementById('direccion');
-    
-    // Limpiar selects existentes
-    tiendaSelect.innerHTML = '<option value="" disabled>Seleccionar Tienda</option>';
-    clienteGeneralSelect.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>';
-    marcaSelect.innerHTML = '<option value="" disabled>Seleccionar Marca</option>';
-    
-    if (!clienteId) {
-        tiendaSelect.style.display = 'none';
-        clienteGeneralSelect.style.display = 'none';
-        return;
-    }
+    document.getElementById('idCliente').addEventListener('change', async function() {
+        const clienteId = this.value;
+        const tiendaSelect = document.getElementById('idTienda');
+        const clienteGeneralSelect = document.getElementById('idClienteGeneral');
+        const marcaSelect = document.getElementById('idMarca');
+        const direccionInput = document.getElementById('direccion');
 
-    try {
-        // 1. Obtener datos del cliente
-        const clienteResponse = await fetch(`/get-cliente-data/${clienteId}`);
-        const clienteData = await clienteResponse.json();
-        
-        // 2. Obtener y procesar clientes generales
-        const clientesGeneralesResponse = await fetch(`/get-clientes-generales/${clienteId}`);
-        const clientesGeneralesData = await clientesGeneralesResponse.json();
-        
-        if (clientesGeneralesData.length > 0) {
-            clientesGeneralesData.forEach(clienteGeneral => {
-                const option = document.createElement('option');
-                option.value = clienteGeneral.idClienteGeneral;
-                option.textContent = clienteGeneral.descripcion;
-                clienteGeneralSelect.appendChild(option);
-            });
-            clienteGeneralSelect.style.display = 'block';
-            
-            // Evento para cuando cambie el cliente general
-            clienteGeneralSelect.addEventListener('change', handleClienteGeneralChange);
-        } else {
-            clienteGeneralSelect.style.display = 'none';
-            // Si no hay clientes generales, cargar todas las marcas
-            await loadMarcas('all');
+        // Limpiar y reinicializar selects
+        $('#idTienda').empty().append('<option value="" disabled>Seleccionar Tienda</option>').select2(
+            'destroy');
+        $('#idClienteGeneral').empty().append(
+            '<option value="" selected>Seleccionar Cliente General</option>').select2('destroy');
+        $('#idMarca').empty().append('<option value="" disabled>Seleccionar Marca</option>').select2(
+            'destroy');
+
+        if (!clienteId) {
+            $('#idTienda').hide();
+            $('#idClienteGeneral').hide();
+            return;
         }
 
-        // 3. Determinar qué tiendas mostrar y actualizar dirección
-        let tiendasEndpoint;
-        if (clienteData.idTipoDocumento == 8 && clienteData.esTienda == 0) {
-            tiendasEndpoint = '/get-all-tiendas';
-            // Actualizar dirección con la del cliente
-            direccionInput.value = clienteData.direccion || '';
-        } else if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
-            tiendasEndpoint = `/get-tiendas-by-cliente/${clienteId}`;
-            // La dirección se actualizará cuando seleccione la tienda
-        } else {
-            tiendasEndpoint = '/get-no-tiendas';
-        }
+        try {
+            // 1. Obtener datos del cliente
+            const clienteResponse = await fetch(`/get-cliente-data/${clienteId}`);
+            const clienteData = await clienteResponse.json();
 
-        // 4. Obtener tiendas (con dirección)
-        const tiendasResponse = await fetch(tiendasEndpoint);
-        const tiendasData = await tiendasResponse.json();
+            // 2. Obtener y procesar clientes generales
+            const clientesGeneralesResponse = await fetch(`/get-clientes-generales/${clienteId}`);
+            const clientesGeneralesData = await clientesGeneralesResponse.json();
 
-        // 5. Actualizar el select de tiendas
-        tiendasData.forEach(tienda => {
-            const option = document.createElement('option');
-            option.value = tienda.idTienda;
-            option.textContent = tienda.nombre;
-            option.dataset.direccion = tienda.direccion; // Almacenar dirección en el option
-            
-            if (tienda.idTienda == @json($orden->idTienda)) {
-                option.selected = true;
-                // Si es tipo 9 y es tienda, actualizar dirección con la de la tienda seleccionada
-                if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
-                    direccionInput.value = tienda.direccion || '';
+            if (clientesGeneralesData.length > 0) {
+                clientesGeneralesData.forEach(clienteGeneral => {
+                    $('#idClienteGeneral').append(
+                        $('<option>', {
+                            value: clienteGeneral.idClienteGeneral,
+                            text: clienteGeneral.descripcion
+                        })
+                    );
+                });
+
+                $('#idClienteGeneral').show();
+
+                if ($('#idClienteGeneral').hasClass('select2-hidden-accessible')) {
+                    $('#idClienteGeneral').select2('destroy');
                 }
+
+                $('#idClienteGeneral').select2({
+                    width: 'resolve'
+                });
+
+
+                // Evitar múltiples listeners
+                clienteGeneralSelect.removeEventListener('change', handleClienteGeneralChange);
+                clienteGeneralSelect.addEventListener('change', handleClienteGeneralChange);
+            } else {
+                $('#idClienteGeneral').hide();
+                await loadMarcas('all');
             }
-            tiendaSelect.appendChild(option);
-        });
-        
-        // 6. Agregar evento para cambiar dirección al seleccionar tienda (solo para tipo 9)
-        if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
-            tiendaSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                direccionInput.value = selectedOption.dataset.direccion || '';
+
+            // 3. Determinar endpoint para tiendas
+            let tiendasEndpoint;
+            if (clienteData.idTipoDocumento == 8 && clienteData.esTienda == 0) {
+                tiendasEndpoint = '/get-all-tiendas';
+                direccionInput.value = clienteData.direccion || '';
+            } else if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
+                tiendasEndpoint = `/get-tiendas-by-cliente/${clienteId}`;
+            } else {
+                tiendasEndpoint = '/get-no-tiendas';
+            }
+
+            // 4. Obtener tiendas
+            const tiendasResponse = await fetch(tiendasEndpoint);
+            const tiendasData = await tiendasResponse.json();
+
+            tiendasData.forEach(tienda => {
+                const option = $('<option>', {
+                    value: tienda.idTienda,
+                    text: tienda.nombre,
+                    'data-direccion': tienda.direccion
+                });
+
+                if (tienda.idTienda == @json($orden->idTienda)) {
+                    option.prop('selected', true);
+                    if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
+                        direccionInput.value = tienda.direccion || '';
+                    }
+                }
+
+                $('#idTienda').append(option);
             });
-        }
-        
-        // 7. Reinicializar NiceSelect para tienda
-        reinicializarNiceSelect(tiendaSelect);
 
-    } catch (error) {
-        console.error('Error:', error);
-        toastr.error('Error al cargar datos');
+            // 5. Evento para actualizar dirección si selecciona tienda
+            if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
+                tiendaSelect.addEventListener('change', function() {
+                    const direccion = this.options[this.selectedIndex].dataset.direccion;
+                    direccionInput.value = direccion || '';
+                });
+            }
+
+            $('#idTienda').show().select2({
+                width: 'resolve'
+            });
+
+        } catch (error) {
+            console.error('Error:', error);
+            toastr.error('Error al cargar datos');
+        }
+    });
+
+
+    async function handleClienteGeneralChange() {
+        const clienteGeneralId = this.value;
+        await loadMarcas(clienteGeneralId ? 'byClienteGeneral' : 'all', clienteGeneralId);
     }
-});
 
-// Función para manejar cambio de cliente general
-async function handleClienteGeneralChange() {
-    const clienteGeneralId = this.value;
-    await loadMarcas(clienteGeneralId ? 'byClienteGeneral' : 'all', clienteGeneralId);
-}
 
-// Función para cargar marcas
-async function loadMarcas(type, clienteGeneralId = null) {
-    const marcaSelect = document.getElementById('idMarca');
-    
-    try {
-        // Mostrar loading
-        marcaSelect.innerHTML = '<option value="" disabled>Cargando marcas...</option>';
-        
-        // Obtener marcas según el tipo
-        let marcas = [];
-        
-        if (type === 'all') {
-            if (!marcasCache.all) {
-                const response = await fetch('/get-all-marcas');
-                marcasCache.all = await response.json();
+    // Función para cargar marcas
+    async function loadMarcas(type, clienteGeneralId = null) {
+        const marcaSelect = document.getElementById('idMarca');
+
+        try {
+            // Mostrar loading
+            marcaSelect.innerHTML = '<option value="" disabled>Cargando marcas...</option>';
+
+            // Obtener marcas según el tipo
+            let marcas = [];
+
+            if (type === 'all') {
+                if (!marcasCache.all) {
+                    const response = await fetch('/get-all-marcas');
+                    marcasCache.all = await response.json();
+                }
+                marcas = marcasCache.all;
+            } else {
+                if (!marcasCache.byClienteGeneral[clienteGeneralId]) {
+                    const response = await fetch(`/get-marcas-by-cliente-general/${clienteGeneralId}`);
+                    marcasCache.byClienteGeneral[clienteGeneralId] = await response.json();
+                }
+                marcas = marcasCache.byClienteGeneral[clienteGeneralId];
             }
-            marcas = marcasCache.all;
-        } else {
-            if (!marcasCache.byClienteGeneral[clienteGeneralId]) {
-                const response = await fetch(`/get-marcas-by-cliente-general/${clienteGeneralId}`);
-                marcasCache.byClienteGeneral[clienteGeneralId] = await response.json();
+
+            // Actualizar select de marcas
+            updateMarcasSelect(marcas);
+
+        } catch (error) {
+            console.error(`Error al cargar marcas (${type}):`, error);
+            toastr.error('Error al cargar marcas');
+            // Fallback a todas las marcas
+            if (type !== 'all') {
+                await loadMarcas('all');
             }
-            marcas = marcasCache.byClienteGeneral[clienteGeneralId];
         }
-        
-        // Actualizar select de marcas
-        updateMarcasSelect(marcas);
-        
-    } catch (error) {
-        console.error(`Error al cargar marcas (${type}):`, error);
-        toastr.error('Error al cargar marcas');
-        // Fallback a todas las marcas
-        if (type !== 'all') {
+    }
+
+    // Función para actualizar select de marcas
+    function updateMarcasSelect(marcas) {
+        const marcaSelect = document.getElementById('idMarca');
+        const currentMarcaId = @json($orden->idMarca);
+
+        marcaSelect.innerHTML = '<option value="" disabled>Seleccionar Marca</option>';
+
+        marcas.forEach(marca => {
+            const option = new Option(marca.nombre, marca.idMarca);
+            if (marca.idMarca == currentMarcaId) option.selected = true;
+            marcaSelect.add(option);
+        });
+
+
+        $('#idMarca').select2('destroy').select2({
+            width: 'resolve'
+        });
+
+    }
+
+
+    // Cargar todas las marcas al inicio (si no hay cliente general seleccionado)
+    document.addEventListener('DOMContentLoaded', async () => {
+        const clienteGeneralSelect = document.getElementById('idClienteGeneral');
+        if (clienteGeneralSelect.value === '') {
             await loadMarcas('all');
         }
-    }
-}
-
-// Función para actualizar select de marcas
-function updateMarcasSelect(marcas) {
-    const marcaSelect = document.getElementById('idMarca');
-    const currentMarcaId = @json($orden->idMarca);
-    
-    marcaSelect.innerHTML = '<option value="" disabled>Seleccionar Marca</option>';
-    
-    marcas.forEach(marca => {
-        const option = new Option(marca.nombre, marca.idMarca);
-        if (marca.idMarca == currentMarcaId) option.selected = true;
-        marcaSelect.add(option);
     });
-    
-    // Reiniciar NiceSelect
-    reinicializarNiceSelect(marcaSelect);
-}
-
-// Función para reinicializar NiceSelect
-function reinicializarNiceSelect(selectElement) {
-    if (typeof NiceSelect !== 'undefined') {
-        // Eliminar instancia anterior si existe
-        const niceSelectInstance = selectElement.nextElementSibling;
-        if (niceSelectInstance?.classList.contains('nice-select')) {
-            niceSelectInstance.remove();
-        }
-        
-        // Mostrar y reinicializar
-        selectElement.style.display = 'block';
-        NiceSelect.bind(selectElement, { searchable: true });
-    } else {
-        selectElement.style.display = 'block';
-    }
-}
-
-// Cargar todas las marcas al inicio (si no hay cliente general seleccionado)
-document.addEventListener('DOMContentLoaded', async () => {
-    const clienteGeneralSelect = document.getElementById('idClienteGeneral');
-    if (clienteGeneralSelect.value === '') {
-        await loadMarcas('all');
-    }
-});
 </script>
 
 
@@ -1386,12 +1426,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     var modeloSelect = document.getElementById('idModelo');
 
-                    // 🔥 Elimina el NiceSelect anterior si existe
-                    const niceSelect = modeloSelect.nextElementSibling;
-                    if (niceSelect && niceSelect.classList.contains('nice-select')) {
-                        niceSelect.remove();
-                    }
-
                     // 🔄 Limpiar y agregar opciones
                     modeloSelect.innerHTML =
                         '<option value="" disabled selected>Seleccionar Modelo</option>';
@@ -1406,9 +1440,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         modeloSelect.style.display = 'block';
 
-                        // 🔁 Re-bind de NiceSelect con buscador
-                        NiceSelect.bind(modeloSelect, {
-                            searchable: true
+                        // ✅ Destruir Select2 si ya estaba aplicado
+                        if ($('#idModelo').hasClass('select2-hidden-accessible')) {
+                            $('#idModelo').select2('destroy');
+                        }
+
+                        // ✅ Aplicar Select2
+                        $('#idModelo').select2({
+                            width: 'resolve'
                         });
 
                     } else {
