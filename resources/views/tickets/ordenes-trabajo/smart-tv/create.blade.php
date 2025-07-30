@@ -362,8 +362,7 @@
                                 <div>
                                     <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
                                         Documento</label>
-                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full"
-                                        style="display:none">
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}">
@@ -1114,7 +1113,7 @@
         const camposObligatorios = [
             'idCliente', 'idClienteGeneral',
             'direccion', 'fechaCompra', 'idMarca', 'idTienda', 'idModelo',
-            'serie', 'fallaReportada', 'fechaTicket', 'linkubicacion'
+            'serie', 'fallaReportada', 'fechaTicket', 'linkubicacion', 'nroTicket'
         ];
 
         // Validación en tiempo real para campos obligatorios
@@ -1141,28 +1140,41 @@
         });
 
         // Función para validar un campo (compatible con Select2)
-        function validateCampo(input) {
-            const errorId = `error-${input.id}`;
-            let errorText = document.getElementById(errorId);
-            const valor = $(input).val(); // soporte para select2
+function validateCampo(input) {
+    const errorId = `error-${input.id}`;
+    let errorText = document.getElementById(errorId);
+    
+    // Obtener valor de manera diferente para Select2
+    let valor;
+    if ($(input).hasClass('select2-hidden-accessible')) {
+        valor = $(input).select2('val');
+    } else {
+        valor = input.value;
+    }
 
-            if (!valor || valor.length === 0) {
-                input.classList.add('border-red-500');
-                if (!errorText) {
-                    errorText = document.createElement('p');
-                    errorText.id = errorId;
-                    errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
-                    input.parentNode.appendChild(errorText);
-                }
-                errorText.textContent = "Campo vacío";
-            } else {
-                input.classList.remove('border-red-500');
-                if (errorText) {
-                    errorText.remove();
-                }
-            }
+    if (!valor || valor.length === 0 || valor === "") {
+        $(input).addClass('border-red-500');
+        if (!errorText) {
+            errorText = document.createElement('p');
+            errorText.id = errorId;
+            errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
+            $(input).parent().append(errorText);
         }
-
+        errorText.textContent = "Campo vacío";
+    } else {
+        $(input).removeClass('border-red-500');
+        if (errorText) {
+            errorText.remove();
+        }
+    }
+}
+// Para cada select con Select2
+$('#idCliente, #idClienteGeneral, #idTienda, #idMarca, #idModelo').on('select2:select', function(e) {
+    validateCampo(this);
+    // Fuerza la actualización del error
+    $(`#error-${this.id}`).remove();
+    $(this).removeClass('border-red-500');
+});
         // Validación específica para fecha de compra
         function validateFechaCompra(input) {
             const fechaCompra = new Date(input.value);
