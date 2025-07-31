@@ -139,8 +139,162 @@
     </div>
 </div>
 
+<!-- 🛠️ Formulario de Detalles -->
+<div class="p-6 mt-4">
+    <form id="tuFormulario" action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}"
+        enctype="multipart/form-data" method="POST">
+        @csrf
+        @method('PUT')
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Ticket -->
+            <div>
+                <label class="text-sm font-medium">Ticket</label>
+                <input type="text" id="numero_ticket" name="numero_ticket" class="form-input w-full bg-gray-100"
+                    value="{{ $orden->numero_ticket }}">
+            </div>
+
+            <!-- Cliente -->
+            <div>
+                <label class="text-sm font-medium">Cliente</label>
+                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100">
+                    <option value="">Seleccionar Cliente</option>
+                    @foreach ($clientes as $cliente)
+                        <option value="{{ $cliente->idCliente }}"
+                            {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
+                            {{ $cliente->nombre }} - {{ $cliente->documento }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Cliente General -->
+            <div>
+                <label class="text-sm font-medium">Cliente General</label>
+                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
+                    <option value="" selected>Seleccionar Cliente General</option>
+                    @if ($orden->clienteGeneral)
+                        <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+                            {{ $orden->clienteGeneral->descripcion }}
+                        </option>
+                    @endif
+                </select>
+            </div>
+
+            <!-- Tienda -->
+            <div>
+                <label class="text-sm font-medium">Tienda</label>
+                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100">
+                    <option value="" disabled>Seleccionar Tienda</option>
+                    @foreach ($tiendas as $tienda)
+                        <option value="{{ $tienda->idTienda }}"
+                            {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
+                            {{ $tienda->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="text-sm font-medium">Direción</label>
+                <input type="text" class="form-input w-full bg-gray-100"
+                    value="{{ $orden->tienda->direccion ?? '' }}" readonly>
+            </div>
+
+            <!-- Ejecutar -->
+            @if ($existeFlujo25)
+                <div>
+                    <label class="text-sm font-medium">Ejecutor</label>
+                    <select id="ejecutor" name="ejecutor" class="select2 w-full">
+                        <option value="" disabled>Seleccionar Ejecutador</option>
+                        @foreach ($usuarios as $usuario)
+                            <option value="{{ $usuario->idUsuario }}"
+                                {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
+                                {{ $usuario->Nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
 
 
+
+
+
+            <!-- Tipo de Servicio -->
+            <div>
+                <label class="text-sm font-medium">Tipo de Servicio</label>
+                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100">
+                    <option value="" disabled>Seleccionar Tipo de Servicio</option>
+                    @foreach ($tiposServicio as $tipo)
+                        <option value="{{ $tipo->idTipoServicio }}"
+                            {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
+                            {{ $tipo->nombre }}
+                        </option>
+                    @endforeach
+                </select>
+                <!-- Input oculto para mantener el valor al enviar el formulario -->
+                <input type="hidden" name="tipoServicio" value="{{ $orden->tipoServicio }}">
+            </div>
+
+            <!-- Falla Reportada -->
+            <div class="md:col-span-2">
+                <label class="text-sm font-medium">Falla Reportada</label>
+                <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
+            </div>
+
+            @if ($idRol != 6)
+                <!-- Botón de Guardar -->
+                <div class="md:col-span-2 flex justify-end space-x-4">
+                    <a href="{{ route('ordenes.helpdesk') }}"
+                        class="btn btn-outline-danger w-full md:w-auto">Volver</a>
+                    <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
+                </div>
+            @endif
+
+        </div>
+    </form>
+</div>
+
+@if ($idRol != 6)
+    <!-- Nueva Card: Historial de Estados -->
+    <div id="estadosCard" class="mt-4 p-4">
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
+            style="background-color: {{ $colorEstado }};">Historial de Estados</span>
+
+        <!-- Contenedor de Estados -->
+        <div class="mt-3 overflow-x-auto">
+            <div id="draggableContainer" class="flex space-x-2 w-max">
+                @foreach ($estadosFlujo as $estado)
+                    <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
+                        style="background-color: {{ $estado->color }}; color: black;"
+                        data-state-description="{{ $estado->descripcion }}">
+                        {{ $estado->descripcion }}
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Última modificación -->
+        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
+                Última modificación:
+            </span>
+            <span id="ultimaModificacion"
+                class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600 
+                   rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
+            </span>
+        </div>
+    </div>
+@endif
+
+
+
+
+
+<!-- Agregar Axios desde un CDN -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
     // Suponiendo que tienes un ID de ticket disponible en tu página
@@ -152,22 +306,32 @@
             horaFinInput: 'Hora Fin',
             fechaVisitaInput: 'Fecha Visita',
             nombreVisitaInput: 'Nombre de la Visita',
-            // Podés seguir agregando más si querés personalizar más campos
         };
 
         document.querySelectorAll("form label").forEach(label => {
-            const input = label.nextElementSibling || label.parentElement.querySelector(
-                'input, select, textarea');
+            let input = label.nextElementSibling;
+
+            // Si no es input, select o textarea, buscar dentro del contenedor padre
+            if (!input || !['INPUT', 'SELECT', 'TEXTAREA'].includes(input.tagName)) {
+                input = label.parentElement.querySelector('input, select, textarea');
+            }
+
+            // Si sigue sin encontrar, intenta buscar por ID (caso Select2 u otros wrappers)
+            if (!input && label.htmlFor) {
+                input = document.getElementById(label.htmlFor);
+            }
+
             if (input) {
                 const name = input.getAttribute("name") || input.getAttribute("id");
                 if (name && !labels[name]) {
-                    labels[name] = label.textContent.trim(); // fallback si no está en el diccionario
+                    labels[name] = label.textContent.trim();
                 }
             }
         });
 
         return labels;
     }
+
 
 
     window.addEventListener('toggle-modal', function() {
@@ -295,167 +459,6 @@
         cargarHistorialModificaciones(ticketId, tbody, preload);
     });
 </script>
-
-
-
-
-
-
-<!-- 🛠️ Formulario de Detalles -->
-<div class="p-6 mt-4">
-    <form id="tuFormulario" action="{{ route('ordenes.helpdesk.update', $orden->idTickets) }}" enctype="multipart/form-data"
-        method="POST">
-        @csrf
-        @method('PUT')
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Ticket -->
-            <div>
-                <label class="text-sm font-medium">Ticket</label>
-                <input type="text" id="numero_ticket" name="numero_ticket" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}">
-            </div>
-
-            <!-- Cliente -->
-            <div>
-                <label class="text-sm font-medium">Cliente</label>
-                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100" style="display: none">
-                    <option value="">Seleccionar Cliente</option>
-                    @foreach ($clientes as $cliente)
-                    <option value="{{ $cliente->idCliente }}"
-                        {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
-                        {{ $cliente->nombre }} - {{ $cliente->documento }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- Cliente General -->
-            <div>
-                <label class="text-sm font-medium">Cliente General</label>
-                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
-                    <option value="" selected>Seleccionar Cliente General</option>
-                    @if ($orden->clienteGeneral)
-                    <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
-                        {{ $orden->clienteGeneral->descripcion }}
-                    </option>
-                    @endif
-                </select>
-            </div>
-
-            <!-- Tienda -->
-            <div>
-                <label class="text-sm font-medium">Tienda</label>
-                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100" style="display: none;">
-                    <option value="" disabled>Seleccionar Tienda</option>
-                    @foreach ($tiendas as $tienda)
-                    <option value="{{ $tienda->idTienda }}"
-                        {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
-                        {{ $tienda->nombre }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <label class="text-sm font-medium">Direción</label>
-                <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->tienda->direccion ?? '' }}"
-                    readonly>
-            </div>
-
-            <!-- Ejecutar -->
-            @if ($existeFlujo25)
-            <div>
-                <label class="text-sm font-medium">Ejecutor</label>
-                <select id="ejecutor" name="ejecutor" class="select2 w-full" style="display: none;">
-                    <option value="" disabled>Seleccionar Ejecutador</option>
-                    @foreach ($usuarios as $usuario)
-                    <option value="{{ $usuario->idUsuario }}"
-                        {{ $usuario->idUsuario == $orden->ejecutor ? 'selected' : '' }}>
-                        {{ $usuario->Nombre }}
-                    </option>
-                    @endforeach
-                </select>
-            </div>
-            @endif
-
-
-
-
-
-            <!-- Tipo de Servicio -->
-            <div>
-                <label class="text-sm font-medium">Tipo de Servicio</label>
-                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100"
-                    style="display: none" >
-                    <option value="" disabled>Seleccionar Tipo de Servicio</option>
-                    @foreach ($tiposServicio as $tipo)
-                    <option value="{{ $tipo->idTipoServicio }}"
-                        {{ $tipo->idTipoServicio == $orden->tipoServicio ? 'selected' : '' }}>
-                        {{ $tipo->nombre }}
-                    </option>
-                    @endforeach
-                </select>
-                <!-- Input oculto para mantener el valor al enviar el formulario -->
-                <input type="hidden" name="tipoServicio" value="{{ $orden->tipoServicio }}">
-            </div>
-
-            <!-- Falla Reportada -->
-            <div class="md:col-span-2">
-                <label class="text-sm font-medium">Falla Reportada</label>
-                <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
-            </div>
-
-               @if ($idRol != 6)
-    <!-- Botón de Guardar -->
-    <div class="md:col-span-2 flex justify-end space-x-4">
-        <a href="{{ route('ordenes.helpdesk') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
-        <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
-    </div>
-@endif
-
-        </div>
-    </form>
-</div>
-
-@if ($idRol != 6)
-    <!-- Nueva Card: Historial de Estados -->
-    <div id="estadosCard" class="mt-4 p-4">
-        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
-            style="background-color: {{ $colorEstado }};">Historial de Estados</span>
-
-        <!-- Contenedor de Estados -->
-        <div class="mt-3 overflow-x-auto">
-            <div id="draggableContainer" class="flex space-x-2 w-max">
-                @foreach ($estadosFlujo as $estado)
-                    <div class="estado-button min-w-[120px] sm:min-w-[140px] px-4 py-2 rounded-lg cursor-pointer text-white text-center shadow-md"
-                        style="background-color: {{ $estado->color }}; color: black;"
-                        data-state-description="{{ $estado->descripcion }}">
-                        {{ $estado->descripcion }}
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        <!-- Última modificación -->
-        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
-            <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
-                Última modificación:
-            </span>
-            <span id="ultimaModificacion"
-                class="bg-gray-100 dark:bg-gray-700 px-3 py-1.5 border border-gray-300 dark:border-gray-600 
-                   rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
-            </span>
-        </div>
-    </div>
-@endif
-
-
-
-
-
-
-
-
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -649,24 +652,20 @@
     });
 </script>
 
-
-
-<!-- Agregar Axios desde un CDN -->
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<!-- Flatpickr JS -->
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         console.log("DOM completamente cargado y analizado");
 
         // Inicializar NiceSelect2
-        document.querySelectorAll('.select2').forEach(function(select) {
-            console.log("Inicializando NiceSelect para elemento:", select);
-            NiceSelect.bind(select, {
-                searchable: true
+        // Inicializar Select2
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Seleccionar una opción',
+                allowClear: true
             });
         });
+
 
         // Inicializar Flatpickr en "Fecha de Compra"
         console.log("Inicializando Flatpickr para fechaCompra");
@@ -705,7 +704,8 @@
                         const ultimaModificacion = response.ultima_modificacion;
                         console.log("Última modificación encontrada:", ultimaModificacion);
 
-                        const fechaUltimaModificacion = formatDate(new Date(ultimaModificacion.created_at));
+                        const fechaUltimaModificacion = formatDate(new Date(
+                            ultimaModificacion.created_at));
                         console.log("Fecha formateada:", fechaUltimaModificacion);
 
                         const usuarioUltimaModificacion = ultimaModificacion.usuario;
@@ -866,7 +866,8 @@
                     const state = row.querySelector("td").textContent.trim();
                     console.log("Estado a eliminar:", state);
                     row.remove();
-                    if (!document.querySelector("#draggableContainer .draggable-state[data-state='" + state + "']")) {
+                    if (!document.querySelector("#draggableContainer .draggable-state[data-state='" +
+                            state + "']")) {
                         console.log("Recreando elemento draggable para:", state);
                         const container = document.getElementById("draggableContainer");
                         const newDraggable = document.createElement("div");
@@ -878,7 +879,8 @@
                         } else if (state === "Operativo") {
                             colorClass = "bg-success/20";
                         }
-                        newDraggable.className = `draggable-state ${colorClass} px-3 py-1 rounded cursor-move`;
+                        newDraggable.className =
+                            `draggable-state ${colorClass} px-3 py-1 rounded cursor-move`;
                         newDraggable.dataset.state = state;
                         newDraggable.textContent = state;
                         reinitializeDraggable(newDraggable);
@@ -893,27 +895,30 @@
         // Por esta versión mejorada:
         function initializeFieldValues() {
             // Selecciona solo los campos dentro del formulario principal
-            const form = document.getElementById('tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
+            const form = document.getElementById(
+                'tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
             if (!form) {
                 console.error("Formulario no encontrado");
                 return;
             }
 
-            form.querySelectorAll("input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea").forEach(function(field) {
-                // Ignora campos sin nombre o ID (como los de Alpine.js)
-                if (!field.name && !field.id) {
-                    console.log("Ignorando campo sin nombre/ID:", field);
-                    return;
-                }
+            form.querySelectorAll(
+                    "input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea")
+                .forEach(function(field) {
+                    // Ignora campos sin nombre o ID (como los de Alpine.js)
+                    if (!field.name && !field.id) {
+                        console.log("Ignorando campo sin nombre/ID:", field);
+                        return;
+                    }
 
-                console.log("Inicializando campo:", field.id || field.name);
-                if (field.tagName.toLowerCase() === "select") {
-                    field.dataset.oldValue = field.options[field.selectedIndex].text;
-                } else {
-                    field.dataset.oldValue = field.value;
-                }
-                console.log("Valor inicial guardado:", field.dataset.oldValue);
-            });
+                    console.log("Inicializando campo:", field.id || field.name);
+                    if (field.tagName.toLowerCase() === "select") {
+                        field.dataset.oldValue = field.options[field.selectedIndex].text;
+                    } else {
+                        field.dataset.oldValue = field.value;
+                    }
+                    console.log("Valor inicial guardado:", field.dataset.oldValue);
+                });
         }
 
         // Y modifica el manejador de eventos así:
@@ -921,7 +926,8 @@
             const field = e.target;
 
             // Filtra solo los campos que nos interesan
-            if (!field.matches('#tuFormulario input:not([type="hidden"]), #tuFormulario select, #tuFormulario textarea')) {
+            if (!field.matches(
+                    '#tuFormulario input:not([type="hidden"]), #tuFormulario select, #tuFormulario textarea')) {
                 return;
             }
 
@@ -973,109 +979,116 @@
 
 <script>
     document.getElementById('idCliente').addEventListener('change', function() {
-        var clienteId = this.value; // Obtén el ID del cliente seleccionado
-        console.log('Cliente seleccionado:', clienteId); // Para depurar
+        const clienteId = this.value;
+        const clienteGeneralSelect = document.getElementById('idClienteGeneral');
 
-        // Si se seleccionó un cliente
+        console.log('Cliente seleccionado:', clienteId);
+
         if (clienteId) {
-            console.log('Haciendo la petición para obtener los clientes generales...');
-
-            // Realizamos la petición para obtener los clientes generales asociados a este cliente
             fetch(`/get-clientes-generales/${clienteId}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Datos recibidos:', data); // Para depurar
+                    // Destruir instancia Select2 si ya existe
+                    if ($(clienteGeneralSelect).hasClass("select2-hidden-accessible")) {
+                        $(clienteGeneralSelect).select2('destroy');
+                    }
 
-                    // Obtener el select de "Cliente General"
-                    var clienteGeneralSelect = document.getElementById('idClienteGeneral');
-
-                    // Limpiar las opciones anteriores del select de Cliente General
+                    // Limpiar opciones
                     clienteGeneralSelect.innerHTML =
                         '<option value="" selected>Seleccionar Cliente General</option>';
 
-                    // Comprobar si hay datos
                     if (data.length > 0) {
-                        console.log('Hay clientes generales asociados. Agregando opciones...');
-                        // Si hay clientes generales, agregarlos al select
-                        data.forEach(function(clienteGeneral) {
-                            var option = document.createElement('option');
-                            option.value = clienteGeneral.idClienteGeneral;
-                            option.textContent = clienteGeneral.descripcion;
+                        data.forEach(cg => {
+                            const option = document.createElement('option');
+                            option.value = cg.idClienteGeneral;
+                            option.textContent = cg.descripcion;
                             clienteGeneralSelect.appendChild(option);
                         });
-                        // Mostrar el select de Cliente General
+
                         clienteGeneralSelect.style.display = 'block';
                     } else {
-                        console.log('No hay clientes generales asociados.');
-                        // Si no hay clientes generales, ocultar el select
                         clienteGeneralSelect.style.display = 'none';
                     }
+
+                    // Volver a inicializar Select2
+                    $(clienteGeneralSelect).select2({
+                        width: '100%',
+                        placeholder: 'Seleccionar Cliente General',
+                        allowClear: true
+                    });
                 })
                 .catch(error => {
                     console.error('Error al obtener los clientes generales:', error);
                     alert('Hubo un error al cargar los clientes generales.');
                 });
         } else {
-            console.log('No se seleccionó ningún cliente. Ocultando el select de Cliente General...');
-            // Si no hay cliente seleccionado, ocultar el select de Cliente General
-            document.getElementById('idClienteGeneral').style.display = 'none';
+            if ($(clienteGeneralSelect).hasClass("select2-hidden-accessible")) {
+                $(clienteGeneralSelect).select2('destroy');
+            }
+            clienteGeneralSelect.innerHTML = '<option value="" selected>Seleccionar Cliente General</option>';
+            clienteGeneralSelect.style.display = 'none';
         }
     });
 </script>
 
+
+
 <script>
     document.getElementById('idMarca').addEventListener('change', function() {
-        var marcaId = this.value; // Obtén el ID de la marca seleccionada
-        console.log('Marca seleccionada:', marcaId); // Para depurar
+        const marcaId = this.value;
+        const modeloSelect = document.getElementById('idModelo');
 
-        // Si se seleccionó una marca
+        console.log('Marca seleccionada:', marcaId);
+
         if (marcaId) {
-            console.log('Haciendo la petición para obtener los modelos asociados a esta marca...');
-
-            // Realizamos la petición para obtener los modelos asociados a esta marca
             fetch(`/get-modelos/${marcaId}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Datos de modelos recibidos:', data); // Para depurar
+                    if ($(modeloSelect).hasClass("select2-hidden-accessible")) {
+                        $(modeloSelect).select2('destroy');
+                    }
 
-                    // Obtener el select de "Modelo"
-                    var modeloSelect = document.getElementById('idModelo');
+                    modeloSelect.innerHTML =
+                        '<option value="" disabled selected>Seleccionar Modelo</option>';
 
-                    // Limpiar las opciones anteriores del select de Modelo
-                    modeloSelect.innerHTML = '<option value="" disabled>Seleccionar Modelo</option>';
-
-                    // Comprobar si hay datos
                     if (data.length > 0) {
-                        console.log('Hay modelos asociados a esta marca. Agregando opciones...');
-                        // Si hay modelos, agregarlos al select
-                        data.forEach(function(modelo) {
-                            var option = document.createElement('option');
+                        data.forEach(modelo => {
+                            const option = document.createElement('option');
                             option.value = modelo.idModelo;
                             option.textContent = modelo.nombre;
                             modeloSelect.appendChild(option);
                         });
-                        // Mostrar el select de Modelo
+
                         modeloSelect.style.display = 'block';
                     } else {
-                        console.log('No hay modelos asociados a esta marca.');
-                        // Si no hay modelos, ocultar el select
                         modeloSelect.style.display = 'none';
                     }
+
+                    $(modeloSelect).select2({
+                        width: '100%',
+                        placeholder: 'Seleccionar Modelo',
+                        allowClear: true
+                    });
                 })
                 .catch(error => {
                     console.error('Error al obtener los modelos:', error);
                     alert('Hubo un error al cargar los modelos.');
                 });
         } else {
-            console.log('No se seleccionó ninguna marca. Ocultando el select de Modelo...');
-            // Si no hay marca seleccionada, ocultar el select de Modelo
-            document.getElementById('idModelo').style.display = 'none';
+            if ($(modeloSelect).hasClass("select2-hidden-accessible")) {
+                $(modeloSelect).select2('destroy');
+            }
+            modeloSelect.innerHTML = '<option value="" disabled selected>Seleccionar Modelo</option>';
+            modeloSelect.style.display = 'none';
         }
     });
 </script>
+
+
+
 <script>
     $(document).ready(function() {
-        var idOrden = @json($orden -> idTickets);
+        var idOrden = @json($orden->idTickets);
 
         $('#guardarFallaReportada').on('click', function(e) {
             e.preventDefault(); // Prevenir que se recargue la página

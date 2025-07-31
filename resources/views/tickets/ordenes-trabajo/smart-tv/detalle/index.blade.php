@@ -7,18 +7,6 @@
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-
-<style>
-    .nice-select {
-        line-height: 2.25rem !important;
-        /* ajusta altura */
-        height: 2.5rem !important;
-        /* igual que un input base */
-        padding: 0 1rem !important;
-        font-size: 0.875rem;
-        /* text-sm */
-    }
-</style>
 <style>
     /* Estilo cuando el formulario está "tachado" */
     .formulario-tachado {
