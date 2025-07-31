@@ -1,8 +1,7 @@
 <x-layout.default>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <style>
@@ -26,7 +25,22 @@
             background-color: #dc3545;
             color: white;
         }
+
+        /* Estilo general del select */
+        .select2-container--default .select2-selection--single {
+            /* azul claro suave */
+            border-radius: 0.5rem;
+            height: 2.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 2px rgba(67, 97, 238, 0.1);
+        }
     </style>
+
+
 
     @if (session('success'))
         <div class="alert alert-success">
@@ -103,30 +117,21 @@
                     </a>
                 </li>
 
-                
+
                 @if ($idEstadflujo == 10)
-    <li>
-        <a href="javascript:;"
-            class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
-            :class="{ '!bg-success text-white': tab === 'constancia' }" @click="tab = 'constancia'">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M9 12l2 2l4 -4m2 -4v12a2 2 0 0 1 -2 2H7a2 2 0 0 1 -2 -2V6a2 2 0 0 1 2 -2h7l4 4z" />
-            </svg>
-            Constancia de entrega
-        </a>
-    </li>
-@endif
-
-
-
-
-
-
-
-
-
+                    <li>
+                        <a href="javascript:;"
+                            class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md transition-all text-xs sm:text-sm"
+                            :class="{ '!bg-success text-white': tab === 'constancia' }" @click="tab = 'constancia'">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor"
+                                stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12l2 2l4 -4m2 -4v12a2 2 0 0 1 -2 2H7a2 2 0 0 1 -2 -2V6a2 2 0 0 1 2 -2h7l4 4z" />
+                            </svg>
+                            Constancia de entrega
+                        </a>
+                    </li>
+                @endif
 
                 @if ($visitaExistente)
                     <li>
@@ -225,8 +230,8 @@
     </div>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     {{-- <script src="{{ asset('assets/js/tickets/smart/smart.js') }}"></script> --}}

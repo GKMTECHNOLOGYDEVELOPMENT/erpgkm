@@ -1,6 +1,5 @@
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 <link rel="stylesheet" href="https://unpkg.com/viewerjs/dist/viewer.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
 <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
 <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
     style="background-color: {{ $colorEstado }};">Detalles de los Estados</span>
@@ -10,8 +9,9 @@
         <div class="md:col-span-1 mt-4">
             <label for="estado" class="block text-sm font-medium">Estado</label>
 
-            <select id="estado" name="estado" class="selectize" onchange="actualizarColorEstado(this)"
-                style="display: none">
+            <select id="estado" name="estado" class="select2" style="width: 100%;" onchange="actualizarColorEstado(this)">
+
+
                 <option value="" disabled selected>Selecciona una opción</option>
 
                 @foreach ($estadosOTS as $index => $estado)
@@ -34,13 +34,6 @@
         <button id="guardarEstado" class="btn btn-primary px-6 py-2">Guardar</button>
     </div>
 </div>
-
-
-<style>
-    .hidden {
-        display: none;
-    }
-</style>
 
 
 <div id="cardFotos" class="hidden mt-6 p-5 rounded-lg">
@@ -140,7 +133,7 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 <script src="https://unpkg.com/viewerjs/dist/viewer.min.js"></script>
 
@@ -529,46 +522,54 @@
 </script>
 
 <script>
-    document.getElementById("estado").addEventListener("change", function() {
-        const estadoId = this.value;
-        const ticketId = {{ $ticket->idTickets }};
-        const visitaId = {{ $visitaId ?? 'null' }};
+    $(document).ready(function() {
+        // Inicializar Select2
+        $('#estado').select2({
+            placeholder: "Selecciona una opción",
+            width: '100%',
+            dropdownParent: $('#estado').parent()
+        });
 
-        // Obtener la justificación del estado seleccionado
-        fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Mostrar la justificación en el textarea
-                    document.getElementById("justificacion").value = data.justificacion || "";
-                } else {
-                    toastr.error(data.message || "Error al obtener la justificación");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                toastr.error("Error al obtener la justificación.");
-            });
+        // ✅ Evento 'change' compatible con Select2
+        $('#estado').on('change', function() {
+            const estadoId = $(this).val();
+            const ticketId = {{ $ticket->idTickets }};
+            const visitaId = {{ $visitaId ?? 'null' }};
 
-        // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
-        if (estadoId == 3) {
-            const cardFotos = document.getElementById("cardFotos");
-            if (cardFotos) {
-                cardFotos.style.display = "block"; // Mostrar el elemento
+            // Limpiar la justificación antes de cargar la nueva
+            $('#justificacion').val("");
 
+            fetch(
+                    `/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`
+                    )
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        $('#justificacion').val(data.justificacion || "");
+                    } else {
+                        toastr.error(data.message || "Error al obtener la justificación");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    toastr.error("Error al obtener la justificación.");
+                });
+
+            // Mostrar u ocultar cardFotos
+            if (estadoId == 3) {
+                $('#cardFotos').removeClass('hidden');
+            } else {
+                $('#cardFotos').addClass('hidden');
             }
-        } else {
-            const cardFotos = document.getElementById("cardFotos");
-            if (cardFotos) {
-                cardFotos.style.display = "none"; // Ocultar el elemento
-            }
-        }
+        });
     });
 
+
     document.addEventListener("DOMContentLoaded", function() {
-        // Inicializar todos los select con la clase .selectize
-        document.querySelectorAll(".selectize").forEach(function(select) {
-            NiceSelect.bind(select);
+        $('#estado').select2({
+            placeholder: "Selecciona una opción",
+            width: '100%',
+            dropdownParent: $('#estado').parent()
         });
     });
 </script>
