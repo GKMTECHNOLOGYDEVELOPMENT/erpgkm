@@ -364,7 +364,7 @@
             <div>
                 <label class="text-sm font-medium">Cliente</label>
                 <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100">
-                    <option value="">Seleccionar Cliente</option> <!-- Permite seleccionar un valor vacío -->
+                    <option value="">Seleccionar Cliente prueba</option> <!-- Permite seleccionar un valor vacío -->
                     @foreach ($clientes as $cliente)
                         <option value="{{ $cliente->idCliente }}"
                             {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
@@ -376,33 +376,37 @@
 
 
             <!-- Cliente General -->
-            <div>
-                <label class="text-sm font-medium">Cliente General</label>
-                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full">
-                    <option value="" selected>Seleccionar Cliente General</option>
-                    @if ($orden->clienteGeneral)
-                        <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
-                            {{ $orden->clienteGeneral->descripcion }}
-                        </option>
-                    @endif
-                </select>
-            </div>
-
+         <div>
+    <label class="text-sm font-medium">Cliente General</label>
+    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full select2">
+        <option value="" selected>Seleccionar Cliente General</option>
+        @if ($orden->clienteGeneral)
+            <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
+                {{ $orden->clienteGeneral->descripcion }}
+            </option>
+        @endif
+    </select>
+</div>
 
             <!-- Tienda -->
-            <div>
-                <label class="text-sm font-medium">Tienda</label>
-                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100">
-                    <option value="" disabled>Seleccionar Tienda</option>
-                    @foreach ($tiendas as $tienda)
-                        <option value="{{ $tienda->idTienda }}"
-                            {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
-                            {{ $tienda->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
+   <div id="selectTiendaContainer"> <!-- Este contenedor es importante -->
+    <div>
+        <label class="text-sm font-medium">Tienda</label>
+        <select id="idTienda" name="idTienda" class="form-input w-full select2">
+            <option value="" disabled selected>Seleccionar Tienda</option>
+            @if(isset($tiendas) && count($tiendas) > 0)
+                @foreach ($tiendas as $tienda)
+                    <option value="{{ $tienda->idTienda }}"
+                        {{ $tienda->idTienda == $orden->idTienda ? 'selected' : '' }}>
+                        {{ $tienda->nombre }}
+                    </option>
+                @endforeach
+            @else
+                <option value="" disabled>No hay tiendas disponibles</option>
+            @endif
+        </select>
+    </div>
+</div>
             <!-- Dirección -->
             <div>
                 <label class="text-sm font-medium">Dirección</label>
@@ -410,31 +414,36 @@
                     value="{{ $orden->direccion }}">
             </div>
 
-            <!-- Marca -->
-            <div>
-                <label class="text-sm font-medium">Marca</label>
-                <select id="idMarca" name="idMarca" class="select2 w-full bg-gray-100">
-                    <option value="" disabled>Seleccionar Marca</option>
-                    @foreach ($marcas as $marca)
-                        <option value="{{ $marca->idMarca }}"
-                            {{ $marca->idMarca == $orden->idMarca ? 'selected' : '' }}>
-                            {{ $marca->nombre }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+          <!-- Marca -->
+<div>
+    <label class="text-sm font-medium">Marca</label>
+    <select id="idMarca" name="idMarca" class="select2 w-full bg-gray-100">
+        <option value="" disabled>Seleccionar Marca</option>
+        @foreach ($marcas as $marca)
+            <option value="{{ $marca->idMarca }}"
+                {{ $marca->idMarca == $orden->idMarca ? 'selected' : '' }}>
+                {{ $marca->nombre }}
+            </option>
+        @endforeach
+    </select>
+    <div id="preload" style="display: none;">Cargando marcas...</div>
+</div>
 
-            <!-- Modelo -->
-            <div>
-                <label class="text-sm font-medium">Modelo</label>
-                <select id="idModelo" name="idModelo" class="form-input w-full">
-                    <option value="" selected>Seleccionar Modelo</option>
-                    <option value="{{ $orden->idModelo ?? '' }}" selected>
-                        {{ $orden->modelo->nombre ?? 'Sin Modelo' }}
-                    </option>
-                </select>
-            </div>
-
+<!-- Modelo -->
+<div>
+    <label class="text-sm font-medium">Modelo</label>
+    <select id="idModelo" name="idModelo" class="select2 w-full">
+        <option value="" disabled selected>Seleccionar Modelo</option>
+        @if($orden->modelo)
+            <option value="{{ $orden->modelo->idModelo }}" selected>
+                {{ $orden->modelo->nombre }}
+            </option>
+        @endif
+    </select>
+    <div id="preload-modelo" style="display: none;">
+        <i class="fas fa-spinner fa-spin"></i> Cargando modelos...
+    </div>
+</div>
             <!-- Serie -->
             <div>
                 <label class="text-sm font-medium">N. Serie</label>
@@ -1218,253 +1227,431 @@
     });
 </script>
 
-
 <script>
-    // Cache para marcas
-    const marcasCache = {
-        all: null,
-        byClienteGeneral: {}
+    
+document.addEventListener('DOMContentLoaded', function () {
+    let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
+    let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
+    // let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
+
+    // console.log(cargarClientesGenerales);
+
+   
+
+    // Función para cargar todas las marcas desde el servidor
+
+// Función para cargar todas las marcas
+$(document).ready(function() {
+    // Inicialización de elementos
+    const marcaSelect = $('#idMarca');
+    const clienteGeneralSelect = $('#idClienteGeneral');
+    const preloadElement = $('#preload');
+    const marcaGuardada = '{{ $orden->idMarca ?? "" }}';
+
+    // Función optimizada para cargar marcas
+    function cargarMarcas(url) {
+        preloadElement.show();
+        marcaSelect.prop('disabled', true).empty().append('<option value="" disabled>Seleccionar Marca</option>');
+
+        $.get(url)
+            .done(function(data) {
+                if (data && data.length > 0) {
+                    data.forEach(marca => {
+                        const isSelected = marca.idMarca == marcaGuardada;
+                        marcaSelect.append(new Option(marca.nombre, marca.idMarca, false, isSelected));
+                    });
+                } else {
+                    marcaSelect.append('<option value="" disabled>No hay marcas disponibles</option>');
+                }
+
+                // Reiniciar Select2
+                if (marcaSelect.hasClass('select2-hidden-accessible')) {
+                    marcaSelect.select2('destroy');
+                }
+                
+                marcaSelect.select2({
+                    placeholder: 'Seleccionar Marca',
+                    width: '100%'
+                });
+
+                // Seleccionar la marca guardada si existe
+                if (marcaGuardada) {
+                    marcaSelect.val(marcaGuardada).trigger('change');
+                }
+            })
+            .fail(function(error) {
+                console.error('Error al cargar marcas:', error);
+                marcaSelect.append('<option value="" disabled>Error al cargar marcas</option>');
+            })
+            .always(function() {
+                marcaSelect.prop('disabled', false);
+                preloadElement.hide();
+            });
+    }
+
+    // Función para cargar todas las marcas
+    function cargarTodasLasMarcas() {
+        cargarMarcas('/check-marcas');
+    }
+
+    // Función para cargar marcas por cliente general
+    function cargarMarcasPorClienteGeneral(clienteGeneralId) {
+        if (!clienteGeneralId) {
+            cargarTodasLasMarcas();
+            return;
+        }
+        cargarMarcas(`/marcas-por-cliente-general/${clienteGeneralId}`);
+    }
+
+    // Evento para cambio de Cliente General
+    clienteGeneralSelect.on('change', function() {
+        const clienteGeneralId = $(this).val();
+        cargarMarcasPorClienteGeneral(clienteGeneralId);
+    });
+
+    // Carga inicial
+    const clienteGeneralId = clienteGeneralSelect.val();
+    if (clienteGeneralId) {
+        cargarMarcasPorClienteGeneral(clienteGeneralId);
+    } else {
+        cargarTodasLasMarcas();
+    }
+});
+
+
+    // Cargar todas las marcas inicialmente si no hay cliente general seleccionado
+    window.onload = function () {
+        let clienteGeneralId = document.getElementById('idClienteGeneral').value;
+        if (!clienteGeneralId) {
+            cargarTodasLasMarcas(); // Si no hay cliente general seleccionado al cargar la página, cargamos todas las marcas
+        }
     };
 
-    document.getElementById('idCliente').addEventListener('change', async function() {
-        const clienteId = this.value;
-        const tiendaSelect = document.getElementById('idTienda');
-        const clienteGeneralSelect = document.getElementById('idClienteGeneral');
-        const marcaSelect = document.getElementById('idMarca');
-        const direccionInput = document.getElementById('direccion');
+   $(document).ready(function() {
+    const clienteSelect = $('#idCliente');
+    const tiendaSelect = $('#idTienda');
+    const tiendaSelectContainer = $('#selectTiendaContainer');
+    let tipoDocumentoCliente = null;
+    let esTiendaCliente = null;
+    
+    // Verificar si el contenedor existe
+    if (tiendaSelectContainer.length === 0) {
+        console.error('❌ No se encontró el contenedor #selectTiendaContainer');
+        return;
+    }
 
-        // Limpiar y reinicializar selects
-        $('#idTienda').empty().append('<option value="" disabled>Seleccionar Tienda</option>').select2(
-            'destroy');
-        $('#idClienteGeneral').empty().append(
-            '<option value="" selected>Seleccionar Cliente General</option>').select2('destroy');
-        $('#idMarca').empty().append('<option value="" disabled>Seleccionar Marca</option>').select2(
-            'destroy');
+    // Ocultar al inicio si no hay cliente seleccionado
+    tiendaSelectContainer.hide();
 
+    // Inicializar Select2 solo si no está ya inicializado
+    if (!tiendaSelect.hasClass('select2-hidden-accessible')) {
+        tiendaSelect.select2({
+            placeholder: 'Seleccionar Tienda',
+            width: '100%',
+            dropdownParent: tiendaSelectContainer
+        });
+    }
+
+    clienteSelect.on('change', function() {
+        const clienteId = $(this).val();
+        
         if (!clienteId) {
-            $('#idTienda').hide();
-            $('#idClienteGeneral').hide();
+            tiendaSelectContainer.hide();
+            tiendaSelect.val('').trigger('change');
             return;
         }
 
-        try {
-            // 1. Obtener datos del cliente
-            const clienteResponse = await fetch(`/get-cliente-data/${clienteId}`);
-            const clienteData = await clienteResponse.json();
+        // Mostrar loading
+        tiendaSelect.prop('disabled', true);
+        tiendaSelectContainer.show();
 
-            // 2. Obtener y procesar clientes generales
-            const clientesGeneralesResponse = await fetch(`/get-clientes-generales/${clienteId}`);
-            const clientesGeneralesData = await clientesGeneralesResponse.json();
+        // 1. Primero obtener datos del cliente
+        $.get(`/api/cliente/${clienteId}`)
+            .done(function(clienteData) {
+                const tipoDocumentoCliente = clienteData.idTipoDocumento;
+                const esTiendaCliente = clienteData.esTienda;
 
-            if (clientesGeneralesData.length > 0) {
-                clientesGeneralesData.forEach(clienteGeneral => {
-                    $('#idClienteGeneral').append(
-                        $('<option>', {
-                            value: clienteGeneral.idClienteGeneral,
-                            text: clienteGeneral.descripcion
-                        })
+                // Actualizar dirección si es tipo documento 8
+                if (tipoDocumentoCliente == 8) {
+                    $('#direccion').val(clienteData.direccion || '');
+                } else {
+                    $('#direccion').val('');
+                }
+
+                // Determinar qué endpoint usar
+                const cargarTodasTiendas = (tipoDocumentoCliente == 8 || esTiendaCliente == 0);
+                const endpoint = cargarTodasTiendas 
+                    ? '/api/tiendas' 
+                    : `/api/cliente/${clienteId}/tiendas`;
+
+                // 2. Ahora cargar las tiendas
+                $.get(endpoint)
+                    .done(function(tiendasData) {
+                        tiendaSelect.empty().append('<option value="" disabled selected>Seleccionar Tienda</option>');
+                        
+                        if (tiendasData && tiendasData.length > 0) {
+                            tiendasData.forEach(tienda => {
+                                tiendaSelect.append(
+                                    $('<option></option>')
+                                        .attr('value', tienda.idTienda)
+                                        .text(tienda.nombre)
+                                );
+                            });
+
+                            // Seleccionar la tienda actual si existe
+                            @if($orden->idTienda)
+                                tiendaSelect.val('{{ $orden->idTienda }}').trigger('change');
+                            @endif
+                        } else {
+                            tiendaSelect.append('<option value="" disabled>No hay tiendas disponibles</option>');
+                        }
+                    })
+                    .fail(function() {
+                        console.error('❌ Error al cargar tiendas');
+                        tiendaSelect.append('<option value="" disabled>Error al cargar tiendas</option>');
+                    })
+                    .always(function() {
+                        tiendaSelect.prop('disabled', false);
+                        tiendaSelect.trigger('change.select2');
+                    });
+            })
+            .fail(function() {
+                console.error('❌ Error al obtener datos del cliente');
+                tiendaSelectContainer.hide();
+                tiendaSelect.prop('disabled', false);
+            });
+    });
+
+    // Manejar cambio de tienda para actualizar dirección
+    tiendaSelect.on('change', function() {
+        const tiendaId = $(this).val();
+        
+        if (!tiendaId || tipoDocumentoCliente == 8) {
+            return;
+        }
+
+        $.get(`/api/tienda/${tiendaId}`)
+            .done(function(tiendaData) {
+                $('#direccion').val(tiendaData.direccion || '');
+            })
+            .fail(function() {
+                console.error('❌ Error al obtener datos de la tienda');
+            });
+    });
+
+    // Cargar tiendas si ya hay cliente seleccionado al inicio
+    if (clienteSelect.val()) {
+        clienteSelect.trigger('change');
+    }
+});
+$(document).ready(function() {
+    // Inicializar Select2 para todos los selects con clase select2
+    $('.select2').select2({
+        placeholder: 'Seleccionar opción',
+        allowClear: true,
+        width: '100%'
+    });
+
+    // Manejar cambio en Cliente para cargar Clientes Generales
+    $('#idCliente').on('change', function() {
+        const clienteId = $(this).val();
+        const $clienteGeneralSelect = $('#idClienteGeneral');
+        
+        if (!clienteId) {
+            $clienteGeneralSelect.empty().append('<option value="">Seleccionar Cliente General</option>');
+            $clienteGeneralSelect.val('').trigger('change');
+            return;
+        }
+
+        // Mostrar loading
+        $clienteGeneralSelect.prop('disabled', true);
+        
+        fetch(`/clientes-generales/${clienteId}`)
+            .then(response => response.json())
+            .then(data => {
+                $clienteGeneralSelect.empty().append('<option value="">Seleccionar Cliente General</option>');
+                
+                data.forEach(clienteGeneral => {
+                    $clienteGeneralSelect.append(
+                        `<option value="${clienteGeneral.idClienteGeneral}">${clienteGeneral.descripcion}</option>`
                     );
                 });
+                
+                // Seleccionar el valor actual si existe
+                @if($orden->clienteGeneral)
+                    $clienteGeneralSelect.val('{{ $orden->clienteGeneral->idClienteGeneral }}').trigger('change');
+                @endif
+                
+                $clienteGeneralSelect.prop('disabled', false);
+            })
+            .catch(error => {
+                console.error('Error al cargar clientes generales:', error);
+                $clienteGeneralSelect.prop('disabled', false);
+            });
+    });
 
-                $('#idClienteGeneral').show();
-
-                if ($('#idClienteGeneral').hasClass('select2-hidden-accessible')) {
-                    $('#idClienteGeneral').select2('destroy');
-                }
-
-                $('#idClienteGeneral').select2({
-                    width: 'resolve'
-                });
+    // Si hay un cliente seleccionado al cargar la página, cargar sus clientes generales
+    @if($orden->cliente)
+        $('#idCliente').trigger('change');
+    @endif
+});
 
 
-                // Evitar múltiples listeners
-                clienteGeneralSelect.removeEventListener('change', handleClienteGeneralChange);
-                clienteGeneralSelect.addEventListener('change', handleClienteGeneralChange);
-            } else {
-                $('#idClienteGeneral').hide();
-                await loadMarcas('all');
-            }
 
-            // 3. Determinar endpoint para tiendas
-            let tiendasEndpoint;
-            if (clienteData.idTipoDocumento == 8 && clienteData.esTienda == 0) {
-                tiendasEndpoint = '/get-all-tiendas';
-                direccionInput.value = clienteData.direccion || '';
-            } else if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
-                tiendasEndpoint = `/get-tiendas-by-cliente/${clienteId}`;
-            } else {
-                tiendasEndpoint = '/get-no-tiendas';
-            }
+    // Evento de envío del formulario de cliente
+    document.getElementById('clienteForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Evitar el envío normal del formulario
 
-            // 4. Obtener tiendas
-            const tiendasResponse = await fetch(tiendasEndpoint);
-            const tiendasData = await tiendasResponse.json();
+        let formData = new FormData(this); // Obtener los datos del formulario
+        console.log('Datos del formulario:', Object.fromEntries(formData.entries())); // Ver los datos del formulario
 
-            tiendasData.forEach(tienda => {
-                const option = $('<option>', {
-                    value: tienda.idTienda,
-                    text: tienda.nombre,
-                    'data-direccion': tienda.direccion
-                });
-
-                if (tienda.idTienda == @json($orden->idTienda)) {
-                    option.prop('selected', true);
-                    if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
-                        direccionInput.value = tienda.direccion || '';
+        fetch('/guardar-cliente', {
+            method: 'POST',
+            body: formData, // Enviar los datos del formulario
+        })
+            .then((response) => response.json()) // Parsear la respuesta como JSON
+            .then((data) => {
+                console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
+                if (data.errors) {
+                    // Mostrar solo el primer error
+                    for (let field in data.errors) {
+                        toastr.error(data.errors[field][0]); // Mostrar solo el primer error del campo
+                        break; // Salir del bucle después de mostrar el primer error
                     }
+                } else {
+                    // Mostrar mensaje de éxito
+                    toastr.success(data.message);
+
+                    // Recargar los clientes después de guardar el cliente
+                    cargarClientes();
+
+                    // Limpiar el formulario y cerrar el modal si es necesario
+                    document.getElementById('clienteForm').reset();
+                    openClienteModal = false; // Cerrar el modal si lo tienes
                 }
-
-                $('#idTienda').append(option);
+            })
+            .catch((error) => {
+                console.error('Error al guardar el cliente:', error);
             });
-
-            // 5. Evento para actualizar dirección si selecciona tienda
-            if (clienteData.idTipoDocumento == 9 && clienteData.esTienda == 1) {
-                tiendaSelect.addEventListener('change', function() {
-                    const direccion = this.options[this.selectedIndex].dataset.direccion;
-                    direccionInput.value = direccion || '';
-                });
-            }
-
-            $('#idTienda').show().select2({
-                width: 'resolve'
-            });
-
-        } catch (error) {
-            console.error('Error:', error);
-            toastr.error('Error al cargar datos');
-        }
     });
 
+    // Evento de envío del formulario de cliente
+    document.getElementById('clientGeneralForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Evitar el envío normal del formulario
 
-    async function handleClienteGeneralChange() {
-        const clienteGeneralId = this.value;
-        await loadMarcas(clienteGeneralId ? 'byClienteGeneral' : 'all', clienteGeneralId);
-    }
+        let formData = new FormData(this); // Obtener los datos del formulario
+        console.log('Datos del formulario:', Object.fromEntries(formData.entries())); // Ver los datos del formulario
 
+        fetch('/guardar-cliente-general-smart', {
+            method: 'POST',
+            body: formData, // Enviar los datos del formulario
+        })
+            .then((response) => response.json()) // Parsear la respuesta como JSON
+            .then((data) => {
+                console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
+                if (data.errors) {
+                    // Mostrar errores si los hay
+                    toastr.error(data.errors);
+                } else {
+                    // Mostrar mensaje de éxito
+                    location.reload();
+                    toastr.success(data.message);
 
-    // Función para cargar marcas
-    async function loadMarcas(type, clienteGeneralId = null) {
-        const marcaSelect = document.getElementById('idMarca');
+                    // Recargar los clientes después de guardar el cliente
+                    cargarClientes();
 
-        try {
-            // Mostrar loading
-            marcaSelect.innerHTML = '<option value="" disabled>Cargando marcas...</option>';
-
-            // Obtener marcas según el tipo
-            let marcas = [];
-
-            if (type === 'all') {
-                if (!marcasCache.all) {
-                    const response = await fetch('/get-all-marcas');
-                    marcasCache.all = await response.json();
+                    // Limpiar el formulario y cerrar el modal si es necesario
+                    document.getElementById('clientGeneralForm').reset();
+                    openClienteGeneralModal = false; // Cerrar el modal si lo tienes
                 }
-                marcas = marcasCache.all;
-            } else {
-                if (!marcasCache.byClienteGeneral[clienteGeneralId]) {
-                    const response = await fetch(`/get-marcas-by-cliente-general/${clienteGeneralId}`);
-                    marcasCache.byClienteGeneral[clienteGeneralId] = await response.json();
-                }
-                marcas = marcasCache.byClienteGeneral[clienteGeneralId];
-            }
-
-            // Actualizar select de marcas
-            updateMarcasSelect(marcas);
-
-        } catch (error) {
-            console.error(`Error al cargar marcas (${type}):`, error);
-            toastr.error('Error al cargar marcas');
-            // Fallback a todas las marcas
-            if (type !== 'all') {
-                await loadMarcas('all');
-            }
-        }
-    }
-
-    // Función para actualizar select de marcas
-    function updateMarcasSelect(marcas) {
-        const marcaSelect = document.getElementById('idMarca');
-        const currentMarcaId = @json($orden->idMarca);
-
-        marcaSelect.innerHTML = '<option value="" disabled>Seleccionar Marca</option>';
-
-        marcas.forEach(marca => {
-            const option = new Option(marca.nombre, marca.idMarca);
-            if (marca.idMarca == currentMarcaId) option.selected = true;
-            marcaSelect.add(option);
-        });
-
-
-        $('#idMarca').select2('destroy').select2({
-            width: 'resolve'
-        });
-
-    }
-
-
-    // Cargar todas las marcas al inicio (si no hay cliente general seleccionado)
-    document.addEventListener('DOMContentLoaded', async () => {
-        const clienteGeneralSelect = document.getElementById('idClienteGeneral');
-        if (clienteGeneralSelect.value === '') {
-            await loadMarcas('all');
-        }
+            })
+            .catch((error) => {
+                console.error('Error al guardar el cliente:', error);
+            });
     });
+
+    // Evento de envío del formulario de marca
+    document.getElementById('marcaForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Evitar el envío normal del formulario
+
+        let formData = new FormData(this); // Obtener los datos del formulario
+        console.log('Datos del formulario:', Object.fromEntries(formData.entries())); // Ver los datos del formulario
+
+        fetch('/guardar-marca-smart', {
+            method: 'POST',
+            body: formData, // Enviar los datos del formulario
+        })
+            .then((response) => response.json()) // Parsear la respuesta como JSON
+            .then((data) => {
+                console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
+
+                if (data.errors) {
+                    // Mostrar solo el primer error de validación
+                    for (let field in data.errors) {
+                        toastr.error(data.errors[field][0]); // Mostrar solo el primer error de cada campo
+                        break; // Salir del bucle después de mostrar el primer error
+                    }
+                } else if (data.error) {
+                    // Si hay un error general (como el que mencionas)
+                    toastr.error(data.error); // Mostrar el mensaje de error general
+                } else {
+                    // Mostrar mensaje de éxito
+                    toastr.success(data.message);
+
+                    // Recargar las marcas después de guardar la marca
+                    cargarMarcas();
+                    cargarMarcass();
+
+                    // Limpiar el formulario y cerrar el modal si es necesario
+                    document.getElementById('marcaForm').reset();
+                    openMarcaModal = false; // Cerrar el modal si lo tienes
+                }
+            })
+            .catch((error) => {
+                console.error('Error al guardar la marca:', error);
+            });
+    });
+
+    // Evento de envío del marca
+    document.getElementById('modeloForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Evitar el envío normal del formulario
+
+        let formData = new FormData(this); // Obtener los datos del formulario
+        console.log('Datos del formulario:', Object.fromEntries(formData.entries())); // Ver los datos del formulario
+
+        fetch('/guardar-modelo-smart', {
+            method: 'POST',
+            body: formData, // Enviar los datos del formulario
+        })
+            .then((response) => response.json()) // Parsear la respuesta como JSON
+            .then((data) => {
+                console.log('Respuesta del servidor (JSON):', data); // Verificar la respuesta
+                if (data.errors) {
+                    // Mostrar errores si los hay
+                    toastr.error(data.errors);
+                } else {
+                    // Mostrar mensaje de éxito
+                    toastr.success(data.message);
+
+                    // Recargar los clientes después de guardar el cliente
+                    cargarClientes();
+
+                    // Limpiar el formulario y cerrar el modal si es necesario
+                    document.getElementById('modeloForm').reset();
+                    openClienteGeneralModal = false; // Cerrar el modal si lo tienes
+                }
+            })
+            .catch((error) => {
+                console.error('Error al guardar el cliente:', error);
+            });
+    });
+});
+
 </script>
 
 
-<script>
-    document.getElementById('idMarca').addEventListener('change', function() {
-        var marcaId = this.value;
-        console.log('Marca seleccionada:', marcaId);
 
-        if (marcaId) {
-            console.log('Haciendo la petición para obtener los modelos asociados a esta marca...');
 
-            fetch(`/get-modelos/${marcaId}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Datos de modelos recibidos:', data);
-
-                    var modeloSelect = document.getElementById('idModelo');
-
-                    // 🔄 Limpiar y agregar opciones
-                    modeloSelect.innerHTML =
-                        '<option value="" disabled selected>Seleccionar Modelo</option>';
-
-                    if (data.length > 0) {
-                        data.forEach(function(modelo) {
-                            var option = document.createElement('option');
-                            option.value = modelo.idModelo;
-                            option.textContent = modelo.nombre;
-                            modeloSelect.appendChild(option);
-                        });
-
-                        modeloSelect.style.display = 'block';
-
-                        // ✅ Destruir Select2 si ya estaba aplicado
-                        if ($('#idModelo').hasClass('select2-hidden-accessible')) {
-                            $('#idModelo').select2('destroy');
-                        }
-
-                        // ✅ Aplicar Select2
-                        $('#idModelo').select2({
-                            width: 'resolve'
-                        });
-
-                    } else {
-                        console.log('No hay modelos asociados a esta marca.');
-                        modeloSelect.style.display = 'none';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al obtener los modelos:', error);
-                    alert('Hubo un error al cargar los modelos.');
-                });
-        } else {
-            console.log('No se seleccionó ninguna marca.');
-            document.getElementById('idModelo').style.display = 'none';
-        }
-    });
-</script>
 
 <script>
     $(document).ready(function() {
@@ -1560,4 +1747,108 @@
             });
         });
     });
+</script>
+<script>
+    $(document).ready(function() {
+    // Elementos del DOM
+    const marcaSelect = $('#idMarca');
+    const modeloSelect = $('#idModelo');
+    const preloadModelo = $('#preload-modelo');
+    
+    // Modelo guardado (si existe)
+    const modeloGuardado = '{{ $orden->idModelo ?? "" }}';
+    const marcaGuardada = '{{ $orden->idMarca ?? "" }}';
+
+    // Función para cargar modelos
+    function cargarModelos(marcaId) {
+        if (!marcaId) {
+            resetearModeloSelect();
+            return;
+        }
+
+        mostrarLoadingModelo();
+
+        $.get(`/get-modelos/${marcaId}`)
+            .done(function(data) {
+                llenarSelectModelos(data);
+            })
+            .fail(function(error) {
+                console.error('Error al cargar modelos:', error);
+                mostrarErrorModelos();
+            })
+            .always(function() {
+                ocultarLoadingModelo();
+            });
+    }
+
+    // Función para resetear el select de modelos
+    function resetearModeloSelect() {
+        modeloSelect.empty().append('<option value="" disabled selected>Seleccionar Modelo</option>');
+        reiniciarSelect2();
+    }
+
+    // Función para mostrar loading
+    function mostrarLoadingModelo() {
+        modeloSelect.prop('disabled', true);
+        preloadModelo.show();
+    }
+
+    // Función para ocultar loading
+    function ocultarLoadingModelo() {
+        modeloSelect.prop('disabled', false);
+        preloadModelo.hide();
+    }
+
+    // Función para llenar el select de modelos
+    function llenarSelectModelos(modelos) {
+        modeloSelect.empty().append('<option value="" disabled>Seleccionar Modelo</option>');
+
+        if (modelos && modelos.length > 0) {
+            modelos.forEach(modelo => {
+                const isSelected = modelo.idModelo == modeloGuardado;
+                modeloSelect.append(new Option(modelo.nombre, modelo.idModelo, false, isSelected));
+            });
+        } else {
+            modeloSelect.append('<option value="" disabled>No hay modelos disponibles</option>');
+        }
+
+        reiniciarSelect2();
+        seleccionarModeloGuardado();
+    }
+
+    // Función para mostrar error
+    function mostrarErrorModelos() {
+        modeloSelect.empty().append('<option value="" disabled>Error al cargar modelos</option>');
+        reiniciarSelect2();
+    }
+
+    // Función para reiniciar Select2
+    function reiniciarSelect2() {
+        if (modeloSelect.hasClass('select2-hidden-accessible')) {
+            modeloSelect.select2('destroy');
+        }
+        modeloSelect.select2({
+            placeholder: 'Seleccionar Modelo',
+            width: '100%'
+        });
+    }
+
+    // Función para seleccionar modelo guardado
+    function seleccionarModeloGuardado() {
+        if (modeloGuardado) {
+            modeloSelect.val(modeloGuardado).trigger('change');
+        }
+    }
+
+    // Evento al cambiar marca
+    marcaSelect.on('change', function() {
+        const marcaId = $(this).val();
+        cargarModelos(marcaId);
+    });
+
+    // Carga inicial si hay marca seleccionada
+    if (marcaGuardada) {
+        cargarModelos(marcaGuardada);
+    }
+});
 </script>
