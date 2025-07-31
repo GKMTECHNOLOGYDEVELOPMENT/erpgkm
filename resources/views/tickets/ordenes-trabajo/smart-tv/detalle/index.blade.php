@@ -1233,7 +1233,25 @@ document.addEventListener('DOMContentLoaded', function () {
     let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
     let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
     // let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
+// Reemplaza todas las inicializaciones de Select2 con esta versión más robusta
+function initializeSelect2(selector) {
+    $(selector).each(function() {
+        if ($(this).hasClass("select2-hidden-accessible")) {
+            $(this).select2('destroy');
+        }
+        $(this).select2({
+            placeholder: 'Seleccionar opción',
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $(this).parent()
+        });
+    });
+}
 
+// Inicializar una sola vez al cargar la página
+$(document).ready(function() {
+    initializeSelect2('.select2');
+});
     // console.log(cargarClientesGenerales);
 
    
@@ -1327,123 +1345,89 @@ $(document).ready(function() {
         }
     };
 
-   $(document).ready(function() {
-    const clienteSelect = $('#idCliente');
+  // Modifica el código de carga de tiendas así:
+$('#idCliente').on('change', function() {
+    const clienteId = $(this).val();
     const tiendaSelect = $('#idTienda');
-    const tiendaSelectContainer = $('#selectTiendaContainer');
-    let tipoDocumentoCliente = null;
-    let esTiendaCliente = null;
+    const container = $('#selectTiendaContainer');
     
-    // Verificar si el contenedor existe
-    if (tiendaSelectContainer.length === 0) {
-        console.error('❌ No se encontró el contenedor #selectTiendaContainer');
+    if (!clienteId) {
+        container.hide();
+        tiendaSelect.val('').trigger('change');
         return;
     }
 
-    // Ocultar al inicio si no hay cliente seleccionado
-    tiendaSelectContainer.hide();
+    // Mostrar loading
+    container.show();
+    tiendaSelect.prop('disabled', true).empty().append('<option value="">Cargando...</option>');
 
-    // Inicializar Select2 solo si no está ya inicializado
-    if (!tiendaSelect.hasClass('select2-hidden-accessible')) {
-        tiendaSelect.select2({
-            placeholder: 'Seleccionar Tienda',
-            width: '100%',
-            dropdownParent: tiendaSelectContainer
+    // Primero obtener datos del cliente
+    $.get(`/api/cliente/${clienteId}`)
+        .then(clienteData => {
+            const tipoDoc = clienteData.idTipoDocumento;
+            const esTienda = clienteData.esTienda;
+            
+            // Actualizar dirección si es tipo documento 8
+            if (tipoDoc == 8) {
+                $('#direccion').val(clienteData.direccion || '');
+            }
+            
+            // Determinar endpoint para tiendas
+            const endpoint = (tipoDoc == 8 || esTienda == 0) 
+                ? '/api/tiendas' 
+                : `/api/cliente/${clienteId}/tiendas`;
+            
+            // Cargar tiendas
+            return $.get(endpoint);
+        })
+        .then(tiendasData => {
+            tiendaSelect.empty().append('<option value="" disabled selected>Seleccionar Tienda</option>');
+            
+            if (tiendasData?.length > 0) {
+                tiendasData.forEach(tienda => {
+                    tiendaSelect.append(new Option(tienda.nombre, tienda.idTienda));
+                });
+                
+                // Seleccionar tienda actual si existe
+                @if($orden->idTienda)
+                    tiendaSelect.val('{{ $orden->idTienda }}').trigger('change');
+                @endif
+            } else {
+                tiendaSelect.append('<option value="" disabled>No hay tiendas</option>');
+            }
+        })
+        .fail(error => {
+            console.error('Error:', error);
+            tiendaSelect.empty().append('<option value="" disabled>Error al cargar</option>');
+        })
+        .always(() => {
+            tiendaSelect.prop('disabled', false);
+            initializeSelect2('#idTienda'); // Re-inicializar Select2
         });
-    }
-
-    clienteSelect.on('change', function() {
-        const clienteId = $(this).val();
-        
-        if (!clienteId) {
-            tiendaSelectContainer.hide();
-            tiendaSelect.val('').trigger('change');
-            return;
-        }
-
-        // Mostrar loading
-        tiendaSelect.prop('disabled', true);
-        tiendaSelectContainer.show();
-
-        // 1. Primero obtener datos del cliente
-        $.get(`/api/cliente/${clienteId}`)
-            .done(function(clienteData) {
-                const tipoDocumentoCliente = clienteData.idTipoDocumento;
-                const esTiendaCliente = clienteData.esTienda;
-
-                // Actualizar dirección si es tipo documento 8
-                if (tipoDocumentoCliente == 8) {
-                    $('#direccion').val(clienteData.direccion || '');
-                } else {
-                    $('#direccion').val('');
-                }
-
-                // Determinar qué endpoint usar
-                const cargarTodasTiendas = (tipoDocumentoCliente == 8 || esTiendaCliente == 0);
-                const endpoint = cargarTodasTiendas 
-                    ? '/api/tiendas' 
-                    : `/api/cliente/${clienteId}/tiendas`;
-
-                // 2. Ahora cargar las tiendas
-                $.get(endpoint)
-                    .done(function(tiendasData) {
-                        tiendaSelect.empty().append('<option value="" disabled selected>Seleccionar Tienda</option>');
-                        
-                        if (tiendasData && tiendasData.length > 0) {
-                            tiendasData.forEach(tienda => {
-                                tiendaSelect.append(
-                                    $('<option></option>')
-                                        .attr('value', tienda.idTienda)
-                                        .text(tienda.nombre)
-                                );
-                            });
-
-                            // Seleccionar la tienda actual si existe
-                            @if($orden->idTienda)
-                                tiendaSelect.val('{{ $orden->idTienda }}').trigger('change');
-                            @endif
-                        } else {
-                            tiendaSelect.append('<option value="" disabled>No hay tiendas disponibles</option>');
-                        }
-                    })
-                    .fail(function() {
-                        console.error('❌ Error al cargar tiendas');
-                        tiendaSelect.append('<option value="" disabled>Error al cargar tiendas</option>');
-                    })
-                    .always(function() {
-                        tiendaSelect.prop('disabled', false);
-                        tiendaSelect.trigger('change.select2');
-                    });
-            })
-            .fail(function() {
-                console.error('❌ Error al obtener datos del cliente');
-                tiendaSelectContainer.hide();
-                tiendaSelect.prop('disabled', false);
-            });
-    });
-
-    // Manejar cambio de tienda para actualizar dirección
-    tiendaSelect.on('change', function() {
-        const tiendaId = $(this).val();
-        
-        if (!tiendaId || tipoDocumentoCliente == 8) {
-            return;
-        }
-
-        $.get(`/api/tienda/${tiendaId}`)
-            .done(function(tiendaData) {
-                $('#direccion').val(tiendaData.direccion || '');
-            })
-            .fail(function() {
-                console.error('❌ Error al obtener datos de la tienda');
-            });
-    });
-
-    // Cargar tiendas si ya hay cliente seleccionado al inicio
-    if (clienteSelect.val()) {
-        clienteSelect.trigger('change');
-    }
 });
+
+
+$('#idTienda').on('change', function() {
+    const tiendaId = $(this).val();
+    const clienteId = $('#idCliente').val();
+    
+    // Solo actualizar dirección si no es tipo documento 8
+    $.get(`/api/cliente/${clienteId}`)
+        .then(clienteData => {
+            if (clienteData.idTipoDocumento != 8 && tiendaId) {
+                return $.get(`/api/tienda/${tiendaId}`);
+            }
+            return null;
+        })
+        .then(tiendaData => {
+            if (tiendaData) {
+                $('#direccion').val(tiendaData.direccion || '');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+});
+
+
 $(document).ready(function() {
     // Inicializar Select2 para todos los selects con clase select2
     $('.select2').select2({
