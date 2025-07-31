@@ -1,33 +1,9 @@
 <x-layout.default>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-
-    <style>
-        .nice-select {
-            display: flex !important;
-            align-items: center !important;
-            padding-top: 0.5rem !important;
-            padding-bottom: 0.5rem !important;
-            border-radius: 0.375rem !important;
-            /* igual a rounded-md */
-            border: 1px solid #d1d5db !important;
-            /* igual a border-gray-300 */
-            width: 100% !important;
-            font-size: 0.875rem !important;
-            /* igual a text-sm */
-            height: auto !important;
-            min-height: 2.5rem;
-            /* similar a h-10 */
-        }
-
-        .nice-select .current {
-            line-height: normal !important;
-            width: 100%;
-        }
-    </style>
-
 
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse mt-4">
@@ -61,7 +37,7 @@
                 <!-- Cliente -->
                 <div>
                     <label for="idCliente" class="block text-sm font-medium">Cliente</label>
-                    <select id="idCliente" name="idCliente" class="form-input w-full">
+                    <select id="idCliente" name="idCliente" class="select2 w-full">
                         <option value="" disabled selected>Seleccionar Cliente</option>
                         <!-- Los clientes se cargarán dinámicamente aquí con JS -->
                     </select>
@@ -70,7 +46,7 @@
                 <!-- Cliente General -->
                 <div>
                     <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
-                    <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full ">
+                    <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full">
                         <option value="" selected>Seleccionar Cliente General</option>
                     </select>
                 </div>
@@ -79,7 +55,7 @@
                 <!-- Select para tiendas (solo si el cliente es tienda) -->
                 <div id="selectTiendaContainer">
                     <label for="idTienda" class="block text-sm font-medium">Tienda</label>
-                    <select id="idTienda" name="idTienda" class="form-input w-full">
+                    <select id="idTienda" name="idTienda" class="select2 w-full">
                         <option value="">Seleccionar Tienda</option>
                     </select>
                 </div>
@@ -87,12 +63,12 @@
                 <!-- Tipo de Servicio -->
                 <div>
                     <label for="tipoServicio" class="block text-sm font-medium">Tipo de Servicio</label>
-                    <select id="tipoServicio" name="tipoServicio" class="select2 w-full" style="display:none">
+                    <select id="tipoServicio" name="tipoServicio" class="select2 w-full">
                         <option value="" disabled selected>Seleccionar Tipo de Servicio</option>
                         @foreach ($tiposServicio as $tipo)
-                        <option value="{{ $tipo->idTipoServicio }}" data-nombre="{{ $tipo->nombre }}">
-                            {{ $tipo->nombre }}
-                        </option>
+                            <option value="{{ $tipo->idTipoServicio }}" data-nombre="{{ $tipo->nombre }}">
+                                {{ $tipo->nombre }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -107,30 +83,17 @@
 
                 <!-- Switches en 2 columnas -->
                 <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- ¿Es Recojo? -->
-                    <!-- <div id="esRecojoContainer" class="hidden">
-                        <label class="block text-sm font-medium mb-2">¿Es Recojo?</label>
-                        <label class="w-12 h-6 relative inline-block">
-                            <input type="checkbox" id="esRecojo" name="esRecojo"
-                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                            <span
-                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300">
-                            </span>
-                        </label>
-                    </div> -->
-
-
-
 
                     <!-- Dentro del formulario -->
                     <div id="esEquipoContainer" class="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
                         <!-- Tipo Producto -->
                         <div>
                             <label class="block text-sm font-medium">Tipo Producto</label>
-                            <select id="tipoProductoLab" name="tipoProducto" class="form-select select2 w-full">
+                            <select id="tipoProductoLab" name="tipoProducto" class="select2 w-full">
+
                                 <option value="" disabled selected>Seleccionar Tipo de Producto</option>
                                 @foreach ($categorias as $categoria)
-                                <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
+                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -138,10 +101,10 @@
                         <!-- Marca -->
                         <div>
                             <label class="block text-sm font-medium">Marca</label>
-                            <select id="marcaLab" name="marca" class="form-select select2 w-full">
+                            <select id="marcaLab" name="marca" class="select2 w-full">
                                 <option value="" disabled selected>Seleccionar Marca</option>
                                 @foreach ($marcas as $marca)
-                                <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
+                                    <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -149,7 +112,7 @@
                         <!-- Modelo -->
                         <div>
                             <label class="block text-sm font-medium">Modelo</label>
-                            <select id="modeloLab" name="modelo" class="form-select select2 w-full hidden">
+                            <select id="modeloLab" name="modelo" class="select2 w-full hidden">
                                 <option value="" disabled selected>Seleccionar Modelo</option>
                             </select>
                         </div>
@@ -166,8 +129,8 @@
                         <!-- Observaciones (ocupa ambas columnas internas) -->
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium">Observaciones</label>
-                            <textarea id="observacionesRetirar" name="observaciones" class="form-textarea w-full"
-                                rows="3" placeholder="Ingrese observaciones (opcional)"></textarea>
+                            <textarea id="observacionesRetirar" name="observaciones" class="form-textarea w-full" rows="3"
+                                placeholder="Ingrese observaciones (opcional)"></textarea>
                         </div>
                     </div>
 
@@ -201,15 +164,16 @@
                     <!-- Agencia -->
                     <div>
                         <label class="block text-sm font-medium">Corruir</label>
-                        <input type="text" name="agencia" class="form-input w-full" placeholder="Ingrese el Agencia">
+                        <input type="text" name="agencia" class="form-input w-full"
+                            placeholder="Ingrese el Agencia">
                     </div>
                     <!-- Técnico -->
                     <div>
                         <label for="idTecnico" class="block text-sm font-medium">Técnico Envío</label>
-                        <select id="idTecnico" name="idTecnico" class="select2 w-full mb-2" style="display: none">
+                        <select id="idTecnico" name="idTecnico" class="select2 w-full mb-2 hidden">
                             <option value="" disabled selected>Seleccionar Técnico</option>
                             @foreach ($usuarios as $usuario)
-                            <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
+                                <option value="{{ $usuario->idUsuario }}">{{ $usuario->Nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -220,7 +184,7 @@
                         <select id="tipoRecojo" name="tipoRecojo" class="select2 w-full mb-2" style="display: none">
                             <option value="" disabled selected>Seleccionar Tipo de Recojo</option>
                             @foreach ($tiposRecojo as $tipo)
-                            <option value="{{ $tipo->idtipoRecojo }}">{{ $tipo->nombre }}</option>
+                                <option value="{{ $tipo->idtipoRecojo }}">{{ $tipo->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -231,7 +195,7 @@
                         <select id="tipoEnvio" name="tipoEnvio" class="select2 w-full mb-2" style="display: none">
                             <option value="" disabled selected>Seleccionar Tipo de Envío</option>
                             @foreach ($tiposEnvio as $tipoEnvio)
-                            <option value="{{ $tipoEnvio->idtipoenvio }}">{{ $tipoEnvio->nombre }}</option>
+                                <option value="{{ $tipoEnvio->idtipoenvio }}">{{ $tipoEnvio->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -276,193 +240,6 @@
                     </div>
                 </div>
 
-
-
-
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        const selectTienda = document.getElementById("idTienda");
-                        const esEnvioContainer = document.getElementById("esEnvioContainer");
-                        const esEnvioCheckbox = document.getElementById("esEnvio");
-                        const selectTipoServicio = document.getElementById(
-                            "tipoServicio"); // Selección de tipo de servicio
-                        const tecnicoContainer = document.getElementById("tecnicoContainer");
-                        const tecnicoDatosContainer = document.getElementById("tecnicoDatosContainer");
-                        const tecnicoFields = document.getElementById("tecnicoFields");
-                        const agregarTecnicoBtn = document.getElementById("agregarTecnico");
-                        const eliminarTecnicoBtn = document.getElementById("eliminarUltimoTecnico");
-
-                        if (!selectTienda || !esEnvioContainer || !esEnvioCheckbox || !tecnicoContainer || !
-                            tecnicoDatosContainer || !selectTipoServicio) {
-                            console.error("No se encontraron los elementos necesarios.");
-                            return;
-                        }
-
-
-                        let selectsInicializados = false;
-
-                        function verificarTipoServicio() {
-                            const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]
-                                ?.value;
-                            const esEquipoContainer = document.getElementById("esEquipoContainer");
-                            const numeroCotizacionContainer = document.getElementById("numeroCotizacionContainer");
-
-                            if (parseInt(tipoServicio) === 6) {
-                                esEquipoContainer.classList.remove("hidden");
-
-                                if (!selectsInicializados) {
-                                    esEquipoContainer.querySelectorAll('select.select2').forEach(function(select) {
-                                        const prevNiceSelect = select.nextElementSibling;
-                                        if (prevNiceSelect && prevNiceSelect.classList.contains(
-                                                'nice-select')) {
-                                            prevNiceSelect.remove();
-                                        }
-                                        NiceSelect.bind(select, {
-                                            searchable: true
-                                        });
-                                        select.classList.add('hidden');
-                                    });
-                                    selectsInicializados = true;
-                                }
-                                console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
-                            } else {
-                                esEquipoContainer.classList.add("hidden");
-                                console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
-                            }
-
-                            if (parseInt(tipoServicio) === 5) {
-                                numeroCotizacionContainer.style.display = "block";
-                                console.log("✅ Mostrando numeroCotizacionContainer (Tipo Servicio = 5)");
-                            } else {
-                                numeroCotizacionContainer.style.display = "none";
-                                console.log("❌ Ocultando numeroCotizacionContainer (Tipo Servicio ≠ 5)");
-                            }
-                        }
-
-
-
-
-
-
-
-
-
-                        function verificarEnvioContainer() {
-                            const selectedDepartamento = selectTienda.options[selectTienda.selectedIndex]
-                                ?.getAttribute(
-                                    "data-departamento");
-                            const tipoServicio = selectTipoServicio.options[selectTipoServicio.selectedIndex]
-                                ?.value;
-
-                            console.log("Departamento:", selectedDepartamento, "| Tipo de Servicio:", tipoServicio);
-
-                            // Convertir a número por si vienen como string
-                            const dep = parseInt(selectedDepartamento);
-                            const tipo = parseInt(tipoServicio);
-
-                            // Condiciones según tu lógica
-                            if (
-                                (dep === 3926 && tipo === 1) || // Si es 3926 y tipo 1 => ocultar
-                                (dep === 3926 && tipo === 2) || // Si es 3926 y tipo 2 => ocultar
-                                (dep !== 3926 && tipo === 2) // Si es diferente a 3926 y tipo 2 => ocultar
-                            ) {
-                                esEnvioContainer.style.display = "none";
-                                console.log("❌ Ocultando esEnvioContainer");
-                            } else if (dep !== 3926 && tipo === 1) { // Si es diferente a 3926 y tipo 1 => mostrar
-                                esEnvioContainer.style.display = "block";
-                                console.log("✅ Mostrando esEnvioContainer");
-                            }
-                        }
-
-
-
-                        function verificarEsEnvio() {
-                            console.log("Verificando si es envío:", esEnvioCheckbox
-                                .checked); // Debugging: Ver estado del checkbox
-                            if (esEnvioCheckbox.checked) {
-                                tecnicoContainer.style.display = "block";
-                                tecnicoDatosContainer.style.display = "block";
-                            } else {
-                                tecnicoContainer.style.display = "none";
-                                tecnicoDatosContainer.style.display = "none";
-                            }
-                        }
-
-                        function actualizarBotonEliminar() {
-                            const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
-                            console.log("Número de técnicos:", tecnicos
-                                .length); // Debugging: Ver número de técnicos
-                            if (tecnicos.length > 1) {
-                                eliminarTecnicoBtn.classList.remove("hidden");
-                            } else {
-                                eliminarTecnicoBtn.classList.add("hidden");
-                            }
-                        }
-
-                        function agregarTecnico() {
-                            console.log(
-                                "Agregando un nuevo técnico"); // Debugging: Cuando se agrega un nuevo técnico
-                            const tecnicoEntry = document.createElement("div");
-                            tecnicoEntry.classList.add("tecnico-entry", "grid", "grid-cols-1", "md:grid-cols-2",
-                                "gap-4");
-
-                            tecnicoEntry.innerHTML = `
-            <div>
-                <label class="block text-sm font-medium">Nombre Técnico de Recojo</label>
-                <input type="text" name="nombreTecnicoEnvio[]" class="form-input w-full" placeholder="Ingrese el nombre">
-            </div>
-            <div>
-                <label class="block text-sm font-medium">DNI Técnico de Recojo</label>
-                <input type="text" name="dniTecnicoEnvio[]" class="form-input w-full" placeholder="Ingrese el DNI">
-            </div>
-        `;
-
-                            tecnicoFields.appendChild(tecnicoEntry);
-                            actualizarBotonEliminar();
-                        }
-
-                        function eliminarUltimoTecnico() {
-                            const tecnicos = tecnicoFields.querySelectorAll(".tecnico-entry");
-                            console.log("Eliminando el último técnico. Técnicos actuales:", tecnicos
-                                .length); // Debugging: Ver número de técnicos antes de eliminar
-                            if (tecnicos.length > 1) {
-                                tecnicos[tecnicos.length - 1].remove();
-                                actualizarBotonEliminar();
-                            }
-                        }
-
-                        // Mantener ocultos al inicio hasta que seleccione una tienda
-                        esEnvioContainer.style.display = "none";
-                        tecnicoContainer.style.display = "none";
-                        tecnicoDatosContainer.style.display = "none";
-                        verificarTipoServicio(); // Agrega esta línea para el estado inicial
-
-
-                        // Eventos
-                        selectTienda.addEventListener("change", function() {
-                            console.log("Cambiando tienda."); // Debugging: Ver cuando se cambia la tienda
-                            verificarEnvioContainer();
-                            verificarEnvioContainer();
-
-                        });
-                        selectTipoServicio.addEventListener("change", function() {
-                            console.log(
-                                "Cambiando tipo de servicio."
-                            ); // Debugging: Ver cuando se cambia el tipo de servicio
-                            verificarEnvioContainer();
-
-                            verificarTipoServicio(); // Agrega esta línea
-
-                        });
-                        esEnvioCheckbox.addEventListener("change", verificarEsEnvio);
-                        agregarTecnicoBtn.addEventListener("click", agregarTecnico);
-                        eliminarTecnicoBtn.addEventListener("click", eliminarUltimoTecnico);
-
-                        actualizarBotonEliminar(); // Inicializa visibilidad del botón eliminar
-                    });
-                </script>
-
-
                 <!-- Botones -->
                 <div class="md:col-span-2 flex justify-end mt-4">
                     <a href="{{ route('ordenes.index') }}" class="btn btn-outline-danger">Cancelar</a>
@@ -472,32 +249,170 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+    <script>
+        $(document).ready(function() {
+            const selectTienda = $('#idTienda');
+            const selectTipoServicio = $('#tipoServicio');
+            const esEnvioContainer = $('#esEnvioContainer');
+            const esEnvioCheckbox = $('#esEnvio');
+            const tecnicoContainer = $('#tecnicoContainer');
+            const tecnicoDatosContainer = $('#tecnicoDatosContainer');
+            const tecnicoFields = $('#tecnicoFields');
+            const agregarTecnicoBtn = $('#agregarTecnico');
+            const eliminarTecnicoBtn = $('#eliminarUltimoTecnico');
+
+            let selectsInicializados = false;
+
+            function verificarTipoServicio() {
+                const tipoServicio = parseInt(selectTipoServicio.val());
+                const esEquipoContainer = $('#esEquipoContainer');
+                const numeroCotizacionContainer = $('#numeroCotizacionContainer');
+
+                if (tipoServicio === 6) {
+                    esEquipoContainer.removeClass('hidden');
+
+                    if (!selectsInicializados) {
+                        esEquipoContainer.find('select.select2').each(function() {
+                            if ($(this).hasClass("select2-hidden-accessible")) {
+                                $(this).select2('destroy');
+                            }
+
+                            $(this).removeClass('hidden').select2({
+                                width: '100%'
+                            });
+                        });
+                        selectsInicializados = true;
+                    }
+                    console.log("✅ Mostrando esEquipoContainer (Tipo Servicio = 6)");
+                } else {
+                    esEquipoContainer.addClass('hidden');
+                    console.log("❌ Ocultando esEquipoContainer (Tipo Servicio ≠ 6)");
+                }
+
+                if (tipoServicio === 5) {
+                    numeroCotizacionContainer.show();
+                    console.log("✅ Mostrando numeroCotizacionContainer (Tipo Servicio = 5)");
+                } else {
+                    numeroCotizacionContainer.hide();
+                    console.log("❌ Ocultando numeroCotizacionContainer (Tipo Servicio ≠ 5)");
+                }
+            }
+
+            function verificarEnvioContainer() {
+                const tipoServicio = parseInt(selectTipoServicio.val());
+                const selectedDepartamento = selectTienda.find(':selected').data('departamento');
+
+                const dep = parseInt(selectedDepartamento);
+                const tipo = parseInt(tipoServicio);
+
+                if (
+                    (dep === 3926 && tipo === 1) ||
+                    (dep === 3926 && tipo === 2) ||
+                    (dep !== 3926 && tipo === 2)
+                ) {
+                    esEnvioContainer.hide();
+                    console.log("❌ Ocultando esEnvioContainer");
+                } else if (dep !== 3926 && tipo === 1) {
+                    esEnvioContainer.show();
+                    console.log("✅ Mostrando esEnvioContainer");
+                }
+            }
+
+            function verificarEsEnvio() {
+                console.log("Verificando si es envío:", esEnvioCheckbox.prop('checked'));
+                if (esEnvioCheckbox.prop('checked')) {
+                    tecnicoContainer.show();
+                    tecnicoDatosContainer.show();
+                } else {
+                    tecnicoContainer.hide();
+                    tecnicoDatosContainer.hide();
+                }
+            }
+
+            function actualizarBotonEliminar() {
+                const tecnicos = tecnicoFields.find('.tecnico-entry');
+                if (tecnicos.length > 1) {
+                    eliminarTecnicoBtn.removeClass('hidden');
+                } else {
+                    eliminarTecnicoBtn.addClass('hidden');
+                }
+            }
+
+            function agregarTecnico() {
+                const tecnicoEntry = $(`
+                <div class="tecnico-entry grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium">Nombre Técnico de Recojo</label>
+                        <input type="text" name="nombreTecnicoEnvio[]" class="form-input w-full" placeholder="Ingrese el nombre">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium">DNI Técnico de Recojo</label>
+                        <input type="text" name="dniTecnicoEnvio[]" class="form-input w-full" placeholder="Ingrese el DNI">
+                    </div>
+                </div>
+            `);
+
+                tecnicoFields.append(tecnicoEntry);
+                actualizarBotonEliminar();
+            }
+
+            function eliminarUltimoTecnico() {
+                const tecnicos = tecnicoFields.find('.tecnico-entry');
+                if (tecnicos.length > 1) {
+                    tecnicos.last().remove();
+                    actualizarBotonEliminar();
+                }
+            }
+
+            // Eventos
+            selectTienda.on("change", function() {
+                console.log("Cambiando tienda.");
+                verificarEnvioContainer();
+            });
+
+            selectTipoServicio.on("change", function() {
+                console.log("Cambiando tipo de servicio.");
+                verificarTipoServicio();
+                verificarEnvioContainer();
+            });
+
+            esEnvioCheckbox.on("change", verificarEsEnvio);
+            agregarTecnicoBtn.on("click", agregarTecnico);
+            eliminarTecnicoBtn.on("click", eliminarUltimoTecnico);
+
+            // Estado inicial
+            esEnvioContainer.hide();
+            tecnicoContainer.hide();
+            tecnicoDatosContainer.hide();
+
+            verificarTipoServicio();
+            verificarEnvioContainer();
+            actualizarBotonEliminar();
+        });
+    </script>
 
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // 1. Inicialización de NiceSelect con sincronización automática
-            const initializeNiceSelect = (selectElement) => {
-                if (selectElement.niceSelectInstance) {
-                    selectElement.niceSelectInstance.destroy();
-                }
-
-                return NiceSelect.bind(selectElement, {
-                    searchable: true,
-                    callback: function(instance) {
-                        // Sincronizar valor con el select original
-                        selectElement.value = instance.selected.value;
-                        console.log(`Select ${selectElement.id} cambiado a:`, selectElement.value);
-                    }
-                });
-            };
-
-            // Inicializar todos los selects con clase .select2
-            document.querySelectorAll('.select2').forEach(select => {
-                select.niceSelectInstance = initializeNiceSelect(select);
+            // Inicializar todos los selects Select2
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Seleccione una opción',
+                allowClear: true
             });
 
-            // 2. Funciones para manejo de errores
+            // Ejecutar lógica inicial si ya hay valor seleccionado
+            const tipoServicioSelect = $('#tipoServicio');
+            if (tipoServicioSelect.length && tipoServicioSelect.val()) {
+                verificarTipoServicio();
+                verificarEnvioContainer();
+            }
+
+            // Validación en tiempo real
             const createErrorText = (inputId, message) => {
                 const input = document.getElementById(inputId);
                 if (!input) return;
@@ -516,14 +431,8 @@
                 if (errorText) errorText.remove();
             };
 
-            // 3. Validación en tiempo real para campos
             const setupFieldValidation = () => {
-                // Campos de texto
-                const textFields = [
-                    'numero_ticket',
-                    'fallaReportada'
-                ];
-
+                const textFields = ['numero_ticket', 'fallaReportada'];
                 textFields.forEach(fieldId => {
                     const field = document.getElementById(fieldId);
                     if (field) {
@@ -537,14 +446,7 @@
                     }
                 });
 
-                // Campos select
-                const selectFields = [
-                    'idClienteGeneral',
-                    'idCliente',
-                    'tipoServicio',
-                    'idTienda'
-                ];
-
+                const selectFields = ['idClienteGeneral', 'idCliente', 'tipoServicio', 'idTienda'];
                 selectFields.forEach(selectId => {
                     const select = document.getElementById(selectId);
                     if (select) {
@@ -559,7 +461,7 @@
 
             setupFieldValidation();
 
-            // 4. Validación del número de ticket
+            // Validación en tiempo real del ticket
             const validateTicket = () => {
                 const inputTicket = document.getElementById('numero_ticket');
                 const errorTicket = document.getElementById('errorTicket');
@@ -603,7 +505,7 @@
 
             validateTicket();
 
-            // 5. Lógica para clientes y clientes generales
+            // Lógica para actualizar clientes al cambiar cliente general
             const setupClientesLogic = () => {
                 const selectClienteGeneral = document.getElementById('idClienteGeneral');
                 const selectCliente = document.getElementById('idCliente');
@@ -614,9 +516,10 @@
                     const idClienteGeneral = this.value;
                     console.log('Cliente general seleccionado:', idClienteGeneral);
 
-                    // Reiniciar select de cliente
-                    selectCliente.innerHTML =
-                        '<option value="" disabled selected>Seleccionar Cliente</option>';
+                    // Reset de opciones
+                    $(selectCliente).empty().append(
+                        new Option('Seleccionar Cliente', '', true, true)
+                    ).trigger('change');
 
                     if (idClienteGeneral) {
                         fetch(`/clientes/${idClienteGeneral}`)
@@ -627,24 +530,24 @@
                             .then(data => {
                                 if (data?.length > 0) {
                                     data.forEach(cliente => {
-                                        const option = new Option(
+                                        const newOption = new Option(
                                             `${cliente.nombre} - ${cliente.documento}`,
-                                            cliente.idCliente
+                                            cliente.idCliente,
+                                            false,
+                                            false
                                         );
-                                        selectCliente.add(option);
+                                        $(selectCliente).append(newOption);
                                     });
-
-                                    // Re-inicializar NiceSelect para mantener sincronización
-                                    selectCliente.niceSelectInstance = initializeNiceSelect(
-                                        selectCliente);
                                 } else {
-                                    selectCliente.add(new Option('No hay clientes disponibles',
-                                        ''));
+                                    $(selectCliente).append(new Option(
+                                        'No hay clientes disponibles', '', true, true));
                                 }
+                                $(selectCliente).trigger('change');
                             })
                             .catch(error => {
                                 console.error('Error:', error);
-                                selectCliente.add(new Option('Error al cargar clientes', ''));
+                                $(selectCliente).append(new Option('Error al cargar clientes', '',
+                                    true, true)).trigger('change');
                             });
                     }
                 });
@@ -652,18 +555,8 @@
 
             setupClientesLogic();
 
-            // 6. Validación final del formulario
+            // Validación al enviar formulario
             document.getElementById("ordenTrabajoForm")?.addEventListener("submit", function(event) {
-                // Sincronizar valores de NiceSelect antes de validar
-                document.querySelectorAll('.select2').forEach(select => {
-                    const niceSelect = select.nextElementSibling;
-                    if (niceSelect?.classList.contains('nice-select')) {
-                        const selected = niceSelect.querySelector('.option.selected');
-                        if (selected) select.value = selected.dataset.value;
-                    }
-                });
-
-                // Validar campos requeridos
                 const camposRequeridos = {
                     'numero_ticket': 'Campo ticket vacío',
                     'idClienteGeneral': 'Campo cliente general vacío',
@@ -674,6 +567,7 @@
                 };
 
                 let isValid = true;
+
                 Object.entries(camposRequeridos).forEach(([id, mensaje]) => {
                     const campo = document.getElementById(id);
                     if (!campo || !campo.value.trim()) {
@@ -683,7 +577,6 @@
                     }
                 });
 
-                // Validación especial del ticket
                 const ticketError = document.getElementById('errorTicket');
                 if (!document.getElementById('numero_ticket').value.trim() ||
                     (ticketError && !ticketError.classList.contains('hidden'))) {
@@ -703,43 +596,30 @@
     </script>
 
 
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            let clientesCargados = false; // Variable para verificar si los clientes ya fueron cargados
-            let marcasCargadas = false; // Flag para verificar si las marcas ya han sido cargadas
-            // let tiendasCargadas = false; // Flag para verificar si las tiendas ya han sido cargadas
+            let clientesCargados = false;
+            let marcasCargadas = false;
 
-            // Función para cargar los clientes
             function cargarClientes() {
                 fetch('/clientesdatoscliente')
                     .then(response => response.json())
                     .then(data => {
                         console.log("🚀 Datos de clientes recibidos:", data);
 
-                        // Obtener o crear el select
                         let select = document.getElementById('idCliente');
-
-                        // Si no existe, lo creamos
                         if (!select) {
                             select = document.createElement('select');
                             select.id = 'idCliente';
                             select.name = 'idCliente';
-                            select.className = 'form-input w-full';
-                            // Agregarlo al DOM donde corresponda
                             document.querySelector('#contenedor-select-cliente').appendChild(select);
                         }
 
-                        // Configurar atributos (por si acaso)
-                        select.id = 'idCliente'; // Asegurar el id
-                        select.name = 'idCliente'; // Asegurar el name
-                        select.setAttribute('data-test', 'select-cliente'); // Atributo adicional para testing
-
-                        // Vaciar y llenar el select con las opciones
+                        select.className = 'select2 w-full';
                         select.innerHTML = '<option value="" disabled selected>Seleccionar Cliente 2</option>';
 
                         data.forEach(cliente => {
-                            console.log(`Cliente: ${cliente.nombre} - ${cliente.documento}`);
-
                             const option = document.createElement('option');
                             option.value = cliente.idCliente;
                             option.textContent = `${cliente.nombre} - ${cliente.documento}`;
@@ -748,42 +628,17 @@
                             select.appendChild(option);
                         });
 
-                        // Manejo de NiceSelect
-                        if (select.niceSelectInstance) {
-                            select.niceSelectInstance.destroy();
+                        // Inicializar Select2 (destruir si ya estaba)
+                        if ($(select).hasClass('select2-hidden-accessible')) {
+                            $(select).select2('destroy');
                         }
 
-                        // Inicializar NiceSelect con configuración mejorada
-                        select.niceSelectInstance = NiceSelect.bind(select, {
-                            searchable: true,
-                            placeholder: 'Seleccionar Cliente',
-                            callback: function(select) {
-                                // Sincronizar el valor con el select original
-                                document.getElementById('idCliente').value = select.value;
-                            }
+                        $(select).select2({
+                            width: '100%',
+                            placeholder: 'Seleccionar Cliente'
                         });
 
-                        // Estilos para NiceSelect
                         select.style.display = 'block';
-                        setTimeout(() => {
-                            const nice = $(select).next(".nice-select");
-                            if (nice.length) {
-                                nice.css({
-                                    'line-height': '2.2rem',
-                                    'height': '2.4rem',
-                                    'padding-top': '0.2rem',
-                                    'padding-bottom': '0.2rem',
-                                    'display': 'flex',
-                                    'align-items': 'center'
-                                });
-                                nice.find('.current').css({
-                                    'line-height': '2.2rem',
-                                    'padding-top': '0',
-                                    'padding-bottom': '0'
-                                });
-                            }
-                        }, 50);
-
                     })
                     .catch(error => {
                         console.error('Error al cargar clientes:', error);
@@ -791,154 +646,81 @@
                     });
             }
 
-            // Función para obtener el cliente seleccionado
             function obtenerClienteSeleccionado() {
                 const select = document.getElementById('idCliente');
-                const idClienteSeleccionado = select.value; // Esto obtendrá el idCliente seleccionado
-                console.log(`Cliente seleccionado: ${idClienteSeleccionado}`); // Ver el valor seleccionado
-
-                if (idClienteSeleccionado) {
-                    // Aquí puedes hacer algo con el idClienteSeleccionado
-                    // Ejemplo: Hacer un fetch para obtener más detalles de ese cliente
-                    console.log(`Detalles del cliente con ID: ${idClienteSeleccionado}`);
-                } else {
-                    console.log('No se ha seleccionado ningún cliente');
-                }
+                const idClienteSeleccionado = select.value;
+                console.log(`Cliente seleccionado: ${idClienteSeleccionado}`);
             }
 
-            // Evento de cambio en el select
-            document.getElementById('idCliente').addEventListener('change', obtenerClienteSeleccionado);
+            // Ocultar el select inicialmente
+            const selectCliente = document.getElementById('idCliente');
+            selectCliente.style.display = 'none';
 
-            // Ocultar el select de clientes inicialmente
-            let selectCliente = document.getElementById('idCliente');
-            selectCliente.style.display = 'none'; // Esto oculta el primer select de "Cliente" al principio
-
-            // Cargar los clientes solo si no se han cargado previamente
             if (!clientesCargados) {
                 cargarClientes();
                 clientesCargados = true;
             }
 
-
-
-
-
-
-
-
             $(document).ready(function() {
-                console.log("🔹 DOM completamente cargado");
-
-                // 1. Configuración inicial del select de Cliente
-                const clienteSelect = $("#idCliente")
-                    .attr('id', 'idCliente') // Asegurar id
-                    .attr('name', 'idCliente') // Asegurar name
-                    .removeAttr("class style")
-                    .addClass("form-input w-full");
-
-                // 2. Configuración inicial del select de Tienda
+                const clienteSelect = $("#idCliente");
+                const tiendaSelect = $("#idTienda");
                 const tiendaSelectContainer = $("#selectTiendaContainer");
-                const tiendaSelect = $("#idTienda")
-                    .attr('id', 'idTienda') // Asegurar id
-                    .attr('name', 'idTienda') // Asegurar name
-                    .removeAttr("class style")
-                    .addClass("form-input w-full");
 
-                // Ocultar select de tiendas al inicio
                 tiendaSelectContainer.hide();
 
-                // 3. Función mejorada para mostrar tiendas
                 function mostrarSelectTiendas(clienteId, cargarTodasTiendas) {
                     tiendaSelectContainer.show();
+                    tiendaSelect.empty().append(
+                        '<option value="" selected disabled>Seleccionar Tienda</option>');
 
-                    // Asegurar atributos antes de llenar
-                    tiendaSelect.attr('id', 'idTienda')
-                        .attr('name', 'idTienda')
-                        .empty()
-                        .append('<option value="" selected disabled>Seleccionar Tienda</option>');
-
-                    const urlTiendas = cargarTodasTiendas ? `/api/tiendas` :
+                    const urlTiendas = cargarTodasTiendas ?
+                        `/api/tiendas` :
                         `/api/cliente/${clienteId}/tiendas`;
 
                     $.get(urlTiendas)
                         .done(function(data) {
                             console.log("🏪 Tiendas obtenidas:", data);
-
                             if (data.length > 0) {
                                 data.forEach(tienda => {
-                                    tiendaSelect.append(`
-                            <option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">
-                                ${tienda.nombre}
-                            </option>
-                        `);
+                                    tiendaSelect.append(
+                                        `<option value="${tienda.idTienda}" data-departamento="${tienda.departamento}">${tienda.nombre}</option>`
+                                    );
                                 });
                             } else {
                                 tiendaSelect.append(
                                     '<option value="">No hay tiendas registradas</option>');
                             }
 
-                            // Inicializar NiceSelect con sincronización
-                            inicializarNiceSelectTienda();
+                            // Inicializar Select2 (destruir si ya estaba)
+                            if (tiendaSelect.hasClass('select2-hidden-accessible')) {
+                                tiendaSelect.select2('destroy');
+                            }
+
+                            tiendaSelect.select2({
+                                width: '100%',
+                                placeholder: 'Seleccionar Tienda'
+                            });
                         })
                         .fail(function(error) {
                             console.error("❌ Error al obtener tiendas:", error);
                             tiendaSelect.append('<option value="">Error al cargar tiendas</option>');
-                            inicializarNiceSelectTienda();
+
+                            if (tiendaSelect.hasClass('select2-hidden-accessible')) {
+                                tiendaSelect.select2('destroy');
+                            }
+
+                            tiendaSelect.select2({
+                                width: '100%',
+                                placeholder: 'Seleccionar Tienda'
+                            });
                         });
                 }
 
-                // 4. Función para inicializar NiceSelect en tienda
-                function inicializarNiceSelectTienda() {
-                    // Destruir instancia previa si existe
-                    if (tiendaSelect[0].niceSelectInstance) {
-                        tiendaSelect[0].niceSelectInstance.destroy();
-                    }
-
-                    // Mostrar select original para inicialización
-                    tiendaSelect.show();
-
-                    // Inicializar NiceSelect con sincronización
-                    tiendaSelect[0].niceSelectInstance = NiceSelect.bind(tiendaSelect[0], {
-                        searchable: true,
-                        placeholder: 'Seleccionar Tienda',
-                        callback: function(select) {
-                            // Sincronizar valor con el select original
-                            document.getElementById('idTienda').value = select.value;
-                        }
-                    });
-
-                    // Ocultar select original
-                    tiendaSelect.hide();
-
-                    // Aplicar estilos
-                    setTimeout(() => {
-                        const nice = tiendaSelect.next(".nice-select");
-                        if (nice.length) {
-                            nice.css({
-                                'height': '2.5rem',
-                                'padding': '0 0.75rem',
-                                'line-height': '2.5rem',
-                                'display': 'flex',
-                                'align-items': 'center'
-                            });
-                            nice.find('.current').css({
-                                'line-height': '2.5rem',
-                                'padding': '0 !important'
-                            });
-                        }
-                    }, 50);
-                }
-
-                // 5. Evento change para cliente (con validación de atributos)
                 clienteSelect.on("change", function() {
-                    // Asegurar atributos en cada cambio
-                    $(this).attr('id', 'idCliente').attr('name', 'idCliente');
-
                     const clienteId = $(this).val();
                     console.log(`🔍 Cliente seleccionado: ${clienteId}`);
 
                     if (!clienteId) {
-                        console.warn("⚠️ No se ha seleccionado un cliente.");
                         tiendaSelectContainer.hide();
                         return;
                     }
@@ -948,7 +730,6 @@
                             console.log("📌 Datos del cliente:", data);
                             $("#direccion").val(data.direccion || "");
 
-                            // Verificar tipo de documento
                             if (data.idTipoDocumento == 8) {
                                 console.log(
                                     "🌍 Cliente con idTipoDocumento == 8, cargando todas las tiendas..."
@@ -964,83 +745,75 @@
                         .fail(function(error) {
                             console.error("❌ Error al obtener datos del cliente:", error);
                         });
-                });
 
-                // 6. Ejecutar validación inicial si hay cliente seleccionado
-                if (clienteSelect.val()) {
-                    clienteSelect.trigger("change");
-                }
-            });
-
-
-
-
-
-
-
-            // Evento para cuando se selecciona un cliente
-            document.getElementById('idCliente').addEventListener('change', function() {
-                let clienteId = this.value;
-
-                console.log('Cliente seleccionado:', clienteId);
-
-                if (clienteId) {
-                    console.log('Cliente seleccionado:',
-                        clienteId); // Verificar si el cliente es seleccionado
+                    // Obtener y cargar clientes generales
                     fetch(`/clientes-generales/${clienteId}`)
                         .then(response => response.json())
                         .then(data => {
-                            let select = document.getElementById('idClienteGeneral');
+                            const select = document.getElementById('idClienteGeneral');
                             select.innerHTML =
-                                '<option value="" selected>Seleccionar Cliente General</option>'; // Limpiar
+                                '<option value="" selected>Seleccionar Cliente General</option>';
 
-                            // Verificar si se recibió algún dato
-                            console.log('Clientes generales:',
-                                data); // Verifica que se reciban los clientes generales
-
-                            // Llenar el select con los clientes generales
                             data.forEach(clienteGeneral => {
-                                let option = document.createElement('option');
+                                const option = document.createElement('option');
                                 option.value = clienteGeneral.idClienteGeneral;
                                 option.textContent = clienteGeneral.descripcion;
                                 select.appendChild(option);
                             });
 
-                            // Si hay solo un cliente general, lo seleccionamos automáticamente
                             if (data.length === 1) {
-                                select.value = data[0]
-                                    .idClienteGeneral; // Seleccionar automáticamente el único cliente
+                                select.value = data[0].idClienteGeneral;
                             }
 
-                            // No inicializamos NiceSelect en el select de Cliente General
-                            // Simplemente utilizamos el select estándar
+                            // Reinicializar Select2 en cliente general
+                            if ($(select).hasClass('select2-hidden-accessible')) {
+                                $(select).select2('destroy');
+                            }
+
+                            $(select).select2({
+                                width: '100%',
+                                placeholder: 'Seleccionar Cliente General'
+                            });
                         })
-                        .catch(error => console.error('Error al cargar clientes generales:', error));
-                } else {
-                    // Limpiar el select si no hay cliente seleccionado
-                    document.getElementById('idClienteGeneral').innerHTML =
-                        '<option value="" selected>Seleccionar Cliente General</option>';
+                        .catch(error => {
+                            console.error('Error al cargar clientes generales:', error);
+                        });
+                });
+
+                if (clienteSelect.val()) {
+                    clienteSelect.trigger("change");
                 }
-
-                console.log("Valor final del idCliente:", this.value);
-
             });
+
+            // Evento adicional fuera del document.ready (si lo necesitas doble)
+            document.getElementById('idCliente').addEventListener('change', obtenerClienteSeleccionado);
         });
     </script>
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-
-
     <script>
         $(document).ready(function() {
+            const $tipoProductoLab = $("#tipoProductoLab");
+            const $marcaLab = $("#marcaLab");
+            const $modeloLab = $("#modeloLab");
 
-            $("#tipoProductoLab").change(function() {
+            // Inicializar select2 base
+            $tipoProductoLab.select2({
+                width: '100%',
+                placeholder: "Seleccionar Tipo de Producto"
+            });
+            $marcaLab.select2({
+                width: '100%',
+                placeholder: "Seleccionar Marca"
+            });
+            $modeloLab.select2({
+                width: '100%',
+                placeholder: "Seleccionar Modelo"
+            });
+
+            // Al cambiar categoría
+            $tipoProductoLab.change(function() {
                 const idCategoria = $(this).val();
-                const $marcaLab = $("#marcaLab");
-                const $modeloLab = $("#modeloLab");
 
                 if (idCategoria) {
                     $.ajax({
@@ -1057,60 +830,49 @@
                                 );
                             });
 
-                            // 🔁 Eliminar nice-select anterior en marca
-                            const prevNiceMarca = $marcaLab.next('.nice-select');
-                            if (prevNiceMarca.length) prevNiceMarca.remove();
-
-                            // 🔁 Volver a aplicar nice-select
-                            NiceSelect.bind($marcaLab[0], {
-                                searchable: true
+                            // Reinicializar Select2
+                            $marcaLab.val(null).trigger('change');
+                            $marcaLab.select2({
+                                width: '100%',
+                                placeholder: "Seleccionar Marca"
                             });
-                            $marcaLab.addClass('hidden');
-                            // Ajuste visual para centrar el texto del select
-                            $marcaLab.next('.nice-select').css({
-                                'display': 'flex',
-                                'align-items': 'center',
-                                'padding-top': '0.5rem',
-                                'padding-bottom': '0.5rem'
-                            });
-                            // Limpiar modelo y ocultarlo
-                            const prevNiceModelo = $modeloLab.next('.nice-select');
-                            if (prevNiceModelo.length) prevNiceModelo.remove();
 
+                            // Limpiar modelo
                             $modeloLab.empty().append(
                                 '<option value="" disabled selected>Seleccionar Modelo</option>'
                             );
-                            $modeloLab.addClass('hidden');
+                            $modeloLab.val(null).trigger('change');
+                            $modeloLab.select2({
+                                width: '100%',
+                                placeholder: "Seleccionar Modelo"
+                            });
                         },
                         error: function() {
                             toastr.error('Error al cargar las marcas');
                         }
                     });
                 } else {
-                    const prevNiceMarca = $marcaLab.next('.nice-select');
-                    if (prevNiceMarca.length) prevNiceMarca.remove();
-
-                    const prevNiceModelo = $modeloLab.next('.nice-select');
-                    if (prevNiceModelo.length) prevNiceModelo.remove();
-
-                    $marcaLab.empty().addClass('hidden');
-                    $modeloLab.empty().addClass('hidden');
+                    $marcaLab.empty().select2({
+                        width: '100%',
+                        placeholder: "Seleccionar Marca"
+                    });
+                    $modeloLab.empty().select2({
+                        width: '100%',
+                        placeholder: "Seleccionar Modelo"
+                    });
                 }
             });
 
-
-
-            $("#marcaLab").change(function() {
+            // Al cambiar marca
+            $marcaLab.change(function() {
                 const idMarca = $(this).val();
-                const idCategoria = $("#tipoProductoLab").val();
-                const $modeloLab = $("#modeloLab");
+                const idCategoria = $tipoProductoLab.val();
 
                 if (idMarca && idCategoria) {
                     $.ajax({
                         url: `/modelos/marca/${idMarca}/categoria/${idCategoria}`,
                         method: 'GET',
                         success: function(response) {
-                            // Limpiar y cargar modelos
                             $modeloLab.empty().append(
                                 '<option value="" disabled selected>Seleccionar Modelo</option>'
                             );
@@ -1120,21 +882,10 @@
                                 );
                             });
 
-                            // 🔁 Eliminar nice-select anterior en modelo
-                            const prevNiceModelo = $modeloLab.next('.nice-select');
-                            if (prevNiceModelo.length) prevNiceModelo.remove();
-
-                            // 🔁 Volver a aplicar nice-select
-                            NiceSelect.bind($modeloLab[0], {
-                                searchable: true
-                            });
-                            $modeloLab.addClass('hidden');
-                            // Ajuste visual para centrar el texto del select
-                            $marcaLab.next('.nice-select').css({
-                                'display': 'flex',
-                                'align-items': 'center',
-                                'padding-top': '0.5rem',
-                                'padding-bottom': '0.5rem'
+                            $modeloLab.val(null).trigger('change');
+                            $modeloLab.select2({
+                                width: '100%',
+                                placeholder: "Seleccionar Modelo"
                             });
                         },
                         error: function() {
@@ -1142,12 +893,13 @@
                         }
                     });
                 } else {
-                    const prevNiceModelo = $modeloLab.next('.nice-select');
-                    if (prevNiceModelo.length) prevNiceModelo.remove();
-
-                    $modeloLab.empty().addClass('hidden');
+                    $modeloLab.empty().select2({
+                        width: '100%',
+                        placeholder: "Seleccionar Modelo"
+                    });
                 }
             });
         });
     </script>
+
 </x-layout.default>
