@@ -1,72 +1,5 @@
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 <style>
-    /* ======== Modo Claro (Default) ======== */
-    .select2-container--default .select2-selection--single {
-        background-color: #fff;
-        border-color: #e8e8e8 !important;
-        height: 36px;
-        line-height: 34px;
-        font-size: 14px;
-        padding: 0 10px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        color: var(--tw-text-opacity) !important;
-        line-height: 34px;
-        font-size: 14px;
-        padding-left: 6px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 34px;
-    }
-
-    .select2-container--default .select2-results__option--selected {
-        font-weight: 700;
-    }
-
-    .select2-container--default .select2-dropdown {
-        border-radius: 5px;
-        box-shadow: 0 0 0 1px #4444441c;
-        font-size: 14px;
-    }
-
-    .select2-container--default .select2-search--dropdown .select2-search__field {
-        border: 1px solid #e8e8e8;
-        font-size: 13px;
-        padding: 6px;
-    }
-
-    /* ======== Modo Oscuro ======== */
-    .dark .select2-container--default .select2-selection--single {
-        background-color: #1b2e4b !important;
-        border-color: #253b5c !important;
-        color: #888ea8 !important;
-        height: 36px;
-        line-height: 34px;
-        font-size: 14px;
-        padding: 0 10px;
-    }
-
-    .dark .select2-container--default .select2-dropdown {
-        background-color: #1b2e4b !important;
-    }
-
-    .dark .select2-container--default .select2-results__option--highlighted,
-    .dark .select2-container--default .select2-results__option--selected {
-        background-color: #132136 !important;
-        border-color: #253b5c !important;
-    }
-
-    .dark .select2-container--default .select2-search--dropdown .select2-search__field {
-        background-color: #132136 !important;
-        border-color: #253b5c !important;
-        color: #fff !important;
-        font-size: 13px;
-        padding: 6px;
-    }
-
     .panel {
         overflow: visible !important;
     }
@@ -450,7 +383,6 @@
 
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>

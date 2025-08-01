@@ -9,14 +9,14 @@
         <div class="md:col-span-1 mt-4">
             <label for="estado" class="block text-sm font-medium">Estado</label>
 
-            <select id="estado" name="estado" class="select2" style="width: 100%;" onchange="actualizarColorEstado(this)">
+            <select id="estado" name="estado" class="select2" style="width: 100%;"
+                onchange="actualizarColorEstado(this)">
 
 
                 <option value="" disabled selected>Selecciona una opción</option>
 
                 @foreach ($estadosOTS as $index => $estado)
-                    <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}"
-                        {{ $index == 0 ? 'selected' : '' }}>
+                    <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}">
                         {{ $estado->descripcion }}
                     </option>
                 @endforeach
@@ -541,7 +541,7 @@
 
             fetch(
                     `/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`
-                    )
+                )
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

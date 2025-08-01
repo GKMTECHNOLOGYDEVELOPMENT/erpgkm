@@ -1,25 +1,24 @@
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
 
 <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
 
-<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success">Detalles de los Estados</span>
+<span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Detalles
+    de los Estados</span>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 items-start">
     <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="md:col-span-1 mt-4">
             <label for="estado" class="block text-sm font-medium">Estado</label>
-          
-            <select id="estado" name="estado" class="selectize"  style="display: none">
-            <option value="" disabled selected>Selecciona una opción</option>
 
-                @foreach ($estadosOTS as $index => $estado)
-                    <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}" {{ $index == 0 ? 'selected' : '' }}>
-                        {{ $estado->descripcion }}
-                    </option>
+            <select id="estado" name="estado" class="w-full select2">
+                <option></option>
+                @foreach ($estadosOTS as $estado)
+                    <option value="{{ (string) $estado->idEstadoots }}">{{ $estado->descripcion }}</option>
                 @endforeach
             </select>
-            
+
+
         </div>
 
         <div class="md:col-span-2">
@@ -44,7 +43,8 @@
 
 
 <div id="cardFotos" class="hidden mt-6 p-5 rounded-lg">
-    <span class="text-lg font-semibold mb-4 badge bg-success">Fotos</span>
+        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge"
+            style="background-color: {{ $colorEstado }};">Fotos</span>
 
     <!-- Botón para abrir el modal -->
     <button id="abrirModalAgregarImagen" class="btn btn-primary mt-4" @click="$dispatch('toggle-modal-agregar-imagen')">
@@ -133,7 +133,7 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
 
 
@@ -325,24 +325,24 @@
                                         if (data.success) {
                                             toastr.success(
                                                 "Imágenes comprimidas y guardadas correctamente."
-                                                );
+                                            );
                                             modalAgregarImagen.classList.add(
                                                 "hidden");
                                             imagenInput.value = "";
                                             imagePreviewContainer.innerHTML = "";
                                             renderizarImagenes
-                                        (); // actualiza el swiper
+                                                (); // actualiza el swiper
                                         } else {
                                             toastr.error(data.message ||
                                                 "Error al guardar las imágenes."
-                                                );
+                                            );
                                         }
                                     })
                                     .catch(error => {
                                         console.error("Error:", error);
                                         toastr.error(
                                             "Hubo un error al guardar las imágenes."
-                                            );
+                                        );
                                     });
                             }
                         },
@@ -360,7 +360,7 @@
             console.error("guardarImagenBtn no encontrado en el DOM");
         }
         // ✅ Maneja el cambio del select "Estado"
-        estadoSelect.addEventListener("change", toggleCardFotos);
+
 
         // ✅ Abre el modal de agregar imagen
         abrirModalBtn.addEventListener("click", function() {
@@ -452,52 +452,60 @@
     });
 </script>
 
-
-
-
-
 <script>
-  document.getElementById("estado").addEventListener("change", function() {
-    const estadoId = this.value;
-    const ticketId = {{ $ticket->idTickets }};
-    const visitaId = {{ $visitaId ?? 'null' }};
-
-    // Obtener la justificación del estado seleccionado
-    fetch(`/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Mostrar la justificación en el textarea
-                document.getElementById("justificacion").value = data.justificacion || "";
-            } else {
-                toastr.error(data.message || "Error al obtener la justificación");
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            toastr.error("Error al obtener la justificación.");
+    document.addEventListener("DOMContentLoaded", function() {
+        // Inicializar Select2
+        $('#estado').select2({
+            placeholder: "Seleccionar estado",
+            allowClear: true,
+            width: '100%'
         });
 
-    // Verificar si el estado seleccionado es igual a 3 (puedes cambiar esto según tu lógica)
-    if (estadoId == 5) {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "block"; // Mostrar el elemento
+        // Evento al cambiar el estado
+        $('#estado').on('change', function() {
+            const estadoId = $(this).val();
+            const estadoTexto = $(this).find('option:selected').text().trim();
 
-            renderizarPrevisualizacion();
-        }
-    } else {
-        const cardFotos = document.getElementById("cardFotos");
-        if (cardFotos) {
-            cardFotos.style.display = "none"; // Ocultar el elemento
-        }
-    }
-});
+            const ticketId = {{ $ticket->idTickets }};
+            const visitaId = {{ $visitaId ?? 'null' }};
 
-    document.addEventListener("DOMContentLoaded", function() {
-        // Inicializar todos los select con la clase .selectize
-        document.querySelectorAll(".selectize").forEach(function(select) {
-            NiceSelect.bind(select);
+            // ✅ Solo forzar visual si la opción no está
+            if (!$('#estado option[value="' + estadoId + '"]').length) {
+                const newOption = new Option(estadoTexto, estadoId, true, true);
+                $('#estado').append(newOption).trigger('change.select2');
+            } else {
+                $('#estado').val(estadoId).trigger('change.select2');
+            }
+
+
+            // 🔍 Debug (puedes quitarlo si todo va bien)
+            console.log("Seleccionado:", estadoId, "-", estadoTexto);
+
+            // ✅ Obtener justificación desde API
+            fetch(
+                    `/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`
+                    )
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        $('#justificacion').val(data.justificacion || "");
+                    } else {
+                        toastr.error(data.message || "Error al obtener la justificación");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    toastr.error("Error al obtener la justificación.");
+                });
+
+            // ✅ Mostrar u ocultar "cardFotos"
+            const cardFotos = document.getElementById("cardFotos");
+            if (estadoId === "5" && cardFotos) {
+                cardFotos.classList.remove("hidden");
+                renderizarImagenes();
+            } else if (cardFotos) {
+                cardFotos.classList.add("hidden");
+            }
         });
     });
 </script>
