@@ -134,7 +134,7 @@
                 <!-- Tipo Producto -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Tipo Producto</label>
-                    <select id="tipoProductoInstalar" name="tipoProducto" class="form-select w-full"
+                    <select id="tipoProductoInstalar" name="tipoProducto" style="width: 100%" class="form-select w-full"
                         data-toggle="tooltip" data-tooltip="Seleccione el tipo de producto a instalar">
                         <option value="" disabled selected>Seleccionar Tipo de Producto</option>
                         @foreach ($categorias as $categoria)
@@ -146,7 +146,7 @@
                 <!-- Marca -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Marca</label>
-                    <select id="marcaInstalar" name="marca" class="form-select w-full" data-toggle="tooltip"
+                    <select id="marcaInstalar" name="marca" style="width: 100%" class="form-select w-full" data-toggle="tooltip"
                         data-tooltip="Seleccione la marca del producto">
                         <option value="" disabled selected>Seleccionar Marca</option>
                         @foreach ($marcas as $marca)
@@ -158,7 +158,7 @@
                 <!-- Modelo -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Modelo</label>
-                    <select id="modeloInstalar" name="modelo" class="form-select w-full hidden" data-toggle="tooltip"
+                    <select id="modeloInstalar" name="modelo" style="width: 100%" class="form-select w-full hidden" data-toggle="tooltip"
                         data-tooltip="Seleccione el modelo específico">
                         <option value="" disabled selected>Seleccionar Modelo</option>
                     </select>
@@ -221,7 +221,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Tipo
                         Producto</label>
-                    <select id="tipoProductoRetirar" name="tipoProducto"
+                    <select id="tipoProductoRetirar" name="tipoProducto" style="width: 100%"
                         class="form-select w-full h-10 px-3 py-2 rounded-md truncate">
                         <option value="" disabled selected>Seleccionar Tipo de Producto</option>
                         @foreach ($categorias as $categoria)
@@ -233,7 +233,7 @@
                 <!-- Marca -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Marca</label>
-                    <select id="marcaRetirar" name="marca"
+                    <select id="marcaRetirar" name="marca" style="width: 100%"
                         class="form-select w-full h-10 px-3 py-2 rounded-md truncate">
                         <option value="" disabled selected>Seleccionar Marca</option>
                         @foreach ($marcas as $marca)
