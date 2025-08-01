@@ -64,15 +64,15 @@
             <!-- Select de Estado con Nice Select -->
             <div>
                 <label for="estado" class="block text-sm font-medium">Estado</label>
-                <select id="estado" name="estado" style="width: 100%;">
-                    <option value="" disabled selected>Selecciona una opción</option>
-                    @foreach ($estadosOTS as $index => $estado)
-                        <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}"
-                            {{ $index == 0 ? 'selected' : '' }}>
+                <select id="estado" name="estado" style="width: 100%" class="w-full">
+                    <option></option> {{-- Requerido por Select2 para mostrar el placeholder --}}
+                    @foreach ($estadosOTS as $estado)
+                        <option value="{{ $estado->idEstadoots }}" data-color="{{ $estado->color }}">
                             {{ $estado->descripcion }}
                         </option>
                     @endforeach
                 </select>
+
             </div>
 
             <!-- Textarea de Justificación -->
@@ -134,7 +134,7 @@
                 <!-- Tipo Producto -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Tipo Producto</label>
-                    <select id="tipoProductoInstalar" name="tipoProducto" class="form-select w-full"
+                    <select id="tipoProductoInstalar" name="tipoProducto" style="width: 100%" class="form-select w-full"
                         data-toggle="tooltip" data-tooltip="Seleccione el tipo de producto a instalar">
                         <option value="" disabled selected>Seleccionar Tipo de Producto</option>
                         @foreach ($categorias as $categoria)
@@ -146,7 +146,7 @@
                 <!-- Marca -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Marca</label>
-                    <select id="marcaInstalar" name="marca" class="form-select w-full" data-toggle="tooltip"
+                    <select id="marcaInstalar" name="marca" style="width: 100%" class="form-select w-full" data-toggle="tooltip"
                         data-tooltip="Seleccione la marca del producto">
                         <option value="" disabled selected>Seleccionar Marca</option>
                         @foreach ($marcas as $marca)
@@ -158,7 +158,7 @@
                 <!-- Modelo -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Modelo</label>
-                    <select id="modeloInstalar" name="modelo" class="form-select w-full hidden" data-toggle="tooltip"
+                    <select id="modeloInstalar" name="modelo" style="width: 100%" class="form-select w-full hidden" data-toggle="tooltip"
                         data-tooltip="Seleccione el modelo específico">
                         <option value="" disabled selected>Seleccionar Modelo</option>
                     </select>
@@ -221,7 +221,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Tipo
                         Producto</label>
-                    <select id="tipoProductoRetirar" name="tipoProducto"
+                    <select id="tipoProductoRetirar" name="tipoProducto" style="width: 100%"
                         class="form-select w-full h-10 px-3 py-2 rounded-md truncate">
                         <option value="" disabled selected>Seleccionar Tipo de Producto</option>
                         @foreach ($categorias as $categoria)
@@ -233,7 +233,7 @@
                 <!-- Marca -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Marca</label>
-                    <select id="marcaRetirar" name="marca"
+                    <select id="marcaRetirar" name="marca" style="width: 100%"
                         class="form-select w-full h-10 px-3 py-2 rounded-md truncate">
                         <option value="" disabled selected>Seleccionar Marca</option>
                         @foreach ($marcas as $marca)
@@ -378,6 +378,9 @@
         </form>
     </div>
 </div>
+
+
+
 
 
 
@@ -546,7 +549,7 @@
                             } else {
                                 $modelo.html(
                                     '<option value="" disabled selected>Seleccione marca</option>'
-                                    );
+                                );
                             }
                         }, 300);
                     } else {
@@ -586,7 +589,7 @@
                         const selected = modelo.idModelo == idModeloSeleccionado ? 'selected' : '';
                         $selectModelo.append(
                             `<option value="${modelo.idModelo}" ${selected}>${modelo.nombre}</option>`
-                            );
+                        );
                     });
                 } else {
                     $selectModelo.append(
@@ -941,11 +944,11 @@
                     success: function(response) {
                         $marcaInstalar.empty().append(
                             '<option value="" disabled selected>Seleccionar Marca</option>'
-                            );
+                        );
                         response.forEach(function(marca) {
                             $marcaInstalar.append(
                                 `<option value="${marca.idMarca}">${marca.nombre}</option>`
-                                );
+                            );
                         });
                         $marcaInstalar.show().trigger('change');
                         $modeloInstalar.hide();
@@ -972,11 +975,11 @@
                     success: function(response) {
                         $modeloInstalar.empty().append(
                             '<option value="" disabled selected>Seleccionar Modelo</option>'
-                            );
+                        );
                         response.forEach(function(modelo) {
                             $modeloInstalar.append(
                                 `<option value="${modelo.idModelo}">${modelo.nombre}</option>`
-                                );
+                            );
                         });
                         $modeloInstalar.show().trigger('change');
                     },
@@ -1064,11 +1067,11 @@
                     success: function(response) {
                         $marcaRetirar.empty().append(
                             '<option value="" disabled selected>Seleccionar Marca</option>'
-                            );
+                        );
                         response.forEach(function(marca) {
                             $marcaRetirar.append(
                                 `<option value="${marca.idMarca}">${marca.nombre}</option>`
-                                );
+                            );
                         });
                         $marcaRetirar.show().trigger('change');
                         $modeloRetirar.hide();
@@ -1095,11 +1098,11 @@
                     success: function(response) {
                         $modeloRetirar.empty().append(
                             '<option value="" disabled selected>Seleccionar Modelo</option>'
-                            );
+                        );
                         response.forEach(function(modelo) {
                             $modeloRetirar.append(
                                 `<option value="${modelo.idModelo}">${modelo.nombre}</option>`
-                                );
+                            );
                         });
                         $modeloRetirar.show().trigger('change');
                     },
@@ -1228,11 +1231,11 @@
                     success: function(response) {
                         $editMarca.empty().append(
                             '<option value="" disabled selected>Seleccionar Marca</option>'
-                            );
+                        );
                         response.forEach(function(marca) {
                             $editMarca.append(
                                 `<option value="${marca.idMarca}">${marca.nombre}</option>`
-                                );
+                            );
                         });
                         $editMarca.trigger('change');
                     },
@@ -1256,11 +1259,11 @@
                         const $editModelo = $('#editModelo');
                         $editModelo.empty().append(
                             '<option value="" disabled selected>Seleccionar Modelo</option>'
-                            );
+                        );
                         response.forEach(function(modelo) {
                             $editModelo.append(
                                 `<option value="${modelo.idModelo}">${modelo.nombre}</option>`
-                                );
+                            );
                         });
                         $editModelo.trigger('change');
                     },
