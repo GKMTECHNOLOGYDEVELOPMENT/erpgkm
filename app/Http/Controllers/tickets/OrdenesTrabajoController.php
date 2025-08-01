@@ -1983,19 +1983,20 @@ class OrdenesTrabajoController extends Controller
 
 
 
-
-    public function obtenerHistorialModificaciones($ticketId)
-    {
-        // Obtener todas las modificaciones relacionadas con el ticket
-        $modificaciones = Modificacion::where('idTickets', $ticketId)
-            ->orderBy('fecha_modificacion', 'desc')  // Ordenar por la fecha de modificación
-            ->get();
-
-        return response()->json($modificaciones);
-    }
-
-
-
+public function obtenerHistorialModificaciones($ticketId)
+{
+    $historial = Modificacion::where('idTickets', $ticketId)
+        ->orderBy('fecha_modificacion', 'desc')
+        ->paginate(10); // 10 registros por página
+    
+    return response()->json([
+        'data' => $historial->items(),
+        'current_page' => $historial->currentPage(),
+        'last_page' => $historial->lastPage(),
+        'per_page' => $historial->perPage(),
+        'total' => $historial->total()
+    ]);
+}
 
 
 
