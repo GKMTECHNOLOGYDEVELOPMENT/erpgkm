@@ -123,47 +123,46 @@
 
                 <!-- TAB: Historial -->
                 <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
-                    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
-                        <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase">
-                            <tr>
-                                <th class="px-4 py-3">Campo</th>
-                                <th class="px-4 py-3">Valor Antiguo</th>
-                                <th class="px-4 py-3">Valor Nuevo</th>
-                                <th class="px-4 py-3">Fecha de Modificación</th>
-                                <th class="px-4 py-3">Usuario</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historialModificaciones">
-                            <!-- Preload visible mientras se cargan los datos -->
-                            <tr id="preload" style="display: none;">
-                                <td colspan="5" class="text-center text-gray-900 dark:text-gray-200">
-                                    <span class="w-5 h-5 m-auto mb-10">
-                                        <span
-                                            class="animate-ping inline-flex h-full w-full rounded-full bg-info dark:bg-blue-500"></span>
-                                    </span>
-                                    Cargando datos...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto rounded-lg shadow border border-gray-300 dark:border-gray-700">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 text-sm">
+                            <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider text-left">
+                                <tr>
+                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Campo</th>
+                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Valor Antiguo
+                                    </th>
+                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Valor Nuevo
+                                    </th>
+                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Fecha de
+                                        Modificación</th>
+                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Usuario</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialModificaciones"
+                                class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                <!-- Preload visible mientras se cargan los datos -->
+                                <tr id="preload" style="display: none;">
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">
+                                        <span class="inline-flex items-center space-x-2">
+                                            <span
+                                                class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-info dark:border-blue-500"></span>
+                                            <span>Cargando datos...</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <!-- Datos dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
 
                     <!-- Paginación para historial -->
                     <div class="flex justify-center mt-4">
                         <ul id="paginationHistorial"
-                            class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
-                            <!-- Se genera dinámicamente -->
+                            class="inline-flex items-center space-x-1 rtl:space-x-reverse bg-white dark:bg-gray-900 p-2 rounded-lg shadow">
+                            <!-- Generado dinámicamente -->
                         </ul>
                     </div>
                 </div>
             </div>
-        </div>
-
-
-        <!-- Contenedor de paginación -->
-        <div class="flex justify-center mt-4">
-            <ul id="pagination" class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
-                <!-- Los botones de paginación se generarán dinámicamente -->
-            </ul>
         </div>
     </div>
 </div>

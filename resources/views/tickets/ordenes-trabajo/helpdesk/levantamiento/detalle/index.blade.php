@@ -123,48 +123,58 @@
 
                 <!-- TAB: Historial -->
                 <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
-                    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
-                        <thead class="bg-gray-100 dark:bg-gray-800">
-                            <tr>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Campo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Valor Antiguo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Valor Nuevo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Fecha de Modificación</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Usuario</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historialModificaciones">
-                            <!-- Preload visible mientras se cargan los datos -->
-                            <tr id="preload" style="display: none;">
-                                <td colspan="5" class="text-center text-gray-900 dark:text-gray-200">
-                                    <span class="w-5 h-5 m-auto mb-10">
-                                        <span
-                                            class="animate-ping inline-flex h-full w-full rounded-full bg-info dark:bg-blue-500"></span>
-                                    </span>
-                                    Cargando datos...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto rounded-lg shadow-md border border-gray-300 dark:border-gray-700">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                        Campo
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                        Valor Antiguo
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                        Valor Nuevo
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                        Fecha de Modificación
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                                        Usuario
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialModificaciones"
+                                class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                                <!-- Preload visible mientras se cargan los datos -->
+                                <tr id="preload" style="display: none;">
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">
+                                        <span class="inline-flex items-center space-x-2">
+                                            <span
+                                                class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-info dark:border-blue-500"></span>
+                                            <span>Cargando datos...</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <!-- Aquí se insertan dinámicamente las filas -->
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <!-- Paginación para historial -->
+                    <!-- Paginación -->
                     <div class="flex justify-center mt-4">
                         <ul id="paginationHistorial"
-                            class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
+                            class="inline-flex items-center space-x-1 rtl:space-x-reverse bg-white dark:bg-gray-900 p-2 rounded-lg shadow">
                             <!-- Se genera dinámicamente -->
                         </ul>
                     </div>
                 </div>
+
             </div>
         </div>
 
