@@ -1189,40 +1189,56 @@ class OrdenesTrabajoController extends Controller
     {
         try {
             Log::info('🔍 Filtros recibidos en getAll', $request->all());
-    
+
             $tipoTicket = $request->input('tipoTicket', 1);
-    
-            $query = Ticket::with([
-                'tecnico:idUsuario,Nombre',
-                'usuario:idUsuario,Nombre',
-                'cliente:idCliente,nombre',
-                'clientegeneral:idClienteGeneral,descripcion',
-                'tiposervicio:idTipoServicio,nombre',
-                'estado_ot:idEstadoots,descripcion,color',
-                'marca:idMarca,nombre',
-                'modelo.categoria:idCategoria,nombre',
-                'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
-                'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')->latest('fecha_programada')->limit(1),
-                'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
-                'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
-                'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
-                'visitas.tecnico:idUsuario,Nombre',
-                'transicion_status_tickets' => fn($q) => $q->when($request->filled('idVisita'), function ($q2) use ($request) {
-                    $q2->whereHas('seleccionarVisita', fn($q3) => $q3->where('idVisitas', $request->idVisita))
-                       ->where('idEstadoots', 3);
-                }),
+
+            $query = Ticket::select([
+                'idTickets',
+                'numero_ticket',
+                'fecha_creacion',
+                'idModelo',
+                'idMarca',
+                'idCliente',
+                'direccion',
+                'serie',
+                'idTicketFlujo'
             ])
-            ->where('idTipotickets', $tipoTicket);
-    
+                ->with([
+                    'cliente:idCliente,nombre',
+                    'marca:idMarca,nombre',
+                    'modelo:idModelo,nombre,idCategoria',
+                    'modelo.categoria:idCategoria,nombre',
+                    'ticketflujo:idTicketFlujo,idTicket,idEstadflujo',
+                    'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
+
+                    // ✅ VISITA seleccionada (primaria)
+                    'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
+                    'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
+                    'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
+
+                    // ✅ Última visita programada (fallback)
+                    'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')->latest('fecha_programada')->limit(1),
+
+                    // ✅ Transición status tickets (según idVisita si viene)
+                    'transicion_status_tickets' => fn($q) => $q->when($request->filled('idVisita'), function ($q2) use ($request) {
+                        $q2->whereHas(
+                            'seleccionarVisita',
+                            fn($q3) =>
+                            $q3->where('idVisitas', $request->idVisita)
+                        )->where('idEstadoots', 3);
+                    }),
+                ])
+                ->where('idTipotickets', $tipoTicket);
+
             // Filtros adicionales
             if ($request->filled('marca')) {
                 $query->where('idMarca', $request->marca);
             }
-    
+
             if ($request->filled('clienteGeneral')) {
                 $query->where('idClienteGeneral', $request->clienteGeneral);
             }
-    
+
             if ($request->filled('startDate') && $request->filled('endDate')) {
                 $query->whereBetween('fecha_creacion', [
                     $request->startDate . ' 00:00:00',
@@ -1233,13 +1249,15 @@ class OrdenesTrabajoController extends Controller
             } elseif ($request->filled('endDate')) {
                 $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
             }
-            $query->orderBy('fecha_creacion', 'desc'); // ✅ Mueve el orderBy aquí
+
+            $query->orderBy('fecha_creacion', 'desc');
+
             return DataTables::of($query)
                 ->filter(function ($query) use ($request) {
                     if ($request->has('search') && !empty($request->input('search.value'))) {
                         $searchValue = trim($request->input('search.value'));
                         $normalized = Str::lower(Str::ascii($searchValue));
-    
+
                         $query->where(function ($q) use ($searchValue, $normalized) {
                             $q->where('serie', $searchValue)
                                 ->orWhere('numero_ticket', $searchValue)
@@ -1248,26 +1266,22 @@ class OrdenesTrabajoController extends Controller
                                 ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                                 ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                                 ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                                ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"))
                                 ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                                ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                                ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                                ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                                ->orWhereHas('seleccionarVisita.visita.tecnico', fn($q) =>
+                                $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
                                 ->orWhereHas('ticketflujo.estadoFlujo', fn($q) =>
-                                    $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
+                                $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
                         });
                     }
                 })
-
                 ->toJson();
-    
         } catch (\Throwable $e) {
             Log::error('❌ Error en getAll()', [
                 'message' => $e->getMessage(),
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),
             ]);
-    
+
             return response()->json([
                 "draw" => intval($request->input('draw')),
                 "recordsTotal" => 0,
@@ -1277,9 +1291,6 @@ class OrdenesTrabajoController extends Controller
             ], 500);
         }
     }
-    
-    
-
 
 
 
@@ -1983,20 +1994,20 @@ class OrdenesTrabajoController extends Controller
 
 
 
-public function obtenerHistorialModificaciones($ticketId)
-{
-    $historial = Modificacion::where('idTickets', $ticketId)
-        ->orderBy('fecha_modificacion', 'desc')
-        ->paginate(10); // 10 registros por página
-    
-    return response()->json([
-        'data' => $historial->items(),
-        'current_page' => $historial->currentPage(),
-        'last_page' => $historial->lastPage(),
-        'per_page' => $historial->perPage(),
-        'total' => $historial->total()
-    ]);
-}
+    public function obtenerHistorialModificaciones($ticketId)
+    {
+        $historial = Modificacion::where('idTickets', $ticketId)
+            ->orderBy('fecha_modificacion', 'desc')
+            ->paginate(10); // 10 registros por página
+
+        return response()->json([
+            'data' => $historial->items(),
+            'current_page' => $historial->currentPage(),
+            'last_page' => $historial->lastPage(),
+            'per_page' => $historial->perPage(),
+            'total' => $historial->total()
+        ]);
+    }
 
 
 

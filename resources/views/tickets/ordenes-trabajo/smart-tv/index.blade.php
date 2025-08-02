@@ -222,11 +222,16 @@
                         </button>
                     </div>
 
-                    <!-- Botón Buscar -->
-                    <button id="btnSearch"
-                        class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm">
-                        Buscar
-                    </button>
+                   <!-- Botón Buscar -->
+<button id="btnSearch" class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm flex items-center justify-center">
+    <span id="searchText">Buscar</span>
+    <span id="searchSpinner" class="hidden ml-2">
+        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </span>
+</button>
                 </div>
 
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
@@ -285,35 +290,53 @@
         });
     </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Botón buscar
-            $('#btnSearch').off('click').on('click', function() {
-                const value = $('#searchInput').val();
-                $('#myTable1').DataTable().search(value).draw();
-            });
+      document.addEventListener('DOMContentLoaded', function() {
+    // Botón buscar
+    $('#btnSearch').off('click').on('click', function() {
+        const btn = $(this);
+        const searchText = $('#searchText');
+        const spinner = $('#searchSpinner');
+        
+        // Mostrar spinner y cambiar texto
+        btn.prop('disabled', true);
+        searchText.text('Buscando...');
+        spinner.removeClass('hidden');
+        
+        const value = $('#searchInput').val();
+        
+        // Usar setTimeout para permitir que la UI se actualice antes de la búsqueda
+        setTimeout(() => {
+            $('#myTable1').DataTable().search(value).draw();
+            
+            // Restaurar botón después de la búsqueda
+            btn.prop('disabled', false);
+            searchText.text('Buscar');
+            spinner.addClass('hidden');
+        }, 50);
+    });
 
-            // Enter para buscar
-            $(document).on('keypress', '#searchInput', function(e) {
-                if (e.which === 13) {
-                    $('#btnSearch').click();
-                }
-            });
+    // Enter para buscar
+    $(document).on('keypress', '#searchInput', function(e) {
+        if (e.which === 13) {
+            $('#btnSearch').click();
+        }
+    });
 
-            // Mostrar botón limpiar si hay texto
-            const input = document.getElementById('searchInput');
-            const clearBtn = document.getElementById('clearInput');
+    // Mostrar botón limpiar si hay texto
+    const input = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearInput');
 
-            input.addEventListener('input', () => {
-                clearBtn.classList.toggle('hidden', input.value.trim() === '');
-            });
+    input.addEventListener('input', () => {
+        clearBtn.classList.toggle('hidden', input.value.trim() === '');
+    });
 
-            // Botón limpiar
-            clearBtn.addEventListener('click', () => {
-                input.value = '';
-                clearBtn.classList.add('hidden');
-                $('#myTable1').DataTable().search('').draw();
-            });
-        });
+    // Botón limpiar
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.classList.add('hidden');
+        $('#myTable1').DataTable().search('').draw();
+    });
+});
     </script>
 
 
