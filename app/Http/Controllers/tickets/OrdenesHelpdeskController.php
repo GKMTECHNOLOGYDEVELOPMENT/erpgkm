@@ -2154,12 +2154,23 @@ class OrdenesHelpdeskController extends Controller
                         ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
                         ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
                         // Por esto (más robusto):
-                        ->orWhereHas('tiposervicio', function ($q) use ($normalized) {
-                            $q->where('nombre', 'LIKE', "%{$normalized}%")
-                                ->orWhereRaw("LOWER(CONVERT(nombre USING utf8)) LIKE ?", ["%{$normalized}%"]);
-                        })
-                        ->orWhereHas('ticketflujo.estadoFlujo', fn($q) =>
-                        $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
+                        ->orWhereHas(
+                            'ticketflujo.estadoFlujo',
+                            fn($q) =>
+                            $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"])
+                        )
+
+                        ->orWhere(function ($q) use ($searchValue, $normalized) {
+                            if (stripos($normalized, 'soporte') !== false || strtolower($normalized) === 's') {
+                                $q->orWhereIn('tipoServicio', [1, 6]); // Soporte On Site y Laboratorio
+                            }
+                            if (stripos($normalized, 'levantamiento') !== false || strtolower($normalized) === 'l') {
+                                $q->orWhere('tipoServicio', 2);
+                            }
+                            if (stripos($normalized, 'ejecucion') !== false || strtolower($normalized) === 'e') {
+                                $q->orWhere('tipoServicio', 5);
+                            }
+                        });
                 });
             }
 
