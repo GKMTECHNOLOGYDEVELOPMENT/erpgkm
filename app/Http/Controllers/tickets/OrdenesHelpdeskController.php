@@ -2070,7 +2070,7 @@ class OrdenesHelpdeskController extends Controller
     }
 
 
-    public function getAll(Request $request)
+  public function getAll(Request $request)
     {
         Log::info("📥 Entrando al método getAll (HELPDESK)");
 
@@ -2085,9 +2085,12 @@ class OrdenesHelpdeskController extends Controller
             'tecnico:idUsuario,Nombre',
             'usuario:idUsuario,Nombre',
             'cliente:idCliente,nombre',
+            'clientegeneral:idClienteGeneral,descripcion',
             'tiposervicio:idTipoServicio,nombre',
             'estado_ot:idEstadoots,descripcion,color',
+            'marca:idMarca,nombre',
             'tienda:idTienda,nombre',
+            'modelo.categoria:idCategoria,nombre',
             'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
             'manejoEnvio:idmanejo_envio,idTickets,tipo',
             'visitas' => function ($q) {
@@ -2108,6 +2111,9 @@ class OrdenesHelpdeskController extends Controller
             }
         ]);
 
+        if ($request->has('marca') && $request->marca != '') {
+            $query->where('idMarca', $request->marca);
+        }
 
         if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
             $query->where('idClienteGeneral', $request->clienteGeneral);
@@ -2124,15 +2130,19 @@ class OrdenesHelpdeskController extends Controller
             $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
         }
 
-        if ($request->has('search') && !empty($request->input('search.value'))) {
+if ($request->has('search') && !empty($request->input('search.value'))) {
             $searchValue = trim($request->input('search.value'));
             $normalized = Str::lower(Str::ascii($searchValue));
         
             $query->where(function ($q) use ($searchValue, $normalized) {
                 $q->orWhere('idTickets', $searchValue)
+                    ->orWhere('serie', $searchValue)
                     ->orWhere('numero_ticket', $searchValue)
+                    ->orWhere('serie', 'LIKE', "%{$searchValue}%")
                     ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
                     ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                     ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
@@ -2140,7 +2150,6 @@ class OrdenesHelpdeskController extends Controller
                         $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
             });
         }
-        
 
         $query->orderBy('idTickets', 'desc');
         $recordsFiltered = (clone $query)->count();
@@ -2161,6 +2170,132 @@ class OrdenesHelpdeskController extends Controller
             "data" => $ordenes
         ]);
     }
+
+
+    public function getAlleldeverdad(Request $request)
+{
+    try {
+        Log::info("📥 Entrando al método getAll (HELPDESK)", $request->all());
+
+        $tipoTicket = 2;
+
+        // Base query
+        $baseQuery = Ticket::query()->where('idTipotickets', $tipoTicket);
+        $recordsTotal = $baseQuery->count();
+
+        // Consulta optimizada con relaciones necesarias
+        $query = $baseQuery->select([
+                'idTickets',
+                'numero_ticket',
+                'fecha_creacion',
+                'idCliente',
+                'idClienteGeneral',
+                'idTienda',
+                'idTicketFlujo',
+                'idEstadoots',
+                'idUsuario',
+                'tipoServicio',
+                'direccion',
+            ])
+            ->with([
+                'cliente:idCliente,nombre',
+                'tienda:idTienda,nombre',
+                'tecnico:idUsuario,Nombre',
+                'usuario:idUsuario,Nombre',
+                'tiposervicio:idTipoServicio,nombre', // ✅ Incluido
+                'estado_ot:idEstadoots,descripcion,color',
+                'ticketflujo:idTicketFlujo,idTicket,idEstadflujo',
+                'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
+                'manejoEnvio:idmanejo_envio,idTickets,tipo',
+
+                // Última visita programada
+                'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')
+                    ->latest('fecha_programada')->limit(1),
+
+                // Visita seleccionada con técnico
+                'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
+                'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
+                'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
+
+                // Transición de estado para visita
+                'transicion_status_tickets' => fn($q) => $q
+                    ->when($request->filled('idVisita'), function ($q2) use ($request) {
+                        $q2->where('idVisita', $request->idVisita)
+                           ->where('idEstadoots', 3);
+                    }),
+            ]);
+
+        // Filtros
+        if ($request->filled('clienteGeneral')) {
+            $query->where('idClienteGeneral', $request->clienteGeneral);
+        }
+
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $query->whereBetween('fecha_creacion', [
+                $request->startDate . ' 00:00:00',
+                $request->endDate . ' 23:59:59'
+            ]);
+        } elseif ($request->filled('startDate')) {
+            $query->where('fecha_creacion', '>=', $request->startDate . ' 00:00:00');
+        } elseif ($request->filled('endDate')) {
+            $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
+        }
+
+        // Buscador global
+        if ($request->has('search') && !empty($request->input('search.value'))) {
+            $searchValue = trim($request->input('search.value'));
+            $normalized = Str::lower(Str::ascii($searchValue));
+
+            $query->where(function ($q) use ($searchValue, $normalized) {
+                $q->orWhere('idTickets', $searchValue)
+                    ->orWhere('numero_ticket', $searchValue)
+                    ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                    ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('tiposervicio', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%")) // ✅ Filtro por tipo servicio
+                    ->orWhereHas('ticketflujo.estadoFlujo', fn($q) =>
+                        $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
+            });
+        }
+
+        // Orden y paginación
+        $query->orderBy('idTickets', 'desc');
+        $recordsFiltered = (clone $query)->count();
+
+        $ordenes = $query->skip($request->input('start', 0))
+            ->take($request->input('length', 10))
+            ->get()
+            ->map(function ($item) {
+                $arr = json_decode(json_encode($item), true);
+                array_walk_recursive($arr, fn(&$v) => $v = is_string($v) ? mb_convert_encoding($v, 'UTF-8', 'UTF-8') : $v);
+                return $arr;
+            });
+
+        return response()->json([
+            "draw" => intval($request->input('draw')),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $ordenes
+        ]);
+    } catch (\Throwable $e) {
+        Log::error('❌ Error en getAll() Helpdesk', [
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+        ]);
+
+        return response()->json([
+            "draw" => intval($request->input('draw')),
+            "recordsTotal" => 0,
+            "recordsFiltered" => 0,
+            "data" => [],
+            "error" => "Error del servidor: " . $e->getMessage()
+        ], 500);
+    }
+}
 
 
     public function verEnvio($id)
