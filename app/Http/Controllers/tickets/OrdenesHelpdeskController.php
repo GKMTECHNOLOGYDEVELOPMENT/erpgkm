@@ -2085,12 +2085,9 @@ class OrdenesHelpdeskController extends Controller
             'tecnico:idUsuario,Nombre',
             'usuario:idUsuario,Nombre',
             'cliente:idCliente,nombre',
-            'clientegeneral:idClienteGeneral,descripcion',
             'tiposervicio:idTipoServicio,nombre',
             'estado_ot:idEstadoots,descripcion,color',
-            'marca:idMarca,nombre',
             'tienda:idTienda,nombre',
-            'modelo.categoria:idCategoria,nombre',
             'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
             'manejoEnvio:idmanejo_envio,idTickets,tipo',
             'visitas' => function ($q) {
@@ -2111,9 +2108,6 @@ class OrdenesHelpdeskController extends Controller
             }
         ]);
 
-        if ($request->has('marca') && $request->marca != '') {
-            $query->where('idMarca', $request->marca);
-        }
 
         if ($request->has('clienteGeneral') && $request->clienteGeneral != '') {
             $query->where('idClienteGeneral', $request->clienteGeneral);
@@ -2136,13 +2130,9 @@ class OrdenesHelpdeskController extends Controller
         
             $query->where(function ($q) use ($searchValue, $normalized) {
                 $q->orWhere('idTickets', $searchValue)
-                    ->orWhere('serie', $searchValue)
                     ->orWhere('numero_ticket', $searchValue)
-                    ->orWhere('serie', 'LIKE', "%{$searchValue}%")
                     ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
                     ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('marca', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                     ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
