@@ -2,8 +2,6 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('multipleTable', () => ({
         datatable1: null,
         ordenesData: [],
-        marcas: [],
-        marcaFilter: '',
         clienteGeneralFilter: '',
         clienteGenerales: [], // 👈 OBLIGATORIO
         startDate: '',
@@ -22,8 +20,6 @@ document.addEventListener('alpine:init', () => {
                 this.debouncedFetch = this.debounce(this.fetchDataAndInitTable, 300);
 
                 this.fetchDataAndInitTable(); // Primera carga
-
-                this.$watch('marcaFilter', () => this.debouncedFetch());
                 this.$watch('startDate', () => this.debouncedFetch());
                 this.$watch('endDate', () => this.debouncedFetch());
 
