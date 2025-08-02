@@ -124,23 +124,13 @@
                 <!-- TAB: Historial -->
                 <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
                     <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
-                        <thead class="bg-gray-100 dark:bg-gray-800">
+                        <thead class="bg-gray-100 dark:bg-gray-800 text-xs uppercase">
                             <tr>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Campo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Valor Antiguo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Valor Nuevo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Fecha de Modificación</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Usuario</th>
+                                <th class="px-4 py-3">Campo</th>
+                                <th class="px-4 py-3">Valor Antiguo</th>
+                                <th class="px-4 py-3">Valor Nuevo</th>
+                                <th class="px-4 py-3">Fecha de Modificación</th>
+                                <th class="px-4 py-3">Usuario</th>
                             </tr>
                         </thead>
                         <tbody id="historialModificaciones">
@@ -351,7 +341,7 @@
                 console.error("Error al cargar el historial", xhr);
                 tbody.html(
                     '<tr><td colspan="5" class="text-center py-4 text-red-500">Error al cargar datos</td></tr>'
-                    );
+                );
             },
             complete: function() {
                 preload.hide();
@@ -579,7 +569,7 @@
                     console.error('Error cargando los estados:', error);
                     $('#estadosTableBody').html(
                         '<tr><td colspan="4" class="text-center py-4 text-red-500">Error al cargar estados</td></tr>'
-                        );
+                    );
                 });
         }
 
@@ -675,7 +665,7 @@
                         }
                         $clienteGeneral.val(
                                 '{{ $orden->clienteGeneral ? $orden->clienteGeneral->idClienteGeneral : '' }}'
-                                )
+                            )
                             .trigger('change')
                             .prop('disabled', false);
                     })
@@ -758,7 +748,7 @@
                         estadoElement.innerHTML =
                             '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
                         estadoElement.style.pointerEvents =
-                        'none'; // Deshabilitar clics adicionales
+                            'none'; // Deshabilitar clics adicionales
 
                         // Mostrar preload general en la página (opcional)
                         document.body.classList.add('waiting');
