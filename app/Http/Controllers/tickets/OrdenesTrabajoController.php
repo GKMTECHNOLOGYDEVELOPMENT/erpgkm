@@ -1184,13 +1184,15 @@ class OrdenesTrabajoController extends Controller
         return $pdf->download('reporte-ordenes-trabajo.pdf');
     }
 
-
     public function getAll(Request $request)
     {
         try {
             Log::info('🔍 Filtros recibidos en getAll', $request->all());
 
             $tipoTicket = $request->input('tipoTicket', 1);
+            $perPage = $request->input('length', 10);
+            $start = $request->input('start', 0);
+            $page = ($start / $perPage) + 1;
 
             $query = Ticket::select([
                 'idTickets',
@@ -1210,27 +1212,21 @@ class OrdenesTrabajoController extends Controller
                     'modelo.categoria:idCategoria,nombre',
                     'ticketflujo:idTicketFlujo,idTicket,idEstadflujo',
                     'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
-
-                    // ✅ VISITA seleccionada (primaria)
                     'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
                     'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
                     'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
-
-                    // ✅ Última visita programada (fallback)
-                    'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')->latest('fecha_programada')->limit(1),
-
-                    // ✅ Transición status tickets (según idVisita si viene)
-                    'transicion_status_tickets' => fn($q) => $q->when($request->filled('idVisita'), function ($q2) use ($request) {
-                        $q2->whereHas(
-                            'seleccionarVisita',
-                            fn($q3) =>
-                            $q3->where('idVisitas', $request->idVisita)
-                        )->where('idEstadoots', 3);
-                    }),
+                    'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')
+                        ->latest('fecha_programada')
+                        ->limit(1),
+                    'transicion_status_tickets' => fn($q) => $q->when($request->filled('idVisita'), 
+                    fn($q2) => $q2->whereHas('seleccionarVisita', 
+                        fn($q3) => $q3->where('idVisitas', $request->idVisita)
+                    )->where('idEstadoots', 3)
+                )
                 ])
                 ->where('idTipotickets', $tipoTicket);
 
-            // Filtros adicionales
+            // Aplicar filtros
             if ($request->filled('marca')) {
                 $query->where('idMarca', $request->marca);
             }
@@ -1244,37 +1240,36 @@ class OrdenesTrabajoController extends Controller
                     $request->startDate . ' 00:00:00',
                     $request->endDate . ' 23:59:59'
                 ]);
-            } elseif ($request->filled('startDate')) {
-                $query->where('fecha_creacion', '>=', $request->startDate . ' 00:00:00');
-            } elseif ($request->filled('endDate')) {
-                $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
             }
 
+            // Búsqueda global
+            if ($request->filled('search.value')) {
+                $searchValue = trim($request->input('search.value'));
+                $query->where(function ($q) use ($searchValue) {
+                    $q->where('numero_ticket', 'LIKE', "%{$searchValue}%")
+                        ->orWhere('serie', 'LIKE', "%{$searchValue}%")
+                        ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                        ->orWhereHas('cliente', function ($q) use ($searchValue) {
+                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
+                        });
+                });
+            }
+
+            // Ordenación
             $query->orderBy('fecha_creacion', 'desc');
 
-            return DataTables::of($query)
-                ->filter(function ($query) use ($request) {
-                    if ($request->has('search') && !empty($request->input('search.value'))) {
-                        $searchValue = trim($request->input('search.value'));
-                        $normalized = Str::lower(Str::ascii($searchValue));
+            // Obtener total de registros
+            $totalRecords = $query->count();
 
-                        $query->where(function ($q) use ($searchValue, $normalized) {
-                            $q->where('serie', $searchValue)
-                                ->orWhere('numero_ticket', $searchValue)
-                                ->orWhere('serie', 'LIKE', "%{$searchValue}%")
-                                ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
-                                ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                                ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                                ->orWhereHas('modelo.categoria', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                                ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                                ->orWhereHas('seleccionarVisita.visita.tecnico', fn($q) =>
-                                $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                                ->orWhereHas('ticketflujo.estadoFlujo', fn($q) =>
-                                $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"]));
-                        });
-                    }
-                })
-                ->toJson();
+            // Paginación
+            $tickets = $query->paginate($perPage, ['*'], 'page', $page);
+
+            return response()->json([
+                "draw" => intval($request->input('draw')),
+                "recordsTotal" => $totalRecords,
+                "recordsFiltered" => $tickets->total(),
+                "data" => $tickets->items()
+            ]);
         } catch (\Throwable $e) {
             Log::error('❌ Error en getAll()', [
                 'message' => $e->getMessage(),

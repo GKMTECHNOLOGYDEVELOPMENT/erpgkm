@@ -1,6 +1,7 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -9,7 +10,6 @@
     <style>
         .panel {
             overflow: visible !important;
-            /* Asegura que el modal no restrinja contenido */
         }
 
         .selected-items {
@@ -19,7 +19,6 @@
 
         #myTable1 {
             min-width: 1000px;
-            /* puedes ajustar si quieres más ancho */
         }
 
         .dataTables_length select {
@@ -29,9 +28,32 @@
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
             padding-right: 1.5rem;
-            /* Ajusta espacio a la derecha para que el texto no se corte */
             background-image: none;
-            /* Opcional, elimina cualquier ícono */
+        }
+        
+        /* Estilos para Select2 */
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--multiple {
+            min-height: 42px;
+            border: 1px solid #e0e6ed;
+            border-radius: 4px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered,
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            line-height: 42px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            padding: 0 10px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white;
+            margin-right: 5px;
         }
     </style>
     <div x-data="multipleTable">
@@ -62,7 +84,6 @@
                         <span>Excel</span>
                     </button>
 
-
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
                         @click="window.location.href = '{{ route('reporte.clientes') }}'">
@@ -75,7 +96,6 @@
                         </svg>
                         <span>PDF</span>
                     </button>
-
 
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
@@ -149,14 +169,12 @@
                     <div class="modal-scroll">
                         <!-- Formulario -->
                         <form class="p-5 space-y-4" id="clienteForm" enctype="multipart/form-data" method="post">
-                            @csrf <!-- Asegúrate de incluir el token CSRF -->
+                            @csrf
 
                             <!-- Cliente General (Ocupa todo el ancho) -->
                             <div>
-                                <label for="idClienteGeneral" class="block text-sm font-medium">Cliente
-                                    General</label>
-                                <select id="idClienteGeneral" name="idClienteGeneral[]"
-                                    placeholder="Seleccionar Cliente General" multiple style="display:none">
+                                <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                                <select id="idClienteGeneral" name="idClienteGeneral[]" class="select2 form-input w-full" multiple>
                                     @foreach ($clientesGenerales as $clienteGeneral)
                                         <option value="{{ $clienteGeneral->idClienteGeneral }}">
                                             {{ $clienteGeneral->descripcion }}</option>
@@ -164,42 +182,23 @@
                                 </select>
                             </div>
 
-                            <!-- Contenedor para mostrar los seleccionados (Ocupa todo el ancho) -->
-                            <div id="selected-items-container">
-                                <strong>Seleccionados:</strong>
-                                <div id="selected-items-list"
-                                    class="overflow-y-auto border border-gray-300 rounded-md p-2 flex flex-wrap gap-2">
-                                </div>
-                            </div>
-
-                            <!-- Resto del formulario (en grid de 2 columnas) -->
+                            <!-- Tipo Documento -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Nombre -->
                                 <div>
-                                    <label for="nombre" class="block text-sm font-medium">Nombre</label>
-                                    <input id="nombre" type="text" name="nombre" class="form-input w-full"
-                                        placeholder="Ingrese el nombre">
-                                </div>
-                                <!-- Tipo Documento -->
-                                <div>
-                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
-                                        Documento</label>
-                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full"
-                                        style="display: none;">
+                                    <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
+                                    <select id="idTipoDocumento" name="idTipoDocumento" class="select2 form-input w-full">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
                                             <option value="{{ $tipoDocumento->idTipoDocumento }}">
                                                 {{ $tipoDocumento->nombre }}</option>
                                         @endforeach
                                     </select>
-
                                 </div>
 
                                 <!-- Contenedor del switch "Es tienda" -->
                                 <div id="esTiendaContainer" class="hidden mt-4">
                                     <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
                                     <div class="flex items-center">
-                                        <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
                                         <input type="hidden" name="esTienda" value="0">
                                         <div class="w-12 h-6 relative">
                                             <input type="checkbox" id="esTienda" name="esTienda"
@@ -209,6 +208,16 @@
                                                 class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Resto del formulario -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Nombre -->
+                                <div>
+                                    <label for="nombre" class="block text-sm font-medium">Nombre</label>
+                                    <input id="nombre" type="text" name="nombre" class="form-input w-full"
+                                        placeholder="Ingrese el nombre">
                                 </div>
 
                                 <!-- Documento -->
@@ -257,7 +266,7 @@
                                         <option value="" disabled selected>Seleccionar Distrito</option>
                                     </select>
                                 </div>
-                                <!-- Dirección (Ocupa 2 columnas) -->
+                                <!-- Dirección -->
                                 <div>
                                     <label for="direccion" class="block text-sm font-medium">Dirección</label>
                                     <input id="direccion" type="text" name="direccion" class="form-input w-full"
@@ -277,8 +286,6 @@
         </div>
     </div>
 
-
-    <!-- En tu archivo Blade -->
     <script>
         window.sessionMessages = {
             success: '{{ session('success') }}',
@@ -288,86 +295,82 @@
 
     <script>
         window.Laravel = {
-            csrfToken: '{{ csrf_token() }}', // Define el token CSRF
-            routeClienteStore: '{{ route('cliente.store') }}' // Define la ruta del endpoint
+            csrfToken: '{{ csrf_token() }}',
+            routeClienteStore: '{{ route('cliente.store') }}'
         };
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar nice-select2
-            NiceSelect.bind(document.getElementById("idClienteGeneral"));
-            NiceSelect.bind(document.getElementById("idTipoDocumento")); // 🔥 Agregado aquí
-
-            const select = document.getElementById('idClienteGeneral');
-            const selectedItemsContainer = document.getElementById('selected-items-list');
-
-            function updateSelectedItems() {
-                selectedItemsContainer.innerHTML = '';
-                const selectedOptions = Array.from(select.selectedOptions);
-                selectedOptions.forEach(option => {
-                    const badge = document.createElement('span');
-                    badge.textContent = option.textContent;
-                    badge.className = 'badge bg-primary';
-                    selectedItemsContainer.appendChild(badge);
-                });
-            }
-
-            select.addEventListener('change', updateSelectedItems);
-            updateSelectedItems();
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const tipoDocumento = document.getElementById("idTipoDocumento");
-            const esTiendaContainer = document.getElementById("esTiendaContainer");
-
-            tipoDocumento.addEventListener("change", function() {
-                // Verificar si el texto del option seleccionado es "RUC"
-                const selectedOptionText = tipoDocumento.options[tipoDocumento.selectedIndex].text;
-
-                if (selectedOptionText === "RUC") {
-                    esTiendaContainer.classList.remove("hidden"); // Muestra el switch
-                } else {
-                    esTiendaContainer.classList.add("hidden"); // Oculta el switch
-                }
-            });
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            // Botón buscar
-            $('#btnSearch').off('click').on('click', function() {
-                const value = $('#searchInput').val();
-                $('#myTable1').DataTable().search(value).draw();
-            });
-
-            // Enter para buscar
-            $(document).on('keypress', '#searchInput', function(e) {
-                if (e.which === 13) {
-                    $('#btnSearch').click();
-                }
-            });
-
-            // Mostrar botón limpiar si hay texto
-            const input = document.getElementById('searchInput');
-            const clearBtn = document.getElementById('clearInput');
-
-            input.addEventListener('input', () => {
-                clearBtn.classList.toggle('hidden', input.value.trim() === '');
-            });
-
-            // Botón limpiar
-            clearBtn.addEventListener('click', () => {
-                input.value = '';
-                clearBtn.classList.add('hidden');
-                $('#myTable1').DataTable().search('').draw();
-            });
-        });
     </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Scripts necesarios -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+   <script>
+    $(document).ready(function () {
+        // Inicializar Select2 para Cliente General
+        $('#idClienteGeneral').select2({
+            placeholder: "Seleccionar Cliente General",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Inicializar Select2 para Tipo Documento
+        $('#idTipoDocumento').select2({
+            placeholder: "Seleccionar Tipo Documento",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Mostrar/ocultar "¿Es tienda?" al seleccionar "RUC"
+        function toggleEsTienda() {
+            const selectedText = $('#idTipoDocumento option:selected').text().trim();
+            if (selectedText === 'RUC') {
+                $('#esTiendaContainer').removeClass('hidden');
+            } else {
+                $('#esTiendaContainer').addClass('hidden');
+            }
+        }
+
+        // Detectar cambios con Select2 correctamente
+        $('#idTipoDocumento').on('select2:select select2:clear', toggleEsTienda);
+
+        // Llamar la función inicialmente por si hay valor preseleccionado
+        toggleEsTienda();
+
+        // Botón buscar
+        $('#btnSearch').on('click', function () {
+            const value = $('#searchInput').val();
+            $('#myTable1').DataTable().search(value).draw();
+        });
+
+        // Enter para buscar
+        $('#searchInput').keypress(function (e) {
+            if (e.which === 13) {
+                $('#btnSearch').click();
+            }
+        });
+
+        // Limpiar búsqueda
+        const $input = $('#searchInput');
+        const $clearBtn = $('#clearInput');
+
+        $input.on('input', function () {
+            $clearBtn.toggleClass('hidden', $input.val().trim() === '');
+        });
+
+        $clearBtn.on('click', function () {
+            $input.val('');
+            $clearBtn.addClass('hidden');
+            $('#myTable1').DataTable().search('').draw();
+        });
+    });
+</script>
+
+
     <script src="{{ asset('assets/js/notificacion.js') }}"></script>
     <script src="{{ asset('assets/js/cliente/clientestore.js') }}"></script>
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <script src="{{ asset('assets/js/cliente/cliente.js') }}"></script>
     <script src="/assets/js/simple-datatables.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-
-
 </x-layout.default>

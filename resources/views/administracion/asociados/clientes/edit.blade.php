@@ -1,10 +1,10 @@
 <x-layout.default>
     <!-- Cargar CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <!-- Cargar jQuery y el plugin -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
         .remove-client {
@@ -14,6 +14,29 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 16px;
+        }  /* Estilos para Select2 */
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--multiple {
+            min-height: 42px;
+            border: 1px solid #e0e6ed;
+            border-radius: 4px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered,
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            line-height: 42px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            padding: 0 10px;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white;
+            margin-right: 5px;
         }
 
     </style>
@@ -203,30 +226,39 @@
     </div>
 
 
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const tipoDocumento = document.getElementById("idTipoDocumento");
-        const esTiendaContainer = document.getElementById("esTiendaContainer");
+  <script>
+    $(document).ready(function () {
+        // ✅ Inicializar Select2
+        $('#idClienteGeneral').select2({
+            placeholder: "Seleccionar Cliente General",
+            allowClear: true,
+            width: '100%'
+        });
 
-        // Verificar el tipo de documento inicialmente
-        const selectedOptionText = tipoDocumento.options[tipoDocumento.selectedIndex].text;
-        if (selectedOptionText === "RUC") {
-            esTiendaContainer.classList.remove("hidden"); // Muestra el switch si el tipo de documento es RUC
-        } else {
-            esTiendaContainer.classList.add("hidden"); // Oculta el switch si no es RUC
+        $('#idTipoDocumento').select2({
+            placeholder: "Seleccionar Tipo Documento",
+            allowClear: true,
+            width: '100%'
+        });
+
+        // ✅ Mostrar u ocultar el switch "¿Es tienda?" cuando se selecciona "RUC"
+        function toggleEsTienda() {
+            const selectedText = $('#idTipoDocumento option:selected').text().trim();
+            if (selectedText === 'RUC') {
+                $('#esTiendaContainer').removeClass('hidden');
+            } else {
+                $('#esTiendaContainer').addClass('hidden');
+            }
         }
 
-        tipoDocumento.addEventListener("change", function() {
-            // Verificar si el texto del option seleccionado es "RUC"
-            const selectedOptionText = tipoDocumento.options[tipoDocumento.selectedIndex].text;
-            if (selectedOptionText === "RUC") {
-                esTiendaContainer.classList.remove("hidden"); // Muestra el switch
-            } else {
-                esTiendaContainer.classList.add("hidden"); // Oculta el switch
-            }
-        });
+        // Detectar cambios usando eventos de Select2
+        $('#idTipoDocumento').on('select2:select select2:clear', toggleEsTienda);
+
+        // Ejecutar al cargar (por si ya está seleccionado "RUC")
+        toggleEsTienda();
     });
 </script>
+
 
 
     <script>

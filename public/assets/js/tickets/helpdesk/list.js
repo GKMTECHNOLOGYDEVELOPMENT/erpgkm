@@ -152,13 +152,13 @@ document.addEventListener('alpine:init', () => {
                         render: function (data) {
                             switch (data) {
                                 case 1:
-                                    return 'Soporte On Site';
+                                    return 'Soporte';
                                 case 2:
                                     return 'Levantamiento de Información';
                                 case 5:
                                     return 'Ejecución';
                                 case 6:
-                                    return 'Soporte Laboratorio';
+                                    return 'Laboratorio';
                                 default:
                                     return '';
                             }
@@ -170,7 +170,7 @@ document.addEventListener('alpine:init', () => {
                         data: 'tipoServicio',
                         render: function (data) {
                             if (data == 1) {
-                                return `<span x-tooltip="Soporte On Site" class="inline-block">
+                                return `<span x-tooltip="Soporte" class="inline-block">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
                             <text x="6" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">S</text>
                         </svg>
@@ -188,7 +188,7 @@ document.addEventListener('alpine:init', () => {
                         </svg>
                     </span>`;
                             } else if (data == 6) {
-                                return `<span x-tooltip="Soporte Laboratorio" class="inline-block">
+                                return `<span x-tooltip="Laboratorio" class="inline-block">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-5 mx-auto" viewBox="0 0 32 24">
                             <text x="3" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">LA</text>
                         </svg>

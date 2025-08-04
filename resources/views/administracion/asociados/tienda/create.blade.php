@@ -1,5 +1,9 @@
 <x-layout.default>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Añadimos Select2 CSS y JS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Mantenemos nice-select2 por si acaso -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
     <style>
@@ -11,6 +15,19 @@
         #map {
             height: 400px;
             width: 100%;
+        }
+        
+        /* Estilos adicionales para Select2 */
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            border: 1px solid #e0e6ed;
+            border-radius: 4px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 42px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
         }
     </style>
     <div>
@@ -26,7 +43,6 @@
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">Agregar Tienda</h2>
 
- 
         <!-- Formulario -->
         <div class="p-5">
             <form id="tiendaForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" method="POST"
@@ -62,7 +78,7 @@
 
                 <div>
                     <label for="idCliente" class="block text-sm font-medium">Cliente</label>
-                    <select id="idCliente" name="idCliente" class="select2 w-full" style="display:none">
+                    <select id="idCliente" name="idCliente" class="select2 form-input w-full">
                         <option value="" disabled selected>Seleccionar Cliente</option>
                         <!-- Llenar el select con clientes dinámicamente -->
                         @foreach ($clientes as $cliente)
@@ -86,9 +102,7 @@
                     <div id="celular-error" class="text-red-500 text-sm" style="display: none;"></div>
                 </div>
 
-
-
-                <!-- departamento -->
+                                <!-- departamento -->
                 <div>
                     <label for="departamento" class="block text-sm font-medium">Departamento</label>
                     <select id="departamento" name="departamento" class="form-input w-full">
@@ -169,8 +183,6 @@
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
 </script>
 
-
-<!-- SCRIPT FINAL -->
 <script>
     let map, marker, geocoder, autocomplete;
 
@@ -198,7 +210,6 @@
 
         geocoder = new google.maps.Geocoder();
 
-        // 🔄 Actualiza inputs + dirección
         function updateInputs(lat, lng, direccion = "") {
             latInput.value = lat.toFixed(6);
             lngInput.value = lng.toFixed(6);
@@ -210,7 +221,6 @@
             }
         }
 
-        // 🔁 Geocodificación inversa
         function getAddressFromCoords(lat, lng) {
             geocoder.geocode({ location: { lat, lng } }, (results, status) => {
                 if (status === "OK" && results[0]) {
@@ -223,7 +233,6 @@
             });
         }
 
-        // 🖱 Clic en el mapa
         map.addListener("click", function (event) {
             const lat = event.latLng.lat();
             const lng = event.latLng.lng();
@@ -231,13 +240,11 @@
             updateInputs(lat, lng);
         });
 
-        // 📍 Drag marker
         marker.addListener("dragend", () => {
             const pos = marker.getPosition();
             updateInputs(pos.lat(), pos.lng());
         });
 
-        // 🔍 Autocompletado
         autocomplete = new google.maps.places.Autocomplete(input);
         autocomplete.bindTo("bounds", map);
 
@@ -252,7 +259,6 @@
             updateInputs(loc.lat(), loc.lng(), place.formatted_address || "");
         });
 
-        // ✏️ Inputs de coordenadas
         function updateMarker() {
             const lat = parseFloat(latInput.value);
             const lng = parseFloat(lngInput.value);
@@ -267,7 +273,6 @@
         latInput.addEventListener("change", updateMarker);
         lngInput.addEventListener("change", updateMarker);
 
-        // URL Maps -> Coordenadas
         function extractCoordinates(url) {
             let lat, lng;
             if (url.includes("/search/")) {
@@ -318,98 +323,62 @@
             }
         });
 
-        // Primera carga
         updateInputs(initialLat, initialLng);
     }
 
-            // ✅ Select2 personalizado
-            document.querySelectorAll('.select2').forEach(function (select) {
-            NiceSelect.bind(select, { searchable: true });
-        });
-    
-</script>
-
-
-<script>
+    // Inicializar Select2 para el campo de cliente
     $(document).ready(function() {
-        let formValid = true; // Bandera que indica si el formulario es válido
+        $('#idCliente').select2({
+            placeholder: "Seleccionar Cliente",
+            allowClear: true,
+            width: '100%'
+        });
 
-        // Validar campos vacíos
+        let formValid = true;
+
         function checkEmptyFields() {
-            formValid = true; // Asumimos que el formulario es válido inicialmente
-
-            console.log("Verificando campos vacíos..."); // Log para ver si estamos entrando en la función
-
-            // Definir los campos a validar (sin email ni celular)
+            formValid = true;
             const camposRequeridos = [
                 '#ruc', '#nombre', '#referencia', '#dirrecion',
-                '#departamento', '#provincia', '#distrito', '#cliente', '#idCliente'
+                '#departamento', '#provincia', '#distrito', '#idCliente'
             ];
 
-            // Comprobar si algún campo requerido está vacío
             camposRequeridos.forEach(function(campo) {
-                console.log("Verificando campo: " + campo); // Ver qué campo estamos verificando
-
                 if ($(campo).is('select')) {
-                    // Validación para campos de tipo select (comprobar si no se seleccionó una opción válida)
                     if ($(campo).val() === "" || $(campo).val() === null) {
-                        formValid = false; // Si algún campo está vacío, desactivar el envío
-                        $(campo).addClass('border-red-500'); // Marcar el campo con borde rojo
-                        $(campo).siblings('.text-red-500').text('Este campo es obligatorio')
-                            .show(); // Mostrar el mensaje de error
-                        console.log("Campo vacío: " + campo); // Log para mostrar el campo vacío
+                        formValid = false;
+                        $(campo).addClass('border-red-500');
+                        $(campo).siblings('.text-red-500').text('Este campo es obligatorio').show();
                     } else {
-                        $(campo).removeClass('border-red-500'); // Quitar el borde rojo si no está vacío
-                        $(campo).siblings('.text-red-500')
-                            .hide(); // Ocultar el mensaje de error si no está vacío
+                        $(campo).removeClass('border-red-500');
+                        $(campo).siblings('.text-red-500').hide();
                     }
                 } else {
-                    // Validación para otros tipos de campos (input)
                     if ($(campo).val() === '') {
-                        formValid = false; // Si algún campo está vacío, desactivar el envío
-                        $(campo).addClass('border-red-500'); // Marcar el campo con borde rojo
-                        $(campo).siblings('.text-red-500').text('Este campo es obligatorio')
-                            .show(); // Mostrar el mensaje de error
-                        console.log("Campo vacío: " + campo); // Log para mostrar el campo vacío
+                        formValid = false;
+                        $(campo).addClass('border-red-500');
+                        $(campo).siblings('.text-red-500').text('Este campo es obligatorio').show();
                     } else {
-                        $(campo).removeClass('border-red-500'); // Quitar el borde rojo si no está vacío
-                        $(campo).siblings('.text-red-500')
-                            .hide(); // Ocultar el mensaje de error si no está vacío
+                        $(campo).removeClass('border-red-500');
+                        $(campo).siblings('.text-red-500').hide();
                     }
                 }
             });
         }
 
-        // Añadir evento para los select
         $('#departamento, #provincia, #distrito, #idCliente, #dirrecion, #referencia').on('change', function() {
-            checkEmptyFields(); // Revalidar campos vacíos cada vez que cambie la selección
+            checkEmptyFields();
         });
 
-        // Interceptar el envío del formulario
         $('#tiendaForm').submit(function(event) {
-            console.log("Formulario a enviar..."); // Log para indicar que estamos interceptando el envío
-            checkEmptyFields(); // Verificar si hay campos vacíos antes de enviar
-
+            checkEmptyFields();
             if (!formValid) {
-                event.preventDefault(); // Evitar el envío del formulario
-                console.log("Formulario no válido, se ha bloqueado el envío"); // Log para ver que el formulario no es válido
-
-                // Crear el div de la alerta
-            
-
-                // Insertar el div de la alerta en el DOM (por ejemplo, al principio del formulario)
-                // $('#tiendaForm').before(alertDiv);
-            } else {
-                console.log("Formulario válido, se enviará"); // Log para ver que el formulario es válido
+                event.preventDefault();
             }
         });
 
-        // Validar RUC en tiempo real
         $('#ruc').on('input', function() {
             let ruc = $(this).val();
-            console.log("Verificando RUC: " + ruc); // Log para ver el valor del RUC
-
-            // Verificar si el RUC contiene solo números
             if (/[^0-9]/.test(ruc)) {
                 $('#ruc').addClass('border-red-500');
                 $('#ruc-error').text('El RUC solo debe contener números').show();
@@ -420,7 +389,6 @@
                 $('#ruc-error').hide();
             }
 
-            // Verificar que el RUC tenga más de 8 dígitos
             if (ruc.length < 8) {
                 $('#ruc').addClass('border-red-500');
                 $('#ruc-error').text('El RUC debe tener al menos 8 dígitos').show();
@@ -431,76 +399,52 @@
                 $('#ruc-error').hide();
             }
 
-            // Si el RUC tiene más de 8 dígitos, proceder con la validación en el servidor
             $.post('{{ route('validar.ruc') }}', {
                 ruc: ruc,
                 _token: '{{ csrf_token() }}'
             }, function(response) {
-                console.log("Respuesta RUC: ", response); // Log para ver la respuesta del servidor
                 if (response.exists) {
                     $('#ruc').addClass('border-red-500');
                     $('#ruc-error').text('El RUC ya está registrado').show();
-                    formValid = false; // Desactivar el envío del formulario
+                    formValid = false;
                 } else {
                     $('#ruc').removeClass('border-red-500');
                     $('#ruc-error').hide();
-                    checkEmptyFields(); // Revalidar campos vacíos
+                    checkEmptyFields();
                 }
             });
         });
 
-        // Validar Nombre en tiempo real
         $('#nombre').on('input', function() {
             let nombre = $(this).val();
-            console.log("Verificando Nombre: " + nombre); // Log para ver el valor del nombre
-
             $.post('{{ route('validar.nombre') }}', {
                 nombre: nombre,
                 _token: '{{ csrf_token() }}'
             }, function(response) {
-                console.log("Respuesta Nombre: ", response); // Log para ver la respuesta del servidor
                 if (response.exists) {
                     $('#nombre').addClass('border-red-500');
                     $('#nombre-error').text('El nombre ya está registrado').show();
-                    formValid = false; // Desactivar el envío del formulario
+                    formValid = false;
                 } else {
                     $('#nombre').removeClass('border-red-500');
                     $('#nombre-error').hide();
-                    checkEmptyFields(); // Revalidar campos vacíos
+                    checkEmptyFields();
                 }
             });
         });
 
+        // Evento para actualizar RUC cuando se selecciona un cliente
+        $('#idCliente').on('change', function() {
+            const clienteId = $(this).val();
+            const clientes = @json($clientes);
+            const clienteSeleccionado = clientes.find(cliente => cliente.idCliente == clienteId);
+
+            if (clienteSeleccionado) {
+                $('#ruc').val(clienteSeleccionado.documento);
+            }
+        });
     });
 </script>
 
-
-
-<script>
-    // Al cargar el documento
-document.addEventListener('DOMContentLoaded', function() {
-    const clienteSelect = document.getElementById('idCliente');
-    const rucInput = document.getElementById('ruc');
-
-    // Esta función se ejecuta cuando el cliente es seleccionado
-    clienteSelect.addEventListener('change', function() {
-        // Obtén el id del cliente seleccionado
-        const clienteId = clienteSelect.value;
-
-        // Aquí mapeamos los clientes ya cargados en la página (por ejemplo, con un atributo data-)
-        const clientes = @json($clientes); // Pasamos el array de clientes desde el backend a JavaScript
-
-        // Buscar el cliente seleccionado por id
-        const clienteSeleccionado = clientes.find(cliente => cliente.idCliente == clienteId);
-
-        // Si encontramos al cliente, ponemos el RUC en el input
-        if (clienteSeleccionado) {
-            rucInput.value = clienteSeleccionado.documento; // Asignamos el RUC al campo
-        }
-    });
-});
-
-</script>
-    <!-- <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script> -->
-    <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
+<script src="{{ asset('assets/js/ubigeo.js') }}"></script>
 </x-layout.default>

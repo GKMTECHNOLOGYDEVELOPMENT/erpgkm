@@ -1,12 +1,26 @@
 <x-layout.default>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+ <!-- Select2 CSS y JS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-    <style>
+ <style>
         #map {
             height: 500px;
-            /* Ajusta el tamaño del mapa según tus necesidades */
             width: 100%;
+        }
+        
+        /* Estilos adicionales para Select2 */
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            border: 1px solid #e0e6ed;
+            border-radius: 4px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 42px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
         }
     </style>
 
@@ -186,6 +200,14 @@
 
     <script>
         $(document).ready(function() {
+
+             // Inicializar Select2 para el campo de cliente
+            $('#idCliente').select2({
+                placeholder: "Seleccionar Cliente",
+                allowClear: true,
+                width: '100%'
+            });
+
             // Cargar provincias y distritos al cargar el formulario si ya hay un departamento seleccionado
             function cargarProvincias(departamentoId) {
                 $.get('/ubigeo/provincias/' + departamentoId, function(data) {
@@ -488,7 +510,6 @@
         });
     </script>
 
-<script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
 <script async
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
@@ -657,30 +678,21 @@
 <script>
     // Al cargar el documento
 document.addEventListener('DOMContentLoaded', function() {
-    const clienteSelect = document.getElementById('idCliente');
-    const rucInput = document.getElementById('ruc');
+    // Evento para actualizar RUC cuando se selecciona un cliente
+        $('#idCliente').on('change', function() {
+            const clienteId = $(this).val();
+            const clientes = @json($clientes);
+            const clienteSeleccionado = clientes.find(cliente => cliente.idCliente == clienteId);
 
-    // Esta función se ejecuta cuando el cliente es seleccionado
-    clienteSelect.addEventListener('change', function() {
-        // Obtén el id del cliente seleccionado
-        const clienteId = clienteSelect.value;
-
-        // Aquí mapeamos los clientes ya cargados en la página (por ejemplo, con un atributo data-)
-        const clientes = @json($clientes); // Pasamos el array de clientes desde el backend a JavaScript
-
-        // Buscar el cliente seleccionado por id
-        const clienteSeleccionado = clientes.find(cliente => cliente.idCliente == clienteId);
-
-        // Si encontramos al cliente, ponemos el RUC en el input
-        if (clienteSeleccionado) {
-            rucInput.value = clienteSeleccionado.documento; // Asignamos el RUC al campo
-        }
-    });
+            if (clienteSeleccionado) {
+                $('#ruc').val(clienteSeleccionado.documento);
+            }
+        });
 });
 
 </script>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 </x-layout.default>
+

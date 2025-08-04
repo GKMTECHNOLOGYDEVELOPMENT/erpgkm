@@ -2162,13 +2162,19 @@ class OrdenesHelpdeskController extends Controller
 
                         ->orWhere(function ($q) use ($searchValue, $normalized) {
                             if (stripos($normalized, 'soporte') !== false || strtolower($normalized) === 's') {
-                                $q->orWhereIn('tipoServicio', [1, 6]); // Soporte On Site y Laboratorio
+                                $q->orWhere('tipoServicio', 1); // Soporte
                             }
+
+                            if (stripos($normalized, 'laboratorio') !== false || strtolower($normalized) === 'la') {
+                                $q->orWhere('tipoServicio', 6); // Laboratorio
+                            }
+
                             if (stripos($normalized, 'levantamiento') !== false || strtolower($normalized) === 'l') {
-                                $q->orWhere('tipoServicio', 2);
+                                $q->orWhere('tipoServicio', 2); // Levantamiento
                             }
+
                             if (stripos($normalized, 'ejecucion') !== false || strtolower($normalized) === 'e') {
-                                $q->orWhere('tipoServicio', 5);
+                                $q->orWhere('tipoServicio', 5); // Ejecución
                             }
                         });
                 });
