@@ -315,8 +315,7 @@ Route::get('/api/validar-nombre-subcategoria', [SubcategoriaController::class, '
 
 Route::get('/usuarios', [CalendarController::class, 'usuariov1']);
 Route::get('/catalogos', [ClienteSeguimientoController::class, 'catalogos']);
-Route::post('/empresas', [EmpresaController::class, 'store']);
-Route::post('/contactos', [ContactoController::class, 'store']);
+
 
 Route::get('/clientes/buscar', function(Request $request) {
     $documento = $request->query('documento');

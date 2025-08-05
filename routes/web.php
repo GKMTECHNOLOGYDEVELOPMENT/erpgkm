@@ -1020,6 +1020,11 @@ Route::middleware('auth')->group(function () {
     Route::get('Seguimiento-Cliente/{id}/historial', [ClienteSeguimientoController::class, 'historial'])->name('Seguimiento.historial');  
 });
 
+Route::post('/contactos', [ContactoController::class, 'store'])->name('contactos.store')->middleware('auth');
+Route::post('/empresas', [EmpresaController::class, 'store'])->name('empresas.store')->middleware('auth');
+Route::put('/contactos/{contacto}', [ContactoController::class, 'update'])->name('contactos.update');
+Route::put('/empresas/{empresa}', [EmpresaController::class, 'update'])->name('empresas.update');
 
-
-
+Route::get('/seguimiento/{id}/edit', [ClienteSeguimientoController::class, 'editSeguimiento'])->name('seguimiento.edit');
+Route::get('/seguimiento/{id}/edit-tab', [ClienteSeguimientoController::class, 'editTab'])
+    ->name('seguimiento.edit-tab');

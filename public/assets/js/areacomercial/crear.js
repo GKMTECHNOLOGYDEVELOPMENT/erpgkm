@@ -29,10 +29,11 @@
     };
 
     try {
-        const response = await fetch('/api/empresas', {
+        const response = await fetch('/empresas', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json', // <--- Esta línea es clave
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify(data)
@@ -42,6 +43,8 @@
 
         if (result.success) {
             alert('✅ Empresa registrada correctamente');
+                window.location.href = '/seguimiento/' + result.idSeguimiento + '/edit';
+
             this.reset();
         } else {
             alert('❌ Error al registrar empresa');
@@ -79,7 +82,7 @@
     };
 
     try {
-        const response = await fetch('/api/contactos', {
+        const response = await fetch('/contactos', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,6 +95,7 @@
 
         if (result.success) {
             alert('✅ Contacto registrado correctamente');
+            window.location.href = '/seguimiento/' + result.idSeguimiento + '/edit';
             this.reset();
         } else {
             alert('❌ Error al registrar contacto');
