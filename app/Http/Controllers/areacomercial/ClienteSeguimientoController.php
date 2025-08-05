@@ -9,6 +9,8 @@ use App\Models\FuenteCaptacion;
 use App\Models\NivelDecision;
 use App\Models\Seguimiento;
 use App\Models\Servicio;
+use App\Models\Status;
+use App\Models\Task;
 use App\Models\Tipoarea;
 use App\Models\Tipodocumento;
 use Illuminate\Http\Request;
@@ -298,17 +300,34 @@ private function handleCronogramaTab($seguimiento)
         ])->render()
     ]);
 }
-
 private function handleObservacionesTab($seguimiento)
 {
-    $observaciones = $seguimiento->observaciones ?? []; // Asumiendo que hay una relación
-    
-    return response()->json([
-        'html' => view('areacomercial.partials.observaciones-tab', [
-            'seguimiento' => $seguimiento,
-            'observaciones' => $observaciones
-        ])->render()
-    ]);
+    try {
+        // Obtener las tareas (observaciones) relacionadas con el seguimiento
+        $tasks = Task::with(['status', 'user', 'empresa', 'contacto'])
+            ->where('seguimiento_id', $seguimiento->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $statuses = Status::where('user_id', auth()->id())->get();
+
+        return response()->json([
+            'html' => view('areacomercial.partials.observaciones-tab', [
+                'tasks' => $tasks,
+                'statuses' => $statuses,
+                'seguimiento' => $seguimiento
+            ])->render()
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error("Error en handleObservacionesTab: " . $e->getMessage());
+        return response()->json([
+            'error' => $e->getMessage(),
+            'html' => view('areacomercial.partials.error-tab', [
+                'message' => 'Error al cargar las observaciones'
+            ])->render()
+        ], 500);
+    }
 }
 
 // Métodos auxiliares (renderNoDataView, renderErrorView) se mantienen igual

@@ -327,4 +327,97 @@ function createNew(type) {
             window.loadTab = loadTab;
         });
     </script>
+
+
+
+<script>
+// Funciones globales para manejar modales
+function openModal(action, taskId = null) {
+    const modal = document.getElementById('taskModal');
+    const form = document.getElementById('taskForm');
+    const modalTitle = document.getElementById('modalTitle');
+    
+    if(action === 'edit' && taskId) {
+        modalTitle.textContent = 'Editar Observación';
+        form.action = `/observaciones/${taskId}`;
+        
+        // Buscar input _method o crearlo si no existe
+        let methodInput = form.querySelector('input[name="_method"]');
+        if (!methodInput) {
+            methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'PUT';
+            form.appendChild(methodInput);
+        }
+        
+        // Obtener datos de la tarea
+        fetch(`/observaciones/${taskId}/edit`)
+            .then(response => {
+                if (!response.ok) throw new Error('Error al cargar datos');
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('title').value = data.title || '';
+                document.getElementById('description').value = data.description || '';
+                document.getElementById('status_id').value = data.status_id || '';
+                if (document.getElementById('taskId')) {
+                    document.getElementById('taskId').value = data.id || '';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cargar los datos para editar');
+            });
+    } else {
+        modalTitle.textContent = 'Nueva Observación';
+        form.action = '/observaciones';
+        
+        // Eliminar input _method si existe
+        const methodInput = form.querySelector('input[name="_method"]');
+        if (methodInput) {
+            form.removeChild(methodInput);
+        }
+        
+        // Resetear formulario
+        form.reset();
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('taskModal').classList.add('hidden');
+}
+
+function confirmDelete(taskId) {
+    const modal = document.getElementById('deleteModal');
+    const form = document.getElementById('deleteForm');
+    
+    form.action = `/observaciones/${taskId}`;
+    modal.classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Cerrar modales al hacer clic fuera
+document.addEventListener('DOMContentLoaded', function() {
+    window.onclick = function(event) {
+        const taskModal = document.getElementById('taskModal');
+        const deleteModal = document.getElementById('deleteModal');
+        
+        if(event.target === taskModal) {
+            closeModal();
+        }
+        
+        if(event.target === deleteModal) {
+            closeDeleteModal();
+        }
+    }
+});
+</script>
+
+
 </x-layout.default>

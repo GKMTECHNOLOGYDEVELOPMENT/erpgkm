@@ -66,6 +66,7 @@ use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
 use App\Http\Controllers\areacomercial\ContactoController;
 use App\Http\Controllers\areacomercial\EmpresaController;
+use App\Http\Controllers\areacomercial\ObservacionController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GuiaController;
@@ -1028,3 +1029,9 @@ Route::put('/empresas/{empresa}', [EmpresaController::class, 'update'])->name('e
 Route::get('/seguimiento/{id}/edit', [ClienteSeguimientoController::class, 'editSeguimiento'])->name('seguimiento.edit');
 Route::get('/seguimiento/{id}/edit-tab', [ClienteSeguimientoController::class, 'editTab'])
     ->name('seguimiento.edit-tab');
+Route::resource('observaciones', ObservacionController::class)->only([
+    'index', 'store', 'update', 'destroy'
+]);
+
+Route::get('observaciones/{task}/edit', [ObservacionController::class, 'edit'])
+    ->name('observaciones.edit');
