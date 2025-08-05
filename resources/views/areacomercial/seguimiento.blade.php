@@ -170,7 +170,7 @@
             loadTab(initialTab, true);
 
             // Función para cargar un tab
-         async function loadTab(tab, isInitialLoad = false) {
+        async function loadTab(tab, isInitialLoad = false) {
     try {
         // Mostrar estado de carga
         showLoadingState(tab);
@@ -178,43 +178,45 @@
         // Hacer la petición al servidor
         const response = await fetch(`/seguimiento/${seguimientoId}/edit-tab?tab=${tab}`);
         
-        // Verificar si la respuesta es JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
+        // Verificar primero si la respuesta es JSON
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            // Si falla el parseo JSON, obtener como texto para diagnóstico
             const textResponse = await response.text();
-            throw new Error(`El servidor devolvió un formato inesperado: ${textResponse.substring(0, 100)}...`);
+            console.error('Respuesta no JSON:', textResponse.substring(0, 300));
+            throw new Error(`El servidor devolvió un formato inesperado. Estado: ${response.status}`);
         }
 
-        const data = await response.json();
-        
-        // Manejar errores del servidor
+        // Si hay error en la respuesta (pero es JSON válido)
         if (!response.ok) {
-            throw new Error(data.error || 'Error en la respuesta del servidor');
+            const errorMsg = data.error || `Error ${response.status}: ${response.statusText}`;
+            throw new Error(errorMsg);
+        }
+
+        // Si no hay contenido HTML
+        if (!data.html) {
+            throw new Error('No se recibió contenido para mostrar');
         }
 
         // Actualizar el contenido del tab
-        if (data.html) {
-            updateTabContent(tab, data.html, isInitialLoad);
-        } else {
-            throw new Error('No se recibió contenido HTML');
-        }
+        updateTabContent(tab, data.html, isInitialLoad);
 
     } catch (error) {
         console.error(`Error al cargar el tab ${tab}:`, error);
         
-        // Mostrar mensaje de error en el tab
+        // Mostrar mensaje de error apropiado
         let errorMessage = error.message;
-        if (error instanceof SyntaxError) {
-            errorMessage = 'Error al procesar la respuesta del servidor (formato inválido)';
+        
+        // Mensajes más amigables para diferentes tipos de error
+        if (error.message.includes('formato inesperado')) {
+            errorMessage = 'Error al comunicarse con el servidor';
+        } else if (error.message.includes('No se recibió contenido')) {
+            errorMessage = 'No hay datos disponibles para mostrar';
         }
         
         showErrorState(tab, errorMessage);
-        
-        // Opcional: Mostrar detalles en consola para depuración
-        const fullResponse = await fetch(`/seguimiento/${seguimientoId}/edit-tab?tab=${tab}`)
-            .then(r => r.text())
-            .catch(e => e.message);
-        console.log('Respuesta completa del servidor:', fullResponse);
     }
 }
 

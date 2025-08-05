@@ -237,23 +237,41 @@ private function handleEmpresaTab($seguimiento)
 
 private function handleContactoTab($seguimiento)
 {
-    if (!$seguimiento->idContacto) {
-        return $this->renderNoDataView('contacto');
-    }
+    try {
+        // Verificar si existe contacto asociado
+        if (!$seguimiento->idContacto) {
+            return response()->json([
+                'html' => $this->renderNoDataView('contacto'),
+                'error' => 'No existe contacto asociado a este seguimiento'
+            ]);
+        }
 
-    $contacto = Contactos::find($seguimiento->idContacto);
-    if (!$contacto) {
-        return $this->renderNoDataView('contacto');
-    }
-
-    return response()->json([
-        'html' => view('areacomercial.partials.contacto-tab', [
+        $contacto = Contactos::find($seguimiento->idContacto);
+        
+        // Si no se encuentra el contacto (aunque idContacto exista)
+        if (!$contacto) {
+            return response()->json([
+                'html' => $this->renderNoDataView('contacto'),
+                'error' => 'El contacto asociado no existe'
+            ]);
+        }
+        
+        $html = view('areacomercial.partials.contacto-tab', [
             'seguimiento' => $seguimiento,
             'contacto' => $contacto,
             'documentos' => TipoDocumento::all(),
             'niveles' => NivelDecision::all()
-        ])->render()
-    ]);
+        ])->render();
+
+        return response()->json(['html' => $html]);
+
+    } catch (\Exception $e) {
+        Log::error("Error en handleContactoTab: " . $e->getMessage());
+        return response()->json([
+            'error' => $e->getMessage(),
+            'html' => $this->renderErrorView($e->getMessage())
+        ], 500);
+    }
 }
 
 private function handleProyectosTab($seguimiento)
@@ -299,12 +317,8 @@ private function renderNoDataView($type)
 {
     $title = $type === 'empresa' ? 'Empresa' : 'Contacto';
     $icon = $type === 'empresa' ? 
-        '<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>' :
-        '<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>';
+        '<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>' :
+        '<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
 
     return view('areacomercial.partials.no-data-tab', [
         'icon' => $icon,
