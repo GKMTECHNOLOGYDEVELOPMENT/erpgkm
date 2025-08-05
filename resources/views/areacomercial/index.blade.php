@@ -36,48 +36,5 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const table = $('#tablaClientes').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: '{{ route('clientes.index.data') }}',
-                columns: [
-                    { data: 'nombre', name: 'cliente.nombre' },
-                    { data: 'telefono', name: 'cliente.telefono' },
-                    { data: 'servicio_nombre', name: 'servicios.nombre' },
-                    {
-                        data: 'estado',
-                        render: estado => estado == 1
-                            ? '<span class="text-green-600 font-semibold">Activo</span>'
-                            : '<span class="text-red-500 font-semibold">Inactivo</span>',
-                        orderable: false,
-                        searchable: false,
-                        className: 'text-center'
-                    },
-                ]
-            });
-
-            $('#btnSearch').on('click', () => {
-                table.search($('#searchInput').val()).draw();
-            });
-
-            $('#searchInput').on('keypress', e => {
-                if (e.which === 13) $('#btnSearch').click();
-            });
-
-            const input = document.getElementById('searchInput');
-            const clearBtn = document.getElementById('clearInput');
-
-            input.addEventListener('input', () => {
-                clearBtn.classList.toggle('hidden', input.value.trim() === '');
-            });
-
-            clearBtn.addEventListener('click', () => {
-                input.value = '';
-                clearBtn.classList.add('hidden');
-                table.search('').draw();
-            });
-        });
-    </script>
+   
 </x-layout.default>

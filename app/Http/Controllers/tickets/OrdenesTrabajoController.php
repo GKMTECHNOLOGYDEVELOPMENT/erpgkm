@@ -1249,6 +1249,7 @@ class OrdenesTrabajoController extends Controller
                     $q->where('numero_ticket', 'LIKE', "%{$searchValue}%")
                         ->orWhere('serie', 'LIKE', "%{$searchValue}%")
                         ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                        ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                         ->orWhereHas('cliente', function ($q) use ($searchValue) {
                             $q->where('nombre', 'LIKE', "%{$searchValue}%");
                         });

@@ -20,14 +20,19 @@ use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
 use App\Http\Controllers\Apps\ActividadController;
 use App\Http\Controllers\Apps\CalendarController;
 use App\Http\Controllers\Apps\EtiquetaController;
+use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
+use App\Http\Controllers\areacomercial\ContactoController;
+use App\Http\Controllers\areacomercial\EmpresaController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Articulo;
+use App\Models\Cliente;
 use App\Models\CuentasBancarias;
 use App\Models\Subcategoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -309,3 +314,57 @@ Route::get('/api/validar-nombre-subcategoria', [SubcategoriaController::class, '
 
 
 Route::get('/usuarios', [CalendarController::class, 'usuariov1']);
+Route::get('/catalogos', [ClienteSeguimientoController::class, 'catalogos']);
+Route::post('/empresas', [EmpresaController::class, 'store']);
+Route::post('/contactos', [ContactoController::class, 'store']);
+
+Route::get('/clientes/buscar', function(Request $request) {
+    $documento = $request->query('documento');
+    $tipoDoc = $request->query('tipo_documento');
+
+    if (!$documento || !$tipoDoc) {
+        return response()->json(['success' => false, 'message' => 'Datos incompletos'], 400);
+    }
+
+    $cliente = \App\Models\Cliente::where('documento', $documento)
+        ->where('idTipoDocumento', $tipoDoc)
+        ->first();
+
+    if ($cliente) {
+        return response()->json([
+            'success' => true,
+            'cliente' => [
+                'nombre' => $cliente->nombre,
+                'telefono' => $cliente->telefono,
+                'email' => $cliente->email
+            ]
+        ]);
+    } else {
+        return response()->json(['success' => false, 'message' => 'Cliente no encontrado']);
+    }
+});
+
+
+Route::get('/consulta-ruc', function(Request $request) {
+    $ruc = $request->query('numero');
+    if (!$ruc) {
+        return response()->json(['success' => false, 'message' => 'RUC requerido'], 400);
+    }
+
+    $token = config('services.ruc_api.token');
+    $apiUrl = config('services.ruc_api.url'); // ejemplo: https://api.decolecta.com/v1/sunat/ruc
+
+    $response = Http::withHeaders([
+        'Accept' => 'application/json',
+        'Authorization' => "Bearer {$token}"
+    ])->get($apiUrl, ['numero' => $ruc]);
+
+    if ($response->ok() && isset($response['ruc'])) {
+        return response()->json(['success' => true, 'empresa' => $response->json()]);
+    }
+
+    return response()->json(['success' => false, 'message' => 'No se pudo obtener datos'], 404);
+});
+
+
+Route::post('/buscar-ruc', [EmpresaController::class, 'buscarRuc']);

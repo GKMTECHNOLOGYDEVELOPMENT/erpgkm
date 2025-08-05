@@ -2,6 +2,8 @@
 namespace App\Http\Controllers\areacomercial;
 use App\Http\Controllers\Controller;
 use App\Models\Cliente;
+use App\Models\FuenteCaptacion;
+use App\Models\NivelDecision;
 use App\Models\Servicio;
 use App\Models\Tipoarea;
 use App\Models\Tipodocumento;
@@ -24,6 +26,15 @@ public function tabsseguimiento(){
 
     return view('areacomercial.tabsseguimiento');
 }
+
+public function catalogos()
+    {
+        return response()->json([
+            'fuentes' => FuenteCaptacion::select('id', 'nombre')->get(),
+            'niveles' => NivelDecision::select('id', 'nombre')->get(),
+            'documentos' => TipoDocumento::select('idTipoDocumento as id', 'nombre')->get(),
+        ]);
+    }
 
 
 
