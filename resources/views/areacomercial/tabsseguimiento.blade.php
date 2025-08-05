@@ -33,6 +33,10 @@
             transform: translateY(-1px);
         }
     </style>
+<div class="text-center mb-6">
+    <h2 class="text-2xl font-bold mb-2">GESTIÓN DE PROSPECTOS COMERCIALES</h2>
+    <span class="badge badge-outline-primary">Área Comercial</span>
+</div>
     <div class="panel mt-6 p-5 max-w-6x2 mx-auto">
         {{-- Tabs --}}
         <div class="flex space-x-4 border-b border-gray-200 mb-6">
