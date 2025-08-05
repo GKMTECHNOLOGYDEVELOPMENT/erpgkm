@@ -1,15 +1,14 @@
 <x-layout.default>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+
+    {{-- ✅ Nueva librería Select2 --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
-            <li>
-                <a href="{{ route('modelos.index') }}" class="text-primary hover:underline">Modelos</a>
-            </li>
-            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                <span>Editar Modelo</span>
-            </li>
+            <li><a href="{{ route('modelos.index') }}" class="text-primary hover:underline">Modelos</a></li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1"><span>Editar Modelo</span></li>
         </ul>
     </div>
 
@@ -33,10 +32,9 @@
 
             <!-- Marca -->
             <div>
-                <!-- Etiqueta encima del select -->
                 <label for="idMarca" class="block text-sm font-medium">Marca</label>
-                <select id="idMarca" name="idMarca" class="select2 w-full" style="display:none" required>
-                    <option value="" disabled >Seleccione la Marca</option>
+                <select id="idMarca" name="idMarca" class="select2 w-full" required>
+                    <option value="" disabled>Seleccione la Marca</option>
                     @foreach ($marcas as $marca)
                         <option value="{{ $marca->idMarca }}"
                             {{ old('idMarca', $modelo->idMarca) == $marca->idMarca ? 'selected' : '' }}>
@@ -46,13 +44,11 @@
                 </select>
             </div>
 
-
-
             <!-- Categoría -->
             <div>
-                <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
-                <select id="idCategoria" name="idCategoria" class="select2 w-full" style="display:none" required>
-                    <option value="" disabled >Seleccione la Categoría</option>
+                <label for="idCategoria" class="block text-sm font-medium">Categoría</label>
+                <select id="idCategoria" name="idCategoria" class="select2 w-full" required>
+                    <option value="" disabled>Seleccione la Categoría</option>
                     @foreach ($categorias as $categoria)
                         <option value="{{ $categoria->idCategoria }}"
                             {{ old('idCategoria', $modelo->idCategoria) == $categoria->idCategoria ? 'selected' : '' }}>
@@ -79,49 +75,46 @@
                 </div>
             </div>
 
+            <!-- Tipo de Modelo -->
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium mb-1">Tipo de Modelo</label>
+                <div class="space-y-2">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="repuesto" value="1"
+                            class="form-checkbox text-primary"
+                            {{ old('repuesto', $modelo->repuesto) ? 'checked' : '' }}>
+                        <span class="ml-2">Repuestos</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="producto" value="1"
+                            class="form-checkbox text-primary"
+                            {{ old('producto', $modelo->producto) ? 'checked' : '' }}>
+                        <span class="ml-2">Productos</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="heramientas" value="1"
+                            class="form-checkbox text-primary"
+                            {{ old('heramientas', $modelo->heramientas) ? 'checked' : '' }}>
+                        <span class="ml-2">Herramientas</span>
+                    </label>
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" name="suministros" value="1"
+                            class="form-checkbox text-primary"
+                            {{ old('suministros', $modelo->suministros) ? 'checked' : '' }}>
+                        <span class="ml-2">Suministros</span>
+                    </label>
+                </div>
+            </div>
 
-            <!-- Tipo de Modelo (Checkboxes) -->
-<div class="md:col-span-2">
-    <label class="block text-sm font-medium mb-1">Tipo de Modelo</label>
-    <div class="space-y-2">
-        <label class="inline-flex items-center">
-            <input type="checkbox" name="repuesto" value="1"
-                class="form-checkbox text-primary"
-                {{ old('repuesto', $modelo->repuesto) ? 'checked' : '' }}>
-            <span class="ml-2">Repuestos</span>
-        </label>
-        <label class="inline-flex items-center">
-            <input type="checkbox" name="producto" value="1"
-                class="form-checkbox text-primary"
-                {{ old('producto', $modelo->producto) ? 'checked' : '' }}>
-            <span class="ml-2">Productos</span>
-        </label>
-        <label class="inline-flex items-center">
-            <input type="checkbox" name="heramientas" value="1"
-                class="form-checkbox text-primary"
-                {{ old('heramientas', $modelo->heramientas) ? 'checked' : '' }}>
-            <span class="ml-2">Herramientas</span>
-        </label>
-        <label class="inline-flex items-center">
-            <input type="checkbox" name="suministros" value="1"
-                class="form-checkbox text-primary"
-                {{ old('suministros', $modelo->suministros) ? 'checked' : '' }}>
-            <span class="ml-2">Suministros</span>
-        </label>
-    </div>
-</div>
-
-<!-- Campo Pulgadas (se muestra solo si "Repuestos" está marcado) -->
-<div id="pulgadasField" class="{{ old('repuesto', $modelo->repuesto) ? '' : 'hidden' }}">
-    <label for="pulgadas" class="block text-sm font-medium">Pulgadas</label>
-    <input type="text" id="pulgadas" name="pulgadas" class="form-input w-full"
-        value="{{ old('pulgadas', $modelo->pulgadas) }}" placeholder="Ingrese las pulgadas">
-    @error('pulgadas')
-        <span class="text-red-500 text-sm">{{ $message }}</span>
-    @enderror
-</div>
-
-
+            <!-- Pulgadas -->
+            <div id="pulgadasField" class="{{ old('repuesto', $modelo->repuesto) ? '' : 'hidden' }}">
+                <label for="pulgadas" class="block text-sm font-medium">Pulgadas</label>
+                <input type="text" id="pulgadas" name="pulgadas" class="form-input w-full"
+                    value="{{ old('pulgadas', $modelo->pulgadas) }}" placeholder="Ingrese las pulgadas">
+                @error('pulgadas')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
 
             <!-- Botones -->
             <div class="md:col-span-2 flex justify-end mt-4">
@@ -132,36 +125,28 @@
     </div>
 
     <script>
-        // Inicializar Select2
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
+        $(document).ready(function () {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Seleccione una opción',
+                allowClear: true
             });
         });
     </script>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const repuestoCheckbox = document.querySelector('input[name="repuesto"]');
-        const pulgadasField = document.getElementById('pulgadasField');
+        document.addEventListener("DOMContentLoaded", function () {
+            const repuestoCheckbox = document.querySelector('input[name="repuesto"]');
+            const pulgadasField = document.getElementById('pulgadasField');
 
-        function togglePulgadasField() {
-            if (repuestoCheckbox.checked) {
-                pulgadasField.classList.remove("hidden");
-            } else {
-                pulgadasField.classList.add("hidden");
+            function togglePulgadasField() {
+                repuestoCheckbox.checked
+                    ? pulgadasField.classList.remove("hidden")
+                    : pulgadasField.classList.add("hidden");
             }
-        }
 
-        // Al cargar por si ya viene seleccionado
-        togglePulgadasField();
-
-        // Al cambiar estado del checkbox
-        repuestoCheckbox.addEventListener("change", togglePulgadasField);
-    });
-</script>
-
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+            togglePulgadasField();
+            repuestoCheckbox.addEventListener("change", togglePulgadasField);
+        });
+    </script>
 </x-layout.default>

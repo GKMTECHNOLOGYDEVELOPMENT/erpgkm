@@ -1,6 +1,6 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -153,8 +153,7 @@
                             <!-- Marca -->
                             <div>
                                 <label for="idMarca" class="block text-sm font-medium">Marca</label>
-                                <select id="idMarca" name="idMarca" class="select2 w-full" style="display:none"
-                                    required>
+                                <select id="idMarca" name="idMarca" class="select2 w-full" required>
                                     <option value="" disabled selected>Seleccione la Marca</option>
                                     @foreach ($marcas as $marca)
                                         <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
@@ -164,8 +163,7 @@
                             <!-- Categoría -->
                             <div>
                                 <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
-                                <select id="idCategoria" name="idCategoria" class="select2 w-full"
-                                    style="display:none" required>
+                                <select id="idCategoria" name="idCategoria" class="select2 w-full" required>
                                     <option value="" disabled selected>Seleccione la Categoría</option>
                                     @foreach ($categorias as $categoria)
                                         <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
@@ -223,15 +221,23 @@
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
+    <script src="{{ asset('assets/js/Modelos/modelos.js') }}"></script>
+    <script src="{{ asset('assets/js/Modelos/modeloStore.js') }}"></script>
+    <script src="{{ asset('assets/js/Modelos/modeloValidaciones.js') }}"></script>
 
+    <script src="/assets/js/simple-datatables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         // Inicializar Select2
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar todos los select con la clase "select2"
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Seleccione una opción',
+                allowClear: true
             });
         });
         document.addEventListener("alpine:init", () => {
@@ -295,15 +301,5 @@
         });
     </script>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-    <script src="{{ asset('assets/js/Modelos/modelos.js') }}"></script>
-    <script src="{{ asset('assets/js/Modelos/modeloStore.js') }}"></script>
-    <script src="{{ asset('assets/js/Modelos/modeloValidaciones.js') }}"></script>
-
-    <script src="/assets/js/simple-datatables.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 
 </x-layout.default>

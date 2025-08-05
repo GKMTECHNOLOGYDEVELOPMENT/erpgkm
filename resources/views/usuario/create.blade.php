@@ -1,14 +1,27 @@
 <x-layout.default>
 
     <!-- Incluir el archivo CSS de Nice Select -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
 
     <!-- Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
 
 
-
+    <style>
+        /* Estilo general del select */
+        .select2-container--default .select2-selection--single {
+            /* azul claro suave */
+            border-radius: 0.5rem;
+            height: 2.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 2px rgba(67, 97, 238, 0.1);
+        }
+    </style>
 
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -40,61 +53,6 @@
                             Perfil
                         </a>
                     </li>
-                    <!-- <li class="inline-block">
-                        <a href="javascript:;"
-                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
-                            :class="{ '!border-primary text-primary': tab == 'payment-details' }"
-                            @click="tab='payment-details'">
-
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                <circle opacity="0.5" cx="12" cy="12" r="10"
-                                    stroke="currentColor" stroke-width="1.5" />
-                                <path d="M12 6V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <path
-                                    d="M15 9.5C15 8.11929 13.6569 7 12 7C10.3431 7 9 8.11929 9 9.5C9 10.8807 10.3431 12 12 12C13.6569 12 15 13.1193 15 14.5C15 15.8807 13.6569 17 12 17C10.3431 17 9 15.8807 9 14.5"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            </svg>
-                            Detalle de Pago
-                        </a>
-                    </li>
-                    <li class="inline-block">
-                        <a href="javascript:;"
-                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
-                            :class="{ '!border-primary text-primary': tab == 'preferences' }"
-                            @click="tab='preferences'">
-
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                <circle cx="12" cy="6" r="4" stroke="currentColor"
-                                    stroke-width="1.5" />
-                                <ellipse opacity="0.5" cx="12" cy="17" rx="7" ry="4"
-                                    stroke="currentColor" stroke-width="1.5" />
-                            </svg>
-                            Permisos
-                        </a>
-                    </li>
-                    <li class="inline-block">
-                        <a href="javascript:;"
-                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
-                            :class="{ '!border-primary text-primary': tab == 'danger-zone' }"
-                            @click="tab='danger-zone'">
-
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                <path
-                                    d="M16.1007 13.359L16.5562 12.9062C17.1858 12.2801 18.1672 12.1515 18.9728 12.5894L20.8833 13.628C22.1102 14.2949 22.3806 15.9295 21.4217 16.883L20.0011 18.2954C19.6399 18.6546 19.1917 18.9171 18.6763 18.9651M4.00289 5.74561C3.96765 5.12559 4.25823 4.56668 4.69185 4.13552L6.26145 2.57483C7.13596 1.70529 8.61028 1.83992 9.37326 2.85908L10.6342 4.54348C11.2507 5.36691 11.1841 6.49484 10.4775 7.19738L10.1907 7.48257"
-                                    stroke="currentColor" stroke-width="1.5" />
-                                <path opacity="0.5"
-                                    d="M18.6763 18.9651C17.0469 19.117 13.0622 18.9492 8.8154 14.7266C4.81076 10.7447 4.09308 7.33182 4.00293 5.74561"
-                                    stroke="currentColor" stroke-width="1.5" />
-                                <path opacity="0.5"
-                                    d="M16.1007 13.3589C16.1007 13.3589 15.0181 14.4353 12.0631 11.4971C9.10807 8.55886 10.1907 7.48242 10.1907 7.48242"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            </svg>
-                            Deshabilitar
-                        </a>
-                    </li> -->
                 </ul>
                 <template x-if="tab === 'home'">
                     <div>
@@ -112,8 +70,8 @@
                                             class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto cursor-pointer" />
                                     </label>
                                     <!-- Input file oculto -->
-                                    <input type="file" id="profile-image" name="profile-image"
-                                        style="display:none;" accept="image/*" onchange="previewImage(event)" />
+                                    <input type="file" id="profile-image" name="profile-image" style="display:none;"
+                                        accept="image/*" onchange="previewImage(event)" />
                                 </div>
 
                                 <!-- Formulario de campos -->
@@ -121,8 +79,8 @@
                                     <!-- Nombre Completo -->
                                     <div>
                                         <label for="Nombre">Nombre Completo</label>
-                                        <input id="Nombre" name="Nombre" type="text"
-                                            placeholder="Pedro Pablo" class="form-input" />
+                                        <input id="Nombre" name="Nombre" type="text" placeholder="Pedro Pablo"
+                                            class="form-input" />
                                     </div>
 
                                     <!-- Apellido Paterno -->
@@ -143,8 +101,8 @@
                                     <div>
                                         <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
                                             Documento</label>
-                                        <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full"
-                                            style="display: none">
+                                        <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
+
                                             <option value="" disabled selected>Seleccionar Tipo Documento
                                             </option>
 
@@ -166,8 +124,8 @@
                                     <!-- Teléfono -->
                                     <div>
                                         <label for="telefono">Teléfono</label>
-                                        <input id="telefono" type="text" name="telefono"
-                                            placeholder="962 952 239" class="form-input" />
+                                        <input id="telefono" type="text" name="telefono" placeholder="962 952 239"
+                                            class="form-input" />
                                     </div>
 
                                     <!-- Email -->
@@ -247,7 +205,7 @@
                                                 for (let key in data.errors) {
                                                     if (data.errors.hasOwnProperty(key)) {
                                                         errorMessages += data.errors[key].join('<br>') +
-                                                        '<br>'; // Concatenamos los errores
+                                                            '<br>'; // Concatenamos los errores
                                                     }
                                                 }
                                                 toastr.error(errorMessages, "Errores en el formulario", {
@@ -289,22 +247,22 @@
                                 // Función para ajustar la longitud del documento
                                 tipoDocumentoSelect.addEventListener('change', function() {
                                     const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex]
-                                    .text;
+                                        .text;
 
                                     // Establecemos el número de caracteres requeridos para el tipo de documento
                                     const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado] ||
-                                    255; // por defecto, 255 caracteres si no coincide
+                                        255; // por defecto, 255 caracteres si no coincide
 
                                     // Establecemos el atributo 'maxlength' del input de documento
                                     documentoInput.setAttribute('maxlength', longitudMaxima);
                                     documentoInput.placeholder =
-                                    `Introduce un ${tipoSeleccionado} de ${longitudMaxima} dígitos`;
+                                        `Introduce un ${tipoSeleccionado} de ${longitudMaxima} dígitos`;
                                 });
 
                                 // Validación al enviar el formulario
                                 formulario.addEventListener('submit', function(event) {
                                     const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex]
-                                    .text;
+                                        .text;
                                     const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado];
 
                                     // Verifica si la longitud del documento es válida
@@ -312,7 +270,7 @@
                                         event.preventDefault(); // Evita que el formulario se envíe
                                         toastr.error(
                                             `El número de dígitos para ${tipoSeleccionado} debe ser ${longitudMaxima} caracteres.`
-                                            );
+                                        );
                                     }
                                 });
 
@@ -735,29 +693,18 @@
         </div>
     </div>
 
-    <script>
-        // Inicializar Select2
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar todos los select con la clase "select2"
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
-            });
-        })
-    </script>
-    <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
-    <!-- Agrega Select2 JS antes del cierre de </body> -->
-
-    <!-- Cargar jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-    <!-- <script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
         $(document).ready(function() {
-            $('select').niceSelect(); // Aplica Nice Select a todos los selectores en la página
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Seleccionar una opción',
+                allowClear: true
+            });
         });
-    </script> -->
+    </script>
     <script>
         // Función para mostrar la imagen seleccionada
         function previewImage(event) {

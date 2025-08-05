@@ -62,6 +62,7 @@ document.addEventListener('alpine:init', () => {
                         }
                     }
                 ],
+                order: [[0, 'desc']], 
                 responsive: true,
                 autoWidth: false,
                 pageLength: 10,
