@@ -160,6 +160,10 @@
         </div>  
     </div>
 
+
+
+        <script src="/assets/js/Sortable.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elementos del DOM
