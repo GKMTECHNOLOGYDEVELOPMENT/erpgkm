@@ -74,7 +74,7 @@
                     <form id="formEmpresa" class="space-y-6">
                         <!-- Nombre o Razón Social -->
                         <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre o Razón Social *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre o Razón Social <span class="text-red-500">*</span></label>
                             <div class="flex">
                                 <div
                                     class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
@@ -93,7 +93,7 @@
 
                         <!-- RUC -->
                         <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">RUC *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">RUC <span class="text-red-500">*</span></label>
                             <div class="flex space-x-2">
                                 <div class="flex flex-grow">
                                     <div
@@ -137,7 +137,7 @@
 
                         <!-- Rubro o Giro Comercial -->
                         <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Rubro o Giro Comercial *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Rubro o Giro Comercial <span class="text-red-500">*</span></label>
                             <div class="flex">
                                 <div
                                     class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
@@ -156,7 +156,7 @@
 
                         <!-- Ubicación Geográfica -->
                         <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación Geográfica</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación Geográfica <span class="text-red-500">*</span></label>
                             <div class="flex">
                                 <div
                                     class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
@@ -175,7 +175,7 @@
 
                         <!-- Fuente de Captación -->
                         <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fuente de Captación *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Fuente de Captación <span class="text-red-500">*</span></label>
                             <div class="flex">
                                 <div
                                     class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
@@ -244,7 +244,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <!-- Campo Tipo de Documento -->
                             <div class="form-group">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento *</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento <span class="text-red-500">*</span></label>
                                 <div class="flex">
                                     <div
                                         class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
@@ -268,7 +268,7 @@
                             <!-- Campo Número de Documento -->
                             <div class="form-group">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Número de Documento
-                                    *</label>
+                                    <span class="text-red-500">*</span></label>
                                 <div class="flex space-x-2">
                                     <div class="flex flex-grow">
                                         <div
@@ -315,7 +315,7 @@
 
                         <!-- Resto de campos -->
                         <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo <span class="text-red-500">*</span></label>
                             <div class="flex">
                                 <div
                                     class="bg-[#eee] flex justify-center items-center ltr:rounded-l-md rtl:rounded-r-md px-3 font-semibold border ltr:border-r-0 rtl:border-l-0 border-[#e0e6ed] dark:border-[#17263c] dark:bg-[#1b2e4b]">
