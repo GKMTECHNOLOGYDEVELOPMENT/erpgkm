@@ -1,139 +1,348 @@
-<div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h3 class="text-xl font-semibold text-gray-700">Observaciones Comerciales</h3>
-        <button onclick="openModal('create')" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Nueva Observación
-        </button>
-    </div>
 
-@if($tasks->count() > 0)
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado por</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($tasks as $task)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $task->title }}</div>
-                            <div class="text-sm text-gray-500 mt-1 line-clamp-2">{{ $task->description }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: {{ $task->status->color }}20; color: {{ $task->status->color }};">
-                                {{ $task->status->name }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                                <div class="flex-shrink-0 h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-800 font-bold">
-                                    {{ substr($task->user->name, 0, 1) }}
-                                </div>
-                                <div class="ml-2 text-sm text-gray-900">{{ $task->user->name }}</div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $task->created_at->format('d/m/Y H:i') }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onclick="openModal('edit', {{ $task->id }})" class="text-blue-600 hover:text-blue-900 mr-2">Editar</button>
-                            <button onclick="confirmDelete({{ $task->id }})" class="text-red-600 hover:text-red-900">Eliminar</button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @else
-        <div class="text-center py-8">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <h4 class="mt-2 text-sm font-medium text-gray-900">No hay observaciones registradas</h4>
-            <p class="mt-1 text-sm text-gray-500">Agrega observaciones relevantes para este seguimiento.</p>
-        </div>
-    @endif
-</div>
+    <script src="/assets/js/Sortable.min.js"></script>
+    <div x-data="scrumboard">
 
-<!-- Modal para crear/editar -->
-<div id="taskModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-1/2 shadow-lg rounded-md bg-white">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-medium" id="modalTitle">Nueva Observación</h3>
-            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        <div>
+            <button type="button" class="btn btn-primary flex" @click="addEditProject()">
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                    class="w-5 h-5 ltr:mr-3 rtl:ml-3">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
+                Add Project
             </button>
         </div>
-        <form id="taskForm" method="POST">
-            @csrf
-            <input type="hidden" id="taskId" name="id">
-            <div class="mb-4">
-                <label for="title" class="block text-sm font-medium text-gray-700">Título</label>
-                <input type="text" id="title" name="title" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-            </div>
-            <div class="mb-4">
-                <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
-                <textarea id="description" name="description" rows="3" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-            </div>
-            <div class="mb-4">
-                <label for="status_id" class="block text-sm font-medium text-gray-700">Estado</label>
-                <select id="status_id" name="status_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    @foreach($statuses as $status)
-                        <option value="{{ $status->id }}" data-color="{{ $status->color }}">{{ $status->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="flex justify-end space-x-3">
-                <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Guardar</button>
-            </div>
-        </form>
-    </div>
-</div>
 
-<!-- Modal de confirmación para eliminar -->
-<div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div class="relative top-20 mx-auto p-5 border w-1/3 shadow-lg rounded-md bg-white">
-        <div class="text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <h3 class="text-lg font-medium text-gray-900 mt-3">¿Eliminar observación?</h3>
-            <p class="text-sm text-gray-500 mt-2">Esta acción no se puede deshacer.</p>
-            <div class="flex justify-center space-x-4 mt-4">
-                <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600">Cancelar</button>
-                <form id="deleteForm" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Eliminar</button>
-                </form>
+        <!-- project list -->
+        <div class="relative pt-5">
+            <div class="perfect-scrollbar h-full -mx-2">
+                <div class="overflow-x-auto flex items-start flex-nowrap gap-5 pb-2 px-2">
+                    <template x-for="project in projectList" :key="project.id">
+                        <div class="panel w-80 flex-none">
+                            <div class="flex justify-between mb-5">
+                                <h4 x-text="project.title" class="text-base font-semibold"> </h4>
+
+                                <div class="flex items-center">
+                                    <button type="button" class="hover:text-primary ltr:mr-2 rtl:ml-2"
+                                        @click="addEditTask(project.id)">
+
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                            <circle opacity="0.5" cx="12" cy="12" r="10"
+                                                stroke="currentColor" stroke-width="1.5" />
+                                            <path d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15"
+                                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                        </svg>
+                                    </button>
+                                    <div x-data="dropdown" @click.outside="open = false" class="dropdown">
+                                        <button type="button" class="hover:text-primary" @click="toggle">
+
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="w-5 h-5 opacity-70 hover:opacity-100">
+                                                <circle cx="5" cy="12" r="2"
+                                                    stroke="currentColor" stroke-width="1.5"></circle>
+                                                <circle opacity="0.5" cx="12" cy="12" r="2"
+                                                    stroke="currentColor" stroke-width="1.5"></circle>
+                                                <circle cx="19" cy="12" r="2"
+                                                    stroke="currentColor" stroke-width="1.5"></circle>
+                                            </svg>
+                                        </button>
+                                        <ul x-cloak x-show="open" x-transition x-transition.duration.300ms
+                                            class="ltr:right-0 rtl:left-0">
+                                            <li><a href="javascript:;" @click="toggle, addEditProject(project)">Edit</a>
+                                            </li>
+                                            <li><a href="javascript:;"
+                                                    @click="toggle, deleteProject(project)">Delete</a></li>
+                                            <li><a href="javascript:;" @click="toggle, clearProjects(project)">Clear
+                                                    All</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- task list -->
+                            <div class="sortable-list min-h-[150px]" :data-id="project.id">
+                                <template x-for="task in project.tasks">
+                                    <div :key="project.id + '' + task.id" :data-id="project.id + '' + task.id"
+                                        class="shadow bg-[#f4f4f4] dark:bg-[#262e40] p-3 pb-5 rounded-md mb-5 space-y-3 cursor-move">
+                                        <template x-if="task.image">
+                                            <img src="/assets/images/carousel1.jpeg"
+                                                alt="images" class="h-32 w-full object-cover rounded-md" />
+                                        </template>
+                                        <div class="text-base font-medium" x-text="task.title"></div>
+                                        <p class="break-all" x-text="task.description"></p>
+                                        <div class="flex gap-2 items-center flex-wrap">
+                                            <template x-if="task.tags?.length">
+                                                <template x-for="(tag , i) in task.tags" :key="i">
+                                                    <div class="btn px-2 py-1 flex btn-outline-primary">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24"
+                                                            fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                            class="w-5 h-5 shrink-0">
+                                                            <path
+                                                                d="M4.72848 16.1369C3.18295 14.5914 2.41018 13.8186 2.12264 12.816C1.83509 11.8134 2.08083 10.7485 2.57231 8.61875L2.85574 7.39057C3.26922 5.59881 3.47597 4.70292 4.08944 4.08944C4.70292 3.47597 5.59881 3.26922 7.39057 2.85574L8.61875 2.57231C10.7485 2.08083 11.8134 1.83509 12.816 2.12264C13.8186 2.41018 14.5914 3.18295 16.1369 4.72848L17.9665 6.55812C20.6555 9.24711 22 10.5916 22 12.2623C22 13.933 20.6555 15.2775 17.9665 17.9665C15.2775 20.6555 13.933 22 12.2623 22C10.5916 22 9.24711 20.6555 6.55812 17.9665L4.72848 16.1369Z"
+                                                                stroke="currentColor" stroke-width="1.5" />
+                                                            <circle opacity="0.5" cx="8.60699" cy="8.87891"
+                                                                r="2" transform="rotate(-45 8.60699 8.87891)"
+                                                                stroke="currentColor" stroke-width="1.5" />
+                                                            <path opacity="0.5" d="M11.5417 18.5L18.5208 11.5208"
+                                                                stroke="currentColor" stroke-width="1.5"
+                                                                stroke-linecap="round" />
+                                                        </svg>
+                                                        <span class="ltr:ml-2 rtl:mr-2" x-text="tag"></span>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                            <template x-if="!task.tags?.length">
+                                                <div
+                                                    class="btn px-2 py-1 flex text-white-dark dark:border-white-dark/50 shadow-none">
+                                                    <svg width="24" height="24" viewBox="0 0 24 24"
+                                                        fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                        class="w-5 h-5 shrink-0">
+                                                        <path
+                                                            d="M4.72848 16.1369C3.18295 14.5914 2.41018 13.8186 2.12264 12.816C1.83509 11.8134 2.08083 10.7485 2.57231 8.61875L2.85574 7.39057C3.26922 5.59881 3.47597 4.70292 4.08944 4.08944C4.70292 3.47597 5.59881 3.26922 7.39057 2.85574L8.61875 2.57231C10.7485 2.08083 11.8134 1.83509 12.816 2.12264C13.8186 2.41018 14.5914 3.18295 16.1369 4.72848L17.9665 6.55812C20.6555 9.24711 22 10.5916 22 12.2623C22 13.933 20.6555 15.2775 17.9665 17.9665C15.2775 20.6555 13.933 22 12.2623 22C10.5916 22 9.24711 20.6555 6.55812 17.9665L4.72848 16.1369Z"
+                                                            stroke="currentColor" stroke-width="1.5" />
+                                                        <circle opacity="0.5" cx="8.60699" cy="8.87891"
+                                                            r="2" transform="rotate(-45 8.60699 8.87891)"
+                                                            stroke="currentColor" stroke-width="1.5" />
+                                                        <path opacity="0.5" d="M11.5417 18.5L18.5208 11.5208"
+                                                            stroke="currentColor" stroke-width="1.5"
+                                                            stroke-linecap="round" />
+                                                    </svg>
+                                                    <span class="ltr:ml-2 rtl:mr-2">No Tags</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="font-medium flex items-center hover:text-primary">
+
+                                                <svg width="24" height="24" viewBox="0 0 24 24"
+                                                    fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                    class="w-5 h-5 ltr:mr-3 rtl:ml-3 shrink-0">
+                                                    <path
+                                                        d="M2 12C2 8.22876 2 6.34315 3.17157 5.17157C4.34315 4 6.22876 4 10 4H14C17.7712 4 19.6569 4 20.8284 5.17157C22 6.34315 22 8.22876 22 12V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V12Z"
+                                                        stroke="currentColor" stroke-width="1.5" />
+                                                    <path opacity="0.5" d="M7 4V2.5" stroke="currentColor"
+                                                        stroke-width="1.5" stroke-linecap="round" />
+                                                    <path opacity="0.5" d="M17 4V2.5" stroke="currentColor"
+                                                        stroke-width="1.5" stroke-linecap="round" />
+                                                    <path opacity="0.5" d="M2 9H22" stroke="currentColor"
+                                                        stroke-width="1.5" stroke-linecap="round" />
+                                                </svg>
+                                                <span x-text="task.date"></span>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <button type="button" class="hover:text-info"
+                                                    @click="addEditTask(project.id, task)">
+
+                                                    <svg width="24" height="24" viewBox="0 0 24 24"
+                                                        fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                        class="w-5 h-5 ltr:mr-3 rtl:ml-3">
+                                                        <path opacity="0.5"
+                                                            d="M22 10.5V12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2H13.5"
+                                                            stroke="currentColor" stroke-width="1.5"
+                                                            stroke-linecap="round" />
+                                                        <path
+                                                            d="M17.3009 2.80624L16.652 3.45506L10.6872 9.41993C10.2832 9.82394 10.0812 10.0259 9.90743 10.2487C9.70249 10.5114 9.52679 10.7957 9.38344 11.0965C9.26191 11.3515 9.17157 11.6225 8.99089 12.1646L8.41242 13.9L8.03811 15.0229C7.9492 15.2897 8.01862 15.5837 8.21744 15.7826C8.41626 15.9814 8.71035 16.0508 8.97709 15.9619L10.1 15.5876L11.8354 15.0091C12.3775 14.8284 12.6485 14.7381 12.9035 14.6166C13.2043 14.4732 13.4886 14.2975 13.7513 14.0926C13.9741 13.9188 14.1761 13.7168 14.5801 13.3128L20.5449 7.34795L21.1938 6.69914C22.2687 5.62415 22.2687 3.88124 21.1938 2.80624C20.1188 1.73125 18.3759 1.73125 17.3009 2.80624Z"
+                                                            stroke="currentColor" stroke-width="1.5" />
+                                                        <path opacity="0.5"
+                                                            d="M16.6522 3.45508C16.6522 3.45508 16.7333 4.83381 17.9499 6.05034C19.1664 7.26687 20.5451 7.34797 20.5451 7.34797M10.1002 15.5876L8.4126 13.9"
+                                                            stroke="currentColor" stroke-width="1.5" />
+                                                    </svg>
+                                                </button>
+                                                <button type="button" class="hover:text-danger"
+                                                    @click="deleteConfirmModal(project.id, task)">
+
+                                                    <svg width="24" height="24" viewBox="0 0 24 24"
+                                                        fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                        class="w-5 h-5">
+                                                        <path opacity="0.5"
+                                                            d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4"
+                                                            stroke="currentColor" stroke-width="1.5"
+                                                            stroke-linecap="round"></path>
+                                                        <path d="M20.5001 6H3.5" stroke="currentColor"
+                                                            stroke-width="1.5" stroke-linecap="round"></path>
+                                                        <path
+                                                            d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5"
+                                                            stroke="currentColor" stroke-width="1.5"
+                                                            stroke-linecap="round"></path>
+                                                        <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor"
+                                                            stroke-width="1.5" stroke-linecap="round"></path>
+                                                        <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor"
+                                                            stroke-width="1.5" stroke-linecap="round"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <div class="pt-3">
+                                <button type="button" class="btn btn-primary mx-auto"
+                                    @click="addEditTask(project.id)">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    Add Task
+                                </button>
+                            </div>
+
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
+        <!-- add project modal -->
+        <div class="fixed inset-0 bg-[black]/60 z-[999] px-4 overflow-y-auto hidden"
+            :class="isAddProjectModal && '!block'">
+            <div class="flex items-center justify-center min-h-screen">
+                <div x-show="isAddProjectModal" x-transition x-transition.duration.300
+                    @click.outside="isAddProjectModal = false"
+                    class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
+                    <button type="button"
+                        class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark"
+                        @click="isAddProjectModal = false">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]"
+                        x-text="params.id ? 'Edit Project' : 'Add Project'"></div>
+                    <div class="p-5">
+                        <form @submit.prevent="saveProject">
+                            <div class="grid gap-5">
+                                <div>
+                                    <label for="title">Name</label>
+                                    <input id="title" x-model="params.title" type="text"
+                                        class="form-input mt-1" placeholder="Enter Name" />
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end items-center mt-8">
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="isAddProjectModal = false">Cancel</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4"
+                                    x-text="params.id ? 'Update' : 'Add'"></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- add task modal -->
+        <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto hidden" :class="isAddTaskModal && '!block'">
+            <div class="flex items-center justify-center min-h-screen px-4" @click.self="isAddTaskModal = false">
+                <div x-show="isAddTaskModal" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
+                    <button type="button"
+                        class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark"
+                        @click="isAddTaskModal = false">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div x-text="paramsTask.id ? 'Edit Task' : 'Add Task'"
+                        class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
+                    </div>
+                    <div class="p-5">
+                        <form @submit.prevent="saveTask">
+                            <div class="grid gap-5">
+                                <div>
+                                    <label for="taskTitle">Name</label>
+                                    <input id="taskTitle" x-model="paramsTask.title" type="text"
+                                        class="form-input" placeholder="Enter Name" />
+                                </div>
+
+                                <div>
+                                    <label for="taskTag">Tag</label>
+                                    <input id="taskTag" x-model="paramsTask.tags" type="text"
+                                        class="form-input" placeholder="Enter Tag" />
+                                </div>
+                                <div>
+                                    <label for="taskdesc">Description</label>
+                                    <textarea id="taskdesc" x-model="paramsTask.description" class="form-textarea min-h-[130px]"
+                                        placeholder="Enter Description"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end items-center mt-8">
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="isAddTaskModal = false">Cancel</button>
+                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4"
+                                    x-text="paramsTask.id ? 'Update' : 'Add'"></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- delete task modal -->
+        <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto hidden" :class="isDeleteModal && '!block'">
+            <div class="flex items-center justify-center min-h-screen px-4 " @click.self="isDeleteModal = false">
+                <div x-show="isDeleteModal" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
+                    <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark"
+                        @click="isDeleteModal = false">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" class="w-6 h-6">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div
+                        class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
+                        Delete Task</div>
+                    <div class="p-5 text-center">
+                        <div class="text-white bg-danger ring-4 ring-danger/30 p-4 rounded-full w-fit mx-auto">
+
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                <path opacity="0.5"
+                                    d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round"></path>
+                                <path
+                                    d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round"></path>
+                                <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round"></path>
+                            </svg>
+                        </div>
+                        <div class="text-base sm:w-3/4 mx-auto mt-5">Are you sure you want to delete Task?</div>
+
+                        <div class="flex justify-center items-center mt-8">
+                            <button type="button" class="btn btn-outline-danger"
+                                @click="isDeleteModal = false">Cancel</button>
+                            <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
+                                @click="deleteTask">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-</div>
 
-
-
-<style>
-    .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
     
-    .hover\:bg-gray-50:hover {
-        background-color: #f9fafb;
-    }
-</style>
