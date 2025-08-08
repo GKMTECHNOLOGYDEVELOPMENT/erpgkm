@@ -109,11 +109,11 @@
         <div class="flex space-x-4 border-b border-gray-200 mb-6 overflow-x-auto">
             <button id="tabEmpresaBtn"
                 class="tab-btn px-6 py-3 flex items-center whitespace-nowrap {{ $seguimiento->tipoRegistro == 1 ? 'active-tab' : '' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd"
-                        d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V4H6z"
-                        clip-rule="evenodd" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path
+                        d="M3 21h18v-2H3v2zm2-4h2v-2H5v2zm0-4h2v-2H5v2zm0-4h2V7H5v2zm4 8h2v-2H9v2zm0-4h2v-2H9v2zm0-4h2V7H9v2zm4 8h2v-2h-2v2zm0-4h2v-2h-2v2zm0-4h2V7h-2v2zm4 8h2v-6h-2v6zm0-8h2V7h-2v2z" />
                 </svg>
+
                 Empresa
             </button>
             <button id="tabContactoBtn"
@@ -157,7 +157,7 @@
             <div id="tabProyectos" class="tab-content hidden"></div>
             <div id="tabCronograma" class="tab-content hidden"></div>
             <div id="tabObservaciones" class="tab-content hidden"></div>
-        </div>  
+        </div>
     </div>
 
 
