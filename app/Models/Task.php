@@ -1,46 +1,28 @@
 <?php
-
+// app/Models/Task.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Task extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
+        'project_id', 
         'title', 
         'description', 
-        'status_id', 
-        'user_id',
-        'seguimiento_id',
-        'empresa_id',
-        'contacto_id'
+        'image', 
+        'date',
+        'tags'
     ];
 
-    public function status()
-    {
-        return $this->belongsTo(Status::class);
-    }
+    protected $casts = [
+        'tags' => 'array',
+        'date' => 'date'
+    ];
 
-    public function user()
+    public function project(): BelongsTo
     {
-        return $this->belongsTo(User::class);
-    }
-
-    public function seguimiento()
-    {
-        return $this->belongsTo(Seguimiento::class);
-    }
-
-    public function empresa()
-    {
-        return $this->belongsTo(Empresa::class);
-    }
-
-    public function contacto()
-    {
-        return $this->belongsTo(Contactos::class);
+        return $this->belongsTo(Project::class);
     }
 }

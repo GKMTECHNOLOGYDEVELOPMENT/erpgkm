@@ -336,7 +336,11 @@ function cargarMarcasPorClienteGeneral(clienteGeneralId) {
                 $('#direccion').val('');
             }
 
-            const cargarTodas = (tipoDocumentoCliente == 8 || esTiendaCliente == 0);
+const cargarTodas = (
+    tipoDocumentoCliente == 8 ||
+    esTiendaCliente == 0 ||
+    (tipoDocumentoCliente == 9 && esTiendaCliente == 0)
+);
             mostrarSelectTiendas(clienteId, cargarTodas);
         }).fail(() => {
             console.error('❌ Error al obtener los datos del cliente.');

@@ -163,6 +163,14 @@
 
 
         <script src="/assets/js/Sortable.min.js"></script>
+        <link href="{{ Vite::asset('resources/css/fullcalendar.min.css') }}" rel='stylesheet' />
+        <script src='/assets/js/fullcalendar.min.js'></script>
+
+
+        
+
+
+        
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -382,597 +390,924 @@
     </script>
 
 
+
+
+
 <script>
-        document.addEventListener("alpine:init", () => {
-            Alpine.data("scrumboard", () => ({
-                params: {
-                    id: null,
-                    title: ''
-                },
-                paramsTask: {
-                    projectId: null,
-                    id: null,
-                    title: '',
-                    description: '',
-                    tags: ''
-                },
-                selectedTask: null,
-                isAddProjectModal: false,
-                isAddTaskModal: false,
-                isDeleteModal: false,
-                projectList: [{
-                        id: 1,
-                        title: 'In Progress',
-                        tasks: [{
-                                projectId: 1,
-                                id: 1,
-                                title: 'Creating a new Portfolio on Dribble',
-                                description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-                                image: true,
-                                date: ' 08 Aug, 2020',
-                                tags: ['designing'],
-                            },
-                            {
-                                projectId: 1,
-                                id: 2,
-                                title: 'Singapore Team Meet',
-                                description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit.',
-                                date: ' 09 Aug, 2020',
-                                tags: ['meeting'],
-                            },
-                        ],
-                    },
-                    {
-                        id: 2,
-                        title: 'Pending',
-                        tasks: [{
-                            projectId: 2,
-                            id: 1,
-                            title: 'Plan a trip to another country',
-                            description: '',
-                            date: ' 10 Sep, 2020'
-                        }],
-                    },
-                    {
-                        id: 3,
-                        title: 'Complete',
-                        tasks: [{
-                                projectId: 3,
-                                id: 1,
-                                title: 'Dinner with Kelly Young',
-                                description: '',
-                                date: ' 08 Aug, 2020'
-                            },
-                            {
-                                projectId: 3,
-                                id: 2,
-                                title: 'Launch New SEO Wordpress Theme ',
-                                description: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                                date: ' 09 Aug, 2020',
-                            },
-                        ],
-                    },
-                    {
-                        id: 4,
-                        title: 'Working',
-                        tasks: [],
-                    }
-                ],
+document.addEventListener("alpine:init", () => {
+    Alpine.data("scrumboard", () => ({
+        // Estado inicial
+        params: {
+            id: null,
+            title: ''
+        },
+        paramsTask: {
+            projectId: null,
+            id: null,
+            title: '',
+            description: '',
+            tags: '',
+            image: null
+        },
+        selectedTask: null,
+        selectedProject: null,
+        isAddProjectModal: false,
+        isAddTaskModal: false,
+        isDeleteModal: false,
+        isDeleteProject: false,
+        projectList: [],
 
+        // Inicialización
+        init() {
+            this.loadProjects();
+            this.initializeSortable();
+        },
 
-                init() {
+        // Cargar proyectos desde el servidor
+        loadProjects() {
+            fetch('/scrumboard/projects')
+                .then(response => response.json())
+                .then(data => {
+                    this.projectList = data.map(project => ({
+                        ...project,
+                        tasks: project.tasks || []
+                    }));
                     this.initializeSortable();
-                },
+                });
+        },
 
-                initializeSortable() {
-                    setTimeout(() => {
-                        //sortable js
-                        const sortable = document.querySelectorAll('.sortable-list');
-                        for (let i = 0; i < sortable.length; i++) {
-                            Sortable.create(sortable[i], {
-                                animation: 200,
-                                group: 'name',
-                                ghostClass: "sortable-ghost",
-                                dragClass: "sortable-drag",
-                            })
-                        }
-                    });
-                },
-
-                addEditProject(project) {
-                    setTimeout(() => {
-                        this.params = {
-                            id: null,
-                            title: ''
-                        };
-                        if (project) {
-                            this.params = JSON.parse(JSON.stringify(project));
-                        }
-
-                        this.isAddProjectModal = true;
-                    });
-                },
-
-                saveProject() {
-                    if (!this.params.title) {
-                        this.showMessage('Title is required.', 'error');
-                        return false;
+        // Inicializar SortableJS para drag and drop
+      initializeSortable() {
+    setTimeout(() => {
+        const sortableLists = document.querySelectorAll('.sortable-list');
+        
+        sortableLists.forEach(list => {
+            Sortable.create(list, {
+                group: 'tasks',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: (evt) => {
+                    const projectId = parseInt(evt.to.getAttribute('data-id'));
+                    const taskId = parseInt(evt.item.getAttribute('data-task-id')); // Cambiar a data-task-id
+                    
+                    if (evt.from !== evt.to) {
+                        this.moveTask(taskId, projectId);
                     }
+                }
+            });
+        });
+    });
+},
 
-                    if (this.params.id) {
-                        //update project
-                        const project = this.projectList.find((d) => d.id === this.params.id);
-                        project.title = this.params.title;
+moveTask(taskId, newProjectId) {
+    // Encontrar el proyecto actual de la tarea
+    const currentProject = this.projectList.find(project => 
+        project.tasks.some(task => task.id === taskId)
+    );
+    
+    if (!currentProject) {
+        console.error('No se encontró el proyecto actual de la tarea');
+        this.showMessage('Error: No se pudo encontrar la tarea actual', 'error');
+        this.loadProjects(); // Recargar para sincronizar
+        return;
+    }
 
-                    } else {
-                        //add project
-                        const lastId = this.projectList.length ? this.projectList.reduce((max, obj) => (
-                            obj.id > max ? obj.id : max), this.projectList[0].id) : 0;
+    // Verificar que el movimiento sea a un proyecto diferente
+    if (currentProject.id === newProjectId) {
+        console.log('La tarea ya está en este proyecto');
+        return;
+    }
 
-                        const project = {
-                            id: lastId + 1,
-                            title: this.params.title,
-                            tasks: [],
-                        };
-                        this.projectList.push(project);
-                    }
+    // Mostrar mensaje de carga
+    this.showMessage('Moviendo tarea...', 'info');
 
-                    this.initializeSortable();
+    fetch('/scrumboard/tasks/move', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({
+            task_id: taskId,
+            new_project_id: newProjectId
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw err; });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            this.showMessage('Tarea movida exitosamente!');
+            this.loadProjects(); // Recargar los proyectos
+        } else {
+            this.showMessage(data.message || 'Error al mover la tarea', 'error');
+            this.loadProjects(); // Recargar para sincronizar estado
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        this.showMessage('Error al mover la tarea: ' + (error.message || 'Error desconocido'), 'error');
+        this.loadProjects(); // Recargar para sincronizar estado
+    });
+},
+
+        // Abrir modal para agregar/editar proyecto
+        addEditProject(project = null) {
+            this.params = {
+                id: null,
+                title: ''
+            };
+            
+            if (project) {
+                this.params = {
+                    id: project.id,
+                    title: project.title
+                };
+            }
+            
+            this.isAddProjectModal = true;
+        },
+
+        // Guardar proyecto (crear o actualizar)
+        saveProject() {
+            if (!this.params.title) {
+                this.showMessage('Title is required.', 'error');
+                return false;
+            }
+
+            const url = this.params.id 
+                ? `/scrumboard/projects/${this.params.id}` 
+                : '/scrumboard/projects';
+                
+            const method = this.params.id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(this.params)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
                     this.showMessage('Project has been saved successfully.');
                     this.isAddProjectModal = false;
-                },
-
-                deleteProject(project) {
-                    this.projectList = this.projectList.filter((d) => d.id != project.id);
-                    this.showMessage('Project has been deleted successfully.');
-                },
-
-                clearProjects(project) {
-                    project.tasks = [];
-                },
-
-
-                // task
-                addEditTask(projectId, task) {
-                    this.paramsTask = {
-                        projectId: null,
-                        id: null,
-                        title: '',
-                        description: '',
-                        tags: ''
-                    };
-                    if (task) {
-                        this.paramsTask = JSON.parse(JSON.stringify(task));
-                        this.paramsTask.tags = this.paramsTask.tags ? this.paramsTask.tags.toString() :
-                            '';
-                    }
-                    this.paramsTask.projectId = projectId;
-                    this.isAddTaskModal = true;
-                },
-
-                saveTask() {
-                    if (!this.paramsTask.title) {
-                        this.showMessage('Title is required.', 'error');
-                        return false;
-                    }
-
-                    const project = this.projectList.find((d) => d.id === this.paramsTask.projectId);
-                    if (this.paramsTask.id) {
-                        //update task
-                        const task = project.tasks.find((d) => d.id === this.paramsTask.id);
-                        task.title = this.paramsTask.title;
-                        task.description = this.paramsTask.description;
-                        task.tags = this.paramsTask.tags?.length > 0 ? this.paramsTask.tags.split(',') :
-                            [];
-                    } else {
-                        //add task
-                        let maxid = 0;
-                        if (project.tasks?.length) {
-                            maxid = project.tasks.reduce((max, obj) => (obj.id > max ? obj.id : max),
-                                project.tasks[0].id);
-                        }
-
-                        const today = new Date();
-                        const dd = String(today.getDate()).padStart(2, '0');
-                        const mm = String(today.getMonth()); //January is 0!
-                        const yyyy = today.getFullYear();
-                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
-                            'Sep', 'Oct', 'Nov', 'Dec'
-                        ];
-
-                        const task = {
-                            projectId: this.paramsTask.projectId,
-                            id: maxid + 1,
-                            title: this.paramsTask.title,
-                            description: this.paramsTask.description,
-                            date: dd + ' ' + monthNames[mm] + ', ' + yyyy,
-                            tags: this.paramsTask.tags?.length > 0 ? this.paramsTask.tags.split(
-                                ',') : [],
-                        };
-
-                        project.tasks.push(task);
-                    }
-
-                    this.showMessage('Task has been saved successfully.');
-                    this.isAddTaskModal = false;
-                },
-
-                deleteConfirmModal(projectId, task) {
-                    this.selectedTask = task;
-                    setTimeout(() => {
-                        this.isDeleteModal = true;
-                    }, 10);
-                },
-
-                deleteTask() {
-                    let project = this.projectList.find((d) => d.id === this.selectedTask.projectId);
-                    project.tasks = project.tasks.filter((d) => d.id != this.selectedTask.id);
-
-                    this.showMessage('Task has been deleted successfully.');
-                    this.isDeleteModal = false;
-                },
-
-                showMessage(msg = '', type = 'success') {
-                    const toast = window.Swal.mixin({
-                        toast: true,
-                        position: 'top',
-                        showConfirmButton: false,
-                        timer: 3000,
-                    });
-                    toast.fire({
-                        icon: type,
-                        title: msg,
-                        padding: '10px 20px',
-                    });
+                    this.loadProjects(); // Recargar la lista de proyectos
+                } else {
+                    this.showMessage(data.message || 'Error saving project', 'error');
                 }
-            }));
-        });
-    </script>
+            })
+            .catch(error => {
+                this.showMessage('Error saving project', 'error');
+                console.error('Error:', error);
+            });
+        },
 
+        // Confirmar eliminación de proyecto
+        deleteConfirmProject(project) {
+            this.selectedProject = project;
+            this.isDeleteProject = true;
+            this.isDeleteModal = true;
+        },
 
-  <script>
-        document.addEventListener("alpine:init", () => {
-            Alpine.data("notes", () => ({
-                defaultParams: {
+        // Eliminar proyecto
+        deleteProject() {
+            if (!this.selectedProject) return;
+            
+            fetch(`/scrumboard/projects/${this.selectedProject.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.showMessage('Project has been deleted successfully.');
+                    this.isDeleteModal = false;
+                    this.loadProjects(); // Recargar la lista de proyectos
+                } else {
+                    this.showMessage(data.message || 'Error deleting project', 'error');
+                }
+            })
+            .catch(error => {
+                this.showMessage('Error deleting project', 'error');
+                console.error('Error:', error);
+            });
+        },
+
+        // Limpiar todas las tareas de un proyecto
+        clearProjects(project) {
+            if (!confirm('Are you sure you want to clear all tasks from this project?')) {
+                return;
+            }
+            
+            fetch(`/scrumboard/projects/${project.id}/clear-tasks`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.showMessage('All tasks have been cleared from the project.');
+                    this.loadProjects(); // Recargar la lista de proyectos
+                } else {
+                    this.showMessage(data.message || 'Error clearing tasks', 'error');
+                }
+            })
+            .catch(error => {
+                this.showMessage('Error clearing tasks', 'error');
+                console.error('Error:', error);
+            });
+        },
+
+        // Abrir modal para agregar/editar tarea
+        addEditTask(projectId, task = null) {
+            this.paramsTask = {
+                projectId: projectId,
+                id: null,
+                title: '',
+                description: '',
+                tags: '',
+                image: null
+            };
+            
+            if (task) {
+                this.paramsTask = {
+                    projectId: projectId,
+                    id: task.id,
+                    title: task.title,
+                    description: task.description,
+                    tags: task.tags ? task.tags.join(', ') : '',
+                    image: task.image || null
+                };
+            }
+            
+            this.isAddTaskModal = true;
+        },
+
+        // Guardar tarea (crear o actualizar)
+     saveTask() {
+    if (!this.paramsTask.title) {
+        this.showMessage('Title is required.', 'error');
+        return false;
+    }
+
+    const url = this.paramsTask.id 
+        ? `/scrumboard/tasks/${this.paramsTask.id}` 
+        : '/scrumboard/tasks';
+    const method = this.paramsTask.id ? 'PUT' : 'POST';
+
+    // 1. Crear objeto con los datos
+    const data = {
+        title: this.paramsTask.title,
+        description: this.paramsTask.description || '',
+        tags: this.paramsTask.tags || ''
+    };
+
+    // 2. Solo agregar project_id para nuevas tareas
+    if (!this.paramsTask.id) {
+        data.project_id = this.paramsTask.projectId;
+    }
+
+    // 3. Configurar headers
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json'
+    };
+
+    // 4. Opciones para fetch
+    const options = {
+        method: method,
+        headers: headers,
+        body: JSON.stringify(data)
+    };
+
+    // 5. Realizar la petición
+    fetch(url, options)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            this.showMessage('Task saved successfully!');
+            this.isAddTaskModal = false;
+            this.loadProjects();
+            
+            // Resetear el formulario solo para nuevas tareas
+            if (!this.paramsTask.id) {
+                this.paramsTask = {
+                    projectId: this.paramsTask.projectId,
                     id: null,
                     title: '',
                     description: '',
-                    tag: '',
-                    user: '',
-                    thumb: ''
-                },
-                isAddNoteModal: false,
-                isDeleteNoteModal: false,
-                isViewNoteModal: false,
+                    tags: '',
+                    image: null
+                };
+            }
+        })
+        .catch(error => {
+            console.error('Error saving task:', error);
+            this.showMessage(error.message || 'Error saving task', 'error');
+        });
+},
+
+        // Confirmar eliminación de tarea
+        deleteConfirmModal(projectId, task) {
+            this.selectedTask = task;
+            this.isDeleteProject = false;
+            this.isDeleteModal = true;
+        },
+
+        // Eliminar tarea
+        deleteTask() {
+            if (!this.selectedTask) return;
+            
+            fetch(`/scrumboard/tasks/${this.selectedTask.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    this.showMessage('Task has been deleted successfully.');
+                    this.isDeleteModal = false;
+                    this.loadProjects(); // Recargar la lista de proyectos
+                } else {
+                    this.showMessage(data.message || 'Error deleting task', 'error');
+                }
+            })
+            .catch(error => {
+                this.showMessage('Error deleting task', 'error');
+                console.error('Error:', error);
+            });
+        },
+
+        // Mostrar mensajes de notificación
+        showMessage(msg = '', type = 'success') {
+            const toast = window.Swal.mixin({
+                toast: true,
+                position: 'top',
+                showConfirmButton: false,
+                timer: 3000,
+            });
+            toast.fire({
+                icon: type,
+                title: msg,
+                padding: '10px 20px',
+            });
+        }
+    }));
+});
+</script>
+
+  <script>
+document.addEventListener("alpine:init", () => {
+    Alpine.data("notes", () => ({
+        defaultParams: {
+            id: null,
+            title: '',
+            description: '',
+            tag_id: null,
+            is_favorite: false
+        },
+        isAddNoteModal: false,
+        isDeleteNoteModal: false,
+        isViewNoteModal: false,
+        params: {
+            id: null,
+            title: '',
+            description: '',
+            tag_id: null,
+            is_favorite: false
+        },
+        isShowNoteMenu: false,
+        notesList: [],
+        tagsList: [],
+        filterdNotesList: [],
+        selectedTab: 'all',
+        deletedNote: null,
+        selectedNote: {
+            id: null,
+            title: '',
+            description: '',
+            tag: '',
+            tag_color: '',
+            user: '',
+            date: '',
+            isFav: false
+        },
+        loading: false,
+
+        init() {
+            this.loadTags();
+            this.loadNotes();
+        },
+
+        async loadTags() {
+            try {
+                const response = await fetch('/tags', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.tagsList = data.tags;
+                }
+            } catch (error) {
+                console.error('Error loading tags:', error);
+                this.showMessage('Error loading tags', 'error');
+            }
+        },
+
+        async loadNotes(filter = 'all') {
+            this.loading = true;
+            try {
+                const url = filter && filter !== 'all' ? `/notes?filter=${filter}` : '/notes';
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.notesList = data.notes.map(note => ({
+                        id: note.id,
+                        title: note.title,
+                        description: note.description,
+                        isFav: note.is_favorite,
+                        tag: note.tag,
+                        tag_color: note.tag_color,
+                        date: note.date,
+                        user: note.user
+                    }));
+                    this.searchNotes();
+                } else {
+                    throw new Error('Failed to load notes');
+                }
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                this.showMessage('Error loading notes', 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        searchNotes() {
+            if (this.selectedTab === 'fav') {
+                this.filterdNotesList = this.notesList.filter((d) => d.isFav);
+            } else if (this.selectedTab === 'all') {
+                this.filterdNotesList = this.notesList;
+            } else {
+                this.filterdNotesList = this.notesList.filter((d) => d.tag === this.selectedTab);
+            }
+        },
+
+        async saveNote() {
+            if (!this.params.title.trim()) {
+                this.showMessage('Title is required.', 'error');
+                return false;
+            }
+
+            this.loading = true;
+            try {
+                const url = this.params.id ? `/notes/${this.params.id}` : '/notes';
+                const method = this.params.id ? 'PUT' : 'POST';
+                
+                const formData = new FormData();
+                formData.append('title', this.params.title);
+                formData.append('description', this.params.description || '');
+                formData.append('tag_id', this.params.tag_id || '');
+                formData.append('is_favorite', this.params.is_favorite ? '1' : '0');
+                
+                if (this.params.id) {
+                    formData.append('_method', 'PUT');
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.showMessage(data.message || 'Note saved successfully.');
+                    this.isAddNoteModal = false;
+                    this.resetParams();
+                    await this.loadNotes(this.selectedTab);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save note');
+                }
+            } catch (error) {
+                console.error('Error saving note:', error);
+                this.showMessage('Error saving note: ' + error.message, 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async tabChanged(type) {
+            this.selectedTab = type;
+            await this.loadNotes(type);
+            this.isShowNoteMenu = false;
+        },
+
+        async setFav(note) {
+            try {
+                const response = await fetch(`/notes/${note.id}/toggle-favorite`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update in local list
+                    let item = this.filterdNotesList.find((d) => d.id === note.id);
+                    if (item) {
+                        item.isFav = data.is_favorite;
+                    }
+                    // Also update in main list
+                    let mainItem = this.notesList.find((d) => d.id === note.id);
+                    if (mainItem) {
+                        mainItem.isFav = data.is_favorite;
+                    }
+                    this.searchNotes();
+                    this.showMessage(data.message);
+                } else {
+                    throw new Error('Failed to update favorite status');
+                }
+            } catch (error) {
+                console.error('Error updating favorite:', error);
+                this.showMessage('Error updating favorite status', 'error');
+            }
+        },
+
+        async setTag(note, tagName) {
+            try {
+                const tag = this.tagsList.find(t => t.name === tagName);
+                const tag_id = tag ? tag.id : null;
+
+                const response = await fetch(`/notes/${note.id}/update-tag`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ tag_id: tag_id })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Update in local lists
+                    [this.notesList, this.filterdNotesList].forEach(list => {
+                        let item = list.find((d) => d.id === note.id);
+                        if (item) {
+                            item.tag = data.tag;
+                            item.tag_color = data.tag_color;
+                        }
+                    });
+                    this.searchNotes();
+                    this.showMessage(data.message);
+                } else {
+                    throw new Error('Failed to update tag');
+                }
+            } catch (error) {
+                console.error('Error updating tag:', error);
+                this.showMessage('Error updating tag', 'error');
+            }
+        },
+
+        deleteNoteConfirm(note) {
+            this.deletedNote = note;
+            this.isDeleteNoteModal = true;
+        },
+
+        viewNote(note) {
+            this.selectedNote = {
+                id: note.id,
+                title: note.title,
+                description: note.description,
+                tag: note.tag,
+                tag_color: note.tag_color,
+                user: note.user,
+                date: note.date,
+                isFav: note.isFav
+            };
+            this.isViewNoteModal = true;
+        },
+
+        editNote(note = null) {
+            this.isShowNoteMenu = false;
+            this.resetParams();
+            
+            if (note) {
+                this.params = {
+                    id: note.id,
+                    title: note.title,
+                    description: note.description,
+                    tag_id: this.tagsList.find(t => t.name === note.tag)?.id || null,
+                    is_favorite: note.isFav || false
+                };
+            }
+            this.isAddNoteModal = true;
+        },
+
+        async deleteNote() {
+            if (!this.deletedNote) return;
+
+            this.loading = true;
+            try {
+                const response = await fetch(`/notes/${this.deletedNote.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.showMessage(data.message || 'Note deleted successfully.');
+                    this.isDeleteNoteModal = false;
+                    this.deletedNote = null;
+                    await this.loadNotes(this.selectedTab);
+                } else {
+                    throw new Error('Failed to delete note');
+                }
+            } catch (error) {
+                console.error('Error deleting note:', error);
+                this.showMessage('Error deleting note', 'error');
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        resetParams() {
+            this.params = JSON.parse(JSON.stringify(this.defaultParams));
+        },
+
+        getTagNameById(tagId) {
+            if (!tagId) return '';
+            const tag = this.tagsList.find(t => t.id === tagId);
+            return tag ? tag.name : '';
+        },
+
+        getTagColorById(tagId) {
+            if (!tagId) return '';
+            const tag = this.tagsList.find(t => t.id === tagId);
+            return tag ? tag.color : '';
+        },
+
+        showMessage(msg = '', type = 'success') {
+            if (window.Swal) {
+                const toast = window.Swal.mixin({
+                    toast: true,
+                    position: 'top',
+                    showConfirmButton: false,
+                    timer: 3000,
+                });
+                toast.fire({
+                    icon: type,
+                    title: msg,
+                    padding: '10px 20px',
+                });
+            } else {
+                // Fallback if no SweetAlert
+                alert(msg);
+            }
+        }
+    }));
+});
+</script>
+        <script>
+        document.addEventListener("alpine:init", () => {
+            Alpine.data("calendar", () => ({
+                defaultParams: ({
+                    id: null,
+                    title: '',
+                    start: '',
+                    end: '',
+                    description: '',
+                    type: 'primary'
+                }),
                 params: {
                     id: null,
                     title: '',
+                    start: '',
+                    end: '',
                     description: '',
-                    tag: '',
-                    user: '',
-                    thumb: '',
+                    type: 'primary'
                 },
-                isShowNoteMenu: false,
-                notesList: [{
-                        id: 1,
-                        user: 'Max Smith',
-                        thumb: 'profile-16.jpeg',
-                        title: 'Meeting with Kelly',
-                        description: 'Curabitur facilisis vel elit sed dapibus sodales purus rhoncus.',
-                        date: '11/01/2020',
-                        isFav: false,
-                        tag: 'personal',
-                    },
-                    {
-                        id: 2,
-                        user: 'John Doe',
-                        thumb: 'profile-14.jpeg',
-                        title: 'Receive Package',
-                        description: 'Facilisis curabitur facilisis vel elit sed dapibus sodales purus.',
-                        date: '11/02/2020',
-                        isFav: true,
-                        tag: '',
-                    },
-                    {
-                        id: 3,
-                        user: 'Kia Jain',
-                        thumb: 'profile-15.jpeg',
-                        title: 'Download Docs',
-                        description: 'Proin a dui malesuada, laoreet mi vel, imperdiet diam quam laoreet.',
-                        date: '11/04/2020',
-                        isFav: false,
-                        tag: 'work',
-                    },
-                    {
-                        id: 4,
-                        user: 'Max Smith',
-                        thumb: 'profile-16.jpeg',
-                        title: 'Meeting at 4:50pm',
-                        description: 'Excepteur sint occaecat cupidatat non proident, anim id est laborum.',
-                        date: '11/08/2020',
-                        isFav: false,
-                        tag: '',
-                    },
-                    {
-                        id: 5,
-                        user: 'Karena Courtliff',
-                        thumb: 'profile-17.jpeg',
-                        title: 'Backup Files EOD',
-                        description: 'Maecenas condimentum neque mollis, egestas leo ut, gravida.',
-                        date: '11/09/2020',
-                        isFav: false,
-                        tag: '',
-                    },
-                    {
-                        id: 6,
-                        user: 'Max Smith',
-                        thumb: 'profile-16.jpeg',
-                        title: 'Download Server Logs',
-                        description: 'Suspendisse efficitur diam quis gravida. Nunc molestie est eros.',
-                        date: '11/09/2020',
-                        isFav: false,
-                        tag: 'social',
-                    },
-                    {
-                        id: 7,
-                        user: 'Vladamir Koschek',
-                        thumb: '',
-                        title: 'Team meet at Starbucks',
-                        description: 'Etiam a odio eget enim aliquet laoreet lobortis sed ornare nibh.',
-                        date: '11/10/2020',
-                        isFav: false,
-                        tag: '',
-                    },
-                    {
-                        id: 8,
-                        user: 'Max Smith',
-                        thumb: 'profile-16.jpeg',
-                        title: 'Create new users Profile',
-                        description: 'Duis aute irure in nulla pariatur. Etiam a odio eget enim aliquet.',
-                        date: '11/11/2020',
-                        isFav: false,
-                        tag: 'important',
-                    },
-                    {
-                        id: 9,
-                        user: 'Robert Garcia',
-                        thumb: 'profile-21.jpeg',
-                        title: "Create a compost pile",
-                        description: 'Zombie ipsum reversus ab viral inferno, nam rick grimes malum cerebro.',
-                        date: '11/12/2020',
-                        isFav: true,
-                        tag: ''
-                    },
-                    {
-                        id: 10,
-                        user: 'Marie Hamilton',
-                        thumb: 'profile-2.jpeg',
-                        title: "Take a hike at a local park",
-                        description: 'De carne lumbering animata corpora quaeritis. Summus brains sit',
-                        date: '11/13/2020',
-                        isFav: true,
-                        tag: ''
-                    },
-                    {
-                        id: 11,
-                        user: 'Megan Meyers',
-                        thumb: 'profile-1.jpeg',
-                        title: "Take a class at local community center that interests you",
-                        description: 'Cupcake ipsum dolor. Sit amet marshmallow topping cheesecake muffin.',
-                        date: '11/13/2020',
-                        isFav: false,
-                        tag: ''
-                    },
-                    {
-                        id: 12,
-                        user: 'Angela Hull',
-                        thumb: 'profile-22.jpeg',
-                        title: "Research a topic interested in",
-                        description: 'Lemon drops tootsie roll marshmallow halvah carrot cake.',
-                        date: '11/14/2020',
-                        isFav: false,
-                        tag: ''
-                    },
-                    {
-                        id: 13,
-                        user: 'Karen Wolf',
-                        thumb: 'profile-23.jpeg',
-                        title: "Plan a trip to another country",
-                        description: 'Space, the final frontier. These are the voyages of the Starship Enterprise.',
-                        date: '11/16/2020',
-                        isFav: true,
-                        tag: ''
-                    },
-                    {
-                        id: 14,
-                        user: 'Jasmine Barnes',
-                        thumb: 'profile-1.jpeg',
-                        title: "Improve touch typing",
-                        description: 'Well, the way they make shows is, they make one show.',
-                        date: '11/16/2020',
-                        isFav: false,
-                        tag: ''
-                    },
-                    {
-                        id: 15,
-                        user: 'Thomas Cox',
-                        thumb: 'profile-11.jpeg',
-                        title: "Learn Express.js",
-                        description: 'Bulbasaur Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                        date: '11/17/2020',
-                        isFav: false,
-                        tag: 'work'
-                    },
-                    {
-                        id: 16,
-                        user: 'Marcus Jones',
-                        thumb: 'profile-12.jpeg',
-                        title: "Learn calligraphy",
-                        description: 'Ivysaur Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                        date: '11/17/2020',
-                        isFav: false,
-                        tag: ''
-                    },
-                    {
-                        id: 17,
-                        user: 'Matthew Gray',
-                        thumb: 'profile-24.jpeg',
-                        title: "Have a photo session with some friends",
-                        description: 'Venusaur Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                        date: '11/18/2020',
-                        isFav: false,
-                        tag: 'important'
-                    },
-                    {
-                        id: 18,
-                        user: 'Chad Davis',
-                        thumb: 'profile-31.jpeg',
-                        title: "Go to the gym",
-                        description: 'Charmander Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                        date: '11/18/2020',
-                        isFav: false,
-                        tag: ''
-                    },
-                    {
-                        id: 19,
-                        user: 'Linda Drake',
-                        thumb: 'profile-23.jpeg',
-                        title: "Make own LEGO creation",
-                        description: 'Charmeleon Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                        date: '11/18/2020',
-                        isFav: false,
-                        tag: 'social'
-                    },
-                    {
-                        id: 20,
-                        user: 'Kathleen Flores',
-                        thumb: 'profile-34.jpeg',
-                        title: "Take cat on a walk",
-                        description: 'Baseball ipsum dolor sit amet cellar rubber win hack tossed. ',
-                        date: '11/18/2020',
-                        isFav: false,
-                        tag: 'personal'
-                    }
-                ],
-                filterdNotesList: '',
-                selectedTab: 'all',
-                deletedNote: null,
-                selectedNote: {
-                    id: null,
-                    title: '',
-                    description: '',
-                    tag: '',
-                    user: '',
-                    thumb: ''
-                },
-
+                isAddEventModal: false,
+                minStartDate: '',
+                minEndDate: '',
+                calendar: null,
+                now: new Date(),
+                events: [],
                 init() {
-                    this.searchNotes();
+                    this.events = [{
+                            id: 1,
+                            title: 'All Day Event',
+                            start: this.now.getFullYear() + '-' + this.getMonth(this.now) +
+                                '-01T14:30:00',
+                            end: this.now.getFullYear() + '-' + this.getMonth(this.now) +
+                                '-02T14:30:00',
+                            className: 'danger',
+                            description: 'Aenean fermentum quam vel sapien rutrum cursus. Vestibulum imperdiet finibus odio, nec tincidunt felis facilisis eu.',
+                        },
+                        {
+                            id: 2,
+                            title: 'Site Visit',
+                            start: this.now.getFullYear() + '-' + this.getMonth(this.now) +
+                                '-07T19:30:00',
+                            end: this.now.getFullYear() + '-' + this.getMonth(this.now) +
+                                '-08T14:30:00',
+                            className: 'primary',
+                            description: 'Etiam a odio eget enim aliquet laoreet. Vivamus auctor nunc ultrices varius lobortis.',
+                        },
+                        {
+                            id: 3,
+                            title: 'Product Lunching Event',
+                            start: this.now.getFullYear() + '-' + this.getMonth(this.now) +
+                                '-17T14:30:00',
+                            end: this.now.getFullYear() + '-' + this.getMonth(this.now) +
+                                '-18T14:30:00',
+                            className: 'info',
+                            description: 'Proin et consectetur nibh. Mauris et mollis purus. Ut nec tincidunt lacus. Nam at rutrum justo, vitae egestas dolor.',
+                        },
+                       
+                        {
+                            id: 13,
+                            title: 'Upcoming Event',
+                            start: this.now.getFullYear() + '-' + this.getMonth(this.now, 1) +
+                                '-15T08:12:14',
+                            end: this.now.getFullYear() + '-' + this.getMonth(this.now, 1) +
+                                '-18T22:20:20',
+                            className: 'primary',
+                            description: 'Pellentesque ut convallis velit. Sed purus urna, aliquam et pharetra ut, efficitur id mi. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+                        },
+                    ];
+                    var calendarEl = document.getElementById('calendar');
+                    this.calendar = new FullCalendar.Calendar(calendarEl, {
+                        initialView: 'dayGridMonth',
+                        headerToolbar: {
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+                        },
+                        editable: true,
+                        dayMaxEvents: true,
+                        selectable: true,
+                        droppable: true,
+                        eventClick: (event) => {
+                            this.editEvent(event);
+                        },
+                        select: (event) => {
+                            this.editDate(event)
+                        },
+                        events: this.events,
+                    });
+                    this.calendar.render();
+
+                    this.$watch('$store.app.sidebar', () => {
+                        setTimeout(() => {
+                            this.calendar.render();
+                        }, 300);
+                    });
                 },
 
-                searchNotes() {
-                    if (this.selectedTab != 'fav') {
-                        if (this.selectedTab != 'all' || this.selectedTab === 'delete') {
-                            this.filterdNotesList = this.notesList.filter((d) => d.tag === this
-                                .selectedTab);
-                        } else {
-                            this.filterdNotesList = this.notesList;
-                        }
-                    } else {
-                        this.filterdNotesList = this.notesList.filter((d) => d.isFav);
-                    }
+                getMonth(dt, add = 0) {
+                    let month = dt.getMonth() + 1 + add;
+                    return dt.getMonth() < 10 ? '0' + month : month;
                 },
 
-                saveNote() {
-                    if (!this.params.title) {
-                        this.showMessage('Title is required.', 'error');
-                        return false;
-                    }
-                    if (this.params.id) {
-                        //update task
-                        let note = this.notesList.find((d) => d.id === this.params.id);
-                        note.title = this.params.title;
-                        note.user = this.params.user;
-                        note.description = this.params.description;
-                        note.tag = this.params.tag;
-                    } else {
-                        //add note
-                        let maxNoteId = this.notesList.length ? this.notesList.reduce((max,
-                                character) => (character.id > max ? character.id : max), this
-                            .notesList[
-                                0].id) : 0;
-                        if (!maxNoteId) {
-                            maxNoteId = 0;
-                        }
-                        let dt = new Date();
-                        let note = {
-                            id: maxNoteId + 1,
-                            title: this.params.title,
-                            user: this.params.user,
-                            thumb: 'profile-21.jpeg',
-                            description: this.params.description,
-                            date: dt.getDate() + '/' + Number(dt.getMonth()) + 1 + '/' + dt
-                                .getFullYear(),
-                            isFav: false,
-                            tag: this.params.tag,
+                editEvent(data) {
+                    this.params = JSON.parse(JSON.stringify(this.defaultParams));
+                    if (data) {
+                        let obj = JSON.parse(JSON.stringify(data.event));
+                        this.params = {
+                            id: obj.id ? obj.id : null,
+                            title: obj.title ? obj.title : null,
+                            start: this.dateFormat(obj.start),
+                            end: this.dateFormat(obj.end),
+                            type: obj.classNames ? obj.classNames[0] : 'primary',
+                            description: obj.extendedProps ? obj.extendedProps.description : '',
                         };
-                        this.notesList.splice(0, 0, note);
-                        this.searchNotes();
+                        this.minStartDate = new Date();
+                        this.minEndDate = this.dateFormat(obj.start);
+                    } else {
+                        this.minStartDate = new Date();
+                        this.minEndDate = new Date();
                     }
 
-                    this.showMessage('Note has been saved successfully.');
-                    this.isAddNoteModal = false;
-                    this.searchNotes();
+                    this.isAddEventModal = true;
                 },
 
-                tabChanged(type) {
-                    this.selectedTab = type;
-                    this.searchNotes();
-                    this.isShowNoteMenu = false;
+                editDate(data) {
+                    let obj = {
+                        event: {
+                            start: data.start,
+                            end: data.end
+                        },
+                    };
+                    this.editEvent(obj);
                 },
 
-                setFav(note) {
-                    let item = this.filterdNotesList.find((d) => d.id === note.id);
-                    item.isFav = !item.isFav;
-                    this.searchNotes();
+                dateFormat(dt) {
+                    dt = new Date(dt);
+                    const month = dt.getMonth() + 1 < 10 ? '0' + (dt.getMonth() + 1) : dt.getMonth() +
+                    1;
+                    const date = dt.getDate() < 10 ? '0' + dt.getDate() : dt.getDate();
+                    const hours = dt.getHours() < 10 ? '0' + dt.getHours() : dt.getHours();
+                    const mins = dt.getMinutes() < 10 ? '0' + dt.getMinutes() : dt.getMinutes();
+                    dt = dt.getFullYear() + '-' + month + '-' + date + 'T' + hours + ':' + mins;
+                    return dt;
                 },
 
-                setTag(note, name) {
-                    let item = this.filterdNotesList.find((d) => d.id === note.id);
-                    item.tag = name;
-                    this.searchNotes();
-                },
+                saveEvent() {
+                    if (!this.params.title) {
+                        return true;
+                    }
+                    if (!this.params.start) {
+                        return true;
+                    }
+                    if (!this.params.end) {
+                        return true;
+                    }
 
-                deleteNoteConfirm(note) {
-                    setTimeout(() => {
-                        this.deletedNote = note;
-                        this.isDeleteNoteModal = true;
-                    });
-                },
-
-                viewNote(note) {
-                    setTimeout(() => {
-                        this.selectedNote = note;
-                        this.isViewNoteModal = true;
-                    });
-                },
-
-                editNote(note) {
-                    this.isShowNoteMenu = false;
-                    setTimeout(() => {
-                        this.params = JSON.parse(JSON.stringify(this.defaultParams));
-                        if (note) {
-                            this.params = JSON.parse(JSON.stringify(note));
+                    if (this.params.id) {
+                        //update event
+                        let event = this.events.find((d) => d.id == this.params.id);
+                        event.title = this.params.title;
+                        event.start = this.params.start;
+                        event.end = this.params.end;
+                        event.description = this.params.description;
+                        event.className = this.params.type;
+                    } else {
+                        //add event
+                        let maxEventId = 0;
+                        if (this.events) {
+                            maxEventId = this.events.reduce(
+                                (max, character) => (character.id > max ? character.id : max),
+                                this.events[0].id
+                            );
                         }
-                        this.isAddNoteModal = true;
-                    });
+
+                        let event = {
+                            id: maxEventId + 1,
+                            title: this.params.title,
+                            start: this.params.start,
+                            end: this.params.end,
+                            description: this.params.description,
+                            className: this.params.type,
+                        };
+                        this.events.push(event);
+                    }
+                    this.calendar.getEventSources()[0].refetch() //refresh Calendar
+                    this.showMessage('Event has been saved successfully.');
+                    this.isAddEventModal = false;
                 },
 
-                deleteNote() {
-                    this.notesList = this.notesList.filter((d) => d.id != this.deletedNote.id);
-                    this.searchNotes();
-                    this.showMessage('Note has been deleted successfully.');
-                    this.isDeleteNoteModal = false;
+                startDateChange(event) {
+                    const dateStr = event.target.value;
+                    if (dateStr) {
+                        this.minEndDate = this.dateFormat(dateStr);
+                        this.params.end = '';
+                    }
                 },
 
                 showMessage(msg = '', type = 'success') {
@@ -988,8 +1323,11 @@
                         padding: '10px 20px',
                     });
                 }
-
             }));
         });
     </script>
+
+            <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
+
+
 </x-layout.default>

@@ -66,7 +66,10 @@ use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
 use App\Http\Controllers\areacomercial\ContactoController;
 use App\Http\Controllers\areacomercial\EmpresaController;
+use App\Http\Controllers\areacomercial\NoteController;
 use App\Http\Controllers\areacomercial\ObservacionController;
+use App\Http\Controllers\areacomercial\ScrumboarddController;
+use App\Http\Controllers\areacomercial\TagController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GuiaController;
@@ -1035,3 +1038,50 @@ Route::resource('observaciones', ObservacionController::class)->only([
 
 Route::get('observaciones/{task}/edit', [ObservacionController::class, 'edit'])
     ->name('observaciones.edit');
+
+
+Route::prefix('scrumboard')->group(function () {
+    // Obtener proyectos
+    Route::get('/projects', [ScrumboarddController::class, 'index']);
+    
+    // Proyectos CRUD
+    Route::post('/projects', [ScrumboarddController::class, 'store']);
+    Route::put('/projects/{project}', [ScrumboarddController::class, 'update']);
+    Route::delete('/projects/{project}', [ScrumboarddController::class, 'destroy']);
+    Route::post('/projects/{project}/clear-tasks', [ScrumboarddController::class, 'clearTasks']);
+    
+    // Tareas CRUD
+    Route::post('/tasks', [ScrumboarddController::class, 'storeTask']);
+    Route::put('/tasks/{task}', [ScrumboarddController::class, 'updateTask']);
+    Route::delete('/tasks/{task}', [ScrumboarddController::class, 'destroyTask']);
+    Route::post('/tasks/move', [ScrumboarddController::class, 'moveTask']);
+});
+
+
+
+
+Route::middleware(['auth'])->group(function () {
+    // Rutas para Notas
+    Route::prefix('notes')->group(function () {
+        Route::get('/', [NoteController::class, 'index'])->name('notes.index');
+        Route::post('/', [NoteController::class, 'store'])->name('notes.store');
+        Route::get('/create', [NoteController::class, 'create'])->name('notes.create');
+        Route::get('/{note}', [NoteController::class, 'show'])->name('notes.show');
+        Route::put('/{note}', [NoteController::class, 'update'])->name('notes.update');
+        Route::delete('/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
+        Route::get('/{note}/edit', [NoteController::class, 'edit'])->name('notes.edit');
+        Route::patch('/{note}/toggle-favorite', [NoteController::class, 'toggleFavorite'])->name('notes.toggle-favorite');
+        Route::patch('/{note}/update-tag', [NoteController::class, 'updateTag'])->name('notes.update-tag');
+    });
+
+    // Rutas para Tags
+    Route::prefix('tags')->group(function () {
+        Route::get('/', [TagController::class, 'index'])->name('tags.index');
+        Route::post('/', [TagController::class, 'store'])->name('tags.store');
+        Route::get('/create', [TagController::class, 'create'])->name('tags.create');
+        Route::get('/{tag}', [TagController::class, 'show'])->name('tags.show');
+        Route::put('/{tag}', [TagController::class, 'update'])->name('tags.update');
+        Route::delete('/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
+        Route::get('/{tag}/edit', [TagController::class, 'edit'])->name('tags.edit');
+    });
+});

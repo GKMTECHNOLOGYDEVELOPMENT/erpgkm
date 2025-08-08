@@ -1,348 +1,395 @@
-
-    <script src="/assets/js/Sortable.min.js"></script>
-    <div x-data="scrumboard">
-
-        <div>
-            <button type="button" class="btn btn-primary flex" @click="addEditProject()">
-
-                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-                    class="w-5 h-5 ltr:mr-3 rtl:ml-3">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Add Project
-            </button>
+<div x-data="notes">
+    <div class="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full">
+        <!-- Sidebar -->
+        <div class="bg-black/60 z-10 w-full h-full rounded-md absolute hidden"
+             :class="{ '!block xl:!hidden': isShowNoteMenu }" @click="isShowNoteMenu = !isShowNoteMenu"></div>
+        
+        <div class="panel p-4 flex-none w-[240px] absolute xl:relative z-10 space-y-4 h-full xl:h-auto hidden xl:block ltr:lg:rounded-r-md ltr:rounded-r-none rtl:lg:rounded-l-md rtl:rounded-l-none overflow-hidden"
+             :class="{ 'hidden shadow': !isShowNoteMenu, 'h-full ltr:left-0 rtl:right-0': isShowNoteMenu }">
+            <div class="flex flex-col h-full pb-16">
+                <div class="flex text-center items-center">
+                    <div class="shrink-0">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                            <path d="M20.3116 12.6473L20.8293 10.7154C21.4335 8.46034 21.7356 7.3328 21.5081 6.35703C21.3285 5.58657 20.9244 4.88668 20.347 4.34587C19.6157 3.66095 18.4881 3.35883 16.2331 2.75458C13.978 2.15033 12.8504 1.84821 11.8747 2.07573C11.1042 2.25537 10.4043 2.65945 9.86351 3.23687C9.27709 3.86298 8.97128 4.77957 8.51621 6.44561C8.43979 6.7254 8.35915 7.02633 8.27227 7.35057L8.27222 7.35077L7.75458 9.28263C7.15033 11.5377 6.84821 12.6652 7.07573 13.641C7.25537 14.4115 7.65945 15.1114 8.23687 15.6522C8.96815 16.3371 10.0957 16.6392 12.3508 17.2435L12.3508 17.2435C14.3834 17.7881 15.4999 18.0873 16.415 17.9744C16.5152 17.9621 16.6129 17.9448 16.7092 17.9223C17.4796 17.7427 18.1795 17.3386 18.7203 16.7612C19.4052 16.0299 19.7074 14.9024 20.3116 12.6473Z" stroke="currentColor" stroke-width="1.5" />
+                            <path opacity="0.5" d="M16.415 17.9741C16.2065 18.6126 15.8399 19.1902 15.347 19.6519C14.6157 20.3368 13.4881 20.6389 11.2331 21.2432C8.97798 21.8474 7.85044 22.1495 6.87466 21.922C6.10421 21.7424 5.40432 21.3383 4.86351 20.7609C4.17859 20.0296 3.87647 18.9021 3.27222 16.647L2.75458 14.7151C2.15033 12.46 1.84821 11.3325 2.07573 10.3567C2.25537 9.58627 2.65945 8.88638 3.23687 8.34557C3.96815 7.66065 5.09569 7.35853 7.35077 6.75428C7.77741 6.63996 8.16368 6.53646 8.51621 6.44531" stroke="currentColor" stroke-width="1.5" />
+                            <path d="M11.7769 10L16.6065 11.2941" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            <path opacity="0.5" d="M11 12.8975L13.8978 13.6739" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold ltr:ml-3 rtl:mr-3">Notes</h3>
+                </div>
+                
+                <div class="h-px w-full border-b border-[#e0e6ed] dark:border-[#1b2e4b] my-4"></div>
+                
+                <div class="perfect-scrollbar relative pr-3.5 -mr-3.5 h-full grow">
+                    <div class="space-y-1">
+                        <button type="button"
+                                class="w-full flex justify-between items-center p-2 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium h-10"
+                                :class="{'bg-gray-100 dark:text-primary text-primary dark:bg-[#181F32]': selectedTab === 'all'}"
+                                @click="tabChanged('all')">
+                            <div class="flex items-center">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0">
+                                    <path d="M18.18 8.03933L18.6435 7.57589C19.4113 6.80804 20.6563 6.80804 21.4241 7.57589C22.192 8.34374 22.192 9.58868 21.4241 10.3565L20.9607 10.82M18.18 8.03933C18.18 8.03933 18.238 9.02414 19.1069 9.89309C19.9759 10.762 20.9607 10.82 20.9607 10.82M18.18 8.03933L13.9194 12.2999C13.6308 12.5885 13.4865 12.7328 13.3624 12.8919C13.2161 13.0796 13.0906 13.2827 12.9882 13.4975C12.9014 13.6797 12.8368 13.8732 12.7078 14.2604L12.2946 15.5L12.1609 15.901M20.9607 10.82L16.7001 15.0806C16.4115 15.3692 16.2672 15.5135 16.1081 15.6376C15.9204 15.7839 15.7173 15.9094 15.5025 16.0118C15.3203 16.0986 15.1268 16.1632 14.7396 16.2922L13.5 16.7054L13.099 16.8391M13.099 16.8391L12.6979 16.9728C12.5074 17.0363 12.2973 16.9867 12.1553 16.8447C12.0133 16.7027 11.9637 16.4926 12.0272 16.3021L12.1609 15.901M13.099 16.8391L12.1609 15.901" stroke="currentColor" stroke-width="1.5" />
+                                    <path d="M8 13H10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                    <path d="M8 9H14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                    <path d="M8 17H9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                    <path opacity="0.5" d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="currentColor" stroke-width="1.5" />
+                                </svg>
+                                <div class="ltr:ml-3 rtl:mr-3">All Notes</div>
+                            </div>
+                        </button>
+                        
+                        <button type="button"
+                                class="w-full flex justify-between items-center p-2 hover:bg-white-dark/10 rounded-md dark:hover:text-primary hover:text-primary dark:hover:bg-[#181F32] font-medium h-10"
+                                :class="{'bg-gray-100 dark:text-primary text-primary dark:bg-[#181F32]': selectedTab === 'fav'}"
+                                @click="tabChanged('fav')">
+                            <div class="flex items-center">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 shrink-0">
+                                    <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" stroke="currentColor" stroke-width="1.5"></path>
+                                </svg>
+                                <div class="ltr:ml-3 rtl:mr-3">Favourites</div>
+                            </div>
+                        </button>
+                        
+                        <div class="h-px w-full border-b border-[#e0e6ed] dark:border-[#1b2e4b]"></div>
+                        
+                        <div class="px-1 py-3 text-white-dark">Tags</div>
+                        
+                        <template x-for="tag in tagsList" :key="tag.id">
+                            <button type="button"
+                                    class="w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium ltr:hover:pl-3 rtl:hover:pr-3 duration-300"
+                                    :class="{
+                                        'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]': selectedTab === tag.name,
+                                        'text-primary': tag.name === 'personal',
+                                        'text-warning': tag.name === 'work',
+                                        'text-info': tag.name === 'social',
+                                        'text-danger': tag.name === 'important'
+                                    }"
+                                    @click="tabChanged(tag.name)">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 rotate-45 shrink-0"
+                                     :class="{
+                                         'fill-primary': tag.name === 'personal',
+                                         'fill-warning': tag.name === 'work',
+                                         'fill-info': tag.name === 'social',
+                                         'fill-danger': tag.name === 'important'
+                                     }">
+                                    <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"></path>
+                                </svg>
+                                <div class="ltr:ml-3 rtl:mr-3" x-text="tag.name"></div>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ltr:left-0 rtl:right-0 absolute bottom-0 p-4 w-full">
+                <button class="btn btn-primary w-full" type="button" @click="editNote">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 ltr:mr-2 rtl:ml-2 shrink-0">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add New Note
+                </button>
+            </div>
         </div>
 
-        <!-- project list -->
-        <div class="relative pt-5">
-            <div class="perfect-scrollbar h-full -mx-2">
-                <div class="overflow-x-auto flex items-start flex-nowrap gap-5 pb-2 px-2">
-                    <template x-for="project in projectList" :key="project.id">
-                        <div class="panel w-80 flex-none">
-                            <div class="flex justify-between mb-5">
-                                <h4 x-text="project.title" class="text-base font-semibold"> </h4>
-
-                                <div class="flex items-center">
-                                    <button type="button" class="hover:text-primary ltr:mr-2 rtl:ml-2"
-                                        @click="addEditTask(project.id)">
-
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                            <circle opacity="0.5" cx="12" cy="12" r="10"
-                                                stroke="currentColor" stroke-width="1.5" />
-                                            <path d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15"
-                                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                        </svg>
-                                    </button>
-                                    <div x-data="dropdown" @click.outside="open = false" class="dropdown">
-                                        <button type="button" class="hover:text-primary" @click="toggle">
-
-                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="w-5 h-5 opacity-70 hover:opacity-100">
-                                                <circle cx="5" cy="12" r="2"
-                                                    stroke="currentColor" stroke-width="1.5"></circle>
-                                                <circle opacity="0.5" cx="12" cy="12" r="2"
-                                                    stroke="currentColor" stroke-width="1.5"></circle>
-                                                <circle cx="19" cy="12" r="2"
-                                                    stroke="currentColor" stroke-width="1.5"></circle>
-                                            </svg>
-                                        </button>
-                                        <ul x-cloak x-show="open" x-transition x-transition.duration.300ms
-                                            class="ltr:right-0 rtl:left-0">
-                                            <li><a href="javascript:;" @click="toggle, addEditProject(project)">Edit</a>
-                                            </li>
-                                            <li><a href="javascript:;"
-                                                    @click="toggle, deleteProject(project)">Delete</a></li>
-                                            <li><a href="javascript:;" @click="toggle, clearProjects(project)">Clear
-                                                    All</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- task list -->
-                            <div class="sortable-list min-h-[150px]" :data-id="project.id">
-                                <template x-for="task in project.tasks">
-                                    <div :key="project.id + '' + task.id" :data-id="project.id + '' + task.id"
-                                        class="shadow bg-[#f4f4f4] dark:bg-[#262e40] p-3 pb-5 rounded-md mb-5 space-y-3 cursor-move">
-                                        <template x-if="task.image">
-                                            <img src="/assets/images/carousel1.jpeg"
-                                                alt="images" class="h-32 w-full object-cover rounded-md" />
-                                        </template>
-                                        <div class="text-base font-medium" x-text="task.title"></div>
-                                        <p class="break-all" x-text="task.description"></p>
-                                        <div class="flex gap-2 items-center flex-wrap">
-                                            <template x-if="task.tags?.length">
-                                                <template x-for="(tag , i) in task.tags" :key="i">
-                                                    <div class="btn px-2 py-1 flex btn-outline-primary">
-                                                        <svg width="24" height="24" viewBox="0 0 24 24"
-                                                            fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                            class="w-5 h-5 shrink-0">
-                                                            <path
-                                                                d="M4.72848 16.1369C3.18295 14.5914 2.41018 13.8186 2.12264 12.816C1.83509 11.8134 2.08083 10.7485 2.57231 8.61875L2.85574 7.39057C3.26922 5.59881 3.47597 4.70292 4.08944 4.08944C4.70292 3.47597 5.59881 3.26922 7.39057 2.85574L8.61875 2.57231C10.7485 2.08083 11.8134 1.83509 12.816 2.12264C13.8186 2.41018 14.5914 3.18295 16.1369 4.72848L17.9665 6.55812C20.6555 9.24711 22 10.5916 22 12.2623C22 13.933 20.6555 15.2775 17.9665 17.9665C15.2775 20.6555 13.933 22 12.2623 22C10.5916 22 9.24711 20.6555 6.55812 17.9665L4.72848 16.1369Z"
-                                                                stroke="currentColor" stroke-width="1.5" />
-                                                            <circle opacity="0.5" cx="8.60699" cy="8.87891"
-                                                                r="2" transform="rotate(-45 8.60699 8.87891)"
-                                                                stroke="currentColor" stroke-width="1.5" />
-                                                            <path opacity="0.5" d="M11.5417 18.5L18.5208 11.5208"
-                                                                stroke="currentColor" stroke-width="1.5"
-                                                                stroke-linecap="round" />
-                                                        </svg>
-                                                        <span class="ltr:ml-2 rtl:mr-2" x-text="tag"></span>
+        <!-- Main Content -->
+        <div class="panel flex-1 overflow-auto h-full">
+            <div class="pb-5">
+                <button type="button" class="xl:hidden hover:text-primary" @click="isShowNoteMenu = !isShowNoteMenu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+                        <path d="M20 7L4 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        <path opacity="0.5" d="M20 12L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                        <path d="M20 17L4 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <template x-if="loading">
+                <div class="flex justify-center items-center py-10">
+                    <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+            </template>
+            
+            <template x-if="!loading && !filterdNotesList.length">
+                <div class="flex justify-center items-center sm:min-h-[300px] min-h-[400px] font-semibold text-lg h-full">
+                    No notes found
+                </div>
+            </template>
+            
+            <template x-if="!loading && filterdNotesList.length">
+                <div class="sm:min-h-[300px] min-h-[400px]">
+                    <div class="grid 2xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5">
+                        <template x-for="note in filterdNotesList" :key="note.id">
+                            <div class="panel pb-12"
+                                 :class="{
+                                     'bg-primary-light shadow-primary': note.tag === 'personal',
+                                     'bg-warning-light shadow-warning': note.tag === 'work',
+                                     'bg-info-light shadow-info': note.tag === 'social',
+                                     'bg-danger-light shadow-danger': note.tag === 'important',
+                                     'dark:shadow-dark': !note.tag
+                                 }">
+                                <div class="min-h-[142px]">
+                                    <div class="flex justify-between">
+                                        <div class="flex items-center w-max">
+                                            <div class="flex-none">
+                                                <template x-if="note.thumb">
+                                                    <div class="p-0.5 bg-gray-300 dark:bg-gray-700 rounded-full">
+                                                        <img class="h-8 w-8 rounded-full object-cover" :src="`/assets/images/${note.thumb}`" />
                                                     </div>
                                                 </template>
-                                            </template>
-                                            <template x-if="!task.tags?.length">
-                                                <div
-                                                    class="btn px-2 py-1 flex text-white-dark dark:border-white-dark/50 shadow-none">
-                                                    <svg width="24" height="24" viewBox="0 0 24 24"
-                                                        fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                        class="w-5 h-5 shrink-0">
-                                                        <path
-                                                            d="M4.72848 16.1369C3.18295 14.5914 2.41018 13.8186 2.12264 12.816C1.83509 11.8134 2.08083 10.7485 2.57231 8.61875L2.85574 7.39057C3.26922 5.59881 3.47597 4.70292 4.08944 4.08944C4.70292 3.47597 5.59881 3.26922 7.39057 2.85574L8.61875 2.57231C10.7485 2.08083 11.8134 1.83509 12.816 2.12264C13.8186 2.41018 14.5914 3.18295 16.1369 4.72848L17.9665 6.55812C20.6555 9.24711 22 10.5916 22 12.2623C22 13.933 20.6555 15.2775 17.9665 17.9665C15.2775 20.6555 13.933 22 12.2623 22C10.5916 22 9.24711 20.6555 6.55812 17.9665L4.72848 16.1369Z"
-                                                            stroke="currentColor" stroke-width="1.5" />
-                                                        <circle opacity="0.5" cx="8.60699" cy="8.87891"
-                                                            r="2" transform="rotate(-45 8.60699 8.87891)"
-                                                            stroke="currentColor" stroke-width="1.5" />
-                                                        <path opacity="0.5" d="M11.5417 18.5L18.5208 11.5208"
-                                                            stroke="currentColor" stroke-width="1.5"
-                                                            stroke-linecap="round" />
-                                                    </svg>
-                                                    <span class="ltr:ml-2 rtl:mr-2">No Tags</span>
-                                                </div>
-                                            </template>
+                                                <template x-if="!note.thumb && note.user">
+                                                    <div class="grid place-content-center h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-700 text-sm font-semibold"
+                                                         x-text="note.user.charAt(0) + '' + note.user.charAt(note.user.indexOf(' ') + 1)">
+                                                    </div>
+                                                </template>
+                                                <template x-if="!note.thumb && !note.user">
+                                                    <div class="bg-gray-300 dark:bg-gray-700 rounded-full p-2">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                                                            <circle cx="12" cy="6" r="4" stroke="currentColor" stroke-width="1.5"></circle>
+                                                            <ellipse opacity="0.5" cx="12" cy="17" rx="7" ry="4" stroke="currentColor" stroke-width="1.5"></ellipse>
+                                                        </svg>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            <div class="ltr:ml-2 rtl:mr-2">
+                                                <div class="font-semibold" x-text="note.user"></div>
+                                                <div class="text-sx text-white-dark" x-text="note.date"></div>
+                                            </div>
                                         </div>
-                                        <div class="flex items-center justify-between">
-                                            <div class="font-medium flex items-center hover:text-primary">
-
-                                                <svg width="24" height="24" viewBox="0 0 24 24"
-                                                    fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                    class="w-5 h-5 ltr:mr-3 rtl:ml-3 shrink-0">
-                                                    <path
-                                                        d="M2 12C2 8.22876 2 6.34315 3.17157 5.17157C4.34315 4 6.22876 4 10 4H14C17.7712 4 19.6569 4 20.8284 5.17157C22 6.34315 22 8.22876 22 12V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V12Z"
-                                                        stroke="currentColor" stroke-width="1.5" />
-                                                    <path opacity="0.5" d="M7 4V2.5" stroke="currentColor"
-                                                        stroke-width="1.5" stroke-linecap="round" />
-                                                    <path opacity="0.5" d="M17 4V2.5" stroke="currentColor"
-                                                        stroke-width="1.5" stroke-linecap="round" />
-                                                    <path opacity="0.5" d="M2 9H22" stroke="currentColor"
-                                                        stroke-width="1.5" stroke-linecap="round" />
+                                        <div x-data="dropdown" @click.outside="open = false" class="dropdown">
+                                            <button type="button" class="text-primary" @click="toggle">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 rotate-90 opacity-70 hover:opacity-100">
+                                                    <circle cx="5" cy="12" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                                                    <circle opacity="0.5" cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1.5"></circle>
+                                                    <circle cx="19" cy="12" r="2" stroke="currentColor" stroke-width="1.5"></circle>
                                                 </svg>
-                                                <span x-text="task.date"></span>
-                                            </div>
-                                            <div class="flex items-center">
-                                                <button type="button" class="hover:text-info"
-                                                    @click="addEditTask(project.id, task)">
-
-                                                    <svg width="24" height="24" viewBox="0 0 24 24"
-                                                        fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                        class="w-5 h-5 ltr:mr-3 rtl:ml-3">
-                                                        <path opacity="0.5"
-                                                            d="M22 10.5V12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2H13.5"
-                                                            stroke="currentColor" stroke-width="1.5"
-                                                            stroke-linecap="round" />
-                                                        <path
-                                                            d="M17.3009 2.80624L16.652 3.45506L10.6872 9.41993C10.2832 9.82394 10.0812 10.0259 9.90743 10.2487C9.70249 10.5114 9.52679 10.7957 9.38344 11.0965C9.26191 11.3515 9.17157 11.6225 8.99089 12.1646L8.41242 13.9L8.03811 15.0229C7.9492 15.2897 8.01862 15.5837 8.21744 15.7826C8.41626 15.9814 8.71035 16.0508 8.97709 15.9619L10.1 15.5876L11.8354 15.0091C12.3775 14.8284 12.6485 14.7381 12.9035 14.6166C13.2043 14.4732 13.4886 14.2975 13.7513 14.0926C13.9741 13.9188 14.1761 13.7168 14.5801 13.3128L20.5449 7.34795L21.1938 6.69914C22.2687 5.62415 22.2687 3.88124 21.1938 2.80624C20.1188 1.73125 18.3759 1.73125 17.3009 2.80624Z"
-                                                            stroke="currentColor" stroke-width="1.5" />
-                                                        <path opacity="0.5"
-                                                            d="M16.6522 3.45508C16.6522 3.45508 16.7333 4.83381 17.9499 6.05034C19.1664 7.26687 20.5451 7.34797 20.5451 7.34797M10.1002 15.5876L8.4126 13.9"
-                                                            stroke="currentColor" stroke-width="1.5" />
-                                                    </svg>
-                                                </button>
-                                                <button type="button" class="hover:text-danger"
-                                                    @click="deleteConfirmModal(project.id, task)">
-
-                                                    <svg width="24" height="24" viewBox="0 0 24 24"
-                                                        fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                        class="w-5 h-5">
-                                                        <path opacity="0.5"
-                                                            d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4"
-                                                            stroke="currentColor" stroke-width="1.5"
-                                                            stroke-linecap="round"></path>
-                                                        <path d="M20.5001 6H3.5" stroke="currentColor"
-                                                            stroke-width="1.5" stroke-linecap="round"></path>
-                                                        <path
-                                                            d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5"
-                                                            stroke="currentColor" stroke-width="1.5"
-                                                            stroke-linecap="round"></path>
-                                                        <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor"
-                                                            stroke-width="1.5" stroke-linecap="round"></path>
-                                                        <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor"
-                                                            stroke-width="1.5" stroke-linecap="round"></path>
-                                                    </svg>
-                                                </button>
-                                            </div>
+                                            </button>
+                                            <ul x-cloak x-show="open" x-transition x-transition.duration.300ms class="ltr:right-0 rtl:left-0 text-sm font-medium">
+                                                <li>
+                                                    <button class="w-full" @click="toggle, editNote(note)">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ltr:mr-3 rtl:ml-3 shrink-0">
+                                                            <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
+                                                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
+                                                        </svg>
+                                                        Edit
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="w-full" @click="toggle, deleteNoteConfirm(note)">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 ltr:mr-3 rtl:ml-3 shrink-0">
+                                                            <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                                            <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                                            <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                                            <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                                            <path opacity="0.5" d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="currentColor" stroke-width="1.5"></path>
+                                                        </svg>
+                                                        Delete
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button class="w-full" @click="toggle, viewNote(note)">
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 ltr:mr-3 rtl:ml-3 shrink-0">
+                                                            <path opacity="0.5" d="M3.27489 15.2957C2.42496 14.1915 2 13.6394 2 12C2 10.3606 2.42496 9.80853 3.27489 8.70433C4.97196 6.49956 7.81811 4 12 4C16.1819 4 19.028 6.49956 20.7251 8.70433C21.575 9.80853 22 10.3606 22 12C22 13.6394 21.575 14.1915 20.7251 15.2957C19.028 17.5004 16.1819 20 12 20C7.81811 20 4.97196 17.5004 3.27489 15.2957Z" stroke="currentColor" stroke-width="1.5" />
+                                                            <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="1.5" />
+                                                        </svg>
+                                                        View
+                                                    </button>
+                                                </li>
+                                            </ul>
                                         </div>
                                     </div>
-                                </template>
-                            </div>
-
-                            <div class="pt-3">
-                                <button type="button" class="btn btn-primary mx-auto"
-                                    @click="addEditTask(project.id)">
-
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                        stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                                    </svg>
-                                    Add Task
-                                </button>
-                            </div>
-
-                        </div>
-                    </template>
-                </div>
-            </div>
-        </div>
-        <!-- add project modal -->
-        <div class="fixed inset-0 bg-[black]/60 z-[999] px-4 overflow-y-auto hidden"
-            :class="isAddProjectModal && '!block'">
-            <div class="flex items-center justify-center min-h-screen">
-                <div x-show="isAddProjectModal" x-transition x-transition.duration.300
-                    @click.outside="isAddProjectModal = false"
-                    class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
-                    <button type="button"
-                        class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark"
-                        @click="isAddProjectModal = false">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-6 h-6">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                    <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]"
-                        x-text="params.id ? 'Edit Project' : 'Add Project'"></div>
-                    <div class="p-5">
-                        <form @submit.prevent="saveProject">
-                            <div class="grid gap-5">
-                                <div>
-                                    <label for="title">Name</label>
-                                    <input id="title" x-model="params.title" type="text"
-                                        class="form-input mt-1" placeholder="Enter Name" />
+                                    <div>
+                                        <h4 class="font-semibold mt-4" x-text="note.title"></h4>
+                                        <p class="text-white-dark mt-2" x-text="note.description"></p>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-5 left-0 w-full px-5">
+                                    <div class="flex items-center justify-between mt-2">
+                                        <div>
+                                            <div x-data="dropdown" @click.outside="open = false" class="dropdown">
+                                                <a href="javascript:;"
+                                                   :class="{
+                                                       'text-primary': note.tag === 'personal',
+                                                       'text-warning': note.tag === 'work',
+                                                       'text-info': note.tag === 'social',
+                                                       'text-danger': note.tag === 'important',
+                                                   }"
+                                                   @click="toggle">
+                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 rotate-45"
+                                                         :class="{
+                                                             'fill-primary': note.tag === 'personal',
+                                                             'fill-warning': note.tag === 'work',
+                                                             'fill-info': note.tag === 'social',
+                                                             'fill-danger': note.tag === 'important',
+                                                         }">
+                                                        <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"></path>
+                                                    </svg>
+                                                </a>
+                                                <ul x-cloak x-show="open" x-transition x-transition.duration.300ms class="ltr:left-0 rtl:right-0">
+                                                    <template x-for="tag in tagsList" :key="tag.id">
+                                                        <li>
+                                                            <a href="javascript:;" @click="toggle, setTag(note, tag.name)">
+                                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 rotate-45 ltr:mr-2 rtl:ml-2"
+                                                                     :class="{
+                                                                         'fill-primary': tag.name === 'personal',
+                                                                         'fill-warning': tag.name === 'work',
+                                                                         'fill-info': tag.name === 'social',
+                                                                         'fill-danger': tag.name === 'important'
+                                                                     }">
+                                                                    <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="none" stroke-width="1.5"></path>
+                                                                </svg>
+                                                                <span x-text="tag.name"></span>
+                                                            </a>
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <button type="button" class="text-danger" @click="deleteNoteConfirm(note)">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                                    <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                                    <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                                    <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                                    <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                                    <path opacity="0.5" d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="currentColor" stroke-width="1.5"></path>
+                                                </svg>
+                                            </button>
+                                            <button type="button" class="text-warning group ltr:ml-2 rtl:mr-2" @click="setFav(note)">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 group-hover:fill-warning" :class="{ 'fill-warning': note.isFav }">
+                                                    <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" stroke="currentColor" stroke-width="1.5"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="flex justify-end items-center mt-8">
-                                <button type="button" class="btn btn-outline-danger"
-                                    @click="isAddProjectModal = false">Cancel</button>
-                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                                    x-text="params.id ? 'Update' : 'Add'"></button>
-                            </div>
-                        </form>
+                        </template>
                     </div>
                 </div>
-            </div>
+            </template>
         </div>
-
-        <!-- add task modal -->
-        <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto hidden" :class="isAddTaskModal && '!block'">
-            <div class="flex items-center justify-center min-h-screen px-4" @click.self="isAddTaskModal = false">
-                <div x-show="isAddTaskModal" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
-                    <button type="button"
-                        class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark"
-                        @click="isAddTaskModal = false">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-6 h-6">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                    <div x-text="paramsTask.id ? 'Edit Task' : 'Add Task'"
-                        class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                    </div>
-                    <div class="p-5">
-                        <form @submit.prevent="saveTask">
-                            <div class="grid gap-5">
-                                <div>
-                                    <label for="taskTitle">Name</label>
-                                    <input id="taskTitle" x-model="paramsTask.title" type="text"
-                                        class="form-input" placeholder="Enter Name" />
-                                </div>
-
-                                <div>
-                                    <label for="taskTag">Tag</label>
-                                    <input id="taskTag" x-model="paramsTask.tags" type="text"
-                                        class="form-input" placeholder="Enter Tag" />
-                                </div>
-                                <div>
-                                    <label for="taskdesc">Description</label>
-                                    <textarea id="taskdesc" x-model="paramsTask.description" class="form-textarea min-h-[130px]"
-                                        placeholder="Enter Description"></textarea>
-                                </div>
-                            </div>
-
-                            <div class="flex justify-end items-center mt-8">
-                                <button type="button" class="btn btn-outline-danger"
-                                    @click="isAddTaskModal = false">Cancel</button>
-                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                                    x-text="paramsTask.id ? 'Update' : 'Add'"></button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- delete task modal -->
-        <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto hidden" :class="isDeleteModal && '!block'">
-            <div class="flex items-center justify-center min-h-screen px-4 " @click.self="isDeleteModal = false">
-                <div x-show="isDeleteModal" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
-                    <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark"
-                        @click="isDeleteModal = false">
-
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-6 h-6">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                    <div
-                        class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                        Delete Task</div>
-                    <div class="p-5 text-center">
-                        <div class="text-white bg-danger ring-4 ring-danger/30 p-4 rounded-full w-fit mx-auto">
-
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                <path opacity="0.5"
-                                    d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-                                <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round"></path>
-                                <path
-                                    d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5"
-                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
-                                <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round"></path>
-                                <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round"></path>
-                            </svg>
-                        </div>
-                        <div class="text-base sm:w-3/4 mx-auto mt-5">Are you sure you want to delete Task?</div>
-
-                        <div class="flex justify-center items-center mt-8">
-                            <button type="button" class="btn btn-outline-danger"
-                                @click="isDeleteModal = false">Cancel</button>
-                            <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                                @click="deleteTask">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    
+    <!-- Add/Edit Note Modal -->
+    <div class="fixed inset-0 bg-[black]/60 z-[999] px-4 overflow-y-auto hidden" :class="isAddNoteModal && '!block'">
+        <div class="flex items-center justify-center min-h-screen">
+            <div x-show="isAddNoteModal" x-transition x-transition.duration.300 @click.outside="isAddNoteModal = false" class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
+                <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark" @click="isAddNoteModal = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]" x-text="params.id ? 'Edit Note' : 'Add Note'"></div>
+                <div class="p-5">
+                    <form @submit.prevent="saveNote">
+                        <div class="mb-5">
+                            <label for="title">Title</label>
+                            <input id="title" type="text" placeholder="Enter Title" class="form-input" x-model="params.title" required />
+                        </div>
+                        <div class="mb-5">
+                            <label for="tag_id">Tag</label>
+                            <select id="tag_id" class="form-select" x-model="params.tag_id">
+                                <option value="">None</option>
+                                <template x-for="tag in tagsList" :key="tag.id">
+                                    <option :value="tag.id" x-text="tag.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="mb-5">
+                            <label for="description">Description</label>
+                            <textarea id="description" rows="3" class="form-textarea resize-none min-h-[130px]" placeholder="Enter Description" x-model="params.description"></textarea>
+                        </div>
+                        <div class="mb-5">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="form-checkbox" x-model="params.is_favorite">
+                                <span class="ltr:ml-2 rtl:mr-2">Mark as Favorite</span>
+                            </label>
+                        </div>
+                        <div class="flex justify-end items-center mt-8">
+                            <button type="button" class="btn btn-outline-danger gap-2" @click="isAddNoteModal = false">Cancel</button>
+                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4" x-text="params.id ? 'Update Note' : 'Add Note'"></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Note Modal -->
+    <div class="fixed inset-0 bg-[black]/60 z-[999] px-4 overflow-y-auto hidden" :class="isDeleteNoteModal && '!block'">
+        <div class="flex items-center justify-center min-h-screen">
+            <div x-show="isDeleteNoteModal" x-transition x-transition.duration.300 @click.outside="isDeleteNoteModal = false" class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
+                <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark" @click="isDeleteNoteModal = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">Delete Note</div>
+                <div class="p-5 text-center">
+                    <div class="text-white bg-danger ring-4 ring-danger/30 p-4 rounded-full w-fit mx-auto">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 mx-auto">
+                            <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path opacity="0.5" d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="currentColor" stroke-width="1.5"></path>
+                        </svg>
+                    </div>
+                    <div class="sm:w-3/4 mx-auto mt-5">Are you sure you want to delete this note?</div>
+                    <div class="flex justify-center items-center mt-8">
+                        <button type="button" class="btn btn-outline-danger" @click="isDeleteNoteModal = false">Cancel</button>
+                        <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4" @click="deleteNote">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Note Modal -->
+    <div class="fixed inset-0 bg-[black]/60 z-[999] px-4 overflow-y-auto hidden" :class="isViewNoteModal && '!block'">
+        <div class="flex items-center justify-center min-h-screen">
+            <div x-show="isViewNoteModal" x-transition x-transition.duration.300 @click.outside="isViewNoteModal = false" class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
+                <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark" @click="isViewNoteModal = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
+                    <div class="flex flex-wrap items-center">
+                        <div class="ltr:mr-3 rtl:ml-3" x-text="selectedNote.title"></div>
+                        <div class="flex items-center">
+                            <button x-show="selectedNote.tag" type="button" class="badge badge-outline-primary rounded-3xl capitalize ltr:mr-3 rtl:ml-3"
+                                    :class="{
+                                        'shadow-primary': selectedNote.tag === 'personal',
+                                        'shadow-warning': selectedNote.tag === 'work',
+                                        'shadow-info': selectedNote.tag === 'social',
+                                        'shadow-danger': selectedNote.tag === 'important'
+                                    }"
+                                    x-text="selectedNote.tag">
+                            </button>
+                            <button x-show="selectedNote.isFav" type="button" class="text-warning">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="fill-warning">
+                                    <path d="M9.15316 5.40838C10.4198 3.13613 11.0531 2 12 2C12.9469 2 13.5802 3.13612 14.8468 5.40837L15.1745 5.99623C15.5345 6.64193 15.7144 6.96479 15.9951 7.17781C16.2757 7.39083 16.6251 7.4699 17.3241 7.62805L17.9605 7.77203C20.4201 8.32856 21.65 8.60682 21.9426 9.54773C22.2352 10.4886 21.3968 11.4691 19.7199 13.4299L19.2861 13.9372C18.8096 14.4944 18.5713 14.773 18.4641 15.1177C18.357 15.4624 18.393 15.8341 18.465 16.5776L18.5306 17.2544C18.7841 19.8706 18.9109 21.1787 18.1449 21.7602C17.3788 22.3417 16.2273 21.8115 13.9243 20.7512L13.3285 20.4768C12.6741 20.1755 12.3469 20.0248 12 20.0248C11.6531 20.0248 11.3259 20.1755 10.6715 20.4768L10.0757 20.7512C7.77268 21.8115 6.62118 22.3417 5.85515 21.7602C5.08912 21.1787 5.21588 19.8706 5.4694 17.2544L5.53498 16.5776C5.60703 15.8341 5.64305 15.4624 5.53586 15.1177C5.42868 14.773 5.19043 14.4944 4.71392 13.9372L4.2801 13.4299C2.60325 11.4691 1.76482 10.4886 2.05742 9.54773C2.35002 8.60682 3.57986 8.32856 6.03954 7.77203L6.67589 7.62805C7.37485 7.4699 7.72433 7.39083 8.00494 7.17781C8.28555 6.96479 8.46553 6.64194 8.82547 5.99623L9.15316 5.40838Z" stroke="currentColor" stroke-width="1.5"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="text-base" x-text="selectedNote.description"></div>
+                    <div class="ltr:text-right rtl:text-left mt-8">
+                        <button type="button" class="btn btn-outline-danger" @click="isViewNoteModal = false">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

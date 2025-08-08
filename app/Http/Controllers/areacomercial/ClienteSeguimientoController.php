@@ -7,6 +7,7 @@ use App\Models\Contactos;
 use App\Models\Empresa;
 use App\Models\FuenteCaptacion;
 use App\Models\NivelDecision;
+use App\Models\Project;
 use App\Models\Seguimiento;
 use App\Models\Servicio;
 use App\Models\Status;
@@ -240,7 +241,6 @@ private function handleEmpresaTab($seguimiento)
 private function handleContactoTab($seguimiento)
 {
     try {
-        // Verificar si existe contacto asociado
         if (!$seguimiento->idContacto) {
             return response()->json([
                 'html' => $this->renderNoDataView('contacto'),
@@ -249,15 +249,14 @@ private function handleContactoTab($seguimiento)
         }
 
         $contacto = Contactos::find($seguimiento->idContacto);
-        
-        // Si no se encuentra el contacto (aunque idContacto exista)
+
         if (!$contacto) {
             return response()->json([
                 'html' => $this->renderNoDataView('contacto'),
                 'error' => 'El contacto asociado no existe'
             ]);
         }
-        
+
         $html = view('areacomercial.partials.contacto-tab', [
             'seguimiento' => $seguimiento,
             'contacto' => $contacto,
@@ -278,13 +277,12 @@ private function handleContactoTab($seguimiento)
 
 private function handleProyectosTab($seguimiento)
 {
-    $proyectos = $seguimiento->proyectos ?? []; // Asumiendo que hay una relación
+    $projects = Project::with('tasks')->get();
     
     return response()->json([
         'html' => view('areacomercial.partials.proyectos-tab', [
             'seguimiento' => $seguimiento,
-            'proyectos' => $proyectos,
-            'servicios' => Servicio::all() // Lista de servicios disponibles
+            'projects' => $projects
         ])->render()
     ]);
 }
@@ -303,20 +301,31 @@ private function handleCronogramaTab($seguimiento)
 private function handleObservacionesTab($seguimiento)
 {
     try {
-        // Obtener las tareas (observaciones) relacionadas con el seguimiento
-        $tasks = Task::with(['status', 'user', 'empresa', 'contacto'])
-            ->where('seguimiento_id', $seguimiento->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
-        $statuses = Status::where('user_id', auth()->id())->get();
+        $user = auth()->user();
+        
+        // Asegúrate de cargar las relaciones
+        $notes = $user->notes()->with(['tag', 'user'])->latest()->get();
+        $tags = $user->tags;
 
         return response()->json([
             'html' => view('areacomercial.partials.observaciones-tab', [
-                'tasks' => $tasks,
-                'statuses' => $statuses,
-                'seguimiento' => $seguimiento
-            ])->render()
+                'seguimiento' => $seguimiento,
+                'notes' => $notes,
+                'tags' => $tags
+            ])->render(),
+            'notes' => $notes->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'title' => $note->title,
+                    'description' => $note->description,
+                    'is_favorite' => $note->is_favorite,
+                    'tag' => $note->tag ? $note->tag->name : null,
+                    'tag_color' => $note->tag ? $note->tag->color : null,
+                    'date' => $note->created_at->format('M d, Y'),
+                    'user' => $note->user->name,
+                ];
+            }),
+            'tags' => $tags
         ]);
 
     } catch (\Exception $e) {
@@ -329,7 +338,6 @@ private function handleObservacionesTab($seguimiento)
         ], 500);
     }
 }
-
 // Métodos auxiliares (renderNoDataView, renderErrorView) se mantienen igual
 // Método para renderizar vista cuando no hay datos
 private function renderNoDataView($type)

@@ -243,4 +243,17 @@ class Usuario extends Authenticatable implements CanResetPassword
 		return $this->hasMany(Actividad::class, 'user_id', 'idUsuario');
 	}
 
+	public function notes()
+    {
+    return $this->hasMany(Note::class, 'user_id', 'idUsuario');
+    }
+
+    /**
+     * Obtener los tags del usuario
+     */
+    public function tags()
+    {
+    return $this->hasMany(Tag::class, 'user_id', 'idUsuario');
+    }
+
 }

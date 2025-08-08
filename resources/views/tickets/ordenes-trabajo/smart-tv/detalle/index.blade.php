@@ -1361,7 +1361,7 @@ $('#idCliente').on('change', function() {
             }
             
             // Determinar endpoint para tiendas
-            const endpoint = (tipoDoc == 8 || esTienda == 0) 
+            const endpoint = (tipoDoc == 8 || esTienda == 0 || (tipoDoc == 9 && esTienda == 0)) 
                 ? '/api/tiendas' 
                 : `/api/cliente/${clienteId}/tiendas`;
             

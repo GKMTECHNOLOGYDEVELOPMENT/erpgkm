@@ -5,6 +5,7 @@ use App\Models\Contacto;
 use App\Models\Contactos;
 use App\Models\Seguimiento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ContactoController extends Controller
 {
@@ -45,23 +46,41 @@ return response()->json([
 }
 
 
-
-public function update(Request $request, Contacto $contacto)
+public function update(Request $request, $id)
 {
-    $validated = $request->validate([
-        'tipo_documento' => 'required|exists:tipos_documento,id',
-        'numero_documento' => 'required|string|max:20',
-        'nombre_completo' => 'required|string|max:255',
-        'cargo' => 'nullable|string|max:100',
-        'correo' => 'nullable|email|max:100',
-        'telefono' => 'nullable|string|max:20',
-        'nivel_decision' => 'nullable|exists:niveles_decision,id',
-    ]);
+    try {
+        $validated = $request->validate([
+            'tipo_documento' => 'required|exists:tipodocumento,idTipoDocumento',
+            'numero_documento' => 'required|string|max:50',
+            'nombre_completo' => 'required|string|max:255',
+            'cargo' => 'nullable|string|max:255',
+            'correo' => 'nullable|email|max:255',
+            'telefono' => 'nullable|string|max:20',
+            'nivel_decision' => 'nullable|exists:niveles_decision,id',
+        ]);
 
-    $contacto->update($validated);
+        $contacto = Contactos::findOrFail($id);
+        $contacto->update($validated);
 
-    return redirect()->route('seguimientos.edit', $request->idSeguimiento)
-        ->with('success', 'Contacto actualizado correctamente');
+        return response()->json([
+            'success' => true,
+            'message' => 'Contacto actualizado correctamente.',
+            'data' => $contacto->fresh() // Devuelve los datos actualizados de la BD
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de validación',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar contacto: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar el contacto: ' . $e->getMessage()
+        ], 500);
+    }
 }
 
 }
