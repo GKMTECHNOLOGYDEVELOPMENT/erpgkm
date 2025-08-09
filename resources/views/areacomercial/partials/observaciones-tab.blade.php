@@ -1,3 +1,4 @@
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <div x-data="notes">
     <div class="flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full">
         <!-- Sidebar -->
@@ -53,30 +54,64 @@
                         
                         <div class="h-px w-full border-b border-[#e0e6ed] dark:border-[#1b2e4b]"></div>
                         
-                        <div class="px-1 py-3 text-white-dark">Tags</div>
+                        <div class="px-1 py-3 text-white-dark flex justify-between items-center">
+                            <span>Tags</span>
+                            <button type="button" class="text-primary hover:text-primary-dark" 
+                                    @click="openTagModal()" title="Add New Tag">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24" fill="none" 
+                                     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+                        </div>
                         
                         <template x-for="tag in tagsList" :key="tag.id">
-                            <button type="button"
-                                    class="w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium ltr:hover:pl-3 rtl:hover:pr-3 duration-300"
-                                    :class="{
-                                        'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]': selectedTab === tag.name,
-                                        'text-primary': tag.name === 'personal',
-                                        'text-warning': tag.name === 'work',
-                                        'text-info': tag.name === 'social',
-                                        'text-danger': tag.name === 'important'
-                                    }"
-                                    @click="tabChanged(tag.name)">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 rotate-45 shrink-0"
-                                     :class="{
-                                         'fill-primary': tag.name === 'personal',
-                                         'fill-warning': tag.name === 'work',
-                                         'fill-info': tag.name === 'social',
-                                         'fill-danger': tag.name === 'important'
-                                     }">
-                                    <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"></path>
-                                </svg>
-                                <div class="ltr:ml-3 rtl:mr-3" x-text="tag.name"></div>
-                            </button>
+                            <div class="flex items-center group">
+                                <button type="button"
+                                        class="w-full flex items-center h-10 p-1 hover:bg-white-dark/10 rounded-md dark:hover:bg-[#181F32] font-medium ltr:hover:pl-3 rtl:hover:pr-3 duration-300"
+                                        :class="{
+                                            'ltr:pl-3 rtl:pr-3 bg-gray-100 dark:bg-[#181F32]': selectedTab === tag.name,
+                                            'text-primary': tag.name === 'personal',
+                                            'text-warning': tag.name === 'work',
+                                            'text-info': tag.name === 'social',
+                                            'text-danger': tag.name === 'important'
+                                        }"
+                                        @click="tabChanged(tag.name)">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                                         class="w-3 h-3 rotate-45 shrink-0"
+                                         :class="{
+                                             'fill-primary': tag.name === 'personal',
+                                             'fill-warning': tag.name === 'work',
+                                             'fill-info': tag.name === 'social',
+                                             'fill-danger': tag.name === 'important',
+                                             'fill-current': !['personal', 'work', 'social', 'important'].includes(tag.name)
+                                         }"
+                                         :style="!['personal', 'work', 'social', 'important'].includes(tag.name) ? `fill: ${tag.color}` : ''">
+                                        <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"></path>
+                                    </svg>
+                                    <div class="ltr:ml-3 rtl:mr-3" x-text="tag.name"></div>
+                                </button>
+                                <div class="opacity-0 group-hover:opacity-100 flex items-center">
+                                    <button type="button" class="text-gray-500 hover:text-primary ltr:ml-2 rtl:mr-2" 
+                                            @click.stop="openTagModal(tag)" title="Edit Tag">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
+                                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" class="text-gray-500 hover:text-danger ltr:ml-1 rtl:mr-1" 
+                                            @click.stop="confirmDeleteTag(tag)" title="Delete Tag">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                            <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                            <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                            <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                                            <path opacity="0.5" d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" stroke="currentColor" stroke-width="1.5"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
                         </template>
                     </div>
                 </div>
@@ -225,27 +260,37 @@
                                                              'fill-warning': note.tag === 'work',
                                                              'fill-info': note.tag === 'social',
                                                              'fill-danger': note.tag === 'important',
-                                                         }">
+                                                         }"
+                                                         :style="!['personal', 'work', 'social', 'important'].includes(note.tag) ? `fill: ${note.tag_color}` : ''">
                                                         <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"></path>
                                                     </svg>
                                                 </a>
                                                 <ul x-cloak x-show="open" x-transition x-transition.duration.300ms class="ltr:left-0 rtl:right-0">
                                                     <template x-for="tag in tagsList" :key="tag.id">
                                                         <li>
-                                                            <a href="javascript:;" @click="toggle, setTag(note, tag.name)">
+                                                            <a href="javascript:;" @click="toggle, setTag(note, tag.id)">
                                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 rotate-45 ltr:mr-2 rtl:ml-2"
                                                                      :class="{
                                                                          'fill-primary': tag.name === 'personal',
                                                                          'fill-warning': tag.name === 'work',
                                                                          'fill-info': tag.name === 'social',
                                                                          'fill-danger': tag.name === 'important'
-                                                                     }">
+                                                                     }"
+                                                                     :style="!['personal', 'work', 'social', 'important'].includes(tag.name) ? `fill: ${tag.color}` : ''">
                                                                     <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="none" stroke-width="1.5"></path>
                                                                 </svg>
                                                                 <span x-text="tag.name"></span>
                                                             </a>
                                                         </li>
                                                     </template>
+                                                    <li>
+                                                        <a href="javascript:;" @click="toggle, setTag(note, null)">
+                                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 rotate-45 ltr:mr-2 rtl:ml-2">
+                                                                <path d="M2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12Z" stroke="currentColor" stroke-width="1.5"></path>
+                                                            </svg>
+                                                            <span>Remove Tag</span>
+                                                        </a>
+                                                    </li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -292,16 +337,20 @@
                             <label for="title">Title</label>
                             <input id="title" type="text" placeholder="Enter Title" class="form-input" x-model="params.title" required />
                         </div>
-                        <div class="mb-5">
-                            <label for="tag_id">Tag</label>
-                            <select id="tag_id" class="form-select" x-model="params.tag_id">
-                                <option value="">None</option>
-                                <template x-for="tag in tagsList" :key="tag.id">
-                                    <option :value="tag.id" x-text="tag.name"></option>
-                                </template>
-                            </select>
-                        </div>
-                        <div class="mb-5">
+       <div class="mb-5">
+    <label for="tag_id">Tag</label>
+    <select id="tag_id" class="form-select" x-model="params.tag_id">
+        <option value="">None</option>
+        <template x-for="tag in tagsList" :key="tag.id">
+            <option 
+                :value="tag.id" 
+                x-text="tag.name"
+                :selected="params.tag_id === tag.id"
+            ></option>
+        </template>
+    </select>
+</div>
+            <div class="mb-5">
                             <label for="description">Description</label>
                             <textarea id="description" rows="3" class="form-textarea resize-none min-h-[130px]" placeholder="Enter Description" x-model="params.description"></textarea>
                         </div>
@@ -387,6 +436,101 @@
                     <div class="text-base" x-text="selectedNote.description"></div>
                     <div class="ltr:text-right rtl:text-left mt-8">
                         <button type="button" class="btn btn-outline-danger" @click="isViewNoteModal = false">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Tag Modal -->
+    <div class="fixed inset-0 bg-[black]/60 z-[999] px-4 overflow-y-auto hidden" :class="isTagModal && '!block'">
+        <div class="flex items-center justify-center min-h-screen">
+            <div x-show="isTagModal" x-transition x-transition.duration.300 @click.outside="isTagModal = false" 
+                 class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
+                <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark" 
+                        @click="isTagModal = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none" 
+                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" 
+                         class="w-6 h-6">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
+                    <span x-text="tagParams.id ? 'Edit Tag' : 'Add Tag'"></span>
+                </div>
+                <div class="p-5">
+                    <form @submit.prevent="saveTag">
+                        <div class="mb-5">
+                            <label for="tag_name">Tag Name</label>
+                            <input id="tag_name" type="text" placeholder="Enter Tag Name" class="form-input" 
+                                   x-model="tagParams.name" required />
+                        </div>
+                        <div class="mb-5">
+                            <label for="tag_color">Color</label>
+                            <div class="flex items-center">
+                                <input id="tag_color" type="color" class="form-input p-1 h-10 w-10 mr-2" 
+                                       x-model="tagParams.color" required />
+                                <input type="text" class="form-input flex-1" x-model="tagParams.color" 
+                                       placeholder="Hex color code" />
+                            </div>
+                        </div>
+                        <div class="mb-5">
+                            <label for="tag_description">Description (Optional)</label>
+                            <textarea id="tag_description" rows="2" class="form-textarea" 
+                                      placeholder="Enter Description" x-model="tagParams.description"></textarea>
+                        </div>
+                        <div class="flex justify-end items-center mt-8">
+                            <button type="button" class="btn btn-outline-danger gap-2" 
+                                    @click="isTagModal = false">Cancel</button>
+                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4" 
+                                    x-text="tagParams.id ? 'Update Tag' : 'Add Tag'"></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Tag Modal -->
+    <div class="fixed inset-0 bg-[black]/60 z-[999] px-4 overflow-y-auto hidden" :class="isDeleteTagModal && '!block'">
+        <div class="flex items-center justify-center min-h-screen">
+            <div x-show="isDeleteTagModal" x-transition x-transition.duration.300 @click.outside="isDeleteTagModal = false" 
+                 class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
+                <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark" 
+                        @click="isDeleteTagModal = false">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none" 
+                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" 
+                         class="w-6 h-6">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
+                    Delete Tag
+                </div>
+                <div class="p-5 text-center">
+                    <div class="text-white bg-danger ring-4 ring-danger/30 p-4 rounded-full w-fit mx-auto">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                             class="w-7 h-7 mx-auto">
+                            <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" 
+                                  stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                            <path opacity="0.5" d="M6.5 6C6.55588 6 6.58382 6 6.60915 5.99936C7.43259 5.97849 8.15902 5.45491 8.43922 4.68032C8.44784 4.65649 8.45667 4.62999 8.47434 4.57697L8.57143 4.28571C8.65431 4.03708 8.69575 3.91276 8.75071 3.8072C8.97001 3.38607 9.37574 3.09364 9.84461 3.01877C9.96213 3 10.0932 3 10.3553 3H13.6447C13.9068 3 14.0379 3 14.1554 3.01877C14.6243 3.09364 15.03 3.38607 15.2493 3.8072C15.3043 3.91276 15.3457 4.03708 15.4286 4.28571L15.5257 4.57697C15.5433 4.62992 15.5522 4.65651 15.5608 4.68032C15.841 5.45491 16.5674 5.97849 17.3909 5.99936C17.4162 6 17.4441 6 17.5 6" 
+                                  stroke="currentColor" stroke-width="1.5"></path>
+                        </svg>
+                    </div>
+                    <div class="sm:w-3/4 mx-auto mt-5">
+                        Are you sure you want to delete the tag "<span x-text="tagToDelete?.name" class="font-semibold"></span>"?
+                        <div x-show="tagToDelete?.notes_count > 0" class="mt-2 text-danger">
+                            This tag is used in <span x-text="tagToDelete?.notes_count"></span> notes.
+                        </div>
+                    </div>
+                    <div class="flex justify-center items-center mt-8">
+                        <button type="button" class="btn btn-outline-danger" @click="isDeleteTagModal = false">Cancel</button>
+                        <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4" @click="deleteTag">Delete</button>
                     </div>
                 </div>
             </div>
