@@ -60,12 +60,22 @@ public function update(Request $request, $id)
         ]);
 
         $contacto = Contactos::findOrFail($id);
-        $contacto->update($validated);
+        
+        // Mapea los campos correctamente según tu modelo
+        $contacto->update([
+            'tipo_documento' => $validated['tipo_documento'],
+            'numero_documento' => $validated['numero_documento'],
+            'nombre_completo' => $validated['nombre_completo'],
+            'cargo' => $validated['cargo'],
+            'correo_electronico' => $validated['correo'], // Nota el cambio aquí
+            'telefono_whatsapp' => $validated['telefono'], // Y aquí
+            'nivel_decision_id' => $validated['nivel_decision'], // Y aquí
+        ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Contacto actualizado correctamente.',
-            'data' => $contacto->fresh() // Devuelve los datos actualizados de la BD
+            'data' => $contacto->fresh()
         ]);
 
     } catch (\Illuminate\Validation\ValidationException $e) {

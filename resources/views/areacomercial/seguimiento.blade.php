@@ -406,4 +406,8 @@
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
 
 
+
+
+
+            
 </x-layout.default>
