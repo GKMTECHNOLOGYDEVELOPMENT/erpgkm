@@ -1,6 +1,5 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
-
     <style>
         .tab-btn {
             font-weight: 600;
@@ -393,21 +392,8 @@
             window.loadTab = loadTab;
         });
     </script>
-
-
-
-
-
-
-
-
     <script src="{{ asset('assets/js/seguimiento/proyectos.js') }}" defer></script>
     <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script>
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
-
-
-
-
-
 
 </x-layout.default>
