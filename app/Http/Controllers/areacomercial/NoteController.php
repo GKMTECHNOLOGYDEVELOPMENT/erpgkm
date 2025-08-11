@@ -195,25 +195,27 @@ class NoteController extends Controller
             ->with('success', 'Nota eliminada exitosamente');
     }
 
-    // Alternar favorito
-    public function toggleFavorite(Note $note)
-    {
-        $this->authorize('update', $note);
+public function toggleFavorite(Note $note)
+{
+    $this->authorize('update', $note);
 
-        $note->update(['is_favorite' => !$note->is_favorite]);
+    // Actualiza y obtiene el nuevo estado inmediatamente
+    $updated = $note->update(['is_favorite' => !$note->is_favorite]);
+    $note->refresh(); // Asegura los datos actualizados
 
-        if (request()->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'is_favorite' => $note->is_favorite,
-                'message' => $note->is_favorite ? 'Agregado a favoritos' : 'Removido de favoritos'
-            ]);
-        }
-
-        return back()->with('success', 
-            $note->is_favorite ? 'Agregado a favoritos' : 'Removido de favoritos'
-        );
+    if (request()->wantsJson()) {
+        return response()->json([
+            'success' => true,
+            'is_favorite' => (bool)$note->is_favorite, // Forzamos booleano
+            'message' => $note->is_favorite ? 'Agregado a favoritos' : 'Removido de favoritos',
+            'note_id' => $note->id // Para identificar la nota en frontend
+        ]);
     }
+
+    return back()->with('success', 
+        $note->is_favorite ? 'Agregado a favoritos' : 'Removido de favoritos'
+    );
+}
 
     // Cambiar tag de la nota
     public function updateTag(Request $request, Note $note)

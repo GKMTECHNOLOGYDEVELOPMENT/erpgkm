@@ -898,7 +898,7 @@ console.log("Filtering by:", filter);
 
 searchNotes() {
     if (this.selectedTab === 'fav') {
-        this.filterdNotesList = this.notesList.filter(note => note.is_favorite);
+        this.filterdNotesList = this.notesList.filter(note => note.is_favorite === true);
     } else if (this.selectedTab === 'all') {
         this.filterdNotesList = this.notesList;
     } else {
@@ -1429,4 +1429,8 @@ async tabChanged(type) {
             <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
 
 
+
+
+
+            
 </x-layout.default>

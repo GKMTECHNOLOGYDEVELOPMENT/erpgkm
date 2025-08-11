@@ -158,9 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
             form.insertBefore(messageContainer, form.lastElementChild);
         }
         
-        form.addEventListener('submit', async function(e) {
+        // IMPORTANTE: Remover todos los event listeners anteriores
+        form.removeEventListener('submit', handleSubmit);
+        form.addEventListener('submit', handleSubmit);
+        
+        async function handleSubmit(e) {
+            // Prevenir el envío normal del formulario
             e.preventDefault();
-            e.stopImmediatePropagation(); // Previene otros listeners
+            e.stopPropagation();
+            e.stopImmediatePropagation();
             
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerHTML;
@@ -180,6 +186,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             try {
                 const formData = new FormData(form);
+                
+                // Debug: ver qué datos se están enviando
+                console.log('Enviando datos:');
+                for (let pair of formData.entries()) {
+                    console.log(pair[0] + ': ' + pair[1]);
+                }
+                
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
@@ -191,6 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 const data = await response.json();
+                console.log('Respuesta del servidor:', data);
 
                 if (!response.ok) {
                     throw data;
@@ -199,11 +213,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Mostrar mensaje de éxito
                 showMessage('success', data.message || 'Contacto actualizado correctamente.', messageContainer);
                 
-                // Opcional: Actualizar datos en la interfaz
-                console.log('Contacto actualizado:', data.data);
+                // Opcional: Actualizar los valores del formulario con los datos actualizados
+                if (data.data) {
+                    updateFormValues(form, data.data);
+                }
 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error completo:', error);
                 let errorMsg = 'Error inesperado al actualizar el contacto.';
                 
                 if (error.message) {
@@ -218,17 +234,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.innerHTML = originalBtnText;
                 submitBtn.disabled = false;
             }
-        });
+            
+            // Asegurarse de que no se envíe el formulario
+            return false;
+        }
     }
     
+    // Función para mostrar mensajes
     function showMessage(type, message, container) {
         if (!container) return;
         
+        const bgColor = type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800';
+        const iconColor = type === 'success' ? 'text-green-400' : 'text-red-400';
+        const iconPath = type === 'success' 
+            ? 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
+            : 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z';
+        
         container.innerHTML = `
-            <div class="p-4 rounded-md ${type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}">
+            <div class="p-4 rounded-md ${bgColor}">
                 <div class="flex items-center">
-                    <svg class="h-5 w-5 ${type === 'success' ? 'text-green-400' : 'text-red-400'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="${type === 'success' ? 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' : 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z'}" clip-rule="evenodd" />
+                    <svg class="h-5 w-5 ${iconColor}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="${iconPath}" clip-rule="evenodd" />
                     </svg>
                     <span class="ml-2">${message}</span>
                 </div>
@@ -236,10 +262,49 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         container.classList.remove('hidden');
         
-        // Ocultar después de 5 segundos
-        // setTimeout(() => {
-        //     container.classList.add('hidden');
-        // }, 5000);
+        // Ocultar después de 5 segundos si es éxito
+        if (type === 'success') {
+            setTimeout(() => {
+                container.classList.add('hidden');
+            }, 5000);
+        }
+    }
+    
+    // Función para actualizar los valores del formulario con los datos actualizados
+    function updateFormValues(form, data) {
+        // Actualizar los campos del formulario con los valores actualizados de la BD
+        const fields = {
+            'tipo_documento': data.tipo_documento,
+            'numero_documento': data.numero_documento,
+            'nombre_completo': data.nombre_completo,
+            'cargo': data.cargo,
+            'correo': data.correo_electronico,
+            'telefono': data.telefono_whatsapp,
+            'nivel_decision': data.nivel_decision_id
+        };
+        
+        Object.entries(fields).forEach(([fieldName, value]) => {
+            const field = form.querySelector(`[name="${fieldName}"]`);
+            if (field && value !== null && value !== undefined) {
+                field.value = value;
+            }
+        });
+    }
+    
+    // Botón limpiar formulario
+    const btnLimpiar = document.getElementById('btnLimpiarFormularioContacto');
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', function() {
+            const form = document.getElementById('formContacto');
+            if (form) {
+                form.reset();
+                // Limpiar mensajes
+                const messageContainer = document.getElementById('formMessage');
+                if (messageContainer) {
+                    messageContainer.classList.add('hidden');
+                }
+            }
+        });
     }
 });
 </script>
