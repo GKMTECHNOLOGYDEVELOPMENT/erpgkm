@@ -21,6 +21,51 @@
         transform: translateY(0) scale(1);
         opacity: 1;
     }
+
+    /* Altura adaptable (móvil = 50vh, desktop = 600px) */
+    #gantt_cronograma {
+        width: 100%;
+        height: min(600px, 60vh);
+        border-radius: 10px;
+        overflow: hidden;
+        /* el layout ya tiene sus propios scrollbars */
+    }
+
+    /* Estilo del “hoy” si llegas a usar markers más adelante */
+    .gantt_marker.today .gantt_marker_content {
+        background: #ef4444;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    /* Colores de barras (si usas custom_class) */
+    .gantt_task_line.custom-blue {
+        background: #4f66ff;
+        border-color: #4f66ff;
+    }
+
+    .gantt_task_line.custom-green {
+        background: #22c55e;
+        border-color: #22c55e;
+    }
+
+    .gantt_task_line.custom-red {
+        background: #ef4444;
+        border-color: #ef4444;
+    }
+
+    .gantt_task_progress.custom-blue {
+        background: #3340b3;
+    }
+
+    .gantt_task_progress.custom-green {
+        background: #1a9e4b;
+    }
+
+    .gantt_task_progress.custom-red {
+        background: #c63b3b;
+    }
 </style>
 
 <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -45,8 +90,7 @@
 </div>
 
 
-<!-- Contenedor Gantt -->
-<div id="gantt_cronograma" style="height:600px;width:100%"></div>
+<div id="gantt_cronograma" style="height:600px;width:100%; overflow-x: auto;"></div>
 
 <!-- Modal (JS puro con animación) -->
 <div id="cronograma_modal" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto">
@@ -98,7 +142,7 @@
                     <div>
                         <label class="block text-sm mb-1">Color</label>
                         <select id="t_color" class="form-select w-full">
-                            <option value="">Violeta</option>
+                            <option value="">Azul</option>
                         </select>
                     </div>
 

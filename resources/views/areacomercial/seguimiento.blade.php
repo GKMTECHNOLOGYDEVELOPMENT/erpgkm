@@ -1,5 +1,5 @@
 <x-layout.default>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
+    <link rel="stylesheet" href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
     <style>
         .tab-btn {
             font-weight: 600;
@@ -163,8 +163,9 @@
 
 
     <script src="/assets/js/Sortable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js" defer></script>
-    <script src="{{ asset('assets/js/seguimiento/cronograma.js') }}"></script>
+    <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js" defer></script>
+    <script src="https://cdn.dhtmlx.com/gantt/edge/locale/locale_es.js" defer></script>
+    <script src="https://export.dhtmlx.com/gantt/api.js" defer></script>
 
 
     <script>
@@ -392,6 +393,8 @@
             window.loadTab = loadTab;
         });
     </script>
+    <script src="{{ asset('assets/js/seguimiento/cronograma.js') }}" defer></script>
+
     <script src="{{ asset('assets/js/seguimiento/proyectos.js') }}" defer></script>
     <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script>
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
