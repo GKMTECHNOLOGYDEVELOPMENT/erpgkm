@@ -18,52 +18,50 @@ class NoteController extends Controller
         $this->middleware('auth');
     }
 
-    // Mostrar todas las notas del usuario
-    public function index(Request $request)
-    {
-        $user = Auth::user();
-        $filter = $request->get('filter', 'all');
-        
-        $query = $user->notes()->with('tag');
+   public function index(Request $request)
+{
+    $user = Auth::user();
+    $filter = $request->get('filter', 'all');
+    
+    $query = $user->notes()->with('tag');
 
-        switch ($filter) {
-            case 'favorites':
-                $query->where('is_favorite', true);
-                break;
-            case 'personal':
-            case 'work':
-            case 'social':
-            case 'important':
-                $query->byTag($filter);
-                break;
-            default:
-                // 'all' - no filtro adicional
-                break;
-        }
-
-        $notes = $query->orderBy('created_at', 'desc')->get();
-        $tags = $user->tags;
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'notes' => $notes->map(function ($note) {
-                    return [
-                        'id' => $note->id,
-                        'title' => $note->title,
-                        'description' => $note->description,
-                        'is_favorite' => $note->is_favorite,
-                        'tag' => $note->tag_name,
-                        'tag_color' => $note->tag_color,
-                        'date' => $note->formatted_date,
-                        'user' => $note->user->name,
-                    ];
-                }),
-                'tags' => $tags
-            ]);
-        }
-
-        return view('notes.index', compact('notes', 'tags', 'filter'));
+    switch ($filter) {
+        case 'favorites':
+            $query->where('is_favorite', true);
+            break;
+        case 'all':
+            // No filter needed
+            break;
+        default:
+            // Filtra por nombre del tag (case insensitive)
+            $query->whereHas('tag', function($q) use ($filter) {
+                $q->where('name', 'LIKE', $filter);
+                // o para coincidencia exacta:
+                // $q->where('name', $filter);
+            });
+            break;
     }
+
+    $notes = $query->orderBy('created_at', 'desc')->get();
+    $tags = $user->tags;
+
+    return response()->json([
+        'notes' => $notes->map(function ($note) {
+            return [
+                'id' => $note->id,
+                'title' => $note->title,
+                'description' => $note->description,
+                'is_favorite' => $note->is_favorite,
+                'tag_id' => $note->tag_id,
+                'tag' => $note->tag ? $note->tag->name : null,
+                'tag_color' => $note->tag ? $note->tag->color : null,
+                'date' => optional($note->created_at)->format('d/m/Y'),
+                'user' => $note->user->name
+            ];
+        }),
+        'tags' => $tags
+    ]);
+}
 
     // Mostrar formulario para crear nueva nota
     public function create()
@@ -239,4 +237,18 @@ class NoteController extends Controller
 
         return back()->with('success', 'Tag actualizado exitosamente');
     }
+
+
+    // En el modelo Note
+public function scopeByTag($query, $tagIdentifier)
+{
+    // Si es numérico, asumimos que es ID, si no, es nombre
+    if (is_numeric($tagIdentifier)) {
+        return $query->where('tag_id', $tagIdentifier);
+    } else {
+        return $query->whereHas('tag', function($q) use ($tagIdentifier) {
+            $q->where('name', $tagIdentifier);
+        });
+    }
+}
 }

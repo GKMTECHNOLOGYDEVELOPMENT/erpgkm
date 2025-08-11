@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Http\Controllers\areacomercial;
+
 use App\Http\Controllers\Controller;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -13,112 +15,60 @@ class TagController extends Controller
         $this->middleware('auth');
     }
 
-    // Mostrar todos los tags del usuario
+    // Mostrar todos los tags del usuario (API)
     public function index()
     {
         $tags = Auth::user()->tags()->withCount('notes')->get();
-
-        if (request()->wantsJson()) {
-            return response()->json(['tags' => $tags]);
-        }
-
-        return view('tags.index', compact('tags'));
+        return response()->json(['tags' => $tags]);
     }
 
-    // Mostrar formulario para crear nuevo tag
-    public function create()
-    {
-        return view('tags.create');
-    }
-
-    // Guardar nuevo tag
+    // Guardar nuevo tag (API)
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('tags')->where('user_id', Auth::id())
             ],
-            'color' => 'required|string|regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
+            'color' => ['required', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
             'description' => 'nullable|string'
         ]);
 
-        $tag = Auth::user()->tags()->create([
-            'name' => $request->name,
-            'color' => $request->color,
-            'description' => $request->description
-        ]);
+        $tag = Auth::user()->tags()->create($validated);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Tag creado exitosamente',
-                'tag' => $tag
-            ]);
-        }
-
-        return redirect()->route('tags.index')
-            ->with('success', 'Tag creado exitosamente');
+        return response()->json([
+            'success' => true,
+            'message' => 'Tag creado exitosamente',
+            'tag' => $tag
+        ], 201);
     }
 
-    // Mostrar un tag específico
-    public function show(Tag $tag)
-    {
-        $this->authorize('view', $tag);
-        
-        $notes = $tag->notes()->where('user_id', Auth::id())->get();
-
-        if (request()->wantsJson()) {
-            return response()->json([
-                'tag' => $tag,
-                'notes' => $notes
-            ]);
-        }
-
-        return view('tags.show', compact('tag', 'notes'));
-    }
-
-    // Mostrar formulario para editar tag
-    public function edit(Tag $tag)
-    {
-        $this->authorize('update', $tag);
-        return view('tags.edit', compact('tag'));
-    }
-
-    // Actualizar tag
+    // Actualizar tag (API)
     public function update(Request $request, Tag $tag)
     {
+        // Autorización automática gracias al modelo policy
         $this->authorize('update', $tag);
 
-        $request->validate([
+        $validated = $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('tags')->where('user_id', Auth::id())->ignore($tag->id)
             ],
-            'color' => 'required|string|regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/',
+            'color' => ['required', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
             'description' => 'nullable|string'
         ]);
 
-        $tag->update([
-            'name' => $request->name,
-            'color' => $request->color,
-            'description' => $request->description
+        $tag->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tag actualizado exitosamente',
+            'tag' => $tag
         ]);
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Tag actualizado exitosamente',
-                'tag' => $tag
-            ]);
-        }
-
-        return redirect()->route('tags.index')
-            ->with('success', 'Tag actualizado exitosamente');
     }
 
     // Eliminar tag
@@ -128,14 +78,9 @@ class TagController extends Controller
 
         $tag->delete();
 
-        if (request()->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Tag eliminado exitosamente'
-            ]);
-        }
-
-        return redirect()->route('tags.index')
-            ->with('success', 'Tag eliminado exitosamente');
+        return response()->json([
+            'success' => true,
+            'message' => 'Tag eliminado exitosamente'
+        ]);
     }
 }
