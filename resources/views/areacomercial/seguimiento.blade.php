@@ -401,13 +401,13 @@
 
 
 
-    <script src="{{ asset('assets/js/segumimiento/proyectos.js') }}"></script>
-    <script src="{{ asset('assets/js/segumimiento/notas.js') }}"></script>
+    <script src="{{ asset('assets/js/seguimiento/proyectos.js') }}" defer></script>
+    <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script>
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
 
 
 
 
 
-            
+
 </x-layout.default>
