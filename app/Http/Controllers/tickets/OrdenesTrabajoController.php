@@ -1203,7 +1203,9 @@ class OrdenesTrabajoController extends Controller
                 'idCliente',
                 'direccion',
                 'serie',
-                'idTicketFlujo'
+                'idTicketFlujo',
+                'idClienteGeneral' // ✅ AÑADIR
+
             ])
                 ->with([
                     'cliente:idCliente,nombre',
@@ -1215,6 +1217,7 @@ class OrdenesTrabajoController extends Controller
                     'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
                     'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
                     'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
+                    'clientegeneral:idClienteGeneral,descripcion', // ✅ AÑADIR
                     'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')
                         ->latest('fecha_programada')
                         ->limit(1),
