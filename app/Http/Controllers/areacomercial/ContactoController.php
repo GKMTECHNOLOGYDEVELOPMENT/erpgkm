@@ -3,7 +3,9 @@ namespace App\Http\Controllers\areacomercial;
 use App\Http\Controllers\Controller;
 use App\Models\Contacto;
 use App\Models\Contactos;
+use App\Models\NivelDecision;
 use App\Models\Seguimiento;
+use App\Models\Tipodocumento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -91,6 +93,44 @@ public function update(Request $request, $id)
             'message' => 'Error al actualizar el contacto: ' . $e->getMessage()
         ], 500);
     }
+}
+
+
+// En tu ContactoController
+public function formmul(Request $request)
+{
+    $contactoId = $request->query('contactoId');
+    $contacto = $contactoId ? Contactos::find($contactoId) : null;
+    
+    return view('areacomercial.partials.contacto-form', [
+        'contacto' => $contacto,
+        'documentos' => Tipodocumento::all(),
+        'niveles' => NivelDecision::all()
+    ]);
+}
+
+public function listmul()
+{
+    // Asumiendo que tienes una manera de obtener los contactos del seguimiento actual
+    $contactos = Contactos::where(...)->get(); // Ajusta esta consulta
+    
+    return response()->json($contactos);
+}
+
+public function storemul(Request $request)
+{
+    // Validación y creación del contacto
+    // No olvides asociarlo al seguimiento actual
+}
+
+public function updatemul(Request $request, Contactos $contacto)
+{
+    // Validación y actualización del contacto
+}
+
+public function destroymul(Contactos $contacto)
+{
+    // Eliminar el contacto
 }
 
 }

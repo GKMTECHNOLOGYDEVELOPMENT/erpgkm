@@ -401,4 +401,248 @@
     <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script>
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
 
+
+
+    
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar contactos al iniciar
+    loadContactos();
+});
+
+function showContactoForm(contactoId = null) {
+    const container = document.getElementById('contactoFormContainer');
+    const initialMessage = document.getElementById('initialMessageContainer');
+    const title = contactoId ? 'Editar Contacto' : 'Nuevo Contacto';
+    
+    // Ocultar el mensaje inicial
+    if (initialMessage) {
+        initialMessage.classList.add('hidden');
+    }
+    
+    // Mostrar spinner mientras carga
+    container.innerHTML = `
+        <div class="flex justify-center">
+            <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+    `;
+    container.classList.remove('hidden');
+
+    // Cargar el formulario vía AJAX
+    fetch(`/contactos/form?contactoId=${contactoId || ''}`)
+        .then(response => response.text())
+        .then(html => {
+            container.innerHTML = html;
+            initContactoForm();
+        })
+        .catch(error => {
+            container.innerHTML = `
+                <div class="bg-red-50 text-red-800 p-4 rounded-md">
+                    Error al cargar el formulario: ${error.message}
+                </div>
+            `;
+        });
+}
+
+function initContactoForm() {
+    const form = document.getElementById('formContacto');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const url = form.getAttribute('action');
+        const method = form.querySelector('input[name="_method"]') ? 
+                      form.querySelector('input[name="_method"]').value : 'POST';
+
+        // Mostrar spinner en el botón de submit
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Procesando...
+        `;
+        submitBtn.disabled = true;
+
+        fetch(url, {
+            method: method,
+            body: formData,
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                document.getElementById('contactoFormContainer').classList.add('hidden');
+                // Mostrar nuevamente el mensaje inicial si no hay contactos
+                const contactosList = document.getElementById('contactosList');
+                if (contactosList.children.length === 0) {
+                    document.getElementById('initialMessageContainer').classList.remove('hidden');
+                }
+                loadContactos();
+            } else {
+                showAlert('error', data.message || 'Error al guardar el contacto');
+            }
+        })
+        .catch(error => {
+            showAlert('error', 'Error en la conexión');
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+        });
+    });
+
+    // Agregar botón de cancelar
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn btn-dark flex items-center justify-center px-6 h-[46px] mt-4';
+    cancelBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M6 6a1 1 0 011.414 0L10 8.586 12.586 6a1 1 0 011.414 1.414L11.414 10l2.586 2.586a1 1 0 01-1.414 1.414L10 11.414 7.414 14a1 1 0 01-1.414-1.414L8.586 10 6 7.414A1 1 0 016 6z" clip-rule="evenodd" />
+        </svg>
+        Cancelar
+    `;
+    cancelBtn.onclick = function() {
+        document.getElementById('contactoFormContainer').classList.add('hidden');
+        document.getElementById('initialMessageContainer').classList.remove('hidden');
+    };
+    
+    form.appendChild(cancelBtn);
+}
+function loadContactos() {
+    const contactosList = document.getElementById('contactosList');
+    if (!contactosList) return;
+
+    contactosList.innerHTML = `
+        <div class="flex justify-center">
+            <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+    `;
+
+    // Aquí debes hacer una llamada a tu backend para obtener los contactos
+    // Ejemplo:
+    fetch('/contactos/list')
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0) {
+                contactosList.innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        No hay contactos registrados
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.forEach(contacto => {
+                html += `
+                    <div class="bg-white rounded-lg shadow p-4" id="contacto-${contacto.id}">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-semibold text-lg">${contacto.nombre_completo}</h4>
+                                <p class="text-gray-600">${contacto.cargo || 'Sin cargo especificado'}</p>
+                                <div class="mt-2 space-y-1">
+                                    ${contacto.correo_electronico ? `<p class="text-sm"><span class="font-medium">Correo:</span> ${contacto.correo_electronico}</p>` : ''}
+                                    ${contacto.telefono_whatsapp ? `<p class="text-sm"><span class="font-medium">Teléfono:</span> ${contacto.telefono_whatsapp}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="showContactoForm(${contacto.id})" class="text-blue-500 hover:text-blue-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                    </svg>
+                                </button>
+                                <button onclick="deleteContacto(${contacto.id})" class="text-red-500 hover:text-red-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            contactosList.innerHTML = html;
+        })
+        .catch(error => {
+            contactosList.innerHTML = `
+                <div class="bg-red-50 text-red-800 p-4 rounded-md">
+                    Error al cargar los contactos: ${error.message}
+                </div>
+            `;
+        });
+}
+
+function deleteContacto(contactoId) {
+    if (!confirm('¿Estás seguro de eliminar este contacto?')) return;
+
+    fetch(`/contactos/${contactoId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', data.message);
+            document.getElementById(`contacto-${contactoId}`).remove();
+            
+            // Verificar si no hay más contactos
+            const contactosList = document.getElementById('contactosList');
+            if (contactosList.children.length === 0) {
+                contactosList.innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        No hay contactos registrados
+                    </div>
+                `;
+            }
+        } else {
+            showAlert('error', data.message || 'Error al eliminar el contacto');
+        }
+    })
+    .catch(error => {
+        showAlert('error', 'Error en la conexión');
+    });
+}
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg ${
+        type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+    }`;
+    alertDiv.innerHTML = `
+        <div class="flex items-center">
+            <svg class="h-5 w-5 ${type === 'success' ? 'text-green-400' : 'text-red-400'}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="${type === 'success' ? 'M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z' : 'M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z'}" clip-rule="evenodd" />
+            </svg>
+            <span class="ml-2">${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        alertDiv.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+        setTimeout(() => alertDiv.remove(), 500);
+    }, 3000);
+}
+</script>
 </x-layout.default>

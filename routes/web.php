@@ -1085,3 +1085,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{tag}/edit', [TagController::class, 'edit'])->name('tags.edit');
     });
 });
+
+
+// Rutas para contactos
+Route::get('/contactos/form', [ContactoController::class, 'formmul'])->name('contactos.form');
+Route::get('/contactos/list', [ContactoController::class, 'listmul'])->name('contactos.list');
+Route::post('/contactos', [ContactoController::class, 'storemul'])->name('contactos.store');
+Route::put('/contactos/{contacto}', [ContactoController::class, 'updatemul'])->name('contactos.update');
+Route::delete('/contactos/{contacto}', [ContactoController::class, 'destroymul'])->name('contactos.destroy');
