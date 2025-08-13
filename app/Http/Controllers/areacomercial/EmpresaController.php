@@ -72,21 +72,34 @@ public function buscarRuc(Request $request)
 }
 
 
-public function update(Request $request, Empresa $empresa)
-{
-    $validated = $request->validate([
-        'razon_social' => 'required|string|max:255',
-        'ruc' => 'required|string|max:20',
-        'rubro' => 'required|string|max:255',
-        'ubicacion' => 'nullable|string|max:255',
-        'fuente_captacion_id' => 'required|exists:fuentes_captacion,id',
-    ]);
+public function update(Request $request, $id)
+    {
+        // Validar datos
+        $request->validate([
+            'razon_social' => 'required|string|max:255',
+            'ruc' => 'required|string|max:20',
+            'rubro' => 'required|string|max:255',
+            'ubicacion' => 'nullable|string|max:255',
+            'fuente_captacion_id' => 'required|exists:fuentes_captacion,id',
+        ]);
 
-    $empresa->update($validated);
+        $empresa = Empresa::findOrFail($id);
 
-    return redirect()->route('areacomercial.seguimiento', $request->idSeguimiento)
-        ->with('success', 'Empresa actualizada correctamente');
-}
+        // Actualizar campos
+        $empresa->nombre_razon_social = $request->razon_social;
+        $empresa->ruc = $request->ruc;
+        $empresa->giro_comercial = $request->rubro;
+        $empresa->ubicacion_geografica = $request->ubicacion;
+        $empresa->fuente_captacion_id = $request->fuente_captacion_id;
+
+        $empresa->save();
+
+        // Retornar respuesta JSON
+        return response()->json([
+            'message' => 'Empresa actualizada correctamente',
+            'empresa' => $empresa,
+        ]);
+    }
 
 
 }
