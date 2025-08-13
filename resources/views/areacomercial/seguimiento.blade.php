@@ -166,6 +166,8 @@
     <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js" defer></script>
     <script src="https://cdn.dhtmlx.com/gantt/edge/locale/locale_es.js" defer></script>
     <script src="https://export.dhtmlx.com/gantt/api.js" defer></script>
+<!-- SweetAlert2 (para toasts) -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
     <script>
