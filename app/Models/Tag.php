@@ -18,7 +18,8 @@ class Tag extends Model
         'name',
         'color',
         'description',
-        'user_id'
+        'user_id',
+        'idseguimiento'
     ];
 
     protected $casts = [

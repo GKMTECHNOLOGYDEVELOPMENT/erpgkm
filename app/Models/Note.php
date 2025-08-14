@@ -14,7 +14,8 @@ class Note extends Model
         'description',
         'is_favorite',
         'user_id',
-        'tag_id'
+        'tag_id',
+        'idseguimiento'
     ];
 
     protected $casts = [
