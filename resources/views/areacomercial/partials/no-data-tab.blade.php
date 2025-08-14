@@ -1,9 +1,4 @@
-{{-- Solo título + mensaje dentro --}}
-<div id="no-data-message" class="text-center p-8">
-    {!! $icon !!}
-    <h3 class="text-xl font-semibold mt-4 text-gray-700">{{ $title }}</h3>
-    <p class="text-gray-500 mt-2">{{ $message }}</p>
-</div>
+
 
 {{-- Este lo separas completamente para que no se oculte --}}
 @if($showCreateButton)
