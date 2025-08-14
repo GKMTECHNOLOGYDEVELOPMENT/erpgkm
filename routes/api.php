@@ -22,7 +22,9 @@ use App\Http\Controllers\Apps\CalendarController;
 use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
 use App\Http\Controllers\areacomercial\ContactoController;
+use App\Http\Controllers\areacomercial\ContactoFormController;
 use App\Http\Controllers\areacomercial\EmpresaController;
+use App\Http\Controllers\areacomercial\EmpresaFormController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
@@ -367,3 +369,34 @@ Route::get('/consulta-ruc', function(Request $request) {
 
 
 Route::post('/buscar-ruc', [EmpresaController::class, 'buscarRuc']);
+// En routes/api.php
+Route::get('/tipos-documento', function() {
+    return \App\Models\TipoDocumento::select('idTipoDocumento', 'nombre')->get();
+});
+
+Route::get('/fuentes-captacion', function() {
+    return \App\Models\FuenteCaptacion::select('id', 'nombre')->get();
+});
+
+Route::get('/niveles-decision', function() {
+    return \App\Models\NivelDecision::select('id', 'nombre')
+           ->orderBy('nombre') // o cualquier otro campo
+           ->get();
+});
+
+
+
+Route::prefix('v1')->group(function () {
+    // Contactos
+    Route::post('/contactosForm', [ContactoFormController::class, 'store']);
+    Route::put('/contactosForm/{id}', [ContactoFormController::class, 'update']);
+    Route::delete('/contactosForm/{id}', [ContactoFormController::class, 'destroy']);
+
+    Route::get('/empresasForm/seguimiento/{idSeguimiento}', [EmpresaFormController::class, 'getBySeguimiento']);
+    
+    // Empresas
+    Route::get('/contactosForm/seguimiento/{idSeguimiento}', [ContactoFormController::class, 'getBySeguimiento']);
+    Route::post('/empresasForm', [EmpresaFormController::class, 'store']);
+    Route::put('/empresasForm/{id}', [EmpresaFormController::class, 'update']);
+    Route::delete('/empresasForm/{id}', [EmpresaFormController::class, 'destroy']);
+});

@@ -65,7 +65,9 @@ use App\Http\Controllers\Apps\ActividadController;
 use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
 use App\Http\Controllers\areacomercial\ContactoController;
+use App\Http\Controllers\areacomercial\ContactoFormController;
 use App\Http\Controllers\areacomercial\EmpresaController;
+use App\Http\Controllers\areacomercial\EmpresaFormController;
 use App\Http\Controllers\areacomercial\NoteController;
 use App\Http\Controllers\areacomercial\ObservacionController;
 use App\Http\Controllers\areacomercial\ScrumboarddController;
@@ -1093,3 +1095,16 @@ Route::get('/contactos/list', [ContactoController::class, 'listmul'])->name('con
 Route::post('/contactos', [ContactoController::class, 'storemul'])->name('contactos.store');
 Route::put('/contactos/{contacto}', [ContactoController::class, 'updatemul'])->name('contactos.update');
 Route::delete('/contactos/{contacto}', [ContactoController::class, 'destroymul'])->name('contactos.destroy');
+
+
+
+Route::get('/formulario/empresa', function () {
+    return view('areacomercial.forms.form-empresa');
+});
+
+Route::get('/formulario/contacto', function () {
+    return view('areacomercial.forms.form-contacto');
+});
+
+Route::put('/empresasformularioprio/{empresa}', [EmpresaController::class, 'update'])->name('empresasformem.update');
+
