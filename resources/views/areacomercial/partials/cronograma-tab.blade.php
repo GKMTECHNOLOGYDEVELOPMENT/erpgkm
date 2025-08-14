@@ -124,3 +124,7 @@
     <div id="gantt_cronograma"></div>
     <div id="gantt_resize" class="absolute left-0 right-0 bottom-0 h-2 cursor-ns-resize"></div>
 </div>
+
+
+<input type="hidden" id="idSeguimientoHidden" value="{{ $seguimiento->idSeguimiento ?? '' }}">
+
