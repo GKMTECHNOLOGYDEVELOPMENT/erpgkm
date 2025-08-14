@@ -66,6 +66,7 @@ use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
 use App\Http\Controllers\areacomercial\ContactoController;
 use App\Http\Controllers\areacomercial\ContactoFormController;
+use App\Http\Controllers\areacomercial\CronogramaController;
 use App\Http\Controllers\areacomercial\EmpresaController;
 use App\Http\Controllers\areacomercial\EmpresaFormController;
 use App\Http\Controllers\areacomercial\NoteController;
@@ -1108,3 +1109,46 @@ Route::get('/formulario/contacto', function () {
 
 Route::put('/empresasformularioprio/{empresa}', [EmpresaController::class, 'update'])->name('empresasformem.update');
 
+
+
+
+Route::prefix('cronograma')->name('cronograma.')->group(function () {
+    
+    // Obtener datos del cronograma
+    Route::get('/{idSeguimiento}/data', [CronogramaController::class, 'getData'])
+        ->name('data');
+    
+    // Operaciones con tareas
+    Route::post('/{idSeguimiento}/task', [CronogramaController::class, 'saveTask'])
+        ->name('task.save');
+    
+    Route::put('/{idSeguimiento}/task/{taskId}', [CronogramaController::class, 'saveTask'])
+        ->name('task.update');
+    
+    Route::delete('/{idSeguimiento}/task/{taskId}', [CronogramaController::class, 'deleteTask'])
+        ->name('task.delete');
+    
+    // Operaciones con dependencias (links)
+    Route::post('/{idSeguimiento}/link', [CronogramaController::class, 'saveLink'])
+        ->name('link.save');
+    
+    Route::delete('/{idSeguimiento}/link/{linkId}', [CronogramaController::class, 'deleteLink'])
+        ->name('link.delete');
+    
+    // Configuración
+    Route::post('/{idSeguimiento}/config', [CronogramaController::class, 'saveConfig'])
+        ->name('config.save');
+    
+    // Histórico
+    Route::get('/{idSeguimiento}/historico', [CronogramaController::class, 'getHistorico'])
+        ->name('historico');
+    
+    // Importar datos
+    Route::post('/{idSeguimiento}/import', [CronogramaController::class, 'importData'])
+        ->name('import');
+    
+    // Exportar datos
+    Route::get('/{idSeguimiento}/export/{format}', [CronogramaController::class, 'exportData'])
+        ->name('export')
+        ->where('format', 'json|excel|csv');
+});

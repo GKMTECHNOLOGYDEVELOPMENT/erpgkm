@@ -1462,4 +1462,6 @@ function buscarCliente(){ /* implementar AJAX aquí */ }
 });
 
 </script>
+
+
 </x-layout.default>

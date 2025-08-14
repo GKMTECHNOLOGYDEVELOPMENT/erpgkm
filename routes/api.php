@@ -23,6 +23,7 @@ use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
 use App\Http\Controllers\areacomercial\ContactoController;
 use App\Http\Controllers\areacomercial\ContactoFormController;
+use App\Http\Controllers\areacomercial\CronogramaController;
 use App\Http\Controllers\areacomercial\EmpresaController;
 use App\Http\Controllers\areacomercial\EmpresaFormController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
@@ -399,4 +400,15 @@ Route::prefix('v1')->group(function () {
     Route::post('/empresasForm', [EmpresaFormController::class, 'store']);
     Route::put('/empresasForm/{id}', [EmpresaFormController::class, 'update']);
     Route::delete('/empresasForm/{id}', [EmpresaFormController::class, 'destroy']);
+});
+
+
+Route::prefix('cronograma/{idSeguimiento}')->group(function() {
+    Route::get('/data', [CronogramaController::class, 'getData']);
+    Route::post('/task', [CronogramaController::class, 'saveTask']); // Para crear
+    Route::put('/task/{taskId}', [CronogramaController::class, 'saveTask']); // Para actualizar
+    Route::delete('/task/{taskId}', [CronogramaController::class, 'deleteTask']);
+    Route::post('/link', [CronogramaController::class, 'saveLink']);
+    Route::delete('/link/{linkId}', [CronogramaController::class, 'deleteLink']);
+    Route::post('/config', [CronogramaController::class, 'saveConfig']);
 });
