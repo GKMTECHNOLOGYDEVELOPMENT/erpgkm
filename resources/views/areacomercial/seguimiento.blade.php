@@ -421,7 +421,7 @@
 
     <script src="{{ asset('assets/js/seguimiento/proyectos.js') }}" defer></script>
     <script src="{{ asset('assets/js/seguimiento/create-contact-empresa.js') }}" defer></script>
-    <!-- <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script> -->
+    <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script>
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
 
 </x-layout.default>
