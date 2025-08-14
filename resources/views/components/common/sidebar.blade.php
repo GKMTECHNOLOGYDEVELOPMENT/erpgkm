@@ -538,7 +538,7 @@
                     </ul>
                 </li>
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <a href="/charts" class="nav-link group">
                         <div class="flex items-center">
 
@@ -555,7 +555,7 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Charts</span>
                         </div>
                     </a>
-                </li> --}}
+                </li>
 
                 <li class="menu nav-item">
                     <a href="{{ route('usuario') }}" class="nav-link group">
@@ -592,7 +592,7 @@
                     </a>
                 </li> --}}
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <a href="/widgets" class="nav-link group">
                         <div class="flex items-center">
 
@@ -615,9 +615,9 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Widgets</span>
                         </div>
                     </a>
-                </li> --}}
+                </li>
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <a href="/font-icons" class="nav-link group">
                         <div class="flex items-center">
 
@@ -635,9 +635,9 @@
                                 Icons</span>
                         </div>
                     </a>
-                </li> --}}
+                </li>
 
-                {{-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <a href="/dragndrop" class="nav-link group">
                         <div class="flex items-center">
 
@@ -664,7 +664,7 @@
                                 and Drop</span>
                         </div>
                     </a>
-                </li> --}}
+                </li>
 
 
                 <h2

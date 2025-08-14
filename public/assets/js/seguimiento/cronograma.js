@@ -3,10 +3,10 @@ const toISO = (d) => new Date(d).toISOString().slice(0, 10);
 
 window.renderCronograma = function (el, tasks, opts = {}) {
     const data = tasks || [
-        { id: 'P1', name: 'Proyecto A', start: '2025-08-01', end: '2025-08-10', progress: 65 },
-        { id: 'T1', name: 'Levantamiento', start: '2025-08-01', end: '2025-08-03', progress: 100, dependencies: 'P1' },
-        { id: 'T2', name: 'Desarrollo', start: '2025-08-04', end: '2025-08-08', progress: 50, dependencies: 'T1' },
-        { id: 'T3', name: 'QA', start: '2025-08-08', end: '2025-08-10', progress: 20, dependencies: 'T2' },
+        { id: 'P1', name: 'Proyecto A', start: '2025-08-01', end: '2025-08-10', progress: 65, type: 'project', open: true },
+        { id: 'T1', name: 'Levantamiento', start: '2025-08-01', end: '2025-08-03', progress: 100, dependencies: 'P1', parent: 'P1' },
+        { id: 'T2', name: 'Desarrollo', start: '2025-08-04', end: '2025-08-08', progress: 50, dependencies: 'T1', parent: 'P1' },
+        { id: 'T3', name: 'QA', start: '2025-08-08', end: '2025-08-10', progress: 20, dependencies: 'T2', parent: 'P1' },
     ];
     if (!el) return;
 
@@ -198,7 +198,7 @@ window.renderCronograma = function (el, tasks, opts = {}) {
     applyScales(el.clientWidth);
     gantt.init(el.id || el);
 
-    // Normaliza tus progress (65 => 0.65)
+    // Normaliza tus progress (65 => 0.65) y mapea parent/type
     gantt.parse({
         data: data.map((t) => ({
             id: t.id,
@@ -206,6 +206,9 @@ window.renderCronograma = function (el, tasks, opts = {}) {
             start_date: gantt.date.parseDate(t.start, '%Y-%m-%d'),
             end_date: gantt.date.parseDate(t.end, '%Y-%m-%d'),
             progress: Math.max(0, Math.min(100, Number(t.progress || 0))) / 100,
+            parent: t.parent || 0,
+            type: t.type || 'task',
+            open: t.open !== false
         })),
         links: (() => {
             const links = [];
@@ -219,6 +222,18 @@ window.renderCronograma = function (el, tasks, opts = {}) {
             return links;
         })(),
     });
+
+    // === >>> AÑADIDO: marcar filas padre en el GRID <<< ===
+    gantt.templates.grid_row_class = (start, end, task) =>
+        gantt.hasChild(task.id) ? 'is-parent' : '';
+
+    // === >>> AÑADIDO: conservar tu task_class y sumar 'is-parent' a la barra <<< ===
+    const __oldTaskClass = gantt.templxates.task_class;
+    gantt.templates.task_class = function (s, e, t) {
+        const base = typeof __oldTaskClass === 'function' ? __oldTaskClass(s, e, t) : '';
+        return (gantt.hasChild(t.id) ? 'is-parent ' : '') + base;
+    };
+    // === /AÑADIDOS ===
 
     // === AUTO-FIT === (añadido, no quita nada)
     function fitToTasksOnce() {
@@ -405,5 +420,4 @@ window.renderCronograma = function (el, tasks, opts = {}) {
     gantt.attachEvent("onAfterTaskUpdate", (id, t) => { ensureVisibleByTask(t);               notify(`Tarea actualizada: ${t.text}`, 'info');   });
     gantt.attachEvent("onAfterTaskDrag",   (id)    => { const t = gantt.getTask(id);          ensureVisibleByTask(t); notify(`Tarea editada: ${t.text}`, 'info'); });
     gantt.attachEvent("onAfterTaskDelete", (id, t) => {                                       notify(`Tarea eliminada: ${t?.text ?? id}`, 'warning'); });
-    // ========== /TOASTS ==========
 };
