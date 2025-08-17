@@ -12,13 +12,24 @@ use Illuminate\Support\Facades\Validator;
 class ScrumboarddController extends Controller
 {
     // Obtener todos los proyectos con sus tareas
-    public function index()
+ // En ScrumboarddController.php
+
+public function index(Request $request)
 {
-    $projects = Project::with('tasks')->get();
+    $idSeguimiento = $request->query('seguimiento');
+    
+    $query = Project::with(['tasks' => function($query) use ($idSeguimiento) {
+        $query->where('idseguimiento', $idSeguimiento);
+    }]);
+    
+    if ($idSeguimiento) {
+        $query->where('idseguimiento', $idSeguimiento);
+    }
+    
+    $projects = $query->get();
 
     $projects->each(function ($project) {
         $project->tasks->each(function ($task) {
-            // 👇 Esta línea es CLAVE
             $task->tags = $task->tags ? json_decode($task->tags, true) : [];
         });
     });
@@ -28,17 +39,20 @@ class ScrumboarddController extends Controller
 
 
     // Guardar un nuevo proyecto
-    public function store(Request $request)
-    {
-        $request->validate(['title' => 'required|string|max:255']);
-        
-        $project = Project::create($request->only('title'));
-        
-        return response()->json([
-            'success' => true,
-            'project' => $project->load('tasks')
-        ]);
-    }
+   public function store(Request $request)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'idseguimiento' => 'required|integer'
+    ]);
+    
+    $project = Project::create($request->only(['title', 'idseguimiento']));
+    
+    return response()->json([
+        'success' => true,
+        'project' => $project->load('tasks')
+    ]);
+}
 
     // Actualizar un proyecto
     public function update(Request $request, Project $project)
@@ -79,7 +93,8 @@ class ScrumboarddController extends Controller
         'description' => 'nullable|string',
         'tags' => 'nullable|string',
         'image' => 'nullable|image|max:2048',
-        'image_url' => 'nullable|string' // Para imágenes existentes
+        'image_url' => 'nullable|string',
+        'idseguimiento' => 'required|integer'
     ]);
     
     $taskData = [
@@ -87,7 +102,8 @@ class ScrumboarddController extends Controller
         'title' => $request->title,
         'description' => $request->description,
         'tags' => $request->tags ? json_encode(explode(',', $request->tags)) : null,
-        'date' => now()
+        'date' => now(),
+        'idseguimiento' => $request->idseguimiento
     ];
     
     // Manejo de imagen (nueva o existente)

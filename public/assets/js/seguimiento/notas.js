@@ -1,5 +1,7 @@
 document.addEventListener("alpine:init", () => {
     Alpine.data("notes", () => ({
+                idSeguimiento: document.getElementById('idSeguimientoHidden')?.value || '',
+
         defaultParams: {
             id: null,
             title: '',
@@ -56,7 +58,12 @@ document.addEventListener("alpine:init", () => {
         },
 
         async loadTags() {
+            
             try {
+                 let url = '/tags';
+                if (this.idSeguimiento) {
+                    url += `?idseguimiento=${this.idSeguimiento}`;
+                }
                 const response = await fetch('/tags', {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -84,10 +91,11 @@ document.addEventListener("alpine:init", () => {
     this.loading = true;
     try {
         // Construye la URL correctamente
-        let url = '/notes';
-        if (filter && filter !== 'all') {
-            url += `?filter=${encodeURIComponent(filter)}`;
-        }
+          let url = `/notes?filter=${encodeURIComponent(filter)}`;
+                if (this.idSeguimiento) {
+                    url += `&idseguimiento=${this.idSeguimiento}`;
+                }
+
 console.log("Filtering by:", filter);
 
         const response = await fetch(url, {
@@ -139,7 +147,6 @@ searchNotes() {
             this.loading = true;
             try {
                 const url = this.params.id ? `/notes/${this.params.id}` : '/notes';
-                const method = this.params.id ? 'PUT' : 'POST';
                 
                 const formData = new FormData();
                 formData.append('title', this.params.title);
@@ -148,6 +155,7 @@ searchNotes() {
                     formData.append('tag_id', this.params.tag_id);
                 }
                 formData.append('is_favorite', this.params.is_favorite ? '1' : '0');
+                formData.append('idseguimiento', this.idSeguimiento);
                 
                 if (this.params.id) {
                     formData.append('_method', 'PUT');
@@ -193,14 +201,16 @@ searchNotes() {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         };
 
-        const response = await fetch(url, {
-            method: 'POST', // Siempre POST pero con _method para PUT
-            headers: headers,
-            body: JSON.stringify({
-                ...this.tagParams,
-                _method: this.tagParams.id ? 'PUT' : 'POST'
-            })
-        });
+         const response = await fetch(url, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        ...this.tagParams,
+                        idseguimiento: this.idSeguimiento,
+                        _method: this.tagParams.id ? 'PUT' : 'POST'
+                    })
+                });
+
 
         if (!response.ok) {
             const errorData = await response.json();

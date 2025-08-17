@@ -14,7 +14,8 @@ class TagPolicy
 
     public function view(Usuario $user, Tag $tag): bool
     {
-        return $user->idUsuario === $tag->user_id; // Cambiar id por idUsuario
+        return $user->idUsuario === $tag->user_id && 
+           $tag->idseguimiento == request()->input('idseguimiento');; // Cambiar id por idUsuario
     }
 
     public function create(Usuario $user): bool

@@ -1,5 +1,7 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('scrumboard', () => ({
+                idSeguimiento: document.getElementById('idSeguimientoHidden')?.value || '',
+
         // Estado inicial
         params: {
             id: null,
@@ -28,8 +30,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         // Cargar proyectos desde el servidor
-        loadProjects() {
-            fetch('/scrumboard/projects')
+          loadProjects() {
+            fetch(`/scrumboard/projects?seguimiento=${this.idSeguimiento}`)
                 .then((response) => response.json())
                 .then((data) => {
                     this.projectList = data.map((project) => ({
@@ -137,15 +139,20 @@ document.addEventListener('alpine:init', () => {
         },
 
         // Guardar proyecto (crear o actualizar)
-        saveProject() {
+         saveProject() {
             if (!this.params.title) {
                 this.showMessage('Title is required.', 'error');
                 return false;
             }
 
             const url = this.params.id ? `/scrumboard/projects/${this.params.id}` : '/scrumboard/projects';
-
             const method = this.params.id ? 'PUT' : 'POST';
+
+            // Agregar idSeguimiento al objeto de datos
+            const data = {
+                ...this.params,
+                idseguimiento: this.idSeguimiento
+            };
 
             fetch(url, {
                 method: method,
@@ -153,7 +160,7 @@ document.addEventListener('alpine:init', () => {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 },
-                body: JSON.stringify(this.params),
+                body: JSON.stringify(data),
             })
                 .then((response) => response.json())
                 .then((data) => {
@@ -259,7 +266,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         // Guardar tarea (crear o actualizar)
-        saveTask() {
+      saveTask() {
             if (!this.paramsTask.title) {
                 this.showMessage('Title is required.', 'error');
                 return false;
@@ -268,18 +275,16 @@ document.addEventListener('alpine:init', () => {
             const url = this.paramsTask.id ? `/scrumboard/tasks/${this.paramsTask.id}` : '/scrumboard/tasks';
             const method = this.paramsTask.id ? 'PUT' : 'POST';
 
-            // 1. Crear objeto con los datos
             const data = {
                 title: this.paramsTask.title,
                 description: this.paramsTask.description || '',
                 tags: this.paramsTask.tags || '',
+                idseguimiento: this.idSeguimiento // Agregar idSeguimiento
             };
 
-            // 2. Solo agregar project_id para nuevas tareas
             if (!this.paramsTask.id) {
                 data.project_id = this.paramsTask.projectId;
             }
-
             // 3. Configurar headers
             const headers = {
                 'Content-Type': 'application/json',

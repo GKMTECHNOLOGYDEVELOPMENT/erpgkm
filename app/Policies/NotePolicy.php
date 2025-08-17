@@ -14,7 +14,8 @@ class NotePolicy
 
     public function view(Usuario $user, Note $note): bool
     {
-        return $user->idUsuario === $note->user_id; // Cambiar id por idUsuario
+        return $user->idUsuario === $note->user_id && 
+           $note->idseguimiento == request()->input('idseguimiento'); // Cambiar id por idUsuario
     }
 
     public function create(Usuario $user): bool

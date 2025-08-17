@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Project extends Model
 {
-    protected $fillable = ['title'];
+    protected $fillable = ['title', 'idseguimiento'];
 
     public function tasks(): HasMany
     {

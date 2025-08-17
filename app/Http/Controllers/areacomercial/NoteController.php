@@ -22,9 +22,14 @@ class NoteController extends Controller
 {
     $user = Auth::user();
     $filter = $request->get('filter', 'all');
+    $idSeguimiento = $request->get('idseguimiento');
     
     $query = $user->notes()->with('tag');
-
+    
+    // Filtrar por seguimiento si está presente
+    if ($idSeguimiento) {
+        $query->where('idseguimiento', $idSeguimiento);
+    }
     switch ($filter) {
         case 'favorites':
             $query->where('is_favorite', true);
@@ -73,19 +78,21 @@ class NoteController extends Controller
     // Guardar nueva nota
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'tag_id' => 'nullable|exists:tags,id',
-            'is_favorite' => 'boolean'
-        ]);
+       $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'tag_id' => 'nullable|exists:tags,id',
+        'is_favorite' => 'boolean',
+        'idseguimiento' => 'required|integer' // Asegurar que siempre venga
+    ]);
 
-        $note = Auth::user()->notes()->create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'tag_id' => $request->tag_id,
-            'is_favorite' => $request->boolean('is_favorite', false)
-        ]);
+    $note = Auth::user()->notes()->create([
+        'title' => $request->title,
+        'description' => $request->description,
+        'tag_id' => $request->tag_id,
+        'is_favorite' => $request->boolean('is_favorite', false),
+        'idseguimiento' => $request->idseguimiento
+    ]);
 
         if ($request->wantsJson()) {
             return response()->json([

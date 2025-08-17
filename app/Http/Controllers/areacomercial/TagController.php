@@ -16,35 +16,43 @@ class TagController extends Controller
     }
 
     // Mostrar todos los tags del usuario (API)
-    public function index()
-    {
-        $tags = Auth::user()->tags()->withCount('notes')->get();
-        return response()->json(['tags' => $tags]);
+    public function index(Request $request)
+{
+    $idSeguimiento = $request->get('idseguimiento');
+    
+    $query = Auth::user()->tags()->withCount('notes');
+    
+    if ($idSeguimiento) {
+        $query->where('idseguimiento', $idSeguimiento);
     }
+    
+    $tags = $query->get();
+    return response()->json(['tags' => $tags]);
+}
 
     // Guardar nuevo tag (API)
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('tags')->where('user_id', Auth::id())
-            ],
-            'color' => ['required', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
-            'description' => 'nullable|string'
-        ]);
+   public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('tags')->where('user_id', Auth::id())
+        ],
+        'color' => ['required', 'string', 'regex:/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/'],
+        'description' => 'nullable|string',
+        'idseguimiento' => 'required|integer'
+    ]);
 
-        $tag = Auth::user()->tags()->create($validated);
+    $tag = Auth::user()->tags()->create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Tag creado exitosamente',
-            'tag' => $tag
-        ], 201);
-    }
-
+    return response()->json([
+        'success' => true,
+        'message' => 'Tag creado exitosamente',
+        'tag' => $tag
+    ], 201);
+}
     // Actualizar tag (API)
     public function update(Request $request, Tag $tag)
     {

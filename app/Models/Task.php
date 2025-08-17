@@ -11,6 +11,7 @@ class Task extends Model
         'project_id', 
         'title', 
         'description', 
+        'idseguimiento',
         'image', 
         'date',
         'tags'
