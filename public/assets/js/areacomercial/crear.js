@@ -78,31 +78,38 @@
         cargo: this.cargo.value,
         correo: this.correo.value,
         telefono: this.telefono.value,
-        nivel_decision_id: this.nivel_decision.value
+        nivel_decision: this.nivel_decision.value // Asegúrate que coincida con el name del select
     };
 
     try {
-        const response = await fetch('/contactos', {
+        const response = await fetch('/contactosone', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify(data)
         });
 
-        const result = await response.json();
+        // Verifica si la respuesta está vacía
+        const responseText = await response.text();
+        if (!responseText) {
+            throw new Error('La respuesta del servidor está vacía');
+        }
+
+        const result = JSON.parse(responseText);
 
         if (result.success) {
             alert('✅ Contacto registrado correctamente');
             window.location.href = '/seguimiento/' + result.idSeguimiento + '/edit';
             this.reset();
         } else {
-            alert('❌ Error al registrar contacto');
+            alert('❌ Error al registrar contacto: ' + (result.message || ''));
         }
     } catch (error) {
-        alert('❌ Error en la conexión');
-        console.error(error);
+        alert('❌ Error en la conexión: ' + error.message);
+        console.error('Error:', error);
     } finally {
         // Restaurar texto y habilitar botón
         btnGuardar.textContent = textoOriginal;

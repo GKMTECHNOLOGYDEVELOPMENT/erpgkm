@@ -11,40 +11,55 @@ use Illuminate\Support\Facades\Log;
 
 class ContactoController extends Controller
 {
-  public function store(Request $request)
+ public function store(Request $request)
 {
-    $request->validate([
-        'tipo_documento' => 'required|string',
-        'numero_documento' => 'required|string',
-        'nombre_completo' => 'required|string',
-        'cargo' => 'nullable|string',
-        'correo' => 'nullable|email',
-        'telefono' => 'nullable|string',
-        'nivel_decision_id' => 'nullable|exists:niveles_decision,id'
-    ]);
+    try {
+        $validated = $request->validate([
+            'tipo_documento' => 'required|string',
+            'numero_documento' => 'required|string|unique:contactos,numero_documento',
+            'nombre_completo' => 'required|string|max:255',
+            'cargo' => 'nullable|string|max:255',
+            'correo' => 'nullable|email|max:255',
+            'telefono' => 'nullable|string|max:20',
+            'nivel_decision' => 'nullable|exists:niveles_decision,id'
+        ]);
 
-    $contacto = Contactos::create([
-    'tipo_documento' => $request->tipo_documento,
-    'numero_documento' => $request->numero_documento,
-    'nombre_completo' => $request->nombre_completo,
-    'cargo' => $request->cargo,
-    'correo_electronico' => $request->correo,
-    'telefono_whatsapp' => $request->telefono,
-    'nivel_decision_id' => $request->nivel_decision_id
-]);
+        $contacto = Contactos::create([
+            'tipo_documento' => $validated['tipo_documento'],
+            'numero_documento' => $validated['numero_documento'],
+            'nombre_completo' => $validated['nombre_completo'],
+            'cargo' => $validated['cargo'],
+            'correo_electronico' => $validated['correo'],
+            'telefono_whatsapp' => $validated['telefono'],
+            'nivel_decision_id' => $validated['nivel_decision'] // Mapeado correctamente
+        ]);
 
-$seguimiento = Seguimiento::create([
-    'idContacto' => $contacto->id,
-    'idUsuario' => auth()->id(),
-    'tipoRegistro' => 2,
-    'fechaIngreso' => now(),
-]);
+        $seguimiento = Seguimiento::create([
+            'idContacto' => $contacto->id,
+            'idUsuario' => auth()->id(),
+            'tipoRegistro' => 2,
+            'fechaIngreso' => now(),
+        ]);
 
-return response()->json([
-    'success' => true,
-    'contacto' => $contacto,
-    'idSeguimiento' => $seguimiento->idSeguimiento
-]);
+        return response()->json([
+            'success' => true,
+            'contacto' => $contacto,
+            'idSeguimiento' => $seguimiento->idSeguimiento
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de validación',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Error al crear contacto: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al crear contacto: ' . $e->getMessage()
+        ], 500);
+    }
 }
 
 
