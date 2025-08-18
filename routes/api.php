@@ -412,3 +412,5 @@ Route::prefix('cronograma/{idSeguimiento}')->group(function() {
     Route::delete('/link/{linkId}', [CronogramaController::class, 'deleteLink']);
     Route::post('/config', [CronogramaController::class, 'saveConfig']);
 });
+
+Route::get('/seguimientos', [ClienteSeguimientoController::class, 'getSeguimientos']);
