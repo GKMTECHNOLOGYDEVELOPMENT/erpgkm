@@ -12,6 +12,7 @@ class CronogramaTarea extends Model
 
     protected $fillable = [
         'idSeguimiento',
+        'idpersona',
         'task_id',
         'parent_task_id',
         'nombre',

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\areacomercial;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\SeleccionarSeguimiento;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,17 +18,29 @@ class ScrumboarddController extends Controller
 public function index(Request $request)
 {
     $idSeguimiento = $request->query('seguimiento');
-    
-    $query = Project::with(['tasks' => function($query) use ($idSeguimiento) {
-        $query->where('idseguimiento', $idSeguimiento);
+    $idPersona = $request->query('idpersona');
+
+    $query = Project::with(['tasks' => function($query) use ($idSeguimiento, $idPersona) {
+        if ($idSeguimiento) {
+            $query->where('idseguimiento', $idSeguimiento);
+        }
+        if ($idPersona) {
+            $query->where('idpersona', $idPersona);
+        }
     }]);
-    
+
+    // Filtrar proyectos también por ambos IDs
     if ($idSeguimiento) {
         $query->where('idseguimiento', $idSeguimiento);
     }
-    
+
+    if ($idPersona) {
+        $query->where('idpersona', $idPersona);
+    }
+
     $projects = $query->get();
 
+    // Decodificar tags en tareas
     $projects->each(function ($project) {
         $project->tasks->each(function ($task) {
             $task->tags = $task->tags ? json_decode($task->tags, true) : [];
@@ -38,16 +51,34 @@ public function index(Request $request)
 }
 
 
+
+
     // Guardar un nuevo proyecto
-   public function store(Request $request)
+public function store(Request $request)
 {
     $request->validate([
         'title' => 'required|string|max:255',
         'idseguimiento' => 'required|integer'
     ]);
-    
-    $project = Project::create($request->only(['title', 'idseguimiento']));
-    
+
+    // Buscar el registro en seleccionarseguimiento
+    $seleccion = SeleccionarSeguimiento::where('idseguimiento', $request->idseguimiento)->first();
+
+    // Verificamos si existe
+    if (!$seleccion) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No se encontró una selección para el seguimiento proporcionado.'
+        ], 404);
+    }
+
+    // Crear el proyecto incluyendo el idpersona
+    $project = Project::create([
+        'title' => $request->title,
+        'idseguimiento' => $request->idseguimiento,
+        'idpersona' => $seleccion->idpersona
+    ]);
+
     return response()->json([
         'success' => true,
         'project' => $project->load('tasks')
@@ -84,8 +115,7 @@ public function index(Request $request)
         return response()->json(['success' => true]);
     }
 
-    // Guardar una nueva tarea
-  public function storeTask(Request $request)
+   public function storeTask(Request $request)
 {
     $request->validate([
         'project_id' => 'required|exists:projects,id',
@@ -96,16 +126,27 @@ public function index(Request $request)
         'image_url' => 'nullable|string',
         'idseguimiento' => 'required|integer'
     ]);
-    
+
+    // Buscar idpersona desde seleccionarseguimiento
+    $seleccion = SeleccionarSeguimiento::where('idseguimiento', $request->idseguimiento)->first();
+
+    if (!$seleccion) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No se encontró una selección para el seguimiento proporcionado.'
+        ], 404);
+    }
+
     $taskData = [
         'project_id' => $request->project_id,
         'title' => $request->title,
         'description' => $request->description,
         'tags' => $request->tags ? json_encode(explode(',', $request->tags)) : null,
         'date' => now(),
-        'idseguimiento' => $request->idseguimiento
+        'idseguimiento' => $request->idseguimiento,
+        'idpersona' => $seleccion->idpersona // 👈 Aquí se guarda el idpersona
     ];
-    
+
     // Manejo de imagen (nueva o existente)
     if ($request->hasFile('image')) {
         $path = $request->file('image')->store('tasks', 'public');
@@ -113,9 +154,9 @@ public function index(Request $request)
     } elseif ($request->filled('image_url')) {
         $taskData['image'] = $request->image_url;
     }
-    
+
     $task = Task::create($taskData);
-    
+
     return response()->json([
         'success' => true,
         'task' => $task

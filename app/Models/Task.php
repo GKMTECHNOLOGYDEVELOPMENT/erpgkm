@@ -14,7 +14,8 @@ class Task extends Model
         'idseguimiento',
         'image', 
         'date',
-        'tags'
+        'tags',
+        'idpersona'
     ];
 
     protected $casts = [

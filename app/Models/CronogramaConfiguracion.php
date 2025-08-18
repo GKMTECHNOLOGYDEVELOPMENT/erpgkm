@@ -14,7 +14,8 @@ class CronogramaConfiguracion extends Model
         'vista_actual',
         'zoom_inicio',
         'zoom_fin',
-        'configuracion_json'
+        'configuracion_json',
+        
     ];
 
     protected $casts = [

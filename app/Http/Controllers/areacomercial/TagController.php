@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\areacomercial;
 
 use App\Http\Controllers\Controller;
+use App\Models\SeleccionarSeguimiento;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,23 +16,28 @@ class TagController extends Controller
         $this->middleware('auth');
     }
 
-    // Mostrar todos los tags del usuario (API)
-    public function index(Request $request)
+ public function index(Request $request)
 {
     $idSeguimiento = $request->get('idseguimiento');
-    
+    $idPersona = $request->get('idpersona');
+
     $query = Auth::user()->tags()->withCount('notes');
-    
+
     if ($idSeguimiento) {
         $query->where('idseguimiento', $idSeguimiento);
     }
-    
+
+    if ($idPersona) {
+        $query->where('idpersona', $idPersona);
+    }
+
     $tags = $query->get();
+
     return response()->json(['tags' => $tags]);
 }
 
     // Guardar nuevo tag (API)
-   public function store(Request $request)
+public function store(Request $request)
 {
     $validated = $request->validate([
         'name' => [
@@ -45,7 +51,20 @@ class TagController extends Controller
         'idseguimiento' => 'required|integer'
     ]);
 
-    $tag = Auth::user()->tags()->create($validated);
+    // Obtener idpersona relacionado al seguimiento
+    $idPersona = SeleccionarSeguimiento::where('idseguimiento', $validated['idseguimiento'])->value('idpersona');
+    if (!$idPersona) {
+        return response()->json([
+            'success' => false,
+            'message' => 'No se encontró idpersona para este seguimiento'
+        ], 400);
+    }
+
+    // Crear el tag incluyendo idpersona
+    $tag = Auth::user()->tags()->create([
+        ...$validated,
+        'idpersona' => $idPersona
+    ]);
 
     return response()->json([
         'success' => true,
@@ -53,6 +72,7 @@ class TagController extends Controller
         'tag' => $tag
     ], 201);
 }
+
     // Actualizar tag (API)
     public function update(Request $request, Tag $tag)
     {

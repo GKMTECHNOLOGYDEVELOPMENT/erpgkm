@@ -6,6 +6,7 @@
 namespace App\Http\Controllers\areacomercial;
 use App\Http\Controllers\Controller;
 use App\Models\Note;
+use App\Models\SeleccionarSeguimiento;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,37 +19,49 @@ class NoteController extends Controller
         $this->middleware('auth');
     }
 
-   public function index(Request $request)
+ public function index(Request $request)
 {
     $user = Auth::user();
     $filter = $request->get('filter', 'all');
     $idSeguimiento = $request->get('idseguimiento');
-    
+    $idPersona = $request->get('idpersona');
+
     $query = $user->notes()->with('tag');
-    
-    // Filtrar por seguimiento si está presente
+
     if ($idSeguimiento) {
         $query->where('idseguimiento', $idSeguimiento);
     }
+
+    if ($idPersona) {
+        $query->where('idpersona', $idPersona);
+    }
+
     switch ($filter) {
         case 'favorites':
             $query->where('is_favorite', true);
             break;
         case 'all':
-            // No filter needed
+            // no additional filter
             break;
         default:
-            // Filtra por nombre del tag (case insensitive)
-            $query->whereHas('tag', function($q) use ($filter) {
+            $query->whereHas('tag', function ($q) use ($filter) {
                 $q->where('name', 'LIKE', $filter);
-                // o para coincidencia exacta:
-                // $q->where('name', $filter);
             });
             break;
     }
 
     $notes = $query->orderBy('created_at', 'desc')->get();
-    $tags = $user->tags;
+
+    // Filtrar tags también por seguimiento y persona
+    $tagsQuery = $user->tags();
+    if ($idSeguimiento) {
+        $tagsQuery->where('idseguimiento', $idSeguimiento);
+    }
+    if ($idPersona) {
+        $tagsQuery->where('idpersona', $idPersona);
+    }
+
+    $tags = $tagsQuery->get();
 
     return response()->json([
         'notes' => $notes->map(function ($note) {
@@ -68,6 +81,7 @@ class NoteController extends Controller
     ]);
 }
 
+
     // Mostrar formulario para crear nueva nota
     public function create()
     {
@@ -75,45 +89,55 @@ class NoteController extends Controller
         return view('notes.create', compact('tags'));
     }
 
-    // Guardar nueva nota
-    public function store(Request $request)
-    {
-       $request->validate([
+   public function store(Request $request)
+{
+    $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
         'tag_id' => 'nullable|exists:tags,id',
         'is_favorite' => 'boolean',
-        'idseguimiento' => 'required|integer' // Asegurar que siempre venga
+        'idseguimiento' => 'required|integer'
     ]);
 
+    // Buscar el idpersona según el seguimiento
+    $idPersona = SeleccionarSeguimiento::where('idseguimiento', $request->idseguimiento)->value('idpersona');
+    if (!$idPersona) {
+        return response()->json(['error' => 'No se encontró idpersona para este seguimiento'], 400);
+    }
+
+    // Crear la nota con idpersona incluido
     $note = Auth::user()->notes()->create([
         'title' => $request->title,
         'description' => $request->description,
         'tag_id' => $request->tag_id,
         'is_favorite' => $request->boolean('is_favorite', false),
-        'idseguimiento' => $request->idseguimiento
+        'idseguimiento' => $request->idseguimiento,
+        'idpersona' => $idPersona
     ]);
 
-        if ($request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Nota creada exitosamente',
-                'note' => [
-                    'id' => $note->id,
-                    'title' => $note->title,
-                    'description' => $note->description,
-                    'is_favorite' => $note->is_favorite,
-                    'tag' => $note->tag_name,
-                    'tag_color' => $note->tag_color,
-                    'date' => $note->formatted_date,
-                    'user' => $note->user->name,
-                ]
-            ]);
-        }
-
-        return redirect()->route('notes.index')
-            ->with('success', 'Nota creada exitosamente');
+    // Si es una petición JSON (AJAX)
+    if ($request->wantsJson()) {
+        return response()->json([
+            'success' => true,
+            'message' => 'Nota creada exitosamente',
+            'note' => [
+                'id' => $note->id,
+                'title' => $note->title,
+                'description' => $note->description,
+                'is_favorite' => $note->is_favorite,
+                'tag' => $note->tag_name,
+                'tag_color' => $note->tag_color,
+                'date' => $note->formatted_date,
+                'user' => $note->user->name,
+            ]
+        ]);
     }
+
+    // Si es una redirección normal
+    return redirect()->route('notes.index')
+        ->with('success', 'Nota creada exitosamente');
+}
+
 
     // Mostrar una nota específica
     public function show(Note $note)

@@ -15,7 +15,8 @@ class CronogramaDependencia extends Model
         'source_task_id',
         'target_task_id',
         'tipo_dependencia',
-        'retraso'
+        'retraso',
+        'idpersona'
     ];
 
     protected $casts = [
