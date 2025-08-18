@@ -338,41 +338,45 @@ async function submitEmpresa(event) {
                     const fuenteNombre = fuenteCaptacionOptions.find((f) => f.id == empresaData.fuente_captacion_id)?.nombre || empresaData.fuente_captacion_id;
                     lines[3].innerHTML = `<span class="font-medium">Fuente:</span> ${fuenteNombre}`;
                 }
-            } else {
-                // Crear nueva tarjeta
-                const id = `empresa-${data.data.id}`;
-                const fuenteNombre = fuenteCaptacionOptions.find((f) => f.id == empresaData.fuente_captacion_id)?.nombre || empresaData.fuente_captacion_id;
+           } else {
+    // Crear nueva tarjeta
+    const id = `empresa-${data.data.id}`;
+    const fuenteNombre = fuenteCaptacionOptions.find((f) => f.id == empresaData.fuente_captacion_id)?.nombre || empresaData.fuente_captacion_id;
 
-                const item = `
-          <div id="${id}" data-razon="${empresaData.nombre_razon_social}" data-ruc="${empresaData.ruc}" 
-               data-rubro="${empresaData.giro_comercial}" data-ubicacion="${empresaData.ubicacion_geografica}" 
-               data-fuente="${empresaData.fuente_captacion_id}"
-               class="p-4 bg-yellow-100 rounded shadow mb-4">
-            <div class="flex justify-between items-start">
-              <div>
-                <strong class="text-lg">${empresaData.nombre_razon_social}</strong>
-                <div class="text-sm text-gray-600 mt-1">
-                  <p><span class="font-medium">RUC:</span> ${empresaData.ruc}</p>
-                  <p><span class="font-medium">Rubro:</span> ${empresaData.giro_comercial}</p>
-                  <p><span class="font-medium">Ubicación:</span> ${empresaData.ubicacion_geografica || 'No especificado'}</p>
-                  <p><span class="font-medium">Fuente:</span> ${fuenteNombre}</p>
-                </div>
-              </div>
-              <div class="flex space-x-2">
-                <button onclick="editEmpresa('${id}')" class="text-blue-500 hover:text-blue-700" title="Editar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
-                </button>
-                <button onclick="deleteItem('${id}', 'empresa')" class="text-red-500 hover:text-red-700" title="Eliminar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                </button>
-                <button onclick="seleccionar('${id}', 'empresa')" class="text-green-600 hover:text-green-800" title="Seleccionar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                </button>
-              </div>
+    const item = `
+      <div id="${id}"  class="empresa-card p-4 bg-yellow-100 rounded shadow mb-4"
+           data-idpersona="${data.data.id}" 
+           data-razon="${empresaData.nombre_razon_social}" 
+           data-ruc="${empresaData.ruc}" 
+           data-rubro="${empresaData.giro_comercial}" 
+           data-ubicacion="${empresaData.ubicacion_geografica}" 
+           data-fuente="${empresaData.fuente_captacion_id}"
+           class="p-4 bg-yellow-100 rounded shadow mb-4">
+        <div class="flex justify-between items-start">
+          <div>
+            <strong class="text-lg">${empresaData.nombre_razon_social}</strong>
+            <div class="text-sm text-gray-600 mt-1">
+              <p><span class="font-medium">RUC:</span> ${empresaData.ruc}</p>
+              <p><span class="font-medium">Rubro:</span> ${empresaData.giro_comercial}</p>
+              <p><span class="font-medium">Ubicación:</span> ${empresaData.ubicacion_geografica || 'No especificado'}</p>
+              <p><span class="font-medium">Fuente:</span> ${fuenteNombre}</p>
             </div>
-          </div>`;
-                document.getElementById('data-list').insertAdjacentHTML('beforeend', item);
-            }
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="editEmpresa('${id}')" class="text-blue-500 hover:text-blue-700" title="Editar">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+            </button>
+            <button onclick="deleteItem('${id}', 'empresa')" class="text-red-500 hover:text-red-700" title="Eliminar">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+            </button>
+            <button onclick="seleccionar('${id}', 'empresa')" class="text-green-600 hover:text-green-800" title="Seleccionar">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('data-list').insertAdjacentHTML('beforeend', item);
+}
 
             cancelCreate();
         } else {
@@ -418,7 +422,7 @@ async function loadExistingData(idSeguimiento) {
         || empresa.fuente_captacion_id;
 
       html += `
-        <div id="${id}" data-razon="${empresa.nombre_razon_social}" data-ruc="${empresa.ruc}" 
+        <div id="${id}" data-idpersona="${empresa.id}" class="empresa-card p-4 bg-yellow-100 rounded shadow mb-4" data-razon="${empresa.nombre_razon_social}" data-ruc="${empresa.ruc}" 
              data-rubro="${empresa.giro_comercial}" data-ubicacion="${empresa.ubicacion_geografica}" 
              data-fuente="${empresa.fuente_captacion_id}"
              class="p-4 bg-yellow-100 rounded shadow mb-4">
@@ -458,7 +462,7 @@ async function loadExistingData(idSeguimiento) {
         || contacto.nivel_decision_id;
 
       html += `
-        <div id="${id}" data-tipo-documento="${contacto.tipo_documento_id}" data-numero-documento="${contacto.numero_documento}"
+        <div id="${id}" class="contacto-card p-4 bg-blue-100 rounded shadow mb-4" data-idpersona="${contacto.id}" data-tipo-documento="${contacto.tipo_documento_id}" data-numero-documento="${contacto.numero_documento}"
              data-nombre-completo="${contacto.nombre_completo}" data-cargo="${contacto.cargo}" data-correo="${contacto.correo_electronico}"
              data-telefono="${contacto.telefono_whatsapp}" data-nivel-decision="${contacto.nivel_decision_id}"
              class="p-4 bg-blue-100 rounded shadow mb-4">
@@ -604,44 +608,50 @@ async function submitContacto(event) {
                         nivelDecisionOptions.find((n) => n.id == contactoData.nivel_decision_id)?.nombre || contactoData.nivel_decision_id;
                     lines[4].innerHTML = `<span class="font-medium">Nivel de decisión:</span> ${nivelDecisionNombre || 'No especificado'}`;
                 }
-            } else {
-                // Crear nueva tarjeta
-                const id = `contacto-${data.data.id}`;
-                const tipoDocNombre =
-                    tipoDocumentoOptions.find((t) => t.idTipoDocumento == contactoData.tipo_documento_id)?.nombre || contactoData.tipo_documento_id;
-                const nivelDecisionNombre = nivelDecisionOptions.find((n) => n.id == contactoData.nivel_decision_id)?.nombre || contactoData.nivel_decision_id;
+           } else {
+    // Crear nueva tarjeta
+    const id = `contacto-${data.data.id}`;
+    const tipoDocNombre =
+        tipoDocumentoOptions.find((t) => t.idTipoDocumento == contactoData.tipo_documento_id)?.nombre || contactoData.tipo_documento_id;
+    const nivelDecisionNombre = nivelDecisionOptions.find((n) => n.id == contactoData.nivel_decision_id)?.nombre || contactoData.nivel_decision_id;
 
-                const item = `
-          <div id="${id}" data-tipo-documento="${contactoData.tipo_documento_id}" data-numero-documento="${contactoData.numero_documento}"
-               data-nombre-completo="${contactoData.nombre_completo}" data-cargo="${contactoData.cargo}" data-correo="${contactoData.correo_electronico}"
-               data-telefono="${contactoData.telefono_whatsapp}" data-nivel-decision="${contactoData.nivel_decision_id}"
-               class="p-4 bg-blue-100 rounded shadow mb-4">
-            <div class="flex justify-between items-start">
-              <div>
-                <strong class="text-lg">${contactoData.nombre_completo}</strong>
-                <div class="text-sm text-gray-600 mt-1">
-                  <p><span class="font-medium">Documento:</span> ${tipoDocNombre} ${contactoData.numero_documento}</p>
-                  <p><span class="font-medium">Cargo:</span> ${contactoData.cargo || 'No especificado'}</p>
-                  <p><span class="font-medium">Correo:</span> ${contactoData.correo_electronico || 'No especificado'}</p>
-                  <p><span class="font-medium">Teléfono:</span> ${contactoData.telefono_whatsapp || 'No especificado'}</p>
-                  <p><span class="font-medium">Nivel de decisión:</span> ${nivelDecisionNombre || 'No especificado'}</p>
-                </div>
-              </div>
-              <div class="flex space-x-2">
-                <button onclick="editContacto('${id}')" class="text-blue-500 hover:text-blue-700" title="Editar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
-                </button>
-                <button onclick="deleteItem('${id}', 'contacto')" class="text-red-500 hover:text-red-700" title="Eliminar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
-                </button>
-                <button onclick="seleccionar('${id}', 'contacto')" class="text-green-600 hover:text-green-800" title="Seleccionar">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                </button>
-              </div>
+    const item = `
+      <div id="${id}" class="contacto-card p-4 bg-blue-100 rounded shadow mb-4"
+           data-idpersona="${data.data.id}" 
+           data-tipo-documento="${contactoData.tipo_documento_id}" 
+           data-numero-documento="${contactoData.numero_documento}"
+           data-nombre-completo="${contactoData.nombre_completo}" 
+           data-cargo="${contactoData.cargo}" 
+           data-correo="${contactoData.correo_electronico}"
+           data-telefono="${contactoData.telefono_whatsapp}" 
+           data-nivel-decision="${contactoData.nivel_decision_id}"
+           class="p-4 bg-blue-100 rounded shadow mb-4">
+        <div class="flex justify-between items-start">
+          <div>
+            <strong class="text-lg">${contactoData.nombre_completo}</strong>
+            <div class="text-sm text-gray-600 mt-1">
+              <p><span class="font-medium">Documento:</span> ${tipoDocNombre} ${contactoData.numero_documento}</p>
+              <p><span class="font-medium">Cargo:</span> ${contactoData.cargo || 'No especificado'}</p>
+              <p><span class="font-medium">Correo:</span> ${contactoData.correo_electronico || 'No especificado'}</p>
+              <p><span class="font-medium">Teléfono:</span> ${contactoData.telefono_whatsapp || 'No especificado'}</p>
+              <p><span class="font-medium">Nivel de decisión:</span> ${nivelDecisionNombre || 'No especificado'}</p>
             </div>
-          </div>`;
-                document.getElementById('data-list').insertAdjacentHTML('beforeend', item);
-            }
+          </div>
+          <div class="flex space-x-2">
+            <button onclick="editContacto('${id}')" class="text-blue-500 hover:text-blue-700" title="Editar">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+            </button>
+            <button onclick="deleteItem('${id}', 'contacto')" class="text-red-500 hover:text-red-700" title="Eliminar">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+            </button>
+            <button onclick="seleccionar('${id}', 'contacto')" class="text-green-600 hover:text-green-800" title="Seleccionar">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+            </button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('data-list').insertAdjacentHTML('beforeend', item);
+}
 
             cancelCreate();
         } else {
@@ -727,18 +737,115 @@ async function deleteItem(id, type) {
     }
 }
 
-function seleccionar(id, tipo) {
+// Función que se ejecuta cuando el DOM está cargado
+
+
+async function cargarSeleccionPrevia() {
+    const idSeguimiento = document.getElementById('idSeguimientoHidden')?.value;
+    if (!idSeguimiento) return;
+
+    try {
+        const response = await fetch(`/obtener-seleccion/${idSeguimiento}`);
+        const data = await response.json();
+
+        console.log('Datos de selección recibidos:', data); // Debug
+
+        if (response.ok && data.success && data.data) {
+            const seleccion = data.data;
+            console.log('Selección encontrada:', seleccion); // Debug
+            
+            // Buscar el elemento por data-idpersona
+            const elemento = document.querySelector(`[data-idpersona="${seleccion.idpersona}"]`);
+            
+            if (elemento) {
+                console.log('Elemento encontrado:', elemento); // Debug
+                elemento.classList.add('border-2', 'border-green-500');
+            } else {
+                console.warn('Elemento no encontrado con data-idpersona:', seleccion.idpersona);
+            }
+        }
+    } catch (error) {
+        console.error('Error al cargar selección previa:', error);
+    }
+}
+
+async function seleccionar(id, tipo) {
     const item = document.getElementById(id);
     if (!item) return;
+
+    // Debug: Ver todos los atributos del elemento
+    console.log('Elemento seleccionado:', item);
+    console.log('Todos los data attributes:', item.dataset);
+    console.log('HTML completo del elemento:', item.outerHTML);
+    
+    // Resaltar visualmente el elemento seleccionado
     const prev = document.querySelector('.border-2.border-green-500');
     if (prev) prev.classList.remove('border-2', 'border-green-500');
     item.classList.add('border-2', 'border-green-500');
-    // sin alert
+
+    const prospectoId = id.split('-')[1];
+    console.log('prospectoId extraído:', prospectoId);
+    
+    const idPersona = parseInt(item.dataset.idpersona, 10);
+    console.log('item.dataset.idpersona (raw):', item.dataset.idpersona);
+    console.log('idPersona parseado:', idPersona);
+
+    if (!idPersona || isNaN(idPersona)) {
+        console.error('No se encontró el ID de persona o es inválido:', item.dataset.idpersona);
+        alert('❌ No se encontró el ID de persona para este elemento');
+        return;
+    }
+
+    const idSeguimiento = document.getElementById('idSeguimientoHidden')?.value;
+    if (!idSeguimiento) {
+        console.error('No se encontró el ID de seguimiento');
+        alert('❌ No se encontró el ID de seguimiento');
+        return;
+    }
+
+    const tipoProspecto = tipo === 'empresa' ? 'empresa' : 'contacto';
+
+    console.log('Datos a enviar:', {
+        idseguimiento: idSeguimiento,
+        idprospecto: prospectoId,
+        tipo_prospecto: tipoProspecto,
+        idpersona: idPersona
+    });
+
+    try {
+        const response = await fetch('/seleccionar-seguimiento', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify({
+                idseguimiento: idSeguimiento,
+                idprospecto: prospectoId,
+                tipo_prospecto: tipoProspecto,
+                idpersona: idPersona
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al guardar la selección');
+        }
+
+        alert('✅ Selección guardada correctamente');
+    } catch (error) {
+        console.error('Error al guardar la selección:', error);
+        alert('❌ Error al guardar la selección: ' + error.message);
+    }
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
     // Solo carga las opciones de los selects al inicio
     await loadSelectOptions();
+
+    cargarSeleccionPrevia();
     // No cargamos datos aquí, porque el DOM aún no tiene el #data-list
 });
 
