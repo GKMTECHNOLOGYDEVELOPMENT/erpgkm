@@ -414,3 +414,4 @@ Route::prefix('cronograma/{idSeguimiento}')->group(function() {
     Route::post('/config', [CronogramaController::class, 'saveConfig']);
 });
 
+Route::get('/seguimientos', [ClienteSeguimientoController::class, 'getSeguimientos']);
