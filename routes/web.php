@@ -72,6 +72,7 @@ use App\Http\Controllers\areacomercial\EmpresaFormController;
 use App\Http\Controllers\areacomercial\NoteController;
 use App\Http\Controllers\areacomercial\ObservacionController;
 use App\Http\Controllers\areacomercial\ScrumboarddController;
+use App\Http\Controllers\areacomercial\SeleccionSeguimientoController;
 use App\Http\Controllers\areacomercial\TagController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -1152,3 +1153,8 @@ Route::prefix('cronograma')->name('cronograma.')->group(function () {
         ->name('export')
         ->where('format', 'json|excel|csv');
 });
+
+
+Route::post('/seleccionar-seguimiento', [SeleccionSeguimientoController::class, 'store']);
+
+Route::get('/obtener-seleccion/{idSeguimiento}', [SeleccionSeguimientoController::class, 'obtenerSeleccion']);
