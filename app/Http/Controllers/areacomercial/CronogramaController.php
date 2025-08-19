@@ -7,6 +7,7 @@ use App\Models\CronogramaDependencia;
 use App\Models\CronogramaConfiguracion;
 use App\Models\CronogramaHistorico;
 use App\Models\Seguimiento;
+use App\Models\SeleccionarSeguimiento;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -18,46 +19,54 @@ use Illuminate\Support\Facades\Log;
 class CronogramaController extends Controller
 {
     // Obtener todos los datos del cronograma para un seguimiento
-    public function getData($idSeguimiento): JsonResponse
-    {
-        try {
-            // Verificar que el seguimiento existe
-            $seguimiento = Seguimiento::findOrFail($idSeguimiento);
+   public function getData($idSeguimiento): JsonResponse
+{
+    try {
+        // Verificar que el seguimiento existe
+        $seguimiento = Seguimiento::findOrFail($idSeguimiento);
 
-            // Obtener tareas
-            $tareas = CronogramaTarea::porSeguimiento($idSeguimiento)
-                ->orderBy('orden')
-                ->get();
+        // Obtener idpersona desde query
+        $idPersona = request()->query('idpersona');
 
-            // Obtener dependencias
-            $dependencias = CronogramaDependencia::porSeguimiento($idSeguimiento)
-                ->get();
-
-            // Obtener configuración
-            $configuracion = CronogramaConfiguracion::where('idSeguimiento', $idSeguimiento)->first();
-
-            // Formatear datos para dhtmlxGantt
-            $data = [
-                'data' => $tareas->map(function ($tarea) {
-                    return $tarea->toGanttFormat();
-                }),
-                'links' => $dependencias->map(function ($dependencia) {
-                    return $dependencia->toGanttFormat();
-                }),
-                'config' => $configuracion ? [
-                    'vista' => $configuracion->vista_actual,
-                    'zoom_inicio' => $configuracion->zoom_inicio?->format('Y-m-d'),
-                    'zoom_fin' => $configuracion->zoom_fin?->format('Y-m-d'),
-                    'extras' => $configuracion->configuracion_json
-                ] : []
-            ];
-
-            return response()->json($data);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if (!$idPersona) {
+            throw new \Exception('idpersona es requerido');
         }
+
+        // Obtener tareas por seguimiento y persona
+        $tareas = CronogramaTarea::where('idSeguimiento', $idSeguimiento)
+            ->where('idpersona', $idPersona)
+            ->orderBy('orden')
+            ->get();
+
+        // Obtener dependencias por seguimiento y persona
+        $dependencias = CronogramaDependencia::where('idSeguimiento', $idSeguimiento)
+            ->where('idpersona', $idPersona)
+            ->get();
+
+        // Obtener configuración por seguimiento y persona
+        $configuracion = CronogramaConfiguracion::where('idSeguimiento', $idSeguimiento)
+            ->where('idpersona', $idPersona)
+            ->first();
+
+        // Formatear datos para Gantt
+        $data = [
+            'data' => $tareas->map(fn($tarea) => $tarea->toGanttFormat()),
+            'links' => $dependencias->map(fn($dep) => $dep->toGanttFormat()),
+            'config' => $configuracion ? [
+                'vista' => $configuracion->vista_actual,
+                'zoom_inicio' => optional($configuracion->zoom_inicio)->format('Y-m-d'),
+                'zoom_fin' => optional($configuracion->zoom_fin)->format('Y-m-d'),
+                'extras' => $configuracion->configuracion_json,
+            ] : []
+        ];
+
+        return response()->json($data);
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
+
 
     // Guardar/Actualizar una tarea
 public function saveTask(Request $request, $idSeguimiento): JsonResponse
@@ -84,12 +93,19 @@ public function saveTask(Request $request, $idSeguimiento): JsonResponse
 
         $esNueva = !$tarea;
 
-        if (!$tarea) {
-            $tarea = new CronogramaTarea();
-            $tarea->idSeguimiento = $idSeguimiento;
-            $tarea->task_id = $validated['id'];
-            $tarea->orden = CronogramaTarea::porSeguimiento($idSeguimiento)->max('orden') + 1;
-        }
+      $idPersona = SeleccionarSeguimiento::where('idseguimiento', $idSeguimiento)->value('idpersona');
+
+if (!$idPersona) {
+    throw new \Exception('No se encontró idpersona para este seguimiento.');
+}
+
+if (!$tarea) {
+    $tarea = new CronogramaTarea();
+    $tarea->idSeguimiento = $idSeguimiento;
+    $tarea->idpersona = $idPersona; // 👈 guardar idpersona
+    $tarea->task_id = $validated['id'];
+    $tarea->orden = CronogramaTarea::porSeguimiento($idSeguimiento)->max('orden') + 1;
+}
 
         // Actualizar campos
         $tarea->nombre = $validated['text'];
@@ -195,6 +211,13 @@ public function saveTask(Request $request, $idSeguimiento): JsonResponse
                 'type' => 'in:0,1,2,3'
             ]);
 
+             // Obtener idpersona
+        $idPersona = SeleccionarSeguimiento::where('idseguimiento', $idSeguimiento)->value('idpersona');
+        if (!$idPersona) {
+            throw new \Exception('No se encontró idpersona para este seguimiento.');
+        }
+
+
             DB::beginTransaction();
 
             // Verificar que las tareas existen
@@ -215,17 +238,18 @@ public function saveTask(Request $request, $idSeguimiento): JsonResponse
                 return response()->json(['error' => 'Esta dependencia crearía un ciclo'], 400);
             }
 
-            $dependencia = CronogramaDependencia::updateOrCreate(
-                [
-                    'idSeguimiento' => $idSeguimiento,
-                    'link_id' => $request->id
-                ],
-                [
-                    'source_task_id' => $request->source,
-                    'target_task_id' => $request->target,
-                    'tipo_dependencia' => $request->type ?? '0'
-                ]
-            );
+             $dependencia = CronogramaDependencia::updateOrCreate(
+            [
+                'idSeguimiento' => $idSeguimiento,
+                'link_id' => $request->id
+            ],
+            [
+                'idpersona' => $idPersona, // ✅ Aquí se guarda
+                'source_task_id' => $request->source,
+                'target_task_id' => $request->target,
+                'tipo_dependencia' => $request->type ?? '0'
+            ]
+        );
 
             DB::commit();
 

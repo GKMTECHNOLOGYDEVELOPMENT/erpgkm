@@ -161,7 +161,8 @@
     </div>
 
 
-    <input type="hidden" id="idSeguimientoHidden" value="{{ $seguimiento->idSeguimiento ?? '' }}">
+        <input type="hidden" id="idSeguimientoHidden" value="{{ $seguimiento->idSeguimiento ?? '' }}">
+<input type="hidden" id="idPersonaHidden" value="{{ $idPersona ?? '' }}">
 
 
 

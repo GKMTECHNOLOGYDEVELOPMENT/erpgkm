@@ -1,6 +1,7 @@
 document.addEventListener("alpine:init", () => {
     Alpine.data("notes", () => ({
                 idSeguimiento: document.getElementById('idSeguimientoHidden')?.value || '',
+idPersona: document.getElementById('idPersonaHidden')?.value || '',
 
         defaultParams: {
             id: null,
@@ -60,10 +61,11 @@ document.addEventListener("alpine:init", () => {
         async loadTags() {
             
             try {
-                 let url = '/tags';
-                if (this.idSeguimiento) {
-                    url += `?idseguimiento=${this.idSeguimiento}`;
-                }
+                let url = '/tags';
+const params = new URLSearchParams();
+if (this.idSeguimiento) params.append('idseguimiento', this.idSeguimiento);
+if (this.idPersona) params.append('idpersona', this.idPersona);
+url += `?${params.toString()}`;
                 const response = await fetch('/tags', {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -91,10 +93,10 @@ document.addEventListener("alpine:init", () => {
     this.loading = true;
     try {
         // Construye la URL correctamente
-          let url = `/notes?filter=${encodeURIComponent(filter)}`;
-                if (this.idSeguimiento) {
-                    url += `&idseguimiento=${this.idSeguimiento}`;
-                }
+      let url = `/notes?filter=${encodeURIComponent(filter)}`;
+if (this.idSeguimiento) url += `&idseguimiento=${this.idSeguimiento}`;
+if (this.idPersona) url += `&idpersona=${this.idPersona}`;
+
 
 console.log("Filtering by:", filter);
 

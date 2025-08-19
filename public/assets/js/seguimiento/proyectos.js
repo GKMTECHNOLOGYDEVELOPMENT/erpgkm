@@ -1,6 +1,8 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('scrumboard', () => ({
                 idSeguimiento: document.getElementById('idSeguimientoHidden')?.value || '',
+                idPersona: document.getElementById('idPersonaHidden')?.value || '',
+
 
         // Estado inicial
         params: {
@@ -30,17 +32,18 @@ document.addEventListener('alpine:init', () => {
         },
 
         // Cargar proyectos desde el servidor
-          loadProjects() {
-            fetch(`/scrumboard/projects?seguimiento=${this.idSeguimiento}`)
-                .then((response) => response.json())
-                .then((data) => {
-                    this.projectList = data.map((project) => ({
-                        ...project,
-                        tasks: project.tasks || [],
-                    }));
-                    this.initializeSortable();
-                });
-        },
+       loadProjects() {
+    fetch(`/scrumboard/projects?seguimiento=${this.idSeguimiento}&idpersona=${this.idPersona}`)
+        .then((response) => response.json())
+        .then((data) => {
+            this.projectList = data.map((project) => ({
+                ...project,
+                tasks: project.tasks || [],
+            }));
+            this.initializeSortable();
+        });
+},
+
 
         // Inicializar SortableJS para drag and drop
         initializeSortable() {

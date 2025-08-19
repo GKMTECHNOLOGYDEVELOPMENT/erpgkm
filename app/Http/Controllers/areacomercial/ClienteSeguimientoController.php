@@ -11,6 +11,7 @@ use App\Models\FuenteCaptacion;
 use App\Models\NivelDecision;
 use App\Models\Project;
 use App\Models\Seguimiento;
+use App\Models\SeleccionarSeguimiento;
 use App\Models\Servicio;
 use App\Models\Status;
 use App\Models\Task;
@@ -131,48 +132,49 @@ class ClienteSeguimientoController extends Controller
 
 
     public function editSeguimiento($id)
-    {
-        Log::info('Intentando editar seguimiento ID: ' . $id);
+{
+    Log::info('Intentando editar seguimiento ID: '.$id);
+    
+    try {
+        $seguimiento = Seguimiento::findOrFail($id);
+        Log::info('Seguimiento encontrado:', $seguimiento->toArray());
 
-        try {
-            $seguimiento = Seguimiento::findOrFail($id);
-            Log::info('Seguimiento encontrado:', $seguimiento->toArray());
+        // Obtener idpersona desde la tabla seleccionarseguimiento
+        $seleccion = SeleccionarSeguimiento::where('idseguimiento', $seguimiento->idSeguimiento)->first();
+        $idPersona = $seleccion?->idpersona ?? null; // usar null si no existe
 
-            if ($seguimiento->tipoRegistro == 1) {
-                Log::info('Es empresa, buscando empresa ID: ' . $seguimiento->idEmpresa);
-                $empresa = Empresa::findOrFail($seguimiento->idEmpresa);
-                Log::info('Empresa encontrada:', $empresa->toArray());
+        if ($seguimiento->tipoRegistro == 1) {
+            $empresa = Empresa::findOrFail($seguimiento->idEmpresa);
+            $fuentes = FuenteCaptacion::all();
 
-                $fuentes = FuenteCaptacion::all();
+            return view('areacomercial.seguimiento', [
+                'seguimiento' => $seguimiento,
+                'empresa' => $empresa,
+                'fuentes' => $fuentes,
+                'documentos' => TipoDocumento::all(),
+                'niveles' => NivelDecision::all(),
+                'idPersona' => $idPersona, // 👈 Pasar a la vista
+            ]);
+        } else {
+            $contacto = Contactos::findOrFail($seguimiento->idContacto);
 
-                return view('areacomercial.seguimiento', [
-                    'seguimiento' => $seguimiento,
-                    'empresa' => $empresa,
-                    'fuentes' => $fuentes,
-                    'documentos' => TipoDocumento::all(),
-                    'niveles' => NivelDecision::all()
-                ]);
-            } else {
-                Log::info('Es contacto, buscando contacto ID: ' . $seguimiento->idContacto);
-                $contacto = Contactos::findOrFail($seguimiento->idContacto);
-                Log::info('Contacto encontrado:', $contacto->toArray());
-
-                return view('areacomercial.seguimiento', [
-                    'seguimiento' => $seguimiento,
-                    'contacto' => $contacto,
-                    'fuentes' => FuenteCaptacion::all(),
-                    'documentos' => TipoDocumento::all(),
-                    'niveles' => NivelDecision::all()
-                ]);
-            }
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Error al encontrar modelo: ' . $e->getMessage());
-            abort(404, 'El recurso solicitado no fue encontrado');
-        } catch (\Exception $e) {
-            Log::error('Error inesperado: ' . $e->getMessage());
-            abort(500, 'Ocurrió un error inesperado');
+            return view('areacomercial.seguimiento', [
+                'seguimiento' => $seguimiento,
+                'contacto' => $contacto,
+                'fuentes' => FuenteCaptacion::all(),
+                'documentos' => TipoDocumento::all(),
+                'niveles' => NivelDecision::all(),
+                'idPersona' => $idPersona, // 👈 Pasar a la vista
+            ]);
         }
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        Log::error('Error al encontrar modelo: '.$e->getMessage());
+        abort(404, 'El recurso solicitado no fue encontrado');
+    } catch (\Exception $e) {
+        Log::error('Error inesperado: '.$e->getMessage());
+        abort(500, 'Ocurrió un error inesperado');
     }
+}
 
     public function editTab($id, Request $request)
     {

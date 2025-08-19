@@ -235,7 +235,8 @@ window.renderCronograma = function (el, idSeguimiento, opts = {}) {
     async function loadData() {
         try {
             showLoading(true);
-            const data = await apiRequest(`${baseUrl}/data`);
+const idPersona = document.getElementById('idPersonaHidden')?.value;
+const data = await apiRequest(`${baseUrl}/data?idpersona=${idPersona}`);
             
             // Convertir fechas de string a Date objects
             data.data.forEach(task => {
