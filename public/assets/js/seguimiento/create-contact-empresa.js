@@ -761,12 +761,6 @@ function marcarSeleccionVisual(idPersona, intentos = 15) {
         // 2. Agregar estilos a la tarjeta actual seleccionada
         el.classList.add('border-2', 'border-green-500');
 
-        const acciones = el.querySelector('.acciones');
-        if (acciones) {
-            el.insertBefore(checkIcon, acciones);
-        } else {
-            el.appendChild(checkIcon); // fallback
-        }
 
     } else if (intentos > 0) {
         // Reintenta si aún no está en el DOM
