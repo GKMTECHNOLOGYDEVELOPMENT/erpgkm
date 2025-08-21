@@ -295,8 +295,8 @@ async function submitEmpresa(event) {
         let response;
         if (isUpdate && editingId) {
             // Actualizar empresa existente
-                response = await fetch(`/api/v1/empresasForm/${editingId.split('-')[1]}`, {
-                    method: 'PUT',
+            response = await fetch(`/api/v1/empresasForm/${editingId.split('-')[1]}`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -338,12 +338,12 @@ async function submitEmpresa(event) {
                     const fuenteNombre = fuenteCaptacionOptions.find((f) => f.id == empresaData.fuente_captacion_id)?.nombre || empresaData.fuente_captacion_id;
                     lines[3].innerHTML = `<span class="font-medium">Fuente:</span> ${fuenteNombre}`;
                 }
-           } else {
-    // Crear nueva tarjeta
-    const id = `empresa-${data.data.id}`;
-    const fuenteNombre = fuenteCaptacionOptions.find((f) => f.id == empresaData.fuente_captacion_id)?.nombre || empresaData.fuente_captacion_id;
+            } else {
+                // Crear nueva tarjeta
+                const id = `empresa-${data.data.id}`;
+                const fuenteNombre = fuenteCaptacionOptions.find((f) => f.id == empresaData.fuente_captacion_id)?.nombre || empresaData.fuente_captacion_id;
 
-    const item = `
+                const item = `
       <div id="${id}"  class="empresa-card p-4 bg-yellow-100 rounded shadow mb-4"
            data-idpersona="${data.data.id}" 
            data-razon="${empresaData.nombre_razon_social}" 
@@ -375,8 +375,8 @@ async function submitEmpresa(event) {
           </div>
         </div>
       </div>`;
-    document.getElementById('data-list').insertAdjacentHTML('beforeend', item);
-}
+                document.getElementById('data-list').insertAdjacentHTML('beforeend', item);
+            }
 
             cancelCreate();
         } else {
@@ -390,38 +390,33 @@ async function submitEmpresa(event) {
 
 // Función para cargar empresas/contactos existentes
 async function loadExistingData(idSeguimiento) {
-  try {
-    // Cachea el contenedor y usa SIEMPRE esta referencia
-    const dataList = document.getElementById('data-list');
-    if (!dataList || !document.body.contains(dataList)) return;
+    try {
+        // Cachea el contenedor y usa SIEMPRE esta referencia
+        const dataList = document.getElementById('data-list');
+        if (!dataList || !document.body.contains(dataList)) return;
 
-    // (opcional) limpiar para evitar duplicados al volver al tab
-    dataList.innerHTML = '';
+        // (opcional) limpiar para evitar duplicados al volver al tab
+        dataList.innerHTML = '';
 
-    // Trae todo en paralelo para reducir ventana de race
-    const [empresasResp, contactosResp] = await Promise.all([
-      fetch(`/api/v1/empresasForm/seguimiento/${idSeguimiento}`),
-      fetch(`/api/v1/contactosForm/seguimiento/${idSeguimiento}`)
-    ]);
+        // Trae todo en paralelo para reducir ventana de race
+        const [empresasResp, contactosResp] = await Promise.all([
+            fetch(`/api/v1/empresasForm/seguimiento/${idSeguimiento}`),
+            fetch(`/api/v1/contactosForm/seguimiento/${idSeguimiento}`),
+        ]);
 
-    const [empresas, contactos] = await Promise.all([
-      empresasResp.json(),
-      contactosResp.json()
-    ]);
+        const [empresas, contactos] = await Promise.all([empresasResp.json(), contactosResp.json()]);
 
-    // Si el usuario cambió de tab y el nodo salió del DOM, aborta
-    if (!dataList.isConnected) return;
+        // Si el usuario cambió de tab y el nodo salió del DOM, aborta
+        if (!dataList.isConnected) return;
 
-    let html = '';
+        let html = '';
 
-    // Empresas
-    for (const empresa of empresas) {
-      const id = `empresa-${empresa.id}`;
-      const fuenteNombre =
-        fuenteCaptacionOptions.find(f => f.id == empresa.fuente_captacion_id)?.nombre
-        || empresa.fuente_captacion_id;
+        // Empresas
+        for (const empresa of empresas) {
+            const id = `empresa-${empresa.id}`;
+            const fuenteNombre = fuenteCaptacionOptions.find((f) => f.id == empresa.fuente_captacion_id)?.nombre || empresa.fuente_captacion_id;
 
-      html += `
+            html += `
         <div id="${id}" data-idpersona="${empresa.id}" class="empresa-card p-4 bg-yellow-100 rounded shadow mb-4" data-razon="${empresa.nombre_razon_social}" data-ruc="${empresa.ruc}" 
              data-rubro="${empresa.giro_comercial}" data-ubicacion="${empresa.ubicacion_geografica}" 
              data-fuente="${empresa.fuente_captacion_id}"
@@ -449,19 +444,15 @@ async function loadExistingData(idSeguimiento) {
             </div>
           </div>
         </div>`;
-    }
+        }
 
-    // Contactos
-    for (const contacto of contactos) {
-      const id = `contacto-${contacto.id}`;
-      const tipoDocNombre =
-        tipoDocumentoOptions.find(t => t.idTipoDocumento == contacto.tipo_documento_id)?.nombre
-        || contacto.tipo_documento_id;
-      const nivelDecisionNombre =
-        nivelDecisionOptions.find(n => n.id == contacto.nivel_decision_id)?.nombre
-        || contacto.nivel_decision_id;
+        // Contactos
+        for (const contacto of contactos) {
+            const id = `contacto-${contacto.id}`;
+            const tipoDocNombre = tipoDocumentoOptions.find((t) => t.idTipoDocumento == contacto.tipo_documento_id)?.nombre || contacto.tipo_documento_id;
+            const nivelDecisionNombre = nivelDecisionOptions.find((n) => n.id == contacto.nivel_decision_id)?.nombre || contacto.nivel_decision_id;
 
-      html += `
+            html += `
         <div id="${id}" class="contacto-card p-4 bg-blue-100 rounded shadow mb-4" data-idpersona="${contacto.id}" data-tipo-documento="${contacto.tipo_documento_id}" data-numero-documento="${contacto.numero_documento}"
              data-nombre-completo="${contacto.nombre_completo}" data-cargo="${contacto.cargo}" data-correo="${contacto.correo_electronico}"
              data-telefono="${contacto.telefono_whatsapp}" data-nivel-decision="${contacto.nivel_decision_id}"
@@ -490,23 +481,22 @@ async function loadExistingData(idSeguimiento) {
             </div>
           </div>
         </div>`;
-    }
+        }
 
-    // Inserta TODO de una sola vez (menos parpadeo y menos riesgo)
-    if (dataList.isConnected) {
-      dataList.insertAdjacentHTML('beforeend', html);
-    }
+        // Inserta TODO de una sola vez (menos parpadeo y menos riesgo)
+        if (dataList.isConnected) {
+            dataList.insertAdjacentHTML('beforeend', html);
+        }
 
-    // Oculta/ muestra el mensaje "no-data"
-    const noData = document.getElementById('no-data-message');
-    if (noData) {
-      noData.classList.toggle('hidden', (empresas.length + contactos.length) > 0);
+        // Oculta/ muestra el mensaje "no-data"
+        const noData = document.getElementById('no-data-message');
+        if (noData) {
+            noData.classList.toggle('hidden', empresas.length + contactos.length > 0);
+        }
+    } catch (error) {
+        console.error('Error cargando datos existentes:', error);
     }
-  } catch (error) {
-    console.error('Error cargando datos existentes:', error);
-  }
 }
-
 
 function editEmpresa(id) {
     const item = document.getElementById(id);
@@ -608,14 +598,14 @@ async function submitContacto(event) {
                         nivelDecisionOptions.find((n) => n.id == contactoData.nivel_decision_id)?.nombre || contactoData.nivel_decision_id;
                     lines[4].innerHTML = `<span class="font-medium">Nivel de decisión:</span> ${nivelDecisionNombre || 'No especificado'}`;
                 }
-           } else {
-    // Crear nueva tarjeta
-    const id = `contacto-${data.data.id}`;
-    const tipoDocNombre =
-        tipoDocumentoOptions.find((t) => t.idTipoDocumento == contactoData.tipo_documento_id)?.nombre || contactoData.tipo_documento_id;
-    const nivelDecisionNombre = nivelDecisionOptions.find((n) => n.id == contactoData.nivel_decision_id)?.nombre || contactoData.nivel_decision_id;
+            } else {
+                // Crear nueva tarjeta
+                const id = `contacto-${data.data.id}`;
+                const tipoDocNombre =
+                    tipoDocumentoOptions.find((t) => t.idTipoDocumento == contactoData.tipo_documento_id)?.nombre || contactoData.tipo_documento_id;
+                const nivelDecisionNombre = nivelDecisionOptions.find((n) => n.id == contactoData.nivel_decision_id)?.nombre || contactoData.nivel_decision_id;
 
-    const item = `
+                const item = `
       <div id="${id}" class="contacto-card p-4 bg-blue-100 rounded shadow mb-4"
            data-idpersona="${data.data.id}" 
            data-tipo-documento="${contactoData.tipo_documento_id}" 
@@ -650,8 +640,8 @@ async function submitContacto(event) {
           </div>
         </div>
       </div>`;
-    document.getElementById('data-list').insertAdjacentHTML('beforeend', item);
-}
+                document.getElementById('data-list').insertAdjacentHTML('beforeend', item);
+            }
 
             cancelCreate();
         } else {
@@ -739,7 +729,6 @@ async function deleteItem(id, type) {
 
 // Función que se ejecuta cuando el DOM está cargado
 
-
 async function cargarSeleccionPrevia() {
     const idSeguimiento = document.getElementById('idSeguimientoHidden')?.value;
     if (!idSeguimiento) return;
@@ -748,26 +737,37 @@ async function cargarSeleccionPrevia() {
         const response = await fetch(`/obtener-seleccion/${idSeguimiento}`);
         const data = await response.json();
 
-        console.log('Datos de selección recibidos:', data); // Debug
-
         if (response.ok && data.success && data.data) {
-            const seleccion = data.data;
-            console.log('Selección encontrada:', seleccion); // Debug
-            
-            // Buscar el elemento por data-idpersona
-            const elemento = document.querySelector(`[data-idpersona="${seleccion.idpersona}"]`);
-            
-            if (elemento) {
-                console.log('Elemento encontrado:', elemento); // Debug
-                elemento.classList.add('border-2', 'border-green-500');
-            } else {
-                console.warn('Elemento no encontrado con data-idpersona:', seleccion.idpersona);
-            }
+            const idPersona = data.data.idpersona;
+            // Espera que el DOM esté listo
+            marcarSeleccionVisual(idPersona);
         }
     } catch (error) {
         console.error('Error al cargar selección previa:', error);
     }
 }
+function marcarSeleccionVisual(idPersona, intentos = 15) {
+    const el = document.querySelector(`[data-idpersona="${idPersona}"]`);
+
+    if (el) {
+        // 1. Limpiar TODAS las tarjetas seleccionadas previamente
+        document.querySelectorAll('[data-idpersona]').forEach((card) => {
+            card.classList.remove('border-2', 'border-green-500');
+
+            // Quitar también todos los textos "Seleccionado"
+            card.querySelectorAll('.texto-seleccionado').forEach(e => e.remove());
+        });
+
+        // 2. Agregar estilos a la tarjeta actual seleccionada
+        el.classList.add('border-2', 'border-green-500');
+
+
+    } else if (intentos > 0) {
+        // Reintenta si aún no está en el DOM
+        setTimeout(() => marcarSeleccionVisual(idPersona, intentos - 1), 200);
+    }
+}
+
 
 async function seleccionar(id, tipo) {
     const item = document.getElementById(id);
@@ -777,7 +777,7 @@ async function seleccionar(id, tipo) {
     console.log('Elemento seleccionado:', item);
     console.log('Todos los data attributes:', item.dataset);
     console.log('HTML completo del elemento:', item.outerHTML);
-    
+
     // Resaltar visualmente el elemento seleccionado
     const prev = document.querySelector('.border-2.border-green-500');
     if (prev) prev.classList.remove('border-2', 'border-green-500');
@@ -785,21 +785,39 @@ async function seleccionar(id, tipo) {
 
     const prospectoId = id.split('-')[1];
     console.log('prospectoId extraído:', prospectoId);
-    
+
     const idPersona = parseInt(item.dataset.idpersona, 10);
     console.log('item.dataset.idpersona (raw):', item.dataset.idpersona);
     console.log('idPersona parseado:', idPersona);
 
     if (!idPersona || isNaN(idPersona)) {
         console.error('No se encontró el ID de persona o es inválido:', item.dataset.idpersona);
-        alert('❌ No se encontró el ID de persona para este elemento');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se encontró el ID de persona para este elemento',
+            toast: true,
+            position: 'top-end',
+            timer: 2500,
+            showConfirmButton: false,
+        });
+
         return;
     }
 
     const idSeguimiento = document.getElementById('idSeguimientoHidden')?.value;
     if (!idSeguimiento) {
         console.error('No se encontró el ID de seguimiento');
-        alert('❌ No se encontró el ID de seguimiento');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se encontró el ID de seguimiento',
+            toast: true,
+            position: 'top-end',
+            timer: 2500,
+            showConfirmButton: false,
+        });
+
         return;
     }
 
@@ -809,7 +827,7 @@ async function seleccionar(id, tipo) {
         idseguimiento: idSeguimiento,
         idprospecto: prospectoId,
         tipo_prospecto: tipoProspecto,
-        idpersona: idPersona
+        idpersona: idPersona,
     });
 
     try {
@@ -817,14 +835,14 @@ async function seleccionar(id, tipo) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
+                Accept: 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             },
             body: JSON.stringify({
                 idseguimiento: idSeguimiento,
                 idprospecto: prospectoId,
                 tipo_prospecto: tipoProspecto,
-                idpersona: idPersona
+                idpersona: idPersona,
             }),
         });
 
@@ -834,10 +852,26 @@ async function seleccionar(id, tipo) {
             throw new Error(data.message || 'Error al guardar la selección');
         }
 
-        alert('✅ Selección guardada correctamente');
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Selección guardada correctamente',
+            showConfirmButton: false,
+            timer: 2500,
+            timerProgressBar: true,
+        });
     } catch (error) {
         console.error('Error al guardar la selección:', error);
-        alert('❌ Error al guardar la selección: ' + error.message);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar',
+            text: error.message,
+            toast: true,
+            position: 'top-end',
+            timer: 2500,
+            showConfirmButton: false,
+        });
     }
 }
 
@@ -860,16 +894,15 @@ function buscarCliente() {
 let hasInitializedNoDataTab = false;
 
 window.initNoDataTab = async function () {
-  const list = document.getElementById('data-list');
-  if (!list || !document.body.contains(list)) return;
+    const list = document.getElementById('data-list');
+    if (!list || !document.body.contains(list)) return;
 
-  const idSeguimiento = document.getElementById('idSeguimientoHidden')?.value;
+    const idSeguimiento = document.getElementById('idSeguimientoHidden')?.value;
 
-  // Solo vuelve a pedir selects si están vacíos (evita refetch innecesario)
-  if (!tipoDocumentoOptions.length || !fuenteCaptacionOptions.length || !nivelDecisionOptions.length) {
-    await loadSelectOptions();
-  }
+    // Solo vuelve a pedir selects si están vacíos (evita refetch innecesario)
+    if (!tipoDocumentoOptions.length || !fuenteCaptacionOptions.length || !nivelDecisionOptions.length) {
+        await loadSelectOptions();
+    }
 
-  await loadExistingData(idSeguimiento);
+    await loadExistingData(idSeguimiento);
 };
-

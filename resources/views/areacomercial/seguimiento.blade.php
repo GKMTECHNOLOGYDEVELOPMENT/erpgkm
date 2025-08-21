@@ -272,6 +272,10 @@
                         if (typeof window.initNoDataTab === 'function') {
                             window.initNoDataTab();
                         }
+                        // 👇 Ejecutar selección al renderizar el tab Empresa
+                        if (typeof window.cargarSeleccionPrevia === 'function') {
+                            window.cargarSeleccionPrevia();
+                        }
                     });
 
                     return;
@@ -291,6 +295,9 @@
                     requestAnimationFrame(() => {
                         if (typeof window.initNoDataTab === 'function') {
                             window.initNoDataTab();
+                        }
+                        if (typeof window.cargarSeleccionPrevia === 'function') {
+                            window.cargarSeleccionPrevia();
                         }
                     });
 
