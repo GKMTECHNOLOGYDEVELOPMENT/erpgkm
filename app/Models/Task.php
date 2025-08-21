@@ -27,4 +27,34 @@ class Task extends Model
     {
         return $this->belongsTo(Project::class);
     }
+
+public function cotizaciones()
+{
+    return $this->hasMany(TaskCotizacion::class);
+}
+
+public function reuniones()
+{
+    return $this->hasMany(TaskReunion::class);
+}
+public function levantamientos()
+{
+    return $this->hasMany(TaskLevantamiento::class);
+}
+
+public function ganados()
+{
+    return $this->hasMany(TaskGanado::class);
+}
+
+public function observados()
+{
+    return $this->hasMany(TaskObservado::class);
+}
+
+public function rechazados()
+{
+    return $this->hasMany(TaskRechazado::class);
+}
+
 }
