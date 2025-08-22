@@ -1158,3 +1158,36 @@ Route::prefix('cronograma')->name('cronograma.')->group(function () {
 Route::post('/seleccionar-seguimiento', [SeleccionSeguimientoController::class, 'store']);
 
 Route::get('/obtener-seleccion/{idSeguimiento}', [SeleccionSeguimientoController::class, 'obtenerSeleccion']);
+// Asegúrate de que estén dentro de las rutas web normales
+Route::middleware('web')->group(function () {
+    Route::get('/scrumboard/tasks/{taskId}/cotizaciones', [ScrumboarddController::class, 'getCotizaciones']);
+    Route::post('/scrumboard/cotizaciones', [ScrumboarddController::class, 'storeCotizacion']);
+    Route::put('/scrumboard/cotizaciones/{id}', [ScrumboarddController::class, 'updateCotizacion']);
+    Route::delete('/scrumboard/cotizaciones/{id}', [ScrumboarddController::class, 'deleteCotizacion']);
+    Route::post('/scrumboard/cotizaciones/handle', [ScrumboarddController::class, 'handleCotizacion']);
+
+
+    // Rutas para reuniones
+Route::post('/scrumboard/reuniones/handle', [ScrumboarddController::class, 'handleReunion']);
+Route::get('/scrumboard/tasks/{taskId}/reuniones', [ScrumboarddController::class, 'getReuniones']);
+Route::delete('/scrumboard/reuniones/{id}', [ScrumboarddController::class, 'deleteReunion']);
+
+// Rutas para levantamientos
+Route::post('/scrumboard/levantamientos/handle', [ScrumboarddController::class, 'handleLevantamiento']);
+Route::get('/scrumboard/tasks/{taskId}/levantamientos', [ScrumboarddController::class, 'getLevantamientos']);
+Route::delete('/scrumboard/levantamientos/{id}', [ScrumboarddController::class, 'deleteLevantamiento']);
+// Rutas para proyectos ganados
+Route::post('/scrumboard/ganados/handle', [ScrumboarddController::class, 'handleGanado']);
+Route::get('/scrumboard/tasks/{taskId}/ganados', [ScrumboarddController::class, 'getGanados']);
+Route::delete('/scrumboard/ganados/{id}', [ScrumboarddController::class, 'deleteGanado']);
+
+
+// Rutas para proyectos observados
+Route::post('/scrumboard/observados/handle', [ScrumboarddController::class, 'handleObservado']);
+Route::get('/scrumboard/tasks/{taskId}/observados', [ScrumboarddController::class, 'getObservados']);
+Route::delete('/scrumboard/observados/{id}', [ScrumboarddController::class, 'deleteObservado']);
+// Rutas para proyectos rechazados
+Route::post('/scrumboard/rechazados/handle', [ScrumboarddController::class, 'handleRechazado']);
+Route::get('/scrumboard/tasks/{taskId}/rechazados', [ScrumboarddController::class, 'getRechazados']);
+Route::delete('/scrumboard/rechazados/{id}', [ScrumboarddController::class, 'deleteRechazado']);
+});

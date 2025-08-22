@@ -1,6 +1,6 @@
-<div x-data="scrumboard" 
-     x-init="loadProjects()"
-     class="p-5">
+<div x-data="scrumboard"
+    x-init="loadProjects()"
+    class="p-5">
 
     <div>
         <button type="button" class="btn btn-primary flex" @click="addEditProject()">
@@ -10,9 +10,8 @@
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-        Agregar proyecto
-
-    </button>
+            Agregar proyecto
+        </button>
     </div>
 
     <!-- project list -->
@@ -23,7 +22,6 @@
                     <div class="panel w-80 flex-none">
                         <div class="flex justify-between mb-5">
                             <h4 x-text="project.title" class="text-base font-semibold"></h4>
-
                             <div class="flex items-center">
                                 <button type="button" class="hover:text-primary ltr:mr-2 rtl:ml-2"
                                     @click="addEditTask(project.id)">
@@ -61,10 +59,9 @@
                         <!-- task list -->
                         <div class="sortable-list min-h-[150px]" :data-id="project.id">
                             <template x-for="task in project.tasks" :key="task.id">
-                                <!-- En la parte donde renderizas las tareas, cambia: -->
-<div :data-id="project.id + '' + task.id" 
-     :data-task-id="task.id" 
-     class="shadow bg-[#f4f4f4] dark:bg-[#262e40] p-3 pb-5 rounded-md mb-5 space-y-3 cursor-move">
+                                <div :data-id="project.id + '' + task.id"
+                                    :data-task-id="task.id"
+                                    class="shadow bg-[#f4f4f4] dark:bg-[#262e40] p-3 pb-5 rounded-md mb-5 space-y-3 cursor-move">
                                     <template x-if="task.image">
                                         <img :src="task.image" alt="task image" class="h-32 w-full object-cover rounded-md" />
                                     </template>
@@ -131,7 +128,7 @@
                                             <button type="button" class="hover:text-info"
                                                 @click="addEditTask(project.id, task)">
                                                 <svg width="24" height="24" viewBox="0 0 24 24"
-                                                    fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                    fill="none" xmlns="http://www.w3.org/2000/surlg"
                                                     class="w-5 h-5 ltr:mr-3 rtl:ml-3">
                                                     <path opacity="0.5"
                                                         d="M22 10.5V12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2H13.5"
@@ -235,9 +232,9 @@
     <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto hidden" :class="isAddTaskModal && '!block'">
         <div class="flex items-center justify-center min-h-screen px-4" @click.self="isAddTaskModal = false">
             <div x-show="isAddTaskModal" x-transition x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
-                <button type="button"
-                    class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark"
+                class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-4xl w-[90%] my-8 max-h-[90vh] overflow-y-auto">
+
+                <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark z-10"
                     @click="isAddTaskModal = false">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -246,35 +243,910 @@
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
-                <div x-text="paramsTask.id ? 'Editar tarea' : 'Agregar tarea'"
-                    class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                </div>
+
+                <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px] sticky top-0"
+                    x-text="paramsTask.id ? 'Editar tarea - ' + currentProjectName : 'Agregar tarea - ' + currentProjectName"></div>
+
                 <div class="p-5">
                     <form @submit.prevent="saveTask">
-                        <div class="grid gap-5">
+                        <!-- Pestañas para diferentes secciones -->
+                        <div class="mb-5 border-b">
+                            <ul class="flex flex-wrap -mb-px">
+                                <li class="mr-2">
+                                    <button type="button"
+                                        class="inline-block py-2 px-4 border-b-2 border-transparent rounded-t-lg hover:text-primary"
+                                        :class="activeTab === 'general' && 'border-primary text-primary'"
+                                        @click="activeTab = 'general'">
+                                        Información General
+                                    </button>
+                                </li>
+                                <li class="mr-2" x-show="currentProjectName.toLowerCase().includes('cotizacion')">
+                                    <button type="button"
+                                        class="inline-block py-2 px-4 border-b-2 border-transparent rounded-t-lg hover:text-primary"
+                                        :class="activeTab === 'cotizacion' && 'border-primary text-primary'"
+                                        @click="activeTab = 'cotizacion'">
+                                        Datos de Cotización
+                                    </button>
+                                </li>
+                                <li class="mr-2" x-show="currentProjectName.toLowerCase().includes('reunion')">
+                                    <button type="button"
+                                        class="inline-block py-2 px-4 border-b-2 border-transparent rounded-t-lg hover:text-primary"
+                                        :class="activeTab === 'reunion' && 'border-primary text-primary'"
+                                        @click="activeTab = 'reunion'">
+                                        Datos de Reunión
+                                    </button>
+                                </li>
+                                <li class="mr-2" x-show="currentProjectName.toLowerCase().includes('levantamiento')">
+                                    <button type="button"
+                                        class="inline-block py-2 px-4 border-b-2 border-transparent rounded-t-lg hover:text-primary"
+                                        :class="activeTab === 'levantamiento' && 'border-primary text-primary'"
+                                        @click="activeTab = 'levantamiento'">
+                                        Datos de Levantamiento
+                                    </button>
+                                </li>
+                                <li class="mr-2" x-show="currentProjectName.toLowerCase().includes('ganado')">
+                                    <button type="button"
+                                        class="inline-block py-2 px-4 border-b-2 border-transparent rounded-t-lg hover:text-primary"
+                                        :class="activeTab === 'ganado' && 'border-primary text-primary'"
+                                        @click="activeTab = 'ganado'">
+                                        Datos de Proyecto Ganado
+                                    </button>
+                                </li>
+                                <li class="mr-2" x-show="currentProjectName.toLowerCase().includes('observado')">
+                                    <button type="button"
+                                        class="inline-block py-2 px-4 border-b-2 border-transparent rounded-t-lg hover:text-primary"
+                                        :class="activeTab === 'observado' && 'border-primary text-primary'"
+                                        @click="activeTab = 'observado'">
+                                        Datos de Proyecto Observado
+                                    </button>
+                                </li>
+                                <li class="mr-2" x-show="currentProjectName.toLowerCase().includes('rechazado')">
+                                    <button type="button"
+                                        class="inline-block py-2 px-4 border-b-2 border-transparent rounded-t-lg hover:text-primary"
+                                        :class="activeTab === 'rechazado' && 'border-primary text-primary'"
+                                        @click="activeTab = 'rechazado'">
+                                        Datos de Proyecto Rechazado
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Sección General -->
+                        <div x-show="activeTab === 'general'" class="space-y-4">
                             <div>
-                                <label for="taskTitle">Nombre</label>
+                                <label for="taskTitle">Nombre *</label>
                                 <input id="taskTitle" x-model="paramsTask.title" type="text"
-                                    class="form-input" placeholder="Introduzca el nombre" />
+                                    class="form-input" placeholder="Introduzca el nombre" required />
                             </div>
 
                             <div>
-                                <label for="taskTag">Etiqueta (separada con comas)</label>
+                                <label for="taskdesc">Descripción</label>
+                                <textarea id="taskdesc" x-model="paramsTask.description" class="form-textarea min-h-[100px]"
+                                    placeholder="Introduzca la descripción"></textarea>
+                            </div>
+
+                            <div>
+                                <label for="taskTag">Etiquetas (separadas con comas)</label>
                                 <input id="taskTag" x-model="paramsTask.tags" type="text"
                                     class="form-input" placeholder="Introducir etiquetas" />
                             </div>
-                            <div>
-                                <label for="taskdesc">Descripción</label>
-                                <textarea id="taskdesc" x-model="paramsTask.description" class="form-textarea min-h-[130px]"
-                                    placeholder="Introduzca la descripción"></textarea>
+
+
+
+                        </div>
+
+                        <!-- Sección Cotización -->
+                        <div x-show="activeTab === 'cotizacion' && currentProjectName.toLowerCase().includes('cotizacion')"
+                            class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="codigoCotizacion">Código de Cotización</label>
+                                    <input id="codigoCotizacion" x-model="paramsTask.codigoCotizacion" type="text"
+                                        class="form-input" placeholder="Código de cotización" />
+                                </div>
+
+                                <div>
+                                    <label for="fechaCotizacion">Fecha de Cotización</label>
+                                    <input id="fechaCotizacion" x-model="paramsTask.fechaCotizacion" type="date"
+                                        class="form-input" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="detalleproducto">Detalle del Producto/Servicio</label>
+                                    <textarea id="detalleproducto" x-model="paramsTask.detalleproducto"
+                                        class="form-textarea" placeholder="Describa el producto o servicio"></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="condicionescomerciales">Condiciones Comerciales</label>
+                                    <textarea id="condicionescomerciales" x-model="paramsTask.condicionescomerciales"
+                                        class="form-textarea" placeholder="Condiciones comerciales"></textarea>
+                                </div>
+
+                                <div>
+                                    <label for="totalcotizacion">Total Cotización</label>
+                                    <input id="totalcotizacion" x-model="paramsTask.totalcotizacion" type="number" step="0.01"
+                                        class="form-input" placeholder="0.00" />
+                                </div>
+
+                                <div>
+                                    <label for="validezcotizacion">Validez</label>
+                                    <input id="validezcotizacion" x-model="paramsTask.validezcotizacion" type="text"
+                                        class="form-input" placeholder="Ej: 30 días" />
+                                </div>
+
+                                <div>
+                                    <label for="responsablecotizacion">Responsable</label>
+                                    <input id="responsablecotizacion" x-model="paramsTask.responsablecotizacion" type="text"
+                                        class="form-input" placeholder="Nombre del responsable" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="observacionescotizacion">Observaciones</label>
+                                    <textarea id="observacionescotizacion" x-model="paramsTask.observacionescotizacion"
+                                        class="form-textarea" placeholder="Observaciones adicionales"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Botones para agregar/actualizar cotización -->
+                            <div class="flex justify-end space-x-3 mt-4">
+                                <button type="button" x-show="cotizacionEditId"
+                                    @click="limpiarFormularioCotizacion()"
+                                    class="btn btn-outline-secondary">
+                                    Cancelar Edición
+                                </button>
+                                <button type="button"
+                                    @click="agregarCotizacion()"
+                                    class="btn btn-primary"
+                                    :disabled="!paramsTask.codigoCotizacion && !paramsTask.fechaCotizacion && !paramsTask.detalleproducto">
+                                    <span x-text="cotizacionEditId ? 'Actualizar Cotización' : 'Agregar Cotización'"></span>
+                                </button>
+                            </div>
+
+                            <!-- Lista de cotizaciones existentes -->
+                            <div class="mt-6 border-t pt-4">
+                                <h4 class="text-lg font-semibold mb-3">Cotizaciones Registradas</h4>
+
+                                <!-- Filtros de búsqueda -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <div>
+                                        <label for="filtroCodigo" class="text-sm">Buscar por código:</label>
+                                        <input id="filtroCodigo" x-model="filtroCodigo" type="text"
+                                            class="form-input" placeholder="Código de cotización">
+                                    </div>
+                                    <div>
+                                        <label for="filtroResponsable" class="text-sm">Buscar por responsable:</label>
+                                        <input id="filtroResponsable" x-model="filtroResponsable" type="text"
+                                            class="form-input" placeholder="Nombre del responsable">
+                                    </div>
+                                    <div>
+                                        <label for="filtroFecha" class="text-sm">Filtrar por fecha:</label>
+                                        <input id="filtroFecha" x-model="filtroFecha" type="date"
+                                            class="form-input">
+                                    </div>
+                                </div>
+
+                                <!-- Tabla de cotizaciones -->
+                                <div class="overflow-x-auto">
+                                    <table class="table-auto w-full">
+                                        <thead>
+                                            <tr class="bg-gray-100 dark:bg-gray-700">
+                                                <th class="px-4 py-2 text-left">Código</th>
+                                                <th class="px-4 py-2 text-left">Fecha</th>
+                                                <th class="px-4 py-2 text-left">Producto/Servicio</th>
+                                                <th class="px-4 py-2 text-left">Total</th>
+                                                <th class="px-4 py-2 text-left">Responsable</th>
+                                                <th class="px-4 py-2 text-left">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="cotizacion in filteredCotizaciones" :key="cotizacion.id">
+                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2" x-text="cotizacion.codigo_cotizacion"></td>
+                                                    <td class="px-4 py-2" x-text="formatDate(cotizacion.fecha_cotizacion)"></td>
+                                                    <td class="px-4 py-2" x-text="cotizacion.detalle_producto"></td>
+                                                    <td class="px-4 py-2" x-text="formatCurrency(cotizacion.total_cotizacion)"></td>
+                                                    <td class="px-4 py-2" x-text="cotizacion.responsable_cotizacion"></td>
+                                                    <td class="px-4 py-2">
+                                                        <div class="flex space-x-2">
+                                                            <button type="button" @click="editarCotizacion(cotizacion)"
+                                                                class="text-blue-500 hover:text-blue-700" title="Editar">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                            <button type="button" @click="eliminarCotizacion(cotizacion.id)"
+                                                                class="text-red-500 hover:text-red-700" title="Eliminar">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>                                                        
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Mensaje cuando no hay cotizaciones -->
+                                <template x-if="filteredCotizaciones.length === 0">
+                                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p>No se encontraron cotizaciones registradas</p>
+                                    </div>
+                                </template>
+
+                                <!-- Paginación (opcional) -->
+                                <div class="flex justify-between items-center mt-4" x-show="filteredCotizaciones.length > 0">
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        Mostrando <span x-text="filteredCotizaciones.length"></span> registros
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm">
+                                            Exportar a Excel
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm">
+                                            Imprimir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Sección Reunión -->
+                        <div x-show="activeTab === 'reunion' && currentProjectName.toLowerCase().includes('reunion')"
+                            class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="fechareunion">Fecha de Reunión</label>
+                                    <input id="fechareunion" x-model="paramsTask.fechareunion" type="date"
+                                        class="form-input" />
+                                </div>
+
+                                <div>
+                                    <label for="tiporeunion">Tipo de Reunión</label>
+                                    <input id="tiporeunion" x-model="paramsTask.tiporeunion" type="text"
+                                        class="form-input" placeholder="Ej: Presencial, Virtual" />
+                                </div>
+
+                                <div>
+                                    <label for="motivoreunion">Motivo de Reunión</label>
+                                    <input id="motivoreunion" x-model="paramsTask.motivoreunion" type="text"
+                                        class="form-input" placeholder="Motivo principal" />
+                                </div>
+
+                                <div>
+                                    <label for="participantesreunion">Participantes</label>
+                                    <input id="participantesreunion" x-model="paramsTask.participantesreunion" type="text"
+                                        class="form-input" placeholder="Nombres de participantes" />
+                                </div>
+
+                                <div>
+                                    <label for="responsablereunion">Responsable</label>
+                                    <input id="responsablereunion" x-model="paramsTask.responsablereunion" type="text"
+                                        class="form-input" placeholder="Nombre del responsable" />
+                                </div>
+
+                                <div>
+                                    <label for="linkreunion">Link de Reunión</label>
+                                    <input id="linkreunion" x-model="paramsTask.linkreunion" type="url"
+                                        class="form-input" placeholder="URL para reunión virtual" />
+                                </div>
+
+                                <div>
+                                    <label for="direccionfisica">Dirección Física</label>
+                                    <input id="direccionfisica" x-model="paramsTask.direccionfisica" type="text"
+                                        class="form-input" placeholder="Dirección para reunión presencial" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="minutareunion">Minuta de Reunión</label>
+                                    <textarea id="minutareunion" x-model="paramsTask.minutareunion"
+                                        class="form-textarea" placeholder="Resumen o acuerdos de la reunión"></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="actividadesReunion">Actividades</label>
+                                    <textarea id="actividadesReunion" x-model="paramsTask.actividadesReunion"
+                                        class="form-textarea" placeholder="Actividades de la reunión"></textarea>
+                                </div>
+                            </div>
+
+
+                            <!-- Botones para agregar/actualizar reunión -->
+                            <div class="flex justify-end space-x-3 mt-4">
+                                <button type="button" x-show="reunionEditId" 
+                                        @click="limpiarFormularioReunion()" 
+                                        class="btn btn-outline-danger">
+                                    Cancelar Edición
+                                </button>
+                                <button type="button" 
+                                        @click="agregarReunion()" 
+                                        class="btn btn-primary"
+                                        :disabled="!paramsTask.fechareunion && !paramsTask.tiporeunion && !paramsTask.motivoreunion">
+                                    <span x-text="reunionEditId ? 'Actualizar Reunión' : 'Agregar Reunión'"></span>
+                                </button>
+                            </div>
+
+                            
+
+                            <!-- Lista de reuniones existentes -->
+                            <div class="mt-6 border-t pt-4">
+                                <h4 class="text-lg font-semibold mb-3">Reuniones Registradas</h4>
+
+                                <!-- Filtros de búsqueda -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <div>
+                                        <label for="filtroTipoReunion" class="text-sm">Buscar por tipo:</label>
+                                        <input id="filtroTipoReunion" x-model="filtroTipoReunion" type="text"
+                                            class="form-input" placeholder="Tipo de reunión">
+                                    </div>
+                                    <div>
+                                        <label for="filtroResponsableReunion" class="text-sm">Buscar por responsable:</label>
+                                        <input id="filtroResponsableReunion" x-model="filtroResponsableReunion" type="text"
+                                            class="form-input" placeholder="Responsable">
+                                    </div>
+                                    <div>
+                                        <label for="filtroFechaReunion" class="text-sm">Filtrar por fecha:</label>
+                                        <input id="filtroFechaReunion" x-model="filtroFechaReunion" type="date"
+                                            class="form-input">
+                                    </div>
+                                </div>
+
+                                <!-- Tabla de reuniones -->
+                                <div class="overflow-x-auto">
+                                    <table class="table-auto w-full">
+                                        <thead>
+                                            <tr class="bg-gray-100 dark:bg-gray-700">
+                                                <th class="px-4 py-2 text-left">Fecha</th>
+                                                <th class="px-4 py-2 text-left">Tipo</th>
+                                                <th class="px-4 py-2 text-left">Motivo</th>
+                                                <th class="px-4 py-2 text-left">Responsable</th>
+                                                <th class="px-4 py-2 text-left">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="reunion in filteredReuniones" :key="reunion.id">
+                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2" x-text="formatDate(reunion.fecha_reunion)"></td>
+                                                    <td class="px-4 py-2" x-text="reunion.tipo_reunion || '-'"></td>
+                                                    <td class="px-4 py-2" x-text="reunion.motivo_reunion ? reunion.motivo_reunion.substring(0, 30) + '...' : '-'"></td>
+                                                    <td class="px-4 py-2" x-text="reunion.responsable_reunion || '-'"></td>
+                                                    <td class="px-4 py-2">
+                                                        <div class="flex space-x-2">
+                                                            <button type="button" @click="editarReunion(reunion)" class="text-blue-500 hover:text-blue-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                            <button type="button" @click="eliminarReunion(reunion.id)" class="text-red-500 hover:text-red-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <template x-if="filteredReuniones.length === 0">
+                                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                        <p>No se encontraron reuniones registradas</p>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 
-                        <div class="flex justify-end items-center mt-8">
+                        <!-- Sección Levantamiento -->
+                        <div x-show="activeTab === 'levantamiento' && currentProjectName.toLowerCase().includes('levantamiento')"
+                            class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="fecharequerimiento">Fecha de Requerimiento</label>
+                                    <input id="fecharequerimiento" x-model="paramsTask.fecharequerimiento" type="date"
+                                        class="form-input" />
+                                </div>
+
+                                <div>
+                                    <label for="participanteslevantamiento">Participantes</label>
+                                    <input id="participanteslevantamiento" x-model="paramsTask.participanteslevantamiento" type="text"
+                                        class="form-input" placeholder="Nombres de participantes" />
+                                </div>
+
+                                <div>
+                                    <label for="ubicacionlevantamiento">Ubicación</label>
+                                    <input id="ubicacionlevantamiento" x-model="paramsTask.ubicacionlevantamiento" type="text"
+                                        class="form-input" placeholder="Ubicación del levantamiento" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="descripcionrequerimiento">Descripción del Requerimiento</label>
+                                    <textarea id="descripcionrequerimiento" x-model="paramsTask.descripcionrequerimiento"
+                                        class="form-textarea" placeholder="Describa el requerimiento"></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="observacioneslevantamiento">Observaciones</label>
+                                    <textarea id="observacioneslevantamiento" x-model="paramsTask.observacioneslevantamiento"
+                                        class="form-textarea" placeholder="Observaciones adicionales"></textarea>
+                                </div>
+
+                            </div>
+                            
+                                       <!-- Botones para agregar/actualizar levantamiento -->
+                            <div class="flex justify-end space-x-3 mt-4">
+                                <button type="button" x-show="levantamientoEditId" 
+                                        @click="limpiarFormularioLevantamiento()" 
+                                        class="btn btn-outline-danger">
+                                    Cancelar Edición
+                                </button>
+                                <button type="button" 
+                                        @click="agregarLevantamiento()" 
+                                        class="btn btn-primary"
+                                        :disabled="!paramsTask.fecharequerimiento && !paramsTask.participanteslevantamiento && !paramsTask.ubicacionlevantamiento">
+                                    <span x-text="levantamientoEditId ? 'Actualizar Levantamiento' : 'Agregar Levantamiento'"></span>
+                                </button>
+                            </div>
+
+                     
+
+                            <!-- Lista de levantamientos existentes -->
+                            <div class="mt-6 border-t pt-4">
+                                <h4 class="text-lg font-semibold mb-3">Levantamientos Registrados</h4>
+
+                                <!-- Filtros de búsqueda -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="filtroUbicacion" class="text-sm">Buscar por ubicación:</label>
+                                        <input id="filtroUbicacion" x-model="filtroUbicacion" type="text"
+                                            class="form-input" placeholder="Ubicación">
+                                    </div>
+                                    <div>
+                                        <label for="filtroFechalevantamiento" class="text-sm">Filtrar por fecha:</label>
+                                        <input id="filtroFechalevantamiento" x-model="filtroFechalevantamiento" type="date"
+                                            class="form-input">
+                                    </div>
+                                </div>
+
+                                <!-- Tabla de levantamientos -->
+                                <div class="overflow-x-auto">
+                                    <table class="table-auto w-full">
+                                        <thead>
+                                            <tr class="bg-gray-100 dark:bg-gray-700">
+                                                <th class="px-4 py-2 text-left">Fecha</th>
+                                                <th class="px-4 py-2 text-left">Ubicación</th>
+                                                <th class="px-4 py-2 text-left">Participantes</th>
+                                                <th class="px-4 py-2 text-left">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="levantamiento in filteredLevantamientos" :key="levantamiento.id">
+                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2" x-text="formatDate(levantamiento.fecha_requerimiento)"></td>
+                                                    <td class="px-4 py-2" x-text="levantamiento.ubicacion || '-'"></td>
+                                                    <td class="px-4 py-2" x-text="levantamiento.participantes ? levantamiento.participantes.substring(0, 50) + '...' : '-'"></td>
+                                                    <td class="px-4 py-2">
+                                                        <div class="flex space-x-2">
+                                                            <button type="button" @click="editarLevantamiento(levantamiento)" class="text-blue-500 hover:text-blue-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                            <button type="button" @click="eliminarLevantamiento(levantamiento.id)" class="text-red-500 hover:text-red-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <template x-if="filteredLevantamientos.length === 0">
+                                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                        <p>No se encontraron levantamientos registrados</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Sección Ganado -->
+                        <div x-show="activeTab === 'ganado' && currentProjectName.toLowerCase().includes('ganado')"
+                            class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="fechaganado">Fecha Ganado</label>
+                                    <input id="fechaganado" x-model="paramsTask.fechaganado" type="date"
+                                        class="form-input" />
+                                </div>
+
+                                <div>
+                                    <label for="codigoCotizacionGanado">Código de Cotización</label>
+                                    <input id="codigoCotizacionGanado" x-model="paramsTask.codigoCotizacionGanado" type="text"
+                                        class="form-input" placeholder="Código asociado" />
+                                </div>
+
+                                <div>
+                                    <label for="tiporelacion">Tipo de Relación</label>
+                                    <input id="tiporelacion" x-model="paramsTask.tiporelacion" type="text"
+                                        class="form-input" placeholder="Ej: Nuevo Cliente" />
+                                </div>
+
+                                <div>
+                                    <label for="tiposervicio">Tipo de Servicio</label>
+                                    <input id="tiposervicio" x-model="paramsTask.tiposervicio" type="text"
+                                        class="form-input" placeholder="Ej: Consultoría" />
+                                </div>
+
+                                <div>
+                                    <label for="valorganado">Valor Ganado</label>
+                                    <input id="valorganado" x-model="paramsTask.valorganado" type="number" step="0.01"
+                                        class="form-input" placeholder="0.00" />
+                                </div>
+
+                                <div>
+                                    <label for="formacierre">Forma de Cierre</label>
+                                    <input id="formacierre" x-model="paramsTask.formacierre" type="text"
+                                        class="form-input" placeholder="Ej: Contrato firmado" />
+                                </div>
+
+                                <div>
+                                    <label for="duraciondelacuerdo">Duración del Acuerdo</label>
+                                    <input id="duraciondelacuerdo" x-model="paramsTask.duraciondelacuerdo" type="text"
+                                        class="form-input" placeholder="Ej: 6 meses" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="observacionesganado">Observaciones</label>
+                                    <textarea id="observacionesganado" x-model="paramsTask.observacionesganado"
+                                        class="form-textarea" placeholder="Observaciones adicionales"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Botones para agregar/actualizar proyecto ganado -->
+                                <div class="flex justify-end space-x-3 mt-4">
+                                    <button type="button" x-show="ganadoEditId" 
+                                            @click="limpiarFormularioGanado()" 
+                                            class="btn btn-outline-danger">
+                                        Cancelar Edición
+                                    </button>
+                                    <button type="button" 
+                                            @click="agregarGanado()" 
+                                            class="btn btn-primary"
+                                            :disabled="!paramsTask.fechaganado && !paramsTask.codigoCotizacionGanado && !paramsTask.tiposervicio">
+                                        <span x-text="ganadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
+                                    </button>
+                                </div>
+
+                            <!-- Lista de ganados existentes -->
+                            <div class="mt-6 border-t pt-4">
+                                <h4 class="text-lg font-semibold mb-3">Proyectos Ganados Registrados</h4>
+
+                                <!-- Filtros de búsqueda -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <div>
+                                        <label for="filtroCodigoGanado" class="text-sm">Buscar por código:</label>
+                                        <input id="filtroCodigoGanado" x-model="filtroCodigoGanado" type="text"
+                                            class="form-input" placeholder="Código de cotización">
+                                    </div>
+                                    <div>
+                                        <label for="filtroTipoServicio" class="text-sm">Buscar por servicio:</label>
+                                        <input id="filtroTipoServicio" x-model="filtroTipoServicio" type="text"
+                                            class="form-input" placeholder="Tipo de servicio">
+                                    </div>
+                                    <div>
+                                        <label for="filtroFechaGanado" class="text-sm">Filtrar por fecha:</label>
+                                        <input id="filtroFechaGanado" x-model="filtroFechaGanado" type="date"
+                                            class="form-input">
+                                    </div>
+                                </div>
+
+                                
+
+                                <!-- Tabla de ganados -->
+                                <div class="overflow-x-auto">
+                                    <table class="table-auto w-full">
+                                        <thead>
+                                            <tr class="bg-gray-100 dark:bg-gray-700">
+                                                <th class="px-4 py-2 text-left">Código</th>
+                                                <th class="px-4 py-2 text-left">Fecha</th>
+                                                <th class="px-4 py-2 text-left">Tipo Servicio</th>
+                                                <th class="px-4 py-2 text-left">Valor</th>
+                                                <th class="px-4 py-2 text-left">Forma Cierre</th>
+                                                <th class="px-4 py-2 text-left">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="ganado in filteredGanados" :key="ganado.id">
+                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2" x-text="ganado.codigo_cotizacion || '-'"></td>
+                                                    <td class="px-4 py-2" x-text="formatDate(ganado.fecha_ganado)"></td>
+                                                    <td class="px-4 py-2" x-text="ganado.tipo_servicio || '-'"></td>
+                                                    <td class="px-4 py-2" x-text="formatCurrency(ganado.valor_ganado)"></td>
+                                                    <td class="px-4 py-2" x-text="ganado.forma_cierre || '-'"></td>
+                                                    <td class="px-4 py-2">
+                                                        <div class="flex space-x-2">
+                                                            <button type="button" @click="editarGanado(ganado)" class="text-blue-500 hover:text-blue-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                            <button type="button" @click="eliminarGanado(ganado.id)" class="text-red-500 hover:text-red-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <template x-if="filteredGanados.length === 0">
+                                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                        <p>No se encontraron proyectos ganados registrados</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Sección Observado -->
+                        <div x-show="activeTab === 'observado' && currentProjectName.toLowerCase().includes('observado')"
+                            class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="fechaobservado">Fecha Observado</label>
+                                    <input id="fechaobservado" x-model="paramsTask.fechaobservado" type="date"
+                                        class="form-input" />
+                                </div>
+
+                                <div>
+                                    <label for="estadoactual">Estado Actual</label>
+                                    <input id="estadoactual" x-model="paramsTask.estadoactual" type="text"
+                                        class="form-input" placeholder="Estado del proyecto" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="detallesobservado">Detalles de Observación</label>
+                                    <textarea id="detallesobservado" x-model="paramsTask.detallesobservado"
+                                        class="form-textarea" placeholder="Detalles de la observación"></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="comentariosobservado">Comentarios</label>
+                                    <textarea id="comentariosobservado" x-model="paramsTask.comentariosobservado"
+                                        class="form-textarea" placeholder="Comentarios adicionales"></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="accionespendientes">Acciones Pendientes</label>
+                                    <textarea id="accionespendientes" x-model="paramsTask.accionespendientes"
+                                        class="form-textarea" placeholder="Acciones por realizar"></textarea>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="detalleobservado">Detalle Específico</label>
+                                    <textarea id="detalleobservado" x-model="paramsTask.detalleobservado"
+                                        class="form-textarea" placeholder="Detalle específico de la observación"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Botones para agregar/actualizar proyecto observado -->
+                            <div class="flex justify-end space-x-3 mt-4">
+                                <button type="button" x-show="observadoEditId" 
+                                        @click="limpiarFormularioObservado()" 
+                                        class="btn btn-outline-danger">
+                                    Cancelar Edición
+                                </button>
+                                <button type="button" 
+                                        @click="agregarObservado()" 
+                                        class="btn btn-primary"
+                                        :disabled="!paramsTask.fechaobservado && !paramsTask.estadoactual && !paramsTask.detallesobservado">
+                                    <span x-text="observadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
+                                </button>
+                            </div>
+
+
+                            <!-- Lista de observados existentes -->
+                            <div class="mt-6 border-t pt-4">
+                                <h4 class="text-lg font-semibold mb-3">Proyectos Observados Registrados</h4>
+
+                                <!-- Filtros de búsqueda -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <div>
+                                        <label for="filtroEstadoObservado" class="text-sm">Buscar por estado:</label>
+                                        <input id="filtroEstadoObservado" x-model="filtroEstadoObservado" type="text"
+                                            class="form-input" placeholder="Estado actual">
+                                    </div>
+                                    <div>
+                                        <label for="filtroFechaObservado" class="text-sm">Filtrar por fecha:</label>
+                                        <input id="filtroFechaObservado" x-model="filtroFechaObservado" type="date"
+                                            class="form-input">
+                                    </div>
+                                </div>
+
+                                <!-- Tabla de observados -->
+                                <div class="overflow-x-auto">
+                                    <table class="table-auto w-full">
+                                        <thead>
+                                            <tr class="bg-gray-100 dark:bg-gray-700">
+                                                <th class="px-4 py-2 text-left">Fecha</th>
+                                                <th class="px-4 py-2 text-left">Estado</th>
+                                                <th class="px-4 py-2 text-left">Detalles</th>
+                                                <th class="px-4 py-2 text-left">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template x-for="observado in filteredObservados" :key="observado.id">
+                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2" x-text="formatDate(observado.fecha_observado)"></td>
+                                                    <td class="px-4 py-2" x-text="observado.estado_actual || '-'"></td>
+                                                    <td class="px-4 py-2" x-text="observado.detalles ? observado.detalles.substring(0, 50) + '...' : '-'"></td>
+                                                    <td class="px-4 py-2">
+                                                        <div class="flex space-x-2">
+                                                            <button type="button" @click="editarObservado(observado)" class="text-blue-500 hover:text-blue-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                </svg>
+                                                            </button>
+                                                            <button type="button" @click="eliminarObservado(observado.id)" class="text-red-500 hover:text-red-700">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <template x-if="filteredObservados.length === 0">
+                                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                        <p>No se encontraron proyectos observados registrados</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Sección Rechazado - ACTUALIZADA -->
+                        <div x-show="activeTab === 'rechazado' && currentProjectName.toLowerCase().includes('rechazado')"
+                            class="space-y-4">
+                            <!-- Sección Rechazado -->
+                            <div x-show="activeTab === 'rechazado' && currentProjectName.toLowerCase().includes('rechazado')"
+                                class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="fecharechazo">Fecha de Rechazo</label>
+                                        <input id="fecharechazo" x-model="paramsTask.fecharechazo" type="date"
+                                            class="form-input" />
+                                    </div>
+
+                                    <div class="md:col-span-2">
+                                        <label for="motivorechazo">Motivo de Rechazo</label>
+                                        <textarea id="motivorechazo" x-model="paramsTask.motivorechazo"
+                                            class="form-textarea" placeholder="Explique el motivo del rechazo"></textarea>
+                                    </div>
+
+                                    <div class="md:col-span-2">
+                                        <label for="comentarioscliente">Comentarios del Cliente</label>
+                                        <textarea id="comentarioscliente" x-model="paramsTask.comentarioscliente"
+                                            class="form-textarea" placeholder="Comentarios o feedback del cliente"></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Botones para agregar/actualizar proyecto rechazado -->
+                                <div class="flex justify-end space-x-3 mt-4">
+                                    <button type="button" x-show="rechazadoEditId" 
+                                            @click="limpiarFormularioRechazado()" 
+                                            class="btn btn-outline-danger">
+                                        Cancelar Edición
+                                    </button>
+                                    <button type="button" 
+                                            @click="agregarRechazado()" 
+                                            class="btn btn-primary"
+                                            :disabled="!paramsTask.fecharechazo && !paramsTask.motivorechazo">
+                                        <span x-text="rechazadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
+                                    </button>
+                                </div>
+
+
+
+                                <!-- Lista de rechazados existentes -->
+                                <div class="mt-6 border-t pt-4">
+                                    <h4 class="text-lg font-semibold mb-3">Proyectos Rechazados Registrados</h4>
+
+                                    <!-- Filtros de búsqueda -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <label for="filtroMotivoRechazo" class="text-sm">Buscar por motivo:</label>
+                                            <input id="filtroMotivoRechazo" x-model="filtroMotivoRechazo" type="text"
+                                                class="form-input" placeholder="Motivo de rechazo">
+                                        </div>
+                                        <div>
+                                            <label for="filtroFechaRechazo" class="text-sm">Filtrar por fecha:</label>
+                                            <input id="filtroFechaRechazo" x-model="filtroFechaRechazo" type="date"
+                                                class="form-input">
+                                        </div>
+                                    </div>
+
+                                    <!-- Tabla de rechazados -->
+                                    <div class="overflow-x-auto">
+                                        <table class="table-auto w-full">
+                                            <thead>
+                                                <tr class="bg-gray-100 dark:bg-gray-700">
+                                                    <th class="px-4 py-2 text-left">Fecha</th>
+                                                    <th class="px-4 py-2 text-left">Motivo</th>
+                                                    <th class="px-4 py-2 text-left">Comentarios</th>
+                                                    <th class="px-4 py-2 text-left">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template x-for="rechazado in filteredRechazados" :key="rechazado.id">
+                                                    <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                        <td class="px-4 py-2" x-text="formatDate(rechazado.fecha_rechazo)"></td>
+                                                        <td class="px-4 py-2" x-text="rechazado.motivo_rechazo ? rechazado.motivo_rechazo.substring(0, 50) + '...' : '-'"></td>
+                                                        <td class="px-4 py-2" x-text="rechazado.comentarios_cliente ? rechazado.comentarios_cliente.substring(0, 50) + '...' : '-'"></td>
+                                                        <td class="px-4 py-2">
+                                                            <div class="flex space-x-2">
+                                                                <button type="button" @click="editarRechazado(rechazado)" class="text-blue-500 hover:text-blue-700">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                    </svg>
+                                                                </button>
+                                                                <button type="button" @click="eliminarRechazado(rechazado.id)" class="text-red-500 hover:text-red-700">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <template x-if="filteredRechazados.length === 0">
+                                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                            <p>No se encontraron proyectos rechazados registrados</p>
+                                        </div>
+                                    </template>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="flex justify-end items-center mt-8 gap-3">
+                            <button type="button" class="btn btn-outline-secondary"
+                                @click="activeTab = 'general'"
+                                x-show="activeTab !== 'general'">
+                                ← Volver a General
+                            </button>
                             <button type="button" class="btn btn-outline-danger"
                                 @click="isAddTaskModal = false">Cancelar</button>
-                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                                x-text="paramsTask.id ? 'Update' : 'Add'"></button>
+                            <button type="submit" class="btn btn-primary"
+                                x-text="paramsTask.id ? 'Actualizar' : 'Crear'"></button>
                         </div>
                     </form>
                 </div>
@@ -297,7 +1169,7 @@
                     </svg>
                 </button>
                 <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
-                    <span x-text="isDeleteProject ? 'Delete Project' : 'Delete Task'"></span>
+                    <span x-text="isDeleteProject ? 'Eliminar Proyecto' : 'Eliminar Tarea'"></span>
                 </div>
                 <div class="p-5 text-center">
                     <div class="text-white bg-danger ring-4 ring-danger/30 p-4 rounded-full w-fit mx-auto">
@@ -319,15 +1191,15 @@
                     </div>
                     <div class="text-base sm:w-3/4 mx-auto mt-5">
                         <span x-text="isDeleteProject 
-                            ? 'Are you sure you want to delete this project and all its tasks?' 
-                            : 'Are you sure you want to delete this task?'"></span>
+                            ? '¿Estás seguro de que quieres eliminar este proyecto y todas sus tareas?' 
+                            : '¿Estás seguro de que quieres eliminar esta tarea?'"></span>
                     </div>
 
                     <div class="flex justify-center items-center mt-8">
                         <button type="button" class="btn btn-outline-danger"
                             @click="isDeleteModal = false">Cancelar</button>
                         <button type="button" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                            @click="isDeleteProject ? deleteProject() : deleteTask()">Borrar</button>
+                            @click="isDeleteProject ? deleteProject() : deleteTask()">Eliminar</button>
                     </div>
                 </div>
             </div>
