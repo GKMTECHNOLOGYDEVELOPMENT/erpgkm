@@ -1,5 +1,5 @@
 <x-layout.default>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@1.0.3/dist/frappe-gantt.css">
+    <link rel="stylesheet" href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
     <style>
         .tab-btn {
             font-weight: 600;
@@ -161,11 +161,11 @@
     </div>
 
 
-    <input type="hidden" id="idSeguimientoHidden" value="{{ $seguimiento->idSeguimiento ?? '' }}">
-    <input type="hidden" id="idPersonaHidden" value="{{ $idPersona ?? '' }}">
+        <input type="hidden" id="idSeguimientoHidden" value="{{ $seguimiento->idSeguimiento ?? '' }}">
+<input type="hidden" id="idPersonaHidden" value="{{ $idPersona ?? '' }}">
 
 
-    <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elementos del DOM
@@ -323,15 +323,8 @@
                 if (tab === 'cronograma') {
                     requestAnimationFrame(() => {
                         const el = tabElement.querySelector('#gantt_cronograma');
-                        if (el) {
-                            // Dar tiempo a que el HTML se renderice completamente
-                            setTimeout(() => {
-                                if (typeof window.renderCronograma === 'function') {
-                                    window.renderCronograma(el);
-                                } else if (typeof window.initCronograma === 'function') {
-                                    window.initCronograma();
-                                }
-                            }, 100);
+                        if (el && typeof window.renderCronograma === 'function') {
+                            window.renderCronograma(el);
                         }
                     });
                 }
@@ -426,12 +419,13 @@
         });
     </script>
 
-
     <script src="/assets/js/Sortable.min.js"></script>
-
+    <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js" defer></script>
+    <script src="https://cdn.dhtmlx.com/gantt/edge/locale/locale_es.js" defer></script>
+    <script src="https://export.dhtmlx.com/gantt/api.js" defer></script>
     <!-- SweetAlert2 (para toasts) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('assets/js/seguimiento/cronograma.js') }}"></script>
+    <script src="{{ asset('assets/js/seguimiento/cronograma.js') }}" defer></script>
 
     <script src="{{ asset('assets/js/seguimiento/proyectos.js') }}" defer></script>
     <script src="{{ asset('assets/js/seguimiento/create-contact-empresa.js') }}" defer></script>

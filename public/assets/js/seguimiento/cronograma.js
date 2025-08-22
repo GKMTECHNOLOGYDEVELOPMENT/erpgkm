@@ -1,385 +1,751 @@
-// assets/js/seguimiento/cronograma.js
-console.log('Cronograma JS cargado - Frappe Gantt disponible:', typeof Gantt !== 'undefined');
+const toISO = (d) => new Date(d).toISOString().slice(0, 10);
 
-// Función para mostrar error si Frappe Gantt no carga
-function mostrarErrorGantt() {
-    const ganttContainer = document.getElementById('gantt_cronograma');
-    if (ganttContainer) {
-        ganttContainer.innerHTML = `
-            <div class="flex flex-col items-center justify-center h-64 text-red-500 p-4">
-                <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.966-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
-                </svg>
-                <h3 class="text-lg font-semibold mb-2">Error al cargar el cronograma</h3>
-                <p class="text-sm text-center">La biblioteca Frappe Gantt no se cargó correctamente.</p>
-                <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Recargar página
-                </button>
-            </div>
-        `;
+window.renderCronograma = function (el, idSeguimiento, opts = {}) {
+
+      if (!idSeguimiento) {
+        idSeguimiento = document.getElementById('idSeguimientoHidden')?.value;
     }
-}
 
-// Función principal para inicializar el cronograma
-function initCronograma() {
-    console.log('initCronograma llamado');
-
-    let gantt;
-    let tareas = [];
-    const seguimientoId = document.getElementById('idSeguimientoHidden')?.value;
-
-    console.log('Seguimiento ID:', seguimientoId);
-    console.log('Gantt disponible:', typeof Gantt);
-
-    // Verificar si Frappe Gantt está cargado
-    if (typeof Gantt === 'undefined') {
-        console.error('Frappe Gantt no está cargado correctamente');
-        mostrarErrorGantt();
+    if (!el || !idSeguimiento) {
+        console.error('Elemento DOM e idSeguimiento son requeridos');
         return;
     }
 
-    // Declarar todas las funciones internas
-    function mostrarEstadoVacio() {
-        const ganttContainer = document.getElementById('gantt_cronograma');
-        if (ganttContainer) {
-            ganttContainer.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-64 text-gray-500">
-                    <svg class="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    <p class="text-lg mb-2">No hay tareas programadas</p>
-                </div>
-            `;
-        }
+    // CSRF Token para Laravel
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    // URLs base
+    const baseUrl = `/cronograma/${idSeguimiento}`;
+    
+    // ===== Locale ES =====
+    if (gantt.i18n?.setLocale) gantt.i18n.setLocale('es');
+
+    // ===== Config base =====
+    gantt.config.autosize = false;
+    gantt.config.fit_tasks = false;
+    gantt.config.date_format = '%Y-%m-%d';
+    gantt.config.readonly = false;
+
+    // === Plugins ===
+    gantt.plugins?.({ columnResize: true, inlineEditors: true, tooltip: true });
+    gantt.config.tooltip_timeout = 20;
+
+    // === Resize horizontal ===
+    gantt.config.grid_resize = true;
+    gantt.config.grid_resizable_columns = true;
+
+    // === Progreso ===
+    gantt.config.drag_progress = true;
+    gantt.templates.progress_text = (s, e, task) => Math.round((task.progress || 0) * 100) + '%';
+
+    // Editor 0–100 para mapear a progress 0–1
+    gantt.config.editor_types.progress_pct = gantt.mixin(
+        {
+            set_value: function (value, id, column, node) {
+                const base = gantt.config.editor_types.number;
+                return base.set_value.call(this, Math.round((value || 0) * 100), id, column, node);
+            },
+            get_value: function (id, column, node) {
+                const base = gantt.config.editor_types.number;
+                const v = parseFloat(base.get_value.call(this, id, column, node)) || 0;
+                return Math.max(0, Math.min(100, v)) / 100;
+            },
+        },
+        gantt.config.editor_types.number,
+    );
+
+    // ===== Layout =====
+    gantt.config.layout = {
+        css: 'gantt_container',
+        rows: [
+            {
+                cols: [
+                    { view: 'grid', width: 360, min_width: 220, scrollY: 'scrollVer' },
+                    { resizer: true, width: 8 },
+                    { view: 'timeline', scrollX: 'scrollHor', scrollY: 'scrollVer' },
+                    { view: 'scrollbar', id: 'scrollVer' },
+                ],
+            },
+            { view: 'scrollbar', id: 'scrollHor', height: 18 },
+        ],
+    };
+
+    // ===== Interacción nativa =====
+    gantt.config.drag_create = true;
+    gantt.config.details_on_create = true;
+    gantt.config.details_on_dblclick = true;
+
+    // ===== Columnas =====
+    const d2s = gantt.date.date_to_str('%Y-%m-%d');
+    function durationDays(t) {
+        const d = gantt.calculateDuration(t.start_date, t.end_date, 'day');
+        return Math.round(d * 10) / 10 + 'd';
+    }
+    function predecessors(t) {
+        return gantt
+            .getLinks()
+            .filter((l) => l.target == t.id)
+            .map((l) => l.source)
+            .join(',');
     }
 
-    async function cargarTareas() {
-        try {
-            // DATOS DE PRUEBA TEMPORAL - Comenta cuando funcione
-            console.log('Usando datos de prueba...');
-            tareas = [
-                {
-                    id: 1,
-                    name: 'Diseño inicial del proyecto',
-                    fecha_inicio: '2024-01-01',
-                    fecha_fin: '2024-01-10',
-                    progreso: 75,
-                    estado: 'en-progreso',
-                    dependencias: '',
-                },
-                {
-                    id: 2,
-                    name: 'Desarrollo frontend',
-                    fecha_inicio: '2024-01-05',
-                    fecha_fin: '2024-01-20',
-                    progreso: 25,
-                    estado: 'pendiente',
-                    dependencias: '1',
-                },
-                {
-                    id: 3,
-                    name: 'Testing y QA',
-                    fecha_inicio: '2024-01-15',
-                    fecha_fin: '2024-01-25',
-                    progreso: 0,
-                    estado: 'pendiente',
-                    dependencias: '2',
-                },
+    const progressEditor = { type: 'progress_pct', map_to: 'progress', min: 0, max: 100 };
+
+    gantt.config.columns = [
+        { name: 'text', label: 'Tareas', tree: true, width: 260, min_width: 180, resize: true, editor: { type: 'text', map_to: 'text' } },
+        {
+            name: 'progress',
+            label: '%',
+            align: 'center',
+            width: 70,
+            min_width: 60,
+            resize: true,
+            editor: progressEditor,
+            template: (t) => Math.round((t.progress || 0) * 100) + '%',
+        },
+        {
+            name: 'start_date',
+            label: 'Inicio',
+            align: 'center',
+            width: 120,
+            min_width: 100,
+            resize: true,
+            editor: { type: 'date', map_to: 'start_date' },
+            template: (t) => d2s(t.start_date),
+        },
+        {
+            name: 'end_date',
+            label: 'Fin',
+            align: 'center',
+            width: 120,
+            min_width: 100,
+            resize: true,
+            editor: { type: 'date', map_to: 'end_date' },
+            template: (t) => d2s(t.end_date),
+        },
+        {
+            name: 'duration',
+            label: 'Duración',
+            align: 'center',
+            width: 90,
+            min_width: 80,
+            resize: true,
+            editor: { type: 'number', map_to: 'duration', min: 0 },
+            template: durationDays,
+        },
+        { name: 'pred', label: 'Pred.', align: 'center', width: 80, min_width: 70, resize: true, template: predecessors },
+        { name: 'add', width: 44 },
+    ];
+
+    // ===== Lightbox =====
+    gantt.config.lightbox.sections = [
+        { name: 'description', height: 38, map_to: 'text', type: 'textarea', focus: true },
+        { name: 'time', type: 'time', map_to: 'auto' },
+        { name: 'type', type: 'typeselect', map_to: 'type' },
+    ];
+    gantt.locale.labels.section_description = 'Descripción';
+    gantt.locale.labels.section_time = 'Tiempo';
+    gantt.locale.labels.section_type = 'Tipo';
+
+    // ===== Colores por % =====
+    gantt.templates.task_class = function (s, e, t) {
+        const p = t.progress || 0;
+        let colorClass = '';
+        if (p >= 0.8) colorClass = 'custom-green';
+        else if (p >= 0.4) colorClass = 'custom-blue';
+        else colorClass = 'custom-red';
+        
+        return (gantt.hasChild(t.id) ? 'is-parent ' : '') + colorClass;
+    };
+
+    // ===== Grid row class =====
+    gantt.templates.grid_row_class = (start, end, task) =>
+        gantt.hasChild(task.id) ? 'is-parent' : '';
+
+    // ===== Tooltip =====
+    const fmt = gantt.date.date_to_str('%d %M %Y');
+    gantt.templates.tooltip_text = (start, end, task) => {
+        const deps = gantt
+            .getLinks()
+            .filter((l) => l.target == task.id)
+            .map((l) => l.source)
+            .join(', ') || '—';
+        const dur = gantt.calculateDuration(task.start_date, task.end_date, 'day');
+        const pct = Math.round((task.progress || 0) * 100);
+        return `
+            <div style="min-width:220px">
+                <div><b>${task.text}</b></div>
+                <div>Inicio: ${fmt(start)}</div>
+                <div>Fin: ${fmt(end)}</div>
+                <div>Duración: ${dur}d</div>
+                <div>Avance: ${pct}%</div>
+                <div>Predecesoras: ${deps}</div>
+            </div>`;
+    };
+
+    // ===== Escalas responsive =====
+    const applyScales = (w) => {
+        if (w < 640) {
+            gantt.config.scale_height = 48;
+            gantt.config.scales = [
+                { unit: 'week', step: 1, format: 'Sem %W' },
+                { unit: 'day', step: 1, format: '%D' },
             ];
-
-            renderizarGantt();
-            actualizarEstadisticas();
-            return;
-            // FIN DATOS DE PRUEBA
-
-            if (!seguimientoId) {
-                console.error('No se encontró el ID de seguimiento');
-                return;
-            }
-
-            const response = await fetch(`/seguimiento/${seguimientoId}/tareas`);
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                tareas = data.tareas || [];
-                renderizarGantt();
-                actualizarEstadisticas();
-            } else {
-                console.error('Error al cargar tareas:', data.message);
-                mostrarEstadoVacio();
-            }
-        } catch (error) {
-            console.error('Error al cargar tareas:', error);
-            mostrarEstadoVacio();
+            gantt.config.row_height = 34;
+        } else if (w < 1024) {
+            gantt.config.scale_height = 50;
+            gantt.config.scales = [
+                { unit: 'day', step: 1, format: '%D %d %M' },
+                { unit: 'hour', step: 6, format: '%H' },
+            ];
+            gantt.config.row_height = 36;
+        } else {
+            gantt.config.scale_height = 52;
+            gantt.config.scales = [
+                { unit: 'week', step: 1, format: (d) => gantt.date.date_to_str('%D %d %M')(d).toUpperCase() },
+                { unit: 'day', step: 1, format: '%D' },
+            ];
+            gantt.config.row_height = 38;
         }
+    };
+
+    // ===== FUNCIONES DE API =====
+    
+    // Función para hacer peticiones con CSRF
+    async function apiRequest(url, options = {}) {
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            }
+        };
+        
+        const response = await fetch(url, { ...defaultOptions, ...options });
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Error en la petición');
+        }
+        
+        return data;
     }
 
-    function renderizarGantt() {
-        const ganttContainer = document.getElementById('gantt_cronograma');
-        console.log('Renderizando Gantt en:', ganttContainer);
-
-        if (!ganttContainer) {
-            console.error('No se encontró el contenedor del Gantt');
-            return;
-        }
-
-        if (tareas.length === 0) {
-            console.log('No hay tareas, mostrando estado vacío');
-            mostrarEstadoVacio();
-            return;
-        }
-
-        console.log('Tareas a renderizar:', tareas);
-
-        // Convertir tareas al formato que espera Frappe Gantt
-        const tasks = tareas.map((tarea) => ({
-            id: tarea.id.toString(),
-            name: tarea.name || tarea.nombre, // ✅ Compatible con ambos nombres
-            start: tarea.fecha_inicio,
-            end: tarea.fecha_fin,
-            progress: tarea.progreso || 0,
-            dependencies: tarea.dependencias ? tarea.dependencias.split(',') : [],
-            custom_class: `estado-${tarea.estado || 'pendiente'}`,
-        }));
-
-        // Destruir instancia anterior si existe
-        if (gantt) {
-            gantt.destroy();
-        }
-
-        // Crear nueva instancia de Gantt
+    // Cargar datos desde Laravel
+    async function loadData() {
         try {
-            gantt = new Gantt(ganttContainer, tasks, {
-                header_height: 60,
-                column_width: 40,
-                step: 24,
-                view_modes: ['Day', 'Week', 'Month', 'Quarter', 'Year'],
-                bar_height: 26,
-                bar_corner_radius: 6,
-                arrow_curve: 6,
-                padding: 22,
-                view_mode: 'Month',
-                date_format: 'YYYY-MM-DD',
-                language: 'es',
-                custom_popup_html: function (task) {
-                    const tarea = tareas.find((t) => t.id.toString() === task.id);
-                    const estadoText = {
-                        pendiente: 'Pendiente ⏳',
-                        'en-progreso': 'En Progreso 🚀',
-                        completado: 'Completado ✅',
-                        atrasado: 'Atrasado ⚠️',
-                    }[tarea?.estado || 'pendiente'];
-
-                    return `
-            <div class="bg-white p-4 rounded-lg shadow-xl border border-gray-200 min-w-64">
-                <div class="flex items-center justify-between mb-3">
-                    <h4 class="font-bold text-gray-800 text-lg">${task.name}</h4>
-                    <span class="px-2 py-1 rounded-full text-xs font-medium ${
-                        tarea?.estado === 'completado'
-                            ? 'bg-green-100 text-green-800'
-                            : tarea?.estado === 'en-progreso'
-                              ? 'bg-blue-100 text-blue-800'
-                              : tarea?.estado === 'atrasado'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                    }">${estadoText}</span>
-                </div>
-                
-                <div class="space-y-2 text-sm text-gray-600">
-                    <div class="flex justify-between">
-                        <span class="font-medium">Inicio:</span>
-                        <span>${formatDate(task.start)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="font-medium">Fin:</span>
-                        <span>${formatDate(task.end)}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="font-medium">Duración:</span>
-                        <span>${calculateDuration(task.start, task.end)} días</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium">Progreso:</span>
-                        <div class="w-20 bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-500 h-2 rounded-full" style="width: ${task.progress}%"></div>
-                        </div>
-                        <span class="text-xs">${task.progress}%</span>
-                    </div>
-                </div>
-            </div>
-        `;
-                },
-                on_click: function (task) {
-                    mostrarDetallesTarea(task.id);
-                },
-                on_date_change: function (task, start, end) {
-                    console.log('Fecha cambiada:', task, start, end);
-                    // Aquí puedes agregar lógica para guardar los cambios de fecha
-                },
-                on_progress_change: function (task, progress) {
-                    console.log('Progreso cambiado:', task, progress);
-                    // Aquí puedes agregar lógica para guardar los cambios de progreso
-                },
+            showLoading(true);
+const idPersona = document.getElementById('idPersonaHidden')?.value;
+const data = await apiRequest(`${baseUrl}/data?idpersona=${idPersona}`);
+            
+            // Convertir fechas de string a Date objects
+            data.data.forEach(task => {
+                if (task.start_date) task.start_date = gantt.date.parseDate(task.start_date, '%Y-%m-%d');
+                if (task.end_date) task.end_date = gantt.date.parseDate(task.end_date, '%Y-%m-%d');
             });
-
-            // Eventos de interacción
-            gantt.bar_click = function (task) {
-                mostrarDetallesTarea(task.id);
-            };
-
-            gantt.bar_dblclick = function (task) {
-                mostrarDetallesTarea(task.id);
-            };
-
-            console.log('Gantt renderizado exitosamente');
+            
+            gantt.parse(data);
+            
+            // Aplicar configuración guardada
+            if (data.config && data.config.vista) {
+                const viewSelect = document.getElementById('cronograma_view');
+                if (viewSelect) viewSelect.value = data.config.vista;
+                applyView(data.config.vista);
+            }
+            
+            showLoading(false);
+            notify('Cronograma cargado correctamente', 'success');
+            
         } catch (error) {
-            console.error('Error al crear instancia de Gantt:', error);
-            mostrarErrorGantt();
+            showLoading(false);
+            notify('Error al cargar cronograma: ' + error.message, 'error');
+            console.error('Error loading data:', error);
         }
     }
 
-    function mostrarDetallesTarea(tareaId) {
-        const tarea = tareas.find((t) => t.id.toString() === tareaId);
-        if (tarea) {
-            Swal.fire({
-                title: tarea.name || tarea.nombre, // ✅ Compatible con ambos
-                html: `
-                <div class="text-left">
-                    <p><strong>Fecha inicio:</strong> ${formatDate(tarea.fecha_inicio)}</p>
-                    <p><strong>Fecha fin:</strong> ${formatDate(tarea.fecha_fin)}</p>
-                    <p><strong>Progreso:</strong> ${tarea.progreso}%</p>
-                    <p><strong>Estado:</strong> ${tarea.estado}</p>
-                </div>
-            `,
-                icon: 'info',
-                confirmButtonText: 'Cerrar',
+    // Guardar tarea
+async function saveTask(task, isNew = false) {
+    try {
+        console.log("Preparando datos para guardar tarea:", task);
+        
+         const taskData = {
+            id: String(task.id), // Asegura que sea string
+            text: task.text,
+            start_date: gantt.date.date_to_str('%Y-%m-%d')(task.start_date),
+            end_date: gantt.date.date_to_str('%Y-%m-%d')(task.end_date),
+            progress: task.progress || 0,
+            parent: String(task.parent || 0), // También convierte parent a string
+            type: task.type || 'task'
+        };
+
+        console.log("Datos a enviar al servidor:", taskData);
+
+        const url = isNew ? `${baseUrl}/task` : `${baseUrl}/task/${task.id}`;
+        const method = isNew ? 'POST' : 'PUT';
+
+        const response = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(taskData)
+        });
+
+        console.log("Respuesta del servidor:", response);
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error al guardar la tarea');
+        }
+
+        const data = await response.json();
+        console.log("Tarea guardada exitosamente:", data);
+
+        // Si es nueva y el servidor devuelve un ID diferente, actualizamos
+        if (isNew && data.id && data.id !== task.id) {
+            gantt.changeTaskId(task.id, data.id);
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error al guardar tarea:", error);
+        notify('Error al guardar tarea: ' + error.message, 'error');
+        return false;
+    }
+}
+    // Eliminar tarea
+    async function deleteTask(taskId) {
+        try {
+            await apiRequest(`${baseUrl}/task/${taskId}`, {
+                method: 'DELETE'
             });
-        }
-    }
-
-    function inicializarEventos() {
-        console.log('Inicializando eventos...');
-
-        // Filtro de estado
-        document.getElementById('filtroEstado')?.addEventListener('change', (e) => {
-            filtrarTareas(e.target.value);
-        });
-
-        // Vista Gantt
-        document.getElementById('vistaGantt')?.addEventListener('change', (e) => {
-            if (gantt) {
-                gantt.change_view_mode(e.target.value);
-            }
-        });
-
-        // Botón exportar
-        document.getElementById('btnExportar')?.addEventListener('click', exportarCronograma);
-    }
-
-    function filtrarTareas(estado) {
-        let tareasFiltradas = tareas;
-
-        if (estado !== 'todos') {
-            tareasFiltradas = tareas.filter((t) => t.estado === estado);
-        }
-
-        if (tareasFiltradas.length === 0) {
-            mostrarEstadoVacio();
-            return;
-        }
-
-        // ✅ CORREGIR ESTA LÍNEA - usar el mismo mapeo que en renderizarGantt
-        const tasks = tareasFiltradas.map((tarea) => ({
-            id: tarea.id.toString(),
-            name: tarea.name || tarea.nombre, // ✅ Compatible con ambos
-            start: tarea.fecha_inicio,
-            end: tarea.fecha_fin,
-            progress: tarea.progreso || 0,
-            dependencies: tarea.dependencias ? tarea.dependencias.split(',') : [],
-            custom_class: `estado-${tarea.estado || 'pendiente'}`,
-        }));
-
-        if (gantt) {
-            gantt.refresh(tasks);
-        }
-    }
-
-    function actualizarEstadisticas() {
-        const total = tareas.length;
-        const pendientes = tareas.filter((t) => t.estado === 'pendiente').length;
-        const completadas = tareas.filter((t) => t.estado === 'completado').length;
-
-        const hoy = new Date();
-        const atrasadas = tareas.filter((t) => {
-            if (t.estado !== 'completado') {
-                const fechaFin = new Date(t.fecha_fin);
-                return fechaFin < hoy;
-            }
+            return true;
+        } catch (error) {
+            notify('Error al eliminar tarea: ' + error.message, 'error');
             return false;
-        }).length;
-
-        document.getElementById('total-tareas').textContent = total;
-        document.getElementById('tareas-pendientes').textContent = pendientes;
-        document.getElementById('tareas-completadas').textContent = completadas;
-        document.getElementById('tareas-atrasadas').textContent = atrasadas;
-    }
-
-    function formatDate(dateString) {
-        try {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('es-ES', options);
-        } catch (error) {
-            return dateString;
         }
     }
 
-    function calculateDuration(start, end) {
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        const diffTime = Math.abs(endDate - startDate);
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 para incluir ambos días
-    }
+    // Guardar dependencia
+// saveLink actualizada
+async function saveLink(link) {
+    try {
+        if (!link?.id || !link?.source || !link?.target) {
+            throw new Error("Datos de link incompletos");
+        }
 
-    function exportarCronograma() {
-        Swal.fire({
-            icon: 'info',
-            title: 'Exportar',
-            text: 'Función de exportación en desarrollo',
-            timer: 2000,
-            showConfirmButton: false,
+        if (await checkForCycles(link.source, link.target)) {
+            throw new Error("Esta dependencia crearía un ciclo");
+        }
+
+        const response = await apiRequest(`${baseUrl}/link`, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: String(link.id),
+                source: String(link.source),
+                target: String(link.target),
+                type: link.type || '0'
+            })
         });
-    }
 
-    // Iniciar la carga
-    cargarTareas();
-    inicializarEventos();
+        return true;
+    } catch (error) {
+        console.error("Error saving link:", error);
+        notify("Error al guardar dependencia: " + error.message, "error");
+        return false;
+    }
 }
 
-// Hacer la función global
-window.initCronograma = initCronograma;
+// Función para detectar ciclos
+function createsCycle(source, target) {
+    return new Promise((resolve) => {
+        // Implementación simple - puedes mejorarla según tus necesidades
+        const links = gantt.getLinks();
+        const visited = new Set();
+        
+        function hasPath(start, end) {
+            if (start === end) return true;
+            if (visited.has(start)) return false;
+            
+            visited.add(start);
+            
+            const outgoingLinks = links.filter(l => l.source == start);
+            for (const link of outgoingLinks) {
+                if (hasPath(link.target, end)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        resolve(hasPath(target, source));
+    });
+}
+    // Eliminar dependencia
+    async function deleteLink(linkId) {
+        try {
+            await apiRequest(`${baseUrl}/link/${linkId}`, {
+                method: 'DELETE'
+            });
+            return true;
+        } catch (error) {
+            notify('Error al eliminar dependencia: ' + error.message, 'error');
+            return false;
+        }
+    }
 
-// Inicializar automáticamente si el elemento existe
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM completamente cargado');
+    // Guardar configuración
+    async function saveConfig(config) {
+        try {
+            await apiRequest(`${baseUrl}/config`, {
+                method: 'POST',
+                body: JSON.stringify(config)
+            });
+        } catch (error) {
+            console.error('Error saving config:', error);
+        }
+    }
 
-    if (document.getElementById('gantt_cronograma')) {
-        console.log('Elemento gantt_cronograma encontrado, inicializando...');
-        initCronograma();
+    // ===== EVENTOS DE DHTMLX GANTT CONECTADOS A LARAVEL =====
+    
+    // Cuando se crea una tarea
+gantt.attachEvent("onAfterTaskAdd", async function(id, task) {
+    console.log("Evento onAfterTaskAdd disparado", task);
+    
+    // Verificar si es una tarea nueva (temporal)
+    const isNewTask = task.$new || 
+                     (typeof task.id === 'string' && task.id.startsWith('T')) || 
+                     (typeof task.id === 'number' && task.id > 1e12); // IDs temporales grandes
+    
+    if (!isNewTask) {
+        console.log("No es tarea nueva, ignorando");
+        return;
+    }
+    
+    console.log("Es una tarea nueva, procediendo a guardar...");
+    const success = await saveTask(task, true);
+    
+    if (success) {
+        ensureVisibleByTask(task);
+        notify(`Tarea creada: ${task.text}`, 'success');
+    } else {
+        console.log("Falló el guardado, eliminando tarea temporal");
+        gantt.deleteTask(id);
     }
 });
 
-// Función global para renderizar desde el tab principal
-window.renderCronograma = function (element) {
-    console.log('Render cronograma llamado para elemento:', element);
-
-    setTimeout(() => {
-        if (typeof initCronograma === 'function') {
-            console.log('Inicializando cronograma desde render...');
-            initCronograma();
+    // Cuando se actualiza una tarea
+    gantt.attachEvent("onAfterTaskUpdate", async function(id, task) {
+        if (task.$new) return; // Skip new tasks
+        
+        const success = await saveTask(task, false);
+        if (success) {
+            ensureVisibleByTask(task);
+            notify(`Tarea actualizada: ${task.text}`, 'info');
         }
-    }, 100);
+    });
+
+    // Cuando se arrastra una tarea
+    gantt.attachEvent("onAfterTaskDrag", async function(id) {
+        const task = gantt.getTask(id);
+        const success = await saveTask(task, false);
+        if (success) {
+            ensureVisibleByTask(task);
+            notify(`Tarea editada: ${task.text}`, 'info');
+        }
+    });
+
+    // Antes de eliminar tarea (para confirmación)
+    gantt.attachEvent("onBeforeTaskDelete", function(id, task) {
+        return confirm(`¿Estás seguro de eliminar la tarea "${task.text}"?`);
+    });
+
+    // Después de eliminar tarea
+    gantt.attachEvent("onAfterTaskDelete", async function(id, task) {
+        const success = await deleteTask(id);
+        if (success) {
+            notify(`Tarea eliminada: ${task?.text ?? id}`, 'warning');
+        }
+    });
+
+// Modificar el evento onAfterLinkAdd
+gantt.attachEvent("onAfterLinkAdd", async function(id) {
+    try {
+        const link = gantt.getLink(id);
+        if (!link) {
+            console.error("No se pudo encontrar el link con id:", id);
+            gantt.deleteLink(id);
+            return;
+        }
+        
+        // Verificar ciclos antes de enviar al servidor
+        const hasCycle = await checkForCycles(link.source, link.target);
+        if (hasCycle) {
+            gantt.deleteLink(id);
+            notify("No se puede crear esta dependencia: crearía un ciclo", "error");
+            return;
+        }
+        
+        const success = await saveLink(link);
+        if (!success) {
+            gantt.deleteLink(id);
+        }
+    } catch (error) {
+        console.error("Error en onAfterLinkAdd:", error);
+        notify("Error al crear dependencia: " + error.message, "error");
+        gantt.deleteLink(id);
+    }
+});
+
+async function checkForCycles(source, target) {
+    const links = gantt.getLinks();
+    const visited = new Set();
+    const queue = [target];
+    
+    while (queue.length > 0) {
+        const current = queue.shift();
+        
+        if (current === source) {
+            return true; // Hay un ciclo
+        }
+        
+        if (!visited.has(current)) {
+            visited.add(current);
+            
+            // Encontrar todos los links que salen de 'current'
+            const outgoing = links.filter(l => l.source == current);
+            outgoing.forEach(l => queue.push(l.target));
+        }
+    }
+    
+    return false; // No hay ciclo
+}
+
+
+    // Cuando se elimina una dependencia
+    gantt.attachEvent("onAfterLinkDelete", async function(id, link) {
+        await deleteLink(id);
+    });
+
+    // ===== INICIALIZACIÓN =====
+    applyScales(el.clientWidth);
+    gantt.init(el.id || el);
+
+    // Cargar datos desde Laravel
+    loadData();
+
+    // ===== AUTO-FIT =====
+    function fitToTasksOnce() {
+        const prev = gantt.config.fit_tasks;
+        gantt.config.fit_tasks = true;
+        gantt.render();
+        gantt.config.fit_tasks = prev;
+    }
+
+    let fittedOnce = false;
+    gantt.attachEvent("onDataRender", function () {
+        if (!fittedOnce) { 
+            fitToTasksOnce(); 
+            fittedOnce = true; 
+        }
+    });
+
+    function ensureVisibleByTask(task) {
+        const st = gantt.getState();
+        if (task && (task.start_date < st.min_date || task.end_date > st.max_date)) {
+            fitToTasksOnce();
+        }
+    }
+
+    // ===== RESPONSIVE =====
+    const ro = new ResizeObserver((entries) => {
+        const w = entries[0].contentRect.width;
+        applyScales(w);
+        gantt.setSizes();
+        gantt.render();
+    });
+    ro.observe(el);
+
+    // ===== TOOLBAR FUNCTIONS =====
+    function applyView(viewType) {
+        const map = {
+            'Quarter Day': [
+                { unit: 'hour', step: 6, format: '%H' },
+                { unit: 'day', step: 1, format: '%D %d %M' },
+            ],
+            'Half Day': [
+                { unit: 'hour', step: 12, format: '%H' },
+                { unit: 'day', step: 1, format: '%D %d %M' },
+            ],
+            Day: [
+                { unit: 'day', step: 1, format: '%D %d %M' },
+                { unit: 'week', step: 1, format: 'Sem %W' },
+            ],
+            Week: [
+                { unit: 'week', step: 1, format: 'Sem %W' },
+                { unit: 'month', step: 1, format: '%M %Y' },
+            ],
+            Month: [
+                { unit: 'month', step: 1, format: '%M %Y' },
+                { unit: 'year', step: 1, format: '%Y' },
+            ],
+        };
+        gantt.config.scales = map[viewType] || map['Day'];
+        gantt.render();
+        fitToTasksOnce();
+        
+        // Guardar configuración
+        saveConfig({ vista_actual: viewType });
+    }
+
+    // ===== EVENT LISTENERS PARA TOOLBAR =====
+    const viewSel = document.getElementById('cronograma_view');
+    const btnNew = document.getElementById('cronograma_new');
+    const btnToday = document.getElementById('cronograma_today');
+    const btnFit = document.getElementById('cronograma_fit');
+
+    viewSel?.addEventListener('change', (e) => {
+        applyView(e.target.value);
+    });
+
+    // En el evento de creación de tareas
+btnNew?.addEventListener('click', () => {
+    console.log("--- INICIANDO CREACIÓN DE TAREA ---");
+    const parent = gantt.getSelectedId() || gantt.getRootId();
+    const base = gantt.getState().min_date || new Date();
+    const taskId = 'tarea_' + Date.now(); // Prefijo + timestamp
+    
+    console.log("ID temporal generado:", taskId);
+    
+    const newTask = {
+        id: taskId,
+        text: 'Nueva tarea',
+        start_date: gantt.date.add(base, 0, 'day'),
+        end_date: gantt.date.add(base, 2, 'day'),
+        progress: 0,
+        parent: parent,
+        type: 'task',
+        $new: true // Marca explícitamente como nueva
+    };
+    
+    const id = gantt.addTask(newTask);
+    gantt.showLightbox(id);
+});
+
+    btnToday?.addEventListener('click', () => gantt.showDate(new Date()));
+
+    btnFit?.addEventListener('click', () => {
+        fitToTasksOnce();
+    });
+
+    // ===== EXPORTES =====
+    const btnExpPdf = document.getElementById('cronograma_export_pdf');
+    const btnExpPng = document.getElementById('cronograma_export_png');
+    const btnExpExcel = document.getElementById('cronograma_export_excel');
+    const btnExpMsp = document.getElementById('cronograma_export_msp');
+
+    function doExport(fn, cfg) {
+        if (typeof fn !== 'function') {
+            alert('Para exportar, incluye: https://export.dhtmlx.com/gantt/api.js');
+            return;
+        }
+        fn.call(gantt, Object.assign({ locale: 'es' }, cfg));
+    }
+
+    btnExpPdf?.addEventListener('click', () => {
+        doExport(gantt.exportToPDF, { name: `cronograma_${toISO(new Date())}.pdf` });
+    });
+    
+    btnExpPng?.addEventListener('click', () => {
+        doExport(gantt.exportToPNG, { name: `cronograma_${toISO(new Date())}.png` });
+    });
+    
+    btnExpMsp?.addEventListener('click', () => {
+        doExport(gantt.exportToMSProject, { name: `cronograma_${toISO(new Date())}.xml` });
+    });
+
+    btnExpExcel?.addEventListener('click', () => {
+        if (typeof gantt.exportToExcel !== 'function') {
+            alert('Para exportar, incluye: https://export.dhtmlx.com/gantt/api.js');
+            return;
+        }
+
+        const d2s = gantt.date.date_to_str('%Y-%m-%d');
+        const rows = [];
+        gantt.eachTask((t) => {
+            const dur = Math.round(gantt.calculateDuration(t.start_date, t.end_date, 'day')) + 'd';
+            const pct = Math.round((t.progress || 0) * 100) + '%';
+            rows.push({
+                tarea: t.text,
+                inicio: d2s(t.start_date),
+                fin: d2s(t.end_date),
+                duracion: dur,
+                pct: pct
+            });
+        });
+
+        const columns = [
+            { id: 'tarea', header: 'Tarea', align: 'center' },
+            { id: 'inicio', header: 'Inicio', align: 'center' },
+            { id: 'fin', header: 'Fin', align: 'center' },
+            { id: 'duracion', header: 'Duración', align: 'center' },
+            { id: 'pct', header: '%', align: 'center'},
+        ];
+
+        gantt.exportToExcel.call(gantt, {
+            name: `cronograma_${toISO(new Date())}.xlsx`,
+            columns,
+            data: rows
+        });
+    });
+
+    // ===== UTILIDADES =====
+    
+    // Loading indicator
+    function showLoading(show) {
+        // Puedes personalizar esto según tu UI
+        if (show) {
+            el.style.opacity = '0.5';
+            el.style.pointerEvents = 'none';
+        } else {
+            el.style.opacity = '1';
+            el.style.pointerEvents = 'auto';
+        }
+    }
+
+    // ===== TOASTS (SweetAlert2) =====
+    const Toast = window.Swal?.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2600,
+        timerProgressBar: true,
+        didOpen: (el) => {
+            el.addEventListener('mouseenter', Swal.stopTimer);
+            el.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+
+    const iconMap = { success: 'success', info: 'info', warning: 'warning', error: 'error' };
+    function notify(msg, type = 'info') {
+        if (Toast) {
+            Toast.fire({ icon: iconMap[type] || 'info', title: msg });
+        } else if (typeof gantt.message === 'function') {
+            gantt.message({ text: msg, type });
+        } else {
+            console.log(`[${type}] ${msg}`);
+        }
+    }
+
+    // ===== API PÚBLICA DEL CRONOGRAMA =====
+    
+    // Retornar objeto con métodos públicos
+    return {
+        reload: loadData,
+        saveConfig: saveConfig,
+        fitToTasks: fitToTasksOnce,
+        gantt: gantt // Acceso directo al objeto gantt si se necesita
+    };
 };
