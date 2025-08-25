@@ -419,6 +419,25 @@
         });
     </script>
 
+
+<!-- <script>
+function tareaApp() {
+    return {
+        tarea: null,
+        async fetchTarea(taskId) {
+            try {
+                const res = await fetch(`/tarea/${taskId}`);
+                if (!res.ok) throw new Error('Error al obtener la tarea');
+                this.tarea = await res.json();
+            } catch (err) {
+                console.error(err);
+                alert('No se pudo cargar la tarea');
+            }
+        }
+    }
+}
+</script> -->
+
     <script src="/assets/js/Sortable.min.js"></script>
     <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js" defer></script>
     <script src="https://cdn.dhtmlx.com/gantt/edge/locale/locale_es.js" defer></script>

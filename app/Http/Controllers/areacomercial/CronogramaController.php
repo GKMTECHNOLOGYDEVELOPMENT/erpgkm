@@ -8,6 +8,7 @@ use App\Models\CronogramaConfiguracion;
 use App\Models\CronogramaHistorico;
 use App\Models\Seguimiento;
 use App\Models\SeleccionarSeguimiento;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -67,6 +68,35 @@ class CronogramaController extends Controller
     }
 }
 
+    // Dentro de CronogramaController o como un servicio externo
+public function createCronogramaDesdeTask(Task $task, $idSeguimiento)
+{
+    $idPersona = SeleccionarSeguimiento::where('idseguimiento', $idSeguimiento)->value('idpersona');
+
+    if (!$idPersona) {
+        throw new \Exception('No se encontró idpersona para este seguimiento.');
+    }
+
+    $tarea = new CronogramaTarea();
+    $tarea->idSeguimiento = $idSeguimiento;
+    $tarea->idpersona = $idPersona;
+    $tarea->task_id = $task->id; // Puedes usar el ID de task como identificador
+    $tarea->orden = CronogramaTarea::porSeguimiento($idSeguimiento)->max('orden') + 1;
+    $tarea->parent_task_id = $parentId ?? '0';
+
+    $tarea->nombre = $task->title;
+    $tarea->descripcion = $task->description ?? '';
+    $tarea->fecha_inicio = now(); // O alguna fecha estimada si tienes
+    $tarea->fecha_fin = now()->addDays(1); // Duración estimada de 1 día
+    $tarea->duracion = 1;
+    $tarea->progreso = 0;
+    $tarea->tipo = 'task';
+    $tarea->abierto = true;
+
+    $tarea->save();
+
+    return $tarea;
+}
 
     // Guardar/Actualizar una tarea
 public function saveTask(Request $request, $idSeguimiento): JsonResponse

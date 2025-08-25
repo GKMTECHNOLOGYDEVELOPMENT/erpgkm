@@ -231,12 +231,13 @@ window.renderCronograma = function (el, idSeguimiento, opts = {}) {
         return data;
     }
 
-    // Cargar datos desde Laravel
+// ===== INICIALIZACIÓN MODIFICADA =====
+ // ===== INICIALIZACIÓN MODIFICADA =====
     async function loadData() {
         try {
             showLoading(true);
-const idPersona = document.getElementById('idPersonaHidden')?.value;
-const data = await apiRequest(`${baseUrl}/data?idpersona=${idPersona}`);
+            const idPersona = document.getElementById('idPersonaHidden')?.value;
+            const data = await apiRequest(`${baseUrl}/data?idpersona=${idPersona}`);
             
             // Convertir fechas de string a Date objects
             data.data.forEach(task => {
@@ -245,6 +246,9 @@ const data = await apiRequest(`${baseUrl}/data?idpersona=${idPersona}`);
             });
             
             gantt.parse(data);
+            
+            // Actualizar progresos de tareas padre después de cargar
+            setTimeout(updateAllParentTasks, 100);
             
             // Aplicar configuración guardada
             if (data.config && data.config.vista) {
@@ -409,51 +413,171 @@ function createsCycle(source, target) {
     }
 
     // ===== EVENTOS DE DHTMLX GANTT CONECTADOS A LARAVEL =====
-    
-    // Cuando se crea una tarea
-gantt.attachEvent("onAfterTaskAdd", async function(id, task) {
-    console.log("Evento onAfterTaskAdd disparado", task);
-    
-    // Verificar si es una tarea nueva (temporal)
-    const isNewTask = task.$new || 
-                     (typeof task.id === 'string' && task.id.startsWith('T')) || 
-                     (typeof task.id === 'number' && task.id > 1e12); // IDs temporales grandes
-    
-    if (!isNewTask) {
-        console.log("No es tarea nueva, ignorando");
-        return;
-    }
-    
-    console.log("Es una tarea nueva, procediendo a guardar...");
-    const success = await saveTask(task, true);
-    
-    if (success) {
-        ensureVisibleByTask(task);
-        notify(`Tarea creada: ${task.text}`, 'success');
-    } else {
-        console.log("Falló el guardado, eliminando tarea temporal");
-        gantt.deleteTask(id);
-    }
-});
+    // ===== GUARDAR TAREA SILENCIOSAMENTE (sin notificaciones) =====
+    async function saveTaskSilently(taskId) {
+        const task = gantt.getTask(taskId);
+        try {
+            const taskData = {
+                id: String(task.id),
+                text: task.text,
+                start_date: gantt.date.date_to_str('%Y-%m-%d')(task.start_date),
+                end_date: gantt.date.date_to_str('%Y-%m-%d')(task.end_date),
+                progress: task.progress || 0,
+                parent: String(task.parent || 0),
+                type: task.type || 'task'
+            };
 
-    // Cuando se actualiza una tarea
+            await fetch(`${baseUrl}/task/${task.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify(taskData)
+            });
+        } catch (error) {
+            console.error("Error al guardar tarea silenciosamente:", error);
+        }
+    }
+  // ===== FUNCIÓN PARA CALCULAR PROGRESO DE TAREAS PADRE =====
+    function updateParentTaskProgress(taskId) {
+        const task = gantt.getTask(taskId);
+        if (!gantt.hasChild(taskId)) return task.progress || 0;
+        
+        const children = gantt.getChildren(taskId);
+        if (children.length === 0) return task.progress || 0;
+        
+        // Calcular el promedio del progreso de todas las subtareas
+        let totalProgress = 0;
+        let count = 0;
+        
+        children.forEach(childId => {
+            const childTask = gantt.getTask(childId);
+            const childProgress = childTask.progress || 0;
+            totalProgress += childProgress;
+            count++;
+        });
+        
+        const newProgress = count > 0 ? totalProgress / count : 0;
+        
+        // Actualizar solo si hay cambio
+        if (Math.abs((task.progress || 0) - newProgress) > 0.001) {
+            // Actualizar sin disparar eventos recursivos
+            gantt.getTask(taskId).progress = newProgress;
+            gantt.updateTask(taskId);
+            
+            // Guardar en el servidor
+            saveTaskSilently(taskId);
+            
+            // Si esta tarea tiene padre, actualizarlo también
+            if (task.parent && task.parent != gantt.config.root_id) {
+                updateParentTaskProgress(task.parent);
+            }
+            
+            return newProgress;
+        }
+        
+        return task.progress || 0;
+    }
+
+ // ===== ACTUALIZAR PROGRESO DE TODOS LOS PADRES =====
+    function updateAllParentTasks() {
+        // Obtener todas las tareas que tienen hijos
+        const parentTasks = [];
+        gantt.eachTask(function(task) {
+            if (gantt.hasChild(task.id)) {
+                parentTasks.push(task.id);
+            }
+        });
+        
+        // Actualizar cada tarea padre
+        parentTasks.forEach(taskId => {
+            updateParentTaskProgress(taskId);
+        });
+    }
+ // Después de añadir una tarea
+// Después de añadir una tarea
+    gantt.attachEvent("onAfterTaskAdd", async function(id, task) {
+        console.log("Evento onAfterTaskAdd disparado", task);
+        
+        const isNewTask = task.$new || 
+                         (typeof task.id === 'string' && task.id.startsWith('T')) || 
+                         (typeof task.id === 'number' && task.id > 1e12);
+        
+        if (!isNewTask) {
+            console.log("No es tarea nueva, ignorando");
+            return;
+        }
+        
+        console.log("Es una tarea nueva, procediendo a guardar...");
+        const success = await saveTask(task, true);
+        
+        if (success) {
+            // Actualizar progreso del padre si existe
+            if (task.parent && task.parent != gantt.config.root_id) {
+                updateParentTaskProgress(task.parent);
+            }
+            
+            ensureVisibleByTask(task);
+            notify(`Tarea creada: ${task.text}`, 'success');
+        } else {
+            console.log("Falló el guardado, eliminando tarea temporal");
+            gantt.deleteTask(id);
+        }
+    });
+
+
+    // Después de actualizar una tarea
+// Después de actualizar una tarea
     gantt.attachEvent("onAfterTaskUpdate", async function(id, task) {
-        if (task.$new) return; // Skip new tasks
+        if (task.$new) return;
         
         const success = await saveTask(task, false);
         if (success) {
+            // Actualizar progreso del padre si existe
+            if (task.parent && task.parent != gantt.config.root_id) {
+                updateParentTaskProgress(task.parent);
+            }
+            
             ensureVisibleByTask(task);
             notify(`Tarea actualizada: ${task.text}`, 'info');
         }
     });
-
-    // Cuando se arrastra una tarea
+  // Después de arrastrar una tarea
     gantt.attachEvent("onAfterTaskDrag", async function(id) {
         const task = gantt.getTask(id);
         const success = await saveTask(task, false);
         if (success) {
+            // Actualizar progreso del padre si existe
+            if (task.parent && task.parent != gantt.config.root_id) {
+                updateParentTaskProgress(task.parent);
+            }
+            
             ensureVisibleByTask(task);
             notify(`Tarea editada: ${task.text}`, 'info');
+        }
+    });
+
+     // ===== EVENTO ESPECÍFICO PARA CAMBIOS DE PROGRESO =====
+    gantt.attachEvent("onTaskSelected", function(id) {
+        // Guardar el progreso inicial cuando se selecciona una tarea
+        const task = gantt.getTask(id);
+        if (task) {
+            task._initialProgress = task.progress || 0;
+        }
+    });
+    gantt.attachEvent("onAfterTaskChange", function(id, mode, task) {
+        if (mode === "progress" && task) {
+            // Detectar cambio específico en el progreso
+            const initialProgress = task._initialProgress || 0;
+            const currentProgress = task.progress || 0;
+            
+            if (Math.abs(initialProgress - currentProgress) > 0.01) {
+                // Actualizar progreso del padre si existe
+                if (task.parent && task.parent != gantt.config.root_id) {
+                    setTimeout(() => updateParentTaskProgress(task.parent), 100);
+                }
+            }
         }
     });
 
@@ -461,11 +585,15 @@ gantt.attachEvent("onAfterTaskAdd", async function(id, task) {
     gantt.attachEvent("onBeforeTaskDelete", function(id, task) {
         return confirm(`¿Estás seguro de eliminar la tarea "${task.text}"?`);
     });
-
-    // Después de eliminar tarea
-    gantt.attachEvent("onAfterTaskDelete", async function(id, task) {
+// Después de eliminar una tarea
+gantt.attachEvent("onAfterTaskDelete", async function(id, task) {
         const success = await deleteTask(id);
         if (success) {
+            // Actualizar progreso del padre si existe
+            if (task.parent && task.parent != gantt.config.root_id) {
+                updateParentTaskProgress(task.parent);
+            }
+            
             notify(`Tarea eliminada: ${task?.text ?? id}`, 'warning');
         }
     });

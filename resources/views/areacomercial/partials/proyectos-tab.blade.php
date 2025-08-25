@@ -1,3 +1,16 @@
+<style>
+    .capitalize {
+        text-transform: capitalize;
+    }
+    [x-cloak] {
+        display: none !important;
+    }
+    .bg-blue-50 { background-color: #eff6ff; }
+    .bg-green-50 { background-color: #f0fdf4; }
+    .bg-yellow-50 { background-color: #fefce8; }
+    .bg-purple-50 { background-color: #faf5ff; }
+</style>
+
 <div x-data="scrumboard"
     x-init="loadProjects()"
     class="p-5">
@@ -10,7 +23,7 @@
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            Agregar proyecto
+            Flujo De Estados
         </button>
     </div>
 
@@ -169,18 +182,19 @@
                             </template>
                         </div>
 
-                        <div class="pt-3">
-                            <button type="button" class="btn btn-primary mx-auto"
-                                @click="addEditTask(project.id)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-                                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                                </svg>
-                                Agregar tarea
-                            </button>
-                        </div>
+                        <div class="pt-3" x-show="project.title === 'Lista de proyectos'">
+    <button type="button" class="btn btn-primary mx-auto"
+        @click="addEditTask(project.id)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Agregar Proyecto
+    </button>
+</div>
+
                     </div>
                 </template>
             </div>
@@ -205,15 +219,23 @@
                     </svg>
                 </button>
                 <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]"
-                    x-text="params.id ? 'Editar proyecto' : 'Agregar proyecto'"></div>
+                    x-text="params.id ? 'Editar estado' : 'Agregar estado'"></div>
                 <div class="p-5">
                     <form @submit.prevent="saveProject">
                         <div class="grid gap-5">
-                            <div>
-                                <label for="title">Nombre</label>
-                                <input id="title" x-model="params.title" type="text"
-                                    class="form-input mt-1" placeholder="Introduzca el nombre" />
-                            </div>
+                            <div x-show="estadosDisponibles.length > 0">
+    <label for="title">Nombre</label>
+    <select id="title" x-model="params.title" class="form-select mt-1">
+        <option value="" disabled selected>Selecciona un estado</option>
+        <template x-for="estado in estadosDisponibles" :key="estado">
+            <option :value="estado" x-text="estado.charAt(0).toUpperCase() + estado.slice(1)"></option>
+        </template>
+    </select>
+</div>
+<div x-show="estadosDisponibles.length === 0" class="text-red-500 mt-2">
+    Todos los estados ya han sido utilizados.
+</div>
+
                         </div>
 
                         <div class="flex justify-end items-center mt-8">
@@ -311,29 +333,69 @@
                             </ul>
                         </div>
 
-                        <!-- Sección General -->
-                        <div x-show="activeTab === 'general'" class="space-y-4">
-                            <div>
-                                <label for="taskTitle">Nombre *</label>
-                                <input id="taskTitle" x-model="paramsTask.title" type="text"
-                                    class="form-input" placeholder="Introduzca el nombre" required />
-                            </div>
+                       <!-- Sección General -->
+<div x-show="activeTab === 'general'" class="space-y-4">
+    <div>
+        <label for="taskTitle">Nombre *</label>
+        <input id="taskTitle" x-model="paramsTask.title" type="text"
+            class="form-input" placeholder="Introduzca el nombre" required />
+    </div>
 
-                            <div>
-                                <label for="taskdesc">Descripción</label>
-                                <textarea id="taskdesc" x-model="paramsTask.description" class="form-textarea min-h-[100px]"
-                                    placeholder="Introduzca la descripción"></textarea>
-                            </div>
+    <div>
+        <label for="taskdesc">Descripción</label>
+        <textarea id="taskdesc" x-model="paramsTask.description" class="form-textarea min-h-[100px]"
+            placeholder="Introduzca la descripción"></textarea>
+    </div>
 
-                            <div>
-                                <label for="taskTag">Etiquetas (separadas con comas)</label>
-                                <input id="taskTag" x-model="paramsTask.tags" type="text"
-                                    class="form-input" placeholder="Introducir etiquetas" />
-                            </div>
+    <div>
+        <label for="taskTag">Etiquetas (separadas con comas)</label>
+        <input id="taskTag" x-model="paramsTask.tags" type="text"
+            class="form-input" placeholder="Introducir etiquetas" />
+    </div>
 
+   <!-- TABLA DE RELACIONES -->
+    <div>
+        <h2 class="text-lg font-bold mb-4">Actividades de la Tarea</h2>
+        
+        <template x-if="tarea && tarea.relaciones && tarea.relaciones.length > 0">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border border-gray-300">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="px-4 py-2">Tipo</th>
+                            <th class="px-4 py-2">ID</th>
+                            <th class="px-4 py-2">Detalle</th>
+                            <th class="px-4 py-2">Fecha</th>
+                            <th class="px-4 py-2">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="relacion in tarea.relaciones" :key="relacion.id + '-' + relacion.tipo">
+                            <tr class="border-t hover:bg-gray-100">
+                                <td class="px-4 py-2" x-text="relacion.tipo"></td>
+                                <td class="px-4 py-2" x-text="relacion.id"></td>
+                                <td class="px-4 py-2" x-text="relacion.detalle"></td>
+                                <td class="px-4 py-2" x-text="relacion.fecha"></td>
+                                <td class="px-4 py-2">
+                                    <button @click="verDetalles(relacion)" 
+                                            class="btn btn-sm btn-primary">
+                                        Ver Detalles
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
 
-
-                        </div>
+        <template x-if="!tarea || !tarea.relaciones || tarea.relaciones.length === 0">
+            <div class="text-center py-4 text-gray-500">
+                No hay actividades registradas para esta tarea.
+            </div>
+        </template>
+    </div>
+</div>
 
                         <!-- Sección Cotización -->
                         <div x-show="activeTab === 'cotizacion' && currentProjectName.toLowerCase().includes('cotizacion')"
@@ -374,6 +436,17 @@
                                     <input id="validezcotizacion" x-model="paramsTask.validezcotizacion" type="text"
                                         class="form-input" placeholder="Ej: 30 días" />
                                 </div>
+
+                              <select id="nivelPorcentajeCotizacion" x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select">
+    <option value="">Seleccionar estado</option>
+    <option value="0">Inicial (0%)</option>
+    <option value="0.5">En Proceso (50%)</option>
+    <option value="1">Finalizado (100%)</option>
+</select>
+
+
+
+                                
 
                                 <div>
                                     <label for="responsablecotizacion">Responsable</label>
@@ -546,6 +619,15 @@
                                         class="form-input" placeholder="Dirección para reunión presencial" />
                                 </div>
 
+                                
+                              <select id="nivelPorcentajeReunion" x-model="paramsTask.nivelPorcentajeReunion" class="form-select">
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="0">Inicial (0%)</option>
+                                    <option value="0.5">En Proceso (50%)</option>
+                                    <option value="1">Finalizado (100%)</option>
+                            </select>
+
+
                                 <div class="md:col-span-2">
                                     <label for="minutareunion">Minuta de Reunión</label>
                                     <textarea id="minutareunion" x-model="paramsTask.minutareunion"
@@ -674,6 +756,14 @@
                                     <textarea id="descripcionrequerimiento" x-model="paramsTask.descripcionrequerimiento"
                                         class="form-textarea" placeholder="Describa el requerimiento"></textarea>
                                 </div>
+
+                                        
+                              <select id="nivelPorcentajeLevantamiento" x-model="paramsTask.nivelPorcentajeLevantamiento" class="form-select">
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="0">Inicial (0%)</option>
+                                    <option value="0.5">En Proceso (50%)</option>
+                                    <option value="1">Finalizado (100%)</option>
+                            </select>
 
                                 <div class="md:col-span-2">
                                     <label for="observacioneslevantamiento">Observaciones</label>
@@ -808,6 +898,14 @@
                                     <input id="duraciondelacuerdo" x-model="paramsTask.duraciondelacuerdo" type="text"
                                         class="form-input" placeholder="Ej: 6 meses" />
                                 </div>
+
+                                  <select id="nivelPorcentajeGanado" x-model="paramsTask.nivelPorcentajeGanado" class="form-select">
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="0">Inicial (0%)</option>
+                                    <option value="0.5">En Proceso (50%)</option>
+                                    <option value="1">Finalizado (100%)</option>
+                            </select>
+
 
                                 <div class="md:col-span-2">
                                     <label for="observacionesganado">Observaciones</label>
@@ -944,6 +1042,13 @@
                                     <textarea id="detalleobservado" x-model="paramsTask.detalleobservado"
                                         class="form-textarea" placeholder="Detalle específico de la observación"></textarea>
                                 </div>
+
+                                 <select id="nivelPorcentajeObservado" x-model="paramsTask.nivelPorcentajeObservado" class="form-select">
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="0">Inicial (0%)</option>
+                                    <option value="0.5">En Proceso (50%)</option>
+                                    <option value="1">Finalizado (100%)</option>
+                            </select>
                             </div>
 
                             <!-- Botones para agregar/actualizar proyecto observado -->
@@ -1049,6 +1154,13 @@
                                         <textarea id="comentarioscliente" x-model="paramsTask.comentarioscliente"
                                             class="form-textarea" placeholder="Comentarios o feedback del cliente"></textarea>
                                     </div>
+
+                                        <select id="nivelPorcentajeRechazado" x-model="paramsTask.nivelPorcentajeRechazado" class="form-select">
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="0">Inicial (0%)</option>
+                                    <option value="0.5">En Proceso (50%)</option>
+                                    <option value="1">Finalizado (100%)</option>
+                            </select>
                                 </div>
 
                                 <!-- Botones para agregar/actualizar proyecto rechazado -->
@@ -1153,6 +1265,155 @@
             </div>
         </div>
     </div>
+
+<!-- Modal para ver detalles completos -->
+<div x-show="mostrarModalDetalles" 
+     x-transition.opacity
+     x-cloak
+     class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+     style="display: none;">
+    <div class="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6 pb-4 border-b">
+            <h3 class="text-2xl font-bold text-primary" 
+                x-text="'Detalles de ' + (detalleSeleccionado ? detalleSeleccionado.tipo : 'Registro')">
+            </h3>
+            <button @click="mostrarModalDetalles = false" 
+                    class="text-gray-500 hover:text-gray-700 transition-colors">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Contenido -->
+        <template x-if="detalleSeleccionado && detalleSeleccionado.data">
+            <div class="space-y-6">
+                <!-- Información básica -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-lg mb-3 text-gray-800">Información General</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">ID:</span>
+                                <span class="font-medium" x-text="detalleSeleccionado.data.id"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Tipo:</span>
+                                <span class="font-medium" x-text="detalleSeleccionado.tipo"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Fecha:</span>
+                                <span class="font-medium" x-text="detalleSeleccionado.fecha"></span>
+                            </div>
+                            <div class="flex justify-between" x-show="detalleSeleccionado.data.task_id">
+                                <span class="text-gray-600">Task ID:</span>
+                                <span class="font-medium" x-text="detalleSeleccionado.data.task_id"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalles específicos según el tipo -->
+                    <template x-if="detalleSeleccionado.tipo === 'Cotización'">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-lg mb-3 text-blue-800">Detalles de Cotización</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-blue-600">Código:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.data.codigo_cotizacion"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-blue-600">Producto:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.data.detalle_producto"></span>
+                                </div>
+                                <div class="flex justify-between" x-show="detalleSeleccionado.data.total_cotizacion">
+                                    <span class="text-blue-600">Total:</span>
+                                    <span class="font-medium" x-text="'S/ ' + detalleSeleccionado.data.total_cotizacion"></span>
+                                </div>
+                                <div class="flex justify-between" x-show="detalleSeleccionado.data.validez_cotizacion">
+                                    <span class="text-blue-600">Validez:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.data.validez_cotizacion + ' días'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="detalleSeleccionado.tipo === 'Reunión'">
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-lg mb-3 text-green-800">Detalles de Reunión</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between">
+                                    <span class="text-green-600">Tipo:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.data.tipo_reunion"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-green-600">Motivo:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.data.motivo_reunion"></span>
+                                </div>
+                                <div class="flex justify-between" x-show="detalleSeleccionado.data.responsable_reunion">
+                                    <span class="text-green-600">Responsable:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.data.responsable_reunion"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Agrega más templates para otros tipos aquí -->
+                </div>
+
+                <!-- Campos adicionales -->
+                <div class="bg-white border rounded-lg p-4">
+                    <h4 class="font-semibold text-lg mb-3 text-gray-800">Información Adicional</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <template x-for="(value, key) in detalleSeleccionado.data">
+                            <div x-show="value && !['id', 'task_id', 'created_at', 'updated_at'].includes(key)"
+                                 class="flex justify-between items-start">
+                                <span class="text-gray-600 capitalize" x-text="key.replace(/_/g, ' ') + ':'"></span>
+                                <span class="font-medium text-right ml-2" 
+                                      x-text="typeof value === 'string' && value.length > 50 ? value.substring(0, 50) + '...' : value">
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Campos de texto largos -->
+                <template x-if="detalleSeleccionado.data.observaciones">
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-lg mb-2 text-yellow-800">Observaciones</h4>
+                        <p class="text-gray-700" x-text="detalleSeleccionado.data.observaciones"></p>
+                    </div>
+                </template>
+
+                <template x-if="detalleSeleccionado.data.condiciones_comerciales">
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-lg mb-2 text-purple-800">Condiciones Comerciales</h4>
+                        <p class="text-gray-700" x-text="detalleSeleccionado.data.condiciones_comerciales"></p>
+                    </div>
+                </template>
+
+                <!-- Timestamps -->
+                <div class="bg-gray-100 p-3 rounded-lg text-sm text-gray-500">
+                    <div class="flex justify-between">
+                        <span>Creación:</span>
+                        <span x-text="new Date(detalleSeleccionado.data.created_at).toLocaleString()"></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Actualización:</span>
+                        <span x-text="new Date(detalleSeleccionado.data.updated_at).toLocaleString()"></span>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <div class="mt-6 pt-4 border-t flex justify-end">
+            <button @click="mostrarModalDetalles = false" 
+                    class="btn btn-primary">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
 
     <!-- delete task modal -->
     <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto hidden" :class="isDeleteModal && '!block'">

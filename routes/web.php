@@ -1190,4 +1190,10 @@ Route::delete('/scrumboard/observados/{id}', [ScrumboarddController::class, 'del
 Route::post('/scrumboard/rechazados/handle', [ScrumboarddController::class, 'handleRechazado']);
 Route::get('/scrumboard/tasks/{taskId}/rechazados', [ScrumboarddController::class, 'getRechazados']);
 Route::delete('/scrumboard/rechazados/{id}', [ScrumboarddController::class, 'deleteRechazado']);
+
+// routes/web.php o routes/api.php
+
 });
+
+
+Route::get('/tarea/{taskId}', [ScrumboarddController::class, 'mostrarTarea']);

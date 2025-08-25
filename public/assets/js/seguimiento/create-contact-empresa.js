@@ -852,15 +852,18 @@ async function seleccionar(id, tipo) {
             throw new Error(data.message || 'Error al guardar la selección');
         }
 
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Selección guardada correctamente',
-            showConfirmButton: false,
-            timer: 2500,
-            timerProgressBar: true,
-        });
+       Swal.fire({
+    toast: true,
+    position: 'top-end',
+    icon: 'success',
+    title: 'Selección guardada correctamente',
+    showConfirmButton: false,
+    timer: 2500,
+    timerProgressBar: true,
+    }).then(() => {
+        // 🔁 Recargar la página después de que se muestre el mensaje de éxito
+        location.reload();
+    });
     } catch (error) {
         console.error('Error al guardar la selección:', error);
         Swal.fire({

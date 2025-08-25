@@ -18,6 +18,12 @@ filtroFechaRechazo: '',
 filtroFecha: '',
 filteredCotizaciones: '',
 filteredReuniones: '',
+nivelPorcentajeCotizacion: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
+nivelPorcentajeReunion: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
+nivelPorcentajeLevantamiento: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
+nivelPorcentajeGanado: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
+nivelPorcentajeObservado: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
+nivelPorcentajeRechazado: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
 cotizacionEditId: null, // Para controlar edición
 filtroTipoReunion: '',
 filtroResponsableReunion: '',
@@ -27,6 +33,12 @@ levantamientoEditId: null,
 ganadoEditId: null,
 observadoEditId: null,
 rechazadoEditId: null,
+
+tarea: null,
+
+ mostrarModalDetalles: false,
+    detalleSeleccionado: null,
+
 
 
 
@@ -38,6 +50,8 @@ rechazados: [],
 cotizaciones: [], // ← ESTA ES LA QUE FALTA
 reuniones: [],
 
+
+estadoOpciones: ['Lista de proyectos','cotizacion', 'reunion', 'levantamiento', 'observado', 'ganado', 'rechazado'],
 
 
 
@@ -62,7 +76,7 @@ reuniones: [],
             validezcotizacion: '', // Nuevo campo para validez de cotización
             responsablecotizacion: '', // Nuevo campo para responsable de cotización
             observacionescotizacion: '', // Nuevo campo para observaciones de cotización
-            //CAMPOS REUNION
+            nivelPorcentajeCotizacion: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
             fechareunion: '', // Nuevo campo para fecha de reunión
             tiporeunion: '', // Nuevo campo para tipo de reunión
             motivoreunion: '', // Nuevo campo para motivo de reunión
@@ -71,6 +85,7 @@ reuniones: [],
             linkreunion: '', // Nuevo campo para link de reunión
             direccionfisica: '', // Nuevo campo para dirección de reunión
             minutareunion: '', // Nuevo campo para minuta de reunión
+            nivelPorcentajeReunion: '',            //CAMPOS REUNION
             actividadesReunion: '', // Nuevo campo para reunión
             //CAMPOS LEVANTAMIENTO DE INFORMACION
             fecharequerimiento: '', // Nuevo campo para fecha de requerimiento
@@ -139,6 +154,12 @@ get filteredCotizaciones() {
     });
 },
 
+
+get estadosDisponibles() {
+    const usados = this.projectList.map(p => p.title);
+    return this.estadoOpciones.filter(e => !usados.includes(e));
+},
+
 // Funciones de utilidad
 formatDate(dateString) {
     if (!dateString) return '-';
@@ -181,6 +202,7 @@ agregarCotizacion() {
         validez_cotizacion: this.paramsTask.validezcotizacion,
         responsable_cotizacion: this.paramsTask.responsablecotizacion,
         observaciones: this.paramsTask.observacionescotizacion,
+        nivelPorcentajeCotizacion: this.paramsTask.nivelPorcentajeCotizacion,
         cotizacion_id: this.cotizacionEditId || null // Incluir ID si estamos editando
     };
 
@@ -237,6 +259,8 @@ limpiarFormularioCotizacion() {
     this.paramsTask.responsablecotizacion = '';
     this.paramsTask.observacionescotizacion = '';
     this.cotizacionEditId = null;
+    this.paramsTask.nivelPorcentajeCotizacion = '';
+
 },
 
 // Editar cotización
@@ -249,7 +273,8 @@ editarCotizacion(cotizacion) {
     this.paramsTask.validezcotizacion = cotizacion.validez_cotizacion || '';
     this.paramsTask.responsablecotizacion = cotizacion.responsable_cotizacion || '';
     this.paramsTask.observacionescotizacion = cotizacion.observaciones || '';
-    
+    this.paramsTask.nivelPorcentajeCotizacion = cotizacion.nivel_porcentaje || '';
+
     this.cotizacionEditId = cotizacion.id;
 },
 
@@ -316,6 +341,7 @@ agregarReunion() {
         direccion_fisica: this.paramsTask.direccionfisica,
         minuta: this.paramsTask.minutareunion,
         actividades: this.paramsTask.actividadesReunion,
+        nivelPorcentajeReunion: this.paramsTask.nivelPorcentajeReunion,
         reunion_id: this.reunionEditId || null
     };
 
@@ -372,6 +398,7 @@ limpiarFormularioReunion() {
     this.paramsTask.direccionfisica = '';
     this.paramsTask.minutareunion = '';
     this.paramsTask.actividadesReunion = '';
+    this.paramsTask.nivelPorcentajeReunion = '';
     this.reunionEditId = null;
 },
 
@@ -386,6 +413,7 @@ editarReunion(reunion) {
     this.paramsTask.direccionfisica = reunion.direccion_fisica || '';
     this.paramsTask.minutareunion = reunion.minuta || '';
     this.paramsTask.actividadesReunion = reunion.actividades || '';
+    this.paramsTask.nivelPorcentajeReunion = reunion.nivel_porcentaje || '';
     
     this.reunionEditId = reunion.id;
 },
@@ -420,6 +448,43 @@ eliminarReunion(id) {
     }
 },
 
+loadTarea(taskId) {
+    if (!taskId) {
+        console.error('❌ No se proporcionó taskId');
+        this.tarea = null;
+        return;
+    }
+
+    console.log('🔄 Cargando tarea con ID:', taskId);
+    console.log('📋 URL de fetch:', `/tarea/${taskId}`);
+    
+    fetch(`/tarea/${taskId}`)
+        .then(response => {
+            console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Tarea cargada exitosamente:', data);
+            this.tarea = data;
+        })
+        .catch(error => {
+            console.error('❌ Error al cargar la tarea:', error);
+            this.tarea = null;
+        });
+},
+
+
+// En tu Alpine.js data
+verDetalles(relacion) {
+    console.log('📋 Detalles de:', relacion.tipo, relacion);
+    
+    // Asigna los datos y muestra el modal
+    this.detalleSeleccionado = relacion;
+    this.mostrarModalDetalles = true;
+},
 // Cargar reuniones de la tarea
 loadReuniones(taskId) {
     if (!taskId) {
@@ -470,7 +535,8 @@ agregarLevantamiento() {
         ubicacion: this.paramsTask.ubicacionlevantamiento,
         descripcion_requerimiento: this.paramsTask.descripcionrequerimiento,
         observaciones: this.paramsTask.observacioneslevantamiento,
-        levantamiento_id: this.levantamientoEditId || null
+        levantamiento_id: this.levantamientoEditId || null,
+        nivelPorcentajeLevantamiento: this.paramsTask.nivelPorcentajeLevantamiento
     };
 
     fetch(url, {
@@ -523,6 +589,7 @@ limpiarFormularioLevantamiento() {
     this.paramsTask.descripcionrequerimiento = '';
     this.paramsTask.observacioneslevantamiento = '';
     this.levantamientoEditId = null;
+    this.paramsTask.nivelPorcentajeLevantamiento = '';
 },
 
 // Editar levantamiento
@@ -532,7 +599,7 @@ editarLevantamiento(levantamiento) {
     this.paramsTask.ubicacionlevantamiento = levantamiento.ubicacion || '';
     this.paramsTask.descripcionrequerimiento = levantamiento.descripcion_requerimiento || '';
     this.paramsTask.observacioneslevantamiento = levantamiento.observaciones || '';
-    
+    this.paramsTask.nivelPorcentajeLevantamiento = levantamiento.nivel_porcentaje || '';
     this.levantamientoEditId = levantamiento.id;
 },
 
@@ -619,6 +686,7 @@ agregarGanado() {
         forma_cierre: this.paramsTask.formacierre,
         duracion_acuerdo: this.paramsTask.duraciondelacuerdo,
         observaciones: this.paramsTask.observacionesganado,
+        nivelPorcentajeGanado: this.paramsTask.nivelPorcentajeGanado,
         ganado_id: this.ganadoEditId || null
     };
 
@@ -674,6 +742,7 @@ limpiarFormularioGanado() {
     this.paramsTask.formacierre = '';
     this.paramsTask.duraciondelacuerdo = '';
     this.paramsTask.observacionesganado = '';
+    this.paramsTask.nivelPorcentajeGanado = '';
     this.ganadoEditId = null;
 },
 
@@ -687,6 +756,7 @@ editarGanado(ganado) {
     this.paramsTask.formacierre = ganado.forma_cierre || '';
     this.paramsTask.duraciondelacuerdo = ganado.duracion_acuerdo || '';
     this.paramsTask.observacionesganado = ganado.observaciones || '';
+    this.paramsTask.nivelPorcentajeGanado = ganado.nivel_porcentaje || '';
     
     this.ganadoEditId = ganado.id;
 },
@@ -772,7 +842,8 @@ agregarObservado() {
         comentarios: this.paramsTask.comentariosobservado,
         acciones_pendientes: this.paramsTask.accionespendientes,
         detalle_observado: this.paramsTask.detalleobservado,
-        observado_id: this.observadoEditId || null
+        observado_id: this.observadoEditId || null,
+        nivelPorcentajeObservado: this.paramsTask.nivelPorcentajeObservado
     };
 
     fetch(url, {
@@ -825,6 +896,7 @@ limpiarFormularioObservado() {
     this.paramsTask.comentariosobservado = '';
     this.paramsTask.accionespendientes = '';
     this.paramsTask.detalleobservado = '';
+    this.paramsTask.nivelPorcentajeObservado = '';
     this.observadoEditId = null;
 },
 
@@ -836,6 +908,7 @@ editarObservado(observado) {
     this.paramsTask.comentariosobservado = observado.comentarios || '';
     this.paramsTask.accionespendientes = observado.acciones_pendientes || '';
     this.paramsTask.detalleobservado = observado.detalle_observado || '';
+    this.paramsTask.nivelPorcentajeObservado = observado.nivel_porcentaje || '';
     
     this.observadoEditId = observado.id;
 },
@@ -917,7 +990,8 @@ agregarRechazado() {
         fecha_rechazo: this.paramsTask.fecharechazo,
         motivo_rechazo: this.paramsTask.motivorechazo,
         comentarios_cliente: this.paramsTask.comentarioscliente,
-        rechazado_id: this.rechazadoEditId || null
+        rechazado_id: this.rechazadoEditId || null,
+        nivelPorcentajeRechazado: this.paramsTask.nivelPorcentajeRechazado
     };
 
     fetch(url, {
@@ -968,6 +1042,7 @@ limpiarFormularioRechazado() {
     this.paramsTask.motivorechazo = '';
     this.paramsTask.comentarioscliente = '';
     this.rechazadoEditId = null;
+    this.paramsTask.nivelPorcentajeRechazado = '';
 },
 
 // Editar proyecto rechazado
@@ -975,6 +1050,7 @@ editarRechazado(rechazado) {
     this.paramsTask.fecharechazo = rechazado.fecha_rechazo || '';
     this.paramsTask.motivorechazo = rechazado.motivo_rechazo || '';
     this.paramsTask.comentarioscliente = rechazado.comentarios_cliente || '';
+    this.paramsTask.nivelPorcentajeRechazado = rechazado.nivel_porcentaje || '';
     
     this.rechazadoEditId = rechazado.id;
 },
@@ -1427,6 +1503,7 @@ get filteredReuniones() {
         this.loadGanados(task.id);
         this.loadObservados(task.id);
         this.loadRechazados(task.id); // ← Agregar esta línea (ÚLTIMA!)
+        this.loadTarea(task.id); // Cargar datos de la tarea
     } else {
         this.cotizaciones = [];
         this.reuniones = [];
@@ -1434,6 +1511,8 @@ get filteredReuniones() {
         this.ganados = [];
         this.observados = [];
         this.rechazados = []; // ← Limpiar para nueva tarea
+                this.tarea = null;
+
     }
         },
 

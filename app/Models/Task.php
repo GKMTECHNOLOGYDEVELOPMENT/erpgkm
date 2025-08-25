@@ -15,7 +15,10 @@ class Task extends Model
         'image', 
         'date',
         'tags',
-        'idpersona'
+        'idpersona',
+        'fecha_inicio',
+        'fecha_fin',
+        'duracion',
     ];
 
     protected $casts = [

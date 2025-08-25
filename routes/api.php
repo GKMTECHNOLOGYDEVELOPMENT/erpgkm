@@ -26,6 +26,7 @@ use App\Http\Controllers\areacomercial\ContactoFormController;
 use App\Http\Controllers\areacomercial\CronogramaController;
 use App\Http\Controllers\areacomercial\EmpresaController;
 use App\Http\Controllers\areacomercial\EmpresaFormController;
+use App\Http\Controllers\areacomercial\ScrumboarddController;
 use App\Http\Controllers\areacomercial\SeleccionSeguimientoController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
@@ -415,3 +416,6 @@ Route::prefix('cronograma/{idSeguimiento}')->group(function() {
 });
 
 Route::get('/seguimientos', [ClienteSeguimientoController::class, 'getSeguimientos']);
+
+
+
