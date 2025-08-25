@@ -7,6 +7,18 @@
 <!-- Flatpickr CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
+
+<style>
+    .nice-select {
+        line-height: 2.25rem !important;
+        /* ajusta altura */
+        height: 2.5rem !important;
+        /* igual que un input base */
+        padding: 0 1rem !important;
+        font-size: 0.875rem;
+        /* text-sm */
+    }
+</style>
 <style>
     /* Estilo cuando el formulario está "tachado" */
     .formulario-tachado {
@@ -224,7 +236,7 @@
             method: 'GET',
             success: function(response) {
                 console.log(response);
-                historialCompleto = response; // Guardar el historial completo
+                historialCompleto = response.data; // Guardar el historial completo
                 paginaActual = 1; // Reiniciar a la primera página
                 mostrarPagina(labels); // Mostrar la primera página
             },
@@ -553,10 +565,6 @@
 
 
 </div>
-
-
-
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -1361,7 +1369,7 @@ $('#idCliente').on('change', function() {
             }
             
             // Determinar endpoint para tiendas
-            const endpoint = (tipoDoc == 8 || esTienda == 0 || (tipoDoc == 9 && esTienda == 0)) 
+            const endpoint = (tipoDoc == 8 || esTienda == 0) 
                 ? '/api/tiendas' 
                 : `/api/cliente/${clienteId}/tiendas`;
             
