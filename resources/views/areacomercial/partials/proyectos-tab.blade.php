@@ -473,17 +473,16 @@
                                         type="text" class="form-input" placeholder="Ej: 30 días" />
                                 </div>
 
-                                <select id="nivelPorcentajeCotizacion" x-model="paramsTask.nivelPorcentajeCotizacion"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
-
-
-
-
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
 
                                 <div>
                                     <label for="responsablecotizacion">Responsable</label>
@@ -679,13 +678,16 @@
                                 </div>
 
 
-                                <select id="nivelPorcentajeReunion" x-model="paramsTask.nivelPorcentajeReunion"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
 
 
                                 <div class="md:col-span-2">
@@ -832,13 +834,16 @@
                                 </div>
 
 
-                                <select id="nivelPorcentajeLevantamiento"
-                                    x-model="paramsTask.nivelPorcentajeLevantamiento" class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
 
                                 <div class="md:col-span-2">
                                     <label for="observacioneslevantamiento">Observaciones</label>
@@ -990,13 +995,16 @@
                                         type="text" class="form-input" placeholder="Ej: 6 meses" />
                                 </div>
 
-                                <select id="nivelPorcentajeGanado" x-model="paramsTask.nivelPorcentajeGanado"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
 
 
                                 <div class="md:col-span-2">
@@ -1145,13 +1153,16 @@
                                         placeholder="Detalle específico de la observación"></textarea>
                                 </div>
 
-                                <select id="nivelPorcentajeObservado" x-model="paramsTask.nivelPorcentajeObservado"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <!-- Botones para agregar/actualizar proyecto observado -->
@@ -1271,13 +1282,16 @@
                                             placeholder="Comentarios o feedback del cliente"></textarea>
                                     </div>
 
-                                    <select id="nivelPorcentajeRechazado"
-                                        x-model="paramsTask.nivelPorcentajeRechazado" class="form-select">
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
                                         <option value="">Seleccionar estado</option>
                                         <option value="0">Inicial (0%)</option>
                                         <option value="0.5">En Proceso (50%)</option>
                                         <option value="1">Finalizado (100%)</option>
                                     </select>
+                                </div>
                                 </div>
 
                                 <!-- Botones para agregar/actualizar proyecto rechazado -->
