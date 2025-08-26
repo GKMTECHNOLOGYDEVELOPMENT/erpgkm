@@ -2,18 +2,29 @@
     .capitalize {
         text-transform: capitalize;
     }
+
     [x-cloak] {
         display: none !important;
     }
-    .bg-blue-50 { background-color: #eff6ff; }
-    .bg-green-50 { background-color: #f0fdf4; }
-    .bg-yellow-50 { background-color: #fefce8; }
-    .bg-purple-50 { background-color: #faf5ff; }
+
+    .bg-blue-50 {
+        background-color: #eff6ff;
+    }
+
+    .bg-green-50 {
+        background-color: #f0fdf4;
+    }
+
+    .bg-yellow-50 {
+        background-color: #fefce8;
+    }
+
+    .bg-purple-50 {
+        background-color: #faf5ff;
+    }
 </style>
 
-<div x-data="scrumboard"
-    x-init="loadProjects()"
-    class="p-5">
+<div x-data="scrumboard" x-init="loadProjects()" class="p-5">
 
     <div>
         <button type="button" class="btn btn-primary flex" @click="addEditProject()">
@@ -42,8 +53,8 @@
                                         xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                         <circle opacity="0.5" cx="12" cy="12" r="10"
                                             stroke="currentColor" stroke-width="1.5" />
-                                        <path d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15"
-                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                        <path d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" />
                                     </svg>
                                 </button>
                                 <div x-data="dropdown" @click.outside="open = false" class="dropdown">
@@ -51,19 +62,22 @@
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg"
                                             class="w-5 h-5 opacity-70 hover:opacity-100">
-                                            <circle cx="5" cy="12" r="2"
-                                                stroke="currentColor" stroke-width="1.5"></circle>
+                                            <circle cx="5" cy="12" r="2" stroke="currentColor"
+                                                stroke-width="1.5"></circle>
                                             <circle opacity="0.5" cx="12" cy="12" r="2"
                                                 stroke="currentColor" stroke-width="1.5"></circle>
-                                            <circle cx="19" cy="12" r="2"
-                                                stroke="currentColor" stroke-width="1.5"></circle>
+                                            <circle cx="19" cy="12" r="2" stroke="currentColor"
+                                                stroke-width="1.5"></circle>
                                         </svg>
                                     </button>
                                     <ul x-cloak x-show="open" x-transition x-transition.duration.300ms
                                         class="ltr:right-0 rtl:left-0">
-                                        <li><a href="javascript:;" @click="toggle, addEditProject(project)">Editar</a></li>
-                                        <li><a href="javascript:;" @click="toggle, deleteConfirmProject(project)">Eliminar</a></li>
-                                        <li><a href="javascript:;" @click="toggle, clearProjects(project)">Limpiar Todo</a></li>
+                                        <li><a href="javascript:;" @click="toggle, addEditProject(project)">Editar</a>
+                                        </li>
+                                        <li><a href="javascript:;"
+                                                @click="toggle, deleteConfirmProject(project)">Eliminar</a></li>
+                                        <li><a href="javascript:;" @click="toggle, clearProjects(project)">Limpiar
+                                                Todo</a></li>
                                     </ul>
                                 </div>
                             </div>
@@ -72,11 +86,11 @@
                         <!-- task list -->
                         <div class="sortable-list min-h-[150px]" :data-id="project.id">
                             <template x-for="task in project.tasks" :key="task.id">
-                                <div :data-id="project.id + '' + task.id"
-                                    :data-task-id="task.id"
+                                <div :data-id="project.id + '' + task.id" :data-task-id="task.id"
                                     class="shadow bg-[#f4f4f4] dark:bg-[#262e40] p-3 pb-5 rounded-md mb-5 space-y-3 cursor-move">
                                     <template x-if="task.image">
-                                        <img :src="task.image" alt="task image" class="h-32 w-full object-cover rounded-md" />
+                                        <img :src="task.image" alt="task image"
+                                            class="h-32 w-full object-cover rounded-md" />
                                     </template>
                                     <div class="text-base font-medium" x-text="task.title"></div>
                                     <p class="break-all" x-text="task.description"></p>
@@ -90,8 +104,8 @@
                                                         <path
                                                             d="M4.72848 16.1369C3.18295 14.5914 2.41018 13.8186 2.12264 12.816C1.83509 11.8134 2.08083 10.7485 2.57231 8.61875L2.85574 7.39057C3.26922 5.59881 3.47597 4.70292 4.08944 4.08944C4.70292 3.47597 5.59881 3.26922 7.39057 2.85574L8.61875 2.57231C10.7485 2.08083 11.8134 1.83509 12.816 2.12264C13.8186 2.41018 14.5914 3.18295 16.1369 4.72848L17.9665 6.55812C20.6555 9.24711 22 10.5916 22 12.2623C22 13.933 20.6555 15.2775 17.9665 17.9665C15.2775 20.6555 13.933 22 12.2623 22C10.5916 22 9.24711 20.6555 6.55812 17.9665L4.72848 16.1369Z"
                                                             stroke="currentColor" stroke-width="1.5" />
-                                                        <circle opacity="0.5" cx="8.60699" cy="8.87891"
-                                                            r="2" transform="rotate(-45 8.60699 8.87891)"
+                                                        <circle opacity="0.5" cx="8.60699" cy="8.87891" r="2"
+                                                            transform="rotate(-45 8.60699 8.87891)"
                                                             stroke="currentColor" stroke-width="1.5" />
                                                         <path opacity="0.5" d="M11.5417 18.5L18.5208 11.5208"
                                                             stroke="currentColor" stroke-width="1.5"
@@ -102,16 +116,17 @@
                                             </template>
                                         </template>
                                         <template x-if="!task.tags?.length">
-                                            <div class="btn px-2 py-1 flex text-white-dark dark:border-white-dark/50 shadow-none">
+                                            <div
+                                                class="btn px-2 py-1 flex text-white-dark dark:border-white-dark/50 shadow-none">
                                                 <svg width="24" height="24" viewBox="0 0 24 24"
                                                     fill="none" xmlns="http://www.w3.org/2000/svg"
                                                     class="w-5 h-5 shrink-0">
                                                     <path
                                                         d="M4.72848 16.1369C3.18295 14.5914 2.41018 13.8186 2.12264 12.816C1.83509 11.8134 2.08083 10.7485 2.57231 8.61875L2.85574 7.39057C3.26922 5.59881 3.47597 4.70292 4.08944 4.08944C4.70292 3.47597 5.59881 3.26922 7.39057 2.85574L8.61875 2.57231C10.7485 2.08083 11.8134 1.83509 12.816 2.12264C13.8186 2.41018 14.5914 3.18295 16.1369 4.72848L17.9665 6.55812C20.6555 9.24711 22 10.5916 22 12.2623C22 13.933 20.6555 15.2775 17.9665 17.9665C15.2775 20.6555 13.933 22 12.2623 22C10.5916 22 9.24711 20.6555 6.55812 17.9665L4.72848 16.1369Z"
                                                         stroke="currentColor" stroke-width="1.5" />
-                                                    <circle opacity="0.5" cx="8.60699" cy="8.87891"
-                                                        r="2" transform="rotate(-45 8.60699 8.87891)"
-                                                        stroke="currentColor" stroke-width="1.5" />
+                                                    <circle opacity="0.5" cx="8.60699" cy="8.87891" r="2"
+                                                        transform="rotate(-45 8.60699 8.87891)" stroke="currentColor"
+                                                        stroke-width="1.5" />
                                                     <path opacity="0.5" d="M11.5417 18.5L18.5208 11.5208"
                                                         stroke="currentColor" stroke-width="1.5"
                                                         stroke-linecap="round" />
@@ -122,8 +137,8 @@
                                     </div>
                                     <div class="flex items-center justify-between">
                                         <div class="font-medium flex items-center hover:text-primary">
-                                            <svg width="24" height="24" viewBox="0 0 24 24"
-                                                fill="none" xmlns="http://www.w3.org/2000/svg"
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
                                                 class="w-5 h-5 ltr:mr-3 rtl:ml-3 shrink-0">
                                                 <path
                                                     d="M2 12C2 8.22876 2 6.34315 3.17157 5.17157C4.34315 4 6.22876 4 10 4H14C17.7712 4 19.6569 4 20.8284 5.17157C22 6.34315 22 8.22876 22 12V14C22 17.7712 22 19.6569 20.8284 20.8284C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.8284C2 19.6569 2 17.7712 2 14V12Z"
@@ -135,7 +150,7 @@
                                                 <path opacity="0.5" d="M2 9H22" stroke="currentColor"
                                                     stroke-width="1.5" stroke-linecap="round" />
                                             </svg>
-                                            <span x-text="task.date"></span>
+                                            <span x-text="formatDate(task.date)"></span>
                                         </div>
                                         <div class="flex items-center">
                                             <button type="button" class="hover:text-info"
@@ -164,8 +179,8 @@
                                                         d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4"
                                                         stroke="currentColor" stroke-width="1.5"
                                                         stroke-linecap="round"></path>
-                                                    <path d="M20.5001 6H3.5" stroke="currentColor"
-                                                        stroke-width="1.5" stroke-linecap="round"></path>
+                                                    <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5"
+                                                        stroke-linecap="round"></path>
                                                     <path
                                                         d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5"
                                                         stroke="currentColor" stroke-width="1.5"
@@ -183,17 +198,16 @@
                         </div>
 
                         <div class="pt-3" x-show="project.title === 'Lista de proyectos'">
-    <button type="button" class="btn btn-primary mx-auto"
-        @click="addEditTask(project.id)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-            stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        Agregar Proyecto
-    </button>
-</div>
+                            <button type="button" class="btn btn-primary mx-auto" @click="addEditTask(project.id)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Agregar Proyecto
+                            </button>
+                        </div>
 
                     </div>
                 </template>
@@ -208,8 +222,7 @@
             <div x-show="isAddProjectModal" x-transition x-transition.duration.300
                 @click.outside="isAddProjectModal = false"
                 class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-lg w-[90%] my-8">
-                <button type="button"
-                    class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark"
+                <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark"
                     @click="isAddProjectModal = false">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -224,17 +237,18 @@
                     <form @submit.prevent="saveProject">
                         <div class="grid gap-5">
                             <div x-show="estadosDisponibles.length > 0">
-    <label for="title">Nombre</label>
-    <select id="title" x-model="params.title" class="form-select mt-1">
-        <option value="" disabled selected>Selecciona un estado</option>
-        <template x-for="estado in estadosDisponibles" :key="estado">
-            <option :value="estado" x-text="estado.charAt(0).toUpperCase() + estado.slice(1)"></option>
-        </template>
-    </select>
-</div>
-<div x-show="estadosDisponibles.length === 0" class="text-red-500 mt-2">
-    Todos los estados ya han sido utilizados.
-</div>
+                                <label for="title">Nombre</label>
+                                <select id="title" x-model="params.title" class="form-select mt-1">
+                                    <option value="" disabled selected>Selecciona un estado</option>
+                                    <template x-for="estado in estadosDisponibles" :key="estado">
+                                        <option :value="estado"
+                                            x-text="estado.charAt(0).toUpperCase() + estado.slice(1)"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div x-show="estadosDisponibles.length === 0" class="text-red-500 mt-2">
+                                Todos los estados ya han sido utilizados.
+                            </div>
 
                         </div>
 
@@ -242,7 +256,7 @@
                             <button type="button" class="btn btn-outline-danger"
                                 @click="isAddProjectModal = false">Cancelar</button>
                             <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4"
-                                x-text="params.id ? 'Update' : 'Add'"></button>
+                                x-text="params.id ? 'Update' : 'Agregar'"></button>
                         </div>
                     </form>
                 </div>
@@ -256,7 +270,8 @@
             <div x-show="isAddTaskModal" x-transition x-transition.duration.300
                 class="panel border-0 p-0 rounded-lg overflow-hidden md:w-full max-w-4xl w-[90%] my-8 max-h-[90vh] overflow-y-auto">
 
-                <button type="button" class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark z-10"
+                <button type="button"
+                    class="absolute top-4 ltr:right-4 rtl:left-4 text-white-dark hover:text-dark z-10"
                     @click="isAddTaskModal = false">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -267,7 +282,8 @@
                 </button>
 
                 <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px] sticky top-0"
-                    x-text="paramsTask.id ? 'Editar tarea - ' + currentProjectName : 'Agregar tarea - ' + currentProjectName"></div>
+                    x-text="paramsTask.id ? 'Editar tarea - ' + currentProjectName : 'Agregar tarea - ' + currentProjectName">
+                </div>
 
                 <div class="p-5">
                     <form @submit.prevent="saveTask">
@@ -298,7 +314,8 @@
                                         Datos de Reunión
                                     </button>
                                 </li>
-                                <li class="mr-2" x-show="currentProjectName.toLowerCase().includes('levantamiento')">
+                                <li class="mr-2"
+                                    x-show="currentProjectName.toLowerCase().includes('levantamiento')">
                                     <button type="button"
                                         class="inline-block py-2 px-4 border-b-2 border-transparent rounded-t-lg hover:text-primary"
                                         :class="activeTab === 'levantamiento' && 'border-primary text-primary'"
@@ -333,69 +350,70 @@
                             </ul>
                         </div>
 
-                       <!-- Sección General -->
-<div x-show="activeTab === 'general'" class="space-y-4">
-    <div>
-        <label for="taskTitle">Nombre *</label>
-        <input id="taskTitle" x-model="paramsTask.title" type="text"
-            class="form-input" placeholder="Introduzca el nombre" required />
-    </div>
+                        <!-- Sección General -->
+                        <div x-show="activeTab === 'general'" class="space-y-4">
+                            <div>
+                                <label for="taskTitle">Nombre *</label>
+                                <input id="taskTitle" x-model="paramsTask.title" type="text" class="form-input"
+                                    placeholder="Introduzca el nombre" required />
+                            </div>
 
-    <div>
-        <label for="taskdesc">Descripción</label>
-        <textarea id="taskdesc" x-model="paramsTask.description" class="form-textarea min-h-[100px]"
-            placeholder="Introduzca la descripción"></textarea>
-    </div>
+                            <div>
+                                <label for="taskdesc">Descripción</label>
+                                <textarea id="taskdesc" x-model="paramsTask.description" class="form-textarea min-h-[100px]"
+                                    placeholder="Introduzca la descripción"></textarea>
+                            </div>
 
-    <div>
-        <label for="taskTag">Etiquetas (separadas con comas)</label>
-        <input id="taskTag" x-model="paramsTask.tags" type="text"
-            class="form-input" placeholder="Introducir etiquetas" />
-    </div>
+                            <div>
+                                <label for="taskTag">Etiquetas (separadas con comas)</label>
+                                <input id="taskTag" x-model="paramsTask.tags" type="text" class="form-input"
+                                    placeholder="Introducir etiquetas" />
+                            </div>
 
-   <!-- TABLA DE RELACIONES -->
-    <div>
-        <h2 class="text-lg font-bold mb-4">Actividades de la Tarea</h2>
-        
-        <template x-if="tarea && tarea.relaciones && tarea.relaciones.length > 0">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border border-gray-300">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="px-4 py-2">Tipo</th>
-                            <th class="px-4 py-2">ID</th>
-                            <th class="px-4 py-2">Detalle</th>
-                            <th class="px-4 py-2">Fecha</th>
-                            <th class="px-4 py-2">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="relacion in tarea.relaciones" :key="relacion.id + '-' + relacion.tipo">
-                            <tr class="border-t hover:bg-gray-100">
-                                <td class="px-4 py-2" x-text="relacion.tipo"></td>
-                                <td class="px-4 py-2" x-text="relacion.id"></td>
-                                <td class="px-4 py-2" x-text="relacion.detalle"></td>
-                                <td class="px-4 py-2" x-text="relacion.fecha"></td>
-                                <td class="px-4 py-2">
-                                    <button @click="verDetalles(relacion)" 
-                                            class="btn btn-sm btn-primary">
-                                        Ver Detalles
-                                    </button>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </template>
+                            <!-- TABLA DE RELACIONES -->
+                            <div>
+                                <h2 class="text-lg font-bold mb-4">Actividades de la Tarea</h2>
 
-        <template x-if="!tarea || !tarea.relaciones || tarea.relaciones.length === 0">
-            <div class="text-center py-4 text-gray-500">
-                No hay actividades registradas para esta tarea.
-            </div>
-        </template>
-    </div>
-</div>
+                                <template x-if="tarea && tarea.relaciones && tarea.relaciones.length > 0">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left border border-gray-300">
+                                            <thead class="bg-gray-200">
+                                                <tr>
+                                                    <th class="px-4 py-2">Tipo</th>
+                                                    <th class="px-4 py-2">ID</th>
+                                                    <th class="px-4 py-2">Detalle</th>
+                                                    <th class="px-4 py-2">Fecha</th>
+                                                    <th class="px-4 py-2">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template x-for="relacion in tarea.relaciones"
+                                                    :key="relacion.id + '-' + relacion.tipo">
+                                                    <tr class="border-t hover:bg-gray-100">
+                                                        <td class="px-4 py-2" x-text="relacion.tipo"></td>
+                                                        <td class="px-4 py-2" x-text="relacion.id"></td>
+                                                        <td class="px-4 py-2" x-text="relacion.detalle"></td>
+                                                        <td class="px-4 py-2" x-text="relacion.fecha"></td>
+                                                        <td class="px-4 py-2">
+                                                            <button @click="verDetalles(relacion)"
+                                                                class="btn btn-sm btn-primary">
+                                                                Ver Detalles
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
+
+                                <template x-if="!tarea || !tarea.relaciones || tarea.relaciones.length === 0">
+                                    <div class="text-center py-4 text-gray-500">
+                                        No hay actividades registradas para esta tarea.
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
 
                         <!-- Sección Cotización -->
                         <div x-show="activeTab === 'cotizacion' && currentProjectName.toLowerCase().includes('cotizacion')"
@@ -415,64 +433,64 @@
 
                                 <div class="md:col-span-2">
                                     <label for="detalleproducto">Detalle del Producto/Servicio</label>
-                                    <textarea id="detalleproducto" x-model="paramsTask.detalleproducto"
-                                        class="form-textarea" placeholder="Describa el producto o servicio"></textarea>
+                                    <textarea id="detalleproducto" x-model="paramsTask.detalleproducto" class="form-textarea"
+                                        placeholder="Describa el producto o servicio"></textarea>
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label for="condicionescomerciales">Condiciones Comerciales</label>
-                                    <textarea id="condicionescomerciales" x-model="paramsTask.condicionescomerciales"
-                                        class="form-textarea" placeholder="Condiciones comerciales"></textarea>
+                                    <textarea id="condicionescomerciales" x-model="paramsTask.condicionescomerciales" class="form-textarea"
+                                        placeholder="Condiciones comerciales"></textarea>
                                 </div>
 
                                 <div>
                                     <label for="totalcotizacion">Total Cotización</label>
-                                    <input id="totalcotizacion" x-model="paramsTask.totalcotizacion" type="number" step="0.01"
-                                        class="form-input" placeholder="0.00" />
+                                    <input id="totalcotizacion" x-model="paramsTask.totalcotizacion" type="number"
+                                        step="0.01" class="form-input" placeholder="0.00" />
                                 </div>
 
                                 <div>
                                     <label for="validezcotizacion">Validez</label>
-                                    <input id="validezcotizacion" x-model="paramsTask.validezcotizacion" type="text"
-                                        class="form-input" placeholder="Ej: 30 días" />
+                                    <input id="validezcotizacion" x-model="paramsTask.validezcotizacion"
+                                        type="text" class="form-input" placeholder="Ej: 30 días" />
                                 </div>
 
-                              <select id="nivelPorcentajeCotizacion" x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select">
-    <option value="">Seleccionar estado</option>
-    <option value="0">Inicial (0%)</option>
-    <option value="0.5">En Proceso (50%)</option>
-    <option value="1">Finalizado (100%)</option>
-</select>
+                                <select id="nivelPorcentajeCotizacion" x-model="paramsTask.nivelPorcentajeCotizacion"
+                                    class="form-select">
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="0">Inicial (0%)</option>
+                                    <option value="0.5">En Proceso (50%)</option>
+                                    <option value="1">Finalizado (100%)</option>
+                                </select>
 
 
 
-                                
+
 
                                 <div>
                                     <label for="responsablecotizacion">Responsable</label>
-                                    <input id="responsablecotizacion" x-model="paramsTask.responsablecotizacion" type="text"
-                                        class="form-input" placeholder="Nombre del responsable" />
+                                    <input id="responsablecotizacion" x-model="paramsTask.responsablecotizacion"
+                                        type="text" class="form-input" placeholder="Nombre del responsable" />
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label for="observacionescotizacion">Observaciones</label>
-                                    <textarea id="observacionescotizacion" x-model="paramsTask.observacionescotizacion"
-                                        class="form-textarea" placeholder="Observaciones adicionales"></textarea>
+                                    <textarea id="observacionescotizacion" x-model="paramsTask.observacionescotizacion" class="form-textarea"
+                                        placeholder="Observaciones adicionales"></textarea>
                                 </div>
                             </div>
 
                             <!-- Botones para agregar/actualizar cotización -->
                             <div class="flex justify-end space-x-3 mt-4">
                                 <button type="button" x-show="cotizacionEditId"
-                                    @click="limpiarFormularioCotizacion()"
-                                    class="btn btn-outline-secondary">
+                                    @click="limpiarFormularioCotizacion()" class="btn btn-outline-secondary">
                                     Cancelar Edición
                                 </button>
-                                <button type="button"
-                                    @click="agregarCotizacion()"
-                                    class="btn btn-primary"
-                                    :disabled="!paramsTask.codigoCotizacion && !paramsTask.fechaCotizacion && !paramsTask.detalleproducto">
-                                    <span x-text="cotizacionEditId ? 'Actualizar Cotización' : 'Agregar Cotización'"></span>
+                                <button type="button" @click="agregarCotizacion()" class="btn btn-primary"
+                                    :disabled="!paramsTask.codigoCotizacion && !paramsTask.fechaCotizacion && !paramsTask
+                                        .detalleproducto">
+                                    <span
+                                        x-text="cotizacionEditId ? 'Actualizar Cotización' : 'Agregar Cotización'"></span>
                                 </button>
                             </div>
 
@@ -513,29 +531,42 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <template x-for="cotizacion in filteredCotizaciones" :key="cotizacion.id">
-                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <template x-for="cotizacion in filteredCotizaciones"
+                                                :key="cotizacion.id">
+                                                <tr
+                                                    class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                                                     <td class="px-4 py-2" x-text="cotizacion.codigo_cotizacion"></td>
-                                                    <td class="px-4 py-2" x-text="formatDate(cotizacion.fecha_cotizacion)"></td>
+                                                    <td class="px-4 py-2"
+                                                        x-text="formatDate(cotizacion.fecha_cotizacion)"></td>
                                                     <td class="px-4 py-2" x-text="cotizacion.detalle_producto"></td>
-                                                    <td class="px-4 py-2" x-text="formatCurrency(cotizacion.total_cotizacion)"></td>
-                                                    <td class="px-4 py-2" x-text="cotizacion.responsable_cotizacion"></td>
+                                                    <td class="px-4 py-2"
+                                                        x-text="formatCurrency(cotizacion.total_cotizacion)"></td>
+                                                    <td class="px-4 py-2" x-text="cotizacion.responsable_cotizacion">
+                                                    </td>
                                                     <td class="px-4 py-2">
                                                         <div class="flex space-x-2">
-                                                            <button type="button" @click="editarCotizacion(cotizacion)"
-                                                                class="text-blue-500 hover:text-blue-700" title="Editar">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            <button type="button"
+                                                                @click="editarCotizacion(cotizacion)"
+                                                                class="text-blue-500 hover:text-blue-700"
+                                                                title="Editar">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
                                                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                                 </svg>
                                                             </button>
-                                                            <button type="button" @click="eliminarCotizacion(cotizacion.id)"
-                                                                class="text-red-500 hover:text-red-700" title="Eliminar">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            <button type="button"
+                                                                @click="eliminarCotizacion(cotizacion.id)"
+                                                                class="text-red-500 hover:text-red-700"
+                                                                title="Eliminar">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
                                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                 </svg>
-                                                            </button>                                                        
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -547,7 +578,8 @@
                                 <!-- Mensaje cuando no hay cotizaciones -->
                                 <template x-if="filteredCotizaciones.length === 0">
                                     <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
@@ -556,7 +588,8 @@
                                 </template>
 
                                 <!-- Paginación (opcional) -->
-                                <div class="flex justify-between items-center mt-4" x-show="filteredCotizaciones.length > 0">
+                                <div class="flex justify-between items-center mt-4"
+                                    x-show="filteredCotizaciones.length > 0">
                                     <div class="text-sm text-gray-500 dark:text-gray-400">
                                         Mostrando <span x-text="filteredCotizaciones.length"></span> registros
                                     </div>
@@ -585,26 +618,34 @@
 
                                 <div>
                                     <label for="tiporeunion">Tipo de Reunión</label>
-                                    <input id="tiporeunion" x-model="paramsTask.tiporeunion" type="text"
-                                        class="form-input" placeholder="Ej: Presencial, Virtual" />
+                                    <select id="tiporeunion" x-model="paramsTask.tiporeunion"
+                                        class="form-select w-full">
+                                        <option value="">Seleccionar tipo</option>
+                                        <option value="Presencial">Presencial</option>
+                                        <option value="Virtual">Virtual</option>
+                                    </select>
                                 </div>
+
 
                                 <div>
                                     <label for="motivoreunion">Motivo de Reunión</label>
                                     <input id="motivoreunion" x-model="paramsTask.motivoreunion" type="text"
                                         class="form-input" placeholder="Motivo principal" />
                                 </div>
-
                                 <div>
                                     <label for="participantesreunion">Participantes</label>
-                                    <input id="participantesreunion" x-model="paramsTask.participantesreunion" type="text"
-                                        class="form-input" placeholder="Nombres de participantes" />
+                                    <select id="participantesreunion" x-ref="participantesSelect"
+                                        x-init="initParticipantesSelect()" multiple class="form-select w-full">
+                                        <option value="Juan">Juan</option>
+                                        <option value="María">María</option>
+                                        <option value="Pedro">Pedro</option>
+                                    </select>
                                 </div>
 
                                 <div>
                                     <label for="responsablereunion">Responsable</label>
-                                    <input id="responsablereunion" x-model="paramsTask.responsablereunion" type="text"
-                                        class="form-input" placeholder="Nombre del responsable" />
+                                    <input id="responsablereunion" x-model="paramsTask.responsablereunion"
+                                        type="text" class="form-input" placeholder="Nombre del responsable" />
                                 </div>
 
                                 <div>
@@ -619,45 +660,43 @@
                                         class="form-input" placeholder="Dirección para reunión presencial" />
                                 </div>
 
-                                
-                              <select id="nivelPorcentajeReunion" x-model="paramsTask.nivelPorcentajeReunion" class="form-select">
+
+                                <select id="nivelPorcentajeReunion" x-model="paramsTask.nivelPorcentajeReunion"
+                                    class="form-select">
                                     <option value="">Seleccionar estado</option>
                                     <option value="0">Inicial (0%)</option>
                                     <option value="0.5">En Proceso (50%)</option>
                                     <option value="1">Finalizado (100%)</option>
-                            </select>
+                                </select>
 
 
                                 <div class="md:col-span-2">
                                     <label for="minutareunion">Minuta de Reunión</label>
-                                    <textarea id="minutareunion" x-model="paramsTask.minutareunion"
-                                        class="form-textarea" placeholder="Resumen o acuerdos de la reunión"></textarea>
+                                    <textarea id="minutareunion" x-model="paramsTask.minutareunion" class="form-textarea"
+                                        placeholder="Resumen o acuerdos de la reunión"></textarea>
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label for="actividadesReunion">Actividades</label>
-                                    <textarea id="actividadesReunion" x-model="paramsTask.actividadesReunion"
-                                        class="form-textarea" placeholder="Actividades de la reunión"></textarea>
+                                    <textarea id="actividadesReunion" x-model="paramsTask.actividadesReunion" class="form-textarea"
+                                        placeholder="Actividades de la reunión"></textarea>
                                 </div>
                             </div>
 
 
                             <!-- Botones para agregar/actualizar reunión -->
                             <div class="flex justify-end space-x-3 mt-4">
-                                <button type="button" x-show="reunionEditId" 
-                                        @click="limpiarFormularioReunion()" 
-                                        class="btn btn-outline-danger">
+                                <button type="button" x-show="reunionEditId" @click="limpiarFormularioReunion()"
+                                    class="btn btn-outline-danger">
                                     Cancelar Edición
                                 </button>
-                                <button type="button" 
-                                        @click="agregarReunion()" 
-                                        class="btn btn-primary"
-                                        :disabled="!paramsTask.fechareunion && !paramsTask.tiporeunion && !paramsTask.motivoreunion">
+                                <button type="button" @click="agregarReunion()" class="btn btn-primary"
+                                    :disabled="!paramsTask.fechareunion && !paramsTask.tiporeunion && !paramsTask.motivoreunion">
                                     <span x-text="reunionEditId ? 'Actualizar Reunión' : 'Agregar Reunión'"></span>
                                 </button>
                             </div>
 
-                            
+
 
                             <!-- Lista de reuniones existentes -->
                             <div class="mt-6 border-t pt-4">
@@ -671,9 +710,10 @@
                                             class="form-input" placeholder="Tipo de reunión">
                                     </div>
                                     <div>
-                                        <label for="filtroResponsableReunion" class="text-sm">Buscar por responsable:</label>
-                                        <input id="filtroResponsableReunion" x-model="filtroResponsableReunion" type="text"
-                                            class="form-input" placeholder="Responsable">
+                                        <label for="filtroResponsableReunion" class="text-sm">Buscar por
+                                            responsable:</label>
+                                        <input id="filtroResponsableReunion" x-model="filtroResponsableReunion"
+                                            type="text" class="form-input" placeholder="Responsable">
                                     </div>
                                     <div>
                                         <label for="filtroFechaReunion" class="text-sm">Filtrar por fecha:</label>
@@ -696,21 +736,35 @@
                                         </thead>
                                         <tbody>
                                             <template x-for="reunion in filteredReuniones" :key="reunion.id">
-                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                    <td class="px-4 py-2" x-text="formatDate(reunion.fecha_reunion)"></td>
+                                                <tr
+                                                    class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2" x-text="formatDate(reunion.fecha_reunion)">
+                                                    </td>
                                                     <td class="px-4 py-2" x-text="reunion.tipo_reunion || '-'"></td>
-                                                    <td class="px-4 py-2" x-text="reunion.motivo_reunion ? reunion.motivo_reunion.substring(0, 30) + '...' : '-'"></td>
-                                                    <td class="px-4 py-2" x-text="reunion.responsable_reunion || '-'"></td>
+                                                    <td class="px-4 py-2"
+                                                        x-text="reunion.motivo_reunion ? reunion.motivo_reunion.substring(0, 30) + '...' : '-'">
+                                                    </td>
+                                                    <td class="px-4 py-2" x-text="reunion.responsable_reunion || '-'">
+                                                    </td>
                                                     <td class="px-4 py-2">
                                                         <div class="flex space-x-2">
-                                                            <button type="button" @click="editarReunion(reunion)" class="text-blue-500 hover:text-blue-700">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            <button type="button" @click="editarReunion(reunion)"
+                                                                class="text-blue-500 hover:text-blue-700">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                                 </svg>
                                                             </button>
-                                                            <button type="button" @click="eliminarReunion(reunion.id)" class="text-red-500 hover:text-red-700">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            <button type="button"
+                                                                @click="eliminarReunion(reunion.id)"
+                                                                class="text-red-500 hover:text-red-700">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                 </svg>
                                                             </button>
                                                         </div>
@@ -735,60 +789,62 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="fecharequerimiento">Fecha de Requerimiento</label>
-                                    <input id="fecharequerimiento" x-model="paramsTask.fecharequerimiento" type="date"
-                                        class="form-input" />
+                                    <input id="fecharequerimiento" x-model="paramsTask.fecharequerimiento"
+                                        type="date" class="form-input" />
                                 </div>
 
                                 <div>
                                     <label for="participanteslevantamiento">Participantes</label>
-                                    <input id="participanteslevantamiento" x-model="paramsTask.participanteslevantamiento" type="text"
+                                    <input id="participanteslevantamiento"
+                                        x-model="paramsTask.participanteslevantamiento" type="text"
                                         class="form-input" placeholder="Nombres de participantes" />
                                 </div>
 
                                 <div>
                                     <label for="ubicacionlevantamiento">Ubicación</label>
-                                    <input id="ubicacionlevantamiento" x-model="paramsTask.ubicacionlevantamiento" type="text"
-                                        class="form-input" placeholder="Ubicación del levantamiento" />
+                                    <input id="ubicacionlevantamiento" x-model="paramsTask.ubicacionlevantamiento"
+                                        type="text" class="form-input"
+                                        placeholder="Ubicación del levantamiento" />
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label for="descripcionrequerimiento">Descripción del Requerimiento</label>
-                                    <textarea id="descripcionrequerimiento" x-model="paramsTask.descripcionrequerimiento"
-                                        class="form-textarea" placeholder="Describa el requerimiento"></textarea>
+                                    <textarea id="descripcionrequerimiento" x-model="paramsTask.descripcionrequerimiento" class="form-textarea"
+                                        placeholder="Describa el requerimiento"></textarea>
                                 </div>
 
-                                        
-                              <select id="nivelPorcentajeLevantamiento" x-model="paramsTask.nivelPorcentajeLevantamiento" class="form-select">
+
+                                <select id="nivelPorcentajeLevantamiento"
+                                    x-model="paramsTask.nivelPorcentajeLevantamiento" class="form-select">
                                     <option value="">Seleccionar estado</option>
                                     <option value="0">Inicial (0%)</option>
                                     <option value="0.5">En Proceso (50%)</option>
                                     <option value="1">Finalizado (100%)</option>
-                            </select>
+                                </select>
 
                                 <div class="md:col-span-2">
                                     <label for="observacioneslevantamiento">Observaciones</label>
-                                    <textarea id="observacioneslevantamiento" x-model="paramsTask.observacioneslevantamiento"
-                                        class="form-textarea" placeholder="Observaciones adicionales"></textarea>
+                                    <textarea id="observacioneslevantamiento" x-model="paramsTask.observacioneslevantamiento" class="form-textarea"
+                                        placeholder="Observaciones adicionales"></textarea>
                                 </div>
 
                             </div>
-                            
-                                       <!-- Botones para agregar/actualizar levantamiento -->
+
+                            <!-- Botones para agregar/actualizar levantamiento -->
                             <div class="flex justify-end space-x-3 mt-4">
-                                <button type="button" x-show="levantamientoEditId" 
-                                        @click="limpiarFormularioLevantamiento()" 
-                                        class="btn btn-outline-danger">
+                                <button type="button" x-show="levantamientoEditId"
+                                    @click="limpiarFormularioLevantamiento()" class="btn btn-outline-danger">
                                     Cancelar Edición
                                 </button>
-                                <button type="button" 
-                                        @click="agregarLevantamiento()" 
-                                        class="btn btn-primary"
-                                        :disabled="!paramsTask.fecharequerimiento && !paramsTask.participanteslevantamiento && !paramsTask.ubicacionlevantamiento">
-                                    <span x-text="levantamientoEditId ? 'Actualizar Levantamiento' : 'Agregar Levantamiento'"></span>
+                                <button type="button" @click="agregarLevantamiento()" class="btn btn-primary"
+                                    :disabled="!paramsTask.fecharequerimiento && !paramsTask.participanteslevantamiento && !
+                                        paramsTask.ubicacionlevantamiento">
+                                    <span
+                                        x-text="levantamientoEditId ? 'Actualizar Levantamiento' : 'Agregar Levantamiento'"></span>
                                 </button>
                             </div>
 
-                     
+
 
                             <!-- Lista de levantamientos existentes -->
                             <div class="mt-6 border-t pt-4">
@@ -802,9 +858,10 @@
                                             class="form-input" placeholder="Ubicación">
                                     </div>
                                     <div>
-                                        <label for="filtroFechalevantamiento" class="text-sm">Filtrar por fecha:</label>
-                                        <input id="filtroFechalevantamiento" x-model="filtroFechalevantamiento" type="date"
-                                            class="form-input">
+                                        <label for="filtroFechalevantamiento" class="text-sm">Filtrar por
+                                            fecha:</label>
+                                        <input id="filtroFechalevantamiento" x-model="filtroFechalevantamiento"
+                                            type="date" class="form-input">
                                     </div>
                                 </div>
 
@@ -820,21 +877,37 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <template x-for="levantamiento in filteredLevantamientos" :key="levantamiento.id">
-                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                    <td class="px-4 py-2" x-text="formatDate(levantamiento.fecha_requerimiento)"></td>
-                                                    <td class="px-4 py-2" x-text="levantamiento.ubicacion || '-'"></td>
-                                                    <td class="px-4 py-2" x-text="levantamiento.participantes ? levantamiento.participantes.substring(0, 50) + '...' : '-'"></td>
+                                            <template x-for="levantamiento in filteredLevantamientos"
+                                                :key="levantamiento.id">
+                                                <tr
+                                                    class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2"
+                                                        x-text="formatDate(levantamiento.fecha_requerimiento)"></td>
+                                                    <td class="px-4 py-2" x-text="levantamiento.ubicacion || '-'">
+                                                    </td>
+                                                    <td class="px-4 py-2"
+                                                        x-text="levantamiento.participantes ? levantamiento.participantes.substring(0, 50) + '...' : '-'">
+                                                    </td>
                                                     <td class="px-4 py-2">
                                                         <div class="flex space-x-2">
-                                                            <button type="button" @click="editarLevantamiento(levantamiento)" class="text-blue-500 hover:text-blue-700">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            <button type="button"
+                                                                @click="editarLevantamiento(levantamiento)"
+                                                                class="text-blue-500 hover:text-blue-700">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                                 </svg>
                                                             </button>
-                                                            <button type="button" @click="eliminarLevantamiento(levantamiento.id)" class="text-red-500 hover:text-red-700">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            <button type="button"
+                                                                @click="eliminarLevantamiento(levantamiento.id)"
+                                                                class="text-red-500 hover:text-red-700">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                 </svg>
                                                             </button>
                                                         </div>
@@ -865,8 +938,8 @@
 
                                 <div>
                                     <label for="codigoCotizacionGanado">Código de Cotización</label>
-                                    <input id="codigoCotizacionGanado" x-model="paramsTask.codigoCotizacionGanado" type="text"
-                                        class="form-input" placeholder="Código asociado" />
+                                    <input id="codigoCotizacionGanado" x-model="paramsTask.codigoCotizacionGanado"
+                                        type="text" class="form-input" placeholder="Código asociado" />
                                 </div>
 
                                 <div>
@@ -883,8 +956,8 @@
 
                                 <div>
                                     <label for="valorganado">Valor Ganado</label>
-                                    <input id="valorganado" x-model="paramsTask.valorganado" type="number" step="0.01"
-                                        class="form-input" placeholder="0.00" />
+                                    <input id="valorganado" x-model="paramsTask.valorganado" type="number"
+                                        step="0.01" class="form-input" placeholder="0.00" />
                                 </div>
 
                                 <div>
@@ -895,39 +968,38 @@
 
                                 <div>
                                     <label for="duraciondelacuerdo">Duración del Acuerdo</label>
-                                    <input id="duraciondelacuerdo" x-model="paramsTask.duraciondelacuerdo" type="text"
-                                        class="form-input" placeholder="Ej: 6 meses" />
+                                    <input id="duraciondelacuerdo" x-model="paramsTask.duraciondelacuerdo"
+                                        type="text" class="form-input" placeholder="Ej: 6 meses" />
                                 </div>
 
-                                  <select id="nivelPorcentajeGanado" x-model="paramsTask.nivelPorcentajeGanado" class="form-select">
+                                <select id="nivelPorcentajeGanado" x-model="paramsTask.nivelPorcentajeGanado"
+                                    class="form-select">
                                     <option value="">Seleccionar estado</option>
                                     <option value="0">Inicial (0%)</option>
                                     <option value="0.5">En Proceso (50%)</option>
                                     <option value="1">Finalizado (100%)</option>
-                            </select>
+                                </select>
 
 
                                 <div class="md:col-span-2">
                                     <label for="observacionesganado">Observaciones</label>
-                                    <textarea id="observacionesganado" x-model="paramsTask.observacionesganado"
-                                        class="form-textarea" placeholder="Observaciones adicionales"></textarea>
+                                    <textarea id="observacionesganado" x-model="paramsTask.observacionesganado" class="form-textarea"
+                                        placeholder="Observaciones adicionales"></textarea>
                                 </div>
                             </div>
 
                             <!-- Botones para agregar/actualizar proyecto ganado -->
-                                <div class="flex justify-end space-x-3 mt-4">
-                                    <button type="button" x-show="ganadoEditId" 
-                                            @click="limpiarFormularioGanado()" 
-                                            class="btn btn-outline-danger">
-                                        Cancelar Edición
-                                    </button>
-                                    <button type="button" 
-                                            @click="agregarGanado()" 
-                                            class="btn btn-primary"
-                                            :disabled="!paramsTask.fechaganado && !paramsTask.codigoCotizacionGanado && !paramsTask.tiposervicio">
-                                        <span x-text="ganadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
-                                    </button>
-                                </div>
+                            <div class="flex justify-end space-x-3 mt-4">
+                                <button type="button" x-show="ganadoEditId" @click="limpiarFormularioGanado()"
+                                    class="btn btn-outline-danger">
+                                    Cancelar Edición
+                                </button>
+                                <button type="button" @click="agregarGanado()" class="btn btn-primary"
+                                    :disabled="!paramsTask.fechaganado && !paramsTask.codigoCotizacionGanado && !paramsTask
+                                        .tiposervicio">
+                                    <span x-text="ganadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
+                                </button>
+                            </div>
 
                             <!-- Lista de ganados existentes -->
                             <div class="mt-6 border-t pt-4">
@@ -952,7 +1024,7 @@
                                     </div>
                                 </div>
 
-                                
+
 
                                 <!-- Tabla de ganados -->
                                 <div class="overflow-x-auto">
@@ -969,22 +1041,34 @@
                                         </thead>
                                         <tbody>
                                             <template x-for="ganado in filteredGanados" :key="ganado.id">
-                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                    <td class="px-4 py-2" x-text="ganado.codigo_cotizacion || '-'"></td>
-                                                    <td class="px-4 py-2" x-text="formatDate(ganado.fecha_ganado)"></td>
+                                                <tr
+                                                    class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2" x-text="ganado.codigo_cotizacion || '-'">
+                                                    </td>
+                                                    <td class="px-4 py-2" x-text="formatDate(ganado.fecha_ganado)">
+                                                    </td>
                                                     <td class="px-4 py-2" x-text="ganado.tipo_servicio || '-'"></td>
-                                                    <td class="px-4 py-2" x-text="formatCurrency(ganado.valor_ganado)"></td>
+                                                    <td class="px-4 py-2"
+                                                        x-text="formatCurrency(ganado.valor_ganado)"></td>
                                                     <td class="px-4 py-2" x-text="ganado.forma_cierre || '-'"></td>
                                                     <td class="px-4 py-2">
                                                         <div class="flex space-x-2">
-                                                            <button type="button" @click="editarGanado(ganado)" class="text-blue-500 hover:text-blue-700">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            <button type="button" @click="editarGanado(ganado)"
+                                                                class="text-blue-500 hover:text-blue-700">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                                 </svg>
                                                             </button>
-                                                            <button type="button" @click="eliminarGanado(ganado.id)" class="text-red-500 hover:text-red-700">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            <button type="button" @click="eliminarGanado(ganado.id)"
+                                                                class="text-red-500 hover:text-red-700">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                 </svg>
                                                             </button>
                                                         </div>
@@ -1021,47 +1105,46 @@
 
                                 <div class="md:col-span-2">
                                     <label for="detallesobservado">Detalles de Observación</label>
-                                    <textarea id="detallesobservado" x-model="paramsTask.detallesobservado"
-                                        class="form-textarea" placeholder="Detalles de la observación"></textarea>
+                                    <textarea id="detallesobservado" x-model="paramsTask.detallesobservado" class="form-textarea"
+                                        placeholder="Detalles de la observación"></textarea>
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label for="comentariosobservado">Comentarios</label>
-                                    <textarea id="comentariosobservado" x-model="paramsTask.comentariosobservado"
-                                        class="form-textarea" placeholder="Comentarios adicionales"></textarea>
+                                    <textarea id="comentariosobservado" x-model="paramsTask.comentariosobservado" class="form-textarea"
+                                        placeholder="Comentarios adicionales"></textarea>
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label for="accionespendientes">Acciones Pendientes</label>
-                                    <textarea id="accionespendientes" x-model="paramsTask.accionespendientes"
-                                        class="form-textarea" placeholder="Acciones por realizar"></textarea>
+                                    <textarea id="accionespendientes" x-model="paramsTask.accionespendientes" class="form-textarea"
+                                        placeholder="Acciones por realizar"></textarea>
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label for="detalleobservado">Detalle Específico</label>
-                                    <textarea id="detalleobservado" x-model="paramsTask.detalleobservado"
-                                        class="form-textarea" placeholder="Detalle específico de la observación"></textarea>
+                                    <textarea id="detalleobservado" x-model="paramsTask.detalleobservado" class="form-textarea"
+                                        placeholder="Detalle específico de la observación"></textarea>
                                 </div>
 
-                                 <select id="nivelPorcentajeObservado" x-model="paramsTask.nivelPorcentajeObservado" class="form-select">
+                                <select id="nivelPorcentajeObservado" x-model="paramsTask.nivelPorcentajeObservado"
+                                    class="form-select">
                                     <option value="">Seleccionar estado</option>
                                     <option value="0">Inicial (0%)</option>
                                     <option value="0.5">En Proceso (50%)</option>
                                     <option value="1">Finalizado (100%)</option>
-                            </select>
+                                </select>
                             </div>
 
                             <!-- Botones para agregar/actualizar proyecto observado -->
                             <div class="flex justify-end space-x-3 mt-4">
-                                <button type="button" x-show="observadoEditId" 
-                                        @click="limpiarFormularioObservado()" 
-                                        class="btn btn-outline-danger">
+                                <button type="button" x-show="observadoEditId" @click="limpiarFormularioObservado()"
+                                    class="btn btn-outline-danger">
                                     Cancelar Edición
                                 </button>
-                                <button type="button" 
-                                        @click="agregarObservado()" 
-                                        class="btn btn-primary"
-                                        :disabled="!paramsTask.fechaobservado && !paramsTask.estadoactual && !paramsTask.detallesobservado">
+                                <button type="button" @click="agregarObservado()" class="btn btn-primary"
+                                    :disabled="!paramsTask.fechaobservado && !paramsTask.estadoactual && !paramsTask
+                                        .detallesobservado">
                                     <span x-text="observadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
                                 </button>
                             </div>
@@ -1075,13 +1158,13 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
                                         <label for="filtroEstadoObservado" class="text-sm">Buscar por estado:</label>
-                                        <input id="filtroEstadoObservado" x-model="filtroEstadoObservado" type="text"
-                                            class="form-input" placeholder="Estado actual">
+                                        <input id="filtroEstadoObservado" x-model="filtroEstadoObservado"
+                                            type="text" class="form-input" placeholder="Estado actual">
                                     </div>
                                     <div>
                                         <label for="filtroFechaObservado" class="text-sm">Filtrar por fecha:</label>
-                                        <input id="filtroFechaObservado" x-model="filtroFechaObservado" type="date"
-                                            class="form-input">
+                                        <input id="filtroFechaObservado" x-model="filtroFechaObservado"
+                                            type="date" class="form-input">
                                     </div>
                                 </div>
 
@@ -1098,20 +1181,35 @@
                                         </thead>
                                         <tbody>
                                             <template x-for="observado in filteredObservados" :key="observado.id">
-                                                <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                    <td class="px-4 py-2" x-text="formatDate(observado.fecha_observado)"></td>
-                                                    <td class="px-4 py-2" x-text="observado.estado_actual || '-'"></td>
-                                                    <td class="px-4 py-2" x-text="observado.detalles ? observado.detalles.substring(0, 50) + '...' : '-'"></td>
+                                                <tr
+                                                    class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                    <td class="px-4 py-2"
+                                                        x-text="formatDate(observado.fecha_observado)"></td>
+                                                    <td class="px-4 py-2" x-text="observado.estado_actual || '-'">
+                                                    </td>
+                                                    <td class="px-4 py-2"
+                                                        x-text="observado.detalles ? observado.detalles.substring(0, 50) + '...' : '-'">
+                                                    </td>
                                                     <td class="px-4 py-2">
                                                         <div class="flex space-x-2">
-                                                            <button type="button" @click="editarObservado(observado)" class="text-blue-500 hover:text-blue-700">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            <button type="button"
+                                                                @click="editarObservado(observado)"
+                                                                class="text-blue-500 hover:text-blue-700">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                                 </svg>
                                                             </button>
-                                                            <button type="button" @click="eliminarObservado(observado.id)" class="text-red-500 hover:text-red-700">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                            <button type="button"
+                                                                @click="eliminarObservado(observado.id)"
+                                                                class="text-red-500 hover:text-red-700">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                 </svg>
                                                             </button>
                                                         </div>
@@ -1145,36 +1243,35 @@
 
                                     <div class="md:col-span-2">
                                         <label for="motivorechazo">Motivo de Rechazo</label>
-                                        <textarea id="motivorechazo" x-model="paramsTask.motivorechazo"
-                                            class="form-textarea" placeholder="Explique el motivo del rechazo"></textarea>
+                                        <textarea id="motivorechazo" x-model="paramsTask.motivorechazo" class="form-textarea"
+                                            placeholder="Explique el motivo del rechazo"></textarea>
                                     </div>
 
                                     <div class="md:col-span-2">
                                         <label for="comentarioscliente">Comentarios del Cliente</label>
-                                        <textarea id="comentarioscliente" x-model="paramsTask.comentarioscliente"
-                                            class="form-textarea" placeholder="Comentarios o feedback del cliente"></textarea>
+                                        <textarea id="comentarioscliente" x-model="paramsTask.comentarioscliente" class="form-textarea"
+                                            placeholder="Comentarios o feedback del cliente"></textarea>
                                     </div>
 
-                                        <select id="nivelPorcentajeRechazado" x-model="paramsTask.nivelPorcentajeRechazado" class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                            </select>
+                                    <select id="nivelPorcentajeRechazado"
+                                        x-model="paramsTask.nivelPorcentajeRechazado" class="form-select">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
                                 </div>
 
                                 <!-- Botones para agregar/actualizar proyecto rechazado -->
                                 <div class="flex justify-end space-x-3 mt-4">
-                                    <button type="button" x-show="rechazadoEditId" 
-                                            @click="limpiarFormularioRechazado()" 
-                                            class="btn btn-outline-danger">
+                                    <button type="button" x-show="rechazadoEditId"
+                                        @click="limpiarFormularioRechazado()" class="btn btn-outline-danger">
                                         Cancelar Edición
                                     </button>
-                                    <button type="button" 
-                                            @click="agregarRechazado()" 
-                                            class="btn btn-primary"
-                                            :disabled="!paramsTask.fecharechazo && !paramsTask.motivorechazo">
-                                        <span x-text="rechazadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
+                                    <button type="button" @click="agregarRechazado()" class="btn btn-primary"
+                                        :disabled="!paramsTask.fecharechazo && !paramsTask.motivorechazo">
+                                        <span
+                                            x-text="rechazadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
                                     </button>
                                 </div>
 
@@ -1187,14 +1284,16 @@
                                     <!-- Filtros de búsqueda -->
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                         <div>
-                                            <label for="filtroMotivoRechazo" class="text-sm">Buscar por motivo:</label>
-                                            <input id="filtroMotivoRechazo" x-model="filtroMotivoRechazo" type="text"
-                                                class="form-input" placeholder="Motivo de rechazo">
+                                            <label for="filtroMotivoRechazo" class="text-sm">Buscar por
+                                                motivo:</label>
+                                            <input id="filtroMotivoRechazo" x-model="filtroMotivoRechazo"
+                                                type="text" class="form-input" placeholder="Motivo de rechazo">
                                         </div>
                                         <div>
-                                            <label for="filtroFechaRechazo" class="text-sm">Filtrar por fecha:</label>
-                                            <input id="filtroFechaRechazo" x-model="filtroFechaRechazo" type="date"
-                                                class="form-input">
+                                            <label for="filtroFechaRechazo" class="text-sm">Filtrar por
+                                                fecha:</label>
+                                            <input id="filtroFechaRechazo" x-model="filtroFechaRechazo"
+                                                type="date" class="form-input">
                                         </div>
                                     </div>
 
@@ -1210,21 +1309,38 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <template x-for="rechazado in filteredRechazados" :key="rechazado.id">
-                                                    <tr class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                        <td class="px-4 py-2" x-text="formatDate(rechazado.fecha_rechazo)"></td>
-                                                        <td class="px-4 py-2" x-text="rechazado.motivo_rechazo ? rechazado.motivo_rechazo.substring(0, 50) + '...' : '-'"></td>
-                                                        <td class="px-4 py-2" x-text="rechazado.comentarios_cliente ? rechazado.comentarios_cliente.substring(0, 50) + '...' : '-'"></td>
+                                                <template x-for="rechazado in filteredRechazados"
+                                                    :key="rechazado.id">
+                                                    <tr
+                                                        class="border-b border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                        <td class="px-4 py-2"
+                                                            x-text="formatDate(rechazado.fecha_rechazo)"></td>
+                                                        <td class="px-4 py-2"
+                                                            x-text="rechazado.motivo_rechazo ? rechazado.motivo_rechazo.substring(0, 50) + '...' : '-'">
+                                                        </td>
+                                                        <td class="px-4 py-2"
+                                                            x-text="rechazado.comentarios_cliente ? rechazado.comentarios_cliente.substring(0, 50) + '...' : '-'">
+                                                        </td>
                                                         <td class="px-4 py-2">
                                                             <div class="flex space-x-2">
-                                                                <button type="button" @click="editarRechazado(rechazado)" class="text-blue-500 hover:text-blue-700">
-                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                <button type="button"
+                                                                    @click="editarRechazado(rechazado)"
+                                                                    class="text-blue-500 hover:text-blue-700">
+                                                                    <svg class="w-4 h-4" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                                     </svg>
                                                                 </button>
-                                                                <button type="button" @click="eliminarRechazado(rechazado.id)" class="text-red-500 hover:text-red-700">
-                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                <button type="button"
+                                                                    @click="eliminarRechazado(rechazado.id)"
+                                                                    class="text-red-500 hover:text-red-700">
+                                                                    <svg class="w-4 h-4" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                                     </svg>
                                                                 </button>
                                                             </div>
@@ -1251,8 +1367,7 @@
 
                         <div class="flex justify-end items-center mt-8 gap-3">
                             <button type="button" class="btn btn-outline-secondary"
-                                @click="activeTab = 'general'"
-                                x-show="activeTab !== 'general'">
+                                @click="activeTab = 'general'" x-show="activeTab !== 'general'">
                                 ← Volver a General
                             </button>
                             <button type="button" class="btn btn-outline-danger"
@@ -1266,154 +1381,163 @@
         </div>
     </div>
 
-<!-- Modal para ver detalles completos -->
-<div x-show="mostrarModalDetalles" 
-     x-transition.opacity
-     x-cloak
-     class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-     style="display: none;">
-    <div class="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6 pb-4 border-b">
-            <h3 class="text-2xl font-bold text-primary" 
-                x-text="'Detalles de ' + (detalleSeleccionado ? detalleSeleccionado.tipo : 'Registro')">
-            </h3>
-            <button @click="mostrarModalDetalles = false" 
+    <!-- Modal para ver detalles completos -->
+    <div x-show="mostrarModalDetalles" x-transition.opacity x-cloak
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+        style="display: none;">
+        <div class="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                <h3 class="text-2xl font-bold text-primary"
+                    x-text="'Detalles de ' + (detalleSeleccionado ? detalleSeleccionado.tipo : 'Registro')">
+                </h3>
+                <button @click="mostrarModalDetalles = false"
                     class="text-gray-500 hover:text-gray-700 transition-colors">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
 
-        <!-- Contenido -->
-        <template x-if="detalleSeleccionado && detalleSeleccionado.data">
-            <div class="space-y-6">
-                <!-- Información básica -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-lg mb-3 text-gray-800">Información General</h4>
-                        <div class="space-y-2">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">ID:</span>
-                                <span class="font-medium" x-text="detalleSeleccionado.data.id"></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Tipo:</span>
-                                <span class="font-medium" x-text="detalleSeleccionado.tipo"></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Fecha:</span>
-                                <span class="font-medium" x-text="detalleSeleccionado.fecha"></span>
-                            </div>
-                            <div class="flex justify-between" x-show="detalleSeleccionado.data.task_id">
-                                <span class="text-gray-600">Task ID:</span>
-                                <span class="font-medium" x-text="detalleSeleccionado.data.task_id"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Detalles específicos según el tipo -->
-                    <template x-if="detalleSeleccionado.tipo === 'Cotización'">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-lg mb-3 text-blue-800">Detalles de Cotización</h4>
+            <!-- Contenido -->
+            <template x-if="detalleSeleccionado && detalleSeleccionado.data">
+                <div class="space-y-6">
+                    <!-- Información básica -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-lg mb-3 text-gray-800">Información General</h4>
                             <div class="space-y-2">
                                 <div class="flex justify-between">
-                                    <span class="text-blue-600">Código:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.data.codigo_cotizacion"></span>
+                                    <span class="text-gray-600">ID:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.data.id"></span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-blue-600">Producto:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.data.detalle_producto"></span>
+                                    <span class="text-gray-600">Tipo:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.tipo"></span>
                                 </div>
-                                <div class="flex justify-between" x-show="detalleSeleccionado.data.total_cotizacion">
-                                    <span class="text-blue-600">Total:</span>
-                                    <span class="font-medium" x-text="'S/ ' + detalleSeleccionado.data.total_cotizacion"></span>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Fecha:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.fecha"></span>
                                 </div>
-                                <div class="flex justify-between" x-show="detalleSeleccionado.data.validez_cotizacion">
-                                    <span class="text-blue-600">Validez:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.data.validez_cotizacion + ' días'"></span>
+                                <div class="flex justify-between" x-show="detalleSeleccionado.data.task_id">
+                                    <span class="text-gray-600">Task ID:</span>
+                                    <span class="font-medium" x-text="detalleSeleccionado.data.task_id"></span>
                                 </div>
                             </div>
                         </div>
-                    </template>
 
-                    <template x-if="detalleSeleccionado.tipo === 'Reunión'">
-                        <div class="bg-green-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-lg mb-3 text-green-800">Detalles de Reunión</h4>
-                            <div class="space-y-2">
-                                <div class="flex justify-between">
-                                    <span class="text-green-600">Tipo:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.data.tipo_reunion"></span>
+                        <!-- Detalles específicos según el tipo -->
+                        <template x-if="detalleSeleccionado.tipo === 'Cotización'">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-lg mb-3 text-blue-800">Detalles de Cotización</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-blue-600">Código:</span>
+                                        <span class="font-medium"
+                                            x-text="detalleSeleccionado.data.codigo_cotizacion"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-blue-600">Producto:</span>
+                                        <span class="font-medium"
+                                            x-text="detalleSeleccionado.data.detalle_producto"></span>
+                                    </div>
+                                    <div class="flex justify-between"
+                                        x-show="detalleSeleccionado.data.total_cotizacion">
+                                        <span class="text-blue-600">Total:</span>
+                                        <span class="font-medium"
+                                            x-text="'S/ ' + detalleSeleccionado.data.total_cotizacion"></span>
+                                    </div>
+                                    <div class="flex justify-between"
+                                        x-show="detalleSeleccionado.data.validez_cotizacion">
+                                        <span class="text-blue-600">Validez:</span>
+                                        <span class="font-medium"
+                                            x-text="detalleSeleccionado.data.validez_cotizacion + ' días'"></span>
+                                    </div>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-green-600">Motivo:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.data.motivo_reunion"></span>
-                                </div>
-                                <div class="flex justify-between" x-show="detalleSeleccionado.data.responsable_reunion">
-                                    <span class="text-green-600">Responsable:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.data.responsable_reunion"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <!-- Agrega más templates para otros tipos aquí -->
-                </div>
-
-                <!-- Campos adicionales -->
-                <div class="bg-white border rounded-lg p-4">
-                    <h4 class="font-semibold text-lg mb-3 text-gray-800">Información Adicional</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <template x-for="(value, key) in detalleSeleccionado.data">
-                            <div x-show="value && !['id', 'task_id', 'created_at', 'updated_at'].includes(key)"
-                                 class="flex justify-between items-start">
-                                <span class="text-gray-600 capitalize" x-text="key.replace(/_/g, ' ') + ':'"></span>
-                                <span class="font-medium text-right ml-2" 
-                                      x-text="typeof value === 'string' && value.length > 50 ? value.substring(0, 50) + '...' : value">
-                                </span>
                             </div>
                         </template>
+
+                        <template x-if="detalleSeleccionado.tipo === 'Reunión'">
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-lg mb-3 text-green-800">Detalles de Reunión</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span class="text-green-600">Tipo:</span>
+                                        <span class="font-medium"
+                                            x-text="detalleSeleccionado.data.tipo_reunion"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-green-600">Motivo:</span>
+                                        <span class="font-medium"
+                                            x-text="detalleSeleccionado.data.motivo_reunion"></span>
+                                    </div>
+                                    <div class="flex justify-between"
+                                        x-show="detalleSeleccionado.data.responsable_reunion">
+                                        <span class="text-green-600">Responsable:</span>
+                                        <span class="font-medium"
+                                            x-text="detalleSeleccionado.data.responsable_reunion"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Agrega más templates para otros tipos aquí -->
+                    </div>
+
+                    <!-- Campos adicionales -->
+                    <div class="bg-white border rounded-lg p-4">
+                        <h4 class="font-semibold text-lg mb-3 text-gray-800">Información Adicional</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <template x-for="(value, key) in detalleSeleccionado.data">
+                                <div x-show="value && !['id', 'task_id', 'created_at', 'updated_at'].includes(key)"
+                                    class="flex justify-between items-start">
+                                    <span class="text-gray-600 capitalize"
+                                        x-text="key.replace(/_/g, ' ') + ':'"></span>
+                                    <span class="font-medium text-right ml-2"
+                                        x-text="typeof value === 'string' && value.length > 50 ? value.substring(0, 50) + '...' : value">
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Campos de texto largos -->
+                    <template x-if="detalleSeleccionado.data.observaciones">
+                        <div class="bg-yellow-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-lg mb-2 text-yellow-800">Observaciones</h4>
+                            <p class="text-gray-700" x-text="detalleSeleccionado.data.observaciones"></p>
+                        </div>
+                    </template>
+
+                    <template x-if="detalleSeleccionado.data.condiciones_comerciales">
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-lg mb-2 text-purple-800">Condiciones Comerciales</h4>
+                            <p class="text-gray-700" x-text="detalleSeleccionado.data.condiciones_comerciales"></p>
+                        </div>
+                    </template>
+
+                    <!-- Timestamps -->
+                    <div class="bg-gray-100 p-3 rounded-lg text-sm text-gray-500">
+                        <div class="flex justify-between">
+                            <span>Creación:</span>
+                            <span x-text="new Date(detalleSeleccionado.data.created_at).toLocaleString()"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Actualización:</span>
+                            <span x-text="new Date(detalleSeleccionado.data.updated_at).toLocaleString()"></span>
+                        </div>
                     </div>
                 </div>
+            </template>
 
-                <!-- Campos de texto largos -->
-                <template x-if="detalleSeleccionado.data.observaciones">
-                    <div class="bg-yellow-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-lg mb-2 text-yellow-800">Observaciones</h4>
-                        <p class="text-gray-700" x-text="detalleSeleccionado.data.observaciones"></p>
-                    </div>
-                </template>
-
-                <template x-if="detalleSeleccionado.data.condiciones_comerciales">
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <h4 class="font-semibold text-lg mb-2 text-purple-800">Condiciones Comerciales</h4>
-                        <p class="text-gray-700" x-text="detalleSeleccionado.data.condiciones_comerciales"></p>
-                    </div>
-                </template>
-
-                <!-- Timestamps -->
-                <div class="bg-gray-100 p-3 rounded-lg text-sm text-gray-500">
-                    <div class="flex justify-between">
-                        <span>Creación:</span>
-                        <span x-text="new Date(detalleSeleccionado.data.created_at).toLocaleString()"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Actualización:</span>
-                        <span x-text="new Date(detalleSeleccionado.data.updated_at).toLocaleString()"></span>
-                    </div>
-                </div>
+            <div class="mt-6 pt-4 border-t flex justify-end">
+                <button @click="mostrarModalDetalles = false" class="btn btn-primary">
+                    Cerrar
+                </button>
             </div>
-        </template>
-
-        <div class="mt-6 pt-4 border-t flex justify-end">
-            <button @click="mostrarModalDetalles = false" 
-                    class="btn btn-primary">
-                Cerrar
-            </button>
         </div>
     </div>
-</div>
 
     <!-- delete task modal -->
     <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto hidden" :class="isDeleteModal && '!block'">
@@ -1429,7 +1553,8 @@
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                 </button>
-                <div class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
+                <div
+                    class="text-lg font-medium bg-[#fbfbfb] dark:bg-[#121c2c] ltr:pl-5 rtl:pr-5 py-3 ltr:pr-[50px] rtl:pl-[50px]">
                     <span x-text="isDeleteProject ? 'Eliminar Proyecto' : 'Eliminar Tarea'"></span>
                 </div>
                 <div class="p-5 text-center">
@@ -1451,7 +1576,8 @@
                         </svg>
                     </div>
                     <div class="text-base sm:w-3/4 mx-auto mt-5">
-                        <span x-text="isDeleteProject 
+                        <span
+                            x-text="isDeleteProject 
                             ? '¿Estás seguro de que quieres eliminar este proyecto y todas sus tareas?' 
                             : '¿Estás seguro de que quieres eliminar esta tarea?'"></span>
                     </div>

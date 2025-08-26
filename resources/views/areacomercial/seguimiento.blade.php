@@ -1,5 +1,8 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Select2 CSS -->
     <style>
         .tab-btn {
             font-weight: 600;
@@ -161,8 +164,8 @@
     </div>
 
 
-        <input type="hidden" id="idSeguimientoHidden" value="{{ $seguimiento->idSeguimiento ?? '' }}">
-<input type="hidden" id="idPersonaHidden" value="{{ $idPersona ?? '' }}">
+    <input type="hidden" id="idSeguimientoHidden" value="{{ $seguimiento->idSeguimiento ?? '' }}">
+    <input type="hidden" id="idPersonaHidden" value="{{ $idPersona ?? '' }}">
 
 
 
@@ -330,6 +333,49 @@
                 }
             }
 
+            // Inicializa Gantt si es cronograma
+            if (tab === 'cronograma') {
+                requestAnimationFrame(() => {
+                    const el = tabElement.querySelector('#gantt_cronograma');
+                    if (el && typeof window.renderCronograma === 'function') {
+                        window.renderCronograma(el);
+                    }
+                });
+            }
+
+            // 👇 Inicializa Alpine + Select2 si es proyectos
+            if (tab === 'proyectos') {
+                requestAnimationFrame(() => {
+                    // 1) Rehidratar Alpine en el contenido recién insertado
+                    if (window.Alpine && typeof Alpine.initTree === 'function') {
+                        Alpine.initTree(tabElement);
+                    }
+
+                    // 2) Inicializar Select2 del campo Participantes
+                    const el = tabElement.querySelector('#participantesreunion');
+                    if (el && window.jQuery) {
+                        const $el = jQuery(el);
+                        $el.select2({
+                            width: '100%',
+                            placeholder: 'Selecciona participantes',
+                            allowClear: true,
+                            tags: true,
+                            tokenSeparators: [','],
+                            dropdownParent: $el.closest('div')
+                        });
+
+                        // Select2 -> Alpine (emitimos evento)
+                        $el.on('change', () => {
+                            const values = $el.val() || [];
+                            el.dispatchEvent(new CustomEvent('select2-participantes', {
+                                detail: values,
+                                bubbles: true
+                            }));
+                        });
+                    }
+                });
+            }
+
 
             // Función para crear nuevo registro
             function createNew(type) {
@@ -420,23 +466,25 @@
     </script>
 
 
-<!-- <script>
-function tareaApp() {
-    return {
-        tarea: null,
-        async fetchTarea(taskId) {
-            try {
-                const res = await fetch(`/tarea/${taskId}`);
-                if (!res.ok) throw new Error('Error al obtener la tarea');
-                this.tarea = await res.json();
-            } catch (err) {
-                console.error(err);
-                alert('No se pudo cargar la tarea');
+    <!-- <script>
+        function tareaApp() {
+            return {
+                tarea: null,
+                async fetchTarea(taskId) {
+                    try {
+                        const res = await fetch(`/tarea/${taskId}`);
+                        if (!res.ok) throw new Error('Error al obtener la tarea');
+                        this.tarea = await res.json();
+                    } catch (err) {
+                        console.error(err);
+                        alert('No se pudo cargar la tarea');
+                    }
+                }
             }
         }
-    }
-}
-</script> -->
+    </script> -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script src="/assets/js/Sortable.min.js"></script>
     <script src="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js" defer></script>
@@ -450,5 +498,4 @@ function tareaApp() {
     <script src="{{ asset('assets/js/seguimiento/create-contact-empresa.js') }}" defer></script>
     <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script>
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
-
 </x-layout.default>
