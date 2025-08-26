@@ -154,6 +154,13 @@ if (!$tarea) {
 
         $tarea->save();
 
+
+        // ✅ Si el task_id es numérico, intenta actualizar la tarea relacionada
+        if (is_numeric($tarea->task_id)) {
+            DB::table('tasks')
+                ->where('id', $tarea->task_id)
+                ->update(['title' => $tarea->nombre, 'updated_at' => now()]);
+        }
         DB::commit();
 
         Log::info('Tarea guardada exitosamente:', $tarea->toArray()); // Debug

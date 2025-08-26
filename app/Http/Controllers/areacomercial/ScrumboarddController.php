@@ -260,6 +260,14 @@ public function deleteCotizacion($id)
 
         $task->update($taskData);
 
+
+         // ✅ Actualizar nombre en cronograma_tareas
+        DB::table('cronograma_tareas')
+            ->where('idSeguimiento', $task->idseguimiento)
+            ->where('idpersona', $task->idpersona)
+            ->update(['nombre' => $taskData['title'], 'updated_at' => now()]);
+
+
         // Actualizar datos específicos
         $this->saveSpecificTaskData($request, $task);
 

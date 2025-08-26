@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Contacto;
 use App\Models\Contactos;
 use App\Models\NivelDecision;
+use App\Models\Project;
 use App\Models\Seguimiento;
 use App\Models\SeleccionarSeguimiento;
 use App\Models\Tipodocumento;
@@ -23,7 +24,7 @@ public function store(Request $request)
         'idpersona'       => 'required|integer'
     ]);
 
-    // Solo registrar la selección sin validaciones complicadas
+    // Registrar la selección
     $seleccion = SeleccionarSeguimiento::updateOrCreate(
         ['idseguimiento' => $request->idseguimiento],
         [
@@ -34,9 +35,27 @@ public function store(Request $request)
         ]
     );
 
+    // Definir los estados que deben crearse POR PERSONA
+    $estadosRequeridos = ['Lista de proyectos', 'cotizacion', 'reunion', 'levantamiento', 'observado', 'ganado', 'rechazado'];
+
+    // Verificar y crear los proyectos si no existen PARA ESTA PERSONA
+    foreach ($estadosRequeridos as $estado) {
+        $proyectoExistente = Project::where('idpersona', $request->idpersona)
+            ->where('title', $estado)
+            ->first();
+
+        if (!$proyectoExistente) {
+            Project::create([
+                'title' => $estado,
+                'idseguimiento' => $request->idseguimiento,
+                'idpersona' => $request->idpersona
+            ]);
+        }
+    }
+
     return response()->json([
         'success' => true,
-        'message' => 'Selección guardada correctamente',
+        'message' => 'Selección guardada correctamente y proyectos verificados para la persona',
         'data'    => $seleccion
     ]);
 }
