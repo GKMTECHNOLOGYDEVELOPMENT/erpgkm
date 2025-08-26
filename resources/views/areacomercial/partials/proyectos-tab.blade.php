@@ -22,6 +22,24 @@
     .bg-purple-50 {
         background-color: #faf5ff;
     }
+
+    /* contenedor visible */
+    .select2-container--default .select2-selection--multiple {
+        border: 1px solid #e5e7eb;
+        /* gray-200 */
+        border-radius: .5rem;
+        /* rounded-md */
+        padding: .375rem .5rem;
+        /* px-2 py-1.5 */
+        min-height: 42px;
+    }
+
+    /* input de búsqueda inline */
+    .select2-container .select2-search--inline .select2-search__field {
+        margin: 0;
+        padding: 0;
+        line-height: 1.25rem;
+    }
 </style>
 
 <div x-data="scrumboard" x-init="loadProjects()" class="p-5">
