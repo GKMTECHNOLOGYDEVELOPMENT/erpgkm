@@ -13,7 +13,6 @@ class TaskReunion extends Model
         'fecha_reunion',
         'tipo_reunion',
         'motivo_reunion',
-        'participantes',
         'responsable_reunion',
         'link_reunion',
         'direccion_fisica',
@@ -24,5 +23,11 @@ class TaskReunion extends Model
     public function task()
     {
         return $this->belongsTo(Task::class);
+    }
+
+     // Relación con participantes - CORREGIDO
+    public function participantesComercial()
+    {
+        return $this->hasMany(ReunionParticipanteComercial::class, 'reunion_id');
     }
 }

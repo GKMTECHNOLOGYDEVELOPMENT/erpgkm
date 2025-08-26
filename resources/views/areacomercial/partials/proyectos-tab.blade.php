@@ -632,15 +632,20 @@
                                     <input id="motivoreunion" x-model="paramsTask.motivoreunion" type="text"
                                         class="form-input" placeholder="Motivo principal" />
                                 </div>
-                                <div>
-                                    <label for="participantesreunion">Participantes</label>
-                                    <select id="participantesreunion" x-ref="participantesSelect"
-                                        x-init="initParticipantesSelect()" multiple class="form-select w-full">
-                                        <option value="Juan">Juan</option>
-                                        <option value="María">María</option>
-                                        <option value="Pedro">Pedro</option>
-                                    </select>
-                                </div>
+                            <div x-data="scrumboard" x-init="fetchUsuarios()" id="scrumboard">
+    <label for="participantesreunion">Participantes</label>
+    <select id="participantesreunion"
+            x-ref="participantesSelect"
+            multiple
+            class="form-select w-full">
+        <template x-if="usuarios && usuarios.length > 0">
+            <template x-for="usuario in usuarios" :key="usuario.id">
+<option :value="usuario.id" x-text="usuario.nombre_completo"></option>
+            </template>
+        </template>
+    </select>
+</div>
+
 
                                 <div>
                                     <label for="responsablereunion">Responsable</label>
@@ -660,7 +665,9 @@
                                         class="form-input" placeholder="Dirección para reunión presencial" />
                                 </div>
 
+                                <div> 
 
+                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
                                 <select id="nivelPorcentajeReunion" x-model="paramsTask.nivelPorcentajeReunion"
                                     class="form-select">
                                     <option value="">Seleccionar estado</option>
@@ -668,6 +675,8 @@
                                     <option value="0.5">En Proceso (50%)</option>
                                     <option value="1">Finalizado (100%)</option>
                                 </select>
+
+                                </div>
 
 
                                 <div class="md:col-span-2">

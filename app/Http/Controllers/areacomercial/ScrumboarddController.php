@@ -661,40 +661,47 @@ public function handleCotizacion(Request $request)
     }
 
 
-    public function handleReunion(Request $request)
+ public function handleReunion(Request $request)
 {
     try {
+        Log::info('📥 Iniciando handleReunion', ['request' => $request->all()]);
+
         $request->validate([
             'task_id' => 'required|exists:tasks,id',
             'fecha_reunion' => 'nullable|date',
             'tipo_reunion' => 'nullable|string|max:255',
             'motivo_reunion' => 'nullable|string|max:255',
-            'participantes' => 'nullable|string',
+            'participantes' => 'nullable|array',
+            'participantes.*' => 'nullable|string|max:255',
             'responsable_reunion' => 'nullable|string|max:255',
             'link_reunion' => 'nullable|url|max:255',
             'direccion_fisica' => 'nullable|string|max:255',
             'minuta' => 'nullable|string',
             'actividades' => 'nullable|string',
             'nivelPorcentajeReunion' => 'nullable|numeric|in:0,0.5,1',
-            'reunion_id' => 'nullable|exists:task_reuniones,id' // Para actualización
+            'reunion_id' => 'nullable|exists:task_reuniones,id'
         ]);
 
+        DB::beginTransaction();
+
         if ($request->filled('reunion_id')) {
-            // 🔄 Actualizar reunión
+            Log::info('🔄 Modo actualización', ['reunion_id' => $request->reunion_id]);
+
             $reunion = TaskReunion::findOrFail($request->reunion_id);
             $reunion->update([
                 'fecha_reunion' => $request->fecha_reunion,
                 'tipo_reunion' => $request->tipo_reunion,
                 'motivo_reunion' => $request->motivo_reunion,
-                'participantes' => $request->participantes,
                 'responsable_reunion' => $request->responsable_reunion,
                 'link_reunion' => $request->link_reunion,
                 'direccion_fisica' => $request->direccion_fisica,
                 'minuta' => $request->minuta,
-                'actividades' => $request->actividades
+                'actividades' => $request->actividades,
+                'nivel_porcentaje' => $request->nivelPorcentajeReunion
             ]);
 
-            // ✅ Actualizar subtarea con helper
+            $this->sincronizarParticipantes($reunion, $request->participantes);
+
             CronogramaHelper::actualizarSubtareaCronograma([
                 'task_id'      => $request->task_id,
                 'tipo'         => 'reunion',
@@ -702,47 +709,66 @@ public function handleCotizacion(Request $request)
                 'nombre'       => 'Reunión: ' . ($reunion->tipo_reunion ?? 'Sin tipo'),
                 'descripcion'  => $reunion->motivo_reunion ?? '',
                 'fecha_inicio' => $reunion->fecha_reunion,
-                'progreso'     => $request->nivelPorcentajeCotizacion // 👈 aquí lo pasas
-
+                'progreso'     => $request->nivelPorcentajeReunion
             ]);
 
             $message = 'Reunión actualizada exitosamente';
         } else {
-            // ➕ Crear nueva reunión
+            Log::info('➕ Modo creación');
+
             $reunion = TaskReunion::create([
                 'task_id' => $request->task_id,
                 'fecha_reunion' => $request->fecha_reunion,
                 'tipo_reunion' => $request->tipo_reunion,
                 'motivo_reunion' => $request->motivo_reunion,
-                'participantes' => $request->participantes,
                 'responsable_reunion' => $request->responsable_reunion,
                 'link_reunion' => $request->link_reunion,
                 'direccion_fisica' => $request->direccion_fisica,
                 'minuta' => $request->minuta,
-                'actividades' => $request->actividades
+                'actividades' => $request->actividades,
+                'nivel_porcentaje' => $request->nivelPorcentajeReunion
             ]);
 
-            // ✅ Crear subtarea con helper
+            Log::info('🧩 Reunión creada con ID: ' . $reunion->id);
+
+            $this->sincronizarParticipantes($reunion, $request->participantes);
+
             CronogramaHelper::crearSubtareaCronograma([
                 'task_id'      => $request->task_id,
                 'tipo'         => 'reunion',
                 'sub_id'       => $reunion->id,
                 'nombre'       => 'Reunión: ' . ($reunion->tipo_reunion ?? 'Sin tipo'),
                 'descripcion'  => $reunion->motivo_reunion ?? '',
-                'progreso' => $request->nivelPorcentajeReunion,
+                'progreso'     => $request->nivelPorcentajeReunion,
                 'fecha_inicio' => $reunion->fecha_reunion
             ]);
 
             $message = 'Reunión creada exitosamente';
         }
 
+        DB::commit();
+
+        $reunion->load('participantesComercial');
+
+        Log::info('✅ Proceso terminado', [
+            'reunion_id' => $reunion->id,
+            'participantes' => $reunion->participantesComercial
+        ]);
+
         return response()->json([
             'success' => true,
             'reunion' => $reunion,
+            'participantes' => $reunion->participantesComercial,
             'message' => $message
         ]);
 
     } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('❌ Error en handleReunion', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
         return response()->json([
             'success' => false,
             'message' => 'Error: ' . $e->getMessage()
@@ -750,19 +776,69 @@ public function handleCotizacion(Request $request)
     }
 }
 
+private function sincronizarParticipantes($reunion, $participantesIds)
+{
+    try {
+        Log::info('🔁 Sincronizando participantes', [
+            'reunion_id' => $reunion->id,
+            'participantes' => $participantesIds
+        ]);
 
-// Obtener reuniones de una tarea
+        \App\Models\ReunionParticipanteComercial::where('reunion_id', $reunion->id)->delete();
+        Log::info('🗑 Participantes anteriores eliminados');
+
+        if (!empty($participantesIds)) {
+            foreach ($participantesIds as $usuarioId) {
+                if (!empty($usuarioId)) {
+                    $usuario = DB::table('usuarios')->where('idUsuario', $usuarioId)->first();
+
+                    if ($usuario) {
+                        $nombreCompleto = $usuario->Nombre . ' ' . 
+                                          $usuario->apellidoPaterno . ' ' . 
+                                          $usuario->apellidoMaterno;
+
+                        $reunion->participantesComercial()->create([
+                            'usuario_id' => $usuarioId,
+                            'nombre' => trim($nombreCompleto)
+                        ]);
+
+                        Log::info('✅ Participante agregado', [
+                            'usuario_id' => $usuarioId,
+                            'nombre' => trim($nombreCompleto)
+                        ]);
+                    } else {
+                        Log::warning('⚠️ Usuario no encontrado', ['usuario_id' => $usuarioId]);
+                    }
+                }
+            }
+        } else {
+            Log::info('ℹ️ Lista de participantes vacía o nula');
+        }
+    } catch (\Exception $e) {
+        Log::error('❌ Error en sincronizarParticipantes', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        throw new \Exception('Error al sincronizar participantes: ' . $e->getMessage());
+    }
+}
+
+// Obtener reuniones de una tarea (modificado para incluir participantes)
 public function getReuniones($taskId)
 {
     try {
         $task = Task::findOrFail($taskId);
-        $reuniones = $task->reuniones;
-        
+        $reuniones = $task->reuniones()->with('participantesComercial')->get();
+
+        // 🪵 Log para verificar qué datos llegan
+        Log::info('Reuniones cargadas:', $reuniones->toArray());
+
         return response()->json([
             'success' => true,
             'reuniones' => $reuniones
         ]);
     } catch (\Exception $e) {
+        Log::error('Error al obtener reuniones:', ['error' => $e->getMessage()]);
         return response()->json([
             'success' => false,
             'message' => 'Error al obtener reuniones'
@@ -770,29 +846,54 @@ public function getReuniones($taskId)
     }
 }
 
+
+// Obtener participantes de una reunión específica
+public function getParticipantesReunion($reunionId)
+{
+    try {
+        $participantes = \App\Models\ReunionParticipanteComercial::where('reunion_id', $reunionId)->get();
+        
+        return response()->json([
+            'success' => true,
+            'participantes' => $participantes
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener participantes: ' . $e->getMessage()
+        ], 500);
+    }
+}
 public function deleteReunion($id)
 {
     try {
+        DB::beginTransaction();
+        
         $reunion = TaskReunion::findOrFail($id);
 
-        // ✅ Solo elimina la subtarea del cronograma (no la tarea padre)
+        // ✅ Eliminar participantes primero
+        $reunion->participantesComercial()->delete(); // CAMBIADO
+
+        // ✅ Eliminar la subtarea del cronograma
         \App\Models\CronogramaTarea::where('task_id', 'reunion-' . $reunion->id)->delete();
 
         // 🗑️ Eliminar la reunión
         $reunion->delete();
+
+        DB::commit();
 
         return response()->json([
             'success' => true,
             'message' => 'Reunión eliminada exitosamente'
         ]);
     } catch (\Exception $e) {
+        DB::rollBack();
         return response()->json([
             'success' => false,
             'message' => 'Error al eliminar la reunión: ' . $e->getMessage()
         ], 500);
     }
 }
-
 public function handleLevantamiento(Request $request)
 {
     try {
