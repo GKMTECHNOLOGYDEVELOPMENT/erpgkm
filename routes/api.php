@@ -419,3 +419,16 @@ Route::get('/seguimientos', [ClienteSeguimientoController::class, 'getSeguimient
 
 
 
+Route::get('/usuarios/comercial', function () {
+    return \App\Models\Usuario::select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno')
+        ->where('estado', 1) // Solo activos si es necesario
+        ->get()
+        ->map(function ($user) {
+            return [
+                'id' => $user->idUsuario,
+                'nombre_completo' => $user->Nombre . ' ' . $user->apellidoPaterno . ' ' . $user->apellidoMaterno,
+            ];
+        });
+});
+
+Route::get('/reunion/{reunionId}/participantes', [ScrumboarddController::class, 'getParticipantesReunion']);

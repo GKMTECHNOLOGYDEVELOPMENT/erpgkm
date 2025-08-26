@@ -498,4 +498,12 @@
     <script src="{{ asset('assets/js/seguimiento/create-contact-empresa.js') }}" defer></script>
     <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script>
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
+
+ <script>
+    window.USUARIO_AUTH = {!! json_encode(auth()->user() ? auth()->user()->Nombre . ' ' . auth()->user()->apellidoPaterno . ' ' . auth()->user()->apellidoMaterno : null) !!};
+    console.log('Usuario autenticado:', window.USUARIO_AUTH);
+</script>
+
+
+
 </x-layout.default>
