@@ -35,6 +35,11 @@
             <input type="text" id="nombreEncargado"
                 class="form-control w-full mt-2 mb-3 border border-gray-300 rounded px-3 py-2"
                 placeholder="Nombre del encargado">
+            <!-- Campo para el cargo del encargado -->
+            <input type="text" id="cargoEncargado"
+                class="form-control w-full mt-2 mb-3 border border-gray-300 rounded px-3 py-2"
+                placeholder="Cargo del encargado">
+
 
             <!-- Canvas firma -->
             <div class="w-full h-[300px] border-2 border-gray-300 rounded-lg relative mt-2">
@@ -117,6 +122,7 @@
             const nombreEncargado = document.getElementById('nombreEncargado').value;
             const tipoDocumento = document.getElementById('tipoDocumento').value;
             const numeroDocumento = document.getElementById('numeroDocumento').value;
+            const cargoEncargado = document.getElementById('cargoEncargado').value; // 👈 nuevo
 
             if (!visitaId) {
                 return toastr.error("No se encontró la visita asociada.");
@@ -132,6 +138,9 @@
 
             if (!numeroDocumento.trim()) {
                 return toastr.error("Por favor, ingresa el número de documento.");
+            }
+            if (!cargoEncargado.trim()) {
+                return toastr.error("Por favor, ingresa el cargo del encargado.");
             }
 
             // Validación de tipo de documento y número
@@ -150,7 +159,8 @@
                         firma,
                         nombreEncargado,
                         tipoDocumento,
-                        documento: numeroDocumento
+                        documento: numeroDocumento,
+                        cargo: cargoEncargado
                     })
                 })
                 .then(res => res.json())

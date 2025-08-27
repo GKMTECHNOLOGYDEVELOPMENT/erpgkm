@@ -50,7 +50,8 @@ class Firma extends Model
 		'idSolicitud',
 		'nombreencargado',
 		'tipodocumento',
-		'documento'
+		'documento',
+		'cargo'
 	];
 
 	public function ticket()

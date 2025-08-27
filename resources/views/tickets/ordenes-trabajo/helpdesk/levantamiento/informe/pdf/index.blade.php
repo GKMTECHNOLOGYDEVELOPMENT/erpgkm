@@ -196,7 +196,7 @@
                             <div class="w-full text-xs">
                                 <p class="text-xs uppercase indent-paragraph">
                                     {!! nl2br(e($transicion->justificacion)) !!}
-                                </p>                        
+                                </p>
                             </div>
                     @endforeach
                 </div>
@@ -270,6 +270,11 @@
                         <p class="text-xs text-gray-600 uppercase tracking-wide">
                             {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
                         </p>
+                        @if (!empty($firma->cargo))
+                            <p class="text-xs text-gray-600 uppercase tracking-wide">
+                                {{ $firma->cargo }}
+                            </p>
+                        @endif
                         <p class="text-xs text-gray-500">
                             {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
                             {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
