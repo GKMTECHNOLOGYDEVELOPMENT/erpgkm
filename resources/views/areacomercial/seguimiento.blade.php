@@ -333,15 +333,6 @@
                 }
             }
 
-            // Inicializa Gantt si es cronograma
-            if (tab === 'cronograma') {
-                requestAnimationFrame(() => {
-                    const el = tabElement.querySelector('#gantt_cronograma');
-                    if (el && typeof window.renderCronograma === 'function') {
-                        window.renderCronograma(el);
-                    }
-                });
-            }
 
             // 👇 Inicializa Alpine + Select2 si es proyectos
             if (tab === 'proyectos') {
