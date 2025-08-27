@@ -1198,3 +1198,7 @@ Route::delete('/scrumboard/rechazados/{id}', [ScrumboarddController::class, 'del
 
 Route::get('/tarea/{taskId}', [ScrumboarddController::class, 'mostrarTarea']);
 Route::get('/scrumboard/reuniones/{id}/participantes', [ScrumboarddController::class, 'getParticipantesReunion']);
+
+Route::get('/buscar-articulo', [ArticulosController::class, 'buscar'])->name('buscar.articulo');
+
+

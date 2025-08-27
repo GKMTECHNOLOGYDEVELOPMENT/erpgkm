@@ -286,4 +286,27 @@ public function validarNombreProveedores(Request $request)
          $exists = Proveedore::where('nombre', $nombre)->exists();
          return response()->json(['exists' => $exists]);
 }
+
+
+
+public function getAllProveedores()
+    {
+        try {
+            // Obtener solo los proveedores activos (estado = 1)
+            $proveedores = Proveedore::where('estado', 1)
+                ->select('idProveedor as id', 'nombre', 'numeroDocumento')
+                ->orderBy('nombre', 'asc')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'data' => $proveedores
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar los proveedores: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

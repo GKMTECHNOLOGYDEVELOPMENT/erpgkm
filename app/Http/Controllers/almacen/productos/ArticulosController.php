@@ -141,8 +141,8 @@ public function buscar(Request $request)
     $codigo = $request->query('codigo');
 
     $articulo = DB::table('articulos')
-        ->where('codigo_repuesto', $codigo)
-        ->where('idTipoArticulo', 2)
+        ->where('codigo_barras', $codigo)
+        ->where('idTipoArticulo', 1)
         ->first();
 
     if (!$articulo) {
@@ -166,6 +166,7 @@ public function buscar(Request $request)
             'idArticulos'     => $articulo->idArticulos,
             'codigo_repuesto' => $articulo->codigo_repuesto,
             'codigo_barras'   => $articulo->codigo_barras,
+            'nombre'          => $articulo->nombre, // ⚠️ AÑADE ESTE CAMPO
             'stock_total'     => $articulo->stock_total,
             'stock_minimo'    => $articulo->stock_minimo,
             'precio_compra'   => $articulo->precio_compra,

@@ -48,7 +48,7 @@ class Compra extends Model
 	protected $primaryKey = 'idCompra';
 	public $timestamps = false;
 
-	protected $casts = [
+		protected $casts = [
 		'nro' => 'int',
 		'fechaEmision' => 'datetime',
 		'fechaVencimiento' => 'datetime',
@@ -63,7 +63,9 @@ class Compra extends Model
 		'idImpuesto' => 'int',
 		'idSujeto' => 'int',
 		'idCondicionCompra' => 'int',
-		'idTipoPago' => 'int'
+		'idTipoPago' => 'int',
+		'created_at' => 'datetime',   // <-- agregado
+		'updated_at' => 'datetime'    // <-- agregado
 	];
 
 	protected $fillable = [

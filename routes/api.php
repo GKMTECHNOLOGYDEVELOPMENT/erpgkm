@@ -6,6 +6,7 @@ use App\Http\Controllers\administracion\asociados\ClientesController;
 use App\Http\Controllers\administracion\asociados\ProveedoresController;
 use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
+use App\Http\Controllers\administracion\compras\ComprasController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kits\KitsController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
@@ -432,3 +433,41 @@ Route::get('/usuarios/comercial', function () {
 });
 
 Route::get('/reunion/{reunionId}/participantes', [ScrumboarddController::class, 'getParticipantesReunion']);
+// Ruta para obtener los documentos
+Route::get('/documentos', function() {
+    try {
+        $documentos = DB::table('documento')
+            ->select('idDocumento', 'nombre')
+            ->orderBy('nombre')
+            ->get();
+            
+        return response()->json([
+            'success' => true,
+            'data' => $documentos
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar documentos'
+        ], 500);
+    }
+});
+
+// En routes/web.php o routes/api.php
+Route::get('/getall-proveedores', [ProveedoresController::class, 'getAllProveedores']);
+
+
+
+// APIs para cargar datos
+Route::get('/monedas', [ComprasController::class, 'getMonedas'])->name('api.monedas');
+Route::get('//impuestos', [ComprasController::class, 'getImpuestos'])->name('api.impuestos');
+Route::get('/sujetos', [ComprasController::class, 'getSujetos'])->name('api.sujetos');
+Route::get('/condiciones-compra', [ComprasController::class, 'getCondicionesCompra'])->name('api.condiciones-compra');
+Route::get('/tipos-pago', [ComprasController::class, 'getTiposPago'])->name('api.tipos-pago');
+
+// Ruta para guardar la compra
+Route::post('/guardar-compra', [ComprasController::class, 'guardarCompra'])->name('api.guardar-compra');
+
+// Rutas que ya deberías tener
+// Route::get('/documentos', [ComprasController::class, 'getDocumentos'])->name('api.documentos');
+// Route::get('/getall-proveedores', [ComprasController::class, 'getProveedores'])->name('api.proveedores');

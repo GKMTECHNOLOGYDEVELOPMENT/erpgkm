@@ -28,7 +28,8 @@ class Moneda extends Model
 	public $timestamps = false;
 
 	protected $fillable = [
-		'nombre'
+		'nombre',
+		'simbolo'
 	];
 
 	public function compras()

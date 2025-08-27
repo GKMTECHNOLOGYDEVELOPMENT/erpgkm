@@ -1,6 +1,7 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
         .clean-input {
@@ -239,58 +240,258 @@
             </div>
 
             <!-- Sección derecha - Datos de la compra -->
+            <!-- Sección derecha - Datos de la compra -->
             <div class="lg:col-span-1">
                 <div class="panel mt-2 p-5 max-w-xl mx-auto sticky top-4">
                     <h2 class="text-lg font-semibold mb-4">DATOS DE LA COMPRA</h2>
 
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
-                            <input type="text" x-ref="fechaInput" x-model="fecha"
-                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
-                                placeholder="Selecciona una fecha" />
+                        <!-- Primera fila: Documento y Serie + Nro -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Documento <span class="text-red-500">*</span></label>
+                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                    x-model="documentoId" required>
+                                    <option value="">Seleccione un documento</option>
+                                    <template x-for="documento in documentos" :key="documento.idDocumento">
+                                        <option :value="documento.idDocumento" x-text="documento.nombre"></option>
+                                    </template>
+                                </select>
+
+                                <!-- Loading state -->
+                                <template x-if="documentos.length === 0">
+                                    <div class="text-sm text-gray-500 mt-1">Cargando documentos...</div>
+                                </template>
+                            </div>
+
+                            <!-- Fila: Serie - Número con guion en el centro -->
+                            <div class="flex gap-2 items-end">
+                                <!-- Campo Serie -->
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Serie <span class="text-red-500">*</span></label>
+                                    <input type="text" x-model="serie"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 
+                   focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 
+                   text-gray-800 dark:text-white text-sm" />
+                                </div>
+
+                                <!-- Separador visual "-" -->
+                                <div class="pb-3 text-lg text-gray-600 dark:text-gray-300">-</div>
+
+                                <!-- Campo Número -->
+                                <div class="w-1/2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Número <span class="text-red-500">*</span></label>
+                                    <input type="text" x-model="nro"
+                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 
+                   focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 
+                   text-gray-800 dark:text-white text-sm" />
+                                </div>
+                            </div>
+
 
                         </div>
 
+                        <!-- Segunda fila: Fechas -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Emisión <span class="text-red-500">*</span></label>
+                                <input type="text" x-ref="fechaInput" x-model="fecha"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                    placeholder="Selecciona fecha" />
+                            </div>
 
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento <span class="text-red-500">*</span></label>
+                                <input type="text" value="2025-08-27" x-ref="fechaVencimientoInput" x-model="fechaVencimiento"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm" />
+                            </div>
+                        </div>
+
+                        <!-- Tercera fila: Moneda y Tipo de Cambio -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Moneda <span class="text-red-500">*</span></label>
+                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                    x-model="monedaId" @change="cambiarMoneda" required>
+                                    <option value="">Seleccione una moneda</option>
+                                    <template x-for="moneda in monedas" :key="moneda.id">
+                                        <option :value="moneda.id" x-text="moneda.nombre + ' (' + moneda.simbolo + ')'"></option>
+                                    </template>
+                                </select>
+
+                                <!-- Loading state -->
+                                <template x-if="monedas.length === 0">
+                                    <div class="text-sm text-gray-500 mt-1">Cargando monedas...</div>
+                                </template>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Cambio</label>
+                                <input type="number" step="0.001" x-model="tipoCambio"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                    @change="cambiarMoneda" />
+                            </div>
+                        </div>
+                        <!-- Cuarta fila: Impuesto y DUA -->
+                        <div class="grid grid-cols-2 gap-4 items-end">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Impuesto <span class="text-red-500">*</span></label>
+                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                    x-model="impuestoId" required>
+                                    <option value="">Seleccione un impuesto</option>
+                                    <template x-for="impuesto in impuestos" :key="impuesto.id">
+                                        <option :value="impuesto.id" x-text="impuesto.nombre + ' (' + impuesto.monto + '%)'"></option>
+                                    </template>
+                                </select>
+
+                                <!-- Loading state -->
+                                <template x-if="impuestos.length === 0">
+                                    <div class="text-sm text-gray-500 mt-1">Cargando impuestos...</div>
+                                </template>
+                            </div>
+
+                            <div class="flex items-center h-10">
+                                <input type="checkbox" id="dua" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                <label for="dua" class="ms-2 text-sm font-medium text-gray-700">DUA</label>
+                            </div>
+                        </div>
+
+                        <!-- Quinta fila: Proveedor -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor <span
-                                    class="text-red-500">*</span></label>
-                            <select
-                                class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor <span class="text-red-500">*</span></label>
+                            <select id="proveedorSelect" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
                                 x-model="proveedorId">
                                 <option value="">Seleccione una opción</option>
                                 <template x-for="proveedor in proveedores" :key="proveedor.id">
-                                    <option :value="proveedor.id" x-text="proveedor.nombre"></option>
+                                    <option :value="proveedor.id" x-text="proveedor.nombre + ' - ' + proveedor.numeroDocumento"></option>
                                 </template>
                             </select>
 
+                            <!-- Loading state -->
+                            <template x-if="proveedores.length === 0">
+                                <div class="text-sm text-gray-500 mt-1">Cargando proveedores...</div>
+                            </template>
                         </div>
 
-                        <div class="border-t border-gray-200 pt-4">
-                            <div class="flex justify-between mb-2">
-                                <span class="text-gray-600">Subtotal:</span>
-                                <span class="font-medium" x-text="formatCurrency(subtotal)"></span>
+                        <!-- Sexta fila: Condición de Compra y Sujeto a -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Condición Compra <span class="text-red-500">*</span></label>
+                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                    x-model="condicionCompraId" required>
+                                    <option value="">Seleccione una condición</option>
+                                    <template x-for="condicion in condicionesCompra" :key="condicion.id">
+                                        <option :value="condicion.id" x-text="condicion.nombre"></option>
+                                    </template>
+                                </select>
+
+                                <!-- Loading state -->
+                                <template x-if="condicionesCompra.length === 0">
+                                    <div class="text-sm text-gray-500 mt-1">Cargando condiciones...</div>
+                                </template>
                             </div>
-                            <div class="flex justify-between mb-2">
-                                <span class="text-gray-600">IGV (18%):</span>
-                                <span class="font-medium" x-text="formatCurrency(itbis)"></span>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Sujeto a <span class="text-red-500">*</span></label>
+                                <select class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                    x-model="sujetoId" required>
+                                    <option value="">Seleccione una opción</option>
+                                    <template x-for="sujeto in sujetos" :key="sujeto.id">
+                                        <option :value="sujeto.id" x-text="sujeto.nombre"></option>
+                                    </template>
+                                </select>
+
+                                <!-- Loading state -->
+                                <template x-if="sujetos.length === 0">
+                                    <div class="text-sm text-gray-500 mt-1">Cargando sujetos...</div>
+                                </template>
                             </div>
-                            <div class="flex justify-between text-lg font-semibold">
+                        </div>
+
+                        <!-- Nueva fila: Tipo de Pago -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pago</label>
+                            <select class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                x-model="tipoPagoId">
+                                <option value="">Seleccione un tipo de pago</option>
+                                <template x-for="tipoPago in tiposPago" :key="tipoPago.id">
+                                    <option :value="tipoPago.id" x-text="tipoPago.nombre"></option>
+                                </template>
+                            </select>
+
+                            <!-- Loading state -->
+                            <template x-if="tiposPago.length === 0">
+                                <div class="text-sm text-gray-500 mt-1">Cargando tipos de pago...</div>
+                            </template>
+                        </div>
+
+
+
+                        <!-- Séptima fila: Adjuntar Archivo -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Adjuntar Archivo</label>
+                            <div class="flex items-center gap-2">
+                                <input type="file"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.qif" />
+                                <span class="text-xs text-gray-500">(pdf/doc/jpg/png/qif)</span>
+                            </div>
+                        </div>
+
+                        <!-- Separador -->
+                        <div class="border-t border-gray-200 pt-4"></div>
+
+                        <!-- Totales con moneda dinámica -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 text-sm">Subtotal:</span>
+                                <span class="font-medium text-sm" x-text="formatCurrency(subtotal)"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 text-sm">
+                                    <span x-text="impuestos.find(i => i.id == impuestoId)?.nombre || 'Impuesto'"></span>
+                                    (<span x-text="impuestos.find(i => i.id == impuestoId)?.monto || 18"></span>%):
+                                </span>
+                                <span class="font-medium text-sm" x-text="formatCurrency(itbis)"></span>
+                            </div>
+                            <div class="flex justify-between text-lg font-semibold pt-2 border-t border-gray-200">
                                 <span class="text-gray-700">Total:</span>
                                 <span class="text-blue-600" x-text="formatCurrency(total)"></span>
                             </div>
                         </div>
 
+                        <!-- Botón Guardar con Loading -->
                         <div class="pt-4">
-                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg"
-                                :disabled="!puedeGuardar" :class="{ 'opacity-50 cursor-not-allowed': !puedeGuardar }"
+                            <button
+                                class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
+                                :disabled="!puedeGuardar || guardandoCompra"
+                                :class="{
+            'bg-blue-600 hover:bg-blue-700 text-white': puedeGuardar && !guardandoCompra,
+            'bg-gray-400 text-gray-600 cursor-not-allowed': !puedeGuardar || guardandoCompra
+        }"
                                 @click="guardarCompra">
-                                GUARDAR COMPRA
+
+                                <!-- Spinner de loading -->
+                                <template x-if="guardandoCompra">
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </template>
+
+                                <!-- Ícono normal cuando no está cargando -->
+                                <template x-if="!guardandoCompra">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </template>
+
+                                <!-- Texto del botón -->
+                                <span x-text="guardandoCompra ? 'GUARDANDO...' : 'GUARDAR COMPRA'"></span>
                             </button>
                         </div>
 
-                        <p class="text-xs text-gray-500">
+                        <p class="text-xs text-gray-500 text-center">
                             Los campos marcados con <span class="text-red-500">*</span> son obligatorios
                         </p>
                     </div>
@@ -320,14 +521,13 @@
 
                     <!-- Body -->
                     <div class="p-6 text-sm text-gray-700 dark:text-white">
+                        <!-- MODAL - Sección cuando producto existe -->
                         <template x-if="productoEncontrado">
                             <div class="space-y-8">
-
                                 <!-- Código y nombre -->
                                 <div>
                                     <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
                                         <i class="fas fa-tags text-gray-600 dark:text-white"></i>
-
                                         Código y Nombre
                                     </h4>
 
@@ -338,8 +538,8 @@
                                             </label>
                                             <div class="input-with-icon">
                                                 <i class="fas fa-barcode input-icon"></i>
-                                                <input type="text" class="clean-input"
-                                                    x-model="nuevoProducto.codigo_barras" :value="codigoBarras">
+                                                <!-- CAMBIO: Usar productoEncontrado en lugar de nuevoProducto -->
+                                                <input type="text" class="clean-input" :value="productoEncontrado.codigo_barras" readonly>
                                             </div>
                                         </div>
                                         <!-- Nombre -->
@@ -349,8 +549,8 @@
                                             </label>
                                             <div class="input-with-icon">
                                                 <i class="fas fa-cog input-icon"></i>
-                                                <input type="text" class="clean-input"
-                                                    x-model="nuevoProducto.nombre">
+                                                <!-- CAMBIO: Usar productoEncontrado en lugar de nuevoProducto -->
+                                                <input type="text" class="clean-input" :value="productoEncontrado.nombre" readonly>
                                             </div>
                                         </div>
                                     </div>
@@ -365,47 +565,50 @@
 
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <label class="block text-gray-600 text-sm mb-1">Stock o existencias
-                                                compradas</label>
+                                            <label class="block text-gray-600 text-sm mb-1">Stock o existencias compradas</label>
                                             <div class="input-with-icon">
                                                 <i class="fas fa-boxes input-icon"></i>
-                                                <input type="number" class="clean-input"
-                                                    x-model="nuevoProducto.stock">
+                                                <!-- CAMBIO: Usar productoEncontrado -->
+                                                <input type="number" class="clean-input" :value="productoEncontrado.stock" readonly>
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="block text-gray-600 text-sm mb-1">Precio de compra (Con
-                                                impuesto incluido)</label>
+                                            <label class="block text-gray-600 text-sm mb-1">Precio de compra (Con impuesto incluido)</label>
                                             <div class="input-with-icon">
                                                 <i class="fas fa-money-bill-wave input-icon"></i>
-                                                <input type="number" step="0.01" class="clean-input"
-                                                    x-model="precioCompra">
+                                                <!-- CAMBIO: Usar x-model para precioCompra (que se actualiza desde productoEncontrado) -->
+                                                <input type="number" step="0.01" class="clean-input" x-model="precioCompra">
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="block text-gray-600 text-sm mb-1">Precio de venta (Con
-                                                impuesto incluido)</label>
+                                            <label class="block text-gray-600 text-sm mb-1">Precio de venta (Con impuesto incluido)</label>
                                             <div class="input-with-icon">
                                                 <i class="fas fa-tags input-icon"></i>
-                                                <input type="number" step="0.01" class="clean-input"
-                                                    x-model="productoEncontrado.precio_venta">
+                                                <!-- CAMBIO: Usar productoEncontrado -->
+                                                <input type="number" step="0.01" class="clean-input" :value="productoEncontrado.precio_venta" readonly>
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="block text-gray-600 text-sm mb-1">Precio de venta por mayoreo
-                                                (Con impuesto incluido)</label>
+                                            <label class="block text-gray-600 text-sm mb-1">Precio de venta por mayoreo (Con impuesto incluido)</label>
                                             <div class="input-with-icon">
                                                 <i class="fas fa-hand-holding-usd input-icon"></i>
-                                                <input type="number" step="0.01" class="clean-input"
-                                                    value="0.00">
+                                                <input type="number" step="0.01" class="clean-input" value="0.00">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
+                                <!-- AÑADIR: Input para cantidad -->
+                                <div>
+                                    <label class="block text-gray-600 text-sm mb-1">Cantidad a comprar</label>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-cart-plus input-icon"></i>
+                                        <input type="number" class="clean-input" x-model="cantidadProducto" min="1">
+                                    </div>
+                                </div>
+
                                 <p class="text-xs text-gray-500 mt-2">
-                                    Los campos marcados con <span class="text-red-500 font-semibold">*</span> son
-                                    obligatorios
+                                    Los campos marcados con <span class="text-red-500 font-semibold">*</span> son obligatorios
                                 </p>
                             </div>
                         </template>
@@ -548,8 +751,11 @@
 
 
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-        <script src="{{ asset('assets/js/compras/compras.js') }}" defer></script>
+    <script src="{{ asset('assets/js/compras/compras.js') }}" defer></script>
 
 </x-layout.default>
