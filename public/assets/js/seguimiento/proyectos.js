@@ -131,6 +131,7 @@ document.addEventListener('alpine:init', () => {
     // Auto-asignar el responsable de reunión con el usuario autenticado
     if (window.USUARIO_AUTH) {
         this.paramsTask.responsablereunion = window.USUARIO_AUTH;
+        this.paramsTask.responsablecotizacion = window.USUARIO_AUTH;
     }
     
     // Inicializar el select2 si lo estás usando (opcional)
@@ -209,6 +210,9 @@ document.addEventListener('alpine:init', () => {
             const url = '/scrumboard/cotizaciones/handle';
             const method = 'POST';
 
+                const responsable = this.paramsTask.responsablecotizacion || window.USUARIO_AUTH || '';
+
+
             const data = {
                 task_id: this.paramsTask.id,
                 codigo_cotizacion: this.paramsTask.codigoCotizacion,
@@ -217,7 +221,7 @@ document.addEventListener('alpine:init', () => {
                 condiciones_comerciales: this.paramsTask.condicionescomerciales,
                 total_cotizacion: this.paramsTask.totalcotizacion,
                 validez_cotizacion: this.paramsTask.validezcotizacion,
-                responsable_cotizacion: this.paramsTask.responsablecotizacion,
+                responsable_cotizacion: responsable,
                 observaciones: this.paramsTask.observacionescotizacion,
                 nivelPorcentajeCotizacion: this.paramsTask.nivelPorcentajeCotizacion,
                 cotizacion_id: this.cotizacionEditId || null, // Incluir ID si estamos editando

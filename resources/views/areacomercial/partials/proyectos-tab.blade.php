@@ -473,14 +473,7 @@
                                         type="text" class="form-input" placeholder="Ej: 30 días" />
                                 </div>
 
-                                <select id="nivelPorcentajeCotizacion" x-model="paramsTask.nivelPorcentajeCotizacion"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
-
+                           
 
 
 
@@ -490,12 +483,25 @@
                                     <input id="responsablecotizacion" x-model="paramsTask.responsablecotizacion"
                                         type="text" class="form-input" placeholder="Nombre del responsable" />
                                 </div>
+                                <div>
+                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
+                                <select id="nivelPorcentajeCotizacion" x-model="paramsTask.nivelPorcentajeCotizacion"
+                                    class="form-select">
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="0">Inicial (0%)</option>
+                                    <option value="0.5">En Proceso (50%)</option>
+                                    <option value="1">Finalizado (100%)</option>
+                                </select>
+                                </div>
 
                                 <div class="md:col-span-2">
                                     <label for="observacionescotizacion">Observaciones</label>
                                     <textarea id="observacionescotizacion" x-model="paramsTask.observacionescotizacion" class="form-textarea"
                                         placeholder="Observaciones adicionales"></textarea>
                                 </div>
+
+
+                               
                             </div>
 
                             <!-- Botones para agregar/actualizar cotización -->
@@ -651,21 +657,21 @@
                                         class="form-input" placeholder="Motivo principal" />
                                 </div>
                             <div x-data="scrumboard" x-init="fetchUsuarios()" id="scrumboard">
-    <label for="participantesreunion">Participantes</label>
-    <select id="participantesreunion"
-            x-ref="participantesSelect"
-            multiple
-            class="form-select w-full">
-        <template x-if="usuarios && usuarios.length > 0">
-            <template x-for="usuario in usuarios" :key="usuario.id">
-<option :value="usuario.id" x-text="usuario.nombre_completo"></option>
-            </template>
-        </template>
-    </select>
-</div>
+                            <label for="participantesreunion">Participantes</label>
+                            <select id="participantesreunion"
+                                    x-ref="participantesSelect"
+                                    multiple
+                                    class="form-select w-full">
+                                <template x-if="usuarios && usuarios.length > 0">
+                                    <template x-for="usuario in usuarios" :key="usuario.id">
+                        <option :value="usuario.id" x-text="usuario.nombre_completo"></option>
+                                    </template>
+                                </template>
+                            </select>
+                        </div>
 
 
-                                <div>
+                                <div style="display: none;">
                                     <label for="responsablereunion">Responsable</label>
                                     <input id="responsablereunion" x-model="paramsTask.responsablereunion"
                                         type="text" class="form-input" placeholder="Nombre del responsable" />
@@ -821,10 +827,10 @@
                                 </div>
 
                                 <div>
-                                    <label for="participanteslevantamiento">Participantes</label>
+                                    <label for="participanteslevantamiento">OT</label>
                                     <input id="participanteslevantamiento"
                                         x-model="paramsTask.participanteslevantamiento" type="text"
-                                        class="form-input" placeholder="Nombres de participantes" />
+                                        class="form-input" placeholder="Numero de OT" />
                                 </div>
 
                                 <div>
@@ -834,20 +840,25 @@
                                         placeholder="Ubicación del levantamiento" />
                                 </div>
 
-                                <div class="md:col-span-2">
-                                    <label for="descripcionrequerimiento">Descripción del Requerimiento</label>
-                                    <textarea id="descripcionrequerimiento" x-model="paramsTask.descripcionrequerimiento" class="form-textarea"
-                                        placeholder="Describa el requerimiento"></textarea>
-                                </div>
-
-
-                                <select id="nivelPorcentajeLevantamiento"
-                                    x-model="paramsTask.nivelPorcentajeLevantamiento" class="form-select">
+                                <div>
+                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
+                                <select id="nivelPorcentajeLevantamiento" x-model="paramsTask.nivelPorcentajeLevantamiento"
+                                    class="form-select">
                                     <option value="">Seleccionar estado</option>
                                     <option value="0">Inicial (0%)</option>
                                     <option value="0.5">En Proceso (50%)</option>
                                     <option value="1">Finalizado (100%)</option>
                                 </select>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label for="descripcionrequerimiento">Descripción del Requerimiento</label>
+                                    <textarea id="descripcionrequerimiento" x-model="paramsTask.descripcionrequerimiento" class="form-textarea"
+                                        placeholder="Describa el requerimiento"></textarea>
+                                </div>
+                                
+                             
+
 
                                 <div class="md:col-span-2">
                                     <label for="observacioneslevantamiento">Observaciones</label>
@@ -899,7 +910,7 @@
                                             <tr class="bg-gray-100 dark:bg-gray-700">
                                                 <th class="px-4 py-2 text-left">Fecha</th>
                                                 <th class="px-4 py-2 text-left">Ubicación</th>
-                                                <th class="px-4 py-2 text-left">Participantes</th>
+                                                <th class="px-4 py-2 text-left">OT</th>
                                                 <th class="px-4 py-2 text-left">Acciones</th>
                                             </tr>
                                         </thead>
@@ -969,11 +980,30 @@
                                         type="text" class="form-input" placeholder="Código asociado" />
                                 </div>
 
-                                <div>
-                                    <label for="tiporelacion">Tipo de Relación</label>
-                                    <input id="tiporelacion" x-model="paramsTask.tiporelacion" type="text"
-                                        class="form-input" placeholder="Ej: Nuevo Cliente" />
-                                </div>
+                               <div>
+                                <label for="tiporelacion">Tipo de Relación</label>
+                                <select id="tiporelacion" x-model="paramsTask.tiporelacion" class="form-input">
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="Nuevo Cliente">Nuevo Cliente</option>
+                                    <option value="Cliente Recurrente">Cliente Recurrente</option>
+                                    <option value="Cliente Potencial">Cliente Potencial</option>
+                                    <option value="Cliente Inactivo">Cliente Inactivo</option>
+                                    <option value="Socio Estratégico">Socio Estratégico</option>
+                                    <option value="Proveedor">Proveedor</option>
+                                    <option value="Aliado Comercial">Aliado Comercial</option>
+                                    <option value="Distribuidor">Distribuidor</option>
+                                    <option value="Revendedor">Revendedor</option>
+                                    <option value="Consultor">Consultor</option>
+                                    <option value="Partner Tecnológico">Partner Tecnológico</option>
+                                    <option value="Cliente VIP">Cliente VIP</option>
+                                    <option value="Cliente Referido">Cliente Referido</option>
+                                    <option value="Interno">Interno</option>
+                                    <option value="Gobierno / Institución Pública">Gobierno / Institución Pública</option>
+                                    <option value="ONG / Fundación">ONG / Fundación</option>
+                                    <option value="Otro">Otro</option>
+                                </select>
+                            </div>
+
 
                                 <div>
                                     <label for="tiposervicio">Tipo de Servicio</label>
@@ -999,6 +1029,8 @@
                                         type="text" class="form-input" placeholder="Ej: 6 meses" />
                                 </div>
 
+                        <div>
+                                  <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
                                 <select id="nivelPorcentajeGanado" x-model="paramsTask.nivelPorcentajeGanado"
                                     class="form-select">
                                     <option value="">Seleccionar estado</option>
@@ -1006,7 +1038,7 @@
                                     <option value="0.5">En Proceso (50%)</option>
                                     <option value="1">Finalizado (100%)</option>
                                 </select>
-
+                        </div>
 
                                 <div class="md:col-span-2">
                                     <label for="observacionesganado">Observaciones</label>
@@ -1124,11 +1156,21 @@
                                         class="form-input" />
                                 </div>
 
-                                <div>
+                              <div>
                                     <label for="estadoactual">Estado Actual</label>
-                                    <input id="estadoactual" x-model="paramsTask.estadoactual" type="text"
-                                        class="form-input" placeholder="Estado del proyecto" />
+                                    <select id="estadoactual" x-model="paramsTask.estadoactual" class="form-input">
+                                        <option value="">Selecciona un estado</option>
+                                        <option value="Observado">Observado</option>
+                                        <option value="Por corregir">Por corregir</option>
+                                        <option value="En revisión">En revisión</option>
+                                        <option value="Corregido">Corregido</option>
+                                        <option value="Aprobado">Aprobado</option>
+                                        <option value="Rechazado">Rechazado</option>
+                                        <option value="Finalizado">Finalizado</option>
+                                        <option value="Cancelado">Cancelado</option>
+                                    </select>
                                 </div>
+
 
                                 <div class="md:col-span-2">
                                     <label for="detallesobservado">Detalles de Observación</label>
@@ -1154,6 +1196,9 @@
                                         placeholder="Detalle específico de la observación"></textarea>
                                 </div>
 
+                                    <div>                                   
+                                        
+                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
                                 <select id="nivelPorcentajeObservado" x-model="paramsTask.nivelPorcentajeObservado"
                                     class="form-select">
                                     <option value="">Seleccionar estado</option>
@@ -1161,6 +1206,12 @@
                                     <option value="0.5">En Proceso (50%)</option>
                                     <option value="1">Finalizado (100%)</option>
                                 </select>
+                                    </div>
+
+                             
+
+
+
                             </div>
 
                             <!-- Botones para agregar/actualizar proyecto observado -->
@@ -1279,14 +1330,17 @@
                                         <textarea id="comentarioscliente" x-model="paramsTask.comentarioscliente" class="form-textarea"
                                             placeholder="Comentarios o feedback del cliente"></textarea>
                                     </div>
-
-                                    <select id="nivelPorcentajeRechazado"
-                                        x-model="paramsTask.nivelPorcentajeRechazado" class="form-select">
-                                        <option value="">Seleccionar estado</option>
-                                        <option value="0">Inicial (0%)</option>
-                                        <option value="0.5">En Proceso (50%)</option>
-                                        <option value="1">Finalizado (100%)</option>
-                                    </select>
+                                
+                                    <div>
+                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
+                                <select id="nivelPorcentajeRechazado" x-model="paramsTask.nivelPorcentajeRechazado"
+                                    class="form-select">
+                                    <option value="">Seleccionar estado</option>
+                                    <option value="0">Inicial (0%)</option>
+                                    <option value="0.5">En Proceso (50%)</option>
+                                    <option value="1">Finalizado (100%)</option>
+                                </select>
+                                </div>
                                 </div>
 
                                 <!-- Botones para agregar/actualizar proyecto rechazado -->

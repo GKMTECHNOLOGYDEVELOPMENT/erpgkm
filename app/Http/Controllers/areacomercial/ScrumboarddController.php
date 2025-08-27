@@ -1015,32 +1015,42 @@ public function deleteLevantamiento($id)
 
 
 
-
-
 public function handleGanado(Request $request)
 {
     try {
+        // ✅ Validación de todos los campos
         $request->validate([
-            'task_id' => 'required|exists:tasks,id',
-            'codigo_cotizacion' => 'nullable|string|max:255',
-            'tipo_servicio' => 'nullable|string|max:255',
-            'fecha_ganado' => 'nullable|date',
-            'responsable_ganado' => 'nullable|string|max:255',
-            'comentarios' => 'nullable|string',
+            'task_id'             => 'required|exists:tasks,id',
+            'codigo_cotizacion'   => 'nullable|string|max:255',
+            'tipo_relacion'       => 'nullable|string|max:255',
+            'tipo_servicio'       => 'nullable|string|max:255',
+            'valor_ganado'        => 'nullable|numeric|min:0',
+            'forma_cierre'        => 'nullable|string|max:255',
+            'duracion_acuerdo'    => 'nullable|string|max:255',
+            'observaciones'       => 'nullable|string',
+            'fecha_ganado'        => 'nullable|date',
+            'responsable_ganado'  => 'nullable|string|max:255',
             'nivelPorcentajeGanado' => 'nullable|numeric|in:0,0.5,1',
-            'ganado_id' => 'nullable|exists:task_ganados,id'
+            'ganado_id'           => 'nullable|exists:task_ganados,id'
         ]);
+
+        // 🧾 Datos a guardar
+        $data = [
+            'codigo_cotizacion'   => $request->codigo_cotizacion,
+            'tipo_relacion'       => $request->tipo_relacion,
+            'tipo_servicio'       => $request->tipo_servicio,
+            'valor_ganado'        => $request->valor_ganado,
+            'forma_cierre'        => $request->forma_cierre,
+            'duracion_acuerdo'    => $request->duracion_acuerdo,
+            'observaciones'       => $request->observaciones,
+            'fecha_ganado'        => $request->fecha_ganado,
+            'responsable_ganado'  => $request->responsable_ganado
+        ];
 
         if ($request->filled('ganado_id')) {
             // 🔄 Actualizar proyecto ganado
             $ganado = TaskGanado::findOrFail($request->ganado_id);
-            $ganado->update([
-                'codigo_cotizacion' => $request->codigo_cotizacion,
-                'tipo_servicio' => $request->tipo_servicio,
-                'fecha_ganado' => $request->fecha_ganado,
-                'responsable_ganado' => $request->responsable_ganado,
-                'comentarios' => $request->comentarios
-            ]);
+            $ganado->update($data);
 
             // ✅ Actualizar subtarea en cronograma
             CronogramaHelper::actualizarSubtareaCronograma([
@@ -1050,20 +1060,14 @@ public function handleGanado(Request $request)
                 'nombre'       => 'Ganado: ' . ($ganado->codigo_cotizacion ?? 'Sin código'),
                 'descripcion'  => $ganado->tipo_servicio ?? '',
                 'fecha_inicio' => $ganado->fecha_ganado,
-                'progreso'     => $request->nivelPorcentajeGanado // 👈 aquí lo pasas
+                'progreso'     => $request->nivelPorcentajeGanado
             ]);
 
             $message = 'Proyecto ganado actualizado exitosamente';
         } else {
             // ➕ Crear nuevo proyecto ganado
-            $ganado = TaskGanado::create([
-                'task_id' => $request->task_id,
-                'codigo_cotizacion' => $request->codigo_cotizacion,
-                'tipo_servicio' => $request->tipo_servicio,
-                'fecha_ganado' => $request->fecha_ganado,
-                'responsable_ganado' => $request->responsable_ganado,
-                'comentarios' => $request->comentarios
-            ]);
+            $data['task_id'] = $request->task_id;
+            $ganado = TaskGanado::create($data);
 
             // ✅ Crear subtarea en cronograma
             CronogramaHelper::crearSubtareaCronograma([
@@ -1072,7 +1076,7 @@ public function handleGanado(Request $request)
                 'sub_id'       => $ganado->id,
                 'nombre'       => 'Ganado: ' . ($ganado->codigo_cotizacion ?? 'Sin código'),
                 'descripcion'  => $ganado->tipo_servicio ?? '',
-                'progreso'     => $request->nivelPorcentajeGanado, // 👈 aquí lo pasas
+                'progreso'     => $request->nivelPorcentajeGanado,
                 'fecha_inicio' => $ganado->fecha_ganado,
             ]);
 
@@ -1081,7 +1085,7 @@ public function handleGanado(Request $request)
 
         return response()->json([
             'success' => true,
-            'ganado' => $ganado,
+            'ganado'  => $ganado,
             'message' => $message
         ]);
 
@@ -1092,6 +1096,7 @@ public function handleGanado(Request $request)
         ], 500);
     }
 }
+
 
 // Obtener proyectos ganados de una tarea
 public function getGanados($taskId)
@@ -1144,17 +1149,25 @@ public function handleObservado(Request $request)
             'detalles' => 'nullable|string',
             'fecha_observado' => 'nullable|date',
             'observado_id' => 'nullable|exists:task_observados,id',
-            'nivelPorcentajeObservado' => 'nullable|numeric|in:0,0.5,1'
+            'nivelPorcentajeObservado' => 'nullable|numeric|in:0,0.5,1',
+            'comentarios' => 'nullable|string',
+            'acciones_pendientes' => 'nullable|string',
+            'detalle_observado' => 'nullable|string',
         ]);
+
 
         if ($request->filled('observado_id')) {
             // 🔄 Actualizar observado
             $observado = TaskObservado::findOrFail($request->observado_id);
-            $observado->update([
-                'estado_actual' => $request->estado_actual,
-                'detalles' => $request->detalles,
-                'fecha_observado' => $request->fecha_observado
+           $observado->update([
+                'estado_actual'      => $request->estado_actual,
+                'detalles'           => $request->detalles,
+                'fecha_observado'    => $request->fecha_observado,
+                'comentarios'        => $request->comentarios,
+                'acciones_pendientes'=> $request->acciones_pendientes,
+                'detalle_observado'  => $request->detalle_observado,
             ]);
+
 
             // ✅ Actualizar subtarea cronograma
             CronogramaHelper::actualizarSubtareaCronograma([
@@ -1170,11 +1183,14 @@ public function handleObservado(Request $request)
             $message = 'Proyecto observado actualizado exitosamente';
         } else {
             // ➕ Crear observado
-            $observado = TaskObservado::create([
-                'task_id' => $request->task_id,
-                'estado_actual' => $request->estado_actual,
-                'detalles' => $request->detalles,
-                'fecha_observado' => $request->fecha_observado
+           $observado = TaskObservado::create([
+                'task_id'            => $request->task_id,
+                'estado_actual'      => $request->estado_actual,
+                'detalles'           => $request->detalles,
+                'fecha_observado'    => $request->fecha_observado,
+                'comentarios'        => $request->comentarios,
+                'acciones_pendientes'=> $request->acciones_pendientes,
+                'detalle_observado'  => $request->detalle_observado,
             ]);
 
             // ✅ Crear subtarea cronograma
