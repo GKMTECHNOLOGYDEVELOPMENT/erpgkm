@@ -270,17 +270,11 @@
                         tabContactoBtn.classList.remove('active-tab');
                     }
 
-                    // Ejecutar lógica después de renderizar HTML
                     requestAnimationFrame(() => {
-                        if (typeof window.initNoDataTab === 'function') {
-                            window.initNoDataTab();
-                        }
-                        // 👇 Ejecutar selección al renderizar el tab Empresa
-                        if (typeof window.cargarSeleccionPrevia === 'function') {
-                            window.cargarSeleccionPrevia();
-                        }
+                        if (typeof window.initNoDataTab === 'function') window.initNoDataTab();
+                        if (typeof window.cargarSeleccionPrevia === 'function') window
+                            .cargarSeleccionPrevia();
                     });
-
                     return;
                 }
 
@@ -294,27 +288,23 @@
                         tabEmpresaBtn.classList.remove('active-tab');
                     }
 
-                    // Ejecutar lógica después de renderizar HTML
                     requestAnimationFrame(() => {
-                        if (typeof window.initNoDataTab === 'function') {
-                            window.initNoDataTab();
-                        }
-                        if (typeof window.cargarSeleccionPrevia === 'function') {
-                            window.cargarSeleccionPrevia();
-                        }
+                        if (typeof window.initNoDataTab === 'function') window.initNoDataTab();
+                        if (typeof window.cargarSeleccionPrevia === 'function') window
+                            .cargarSeleccionPrevia();
                     });
-
                     return;
                 }
 
                 // --- Cronograma / Proyectos / Observaciones ---
                 const tabElement = tabContents[tab];
                 const tabButton = tabButtons[tab];
+                if (!tabElement || !tabButton) return; // guard
+
                 tabElement.innerHTML = html;
                 tabElement.classList.remove('hidden');
                 tabButton.classList.add('active-tab');
 
-                // Oculta empresa/contacto si aplica
                 if (!isInitialLoad) {
                     tabEmpresa.classList.add('hidden');
                     tabContacto.classList.add('hidden');
@@ -322,7 +312,7 @@
                     tabContactoBtn.classList.remove('active-tab');
                 }
 
-                // Inicializa Gantt si es cronograma
+                // Inicializa Gantt
                 if (tab === 'cronograma') {
                     requestAnimationFrame(() => {
                         const el = tabElement.querySelector('#gantt_cronograma');
@@ -331,50 +321,39 @@
                         }
                     });
                 }
+
+                // Inicializa Alpine + Select2 en "proyectos"
+                if (tab === 'proyectos') {
+                    requestAnimationFrame(() => {
+                        if (window.Alpine && typeof Alpine.initTree === 'function') {
+                            Alpine.initTree(tabElement);
+                        }
+
+                        const el = tabElement.querySelector('#participantesreunion');
+                        if (el && window.jQuery) {
+                            const $el = jQuery(el);
+                            $el.select2({
+                                width: '100%',
+                                placeholder: 'Selecciona participantes',
+                                allowClear: true,
+                                tags: true,
+                                tokenSeparators: [','],
+                                dropdownParent: $el.closest('div')
+                            });
+
+                            // Select2 -> Alpine (emitir evento)
+                            $el.on('change', () => {
+                                const values = $el.val() || [];
+                                el.dispatchEvent(new CustomEvent('select2-participantes', {
+                                    detail: values,
+                                    bubbles: true
+                                }));
+                            });
+                        }
+                    });
+                }
             }
 
-            // Inicializa Gantt si es cronograma
-            if (tab === 'cronograma') {
-                requestAnimationFrame(() => {
-                    const el = tabElement.querySelector('#gantt_cronograma');
-                    if (el && typeof window.renderCronograma === 'function') {
-                        window.renderCronograma(el);
-                    }
-                });
-            }
-
-            // 👇 Inicializa Alpine + Select2 si es proyectos
-            if (tab === 'proyectos') {
-                requestAnimationFrame(() => {
-                    // 1) Rehidratar Alpine en el contenido recién insertado
-                    if (window.Alpine && typeof Alpine.initTree === 'function') {
-                        Alpine.initTree(tabElement);
-                    }
-
-                    // 2) Inicializar Select2 del campo Participantes
-                    const el = tabElement.querySelector('#participantesreunion');
-                    if (el && window.jQuery) {
-                        const $el = jQuery(el);
-                        $el.select2({
-                            width: '100%',
-                            placeholder: 'Selecciona participantes',
-                            allowClear: true,
-                            tags: true,
-                            tokenSeparators: [','],
-                            dropdownParent: $el.closest('div')
-                        });
-
-                        // Select2 -> Alpine (emitimos evento)
-                        $el.on('change', () => {
-                            const values = $el.val() || [];
-                            el.dispatchEvent(new CustomEvent('select2-participantes', {
-                                detail: values,
-                                bubbles: true
-                            }));
-                        });
-                    }
-                });
-            }
 
 
             // Función para crear nuevo registro
@@ -499,10 +478,14 @@
     <script src="{{ asset('assets/js/seguimiento/notas.js') }}" defer></script>
     <script src="{{ asset('assets/js/areacomercial/actualizarcliente.js') }}"></script>
 
- <script>
-    window.USUARIO_AUTH = {!! json_encode(auth()->user() ? auth()->user()->Nombre . ' ' . auth()->user()->apellidoPaterno . ' ' . auth()->user()->apellidoMaterno : null) !!};
-    console.log('Usuario autenticado:', window.USUARIO_AUTH);
-</script>
+    <script>
+        window.USUARIO_AUTH = {!! json_encode(
+            auth()->user()
+                ? auth()->user()->Nombre . ' ' . auth()->user()->apellidoPaterno . ' ' . auth()->user()->apellidoMaterno
+                : null,
+        ) !!};
+        console.log('Usuario autenticado:', window.USUARIO_AUTH);
+    </script>
 
 
 

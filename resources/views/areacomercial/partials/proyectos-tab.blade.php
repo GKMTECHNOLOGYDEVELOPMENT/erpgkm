@@ -473,10 +473,16 @@
                                         type="text" class="form-input" placeholder="Ej: 30 días" />
                                 </div>
 
-                           
-
-
-
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
 
                                 <div>
                                     <label for="responsablecotizacion">Responsable</label>
@@ -856,9 +862,18 @@
                                     <textarea id="descripcionrequerimiento" x-model="paramsTask.descripcionrequerimiento" class="form-textarea"
                                         placeholder="Describa el requerimiento"></textarea>
                                 </div>
-                                
-                             
 
+
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
 
                                 <div class="md:col-span-2">
                                     <label for="observacioneslevantamiento">Observaciones</label>
@@ -1330,16 +1345,16 @@
                                         <textarea id="comentarioscliente" x-model="paramsTask.comentarioscliente" class="form-textarea"
                                             placeholder="Comentarios o feedback del cliente"></textarea>
                                     </div>
-                                
-                                    <div>
-                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
-                                <select id="nivelPorcentajeRechazado" x-model="paramsTask.nivelPorcentajeRechazado"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
+
+                                <div>
+                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
                                 </div>
                                 </div>
 
