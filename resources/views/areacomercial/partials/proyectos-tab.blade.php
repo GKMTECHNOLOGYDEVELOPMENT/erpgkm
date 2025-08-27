@@ -473,18 +473,8 @@
                                         type="text" class="form-input" placeholder="Ej: 30 días" />
                                 </div>
 
-                                <div>
-                                    <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
-                                    <select id="nivelPorcentajeCotizacion"
-                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
-                                        <option value="">Seleccionar estado</option>
-                                        <option value="0">Inicial (0%)</option>
-                                        <option value="0.5">En Proceso (50%)</option>
-                                        <option value="1">Finalizado (100%)</option>
-                                    </select>
-                                </div>
 
-                                <div>
+                                <div style="display: none;">
                                     <label for="responsablecotizacion">Responsable</label>
                                     <input id="responsablecotizacion" x-model="paramsTask.responsablecotizacion"
                                         type="text" class="form-input" placeholder="Nombre del responsable" />
@@ -864,7 +854,7 @@
                                 </div>
 
 
-                                <div>
+                                <!-- <div>
                                     <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
                                     <select id="nivelPorcentajeCotizacion"
                                         x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select w-full">
@@ -873,7 +863,7 @@
                                         <option value="0.5">En Proceso (50%)</option>
                                         <option value="1">Finalizado (100%)</option>
                                     </select>
-                                </div>
+                                </div> -->
 
                                 <div class="md:col-span-2">
                                     <label for="observacioneslevantamiento">Observaciones</label>
@@ -1345,7 +1335,7 @@
                                         <textarea id="comentarioscliente" x-model="paramsTask.comentarioscliente" class="form-textarea"
                                             placeholder="Comentarios o feedback del cliente"></textarea>
                                     </div>
-
+<!-- 
                                 <div>
                                     <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
                                     <select id="nivelPorcentajeCotizacion"
@@ -1355,7 +1345,7 @@
                                         <option value="0.5">En Proceso (50%)</option>
                                         <option value="1">Finalizado (100%)</option>
                                     </select>
-                                </div>
+                                </div> -->
                                 </div>
 
                                 <!-- Botones para agregar/actualizar proyecto rechazado -->
