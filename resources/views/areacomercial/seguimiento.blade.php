@@ -313,7 +313,7 @@
                 }
 
                 // Inicializa Gantt
-                if (tab === 'cronograma') {
+                        if (tab === 'cronograma') {
                     requestAnimationFrame(() => {
                         const el = tabElement.querySelector('#gantt_cronograma');
                         if (el && typeof window.renderCronograma === 'function') {
@@ -321,37 +321,49 @@
                         }
                     });
                 }
+            }
 
-                // Inicializa Alpine + Select2 en "proyectos"
-                if (tab === 'proyectos') {
-                    requestAnimationFrame(() => {
-                        if (window.Alpine && typeof Alpine.initTree === 'function') {
-                            Alpine.initTree(tabElement);
-                        }
+            // Inicializa Gantt si es cronograma
+            if (tab === 'cronograma') {
+                requestAnimationFrame(() => {
+                    const el = tabElement.querySelector('#gantt_cronograma');
+                    if (el && typeof window.renderCronograma === 'function') {
+                        window.renderCronograma(el);
+                    }
+                });
+            }
 
-                        const el = tabElement.querySelector('#participantesreunion');
-                        if (el && window.jQuery) {
-                            const $el = jQuery(el);
-                            $el.select2({
-                                width: '100%',
-                                placeholder: 'Selecciona participantes',
-                                allowClear: true,
-                                tags: true,
-                                tokenSeparators: [','],
-                                dropdownParent: $el.closest('div')
-                            });
+            // 👇 Inicializa Alpine + Select2 si es proyectos
+            if (tab === 'proyectos') {
+                requestAnimationFrame(() => {
+                    // 1) Rehidratar Alpine en el contenido recién insertado
+                    if (window.Alpine && typeof Alpine.initTree === 'function') {
+                        Alpine.initTree(tabElement);
+                    }
 
-                            // Select2 -> Alpine (emitir evento)
-                            $el.on('change', () => {
-                                const values = $el.val() || [];
-                                el.dispatchEvent(new CustomEvent('select2-participantes', {
-                                    detail: values,
-                                    bubbles: true
-                                }));
-                            });
-                        }
-                    });
-                }
+                    // 2) Inicializar Select2 del campo Participantes
+                    const el = tabElement.querySelector('#participantesreunion');
+                    if (el && window.jQuery) {
+                        const $el = jQuery(el);
+                        $el.select2({
+                            width: '100%',
+                            placeholder: 'Selecciona participantes',
+                            allowClear: true,
+                            tags: true,
+                            tokenSeparators: [','],
+                            dropdownParent: $el.closest('div')
+                        });
+
+                        // Select2 -> Alpine (emitimos evento)
+                        $el.on('change', () => {
+                            const values = $el.val() || [];
+                            el.dispatchEvent(new CustomEvent('select2-participantes', {
+                                detail: values,
+                                bubbles: true
+                            }));
+                        });
+                    }
+                });
             }
 
 
