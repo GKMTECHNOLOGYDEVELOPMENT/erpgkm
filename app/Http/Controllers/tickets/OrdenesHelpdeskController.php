@@ -4520,6 +4520,7 @@ class OrdenesHelpdeskController extends Controller
             'nombreEncargado' => 'nullable|string|max:255',
             'tipoDocumento' => 'nullable|string|max:255',
             'documento' => 'nullable|string|max:255',
+            'cargo' => 'nullable|string|max:255', // 👈 nuevo
         ]);
 
         $ticket = Ticket::findOrFail($id);
@@ -4553,6 +4554,7 @@ class OrdenesHelpdeskController extends Controller
             'nombreencargado' => $request->nombreEncargado,
             'tipodocumento' => $request->tipoDocumento,
             'documento' => $request->documento,
+            'cargo' => $request->cargo, // 👈 nuevo
         ]);
 
         return response()->json(['message' => 'Firma creada correctamente'], 201);

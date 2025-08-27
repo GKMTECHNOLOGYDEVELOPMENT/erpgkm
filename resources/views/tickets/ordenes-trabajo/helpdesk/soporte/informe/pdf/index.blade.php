@@ -26,7 +26,7 @@
         }
 
         .indent-paragraph {
-            text-align: justify  !important;
+            text-align: justify !important;
             /* alineado a la izquierda */
             line-height: 2 !important;
             /* interlineado 2.0 */
@@ -305,6 +305,14 @@
                     <p class="text-xs text-gray-600 uppercase tracking-wide">
                         {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
                     </p>
+
+                    @if (!empty($firma->cargo))
+                        <p class="text-xs text-gray-600 uppercase tracking-wide">
+                            {{ $firma->cargo }}
+                        </p>
+                    @endif
+
+
                     <p class="text-xs text-gray-500">
                         {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
                         {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}

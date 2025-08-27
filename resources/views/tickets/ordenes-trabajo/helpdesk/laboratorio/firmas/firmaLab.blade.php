@@ -33,6 +33,9 @@
             <input type="text" id="nombreEncargado"
                 class="form-control w-full mt-2 mb-3 border border-gray-300 rounded px-3 py-2"
                 placeholder="Nombre del encargado">
+            <input type="text" id="cargoEncargado"
+                class="form-control w-full mt-2 mb-3 border border-gray-300 rounded px-3 py-2"
+                placeholder="Cargo del encargado (Opcional)">
             <!-- Canvas firma -->
             <div class="w-full h-[300px] border-2 border-gray-300 rounded-lg relative mt-2">
                 <canvas id="signatureCanvasCliente" class="w-full h-full"></canvas>
@@ -114,6 +117,8 @@
             const nombreEncargado = document.getElementById('nombreEncargado').value;
             const tipoDocumento = document.getElementById('tipoDocumento').value;
             const numeroDocumento = document.getElementById('numeroDocumento').value;
+            const cargoEncargado = document.getElementById('cargoEncargado').value; // 👈 nuevo
+
 
             if (!visitaId) {
                 return toastr.error("No se encontró la visita asociada.");
@@ -141,7 +146,8 @@
                         firma,
                         nombreEncargado,
                         tipoDocumento,
-                        documento: numeroDocumento
+                        documento: numeroDocumento,
+                        cargo: cargoEncargado
                     })
                 })
                 .then(res => res.json())
