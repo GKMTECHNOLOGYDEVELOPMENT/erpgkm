@@ -10,9 +10,16 @@ class ComprasController extends Controller
 {
     public function index()
     {
+        
+        return view('administracion.compras.index');
+    }
+
+
+     public function create()
+    {
         $documentos = DB::table('documento')->get();
         
-        return view('administracion.compras.index', compact('documentos'));
+        return view('administracion.compras.create', compact('documentos'));
     }
 
     // API para obtener monedas
@@ -163,8 +170,8 @@ class ComprasController extends Controller
             ]);
 
             // Si tienes una tabla de detalle de compra, insertar los productos aquí
-            foreach ($request->productos as $producto) {
-                // Asumiendo que tienes una tabla 'detalle_compra' o similar
+           foreach ($request->productos as $producto) {
+                // Insertar detalle de compra
                 DB::table('detalle_compra')->insert([
                     'idCompra' => $compraId,
                     'idProducto' => $producto['id'],
@@ -174,7 +181,11 @@ class ComprasController extends Controller
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+
+                // Aumentar el stock en la tabla 'articulos'
+                DB::table('articulos')->where('idArticulos', $producto['id'])->increment('stock_total', $producto['cantidad']);
             }
+
 
             DB::commit();
 

@@ -1259,6 +1259,9 @@
                         <li>
                             <a href="{{ route('compras.index') }}">Compras</a>
                         </li>
+                        <li>
+                            <a href="{{ route('compras.index') }}">Lista de Compras</a>
+                        </li>
                     </ul>
                 </li>
 

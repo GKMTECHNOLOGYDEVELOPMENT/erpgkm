@@ -370,7 +370,7 @@ Route::prefix('ventas')->name('ventas.')->group(function () {
 /// INICIO COMPRAS ///
 Route::prefix('compras')->name('compras.')->group(function () {
     Route::get('/', [ComprasController::class, 'index'])->name('index'); // Mostrar la vista principal
-    Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
+    Route::get('/create', [ComprasController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
