@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\administracion\compras;
 use App\Http\Controllers\Controller;
+use App\Models\Compra;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Validator;
 
 class ComprasController extends Controller
 {
@@ -14,6 +16,62 @@ class ComprasController extends Controller
         return view('administracion.compras.index');
     }
 
+
+      public function data(Request $request)
+{
+    // Validar los parámetros de entrada (campos opcionales)
+    $validator = Validator::make($request->all(), [
+        'per_page' => 'sometimes|integer|min:1|max:100',
+        'page' => 'sometimes|integer|min:1',
+        'fecha_inicio' => 'sometimes|nullable|date',
+        'fecha_fin' => 'sometimes|nullable|date'
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'error' => 'Parámetros inválidos',
+            'details' => $validator->errors()
+        ], 422);
+    }
+
+    $validated = $validator->validated();
+    
+    $perPage = $validated['per_page'] ?? 10;
+    $page = $validated['page'] ?? 1;
+    
+    $query = Compra::select([
+            'idCompra',
+            'serie',
+            'nro',
+            'fechaEmision',
+            'total',
+            'idSujeto' // Mantenemos este campo por si lo necesitas después
+        ]);
+
+    // Filtros con validación mejorada
+    if (!empty($validated['fecha_inicio']) && $validated['fecha_inicio'] !== 'null') {
+        $query->whereDate('fechaEmision', '>=', $validated['fecha_inicio']);
+    }
+
+    if (!empty($validated['fecha_fin']) && $validated['fecha_fin'] !== 'null') {
+        $query->whereDate('fechaEmision', '<=', $validated['fecha_fin']);
+    }
+
+    $compras = $query->orderBy('fechaEmision', 'desc')
+        ->paginate($perPage, ['*'], 'page', $page);
+
+    return response()->json([
+        'data' => $compras->items(),
+        'pagination' => [
+            'current_page' => $compras->currentPage(),
+            'last_page' => $compras->lastPage(),
+            'per_page' => $compras->perPage(),
+            'total' => $compras->total(),
+            'from' => $compras->firstItem(),
+            'to' => $compras->lastItem(),
+        ]
+    ]);
+}
 
      public function create()
     {
@@ -204,4 +262,27 @@ class ComprasController extends Controller
             ], 500);
         }
     }
+
+
+
+    public function detalles($id)
+{
+    // Lógica para la página de detalles de compra
+    $compra = Compra::findOrFail($id);
+    return view('administracion.compras.detalles', compact('compra'));
+}
+
+public function factura($id)
+{
+    // Lógica para la página de factura
+    $compra = Compra::findOrFail($id);
+    return view('administracion.compras.factura', compact('compra'));
+}
+
+public function ticket($id)
+{
+    // Lógica para la página de ticket
+    $compra = Compra::findOrFail($id);
+    return view('administracion.compras.ticket', compact('compra'));
+}
 }
