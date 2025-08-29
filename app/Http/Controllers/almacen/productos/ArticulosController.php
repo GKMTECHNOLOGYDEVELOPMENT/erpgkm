@@ -136,56 +136,52 @@ class ArticulosController extends Controller
     }
 
     public function buscar(Request $request)
-    {
-        $busqueda = $request->query('q');
-        $tipoBusqueda = $request->query('tipo', 'texto');
-        $page = (int) $request->query('page', 1);
-        $perPage = (int) $request->query('perPage', 10);
+{
+    $busqueda = $request->query('q');
+    $tipoBusqueda = $request->query('tipo', 'texto');
+    $page = (int) $request->query('page', 1);
+    $perPage = (int) $request->query('perPage', 10);
 
-
-        if ($tipoBusqueda === 'texto') {
-            if (!$busqueda || strlen($busqueda) < 2) {
-                return response()->json([
-                    'existe' => false,
-                    'productos' => [],
-                    'total' => 0
-                ]);
-            }
-
-            $query = DB::table('articulos')
-                ->where('idTipoArticulo', 1)
-                ->where(function ($q) use ($busqueda) {
-                    $q->where('nombre', 'LIKE', "%{$busqueda}%")
-                        ->orWhere('codigo_barras', 'LIKE', "%{$busqueda}%")
-                        ->orWhere('codigo_repuesto', 'LIKE', "%{$busqueda}%");
-                });
-
-            $total = $query->count();
-
-            $productos = $query->select(
-                'idArticulos',
-                'codigo_barras',
-                'codigo_repuesto',
-                'nombre',
-                'stock_total',
-                'precio_compra',
-                'precio_venta'
-            )
-                ->offset(($page - 1) * $perPage)
-                ->limit($perPage)
-                ->get();
-
+    if ($tipoBusqueda === 'texto') {
+        if (!$busqueda) {
             return response()->json([
-                'existe' => $productos->count() > 0,
-                'productos' => $productos,
-                'total' => $total,
-                'currentPage' => (int) $page,
-                'perPage' => (int) $perPage,
+                'existe' => false,
+                'productos' => [],
+                'total' => 0
             ]);
         }
 
-        return response()->json(['existe' => false]);
+        $query = DB::table('articulos')
+            ->where('idTipoArticulo', 1)
+            ->where('codigo_barras', $busqueda); // búsqueda exacta
+
+        $total = $query->count();
+
+        $productos = $query->select(
+            'idArticulos',
+            'codigo_barras',
+            'codigo_repuesto',
+            'nombre',
+            'stock_total',
+            'precio_compra',
+            'precio_venta'
+        )
+            ->offset(($page - 1) * $perPage)
+            ->limit($perPage)
+            ->get();
+
+        return response()->json([
+            'existe' => $productos->count() > 0,
+            'productos' => $productos,
+            'total' => $total,
+            'currentPage' => (int) $page,
+            'perPage' => (int) $perPage,
+        ]);
     }
+
+    return response()->json(['existe' => false]);
+}
+
 
     public function create()
     {

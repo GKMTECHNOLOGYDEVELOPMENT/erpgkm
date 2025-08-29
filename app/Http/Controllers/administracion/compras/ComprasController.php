@@ -4,9 +4,11 @@ namespace App\Http\Controllers\administracion\compras;
 
 use App\Http\Controllers\Controller;
 use App\Models\Compra;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class ComprasController extends Controller
@@ -196,87 +198,168 @@ public function data(Request $request)
     }
 
     // Método para guardar la compra
-    public function guardarCompra(Request $request)
-    {
-        try {
-            DB::beginTransaction();
+public function guardarCompra(Request $request)
+{
+    try {
+        DB::beginTransaction();
 
-            // Validar datos requeridos
-            $request->validate([
-                'serie' => 'required|string',
-                'nro' => 'required|integer',
-                'fecha' => 'required|date',
-                'fecha_vencimiento' => 'required|date',
-                'documento_id' => 'required|integer|exists:documento,idDocumento',
-                'proveedor_id' => 'required|integer|exists:proveedores,idProveedor',
-                'moneda_id' => 'required|integer|exists:monedas,idMonedas',
-                'impuesto_id' => 'required|integer|exists:impuesto,idImpuesto',
-                'sujeto_id' => 'required|integer|exists:sujeto,idSujeto',
-                'condicion_compra_id' => 'required|integer|exists:condicioncompra,idCondicionCompra',
-                'tipo_pago_id' => 'required|integer|exists:tipopago,idTipoPago',
-                'productos' => 'required|array|min:1',
-                'subtotal' => 'required|numeric|min:0',
-                'igv' => 'required|numeric|min:0',
-                'total' => 'required|numeric|min:0'
-            ]);
 
-            // Insertar la compra
-            $compraId = DB::table('compra')->insertGetId([
-                'serie' => $request->serie,
-                'nro' => $request->nro,
-                'fechaEmision' => $request->fecha,
-                'fechaVencimiento' => $request->fecha_vencimiento,
-                'imagen' => null, // Si tienes imagen, procésala aquí
-                'sujetoporcentaje' => $request->sujeto_porcentaje ?? 0,
-                'proveedor_id' => $request->proveedor_id,
-                'cantidad' => count($request->productos),
-                'gravada' => $request->subtotal,
-                'igv' => $request->igv,
-                'total' => $request->total,
-                'idMonedas' => $request->moneda_id,
-                'idDocumento' => $request->documento_id,
-                'idImpuesto' => $request->impuesto_id,
-                'idSujeto' => $request->sujeto_id,
-                'idCondicionCompra' => $request->condicion_compra_id,
-                'idTipoPago' => $request->tipo_pago_id,
+          // Log para verificar los datos recibidos
+        Log::info('Datos recibidos en guardarCompra:', $request->all());
+        Log::info('Productos recibidos:', $request->productos);
+
+        // Validar datos requeridos
+        $request->validate([
+            'serie' => 'required|string',
+            'nro' => 'required|integer',
+            'fecha' => 'required|date',
+            'fecha_vencimiento' => 'required|date',
+            'documento_id' => 'required|integer|exists:documento,idDocumento',
+            'proveedor_id' => 'required|integer|exists:proveedores,idProveedor',
+            'moneda_id' => 'required|integer|exists:monedas,idMonedas',
+            'impuesto_id' => 'required|integer|exists:impuesto,idImpuesto',
+            'sujeto_id' => 'required|integer|exists:sujeto,idSujeto',
+            'condicion_compra_id' => 'required|integer|exists:condicioncompra,idCondicionCompra',
+            'tipo_pago_id' => 'required|integer|exists:tipopago,idTipoPago',
+            'productos' => 'required|array|min:1',
+            'subtotal' => 'required|numeric|min:0',
+            'igv' => 'required|numeric|min:0',
+            'total' => 'required|numeric|min:0'
+        ]);
+
+        // Insertar la compra
+        $compraId = DB::table('compra')->insertGetId([
+            'serie' => $request->serie,
+            'nro' => $request->nro,
+            'fechaEmision' => $request->fecha,
+            'fechaVencimiento' => $request->fecha_vencimiento,
+            'imagen' => null,
+            'sujetoporcentaje' => $request->sujeto_porcentaje ?? 0,
+            'proveedor_id' => $request->proveedor_id,
+            'cantidad' => count($request->productos),
+            'gravada' => $request->subtotal,
+            'igv' => $request->igv,
+            'total' => $request->total,
+            'idMonedas' => $request->moneda_id,
+            'idDocumento' => $request->documento_id,
+            'idImpuesto' => $request->impuesto_id,
+            'idSujeto' => $request->sujeto_id,
+            'idCondicionCompra' => $request->condicion_compra_id,
+            'idTipoPago' => $request->tipo_pago_id,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Procesar cada producto de la compra
+        // Procesar cada producto de la compra
+        foreach ($request->productos as $index => $producto) {
+            Log::info("Procesando producto {$index}:", $producto);
+            
+            // Verificar si existe precio_venta
+            if (!isset($producto['precio_venta']) || $producto['precio_venta'] == 0) {
+                Log::warning("Producto {$index} tiene precio_venta en 0 o no definido:", $producto);
+            }
+
+            // Insertar detalle de compra con precio_venta
+            DB::table('detalle_compra')->insert([
+                'idCompra' => $compraId,
+                'idProducto' => $producto['id'],
+                'cantidad' => $producto['cantidad'],
+                'precio' => $producto['precio'],
+                'precio_venta' => $producto['precio_venta'] ?? 0, // Usar 0 si no está definido
+                'subtotal' => $producto['subtotal'],
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
-            // Si tienes una tabla de detalle de compra, insertar los productos aquí
-            foreach ($request->productos as $producto) {
-                // Insertar detalle de compra
-                DB::table('detalle_compra')->insert([
-                    'idCompra' => $compraId,
-                    'idProducto' => $producto['id'],
-                    'cantidad' => $producto['cantidad'],
-                    'precio' => $producto['precio'],
-                    'subtotal' => $producto['subtotal'],
-                    'created_at' => now(),
+            // Actualizar los precios en la tabla de artículos
+            DB::table('articulos')
+                ->where('idArticulos', $producto['id'])
+                ->update([
+                    'precio_compra' => $producto['precio'],
+                    'precio_venta' => $producto['precio_venta'] ?? 0, // Usar 0 si no está definido
                     'updated_at' => now()
                 ]);
 
-                // Aumentar el stock en la tabla 'articulos'
-                DB::table('articulos')->where('idArticulos', $producto['id'])->increment('stock_total', $producto['cantidad']);
+            // Obtener el artículo
+            $articulo = DB::table('articulos')->where('idArticulos', $producto['id'])->first();
+            
+            // Aumentar el stock en la tabla 'articulos'
+            DB::table('articulos')->where('idArticulos', $producto['id'])->increment('stock_total', $producto['cantidad']);
+            
+            // Obtener el mes y año actual de la compra
+            $fechaCompra = Carbon::parse($request->fecha);
+            $mesCompra = $fechaCompra->format('m');
+            $anioCompra = $fechaCompra->format('Y');
+            
+            // Buscar si existe un registro de kardex para este artículo en el mismo mes
+            $kardexExistente = DB::table('kardex')
+                ->where('idArticulo', $producto['id'])
+                ->whereMonth('fecha', $mesCompra)
+                ->whereYear('fecha', $anioCompra)
+                ->first();
+            
+            if ($kardexExistente) {
+                // Actualizar el registro existente del mes
+                DB::table('kardex')
+                    ->where('id', $kardexExistente->id)
+                    ->update([
+                        'unidades_entrada' => $kardexExistente->unidades_entrada + $producto['cantidad'],
+                        
+                        'costo_unitario_entrada' => ($kardexExistente->costo_inventario) + ($producto['precio'] * $producto['cantidad']),
+
+
+                        'inventario_actual' => $kardexExistente->inventario_actual + $producto['cantidad'],
+                        'costo_inventario' => ($kardexExistente->costo_inventario) + ($producto['precio'] * $producto['cantidad']),
+                        'updated_at' => now()
+                    ]);
+            } else {
+                // Buscar el último registro de kardex para este artículo
+                $ultimoKardex = DB::table('kardex')
+                    ->where('idArticulo', $producto['id'])
+                    ->orderBy('fecha', 'desc')
+                    ->first();
+                
+                // Calcular valores iniciales
+                $inventarioInicial = $ultimoKardex ? $ultimoKardex->inventario_actual : $articulo->stock_total - $producto['cantidad'];
+                $inventarioActual = $inventarioInicial + $producto['cantidad'];
+                $costoInventario = ($ultimoKardex ? $ultimoKardex->costo_inventario : 0) + ($producto['precio'] * $producto['cantidad']);
+                
+                // Crear nuevo registro de kardex para el nuevo mes
+                DB::table('kardex')->insert([
+                    'fecha' => $fechaCompra,
+                    'idArticulo' => $producto['id'],
+                    'unidades_entrada' => $producto['cantidad'],
+                    'costo_unitario_entrada' => $producto['precio'],
+                    'unidades_salida' => 0,
+                    'costo_unitario_salida' => 0,
+                    'inventario_inicial' => $inventarioInicial,
+                    'inventario_actual' => $inventarioActual,
+                    'costo_inventario' => $costoInventario,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
             }
-
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Compra guardada exitosamente',
-                'compra_id' => $compraId
-            ]);
-        } catch (Exception $e) {
-            DB::rollback();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al guardar la compra: ' . $e->getMessage()
-            ], 500);
         }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Compra guardada exitosamente',
+            'compra_id' => $compraId
+        ]);
+    } catch (Exception $e) {
+        DB::rollback();
+                Log::error('Error al guardar la compra: ' . $e->getMessage());
+
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al guardar la compra: ' . $e->getMessage()
+        ], 500);
     }
+}
 
 
 

@@ -159,84 +159,71 @@
                      </div>
 
 
-                     <!-- Tabla de productos -->
-                     <div class="overflow-x-auto">
-                         <table class="min-w-full divide-y divide-gray-200">
-                             <thead class="bg-gray-50">
-                                 <tr>
-                                     <th
-                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                         #</th>
-                                     <th
-                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                         Código de barras</th>
-                                     <th
-                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                         Producto</th>
-                                     <th
-                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                         Cantidad</th>
-                                     <th
-                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                         Precio</th>
-                                     <th
-                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                         Subtotal</th>
-                                     <th
-                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                         Remover</th>
-                                 </tr>
-                             </thead>
-                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                 <template x-if="productos.length === 0">
-                                     <tr>
-                                         <td colspan="7"
-                                             class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                                             No hay productos agregados
-                                         </td>
-                                     </tr>
-                                 </template>
+                  <!-- Tabla de productos -->
+                <!-- Tabla de productos -->
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código de barras</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remover</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <template x-if="productos.length === 0">
+                <tr>
+                    <td colspan="7" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                        No hay productos agregados
+                    </td>
+                </tr>
+            </template>
 
-                                 <template x-for="(producto, index) in productos" :key="producto.id">
-                                     <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                                         <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
-                                             x-text="index + 1"></td>
-                                         <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
-                                             x-text="producto.codigo_barras"></td>
-                                         <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
-                                             x-text="producto.nombre"></td>
-                                         <td class="px-4 py-4 whitespace-nowrap">
-                                             <input type="number"
-                                                 class="w-20 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-center bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
-                                                 x-model="producto.cantidad" @change="actualizarSubtotal(producto)"
-                                                 min="1">
-                                         </td>
-                                         <td class="px-4 py-4 whitespace-nowrap">
-                                             <input type="number" step="0.01"
-                                                 class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
-                                                 x-model="producto.precio" @change="actualizarSubtotal(producto)">
-                                         </td>
-                                         <td class="px-4 py-4 whitespace-nowrap text-right text-gray-800 dark:text-gray-100"
-                                             x-text="formatCurrency(producto.subtotal)">
-                                         </td>
-                                         <td class="px-4 py-4 whitespace-nowrap text-center">
-                                             <button
-                                                 class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                                                 @click="removerProducto(index)">
-                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                     viewBox="0 0 20 20" fill="currentColor">
-                                                     <path fill-rule="evenodd"
-                                                         d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                                         clip-rule="evenodd" />
-                                                 </svg>
-                                             </button>
-                                         </td>
-                                     </tr>
-                                 </template>
-                             </tbody>
-
-                         </table>
-                     </div>
+            <template x-for="(producto, index) in productos" :key="producto.id">
+                <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                        x-text="index + 1"></td>
+                    <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                        x-text="producto.codigo_barras"></td>
+                    <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                        x-text="producto.nombre"></td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <input type="number"
+                            class="w-20 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-center bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
+                            x-model="producto.cantidad" @change="actualizarSubtotal(producto)"
+                            min="1">
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <input type="number" step="0.01"
+                            class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
+                            x-model="producto.precio" @change="actualizarSubtotal(producto)">
+                        <!-- CAMPO OCULTO para precio_venta -->
+                        <input type="hidden" x-model="producto.precio_venta">
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-right text-gray-800 dark:text-gray-100"
+                        x-text="formatCurrency(producto.subtotal)">
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap text-center">
+                        <button
+                            class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                            @click="removerProducto(index)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</div>
                  </div>
              </div>
 
@@ -613,16 +600,16 @@
                                                      x-model="precioCompra">
                                              </div>
                                          </div>
-                                         <div>
-                                             <label class="block text-gray-600 text-sm mb-1">Precio de venta (Con
-                                                 impuesto incluido)<span class="text-red-500 font-semibold">*</span></label>
-                                             <div class="input-with-icon">
-                                                 <i class="fas fa-tags input-icon"></i>
-                                                 <!-- CAMBIO: Usar productoEncontrado -->
-                                                 <input type="number" step="0.01" class="clean-input"
-                                                     :value="productoEncontrado.precio_venta" >
-                                             </div>
-                                         </div>
+                                         <!-- En el modal, en la sección de información del producto -->
+                                        <div>
+                                            <label class="block text-gray-600 text-sm mb-1">Precio de venta<span class="text-red-500 font-semibold">*</span></label>
+                                            <div class="input-with-icon">
+                                                <i class="fas fa-tags input-icon"></i>
+                                                <input type="number" step="0.01" class="clean-input"
+                                                    :value="productoEncontrado.precio_venta">
+                                                
+                                            </div>
+                                        </div>
                                          <div>
                                              <label class="block text-gray-600 text-sm mb-1">Precio de venta por
                                                  mayoreo (Con impuesto incluido)<span class="text-red-500 font-semibold">*</span></label>
@@ -741,15 +728,17 @@
                                          </div>
                                      </div>
 
-                                     <!-- Precio Venta -->
-                                     <div>
-                                         <label class="text-sm font-medium text-gray-700">Precio de Venta</label>
-                                         <div class="flex items-center gap-2">
-                                             <span>S/</span>
-                                             <input type="number" step="0.01" class="clean-input"
-                                                 x-model="nuevoProducto.precio_venta">
-                                         </div>
-                                     </div>
+                                     <!-- En el modal, en la sección de información del producto -->
+                                    <div>
+                                        <label class="block text-gray-600 text-sm mb-1">Precio de venta<span class="text-red-500 font-semibold">*</span></label>
+                                        <div class="input-with-icon">
+                                            <i class="fas fa-tags input-icon"></i>
+                                            <input type="number" step="0.01" class="clean-input"
+                                                :value="productoEncontrado.precio_venta" readonly>
+                                            <!-- Campo oculto para vincular el valor -->
+                                            <input type="hidden" x-model="productoEncontrado.precio_venta">
+                                        </div>
+                                    </div>
                                  </div>
 
                                  <div class="pt-6 flex justify-end">

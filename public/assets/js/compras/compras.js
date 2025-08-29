@@ -332,57 +332,80 @@ document.addEventListener('alpine:init', () => {
             this.cerrarModal();
             this.codigoBarras = '';
         },
-        agregarAlCarrito() {
-            if (!this.productoEncontrado) return;
+      // En la función agregarAlCarrito, agregaremos un console.log
+ agregarAlCarrito() {
+    if (!this.productoEncontrado) return;
 
-            const nuevoProducto = {
-                id: this.productoEncontrado.id,
-                codigo_barras: this.productoEncontrado.codigo_barras,
-                nombre: this.productoEncontrado.nombre,
-                cantidad: this.cantidadProducto,
-                precio: this.precioCompra,
-                precioBase: this.productoEncontrado.precio_compra,
-                subtotal: this.cantidadProducto * this.precioCompra,
-                stock: this.productoEncontrado.stock,
-                precio_venta: this.productoEncontrado.precio_venta,
-            };
+    console.log('DEBUG - productoEncontrado:', this.productoEncontrado);
+    
+    // Asegurar que precio_venta tenga un valor válido
+    let precioVenta = this.productoEncontrado.precio_venta;
+    if (!precioVenta || precioVenta == 0) {
+        // Calcular precio de venta con 30% de margen si no tiene valor
+        precioVenta = this.precioCompra * 1.3;
+        console.log('Precio venta calculado:', precioVenta);
+    }
 
-            this.productos.push(nuevoProducto);
-            this.cerrarModal();
-            this.codigoBarras = '';
-        },
+    const nuevoProducto = {
+        id: this.productoEncontrado.id,
+        codigo_barras: this.productoEncontrado.codigo_barras,
+        nombre: this.productoEncontrado.nombre,
+        cantidad: this.cantidadProducto,
+        precio: this.precioCompra,
+        precioBase: this.productoEncontrado.precio_compra,
+        subtotal: this.cantidadProducto * this.precioCompra,
+        stock: this.productoEncontrado.stock,
+        precio_venta: precioVenta, // Siempre tendrá valor
+    };
+
+    console.log('DEBUG - nuevoProducto a agregar:', nuevoProducto);
+
+    this.productos.push(nuevoProducto);
+    this.cerrarModal();
+    this.codigoBarras = '';
+},
         seleccionarProducto(producto) {
-            this.productoEncontrado = {
-                id: producto.idArticulos,
-                codigo_barras: producto.codigo_barras,
-                nombre: producto.nombre,
-                stock: producto.stock_total,
-                precio_compra: 0,
-                precio_venta: 0,
-            };
-            this.precioCompra = 0;
-            this.cantidadProducto = 1;
-        },
-        guardarNuevoProducto() {
-            console.log('Guardar nuevo producto:', this.nuevoProducto);
+    console.log('DEBUG - Producto seleccionado:', producto);
+    console.log('DEBUG - Precio venta del producto:', producto.precio_venta);
+    
+    this.productoEncontrado = {
+        id: producto.idArticulos,
+        codigo_barras: producto.codigo_barras,
+        nombre: producto.nombre,
+        stock: producto.stock_total,
+        precio_compra: producto.precio_compra || 0,
+        precio_venta: producto.precio_venta || 0, // Asegúrate de que esto tenga valor
+    };
+    
+    console.log('DEBUG - productoEncontrado después:', this.productoEncontrado);
+    this.precioCompra = producto.precio_compra || 0;
+    this.cantidadProducto = 1;
+},
+       guardarNuevoProducto() {
+    console.log('Guardar nuevo producto:', this.nuevoProducto);
 
-            const nuevoProductoCarrito = {
-                id: Date.now(),
-                codigo_barras: this.nuevoProducto.codigo_barras,
-                nombre: this.nuevoProducto.nombre,
-                cantidad: 1,
-                precio: this.convertirPrecio(this.nuevoProducto.precio_compra),
-                precioBase: this.nuevoProducto.precio_compra,
-                subtotal: this.convertirPrecio(this.nuevoProducto.precio_compra),
-                stock: this.nuevoProducto.stock,
-                precio_venta: this.nuevoProducto.precio_venta,
-            };
+    // Asegurar precio_venta para nuevos productos
+    let precioVenta = this.nuevoProducto.precio_venta;
+    if (!precioVenta || precioVenta == 0) {
+        precioVenta = this.nuevoProducto.precio_compra * 1.3;
+    }
 
-            this.productos.push(nuevoProductoCarrito);
-            this.cerrarModal();
-            this.codigoBarras = '';
-        },
+    const nuevoProductoCarrito = {
+        id: Date.now(),
+        codigo_barras: this.nuevoProducto.codigo_barras,
+        nombre: this.nuevoProducto.nombre,
+        cantidad: 1,
+        precio: this.convertirPrecio(this.nuevoProducto.precio_compra),
+        precioBase: this.nuevoProducto.precio_compra,
+        subtotal: this.convertirPrecio(this.nuevoProducto.precio_compra),
+        stock: this.nuevoProducto.stock,
+        precio_venta: precioVenta, // Siempre tendrá valor
+    };
 
+    this.productos.push(nuevoProductoCarrito);
+    this.cerrarModal();
+    this.codigoBarras = '';
+},
         cerrarModal() {
             this.modalAbierto = false;
             this.open = false;
@@ -401,47 +424,55 @@ document.addEventListener('alpine:init', () => {
             return `${this.simboloMoneda}${value.toFixed(2)}`;
         },
 
-        async guardarCompra() {
-            if (!this.puedeGuardar) {
-                toastr.warning('Por favor complete todos los campos obligatorios', 'Campos incompletos', {
-                    closeButton: true,
-                    progressBar: true,
-                    timeOut: 3000,
-                    positionClass: 'toast-top-right',
-                });
-                return;
-            }
+       async guardarCompra() {
+    if (!this.puedeGuardar) {
+        toastr.warning('Por favor complete todos los campos obligatorios', 'Campos incompletos');
+        return;
+    }
 
-            this.guardandoCompra = true;
+    // VERIFICACIÓN: Mostrar todos los productos con sus precios de venta
+    console.log('=== VERIFICACIÓN FINAL - PRODUCTOS ===');
+    this.productos.forEach((producto, index) => {
+        console.log(`Producto ${index + 1}:`);
+        console.log(' - ID:', producto.id);
+        console.log(' - Nombre:', producto.nombre);
+        console.log(' - Precio compra:', producto.precio);
+        console.log(' - Precio venta:', producto.precio_venta);
+        console.log(' - ¿Precio venta válido?', producto.precio_venta > 0 ? 'SÍ' : 'NO');
+    });
 
-            try {
-                const compraData = {
-                    serie: this.serie,
-                    nro: parseInt(this.nro),
-                    fecha: this.fecha,
-                    fecha_vencimiento: this.fechaVencimiento,
-                    documento_id: this.documentoId,
-                    proveedor_id: this.proveedorId,
-                    moneda_id: this.monedaId,
-                    impuesto_id: this.impuestoId,
-                    sujeto_id: this.sujetoId,
-                    condicion_compra_id: this.condicionCompraId,
-                    tipo_pago_id: this.tipoPagoId,
-                    productos: this.productos,
-                    subtotal: this.subtotal,
-                    igv: this.itbis,
-                    total: this.total,
-                    tipo_cambio: this.tipoCambio,
-                };
+    this.guardandoCompra = true;
 
-                const response = await fetch('/api/guardar-compra', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    },
-                    body: JSON.stringify(compraData),
-                });
+    try {
+        const compraData = {
+            serie: this.serie,
+            nro: parseInt(this.nro),
+            fecha: this.fecha,
+            fecha_vencimiento: this.fechaVencimiento,
+            documento_id: this.documentoId,
+            proveedor_id: this.proveedorId,
+            moneda_id: this.monedaId,
+            impuesto_id: this.impuestoId,
+            sujeto_id: this.sujetoId,
+            condicion_compra_id: this.condicionCompraId,
+            tipo_pago_id: this.tipoPagoId,
+            productos: this.productos,
+            subtotal: this.subtotal,
+            igv: this.itbis,
+            total: this.total,
+            tipo_cambio: this.tipoCambio,
+        };
+
+        console.log('Datos completos a enviar:', compraData);
+
+        const response = await fetch('/api/guardar-compra', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify(compraData),
+        });
 
                 const result = await response.json();
 

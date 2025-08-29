@@ -128,7 +128,7 @@ class ProductoController extends Controller
                 'fecha' => now(),
                 'idArticulo' => $articulo->idArticulos,
                 'unidades_entrada' => $dataArticulo['stock_total'],
-                'costo_unitario_entrada' => $dataArticulo['precio_compra'],
+                'costo_unitario_entrada' => $dataArticulo['stock_total'] * $dataArticulo['precio_compra'],
                 'unidades_salida' => 0,
                 'costo_unitario_salida' => 0,
                 'inventario_inicial' => $dataArticulo['stock_total'], 
