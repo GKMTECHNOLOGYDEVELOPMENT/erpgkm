@@ -113,48 +113,47 @@
      <div class="container mx-auto px-4 py-6" x-data="compra">
          <!-- Encabezado -->
          <div class="mb-8">
-             <h1 class="text-2xl font-bold text-gray-800 mb-2">NUEVA COMPRA</h1>
-             <p class="text-gray-600">
-                 En el módulo COMPRAS usted podrá registrar compras de productos ya sea nuevos o ya registrados en
-                 sistema.
-                 También puede ver la lista de todas las compras realizadas, buscar compras y ver información más
-                 detallada de cada compra.
+             <h1 class="mt-3 text-2xl font-bold text-gray-900">Nueva compra</h1>
+             <p class="mt-1 text-gray-600">
+                 Registra compras de forma simple: busca productos por <span class="font-medium">código de barras</span>
+                 o
+                 <span class="font-medium">nombre</span>, selecciónalos del listado, ajusta cantidades y guarda.
+                 Si el producto no existe, podrás crearlo al instante.
              </p>
-
-             <!-- Pestañas -->
-             <!-- <div class="flex border-b border-gray-200 mt-6">
-                <button class="px-4 py-2 font-medium text-blue-600 border-b-2 border-blue-600">NUEVA COMPRA</button>
-                <button class="px-4 py-2 font-medium text-gray-500 hover:text-blue-500">COMPRAS REALIZADAS</button>
-                <button class="px-4 py-2 font-medium text-gray-500 hover:text-blue-500">BUSCAR COMPRA</button>
-            </div> -->
          </div>
+
 
          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
              <!-- Sección izquierda - Búsqueda y productos -->
              <div class="lg:col-span-2">
                  <div class="panel mt-6 p-5 max-w-7xl mx-auto">
-                     <h2 class="text-lg font-semibold mb-4">Registro de Productos</h2>
+                     <h2 class="text-lg font-semibold mb-4">Búsqueda y selección de productos</h2>
                      <p class="text-gray-600 mb-6">
-                         Ingrese el código de barras del producto y luego haga clic en "Verificar producto" para cargar
-                         los datos en caso el producto ya esté registrado,
-                         en caso contrario se cargará el formulario para registrar un nuevo producto.
+                         Escribe el código de barras o el nombre y haz clic en <strong>Buscar producto</strong>.
+                         Te mostraremos las coincidencias en una ventana donde podrás elegir uno o varios productos.
+                         Si no aparece lo que buscas, tendrás la opción de registrarlo.
                      </p>
 
                      <div class="flex items-end gap-4 mb-8">
                          <!-- Input con ancho forzado -->
                          <div class="w-full">
                              <label class="block text-sm text-gray-500 mb-1">Código de barras</label>
-                             <input type="text" class="clean-input w-full text-xl"
-                                 placeholder="Código de barras o nombre" x-model="codigoBarras"
-                                 @keyup.enter="abrirModalVerificacion" />
+                             <div class="relative">
+                                 <i
+                                     class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                                 <input type="text" class="clean-input w-full text-xl pl-9"
+                                     placeholder="Código de barras o nombre" x-model="codigoBarras"
+                                     @keyup.enter="abrirModalVerificacion" />
+                             </div>
                          </div>
+
 
                          <!-- Botón fijo -->
                          <button
                              class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
                              @click="abrirModalVerificacion">
                              <i class="fas fa-check-circle"></i>
-                             VERIFICAR PRODUCTO
+                             BUSCAR PRODUCTO
                          </button>
                      </div>
 
@@ -240,7 +239,6 @@
                  </div>
              </div>
 
-             <!-- Sección derecha - Datos de la compra -->
              <!-- Sección derecha - Datos de la compra -->
              <div class="lg:col-span-1">
                  <div class="panel mt-2 p-5 max-w-xl mx-auto sticky top-4">
@@ -548,71 +546,63 @@
                          </button>
                      </div>
 
+                     <!-- Body (cards) -->
                      <!-- Body -->
                      <div class="p-6 text-sm text-gray-700 dark:text-white">
-
-                         <!-- Resultados -->
                          <template x-if="productosEncontrados.length > 0">
                              <div class="space-y-4">
-                                 <div class="flex items-center gap-2 mb-2">
-                                     <i class="fas fa-search text-gray-600 dark:text-white"></i>
-                                     <h4 class="text-base font-semibold">Resultados encontrados</h4>
+                                 <div class="flex items-center gap-2">
+                                     <h4 class="text-base font-semibold">Resultados</h4>
                                      <span class="text-xs text-gray-500">(<span x-text="totalResultados"></span>
                                          total)</span>
                                  </div>
 
-                                 <div class="rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                                 <div
+                                     class="rounded-2xl border border-gray-200/70 bg-white/70 dark:bg-gray-900/50 shadow-sm overflow-hidden">
                                      <div class="max-h-[420px] overflow-auto">
                                          <table class="min-w-full text-xs md:text-sm">
                                              <!-- THEAD -->
-                                             <thead class="sticky top-0 z-10 bg-gray-50 border-b border-gray-200">
-                                                 <tr class="text-gray-600">
-                                                     <th class="px-4 py-2 text-left w-28">Código</th>
-                                                     <th class="px-4 py-2 text-left">Nombre</th>
-                                                     <th class="px-2 py-2 text-right w-20">Stock</th>
-                                                     <th class="px-2 py-2 text-right w-28">P. Compra</th>
-                                                     <th class="px-2 py-2 text-right w-28">P. Venta</th>
-                                                     <th class="px-4 py-2 text-center w-36">Acción</th>
+                                             <thead class="sticky top-0 z-10">
+                                                 <tr
+                                                     class="bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 text-gray-600">
+                                                     <th class="px-4 py-3 text-left w-28 font-semibold">Código</th>
+                                                     <th class="px-4 py-3 text-left font-semibold">Nombre</th>
+                                                     <th class="px-3 py-3 text-right w-20 font-semibold">Stock</th>
+                                                     <th class="px-3 py-3 text-right w-28 font-semibold">P. Compra</th>
+                                                     <th class="px-3 py-3 text-right w-28 font-semibold">P. Venta</th>
+                                                     <th class="px-4 py-3 text-center w-36 font-semibold">Acción</th>
                                                  </tr>
                                              </thead>
 
                                              <!-- TBODY -->
-                                             <tbody class="divide-y divide-gray-100">
-                                                 <template x-for="producto in productosEncontrados"
+                                             <tbody>
+                                                 <template x-for="(producto, i) in productosEncontrados"
                                                      :key="producto.idArticulos">
                                                      <tr
-                                                         :class="isSelected(producto) ? 'bg-green-50' :
-                                                             'bg-white hover:bg-gray-50 transition-colors'">
-                                                         <!-- Código -->
+                                                         :class="[
+                                                             isSelected(producto) ? 'bg-green-50' : (i % 2 === 0 ?
+                                                                 'bg-white' : 'bg-gray-50/60'),
+                                                             'hover:bg-blue-50/60 transition-colors'
+                                                         ]">
                                                          <td class="px-4 py-2 font-mono text-[13px] whitespace-nowrap"
                                                              x-text="producto.codigo_barras"></td>
-
-                                                         <!-- Nombre (truncado) -->
                                                          <td class="px-4 py-2">
-                                                             <div class="max-w-[320px] truncate"
+                                                             <div class="max-w-[360px] truncate"
                                                                  :title="producto.nombre" x-text="producto.nombre">
                                                              </div>
                                                          </td>
-
-                                                         <!-- Stock -->
-                                                         <td class="px-2 py-2 text-right tabular-nums"
+                                                         <td class="px-3 py-2 text-right tabular-nums"
                                                              x-text="Number(producto.stock_total)"></td>
-
-                                                         <!-- P. Compra -->
-                                                         <td class="px-2 py-2 text-right tabular-nums"
+                                                         <td class="px-3 py-2 text-right tabular-nums"
                                                              x-text="Number(producto.precio_compra).toFixed(2)"></td>
-
-                                                         <!-- P. Venta -->
-                                                         <td class="px-2 py-2 text-right tabular-nums"
+                                                         <td class="px-3 py-2 text-right tabular-nums"
                                                              x-text="Number(producto.precio_venta).toFixed(2)"></td>
-
-                                                         <!-- Acción -->
                                                          <td class="px-4 py-2 text-center">
                                                              <button type="button"
                                                                  @click.prevent="toggleSeleccion(producto)"
                                                                  :class="isSelected(producto) ?
-                                                                     'px-2 py-1 rounded border border-green-400 bg-green-100 text-green-700 text-[11px] font-semibold' :
-                                                                     'px-2 py-1 rounded text-[11px] font-semibold text-blue-600 hover:bg-blue-50'">
+                                                                     'px-2 py-1 rounded-full border border-green-400 bg-green-100 text-green-700 text-[11px] font-semibold' :
+                                                                     'px-2 py-1 rounded-full text-[11px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100'">
                                                                  <span
                                                                      x-show="!isSelected(producto)">Seleccionar</span>
                                                                  <span
@@ -626,14 +616,12 @@
                                      </div>
 
                                      <!-- Paginación -->
-                                     <div class="flex items-center justify-center gap-2 p-3 border-t border-gray-200 bg-gray-50"
-                                         x-show="totalResultados > resultadosPorPagina">
+                                     <div
+                                         class="flex items-center justify-center gap-2 p-3 border-t border-gray-200 bg-gray-50">
                                          <button
-                                             class="px-3 py-1 text-sm border rounded hover:bg-white disabled:opacity-50"
+                                             class="px-3 py-1 text-sm rounded-full border hover:bg-white disabled:opacity-50"
                                              @click="abrirModalVerificacion(paginaActual - 1)"
-                                             :disabled="paginaActual === 1">
-                                             Anterior
-                                         </button>
+                                             :disabled="paginaActual === 1">Anterior</button>
 
                                          <span class="text-sm">
                                              Página <span class="font-semibold" x-text="paginaActual"></span>
@@ -642,11 +630,9 @@
                                          </span>
 
                                          <button
-                                             class="px-3 py-1 text-sm border rounded hover:bg-white disabled:opacity-50"
+                                             class="px-3 py-1 text-sm rounded-full border hover:bg-white disabled:opacity-50"
                                              @click="abrirModalVerificacion(paginaActual + 1)"
-                                             :disabled="paginaActual >= Math.ceil(totalResultados / resultadosPorPagina)">
-                                             Siguiente
-                                         </button>
+                                             :disabled="paginaActual >= Math.ceil(totalResultados / resultadosPorPagina)">Siguiente</button>
                                      </div>
                                  </div>
                              </div>
@@ -654,13 +640,10 @@
 
                          <!-- Sin resultados -->
                          <template x-if="productosEncontrados.length === 0 && codigoBarras && !productoEncontrado">
-                             <div class="text-center text-gray-500 mt-8">
-                                 No se encontraron productos con el término ingresado.
-                             </div>
+                             <div class="text-center text-gray-500 mt-8">No se encontraron productos con el término
+                                 ingresado.</div>
                          </template>
-
                      </div>
-
 
                      <!-- Footer -->
                      <div
