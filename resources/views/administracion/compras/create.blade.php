@@ -596,18 +596,16 @@
 
                                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                          <div>
-                                             <label class="block text-gray-600 text-sm mb-1">Stock o existencias
-                                                 compradas</label>
+                                             <label class="block text-gray-600 text-sm mb-1">Cantidad a comprar<span class="text-red-500 font-semibold">*</span></label>
                                              <div class="input-with-icon">
-                                                 <i class="fas fa-boxes input-icon"></i>
-                                                 <!-- CAMBIO: Usar productoEncontrado -->
-                                                 <input type="number" class="clean-input"
-                                                     :value="productoEncontrado.stock" readonly>
+                                                 <i class="fas fa-cart-plus input-icon"></i>
+                                                 <input type="number" class="clean-input" x-model="cantidadProducto"
+                                                     min="1">
                                              </div>
                                          </div>
                                          <div>
                                              <label class="block text-gray-600 text-sm mb-1">Precio de compra (Con
-                                                 impuesto incluido)</label>
+                                                 impuesto incluido)<span class="text-red-500 font-semibold">*</span></label>
                                              <div class="input-with-icon">
                                                  <i class="fas fa-money-bill-wave input-icon"></i>
                                                  <!-- CAMBIO: Usar x-model para precioCompra (que se actualiza desde productoEncontrado) -->
@@ -617,33 +615,23 @@
                                          </div>
                                          <div>
                                              <label class="block text-gray-600 text-sm mb-1">Precio de venta (Con
-                                                 impuesto incluido)</label>
+                                                 impuesto incluido)<span class="text-red-500 font-semibold">*</span></label>
                                              <div class="input-with-icon">
                                                  <i class="fas fa-tags input-icon"></i>
                                                  <!-- CAMBIO: Usar productoEncontrado -->
                                                  <input type="number" step="0.01" class="clean-input"
-                                                     :value="productoEncontrado.precio_venta" readonly>
+                                                     :value="productoEncontrado.precio_venta" >
                                              </div>
                                          </div>
                                          <div>
                                              <label class="block text-gray-600 text-sm mb-1">Precio de venta por
-                                                 mayoreo (Con impuesto incluido)</label>
+                                                 mayoreo (Con impuesto incluido)<span class="text-red-500 font-semibold">*</span></label>
                                              <div class="input-with-icon">
                                                  <i class="fas fa-hand-holding-usd input-icon"></i>
                                                  <input type="number" step="0.01" class="clean-input"
                                                      value="0.00">
                                              </div>
                                          </div>
-                                     </div>
-                                 </div>
-
-                                 <!-- AÑADIR: Input para cantidad -->
-                                 <div>
-                                     <label class="block text-gray-600 text-sm mb-1">Cantidad a comprar</label>
-                                     <div class="input-with-icon">
-                                         <i class="fas fa-cart-plus input-icon"></i>
-                                         <input type="number" class="clean-input" x-model="cantidadProducto"
-                                             min="1">
                                      </div>
                                  </div>
 

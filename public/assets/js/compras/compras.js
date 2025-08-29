@@ -357,13 +357,12 @@ document.addEventListener('alpine:init', () => {
                 codigo_barras: producto.codigo_barras,
                 nombre: producto.nombre,
                 stock: producto.stock_total,
-                precio_compra: producto.precio_compra,
-                precio_venta: producto.precio_venta,
+                precio_compra: 0,
+                precio_venta: 0,
             };
-            this.precioCompra = this.convertirPrecio(producto.precio_compra);
+            this.precioCompra = 0;
             this.cantidadProducto = 1;
         },
-
         guardarNuevoProducto() {
             console.log('Guardar nuevo producto:', this.nuevoProducto);
 
