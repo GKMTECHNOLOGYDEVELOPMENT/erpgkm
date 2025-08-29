@@ -62,7 +62,7 @@ document.addEventListener('alpine:init', () => {
                                             <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
                                     </a>
-                                   <a href="/producto/${row.idArticulos}/kardex" class="ltr:mr-2 rtl:ml-2" x-tooltip="Kardex">
+                                   <a href="/kardex/producto/${row.idArticulos}/kardex" class="ltr:mr-2 rtl:ml-2" x-tooltip="Kardex">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                             xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                                             <!-- Caja que representa inventario -->

@@ -202,17 +202,13 @@ class ProductoController extends Controller
 }
 
 
-public function kardex($id)
-{
-    $articulo = Articulo::findOrFail($id);
-    
-    // Obtener todos los movimientos del kardex para este artículo ordenados por fecha descendente
-    $movimientos = Kardex::where('idArticulo', $id)
-                        ->orderBy('fecha', 'desc')
-                        ->paginate(10);
-    
-    return view('almacen.productos.articulos.kardex.index', compact('articulo', 'movimientos'));
-}
+
+
+
+
+
+
+
 
 public function detalle($id)
 {

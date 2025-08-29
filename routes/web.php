@@ -460,7 +460,6 @@ Route::prefix('producto')->name('producto.')->group(function () {
     Route::get('/create', [ProductoController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [ProductoController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [ProductoController::class, 'edit'])->name('edit'); // Editar un artículo
-    Route::get('/{id}/kardex', [ProductoController::class, 'kardex'])->name('kardex'); // Editar un artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
     Route::get('/{id}/detalles', [ProductoController::class, 'detalle'])->name('detalles'); // Editar un artículo
@@ -474,6 +473,16 @@ Route::prefix('producto')->name('producto.')->group(function () {
         return Excel::download(new ArticuloExport, 'producto.xlsx');
     })->name('exportExcel');
 });
+
+Route::prefix('kardex')->name('kardex.')->group(function () {
+    Route::get('/producto/{id}/kardex', [KardexController::class, 'kardexxproducto'])->name('kardexxproducto'); // Editar un artículo
+
+    Route::get('/producto/{idArticulo}/detalles/{id}', [KardexController::class, 'detalles'])
+    ->name('kardex.detalles');
+});
+
+
+
 
 
 Route::post('/unidades/store', [RepuestosController::class, 'storeunidad'])->name('unidades.store');
