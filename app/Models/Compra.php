@@ -84,7 +84,8 @@ class Compra extends Model
 		'idImpuesto',
 		'idSujeto',
 		'idCondicionCompra',
-		'idTipoPago'
+		'idTipoPago',
+		'proveedor_id' 
 	];
 
 	public function moneda()
