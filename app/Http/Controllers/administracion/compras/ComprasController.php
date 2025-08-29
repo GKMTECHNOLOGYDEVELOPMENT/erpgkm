@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\administracion\compras;
+
 use App\Http\Controllers\Controller;
 use App\Models\Compra;
 use Illuminate\Http\Request;
@@ -12,19 +13,20 @@ class ComprasController extends Controller
 {
     public function index()
     {
-        
+
         return view('administracion.compras.index');
     }
 
 
-      public function data(Request $request)
+public function data(Request $request)
 {
-    // Validar los parámetros de entrada (campos opcionales)
+    // 1) Valida también 'q'
     $validator = Validator::make($request->all(), [
-        'per_page' => 'sometimes|integer|min:1|max:100',
-        'page' => 'sometimes|integer|min:1',
-        'fecha_inicio' => 'sometimes|nullable|date',
-        'fecha_fin' => 'sometimes|nullable|date'
+        'per_page'      => 'sometimes|integer|min:1|max:100',
+        'page'          => 'sometimes|integer|min:1',
+        'fecha_inicio'  => 'sometimes|nullable|date',
+        'fecha_fin'     => 'sometimes|nullable|date',
+        'q'             => 'sometimes|nullable|string|max:100',
     ]);
 
     if ($validator->fails()) {
@@ -34,49 +36,62 @@ class ComprasController extends Controller
         ], 422);
     }
 
-    $validated = $validator->validated();
-    
-    $perPage = $validated['per_page'] ?? 10;
-    $page = $validated['page'] ?? 1;
-    
-    $query = Compra::select([
-            'idCompra',
-            'serie',
-            'nro',
-            'fechaEmision',
-            'total',
-            'idSujeto' // Mantenemos este campo por si lo necesitas después
+    $perPage = (int)($request->per_page ?? 10);
+    $page    = (int)($request->page ?? 1);
+    $q       = trim((string)$request->input('q',''));   // <<— Toma q del request
+
+    // 2) Base query (incluye proveedor_id para resolver la relación)
+    $query = Compra::with('proveedor:idProveedor,nombre')
+        ->select([
+            'idCompra','serie','nro','fechaEmision','total','proveedor_id','created_at'
         ]);
 
-    // Filtros con validación mejorada
-    if (!empty($validated['fecha_inicio']) && $validated['fecha_inicio'] !== 'null') {
-        $query->whereDate('fechaEmision', '>=', $validated['fecha_inicio']);
+    // 3) Filtros por fecha
+    if ($request->filled('fecha_inicio')) {
+        $query->whereDate('fechaEmision','>=',$request->fecha_inicio);
+    }
+    if ($request->filled('fecha_fin')) {
+        $query->whereDate('fechaEmision','<=',$request->fecha_fin);
     }
 
-    if (!empty($validated['fecha_fin']) && $validated['fecha_fin'] !== 'null') {
-        $query->whereDate('fechaEmision', '<=', $validated['fecha_fin']);
+    // 4) Filtro de búsqueda (mínimo 3 chars)
+    if (strlen($q) >= 3) {
+        $query->where(function ($qq) use ($q) {
+            if (ctype_digit($q)) {
+                // si es número, prioriza nro
+                $qq->where('nro', $q)
+                   ->orWhere('nro','like',$q.'%');
+            }
+            // serie y proveedor por prefijo para usar índices
+            $qq->orWhere('serie','like',$q.'%')
+               ->orWhereHas('proveedor', fn($p)=>$p->where('nombre','like',$q.'%'));
+        });
     }
 
-    $compras = $query->orderBy('fechaEmision', 'desc')
+    // 5) Orden: últimos creados primero
+    $compras = $query->orderByDesc('created_at')
+        ->orderByDesc('idCompra')
         ->paginate($perPage, ['*'], 'page', $page);
 
     return response()->json([
-        'data' => $compras->items(),
+        'data' => $compras->items(), // incluye compra.proveedor.nombre
         'pagination' => [
             'current_page' => $compras->currentPage(),
-            'last_page' => $compras->lastPage(),
-            'per_page' => $compras->perPage(),
-            'total' => $compras->total(),
-            'from' => $compras->firstItem(),
-            'to' => $compras->lastItem(),
+            'last_page'    => $compras->lastPage(),
+            'per_page'     => $compras->perPage(),
+            'total'        => $compras->total(),
+            'from'         => $compras->firstItem(),
+            'to'           => $compras->lastItem(),
         ]
     ]);
 }
 
-     public function create()
+
+
+    public function create()
     {
         $documentos = DB::table('documento')->get();
-        
+
         return view('administracion.compras.create', compact('documentos'));
     }
 
@@ -87,7 +102,7 @@ class ComprasController extends Controller
             $monedas = DB::table('monedas')
                 ->select('idMonedas as id', 'nombre', 'simbolo')
                 ->get();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $monedas
@@ -107,7 +122,7 @@ class ComprasController extends Controller
             $impuestos = DB::table('impuesto')
                 ->select('idImpuesto as id', 'nombre', 'monto')
                 ->get();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $impuestos
@@ -127,7 +142,7 @@ class ComprasController extends Controller
             $sujetos = DB::table('sujeto')
                 ->select('idSujeto as id', 'nombre')
                 ->get();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $sujetos
@@ -147,7 +162,7 @@ class ComprasController extends Controller
             $condiciones = DB::table('condicioncompra')
                 ->select('idCondicionCompra as id', 'nombre')
                 ->get();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $condiciones
@@ -167,7 +182,7 @@ class ComprasController extends Controller
             $tiposPago = DB::table('tipopago')
                 ->select('idTipoPago as id', 'nombre')
                 ->get();
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $tiposPago
@@ -229,7 +244,7 @@ class ComprasController extends Controller
             ]);
 
             // Si tienes una tabla de detalle de compra, insertar los productos aquí
-           foreach ($request->productos as $producto) {
+            foreach ($request->productos as $producto) {
                 // Insertar detalle de compra
                 DB::table('detalle_compra')->insert([
                     'idCompra' => $compraId,
@@ -253,10 +268,9 @@ class ComprasController extends Controller
                 'message' => 'Compra guardada exitosamente',
                 'compra_id' => $compraId
             ]);
-
         } catch (Exception $e) {
             DB::rollback();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al guardar la compra: ' . $e->getMessage()
@@ -267,23 +281,23 @@ class ComprasController extends Controller
 
 
     public function detalles($id)
-{
-    // Lógica para la página de detalles de compra
-    $compra = Compra::findOrFail($id);
-    return view('administracion.compras.detalles', compact('compra'));
-}
+    {
+        // Lógica para la página de detalles de compra
+        $compra = Compra::findOrFail($id);
+        return view('administracion.compras.detalles', compact('compra'));
+    }
 
-public function factura($id)
-{
-    // Lógica para la página de factura
-    $compra = Compra::findOrFail($id);
-    return view('administracion.compras.factura', compact('compra'));
-}
+    public function factura($id)
+    {
+        // Lógica para la página de factura
+        $compra = Compra::findOrFail($id);
+        return view('administracion.compras.factura', compact('compra'));
+    }
 
-public function ticket($id)
-{
-    // Lógica para la página de ticket
-    $compra = Compra::findOrFail($id);
-    return view('administracion.compras.ticket', compact('compra'));
-}
+    public function ticket($id)
+    {
+        // Lógica para la página de ticket
+        $compra = Compra::findOrFail($id);
+        return view('administracion.compras.ticket', compact('compra'));
+    }
 }
