@@ -48,7 +48,7 @@ class Compra extends Model
 	protected $primaryKey = 'idCompra';
 	public $timestamps = false;
 
-		protected $casts = [
+	protected $casts = [
 		'nro' => 'int',
 		'fechaEmision' => 'datetime',
 		'fechaVencimiento' => 'datetime',
@@ -85,7 +85,7 @@ class Compra extends Model
 		'idSujeto',
 		'idCondicionCompra',
 		'idTipoPago',
-		'proveedor_id' 
+		'proveedor_id'
 	];
 
 	public function moneda()
@@ -121,11 +121,11 @@ class Compra extends Model
 	public function articulos()
 	{
 		return $this->belongsToMany(Articulo::class, 'compraarticulo', 'idCompra', 'idArticulos')
-					->withPivot('idCompraArticulo', 'serie', 'nro');
+			->withPivot('idCompraArticulo', 'serie', 'nro');
 	}
 
-	public function proveedores()
+	public function proveedor()
 	{
-		return $this->hasMany(Proveedore::class, 'idCompra');
+		return $this->belongsTo(\App\Models\Proveedore::class, 'proveedor_id', 'idProveedor');
 	}
 }

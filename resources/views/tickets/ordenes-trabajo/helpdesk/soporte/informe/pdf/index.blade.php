@@ -308,11 +308,9 @@
 
                     @if (!empty($firma->cargo))
                         <p class="text-xs text-gray-600 uppercase tracking-wide">
-                            {{ $firma->cargo }}
+                            CARGO: {{ $firma->cargo }}
                         </p>
                     @endif
-
-
                     <p class="text-xs text-gray-500">
                         {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
                         {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}

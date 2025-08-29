@@ -528,8 +528,9 @@
          </div>
 
          <!-- MODAL -->
+         <!-- MODAL -->
          <div x-show="modalAbierto" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition
-             style="display:none;">
+             style="display: none;">
              <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModal">
                  <div x-show="open" x-transition x-transition.duration.300
                      class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
@@ -547,128 +548,244 @@
                          </button>
                      </div>
 
-                     <!-- Body (cards) -->
                      <!-- Body -->
                      <div class="p-6 text-sm text-gray-700 dark:text-white">
-                         <template x-if="productosEncontrados.length > 0">
-                             <div class="space-y-4">
-                                 <div class="flex items-center gap-2">
-                                     <h4 class="text-base font-semibold">Resultados</h4>
-                                     <span class="text-xs text-gray-500">(<span x-text="totalResultados"></span>
-                                         total)</span>
+                         <!-- MODAL - Sección cuando producto existe -->
+                         <template x-if="productoEncontrado">
+                             <div class="space-y-8">
+                                 <!-- Código y nombre -->
+                                 <div>
+                                     <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
+                                         <i class="fas fa-tags text-gray-600 dark:text-white"></i>
+                                         Código y Nombre
+                                     </h4>
+
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                         <div>
+                                             <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                 Código de Barras
+                                             </label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-barcode input-icon"></i>
+                                                 <!-- CAMBIO: Usar productoEncontrado en lugar de nuevoProducto -->
+                                                 <input type="text" class="clean-input"
+                                                     :value="productoEncontrado.codigo_barras" readonly>
+                                             </div>
+                                         </div>
+                                         <!-- Nombre -->
+                                         <div>
+                                             <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                                 Nombre
+                                             </label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-cog input-icon"></i>
+                                                 <!-- CAMBIO: Usar productoEncontrado en lugar de nuevoProducto -->
+                                                 <input type="text" class="clean-input"
+                                                     :value="productoEncontrado.nombre" readonly>
+                                             </div>
+                                         </div>
+                                     </div>
                                  </div>
 
-                                 <div
-                                     class="rounded-2xl border border-gray-200/70 bg-white/70 dark:bg-gray-900/50 shadow-sm overflow-hidden">
-                                     <div class="max-h-[420px] overflow-auto">
-                                         <table class="min-w-full text-xs md:text-sm">
-                                             <!-- THEAD -->
-                                             <thead class="sticky top-0 z-10">
-                                                 <tr
-                                                     class="bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 text-gray-600">
-                                                     <th class="px-4 py-3 text-left w-28 font-semibold">Código</th>
-                                                     <th class="px-4 py-3 text-left font-semibold">Nombre</th>
-                                                     <th class="px-3 py-3 text-right w-20 font-semibold">Stock</th>
-                                                     <th class="px-3 py-3 text-right w-28 font-semibold">P. Compra</th>
-                                                     <th class="px-3 py-3 text-right w-28 font-semibold">P. Venta</th>
-                                                     <th class="px-4 py-3 text-center w-36 font-semibold">Acción</th>
-                                                 </tr>
-                                             </thead>
+                                 <!-- Información del producto -->
+                                 <div>
+                                     <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
+                                         <i class="fas fa-box-open text-gray-600 dark:text-white"></i>
+                                         Información del producto
+                                     </h4>
 
-                                             <!-- TBODY -->
-                                             <tbody>
-                                                 <template x-for="(producto, i) in productosEncontrados"
-                                                     :key="producto.idArticulos">
-                                                     <tr
-                                                         :class="[
-                                                             isSelected(producto) ? 'bg-green-50' : (i % 2 === 0 ?
-                                                                 'bg-white' : 'bg-gray-50/60'),
-                                                             'hover:bg-blue-50/60 transition-colors'
-                                                         ]">
-                                                         <td class="px-4 py-2 font-mono text-[13px] whitespace-nowrap"
-                                                             x-text="producto.codigo_barras"></td>
-                                                         <td class="px-4 py-2">
-                                                             <div class="max-w-[360px] truncate"
-                                                                 :title="producto.nombre" x-text="producto.nombre">
-                                                             </div>
-                                                         </td>
-                                                         <td class="px-3 py-2 text-right tabular-nums"
-                                                             x-text="Number(producto.stock_total)"></td>
-                                                         <td class="px-3 py-2 text-right tabular-nums"
-                                                             x-text="Number(producto.precio_compra).toFixed(2)"></td>
-                                                         <td class="px-3 py-2 text-right tabular-nums"
-                                                             x-text="Number(producto.precio_venta).toFixed(2)"></td>
-                                                         <td class="px-4 py-2 text-center">
-                                                             <button type="button"
-                                                                 @click.prevent="toggleSeleccion(producto)"
-                                                                 :class="isSelected(producto) ?
-                                                                     'px-2 py-1 rounded-full border border-green-400 bg-green-100 text-green-700 text-[11px] font-semibold' :
-                                                                     'px-2 py-1 rounded-full text-[11px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100'">
-                                                                 <span
-                                                                     x-show="!isSelected(producto)">Seleccionar</span>
-                                                                 <span
-                                                                     x-show="isSelected(producto)">Seleccionado</span>
-                                                             </button>
-                                                         </td>
-                                                     </tr>
-                                                 </template>
-                                             </tbody>
-                                         </table>
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                         <div>
+                                             <label class="block text-gray-600 text-sm mb-1">Stock o existencias
+                                                 compradas</label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-boxes input-icon"></i>
+                                                 <!-- CAMBIO: Usar productoEncontrado -->
+                                                 <input type="number" class="clean-input"
+                                                     :value="productoEncontrado.stock" readonly>
+                                             </div>
+                                         </div>
+                                         <div>
+                                             <label class="block text-gray-600 text-sm mb-1">Precio de compra (Con
+                                                 impuesto incluido)</label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-money-bill-wave input-icon"></i>
+                                                 <!-- CAMBIO: Usar x-model para precioCompra (que se actualiza desde productoEncontrado) -->
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     x-model="precioCompra">
+                                             </div>
+                                         </div>
+                                         <div>
+                                             <label class="block text-gray-600 text-sm mb-1">Precio de venta (Con
+                                                 impuesto incluido)</label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-tags input-icon"></i>
+                                                 <!-- CAMBIO: Usar productoEncontrado -->
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     :value="productoEncontrado.precio_venta" readonly>
+                                             </div>
+                                         </div>
+                                         <div>
+                                             <label class="block text-gray-600 text-sm mb-1">Precio de venta por
+                                                 mayoreo (Con impuesto incluido)</label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-hand-holding-usd input-icon"></i>
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     value="0.00">
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 <!-- AÑADIR: Input para cantidad -->
+                                 <div>
+                                     <label class="block text-gray-600 text-sm mb-1">Cantidad a comprar</label>
+                                     <div class="input-with-icon">
+                                         <i class="fas fa-cart-plus input-icon"></i>
+                                         <input type="number" class="clean-input" x-model="cantidadProducto"
+                                             min="1">
+                                     </div>
+                                 </div>
+
+                                 <p class="text-xs text-gray-500 mt-2">
+                                     Los campos marcados con <span class="text-red-500 font-semibold">*</span> son
+                                     obligatorios
+                                 </p>
+                             </div>
+                         </template>
+
+                         <template x-if="!productoEncontrado && codigoBarras">
+                             <div class="p-6 space-y-8">
+                                 <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
+                                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                             d="M6 18L18 6M6 6l12 12" />
+                                     </svg>
+                                     Producto no encontrado: Registrar nuevo producto
+                                 </h4>
+
+                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                     <!-- Código de Barras -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-barcode"></i> Código de Barras
+                                         </label>
+                                         <input type="text" class="clean-input"
+                                             x-model="nuevoProducto.codigo_barras" :value="codigoBarras">
                                      </div>
 
-                                     <!-- Paginación -->
-                                     <div
-                                         class="flex items-center justify-center gap-2 p-3 border-t border-gray-200 bg-gray-50">
-                                         <button
-                                             class="px-3 py-1 text-sm rounded-full border hover:bg-white disabled:opacity-50"
-                                             @click="abrirModalVerificacion(paginaActual - 1)"
-                                             :disabled="paginaActual === 1">Anterior</button>
-
-                                         <span class="text-sm">
-                                             Página <span class="font-semibold" x-text="paginaActual"></span>
-                                             de <span class="font-semibold"
-                                                 x-text="Math.ceil(totalResultados / resultadosPorPagina)"></span>
-                                         </span>
-
-                                         <button
-                                             class="px-3 py-1 text-sm rounded-full border hover:bg-white disabled:opacity-50"
-                                             @click="abrirModalVerificacion(paginaActual + 1)"
-                                             :disabled="paginaActual >= Math.ceil(totalResultados / resultadosPorPagina)">Siguiente</button>
+                                     <!-- SKU -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-tag"></i> SKU
+                                         </label>
+                                         <input type="text" class="clean-input" x-model="nuevoProducto.sku">
                                      </div>
+
+                                     <!-- Nombre -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-cog"></i> Nombre
+                                         </label>
+                                         <input type="text" class="clean-input" x-model="nuevoProducto.nombre">
+                                     </div>
+
+                                     <!-- Stock Total -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-boxes"></i> Stock Total
+                                         </label>
+                                         <input type="number" class="clean-input" x-model="nuevoProducto.stock">
+                                     </div>
+
+                                     <!-- Stock Mínimo -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-database"></i> Stock Mínimo
+                                         </label>
+                                         <input type="number" class="clean-input"
+                                             x-model="nuevoProducto.stock_minimo">
+                                     </div>
+
+                                     <!-- Unidad de Medida -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-balance-scale"></i> Unidad de Medida
+                                         </label>
+                                         <select class="clean-input" x-model="nuevoProducto.unidad">
+                                             <option value="">Seleccione una opción</option>
+                                             <template x-for="unidad in unidades" :key="unidad.id">
+                                                 <option :value="unidad.id" x-text="unidad.nombre"></option>
+                                             </template>
+                                         </select>
+                                     </div>
+
+                                     <!-- Modelo -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-project-diagram"></i> Modelo
+                                         </label>
+                                         <select class="clean-input" x-model="nuevoProducto.modelo">
+                                             <option value="">Seleccione una opción</option>
+                                             <template x-for="modelo in modelos" :key="modelo.id">
+                                                 <option :value="modelo.id" x-text="modelo.nombre"></option>
+                                             </template>
+                                         </select>
+                                     </div>
+
+                                     <!-- Peso -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-weight"></i> Peso (kg)
+                                         </label>
+                                         <input type="number" step="0.01" class="clean-input"
+                                             x-model="nuevoProducto.peso">
+                                     </div>
+
+                                     <!-- Precio Compra -->
+                                     <div>
+                                         <label class="text-sm font-medium text-gray-700">Precio de Compra</label>
+                                         <div class="flex items-center gap-2">
+                                             <span>S/</span>
+                                             <input type="number" step="0.01" class="clean-input"
+                                                 x-model="nuevoProducto.precio_compra">
+                                         </div>
+                                     </div>
+
+                                     <!-- Precio Venta -->
+                                     <div>
+                                         <label class="text-sm font-medium text-gray-700">Precio de Venta</label>
+                                         <div class="flex items-center gap-2">
+                                             <span>S/</span>
+                                             <input type="number" step="0.01" class="clean-input"
+                                                 x-model="nuevoProducto.precio_venta">
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 <div class="pt-6 flex justify-end">
+                                     <button @click="guardarNuevoProducto" class="btn btn-primary">Guardar
+                                         producto</button>
                                  </div>
                              </div>
                          </template>
 
-                         <!-- Sin resultados -->
-                         <template x-if="productosEncontrados.length === 0 && codigoBarras && !productoEncontrado">
-                             <div class="text-center text-gray-500 mt-8">No se encontraron productos con el término
-                                 ingresado.</div>
-                         </template>
                      </div>
 
                      <!-- Footer -->
                      <div
                          class="flex justify-end items-center gap-4 px-6 py-4 border-t border-gray-200 dark:border-white/10">
-                         <div class="mr-auto text-sm text-gray-600" x-show="seleccionadosCount > 0">
-                             Seleccionados: <span class="font-semibold" x-text="seleccionadosCount"></span>
-                         </div>
-
                          <button @click="cerrarModal" class="text-sm btn btn-outline-danger">CERRAR</button>
-
-                         <!-- Botón único dinámico -->
-                         <button @click="seleccionadosCount > 0 ? agregarSeleccionados() : agregarAlCarrito()"
-                             :class="seleccionadosCount > 0 ?
-                                 'text-sm px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700' :
-                                 'text-sm btn btn-primary flex items-center gap-2'">
-                             <svg x-show="seleccionadosCount === 0" class="w-4 h-4" fill="none"
-                                 stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                         <button x-show="productoEncontrado" @click="agregarAlCarrito"
+                             class="text-sm btn btn-primary flex items-center gap-2">
+                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
                                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                              </svg>
-                             <span
-                                 x-text="seleccionadosCount > 0 ? 'AGREGAR SELECCIONADOS' : 'AGREGAR PRODUCTO'"></span>
+                             AGREGAR PRODUCTO
                          </button>
                      </div>
-
                  </div>
              </div>
          </div>

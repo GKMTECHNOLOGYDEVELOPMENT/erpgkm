@@ -6,6 +6,7 @@ document.addEventListener('alpine:init', () => {
         filters: {
             fecha_inicio: '',
             fecha_fin: '',
+            q: '',
         },
         pagination: {
             current_page: 1,
@@ -26,20 +27,15 @@ document.addEventListener('alpine:init', () => {
 
             try {
                 // Limpiar filtros - solo enviar si tienen valor
-                const cleanFilters = {};
-
-                if (this.filters.fecha_inicio) {
-                    cleanFilters.fecha_inicio = this.filters.fecha_inicio;
-                }
-
-                if (this.filters.fecha_fin) {
-                    cleanFilters.fecha_fin = this.filters.fecha_fin;
-                }
+                const clean = {};
+                if (this.filters.fecha_inicio) clean.fecha_inicio = this.filters.fecha_inicio;
+                if (this.filters.fecha_fin) clean.fecha_fin = this.filters.fecha_fin;
+                if (this.filters.q && this.filters.q.trim().length >= 3) clean.q = this.filters.q.trim();
 
                 const params = new URLSearchParams({
                     page: this.pagination.current_page,
                     per_page: this.pagination.per_page,
-                    ...cleanFilters,
+                    ...clean,
                 });
 
                 const response = await fetch(`/compras/data?${params}`);
@@ -63,6 +59,11 @@ document.addEventListener('alpine:init', () => {
                 this.loading = false;
             }
         },
+            buscar() {
+      // mínimo 3 caracteres para enviar q
+      this.pagination.current_page = 1;
+      this.loadCompras();
+    },
 
         detallesCompra(idCompra) {
             // Redireccionar a la página de detalles de compra
