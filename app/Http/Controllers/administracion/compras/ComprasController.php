@@ -213,6 +213,7 @@ class ComprasController extends Controller
                 'fechaVencimiento' => $request->fecha_vencimiento,
                 'imagen' => null, // Si tienes imagen, procésala aquí
                 'sujetoporcentaje' => $request->sujeto_porcentaje ?? 0,
+                'proveedor_id' => $request->proveedor_id,
                 'cantidad' => count($request->productos),
                 'gravada' => $request->subtotal,
                 'igv' => $request->igv,
