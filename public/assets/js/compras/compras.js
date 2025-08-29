@@ -404,11 +404,15 @@ document.addEventListener('alpine:init', () => {
 
         async guardarCompra() {
             if (!this.puedeGuardar) {
-                alert('Por favor complete todos los campos obligatorios');
+                toastr.warning('Por favor complete todos los campos obligatorios', 'Campos incompletos', {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: 3000,
+                    positionClass: 'toast-top-right',
+                });
                 return;
             }
 
-            // Activar estado de loading
             this.guardandoCompra = true;
 
             try {
@@ -443,16 +447,30 @@ document.addEventListener('alpine:init', () => {
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('Compra guardada exitosamente');
+                    toastr.success('Compra guardada exitosamente', 'Éxito', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3000,
+                        positionClass: 'toast-top-right',
+                    });
                     this.resetFormulario();
                 } else {
-                    alert('Error al guardar la compra: ' + result.message);
+                    toastr.error('Error al guardar la compra: ' + result.message, 'Error', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3000,
+                        positionClass: 'toast-top-right',
+                    });
                 }
             } catch (error) {
                 console.error('Error al guardar compra:', error);
-                alert('Error al guardar la compra');
+                toastr.error('Error al guardar la compra', 'Error inesperado', {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: 3000,
+                    positionClass: 'toast-top-right',
+                });
             } finally {
-                // Desactivar estado de loading siempre
                 this.guardandoCompra = false;
             }
         },
