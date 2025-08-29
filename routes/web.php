@@ -370,6 +370,8 @@ Route::prefix('ventas')->name('ventas.')->group(function () {
 /// INICIO COMPRAS ///
 Route::prefix('compras')->name('compras.')->group(function () {
     Route::get('/', [ComprasController::class, 'index'])->name('index'); // Mostrar la vista principal
+        Route::get('/data', [ComprasController::class, 'data'])->name('data'); // Mostrar la vista principal
+
     Route::get('/create', [ComprasController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
@@ -381,6 +383,14 @@ Route::prefix('compras')->name('compras.')->group(function () {
     Route::get('/export-pdf', [RepuestosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
     Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
     Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+
+    // Rutas para las acciones de compras
+// Rutas para las acciones de compras
+Route::get('/{id}/detalles', [ComprasController::class, 'detalles'])->name('compras.detalles');
+Route::get('/{id}/factura', [ComprasController::class, 'factura'])->name('compras.factura');
+Route::get('/{id}/ticket', [ComprasController::class, 'ticket'])->name('compras.ticket');
+
+
     Route::get('/exportar-excel', function () {
         return Excel::download(new ArticuloExport, 'compras.xlsx');
     })->name('exportExcel');
