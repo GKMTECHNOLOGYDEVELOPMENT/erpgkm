@@ -4,6 +4,7 @@ namespace App\Http\Controllers\administracion\compras;
 
 use App\Http\Controllers\Controller;
 use App\Models\Compra;
+use App\Models\Moneda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -93,8 +94,10 @@ public function data(Request $request)
     public function create()
     {
         $documentos = DB::table('documento')->get();
+                $monedas = Moneda::all();
 
-        return view('administracion.compras.create', compact('documentos'));
+
+        return view('administracion.compras.create', compact('documentos', 'monedas'));
     }
 
     // API para obtener monedas
