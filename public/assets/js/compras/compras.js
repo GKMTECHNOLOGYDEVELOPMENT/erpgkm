@@ -16,6 +16,7 @@ document.addEventListener('alpine:init', () => {
         guardandoCompra: false, // Estado de loading para el botón
         errorPrecio: '',
         mostrarErrorPrecio: false,
+        modalType: null,
         // Arrays para datos de la API
         documentos: [],
         proveedores: [],
@@ -94,17 +95,16 @@ document.addEventListener('alpine:init', () => {
             return moneda ? moneda.simbolo : 'S/';
         },
 
-
         // Métodos para cargar unidades y modelos
         async cargarUnidades() {
             this.cargandoUnidades = true;
             try {
                 const response = await fetch('/api/unidades');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     this.unidades = data.data;
-                    Log.info('Unidades cargadas:', this.unidades);
+                    console.log('Unidades cargadas:', this.unidades);
                 } else {
                     console.error('Error al cargar unidades:', data.message);
                 }
@@ -120,10 +120,10 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await fetch('/api/modelos');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     this.modelos = data.data;
-                    Log.info('Modelos cargados:', this.modelos);
+                    console.log('Modelos cargados:', this.modelos);
                 } else {
                     console.error('Error al cargar modelos:', data.message);
                 }
@@ -261,7 +261,6 @@ document.addEventListener('alpine:init', () => {
         },
 
         async abrirModalVerificacion(pagina = 1) {
-            // Si vino un evento (KeyboardEvent, MouseEvent), forzamos página = 1
             if (pagina && typeof pagina === 'object') pagina = 1;
             pagina = Number(pagina) || 1;
 
@@ -284,10 +283,15 @@ document.addEventListener('alpine:init', () => {
 
                     if (data.productos.length === 1) {
                         this.seleccionarProducto(data.productos[0]);
+                        this.modalType = 'existente';
                     }
                 } else {
                     this.productosEncontrados = [];
                     this.totalResultados = 0;
+                    this.modalType = 'nuevo';
+
+                    // 👇 Aquí está lo importante
+                    this.nuevoProducto.codigo_barras = this.codigoBarras;
                 }
             } catch (e) {
                 console.error('Error al buscar producto:', e);
@@ -368,213 +372,211 @@ document.addEventListener('alpine:init', () => {
             this.cerrarModal();
             this.codigoBarras = '';
         },
-      // En la función agregarAlCarrito, agregaremos un console.log
-// Función agregarAlCarrito corregida
-agregarAlCarrito() {
-    if (!this.productoEncontrado) return;
+        // En la función agregarAlCarrito, agregaremos un console.log
+        // Función agregarAlCarrito corregida
+        agregarAlCarrito() {
+            if (!this.productoEncontrado) return;
 
-    // IMPORTANTE: Validar precios ANTES de continuar
-    if (!this.validarPrecios()) {
-        return; // Si la validación falla, NO cerrar el modal
-    }
+            // IMPORTANTE: Validar precios ANTES de continuar
+            if (!this.validarPrecios()) {
+                return; // Si la validación falla, NO cerrar el modal
+            }
 
-    console.log('DEBUG - productoEncontrado:', this.productoEncontrado);
-    
-    // Asegurar que precio_venta tenga un valor válido
-    let precioVenta = this.productoEncontrado.precio_venta;
-    if (!precioVenta || precioVenta == 0) {
-        // Calcular precio de venta con 30% de margen si no tiene valor
-        precioVenta = this.precioCompra * 1.3;
-        console.log('Precio venta calculado:', precioVenta);
-    }
+            console.log('DEBUG - productoEncontrado:', this.productoEncontrado);
 
-    const nuevoProducto = {
-        id: this.productoEncontrado.id,
-        codigo_barras: this.productoEncontrado.codigo_barras,
-        nombre: this.productoEncontrado.nombre,
-        cantidad: this.cantidadProducto,
-        precio: this.precioCompra,
-        precioBase: this.productoEncontrado.precio_compra,
-        subtotal: this.cantidadProducto * this.precioCompra,
-        stock: this.productoEncontrado.stock,
-        precio_venta: precioVenta,
-    };
+            // Asegurar que precio_venta tenga un valor válido
+            let precioVenta = this.productoEncontrado.precio_venta;
+            if (!precioVenta || precioVenta == 0) {
+                // Calcular precio de venta con 30% de margen si no tiene valor
+                precioVenta = this.precioCompra * 1.3;
+                console.log('Precio venta calculado:', precioVenta);
+            }
 
-    console.log('DEBUG - nuevoProducto a agregar:', nuevoProducto);
-
-    this.productos.push(nuevoProducto);
-    
-    // SOLO cerrar modal si todo está correcto
-    this.cerrarModal();
-    this.codigoBarras = '';
-},
-
-// También necesitas mejorar la función validarPrecios
-validarPrecios() {
-    const precioCompra = parseFloat(this.precioCompra);
-    const precioVenta = parseFloat(this.productoEncontrado.precio_venta);
-    
-    if (isNaN(precioCompra) || precioCompra <= 0) {
-        this.errorPrecio = 'El precio de compra debe ser mayor que cero.';
-        this.mostrarErrorPrecio = true;
-        return false;
-    }
-    
-    if (isNaN(precioVenta) || precioVenta <= 0) {
-        this.errorPrecio = 'El precio de venta debe ser mayor que cero.';
-        this.mostrarErrorPrecio = true;
-        return false;
-    }
-    
-    if (precioVenta <= precioCompra) {
-        this.errorPrecio = 'El precio de venta debe ser mayor que el precio de compra.';
-        this.mostrarErrorPrecio = true;
-        return false;
-    }
-    
-    // Si llegamos aquí, todo está bien
-    this.mostrarErrorPrecio = false;
-    this.errorPrecio = '';
-    return true;
-},
-        seleccionarProducto(producto) {
-    console.log('DEBUG - Producto seleccionado:', producto);
-    console.log('DEBUG - Precio venta del producto:', producto.precio_venta);
-    
-    this.productoEncontrado = {
-        id: producto.idArticulos,
-        codigo_barras: producto.codigo_barras,
-        nombre: producto.nombre,
-        stock: producto.stock_total,
-        precio_compra: producto.precio_compra || 0,
-        precio_venta: producto.precio_venta || 0, // Asegúrate de que esto tenga valor
-    };
-    
-    console.log('DEBUG - productoEncontrado después:', this.productoEncontrado);
-    this.precioCompra = producto.precio_compra || 0;
-    this.cantidadProducto = 1;
-},
-
-// Agrega esta función en tu Alpine.js
-validarStock() {
-    const stock = parseInt(this.nuevoProducto.stock) || 0;
-    const stockMinimo = parseInt(this.nuevoProducto.stock_minimo) || 0;
-    
-    if (stock < 0 || stockMinimo < 0) {
-        this.errorPrecio = '❌ ERROR: El stock no puede ser negativo';
-        this.mostrarErrorPrecio = true;
-        return false;
-    }
-    
-    this.mostrarErrorPrecio = false;
-    this.errorPrecio = '';
-    return true;
-},
-// Función para verificar si el código de barras ya existe
-async verificarCodigoBarras() {
-    if (!this.nuevoProducto.codigo_barras) return;
-    
-    try {
-        const response = await fetch(`/api/verificar-codigo-barras?codigo=${this.nuevoProducto.codigo_barras}`);
-        const result = await response.json();
-        
-        if (result.exists) {
-            this.errorPrecio = '❌ El código de barras ya existe';
-            this.mostrarErrorPrecio = true;
-        }
-    } catch (error) {
-        console.error('Error al verificar código de barras:', error);
-    }
-},
-       // Modifica la función guardarNuevoProducto
-async guardarNuevoProducto() {
-    // Validar precios primero
-    const precioCompra = parseFloat(this.nuevoProducto.precio_compra);
-    const precioVenta = parseFloat(this.nuevoProducto.precio_venta);
-    
-    if (precioVenta < precioCompra) {
-        this.errorPrecio = '❌ ERROR: El precio de venta no puede ser menor al precio de compra';
-        this.mostrarErrorPrecio = true;
-        return;
-    }
-
-    // Validar stock
-    if (this.nuevoProducto.stock < 0 || this.nuevoProducto.stock_minimo < 0) {
-        this.errorPrecio = '❌ ERROR: El stock no puede ser negativo';
-        this.mostrarErrorPrecio = true;
-        return;
-    }
-
-    // Preparar datos para enviar
-    const articuloData = {
-        codigo_barras: this.nuevoProducto.codigo_barras,
-        sku: this.nuevoProducto.sku || '',
-        nombre: this.nuevoProducto.nombre,
-        stock_total: parseInt(this.nuevoProducto.stock) || 0,
-        stock_minimo: parseInt(this.nuevoProducto.stock_minimo) || 0,
-        precio_compra: precioCompra,
-        precio_venta: precioVenta,
-        peso: parseFloat(this.nuevoProducto.peso) || 0,
-        idUnidad: parseInt(this.nuevoProducto.unidad) || null,
-        idModelo: parseInt(this.nuevoProducto.modelo) || null
-    };
-
-    console.log('Enviando datos del artículo:', articuloData);
-
-    try {
-        const response = await fetch('/api/guardar-nuevo-articulo', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            },
-            body: JSON.stringify(articuloData),
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            // Crear producto para el carrito
-            const nuevoProductoCarrito = {
-                id: result.articulo_id,
-                codigo_barras: articuloData.codigo_barras,
-                nombre: articuloData.nombre,
-                cantidad: 1,
-                precio: this.convertirPrecio(articuloData.precio_compra),
-                precioBase: articuloData.precio_compra,
-                subtotal: this.convertirPrecio(articuloData.precio_compra),
-                stock: articuloData.stock_total,
-                precio_venta: articuloData.precio_venta,
+            const nuevoProducto = {
+                id: this.productoEncontrado.id,
+                codigo_barras: this.productoEncontrado.codigo_barras,
+                nombre: this.productoEncontrado.nombre,
+                cantidad: this.cantidadProducto,
+                precio: this.precioCompra,
+                precioBase: this.productoEncontrado.precio_compra,
+                subtotal: this.cantidadProducto * this.precioCompra,
+                stock: this.productoEncontrado.stock,
+                precio_venta: precioVenta,
             };
 
-            this.productos.push(nuevoProductoCarrito);
+            console.log('DEBUG - nuevoProducto a agregar:', nuevoProducto);
+
+            this.productos.push(nuevoProducto);
+
+            // SOLO cerrar modal si todo está correcto
             this.cerrarModal();
             this.codigoBarras = '';
-            this.mostrarErrorPrecio = false;
+        },
 
-            // Mostrar mensaje de éxito
-            toastr.success('Artículo guardado y agregado a la compra', 'Éxito');
+        // También necesitas mejorar la función validarPrecios
+        validarPrecios() {
+            const precioCompra = parseFloat(this.precioCompra);
+            const precioVenta = parseFloat(this.productoEncontrado.precio_venta);
 
-        } else {
-            // Mostrar errores de validación
-            if (result.errors) {
-                let errorMessage = 'Errores de validación:\n';
-                for (const field in result.errors) {
-                    errorMessage += `- ${result.errors[field][0]}\n`;
-                }
-                this.errorPrecio = errorMessage;
-            } else {
-                this.errorPrecio = result.message || 'Error al guardar el artículo';
+            if (isNaN(precioCompra) || precioCompra <= 0) {
+                this.errorPrecio = 'El precio de compra debe ser mayor que cero.';
+                this.mostrarErrorPrecio = true;
+                return false;
             }
-            this.mostrarErrorPrecio = true;
-        }
 
-    } catch (error) {
-        console.error('Error al guardar artículo:', error);
-        this.errorPrecio = 'Error de conexión al guardar el artículo';
-        this.mostrarErrorPrecio = true;
-    }
-},
+            if (isNaN(precioVenta) || precioVenta <= 0) {
+                this.errorPrecio = 'El precio de venta debe ser mayor que cero.';
+                this.mostrarErrorPrecio = true;
+                return false;
+            }
+
+            if (precioVenta <= precioCompra) {
+                this.errorPrecio = 'El precio de venta debe ser mayor que el precio de compra.';
+                this.mostrarErrorPrecio = true;
+                return false;
+            }
+
+            // Si llegamos aquí, todo está bien
+            this.mostrarErrorPrecio = false;
+            this.errorPrecio = '';
+            return true;
+        },
+        seleccionarProducto(producto) {
+            console.log('DEBUG - Producto seleccionado:', producto);
+            console.log('DEBUG - Precio venta del producto:', producto.precio_venta);
+
+            this.productoEncontrado = {
+                id: producto.idArticulos,
+                codigo_barras: producto.codigo_barras,
+                nombre: producto.nombre,
+                stock: producto.stock_total,
+                precio_compra: producto.precio_compra || 0,
+                precio_venta: producto.precio_venta || 0, // Asegúrate de que esto tenga valor
+            };
+
+            console.log('DEBUG - productoEncontrado después:', this.productoEncontrado);
+            this.precioCompra = producto.precio_compra || 0;
+            this.cantidadProducto = 1;
+        },
+
+        // Agrega esta función en tu Alpine.js
+        validarStock() {
+            const stock = parseInt(this.nuevoProducto.stock) || 0;
+            const stockMinimo = parseInt(this.nuevoProducto.stock_minimo) || 0;
+
+            if (stock < 0 || stockMinimo < 0) {
+                this.errorPrecio = '❌ ERROR: El stock no puede ser negativo';
+                this.mostrarErrorPrecio = true;
+                return false;
+            }
+
+            this.mostrarErrorPrecio = false;
+            this.errorPrecio = '';
+            return true;
+        },
+        // Función para verificar si el código de barras ya existe
+        async verificarCodigoBarras() {
+            if (!this.nuevoProducto.codigo_barras) return;
+
+            try {
+                const response = await fetch(`/api/verificar-codigo-barras?codigo=${this.nuevoProducto.codigo_barras}`);
+                const result = await response.json();
+
+                if (result.exists) {
+                    this.errorPrecio = '❌ El código de barras ya existe';
+                    this.mostrarErrorPrecio = true;
+                }
+            } catch (error) {
+                console.error('Error al verificar código de barras:', error);
+            }
+        },
+        // Modifica la función guardarNuevoProducto
+        async guardarNuevoProducto() {
+            // Validar precios primero
+            const precioCompra = parseFloat(this.nuevoProducto.precio_compra);
+            const precioVenta = parseFloat(this.nuevoProducto.precio_venta);
+
+            if (precioVenta < precioCompra) {
+                this.errorPrecio = '❌ ERROR: El precio de venta no puede ser menor al precio de compra';
+                this.mostrarErrorPrecio = true;
+                return;
+            }
+
+            // Validar stock
+            if (this.nuevoProducto.stock < 0 || this.nuevoProducto.stock_minimo < 0) {
+                this.errorPrecio = '❌ ERROR: El stock no puede ser negativo';
+                this.mostrarErrorPrecio = true;
+                return;
+            }
+
+            // Preparar datos para enviar
+            const articuloData = {
+                codigo_barras: this.nuevoProducto.codigo_barras,
+                sku: this.nuevoProducto.sku || '',
+                nombre: this.nuevoProducto.nombre,
+                stock_total: parseInt(this.nuevoProducto.stock) || 0,
+                stock_minimo: parseInt(this.nuevoProducto.stock_minimo) || 0,
+                precio_compra: precioCompra,
+                precio_venta: precioVenta,
+                peso: parseFloat(this.nuevoProducto.peso) || 0,
+                idUnidad: parseInt(this.nuevoProducto.unidad) || null,
+                idModelo: parseInt(this.nuevoProducto.modelo) || null,
+            };
+
+            console.log('Enviando datos del artículo:', articuloData);
+
+            try {
+                const response = await fetch('/api/guardar-nuevo-articulo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify(articuloData),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Crear producto para el carrito
+                    const nuevoProductoCarrito = {
+                        id: result.articulo_id,
+                        codigo_barras: articuloData.codigo_barras,
+                        nombre: articuloData.nombre,
+                        cantidad: 1,
+                        precio: this.convertirPrecio(articuloData.precio_compra),
+                        precioBase: articuloData.precio_compra,
+                        subtotal: this.convertirPrecio(articuloData.precio_compra),
+                        stock: articuloData.stock_total,
+                        precio_venta: articuloData.precio_venta,
+                    };
+
+                    this.productos.push(nuevoProductoCarrito);
+                    this.cerrarModal();
+                    this.codigoBarras = '';
+                    this.mostrarErrorPrecio = false;
+
+                    // Mostrar mensaje de éxito
+                    toastr.success('Artículo guardado y agregado a la compra', 'Éxito');
+                } else {
+                    // Mostrar errores de validación
+                    if (result.errors) {
+                        let errorMessage = 'Errores de validación:\n';
+                        for (const field in result.errors) {
+                            errorMessage += `- ${result.errors[field][0]}\n`;
+                        }
+                        this.errorPrecio = errorMessage;
+                    } else {
+                        this.errorPrecio = result.message || 'Error al guardar el artículo';
+                    }
+                    this.mostrarErrorPrecio = true;
+                }
+            } catch (error) {
+                console.error('Error al guardar artículo:', error);
+                this.errorPrecio = 'Error de conexión al guardar el artículo';
+                this.mostrarErrorPrecio = true;
+            }
+        },
         cerrarModal() {
             this.modalAbierto = false;
             this.open = false;
@@ -593,55 +595,55 @@ async guardarNuevoProducto() {
             return `${this.simboloMoneda}${value.toFixed(2)}`;
         },
 
-       async guardarCompra() {
-    if (!this.puedeGuardar) {
-        toastr.warning('Por favor complete todos los campos obligatorios', 'Campos incompletos');
-        return;
-    }
+        async guardarCompra() {
+            if (!this.puedeGuardar) {
+                toastr.warning('Por favor complete todos los campos obligatorios', 'Campos incompletos');
+                return;
+            }
 
-    // VERIFICACIÓN: Mostrar todos los productos con sus precios de venta
-    console.log('=== VERIFICACIÓN FINAL - PRODUCTOS ===');
-    this.productos.forEach((producto, index) => {
-        console.log(`Producto ${index + 1}:`);
-        console.log(' - ID:', producto.id);
-        console.log(' - Nombre:', producto.nombre);
-        console.log(' - Precio compra:', producto.precio);
-        console.log(' - Precio venta:', producto.precio_venta);
-        console.log(' - ¿Precio venta válido?', producto.precio_venta > 0 ? 'SÍ' : 'NO');
-    });
+            // VERIFICACIÓN: Mostrar todos los productos con sus precios de venta
+            console.log('=== VERIFICACIÓN FINAL - PRODUCTOS ===');
+            this.productos.forEach((producto, index) => {
+                console.log(`Producto ${index + 1}:`);
+                console.log(' - ID:', producto.id);
+                console.log(' - Nombre:', producto.nombre);
+                console.log(' - Precio compra:', producto.precio);
+                console.log(' - Precio venta:', producto.precio_venta);
+                console.log(' - ¿Precio venta válido?', producto.precio_venta > 0 ? 'SÍ' : 'NO');
+            });
 
-    this.guardandoCompra = true;
+            this.guardandoCompra = true;
 
-    try {
-        const compraData = {
-            serie: this.serie,
-            nro: parseInt(this.nro),
-            fecha: this.fecha,
-            fecha_vencimiento: this.fechaVencimiento,
-            documento_id: this.documentoId,
-            proveedor_id: this.proveedorId,
-            moneda_id: this.monedaId,
-            impuesto_id: this.impuestoId,
-            sujeto_id: this.sujetoId,
-            condicion_compra_id: this.condicionCompraId,
-            tipo_pago_id: this.tipoPagoId,
-            productos: this.productos,
-            subtotal: this.subtotal,
-            igv: this.itbis,
-            total: this.total,
-            tipo_cambio: this.tipoCambio,
-        };
+            try {
+                const compraData = {
+                    serie: this.serie,
+                    nro: parseInt(this.nro),
+                    fecha: this.fecha,
+                    fecha_vencimiento: this.fechaVencimiento,
+                    documento_id: this.documentoId,
+                    proveedor_id: this.proveedorId,
+                    moneda_id: this.monedaId,
+                    impuesto_id: this.impuestoId,
+                    sujeto_id: this.sujetoId,
+                    condicion_compra_id: this.condicionCompraId,
+                    tipo_pago_id: this.tipoPagoId,
+                    productos: this.productos,
+                    subtotal: this.subtotal,
+                    igv: this.itbis,
+                    total: this.total,
+                    tipo_cambio: this.tipoCambio,
+                };
 
-        console.log('Datos completos a enviar:', compraData);
+                console.log('Datos completos a enviar:', compraData);
 
-        const response = await fetch('/api/guardar-compra', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            },
-            body: JSON.stringify(compraData),
-        });
+                const response = await fetch('/api/guardar-compra', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify(compraData),
+                });
 
                 const result = await response.json();
 
@@ -715,7 +717,7 @@ async guardarNuevoProducto() {
             this.cargarCondicionesCompra();
             this.cargarTiposPago();
             this.cargarUnidades(); // Cargar unidades
-            this.cargarModelos();  // Cargar modelos
+            this.cargarModelos(); // Cargar modelos
 
             // Flatpickr para Fecha Emisión
             flatpickr(this.$refs.fechaInput, {
