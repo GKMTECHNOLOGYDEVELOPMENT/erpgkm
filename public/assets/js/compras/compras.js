@@ -18,6 +18,8 @@ document.addEventListener('alpine:init', () => {
         mostrarErrorPrecio: false,
         modalType: null,
         modalCargando: false,
+        garantiaFabrica: 0,
+        unidadTiempoGarantia: 'meses',
         // Arrays para datos de la API
         documentos: [],
         proveedores: [],
@@ -723,20 +725,33 @@ document.addEventListener('alpine:init', () => {
 
         inicializarSelect2() {
             if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
-                $('#proveedorSelect').select2({
-                    placeholder: 'Seleccione un proveedor',
-                    allowClear: true,
-                    language: 'es',
-                });
+                // Proveedor
+                $('#proveedorSelect')
+                    .select2({
+                        placeholder: 'Seleccione un proveedor',
+                        allowClear: true,
+                        language: 'es',
+                        dropdownParent: $('#proveedorSelect').parent(),
+                    })
+                    .on('change', (e) => {
+                        this.proveedorId = e.target.value;
+                    });
 
-                $('#proveedorSelect').on('change', (e) => {
-                    this.proveedorId = e.target.value;
-                });
+                // Unidad de Tiempo de Garantía
+                $('#unidadGarantiaSelect')
+                    .select2({
+                        placeholder: 'Seleccione unidad de tiempo',
+                        language: 'es',
+                        minimumResultsForSearch: Infinity,
+                        dropdownParent: $('#unidadGarantiaSelect').parent(),
+                    })
+                    .on('change', (e) => {
+                        this.unidadTiempoGarantia = e.target.value;
+                    });
             } else {
                 console.error('jQuery o Select2 no están cargados correctamente');
             }
         },
-
         init() {
             // Cargar todos los datos al inicializar
             this.cargarDocumentos();

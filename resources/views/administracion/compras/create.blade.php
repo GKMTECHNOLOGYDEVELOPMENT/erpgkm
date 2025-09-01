@@ -715,7 +715,7 @@
                                              <i class="fas fa-barcode"></i> Código de Barras
                                          </label>
                                          <input type="text" class="clean-input"
-                                             x-model="nuevoProducto.codigo_barras">
+                                             x-model="nuevoProducto.codigo_barras" readonly>
 
                                      </div>
 
@@ -755,36 +755,113 @@
                                      </div>
 
                                      <!-- Unidad de Medida -->
-                                     <div>
+                                     <div x-init="$nextTick(() => {
+                                         const select = $el.querySelector('select');
+                                         $(select).select2({
+                                             placeholder: 'Seleccione una opción',
+                                             width: '100%',
+                                             dropdownParent: select.closest('div') // para modales
+                                         }).on('change', (e) => {
+                                             nuevoProducto.unidad = e.target.value;
+                                         });
+                                     })">
                                          <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
                                              <i class="fas fa-balance-scale"></i> Unidad de Medida
                                          </label>
-                                         <select class="clean-input" x-model="nuevoProducto.unidad">
+                                         <select class="clean-input w-full">
                                              <option value="">Seleccione una opción</option>
                                              <template x-for="unidad in unidades" :key="unidad.id">
-                                                 <option :value="unidad.id" x-text="unidad.nombre"></option>
+                                                 <option :value="unidad.id" x-text="unidad.nombre"
+                                                     :selected="unidad.id == nuevoProducto.unidad"></option>
                                              </template>
                                          </select>
+
                                          <template x-if="cargandoUnidades">
                                              <div class="text-xs text-gray-500 mt-1">Cargando unidades...</div>
                                          </template>
                                      </div>
 
+
                                      <!-- Modelo -->
-                                     <div>
+                                     <div x-init="$nextTick(() => {
+                                         const select = $el.querySelector('select');
+                                         $(select).select2({
+                                             placeholder: 'Seleccione una opción',
+                                             width: '100%',
+                                             dropdownParent: select.closest('div')
+                                         }).on('change', (e) => {
+                                             nuevoProducto.modelo = e.target.value;
+                                         });
+                                     })">
                                          <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
                                              <i class="fas fa-project-diagram"></i> Modelo
                                          </label>
-                                         <select class="clean-input" x-model="nuevoProducto.modelo">
+                                         <select class="clean-input w-full">
                                              <option value="">Seleccione una opción</option>
                                              <template x-for="modelo in modelos" :key="modelo.id">
-                                                 <option :value="modelo.id" x-text="modelo.nombre"></option>
+                                                 <option :value="modelo.id" x-text="modelo.nombre"
+                                                     :selected="modelo.id == nuevoProducto.modelo"></option>
                                              </template>
                                          </select>
+
                                          <template x-if="cargandoModelos">
                                              <div class="text-xs text-gray-500 mt-1">Cargando modelos...</div>
                                          </template>
                                      </div>
+
+                                     <!-- Garantía de Fábrica -->
+                                     <div class="relative">
+                                         <label for="garantia_fabrica"
+                                             class="block text-sm font-medium text-gray-700">Garantía de
+                                             Fábrica</label>
+                                         <div class="relative mt-1">
+                                             <i class="fas fa-shield-alt input-icon"></i>
+                                             <input id="garantia_fabrica" name="garantia_fabrica" type="number"
+                                                 min="0" class="clean-input w-full"
+                                                 placeholder="Tiempo de garantía" value="0">
+                                         </div>
+                                     </div>
+
+                                     <!-- Unidad de Tiempo de Garantía -->
+                                     <div class="relative">
+                                         <label for="unidad_tiempo_garantia"
+                                             class="block text-sm font-medium text-gray-700">Unidad de Tiempo</label>
+                                         <div class="relative mt-1">
+                                             <i class="fas fa-clock input-icon"></i>
+                                             <select id="unidad_tiempo_garantia" name="unidad_tiempo_garantia"
+                                                 class="select2-single clean-input w-full pl-10">
+                                                 <option value="dias">Días</option>
+                                                 <option value="semanas">Semanas</option>
+                                                 <option value="meses" selected>Meses</option>
+                                                 <option value="años">Años</option>
+                                             </select>
+                                         </div>
+                                     </div>
+
+                                     <div x-init="$nextTick(() => {
+                                         const select = $el.querySelector('select');
+                                         $(select).select2({
+                                             placeholder: 'Seleccione un proveedor',
+                                             width: '100%',
+                                             dropdownParent: select.closest('div')
+                                         }).on('change', (e) => {
+                                             nuevoProducto.proveedor = e.target.value;
+                                         });
+                                     })">
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-truck"></i> Proveedor
+                                         </label>
+                                         <select class="clean-input w-full">
+                                             <option value="">Seleccione un proveedor</option>
+                                             <option value="1" :selected="nuevoProducto.proveedor == 1">Tech
+                                                 Solutions S.A.C. - 20481234567</option>
+                                             <option value="2" :selected="nuevoProducto.proveedor == 2">
+                                                 Distribuidora Lima Norte - 20567890123</option>
+                                             <option value="3" :selected="nuevoProducto.proveedor == 3">Global
+                                                 Supplies EIRL - 20345678901</option>
+                                         </select>
+                                     </div>
+
 
 
                                      <!-- Peso -->
@@ -813,7 +890,7 @@
                                          <div class="input-with-icon">
                                              <i class="fas fa-tags input-icon"></i>
                                              <input type="number" step="0.01" class="clean-input"
-                                                 :value="nuevoProducto.precio_venta" readonly>
+                                                 :value="nuevoProducto.precio_venta">
                                              <input type="hidden" x-model="nuevoProducto.precio_venta">
 
                                          </div>
