@@ -464,7 +464,10 @@ Route::get('//impuestos', [ComprasController::class, 'getImpuestos'])->name('api
 Route::get('/sujetos', [ComprasController::class, 'getSujetos'])->name('api.sujetos');
 Route::get('/condiciones-compra', [ComprasController::class, 'getCondicionesCompra'])->name('api.condiciones-compra');
 Route::get('/tipos-pago', [ComprasController::class, 'getTiposPago'])->name('api.tipos-pago');
-
+Route::get('/unidades', [ComprasController::class, 'getUnidades']);
+Route::get('/modelos', [ComprasController::class, 'getModelos']);
+Route::post('/guardar-nuevo-articulo', [ComprasController::class, 'guardarNuevoArticuloDesdeCompra']);
+Route::get('/verificar-codigo-barras', [ComprasController::class, 'verificarCodigoBarras']);
 // Ruta para guardar la compra
 Route::post('/guardar-compra', [ComprasController::class, 'guardarCompra'])->name('api.guardar-compra');
 
