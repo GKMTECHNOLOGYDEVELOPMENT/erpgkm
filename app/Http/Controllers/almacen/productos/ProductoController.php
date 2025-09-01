@@ -10,6 +10,7 @@ use App\Models\Kardex;
 use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\Moneda;
+use App\Models\Proveedore;
 use App\Models\Tipoarea;
 use App\Models\Tipoarticulo;
 use App\Models\Unidad;
@@ -36,24 +37,33 @@ class ProductoController extends Controller
     }
 
     public function create()
-    {
-        // Obtener datos para los selects
-        $unidades = Unidad::all();
-        $tiposArticulo = Tipoarticulo::all();
-        $modelos = Modelo::with(['marca', 'categoria'])
-            ->where('estado', 1)
-            ->where('producto', 1)
-            ->get();
-        $monedas = Moneda::all();
-        $marcas = Marca::all();
-        $categorias = Categoria::all();
-        $monedas = Moneda::all();
+{
+    // Obtener datos para los selects
+    $unidades = Unidad::all();
+    $tiposArticulo = Tipoarticulo::all();
+    $modelos = Modelo::with(['marca', 'categoria'])
+        ->where('estado', 1)
+        ->where('producto', 1)
+        ->get();
+    $monedas = Moneda::all();
+    $marcas = Marca::all();
+    $categorias = Categoria::all();
+    $monedas = Moneda::all();
+    
+    // Obtener proveedores activos
+    $proveedores = Proveedore::where('estado', 1)->get();
 
-        
-
-        // Retornar la vista con los datos necesarios
-        return view('almacen.productos.articulos.create', compact('unidades', 'tiposArticulo', 'modelos', 'monedas', 'marcas', 'categorias'));
-    }
+    // Retornar la vista con los datos necesarios
+    return view('almacen.productos.articulos.create', compact(
+        'unidades', 
+        'tiposArticulo', 
+        'modelos', 
+        'monedas', 
+        'marcas', 
+        'categorias',
+        'proveedores'  // Agregamos los proveedores
+    ));
+}
 
      public function createproducto(Request $request)
     {
