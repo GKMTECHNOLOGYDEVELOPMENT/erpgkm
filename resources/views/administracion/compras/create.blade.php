@@ -143,7 +143,7 @@
                                  <i
                                      class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
                                  <input type="text" class="clean-input w-full text-xl pl-9"
-                                     placeholder="Código de barras o nombre" x-model="codigoBarras"
+                                     placeholder="Código de barras" x-model="codigoBarras"
                                      @keyup.enter="abrirModalVerificacion" />
                              </div>
                          </div>
@@ -159,75 +159,90 @@
                      </div>
 
 
-                  <!-- Tabla de productos -->
-                <!-- Tabla de productos -->
-<div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código de barras</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remover</th>
-            </tr>
-        </thead>
-        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <template x-if="productos.length === 0">
-                <tr>
-                    <td colspan="7" class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
-                        No hay productos agregados
-                    </td>
-                </tr>
-            </template>
+                     <!-- Tabla de productos -->
+                     <!-- Tabla de productos -->
+                     <div class="overflow-x-auto">
+                         <table class="min-w-full divide-y divide-gray-200">
+                             <thead class="bg-gray-50">
+                                 <tr>
+                                     <th
+                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                         #</th>
+                                     <th
+                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                         Código de barras</th>
+                                     <th
+                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                         Producto</th>
+                                     <th
+                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                         Cantidad</th>
+                                     <th
+                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                         Precio</th>
+                                     <th
+                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                         Subtotal</th>
+                                     <th
+                                         class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                         Remover</th>
+                                 </tr>
+                             </thead>
+                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                 <template x-if="productos.length === 0">
+                                     <tr>
+                                         <td colspan="7"
+                                             class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">
+                                             No hay productos agregados
+                                         </td>
+                                     </tr>
+                                 </template>
 
-            <template x-for="(producto, index) in productos" :key="producto.id">
-                <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
-                        x-text="index + 1"></td>
-                    <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
-                        x-text="producto.codigo_barras"></td>
-                    <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
-                        x-text="producto.nombre"></td>
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <input type="number"
-                            class="w-20 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-center bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
-                            x-model="producto.cantidad" @change="actualizarSubtotal(producto)"
-                            min="1">
-                    </td>
-                    <!-- En la tabla de productos, reemplazar el campo oculto por uno visible -->
-                    <td class="px-4 py-4 whitespace-nowrap">
-                        <input type="number" step="0.01"
-                            class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
-                            x-model="producto.precio" @change="actualizarSubtotal(producto)">
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap" style="display: none;">
-                        <input type="number" step="0.01"
-                            class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
-                            x-model="producto.precio_venta" placeholder="Precio venta">
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-right text-gray-800 dark:text-gray-100"
-                        x-text="formatCurrency(producto.subtotal)">
-                    </td>
-                    <td class="px-4 py-4 whitespace-nowrap text-center">
-                        <button
-                            class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                            @click="removerProducto(index)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </td>
-                </tr>
-            </template>
-        </tbody>
-    </table>
-</div>
+                                 <template x-for="(producto, index) in productos" :key="producto.id">
+                                     <tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                         <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                             x-text="index + 1"></td>
+                                         <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                             x-text="producto.codigo_barras"></td>
+                                         <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
+                                             x-text="producto.nombre"></td>
+                                         <td class="px-4 py-4 whitespace-nowrap">
+                                             <input type="number"
+                                                 class="w-20 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-center bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
+                                                 x-model="producto.cantidad" @change="actualizarSubtotal(producto)"
+                                                 min="1">
+                                         </td>
+                                         <!-- En la tabla de productos, reemplazar el campo oculto por uno visible -->
+                                         <td class="px-4 py-4 whitespace-nowrap">
+                                             <input type="number" step="0.01"
+                                                 class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
+                                                 x-model="producto.precio" @change="actualizarSubtotal(producto)">
+                                         </td>
+                                         <td class="px-4 py-4 whitespace-nowrap" style="display: none;">
+                                             <input type="number" step="0.01"
+                                                 class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
+                                                 x-model="producto.precio_venta" placeholder="Precio venta">
+                                         </td>
+                                         <td class="px-4 py-4 whitespace-nowrap text-right text-gray-800 dark:text-gray-100"
+                                             x-text="formatCurrency(producto.subtotal)">
+                                         </td>
+                                         <td class="px-4 py-4 whitespace-nowrap text-center">
+                                             <button
+                                                 class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                                 @click="removerProducto(index)">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                     viewBox="0 0 20 20" fill="currentColor">
+                                                     <path fill-rule="evenodd"
+                                                         d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                                                         clip-rule="evenodd" />
+                                                 </svg>
+                                             </button>
+                                         </td>
+                                     </tr>
+                                 </template>
+                             </tbody>
+                         </table>
+                     </div>
                  </div>
              </div>
 
@@ -520,11 +535,11 @@
 
          <!-- MODAL -->
          <!-- MODAL -->
-         <div x-show="modalAbierto" class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition
-             style="display: none;">
+         <div x-show="modalAbierto" x-cloak class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition>
              <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModal">
-                 <div x-show="open" x-transition x-transition.duration.300
+                 <div x-show="modalType !== null" x-transition x-transition.duration.300
                      class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
+
 
                      <!-- Header -->
                      <div
@@ -542,7 +557,7 @@
                      <!-- Body -->
                      <div class="p-6 text-sm text-gray-700 dark:text-white">
                          <!-- MODAL - Sección cuando producto existe -->
-                         <template x-if="productoEncontrado">
+                         <template x-if="modalType === 'existente'">
                              <div class="space-y-8">
                                  <!-- Código y nombre -->
                                  <div>
@@ -579,76 +594,85 @@
                                  </div>
 
                                  <!-- En el modal, dentro de la sección "Información del producto" -->
-<div>
-    <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
-        <i class="fas fa-box-open text-gray-600 dark:text-white"></i>
-        Información del producto
-    </h4>
+                                 <div>
+                                     <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
+                                         <i class="fas fa-box-open text-gray-600 dark:text-white"></i>
+                                         Información del producto
+                                     </h4>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-            <label class="block text-gray-600 text-sm mb-1">Cantidad a comprar<span class="text-red-500 font-semibold">*</span></label>
-            <div class="input-with-icon">
-                <i class="fas fa-cart-plus input-icon"></i>
-                <input type="number" class="clean-input" x-model="cantidadProducto" min="1">
-            </div>
-        </div>
-        
-        <div>
-            <label class="block text-gray-600 text-sm mb-1">Precio de compra<span class="text-red-500 font-semibold">*</span></label>
-            <div class="input-with-icon">
-                <i class="fas fa-money-bill-wave input-icon"></i>
-                <input type="number" step="0.01" class="clean-input" 
-                       x-model="precioCompra"
-                       :class="{ 'border-red-500': mostrarErrorPrecio }">
-            </div>
-        </div>
-        
-        <!-- Campo de precio de venta con validación visual -->
-        <div>
-            <label class="block text-gray-600 text-sm mb-1">Precio de venta<span class="text-red-500 font-semibold">*</span></label>
-            <div class="input-with-icon">
-                <i class="fas fa-tags input-icon"></i>
-                <input type="number" step="0.01" class="clean-input" 
-                       x-model="productoEncontrado.precio_venta"
-                       :class="{ 'border-red-500': mostrarErrorPrecio }"
-                       @input="validarPrecios()">
-            </div>
-            <!-- Mostrar mensaje de error -->
-            <div x-show="mostrarErrorPrecio" x-transition 
-                 class="error-msg text-red-500 text-xs mt-1">
-                <span x-text="errorPrecio"></span>
-            </div>
-        </div>
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                         <div>
+                                             <label class="block text-gray-600 text-sm mb-1">Cantidad a comprar<span
+                                                     class="text-red-500 font-semibold">*</span></label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-cart-plus input-icon"></i>
+                                                 <input type="number" class="clean-input" x-model="cantidadProducto"
+                                                     min="1">
+                                             </div>
+                                         </div>
+
+                                         <div>
+                                             <label class="block text-gray-600 text-sm mb-1">Precio de compra<span
+                                                     class="text-red-500 font-semibold">*</span></label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-money-bill-wave input-icon"></i>
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     x-model="precioCompra"
+                                                     :class="{ 'border-red-500': mostrarErrorPrecio }">
+                                             </div>
+                                         </div>
+
+                                         <!-- Campo de precio de venta con validación visual -->
+                                         <div>
+                                             <label class="block text-gray-600 text-sm mb-1">Precio de venta<span
+                                                     class="text-red-500 font-semibold">*</span></label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-tags input-icon"></i>
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     x-model="productoEncontrado.precio_venta"
+                                                     :class="{ 'border-red-500': mostrarErrorPrecio }"
+                                                     @input="validarPrecios()">
+                                             </div>
+                                             <!-- Mostrar mensaje de error -->
+                                             <div x-show="mostrarErrorPrecio" x-transition
+                                                 class="error-msg text-red-500 text-xs mt-1">
+                                                 <span x-text="errorPrecio"></span>
+                                             </div>
+                                         </div>
 
 
-        <div style="display: none;">
-            <label class="block text-gray-600 text-sm mb-1">Precio de venta por mayoreo <span class="text-red-500 font-semibold">*</span></label>
-            <div class="input-with-icon">
-                <i class="fas fa-hand-holding-usd input-icon"></i>
-                <input type="number" step="0.01" class="clean-input" value="0.00">
-            </div>
-        </div>
-    </div>
-    
-    <!-- Mensaje de error general (opcional, para errores más grandes) -->
-    <div x-show="mostrarErrorPrecio" x-transition 
-         class="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">Error de validación</h3>
-                <div class="mt-2 text-sm text-red-700">
-                    <span x-text="errorPrecio"></span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                                         <div style="display: none;">
+                                             <label class="block text-gray-600 text-sm mb-1">Precio de venta por
+                                                 mayoreo <span class="text-red-500 font-semibold">*</span></label>
+                                             <div class="input-with-icon">
+                                                 <i class="fas fa-hand-holding-usd input-icon"></i>
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     value="0.00">
+                                             </div>
+                                         </div>
+                                     </div>
+
+                                     <!-- Mensaje de error general (opcional, para errores más grandes) -->
+                                     <div x-show="mostrarErrorPrecio" x-transition
+                                         class="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                                         <div class="flex">
+                                             <div class="flex-shrink-0">
+                                                 <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg"
+                                                     viewBox="0 0 20 20" fill="currentColor">
+                                                     <path fill-rule="evenodd"
+                                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                         clip-rule="evenodd" />
+                                                 </svg>
+                                             </div>
+                                             <div class="ml-3">
+                                                 <h3 class="text-sm font-medium text-red-800">Error de validación</h3>
+                                                 <div class="mt-2 text-sm text-red-700">
+                                                     <span x-text="errorPrecio"></span>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
 
                                  <p class="text-xs text-gray-500 mt-2">
                                      Los campos marcados con <span class="text-red-500 font-semibold">*</span> son
@@ -657,7 +681,7 @@
                              </div>
                          </template>
 
-                         <template x-if="!productoEncontrado && codigoBarras">
+                         <template x-if="modalType === 'nuevo'">
                              <div class="p-6 space-y-8">
                                  <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
                                      <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor"
@@ -675,7 +699,8 @@
                                              <i class="fas fa-barcode"></i> Código de Barras
                                          </label>
                                          <input type="text" class="clean-input"
-                                             x-model="nuevoProducto.codigo_barras" :value="codigoBarras">
+                                             x-model="nuevoProducto.codigo_barras">
+
                                      </div>
 
                                      <!-- SKU -->
@@ -699,50 +724,51 @@
                                          <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
                                              <i class="fas fa-boxes"></i> Stock Total
                                          </label>
-                                            <input type="number" class="clean-input" x-model="nuevoProducto.stock" 
-                                                @change="validarStock" min="0">  
-                                            </div>
+                                         <input type="number" class="clean-input" x-model="nuevoProducto.stock"
+                                             @change="validarStock" min="0">
+                                     </div>
 
                                      <!-- Stock Mínimo -->
                                      <div>
                                          <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
                                              <i class="fas fa-database"></i> Stock Mínimo
                                          </label>
-                                         <input type="number" class="clean-input" x-model="nuevoProducto.stock_minimo" 
-                                         @change="validarStock" min="0">
+                                         <input type="number" class="clean-input"
+                                             x-model="nuevoProducto.stock_minimo" @change="validarStock"
+                                             min="0">
                                      </div>
 
                                      <!-- Unidad de Medida -->
-                                    <div>
-                                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                            <i class="fas fa-balance-scale"></i> Unidad de Medida
-                                        </label>
-                                        <select class="clean-input" x-model="nuevoProducto.unidad">
-                                            <option value="">Seleccione una opción</option>
-                                            <template x-for="unidad in unidades" :key="unidad.id">
-                                                <option :value="unidad.id" x-text="unidad.nombre"></option>
-                                            </template>
-                                        </select>
-                                        <template x-if="cargandoUnidades">
-                                            <div class="text-xs text-gray-500 mt-1">Cargando unidades...</div>
-                                        </template>
-                                    </div>
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-balance-scale"></i> Unidad de Medida
+                                         </label>
+                                         <select class="clean-input" x-model="nuevoProducto.unidad">
+                                             <option value="">Seleccione una opción</option>
+                                             <template x-for="unidad in unidades" :key="unidad.id">
+                                                 <option :value="unidad.id" x-text="unidad.nombre"></option>
+                                             </template>
+                                         </select>
+                                         <template x-if="cargandoUnidades">
+                                             <div class="text-xs text-gray-500 mt-1">Cargando unidades...</div>
+                                         </template>
+                                     </div>
 
-                                    <!-- Modelo -->
-                                    <div>
-                                        <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                            <i class="fas fa-project-diagram"></i> Modelo
-                                        </label>
-                                        <select class="clean-input" x-model="nuevoProducto.modelo">
-                                            <option value="">Seleccione una opción</option>
-                                            <template x-for="modelo in modelos" :key="modelo.id">
-                                                <option :value="modelo.id" x-text="modelo.nombre"></option>
-                                            </template>
-                                        </select>
-                                        <template x-if="cargandoModelos">
-                                            <div class="text-xs text-gray-500 mt-1">Cargando modelos...</div>
-                                        </template>
-                                    </div>
+                                     <!-- Modelo -->
+                                     <div>
+                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                             <i class="fas fa-project-diagram"></i> Modelo
+                                         </label>
+                                         <select class="clean-input" x-model="nuevoProducto.modelo">
+                                             <option value="">Seleccione una opción</option>
+                                             <template x-for="modelo in modelos" :key="modelo.id">
+                                                 <option :value="modelo.id" x-text="modelo.nombre"></option>
+                                             </template>
+                                         </select>
+                                         <template x-if="cargandoModelos">
+                                             <div class="text-xs text-gray-500 mt-1">Cargando modelos...</div>
+                                         </template>
+                                     </div>
 
 
                                      <!-- Peso -->
@@ -765,16 +791,17 @@
                                      </div>
 
                                      <!-- En el modal, en la sección de información del producto -->
-                                    <div>
-                                        <label class="block text-gray-600 text-sm mb-1">Precio de venta<span class="text-red-500 font-semibold">*</span></label>
-                                        <div class="input-with-icon">
-                                            <i class="fas fa-tags input-icon"></i>
-                                            <input type="number" step="0.01" class="clean-input"
-                                                :value="productoEncontrado.precio_venta" >
-                                            <!-- Campo oculto para vincular el valor -->
-                                            <input type="hidden" x-model="productoEncontrado.precio_venta">
-                                        </div>
-                                    </div>
+                                     <div>
+                                         <label class="block text-gray-600 text-sm mb-1">Precio de venta<span
+                                                 class="text-red-500 font-semibold">*</span></label>
+                                         <div class="input-with-icon">
+                                             <i class="fas fa-tags input-icon"></i>
+                                             <input type="number" step="0.01" class="clean-input"
+                                                 :value="productoEncontrado.precio_venta">
+                                             <!-- Campo oculto para vincular el valor -->
+                                             <input type="hidden" x-model="productoEncontrado.precio_venta">
+                                         </div>
+                                     </div>
                                  </div>
 
                                  <div class="pt-6 flex justify-end">
