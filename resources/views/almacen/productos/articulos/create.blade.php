@@ -270,6 +270,47 @@
                     </div>
                 </div>
 
+                <!-- Garantía de Fábrica -->
+                <div class="relative">
+                    <label for="garantia_fabrica" class="block text-sm font-medium text-gray-700">Garantía de Fábrica</label>
+                    <div class="relative mt-1">
+                        <i class="fas fa-shield-alt input-icon"></i>
+                        <input id="garantia_fabrica" name="garantia_fabrica" type="number" min="0" class="clean-input w-full"
+                            placeholder="Tiempo de garantía" value="0">
+                    </div>
+                </div>
+
+                <!-- Unidad de Tiempo de Garantía -->
+                <div class="relative">
+                    <label for="unidad_tiempo_garantia" class="block text-sm font-medium text-gray-700">Unidad de Tiempo</label>
+                    <div class="relative mt-1">
+                        <i class="fas fa-clock input-icon"></i>
+                        <select id="unidad_tiempo_garantia" name="unidad_tiempo_garantia" class="select2-single clean-input w-full pl-10">
+                            <option value="dias">Días</option>
+                            <option value="semanas">Semanas</option>
+                            <option value="meses" selected>Meses</option>
+                            <option value="años">Años</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Proveedor -->
+                <div class="relative input-with-icon">
+                    <label for="idProveedor" class="block text-sm font-medium text-gray-700">Proveedor</label>
+                    <div class="relative mt-1">
+                        <i class="fas fa-truck input-icon"></i>
+                        <select id="idProveedor" name="idProveedor" class="select2-single clean-input w-full pl-10">
+                            <option value="" selected>Seleccionar proveedor (opcional)</option>
+                            @foreach ($proveedores as $proveedor)
+                                <option value="{{ $proveedor->idProveedor }}">
+                                    {{ $proveedor->nombre }} - {{ $proveedor->numeroDocumento }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+
                  <!-- Foto -->
                 <div class="mb-5" x-data="{ 
                     fotoPreview: '/assets/images/articulo/producto-default.png', 

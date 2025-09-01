@@ -19,10 +19,54 @@ use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class KardexController extends Controller
 {
-    public function index(){
-
-
-        return view('almacen.kardex.index');
+  public function index(Request $request)
+    {
+        // Obtener parámetros de búsqueda y filtrado
+        $search = $request->input('search');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        
+        // Consulta base para obtener movimientos de kardex
+        $query = Kardex::with('articulo')
+            ->join('articulos', 'kardex.idArticulo', '=', 'articulos.idArticulos')
+            ->select('kardex.*', 'articulos.nombre', 'articulos.codigo_barras');
+        
+        // Aplicar filtros si existen
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('articulos.nombre', 'like', "%{$search}%")
+                  ->orWhere('articulos.codigo_barras', 'like', "%{$search}%");
+            });
+        }
+        
+        if ($startDate) {
+            $query->whereDate('kardex.fecha', '>=', $startDate);
+        }
+        
+        if ($endDate) {
+            $query->whereDate('kardex.fecha', '<=', $endDate);
+        }
+        
+        // Ordenar y paginar resultados
+        $movimientos = $query->orderBy('kardex.fecha', 'desc')
+                            ->paginate(20);
+        
+        // Obtener estadísticas generales
+        $totalArticulos = Articulo::count();
+        $totalMovimientos = Kardex::count();
+        
+        // Si hay filtros aplicados, calcular movimientos filtrados
+        $movimientosFiltrados = $movimientos->total();
+        
+        return view('almacen.kardex.index', compact(
+            'movimientos', 
+            'totalArticulos',
+            'totalMovimientos',
+            'movimientosFiltrados',
+            'search',
+            'startDate',
+            'endDate'
+        ));
     }
 
 
