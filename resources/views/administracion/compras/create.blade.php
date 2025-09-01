@@ -557,7 +557,23 @@
                      <!-- Body -->
                      <div class="p-6 text-sm text-gray-700 dark:text-white">
                          <!-- MODAL - Sección cuando producto existe -->
-                         <template x-if="modalType === 'existente'">
+                         <!-- Loader flotante mientras se carga el modal -->
+                         <div x-show="modalCargando" x-transition.opacity x-cloak
+                             class="fixed inset-0 z-[1000] bg-black/60 flex items-center justify-center">
+                             <div
+                                 class="bg-white dark:bg-gray-900 px-6 py-4 rounded-lg shadow-md flex items-center gap-2">
+                                 <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg"
+                                     fill="none" viewBox="0 0 24 24">
+                                     <circle class="opacity-25" cx="12" cy="12" r="10"
+                                         stroke="currentColor" stroke-width="4"></circle>
+                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                 </svg>
+                                 <span class="text-sm text-gray-700 dark:text-white">Cargando información del
+                                     producto...</span>
+                             </div>
+                         </div>
+
+                         <template x-if="modalType === 'existente' && !modalCargando">
                              <div class="space-y-8">
                                  <!-- Código y nombre -->
                                  <div>
@@ -681,7 +697,7 @@
                              </div>
                          </template>
 
-                         <template x-if="modalType === 'nuevo'">
+                         <template x-if="modalType === 'nuevo' && !modalCargando">
                              <div class="p-6 space-y-8">
                                  <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
                                      <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor"
@@ -797,9 +813,9 @@
                                          <div class="input-with-icon">
                                              <i class="fas fa-tags input-icon"></i>
                                              <input type="number" step="0.01" class="clean-input"
-                                                 :value="productoEncontrado.precio_venta">
-                                             <!-- Campo oculto para vincular el valor -->
-                                             <input type="hidden" x-model="productoEncontrado.precio_venta">
+                                                 :value="nuevoProducto.precio_venta" readonly>
+                                             <input type="hidden" x-model="nuevoProducto.precio_venta">
+
                                          </div>
                                      </div>
                                  </div>
