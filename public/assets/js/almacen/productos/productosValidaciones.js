@@ -18,11 +18,53 @@ document.addEventListener("DOMContentLoaded", function () {
         { id: "nombre", name: "Nombre" },
         { id: "peso", name: "Peso" },
         { id: "stock_minimo", name: "Stock Mínimo" },
-
-
+        // Nuevos campos agregados
+        { id: "garantia_fabrica", name: "Garantía de Fábrica", optional: true },
+        { id: "unidad_tiempo_garantia", name: "Unidad de Tiempo Garantía", optional: true },
+        { id: "idProveedor", name: "Proveedor", optional: true }
     ];
 
     const camposUnicos = ["codigo_barras", "sku", "codigo_repuesto"];
+
+    // Función para validar campos de garantía
+    function validarGarantia() {
+        const garantiaInput = document.getElementById("garantia_fabrica");
+        const unidadTiempoSelect = document.getElementById("unidad_tiempo_garantia");
+        const garantiaValue = garantiaInput ? garantiaInput.value.trim() : "";
+        
+        // Si hay valor en garantía, la unidad de tiempo es obligatoria
+        if (garantiaValue && garantiaValue > 0) {
+            if (!unidadTiempoSelect || unidadTiempoSelect.value === "") {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    // Mostrar/ocultar unidad de tiempo según garantía
+    function toggleUnidadTiempo() {
+        const garantiaInput = document.getElementById("garantia_fabrica");
+        const unidadTiempoContainer = document.querySelector('[for="unidad_tiempo_garantia"]').parentElement;
+        
+        if (garantiaInput && garantiaInput.value > 0) {
+            unidadTiempoContainer.style.display = "block";
+        } else {
+            unidadTiempoContainer.style.display = "none";
+        }
+    }
+
+    // Inicializar visibilidad de unidad de tiempo
+    toggleUnidadTiempo();
+    
+    // Event listener para cambios en garantía
+    const garantiaInput = document.getElementById("garantia_fabrica");
+    if (garantiaInput) {
+        garantiaInput.addEventListener("input", function() {
+            toggleUnidadTiempo();
+            validarCampos();
+        });
+    }
 
     camposUnicos.forEach(campoId => {
         const input = document.getElementById(campoId);
@@ -92,6 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
             input.classList.remove("border-red-500");
         });
     });
+
     function validarCampos() {
         let todosValidos = true;
 
@@ -100,16 +143,22 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!input) return;
 
             const value = input.value.trim();
-let isInvalid = false;
-if (input.tagName === "SELECT") {
-    if (input.multiple) {
-        isInvalid = input.selectedOptions.length === 0;
-    } else {
-        isInvalid = input.selectedIndex === 0 || !value;
-    }
-} else {
-    isInvalid = !value;
-}
+            let isInvalid = false;
+            
+            if (input.tagName === "SELECT") {
+                if (input.multiple) {
+                    isInvalid = input.selectedOptions.length === 0;
+                } else {
+                    isInvalid = input.selectedIndex === 0 || !value;
+                }
+            } else {
+                isInvalid = !value;
+            }
+
+            // Campos opcionales no son obligatorios
+            if (campo.optional) {
+                return; // Saltar validación para campos opcionales
+            }
 
             if (campo.id !== 'stock_minimo' && isInvalid) {
                 todosValidos = false;
@@ -134,6 +183,11 @@ if (input.tagName === "SELECT") {
                 todosValidos = false;
             }
         });
+
+        // Validar campos de garantía
+        if (!validarGarantia()) {
+            todosValidos = false;
+        }
 
         submitBtn.classList.toggle('opacity-50', !todosValidos);
         submitBtn.classList.toggle('cursor-not-allowed', !todosValidos);
@@ -189,6 +243,11 @@ if (input.tagName === "SELECT") {
                 isInvalid = !value;
             }
 
+            // Campos opcionales no son obligatorios
+            if (campo.optional) {
+                return; // Saltar validación para campos opcionales
+            }
+
             if (campo.id !== 'stock_minimo' && isInvalid) {
                 valid = false;
                 input.classList.add("border-red-500");
@@ -199,7 +258,7 @@ if (input.tagName === "SELECT") {
                 parent.appendChild(msg);
             }
 
-          if (campo.id === "precio_venta" || campo.id === "precio_compra") {
+            if (campo.id === "precio_venta" || campo.id === "precio_compra") {
                 const pc = parseFloat(document.getElementById("precio_compra").value);
                 const pv = parseFloat(document.getElementById("precio_venta").value);
 
@@ -248,6 +307,20 @@ if (input.tagName === "SELECT") {
             }
         });
 
+        // Validar campos de garantía
+        if (!validarGarantia()) {
+            valid = false;
+            const unidadTiempoSelect = document.getElementById("unidad_tiempo_garantia");
+            const parent = unidadTiempoSelect.parentElement.classList.contains("flex")
+                ? unidadTiempoSelect.parentElement.parentElement
+                : unidadTiempoSelect.parentElement;
+                
+            const msg = document.createElement("p");
+            msg.className = "text-red-500 text-sm mt-1 error-msg";
+            msg.innerText = "Debe seleccionar una unidad de tiempo para la garantía.";
+            parent.appendChild(msg);
+        }
+
         // Cancelar envío si hay algún campo con duplicado
         camposUnicos.forEach(campoId => {
             const input = document.getElementById(campoId);
@@ -264,4 +337,3 @@ if (input.tagName === "SELECT") {
 
     validarCampos();
 });
-

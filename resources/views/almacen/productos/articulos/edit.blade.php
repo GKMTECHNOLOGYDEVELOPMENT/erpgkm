@@ -240,6 +240,47 @@
                     </div>
                 </div>
 
+                <!-- Garantía de Fábrica -->
+                <div class="relative">
+                    <label for="garantia_fabrica" class="block text-sm font-medium text-gray-700">Garantía de Fábrica</label>
+                    <div class="relative mt-1">
+                        <i class="fas fa-shield-alt input-icon"></i>
+                        <input id="garantia_fabrica" name="garantia_fabrica" type="number" min="0" class="clean-input w-full"
+                            placeholder="Tiempo de garantía" value="{{ $articulo->garantia_fabrica ?? 0 }}">
+                    </div>
+                </div>
+
+                <!-- Unidad de Tiempo de Garantía -->
+                <div class="relative" id="unidad_tiempo_container" style="{{ ($articulo->garantia_fabrica ?? 0) > 0 ? '' : 'display: none;' }}">
+                    <label for="unidad_tiempo_garantia" class="block text-sm font-medium text-gray-700">Unidad de Tiempo</label>
+                    <div class="relative mt-1">
+                        <i class="fas fa-clock input-icon"></i>
+                        <select id="unidad_tiempo_garantia" name="unidad_tiempo_garantia" class="select2-single clean-input w-full pl-10">
+                            <option value="dias" {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'dias' ? 'selected' : '' }}>Días</option>
+                            <option value="semanas" {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'semanas' ? 'selected' : '' }}>Semanas</option>
+                            <option value="meses" {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'meses' ? 'selected' : '' }}>Meses</option>
+                            <option value="años" {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'años' ? 'selected' : '' }}>Años</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Proveedor -->
+                <div class="relative input-with-icon">
+                    <label for="idProveedor" class="block text-sm font-medium text-gray-700">Proveedor</label>
+                    <div class="relative mt-1">
+                        <i class="fas fa-truck input-icon"></i>
+                        <select id="idProveedor" name="idProveedor" class="select2-single clean-input w-full pl-10">
+                            <option value="" {{ is_null($articulo->idProveedor) ? 'selected' : '' }}>Seleccionar proveedor (opcional)</option>
+                            @foreach ($proveedores as $proveedor)
+                                <option value="{{ $proveedor->idProveedor }}"
+                                    {{ $proveedor->idProveedor == $articulo->idProveedor ? 'selected' : '' }}>
+                                    {{ $proveedor->nombre }} - {{ $proveedor->numeroDocumento }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
                 <!-- Precio de Compra -->
                 <div>
                     <label for="precio_compra" class="block text-sm font-medium text-gray-700">Precio de
@@ -467,62 +508,87 @@
                 });
             }
 
-            document.getElementById("btnGuardar").addEventListener("click", function() {
-                const form = document.getElementById("productoForm");
+           // ---------------------------
+// 4. Actualizar del formulario por AJAX con preloader
+// ---------------------------
+document.getElementById("btnGuardar").addEventListener("click", function() {
+    const form = document.getElementById("productoForm");
+    const btnGuardar = this;
 
-                // Ejecutar validaciones manuales
-                form.dispatchEvent(new Event('submit', {
-                    cancelable: true,
-                    bubbles: true
-                }));
+    // Ejecutar validaciones manuales
+    form.dispatchEvent(new Event('submit', {
+        cancelable: true,
+        bubbles: true
+    }));
 
-                const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
-                if (errores.length > 0) {
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
-                    return;
-                }
+    const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
+    if (errores.length > 0) {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+        return;
+    }
 
-                const formData = new FormData(form);
+    // Deshabilitar botón y mostrar loader
+    btnGuardar.disabled = true;
+    btnGuardar.innerHTML = `
+        <i class="fas fa-spinner fa-spin mr-2"></i> Actualizando...
+    `;
+    btnGuardar.classList.add('opacity-75', 'cursor-not-allowed');
 
-                // ✅ Agregar _method = PUT para que Laravel lo acepte como actualización
-                formData.append('_method', 'PUT');
+    const formData = new FormData(form);
 
-                // ✅ Este ID debe venir de un campo oculto en el formulario
-                const idArticulo = document.getElementById("idArticulo").value;
+    // ✅ Agregar _method = PUT para que Laravel lo acepte como actualización
+    formData.append('_method', 'PUT');
 
-                const url = `/producto/update/${idArticulo}`;
-                console.log("📤 Enviando datos para actualización a:", url);
+    // ✅ Este ID debe venir de un campo oculto en el formulario
+    const idArticulo = document.getElementById("idArticulo").value;
 
-                fetch(url, {
-                        method: "POST", // Laravel interpretará como PUT gracias a _method
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            toastr.success("Producto actualizado correctamente");
+    const url = `/producto/update/${idArticulo}`;
+    console.log("📤 Enviando datos para actualización a:", url);
 
-                            // ✅ Redireccionar o lo que quieras hacer después
-                            // window.location.href = "/repuestos";
+    fetch(url, {
+        method: "POST", // Laravel interpretará como PUT gracias a _method
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Restaurar botón a estado normal
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = `
+            <i class="fas fa-save mr-2"></i> Actualizar Producto
+        `;
+        btnGuardar.classList.remove('opacity-75', 'cursor-not-allowed');
 
-                        } else {
-                            toastr.error("Error al actualizar el repuesto.");
-                            console.error("❌ Error del servidor:", data);
-                        }
-                    })
-                    .catch(error => {
-                        toastr.error("Error en la comunicación con el servidor.");
-                        console.error("🚨 Error AJAX:", error);
-                    });
-            });
+        if (data.success) {
+            toastr.success("Producto actualizado correctamente");
 
+            // ✅ Redireccionar después de 2 segundos para que el usuario vea el mensaje
+            // setTimeout(() => {
+            //     window.location.href = "/producto"; // Cambia por tu ruta deseada
+            // }, 2000);
 
+        } else {
+            toastr.error("Error al actualizar el producto.");
+            console.error("❌ Error del servidor:", data);
+        }
+    })
+    .catch(error => {
+        // Restaurar botón a estado normal incluso en caso de error
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = `
+            <i class="fas fa-save mr-2"></i> Actualizar Producto
+        `;
+        btnGuardar.classList.remove('opacity-75', 'cursor-not-allowed');
+        
+        toastr.error("Error en la comunicación con el servidor.");
+        console.error("🚨 Error AJAX:", error);
+    });
+});
 
         });
     </script>
@@ -542,4 +608,39 @@
     <script src="{{ asset('assets/js/almacen/productos/productosValidacionesUpdate.js') }}"></script>
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+    <script>
+    // Función para mostrar/ocultar unidad de tiempo según garantía
+    function toggleUnidadTiempo() {
+        const garantiaInput = document.getElementById('garantia_fabrica');
+        const unidadTiempoContainer = document.getElementById('unidad_tiempo_container');
+        
+        if (garantiaInput && unidadTiempoContainer) {
+            if (garantiaInput.value > 0) {
+                unidadTiempoContainer.style.display = 'block';
+            } else {
+                unidadTiempoContainer.style.display = 'none';
+            }
+        }
+    }
+
+    // Inicializar al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleUnidadTiempo();
+        
+        // Event listener para cambios en garantía
+        const garantiaInput = document.getElementById('garantia_fabrica');
+        if (garantiaInput) {
+            garantiaInput.addEventListener('input', toggleUnidadTiempo);
+        }
+        
+        // Inicializar Select2 para el nuevo campo de proveedor
+        $('#idProveedor').select2({
+            placeholder: "Seleccione un proveedor",
+            width: '100%',
+            allowClear: true
+        });
+    });
+</script>
 </x-layout.default>

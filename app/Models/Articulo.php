@@ -89,7 +89,10 @@ class Articulo extends Model
 		'pulgadas',
 		'codigo_repuesto',
 		'ficha_tecnica',
-		'idsubcategoria'
+		'idsubcategoria',
+		'garantia_fabrica',
+		'unidad_tiempo_garantia',
+		'idProveedor',
 	];
 
 	public function unidad()
@@ -164,6 +167,11 @@ class Articulo extends Model
         return $this->hasOne(Kardex::class, 'idArticulo', 'idArticulos')
                    ->latest('fecha');
     }
+
+	public function proveedor()
+	{
+		return $this->belongsTo(Proveedore::class, 'idProveedor');
+	}
 
 
 

@@ -584,65 +584,87 @@
     }
 
     // ---------------------------
-    // 4. Envío del formulario por AJAX
-    // ---------------------------
-    document.getElementById("btnGuardar").addEventListener("click", function () {
-        const form = document.getElementById("productoForm");
+// 4. Envío del formulario por AJAX
+// ---------------------------
+document.getElementById("btnGuardar").addEventListener("click", function () {
+    const form = document.getElementById("productoForm");
+    const btnGuardar = this;
 
-        // Ejecutar validaciones manuales
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    // Ejecutar validaciones manuales
+    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
 
-        // Verificar errores
-        const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
-        if (errores.length > 0) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-        }
+    // Verificar errores
+    const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
+    if (errores.length > 0) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
 
-        const formData = new FormData(form);
+    // Deshabilitar botón y mostrar loader
+    btnGuardar.disabled = true;
+    btnGuardar.innerHTML = `
+        <i class="fas fa-spinner fa-spin mr-2"></i> Guardando...
+    `;
+    btnGuardar.classList.add('opacity-75', 'cursor-not-allowed');
 
-        fetch("/producto/store", {
-            method: "POST",
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                toastr.success("Producto guardado correctamente");
+    const formData = new FormData(form);
 
-                // ✅ Limpiar el formulario
-                form.reset();
+    fetch("/producto/store", {
+        method: "POST",
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Restaurar botón a estado normal
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = `
+            <i class="fas fa-save mr-2"></i> Guardar Producto
+        `;
+        btnGuardar.classList.remove('opacity-75', 'cursor-not-allowed');
 
-                // ✅ Limpiar Select2
-                $('#idModelo').val(null).trigger('change');
+        if (data.success) {
+            toastr.success("Producto guardado correctamente");
 
-                // ✅ Limpiar preview imagen (usando Alpine.js)
-                if (window.Alpine && Alpine.store) {
-                    // Si estás usando Alpine v3 con store, podrías resetearlo así (opcional)
-                    Alpine.store('fotoPreview', '');
-                } else {
-                    // Alternativamente, puedes resetear manualmente el contenedor de preview
-                    document.querySelector('[x-data]').__x.$data.fotoPreview = '';
-                }
+            // ✅ Limpiar el formulario
+            form.reset();
 
-                // ✅ Limpiar vista previa PDF
-                document.getElementById('pdf_viewer').src = '';
-                document.getElementById('nombre_archivo').textContent = 'Ningún archivo seleccionado';
-                document.getElementById('preview_pdf').classList.add('hidden');
+            // ✅ Limpiar Select2
+            $('#idModelo').val(null).trigger('change');
 
+            // ✅ Limpiar preview imagen (usando Alpine.js)
+            if (window.Alpine && Alpine.store) {
+                // Si estás usando Alpine v3 con store, podrías resetearlo así (opcional)
+                Alpine.store('fotoPreview', '');
             } else {
-                toastr.error("Ocurrió un error al guardar el producto.");
-                console.error(data);
+                // Alternativamente, puedes resetear manualmente el contenedor de preview
+                document.querySelector('[x-data]').__x.$data.fotoPreview = '';
             }
-        })
-        .catch(error => {
-            toastr.error("Error en la comunicación con el servidor.");
-            console.error(error);
-        });
+
+            // ✅ Limpiar vista previa PDF
+            document.getElementById('pdf_viewer').src = '';
+            document.getElementById('nombre_archivo').textContent = 'Ningún archivo seleccionado';
+            document.getElementById('preview_pdf').classList.add('hidden');
+
+        } else {
+            toastr.error("Ocurrió un error al guardar el producto.");
+            console.error(data);
+        }
+    })
+    .catch(error => {
+        // Restaurar botón a estado normal incluso en caso de error
+        btnGuardar.disabled = false;
+        btnGuardar.innerHTML = `
+            <i class="fas fa-save mr-2"></i> Guardar Producto
+        `;
+        btnGuardar.classList.remove('opacity-75', 'cursor-not-allowed');
+        
+        toastr.error("Error en la comunicación con el servidor.");
+        console.error(error);
     });
+});
 
     });
     </script>

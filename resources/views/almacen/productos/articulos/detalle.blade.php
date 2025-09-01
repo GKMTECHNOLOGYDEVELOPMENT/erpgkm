@@ -185,6 +185,74 @@
                 @endif
             </div>
 
+            <!-- Nueva sección: Garantía y Proveedor -->
+<div class="overflow-x-auto mb-4">
+    <table class="min-w-full">
+        <thead class="text-[#e2a03f] uppercase text-sm">
+            <tr>
+                <th class="py-2 px-4 text-center">Garantía de Fábrica</th>
+                <th class="py-2 px-4 text-center">Unidad de Tiempo</th>
+                <th class="py-2 px-4 text-center">Proveedor</th>
+                <th class="py-2 px-4 text-center">Documento Proveedor</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <!-- Garantía de Fábrica -->
+                <td class="py-2 px-4 text-center">
+                    @if($articulo->garantia_fabrica > 0)
+                        {{ $articulo->garantia_fabrica }}
+                    @else
+                        <span class="text-gray-400">Sin garantía</span>
+                    @endif
+                </td>
+                
+                <!-- Unidad de Tiempo -->
+                <td class="py-2 px-4 text-center">
+                    @if($articulo->garantia_fabrica > 0)
+                        @switch($articulo->unidad_tiempo_garantia)
+                            @case('dias')
+                                Días
+                                @break
+                            @case('semanas')
+                                Semanas
+                                @break
+                            @case('meses')
+                                Meses
+                                @break
+                            @case('años')
+                                Años
+                                @break
+                            @default
+                                {{ $articulo->unidad_tiempo_garantia ?? 'N/A' }}
+                        @endswitch
+                    @else
+                        <span class="text-gray-400">-</span>
+                    @endif
+                </td>
+                
+                <!-- Proveedor -->
+                <td class="py-2 px-4 text-center">
+                    @if($articulo->proveedor)
+                        {{ $articulo->proveedor->nombre }}
+                    @else
+                        <span class="text-gray-400">No asignado</span>
+                    @endif
+                </td>
+                
+                <!-- Documento del Proveedor -->
+                <td class="py-2 px-4 text-center">
+                    @if($articulo->proveedor)
+                        {{ $articulo->proveedor->numeroDocumento }}
+                    @else
+                        <span class="text-gray-400">-</span>
+                    @endif
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
 
             <!-- Modal de impresión -->
             <template x-if="isOpen">

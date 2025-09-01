@@ -97,13 +97,12 @@ class ProductoController extends Controller
 
 
 
-
-  public function store(Request $request)
+public function store(Request $request)
 {
     DB::beginTransaction(); // Iniciar transacción para operaciones atómicas
 
     try {
-        // Validación de datos
+        // Validación de datos (agregar los nuevos campos)
         $validatedData = $request->validate([
             'codigo_barras' => 'required|string|max:255|unique:articulos,codigo_barras',
             'sku' => 'required|string|max:255|unique:articulos,sku',
@@ -118,7 +117,11 @@ class ProductoController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120',
             'idUnidad' => 'required|nullable|integer',
-            'idModelo' => 'integer|exists:modelo,idModelo', 
+            'idModelo' => 'integer|exists:modelo,idModelo',
+            // Nuevos campos agregados
+            'garantia_fabrica' => 'nullable|integer|min:0',
+            'unidad_tiempo_garantia' => 'nullable|in:dias,semanas,meses,años',
+            'idProveedor' => 'nullable|exists:proveedores,idProveedor',
         ]);
         
         // Asignación de valores por defecto
@@ -128,6 +131,10 @@ class ProductoController extends Controller
         $dataArticulo['fecha_ingreso'] = now(); // Fecha de ingreso actual
         $dataArticulo['stock_total'] = $dataArticulo['stock_total'] ?? 0; // Asegurar valor por defecto
         $dataArticulo['precio_compra'] = $dataArticulo['precio_compra'] ?? 0; // Asegurar valor por defecto
+        
+        // Valores por defecto para los nuevos campos
+        $dataArticulo['garantia_fabrica'] = $dataArticulo['garantia_fabrica'] ?? 0;
+        $dataArticulo['unidad_tiempo_garantia'] = $dataArticulo['unidad_tiempo_garantia'] ?? 'meses';
         
         // Crear el artículo
         $articulo = Articulo::create($dataArticulo);
@@ -182,22 +189,32 @@ class ProductoController extends Controller
             'data' => [
                 'articulo_id' => $articulo->idArticulos,
                 'kardex_created' => $dataArticulo['stock_total'] > 0,
-                'stock_inicial' => $dataArticulo['stock_total']
+                'stock_inicial' => $dataArticulo['stock_total'],
+                'garantia' => $dataArticulo['garantia_fabrica'] . ' ' . $dataArticulo['unidad_tiempo_garantia'],
+                'proveedor_id' => $dataArticulo['idProveedor'] ?? null
             ]
         ]);
 
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack(); // Revertir en caso de error de validación
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de validación',
+            'errors' => $e->errors()
+        ], 422);
+        
     } catch (\Exception $e) {
         DB::rollBack(); // Revertir en caso de error
         
         return response()->json([
             'success' => false,
             'message' => 'Ocurrió un error al guardar el artículo.',
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString() // Solo para desarrollo, quitar en producción
+            'error' => $e->getMessage()
+            // 'trace' => $e->getTraceAsString() // Solo para desarrollo, quitar en producción
         ], 500);
     }
 }
-    
 
     public function edit($id)
 {
@@ -207,8 +224,8 @@ class ProductoController extends Controller
     $modelos = Modelo::all();
     $monedas = Moneda::all();
     $tiposAreas = Tipoarea::all();  // Asegúrate de tener un modelo llamado Tipoarea si es necesario
-
-    return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
+    $proveedores = Proveedore::where('estado', 1)->get(); // Obtener proveedores activos
+    return view('almacen.productos.articulos.edit', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas', 'proveedores'));
 }
 
 
@@ -232,27 +249,30 @@ public function detalle($id)
     return view('almacen.productos.articulos.detalle', compact('articulo', 'unidades', 'tiposArticulo', 'modelos', 'monedas', 'tiposAreas'));
 }
 
-
 public function update(Request $request, $id)
 {
     try {
         // ✅ Validación igual que en store, sin UNIQUE
         $validatedData = $request->validate([
-                'codigo_barras' => 'required|string|max:255',
-                'sku' => 'required|string|max:255',
-                'nombre' => 'required|string|max:255',
-                'stock_total' => 'required|nullable|integer',
-                'stock_minimo' => 'required|nullable|integer',
-                'moneda_compra' => 'required|nullable|integer',
-                'moneda_venta' => 'required|nullable|integer',
-                'precio_compra' => 'required|nullable|numeric',
-                'precio_venta' => 'required|nullable|numeric',
-                'peso' => 'required|nullable|numeric',
-                'estado' => 'required|boolean',
-                'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-                'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120', // <= validación del PDF
-                'idUnidad' => 'required|nullable|integer',
-                'idModelo' => 'integer|exists:modelo,idModelo', 
+            'codigo_barras' => 'required|string|max:255',
+            'sku' => 'required|string|max:255',
+            'nombre' => 'required|string|max:255',
+            'stock_total' => 'required|nullable|integer',
+            'stock_minimo' => 'required|nullable|integer',
+            'moneda_compra' => 'required|nullable|integer',
+            'moneda_venta' => 'required|nullable|integer',
+            'precio_compra' => 'required|nullable|numeric',
+            'precio_venta' => 'required|nullable|numeric',
+            'peso' => 'required|nullable|numeric',
+            'estado' => 'required|boolean',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120',
+            'idUnidad' => 'required|nullable|integer',
+            'idModelo' => 'integer|exists:modelo,idModelo',
+            // Nuevos campos agregados
+            'garantia_fabrica' => 'nullable|integer|min:0',
+            'unidad_tiempo_garantia' => 'nullable|in:dias,semanas,meses,años',
+            'idProveedor' => 'nullable|exists:proveedores,idProveedor',
         ]);
 
         // ✅ Buscar el artículo
@@ -260,6 +280,15 @@ public function update(Request $request, $id)
 
         // ✅ Actualizar datos principales
         $dataArticulo = $validatedData;
+        
+        // Valores por defecto para los nuevos campos si no están presentes
+        $dataArticulo['garantia_fabrica'] = $dataArticulo['garantia_fabrica'] ?? 0;
+        $dataArticulo['unidad_tiempo_garantia'] = $dataArticulo['unidad_tiempo_garantia'] ?? 'meses';
+        
+        // Si idProveedor está vacío, establecerlo como null
+        if (empty($dataArticulo['idProveedor'])) {
+            $dataArticulo['idProveedor'] = null;
+        }
     
         $articulo->update($dataArticulo);
 
@@ -284,7 +313,7 @@ public function update(Request $request, $id)
             $articulo->update(['foto' => $photoData]);
         }
 
-      // ✅ Reemplazar el PDF anterior si viene uno nuevo
+        // ✅ Reemplazar el PDF anterior si viene uno nuevo
         if ($request->hasFile('ficha_tecnica')) {
             // Eliminar el anterior si existe
             if ($articulo->ficha_tecnica) {
@@ -300,7 +329,6 @@ public function update(Request $request, $id)
             $fileName = basename($pdfPath);
             $articulo->update(['ficha_tecnica' => $fileName]);
         }
-
 
         // ✅ Respuesta de éxito
         return response()->json([
