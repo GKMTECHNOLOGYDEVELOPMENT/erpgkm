@@ -17,6 +17,7 @@ document.addEventListener('alpine:init', () => {
         errorPrecio: '',
         mostrarErrorPrecio: false,
         modalType: null,
+        modalCargando: false,
         // Arrays para datos de la API
         documentos: [],
         proveedores: [],
@@ -34,7 +35,15 @@ document.addEventListener('alpine:init', () => {
         productos: [],
         modalAbierto: false,
         open: false,
-        productoEncontrado: null,
+        productoEncontrado: {
+            id: null,
+            codigo_barras: '',
+            nombre: '',
+            stock: 0,
+            precio_compra: 0,
+            precio_venta: 0,
+        },
+
         cantidadProducto: 1,
         precioCompra: 0,
         tipoCambio: 4.05,
@@ -266,11 +275,22 @@ document.addEventListener('alpine:init', () => {
 
             if (!this.codigoBarras) return;
 
-            this.productoEncontrado = null;
+            // Estado inicial
+            this.productoEncontrado = {
+                id: null,
+                codigo_barras: '',
+                nombre: '',
+                stock: 0,
+                precio_compra: 0,
+                precio_venta: 0,
+            };
+
             this.productosEncontrados = [];
             this.paginaActual = pagina;
             this.modalAbierto = true;
             this.open = true;
+            this.modalCargando = true; // <-- Activamos spinner
+            this.modalType = null; // <-- Limpiamos tipo previo
 
             try {
                 const url = `/buscar-articulo?q=${encodeURIComponent(this.codigoBarras)}&tipo=texto&page=${this.paginaActual}&perPage=${this.resultadosPorPagina}`;
@@ -284,18 +304,21 @@ document.addEventListener('alpine:init', () => {
                     if (data.productos.length === 1) {
                         this.seleccionarProducto(data.productos[0]);
                         this.modalType = 'existente';
+                    } else {
+                        this.modalType = 'existente';
                     }
                 } else {
                     this.productosEncontrados = [];
                     this.totalResultados = 0;
                     this.modalType = 'nuevo';
 
-                    // 👇 Aquí está lo importante
                     this.nuevoProducto.codigo_barras = this.codigoBarras;
                 }
             } catch (e) {
                 console.error('Error al buscar producto:', e);
                 alert('Error al buscar el producto');
+            } finally {
+                this.modalCargando = false; // <-- Ocultamos spinner siempre
             }
         },
         get seleccionadosCount() {
@@ -580,7 +603,14 @@ document.addEventListener('alpine:init', () => {
         cerrarModal() {
             this.modalAbierto = false;
             this.open = false;
-            this.productoEncontrado = null;
+            this.productoEncontrado = {
+                id: null,
+                codigo_barras: '',
+                nombre: '',
+                stock: 0,
+                precio_compra: 0,
+                precio_venta: 0,
+            };
         },
 
         actualizarSubtotal(producto) {
