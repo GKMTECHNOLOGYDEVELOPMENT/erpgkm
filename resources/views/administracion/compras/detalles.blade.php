@@ -262,7 +262,7 @@
         <section class="rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
             <!-- Encabezado -->
             <div class="px-6 py-5 bg-gradient-to-r from-rose-500 to-pink-600">
-                <h2 class="text-xl font-bold flex items-center gap-3 text-white">
+                <h2 class="text-xl font-bold flex items-center gap-3">
                     <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                         <i class="fa-solid fa-arrow-rotate-left"></i>
                     </div>
