@@ -129,11 +129,12 @@
              <div class="lg:col-span-2">
                  <div class="panel mt-6 p-5 max-w-7xl mx-auto">
                      <h2 class="text-lg font-semibold mb-4">Búsqueda y selección de producto</h2>
-                    <p class="text-gray-600 mb-6">
-                        Escribe o escanea el <strong>código de barras</strong> del producto y haz clic en <strong>Buscar producto</strong>.
-                        Si el código es válido, se mostrará el producto correspondiente. 
-                        Si no se encuentra, tendrás la opción de registrarlo manualmente.
-                    </p>
+                     <p class="text-gray-600 mb-6">
+                         Escribe o escanea el <strong>código de barras</strong> del producto y haz clic en
+                         <strong>Buscar producto</strong>.
+                         Si el código es válido, se mostrará el producto correspondiente.
+                         Si no se encuentra, tendrás la opción de registrarlo manualmente.
+                     </p>
 
 
                      <div class="flex items-end gap-4 mb-8">
@@ -253,56 +254,46 @@
                      <h2 class="text-lg font-semibold mb-4">DATOS DE LA COMPRA</h2>
 
                      <div class="space-y-4">
-                         <!-- Primera fila: Documento y Serie + Nro -->
-                         <div class="grid grid-cols-2 gap-4">
-                             <div>
-                                 <label class="block text-sm font-medium text-gray-700 mb-1">Documento <span
-                                         class="text-red-500">*</span></label>
-                                 <select
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                     x-model="documentoId" required>
-                                     <option value="">Seleccione un documento</option>
-                                     <template x-for="documento in documentos" :key="documento.idDocumento">
-                                         <option :value="documento.idDocumento" x-text="documento.nombre"></option>
-                                     </template>
-                                 </select>
-
-                                 <!-- Loading state -->
-                                 <template x-if="documentos.length === 0">
-                                     <div class="text-sm text-gray-500 mt-1">Cargando documentos...</div>
+                         <!-- Primera fila: Documento -->
+                         <div>
+                             <label class="block text-sm font-medium text-gray-700 mb-1">Documento <span
+                                     class="text-red-500">*</span></label>
+                             <select class="clean-input w-full" x-model="documentoId" required>
+                                 <option value="">Seleccione un documento</option>
+                                 <template x-for="documento in documentos" :key="documento.idDocumento">
+                                     <option :value="documento.idDocumento" x-text="documento.nombre"></option>
                                  </template>
-                             </div>
+                             </select>
 
-                             <!-- Fila: Serie - Número con guion en el centro -->
-                             <div class="flex gap-2 items-end">
+                             <!-- Loading state -->
+                             <template x-if="documentos.length === 0">
+                                 <div class="text-sm text-gray-500 mt-1">Cargando documentos...</div>
+                             </template>
+                         </div>
+
+                         <!-- Segunda fila: Serie - Número con guion en el centro -->
+                         <div>
+                             <label class="block text-sm font-medium text-gray-700 mb-1">Serie y Número <span
+                                     class="text-red-500">*</span></label>
+                             <div class="flex gap-2 items-center">
                                  <!-- Campo Serie -->
                                  <div class="w-1/2">
-                                     <label class="block text-sm font-medium text-gray-700 mb-1">Serie <span
-                                             class="text-red-500">*</span></label>
-                                     <input type="text" x-model="serie"
-                                         class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 
-                   focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 
-                   text-gray-800 dark:text-white text-sm" />
+                                     <input type="text" x-model="serie" placeholder="Serie"
+                                         class="clean-input w-full" />
                                  </div>
 
                                  <!-- Separador visual "-" -->
-                                 <div class="pb-3 text-lg text-gray-600 dark:text-gray-300">-</div>
+                                 <div class="text-lg text-gray-600 dark:text-gray-300">-</div>
 
                                  <!-- Campo Número -->
                                  <div class="w-1/2">
-                                     <label class="block text-sm font-medium text-gray-700 mb-1">Número <span
-                                             class="text-red-500">*</span></label>
-                                     <input type="text" x-model="nro"
-                                         class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 
-                   focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 
-                   text-gray-800 dark:text-white text-sm" />
+                                     <input type="text" x-model="nro" placeholder="Número"
+                                         class="clean-input w-full" />
                                  </div>
                              </div>
-
-
                          </div>
 
-                         <!-- Segunda fila: Fechas -->
+                         <!-- Tercera fila: Fechas -->
                          <div class="grid grid-cols-2 gap-4">
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Emisión <span
@@ -321,14 +312,13 @@
                              </div>
                          </div>
 
-                         <!-- Tercera fila: Moneda y Tipo de Cambio -->
+                         <!-- Cuarta fila: Moneda y Tipo de Cambio -->
                          <div class="grid grid-cols-2 gap-4">
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1">Moneda <span
                                          class="text-red-500">*</span></label>
-                                 <select
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                     x-model="monedaId" @change="cambiarMoneda" required>
+                                 <select class="clean-input w-full" x-model="monedaId" @change="cambiarMoneda"
+                                     required>
                                      <option value="">Seleccione una moneda</option>
                                      <template x-for="moneda in monedas" :key="moneda.id">
                                          <option :value="moneda.id"
@@ -345,18 +335,16 @@
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Cambio</label>
                                  <input type="number" step="0.001" x-model="tipoCambio"
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                     @change="cambiarMoneda" />
+                                     class="clean-input w-full" @change="cambiarMoneda" />
                              </div>
                          </div>
-                         <!-- Cuarta fila: Impuesto y DUA -->
+
+                         <!-- Quinta fila: Impuesto y DUA -->
                          <div class="grid grid-cols-2 gap-4 items-end">
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1">Impuesto <span
                                          class="text-red-500">*</span></label>
-                                 <select
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                     x-model="impuestoId" required>
+                                 <select class="clean-input w-full" x-model="impuestoId" required>
                                      <option value="">Seleccione un impuesto</option>
                                      <template x-for="impuesto in impuestos" :key="impuesto.id">
                                          <option :value="impuesto.id"
@@ -377,7 +365,7 @@
                              </div>
                          </div>
 
-                         <!-- Quinta fila: Proveedor -->
+                         <!-- Sexta fila: Proveedor -->
                          <div>
                              <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor <span
                                      class="text-red-500">*</span></label>
@@ -397,14 +385,12 @@
                              </template>
                          </div>
 
-                         <!-- Sexta fila: Condición de Compra y Sujeto a -->
+                         <!-- Séptima fila: Condición de Compra y Sujeto a -->
                          <div class="grid grid-cols-2 gap-4">
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1">Condición Compra <span
                                          class="text-red-500">*</span></label>
-                                 <select
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                     x-model="condicionCompraId" required>
+                                 <select class="clean-input w-full" x-model="condicionCompraId" required>
                                      <option value="">Seleccione una condición</option>
                                      <template x-for="condicion in condicionesCompra" :key="condicion.id">
                                          <option :value="condicion.id" x-text="condicion.nombre"></option>
@@ -420,9 +406,7 @@
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1">Sujeto a <span
                                          class="text-red-500">*</span></label>
-                                 <select
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                     x-model="sujetoId" required>
+                                 <select class="clean-input w-full" x-model="sujetoId" required>
                                      <option value="">Seleccione una opción</option>
                                      <template x-for="sujeto in sujetos" :key="sujeto.id">
                                          <option :value="sujeto.id" x-text="sujeto.nombre"></option>
@@ -436,12 +420,10 @@
                              </div>
                          </div>
 
-                         <!-- Nueva fila: Tipo de Pago -->
+                         <!-- Octava fila: Tipo de Pago -->
                          <div>
                              <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pago</label>
-                             <select
-                                 class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                 x-model="tipoPagoId">
+                             <select class="clean-input w-full" x-model="tipoPagoId">
                                  <option value="">Seleccione un tipo de pago</option>
                                  <template x-for="tipoPago in tiposPago" :key="tipoPago.id">
                                      <option :value="tipoPago.id" x-text="tipoPago.nombre"></option>
@@ -454,18 +436,69 @@
                              </template>
                          </div>
 
+                         <!-- Novena fila: Adjuntar Archivo -->
+                         <div x-data="{
+                             file: null,
+                             fileName: '',
+                             fileSize: 0,
+                             over: false,
+                             onFileChange(e) {
+                                 const f = e.target.files[0];
+                                 if (!f) return this.clear();
+                                 const max = 5 * 1024 * 1024; // 5MB
+                                 if (f.size > max) { if (window.toastr) toastr.error('El archivo supera 5MB');
+                                     this.clear(); return; }
+                                 this.file = f;
+                                 this.fileName = f.name;
+                                 this.fileSize = f.size;
+                             },
+                             clear() { this.file = null;
+                                 this.fileName = '';
+                                 this.fileSize = 0;
+                                 $refs.fileInput.value = ''; }
+                         }">
+                             <label class="block text-sm font-medium text-gray-700 mb-2">Adjuntar archivo</label>
 
-
-                         <!-- Séptima fila: Adjuntar Archivo -->
-                         <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Adjuntar Archivo</label>
-                             <div class="flex items-center gap-2">
-                                 <input type="file"
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                             <!-- Dropzone -->
+                             <label @dragover.prevent="over=true" @dragleave="over=false"
+                                 @drop.prevent="
+      over=false;
+      $refs.fileInput.files = $event.dataTransfer.files;
+      onFileChange({ target: $refs.fileInput })
+    "
+                                 class="w-full cursor-pointer rounded-xl border-2 border-dashed border-gray-300 p-6 text-center transition
+           hover:border-blue-400"
+                                 :class="over ? 'border-blue-500 bg-blue-50/60' : ''">
+                                 <div class="flex flex-col items-center gap-2 text-gray-600">
+                                     <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                                     <div class="text-sm">
+                                         <span class="font-medium text-blue-600">Haz clic</span> o arrastra tu archivo
+                                         aquí
+                                     </div>
+                                     <div class="text-xs text-gray-500">(pdf/doc/docx/jpg/jpeg/png/qif) · máx 5MB</div>
+                                 </div>
+                                 <input x-ref="fileInput" type="file" class="sr-only" @change="onFileChange"
                                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.qif" />
-                                 <span class="text-xs text-gray-500">(pdf/doc/jpg/png/qif)</span>
-                             </div>
+                             </label>
+
+                             <!-- Preview -->
+                             <template x-if="fileName">
+                                 <div
+                                     class="mt-3 flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-3">
+                                     <div class="flex items-center gap-3">
+                                         <i class="fas fa-file-alt text-gray-500"></i>
+                                         <div>
+                                             <p class="text-sm font-medium text-gray-800" x-text="fileName"></p>
+                                             <p class="text-xs text-gray-500"
+                                                 x-text="(fileSize/1024).toFixed(1) + ' KB'"></p>
+                                         </div>
+                                     </div>
+                                     <button type="button" @click="clear()"
+                                         class="text-sm text-red-600 hover:underline">Quitar</button>
+                                 </div>
+                             </template>
                          </div>
+
 
                          <!-- Separador -->
                          <div class="border-t border-gray-200 pt-4"></div>
@@ -699,231 +732,219 @@
                          </template>
 
                          <template x-if="modalType === 'nuevo' && !modalCargando">
-                             <div class="p-6 space-y-8">
-                                 <h4 class="text-base font-semibold mb-4 flex items-center gap-2">
-                                     <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor"
-                                         viewBox="0 0 24 24">
-                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M6 18L18 6M6 6l12 12" />
-                                     </svg>
-                                     Producto no encontrado: Registrar nuevo producto
-                                 </h4>
-
-                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                     <!-- Código de Barras -->
-                                     <div>
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-barcode"></i> Código de Barras
-                                         </label>
-                                         <input type="text" class="clean-input"
-                                             x-model="nuevoProducto.codigo_barras" readonly>
-
+                             <div class="p-6 space-y-8 mb-4">
+                                 <!-- Encabezado mejorado -->
+                                 <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-2">
+                                     <div class="flex items-center gap-3">
+                                         <div class="bg-red-100 p-2 rounded-full">
+                                             <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor"
+                                                 viewBox="0 0 24 24">
+                                                 <path stroke-linecap="round" stroke-linejoin="round"
+                                                     stroke-width="2"
+                                                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                             </svg>
+                                         </div>
+                                         <div>
+                                             <h4 class="text-lg font-semibold text-gray-800">Producto no encontrado
+                                             </h4>
+                                             <p class="text-sm text-red-600">Registrar nuevo producto en el sistema</p>
+                                         </div>
                                      </div>
+                                 </div>
 
-                                     <!-- SKU -->
-                                     <div>
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-tag"></i> SKU
-                                         </label>
-                                         <input type="text" class="clean-input" x-model="nuevoProducto.sku">
+                                 <!-- 1) CÓDIGO Y SKU -->
+                                 <section>
+                                     <header class="flex items-center gap-2 mb-4">
+                                         <i class="fas fa-barcode text-gray-700"></i>
+                                         <h3 class="text-lg font-semibold text-gray-800">Código y SKU</h3>
+                                     </header>
+
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                         <!-- Código de Barras -->
+                                         <div>
+                                             <input type="text" class="clean-input"
+                                                 x-model="nuevoProducto.codigo_barras" placeholder="Código de barras"
+                                                 readonly>
+                                         </div>
+
+                                         <!-- SKU -->
+                                         <div>
+                                             <input type="text" class="clean-input" x-model="nuevoProducto.sku"
+                                                 placeholder="SKU">
+                                         </div>
                                      </div>
+                                 </section>
 
-                                     <!-- Nombre -->
-                                     <div>
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-cog"></i> Nombre
-                                         </label>
-                                         <input type="text" class="clean-input" x-model="nuevoProducto.nombre">
-                                     </div>
+                                 <!-- 2) INFORMACIÓN DEL PRODUCTO -->
+                                 <section>
+                                     <header class="flex items-center gap-2 mb-4">
+                                         <i class="fas fa-box-open text-gray-700"></i>
+                                         <h3 class="text-lg font-semibold text-gray-800">Información del producto</h3>
+                                     </header>
 
-                                     <!-- Stock Total -->
-                                     <div>
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-boxes"></i> Stock Total
-                                         </label>
-                                         <input type="number" class="clean-input" x-model="nuevoProducto.stock"
-                                             @change="validarStock" min="0">
-                                     </div>
+                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                         <!-- Nombre (full) -->
+                                         <div>
+                                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                 <i class="fas fa-cog mr-2"></i> Nombre
+                                             </label>
+                                             <input type="text" class="clean-input"
+                                                 x-model="nuevoProducto.nombre">
+                                         </div>
 
-                                     <!-- Stock Mínimo -->
-                                     <div>
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-database"></i> Stock Mínimo
-                                         </label>
-                                         <input type="number" class="clean-input"
-                                             x-model="nuevoProducto.stock_minimo" @change="validarStock"
-                                             min="0">
-                                     </div>
+                                         <!-- Stock -->
+                                         <div>
+                                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                 <i class="fas fa-warehouse mr-2"></i> Stock o existencias
+                                             </label>
+                                             <input type="number" min="0" class="clean-input"
+                                                 x-model="nuevoProducto.stock" @change="validarStock">
+                                         </div>
 
-                                     <!-- Unidad de Medida -->
-                                     <div x-init="$nextTick(() => {
-                                         const select = $el.querySelector('select');
-                                         $(select).select2({
-                                             placeholder: 'Seleccione una opción',
-                                             width: '100%',
-                                             dropdownParent: select.closest('div') // para modales
-                                         }).on('change', (e) => {
-                                             nuevoProducto.unidad = e.target.value;
-                                         });
-                                     })">
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-balance-scale"></i> Unidad de Medida
-                                         </label>
-                                         <select class="clean-input w-full">
-                                             <option value="">Seleccione una opción</option>
-                                             <template x-for="unidad in unidades" :key="unidad.id">
-                                                 <option :value="unidad.id" x-text="unidad.nombre"
-                                                     :selected="unidad.id == nuevoProducto.unidad"></option>
-                                             </template>
-                                         </select>
-
-                                         <template x-if="cargandoUnidades">
-                                             <div class="text-xs text-gray-500 mt-1">Cargando unidades...</div>
-                                         </template>
-                                     </div>
-
-
-                                     <!-- Modelo -->
-                                     <div x-init="$nextTick(() => {
-                                         const select = $el.querySelector('select');
-                                         $(select).select2({
-                                             placeholder: 'Seleccione una opción',
-                                             width: '100%',
-                                             dropdownParent: select.closest('div')
-                                         }).on('change', (e) => {
-                                             nuevoProducto.modelo = e.target.value;
-                                         });
-                                     })">
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-project-diagram"></i> Modelo
-                                         </label>
-                                         <select class="clean-input w-full">
-                                             <option value="">Seleccione una opción</option>
-                                             <template x-for="modelo in modelos" :key="modelo.id">
-                                                 <option :value="modelo.id" x-text="modelo.nombre"
-                                                     :selected="modelo.id == nuevoProducto.modelo"></option>
-                                             </template>
-                                         </select>
-
-                                         <template x-if="cargandoModelos">
-                                             <div class="text-xs text-gray-500 mt-1">Cargando modelos...</div>
-                                         </template>
-                                     </div>
-
-                                     <!-- Garantía de Fábrica -->
-                                     <div class="relative">
-                                         <label for="garantia_fabrica"
-                                             class="block text-sm font-medium text-gray-700">Garantía de
-                                             Fábrica</label>
-                                         <div class="relative mt-1">
-                                             <i class="fas fa-shield-alt input-icon"></i>
-                                             <input id="garantia_fabrica" name="garantia_fabrica" type="number"
-                                                 min="0" class="clean-input w-full"
-                                                 placeholder="Tiempo de garantía" value="0">
+                                         <!-- Stock mínimo -->
+                                         <div>
+                                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                 <i class="fas fa-layer-group mr-2"></i> Stock mínimo
+                                             </label>
+                                             <input type="number" min="0" class="clean-input"
+                                                 x-model="nuevoProducto.stock_minimo" @change="validarStock">
                                          </div>
                                      </div>
 
-                                     <!-- Unidad de Tiempo de Garantía -->
-                                     <div class="relative">
-                                         <label for="unidad_tiempo_garantia"
-                                             class="block text-sm font-medium text-gray-700">Unidad de Tiempo</label>
-                                         <div class="relative mt-1">
-                                             <i class="fas fa-clock input-icon"></i>
-                                             <select id="unidad_tiempo_garantia" name="unidad_tiempo_garantia"
-                                                 class="select2-single clean-input w-full pl-10">
+                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                                         <!-- Unidad de medida -->
+                                         <div x-init="$nextTick(() => {
+                                             const s = $el.querySelector('select');
+                                             $(s).select2({ placeholder: 'Seleccione una opción', width: '100%', dropdownParent: s.closest('div') })
+                                                 .on('change', e => nuevoProducto.unidad = e.target.value);
+                                         })">
+                                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                 <i class="fas fa-balance-scale mr-2"></i> Unidad de medida
+                                             </label>
+                                             <select class="clean-input w-full">
+                                                 <option value="">Seleccione una opción</option>
+                                                 <template x-for="u in unidades" :key="u.id">
+                                                     <option :value="u.id" x-text="u.nombre"
+                                                         :selected="u.id == nuevoProducto.unidad"></option>
+                                                 </template>
+                                             </select>
+                                             <template x-if="cargandoUnidades">
+                                                 <div class="text-xs text-gray-500 mt-2">Cargando unidades...</div>
+                                             </template>
+                                         </div>
+
+                                         <!-- Modelo -->
+                                         <div x-init="$nextTick(() => {
+                                             const s = $el.querySelector('select');
+                                             $(s).select2({ placeholder: 'Seleccione una opción', width: '100%', dropdownParent: s.closest('div') })
+                                                 .on('change', e => nuevoProducto.modelo = e.target.value);
+                                         })">
+                                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                 <i class="fas fa-project-diagram mr-2"></i> Modelo
+                                             </label>
+                                             <select class="clean-input w-full">
+                                                 <option value="">Seleccione una opción</option>
+                                                 <template x-for="m in modelos" :key="m.id">
+                                                     <option :value="m.id" x-text="m.nombre"
+                                                         :selected="m.id == nuevoProducto.modelo"></option>
+                                                 </template>
+                                             </select>
+                                             <template x-if="cargandoModelos">
+                                                 <div class="text-xs text-gray-500 mt-2">Cargando modelos...</div>
+                                             </template>
+                                         </div>
+
+                                         <!-- Garantía -->
+                                         <div>
+                                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                 <i class="fas fa-shield-alt mr-2"></i> Garantía de fábrica
+                                             </label>
+                                             <input type="number" min="0" class="clean-input"
+                                                 x-model="nuevoProducto.garantia" placeholder="Tiempo de garantía">
+                                         </div>
+
+                                         <!-- Unidad de tiempo -->
+                                         <div>
+                                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                 <i class="fas fa-clock mr-2"></i> Unidad de tiempo
+                                             </label>
+                                             <select class="clean-input w-full"
+                                                 x-model="nuevoProducto.unidad_tiempo_garantia">
                                                  <option value="dias">Días</option>
                                                  <option value="semanas">Semanas</option>
-                                                 <option value="meses" selected>Meses</option>
+                                                 <option value="meses">Meses</option>
                                                  <option value="años">Años</option>
                                              </select>
                                          </div>
+
+                                         <!-- Peso -->
+                                         <div>
+                                             <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                 <i class="fas fa-weight mr-2"></i> Peso (kg)
+                                             </label>
+                                             <input type="number" step="0.01" class="clean-input"
+                                                 x-model="nuevoProducto.peso">
+                                         </div>
                                      </div>
+                                 </section>
 
-                                     <!-- <div x-init="$nextTick(() => {
-                                         const select = $el.querySelector('select');
-                                         $(select).select2({
-                                             placeholder: 'Seleccione un proveedor',
-                                             width: '100%',
-                                             dropdownParent: select.closest('div')
-                                         }).on('change', (e) => {
-                                             nuevoProducto.proveedor = e.target.value;
-                                         });
-                                     })">
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-truck"></i> Proveedor
-                                         </label>
-                                         <select id="proveedorSelect"
-                                 class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                 x-model="proveedorId">
-                                 <option value="">Seleccione una opción</option>
-                                 <template x-for="proveedor in proveedores" :key="proveedor.id">
-                                     <option :value="proveedor.id"
-                                         x-text="proveedor.nombre + ' - ' + proveedor.numeroDocumento"></option>
-                                 </template>
-                             </select>
+                                 <!-- 4) PRECIOS -->
+                                 <section>
+                                     <header class="flex items-center gap-2 mb-4">
+                                         <i class="fas fa-money-bill-wave text-gray-700"></i>
+                                         <h3 class="text-lg font-semibold text-gray-800">Precios</h3>
+                                     </header>
 
-                                         <template x-if="cargandoProveedores">
-                                             <div class="text-xs text-gray-500 mt-1">Cargando proveedores...</div>
-                                         </template>
-                                     </div> -->
+                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10">
+                                         <!-- Compra -->
+                                         <div class="space-y-2">
+                                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                 <i class="fas fa-money-bill-wave"></i> Precio de compra
+                                             </label>
+                                             <div class="flex items-center gap-2">
+                                                 <button type="button" @click="toggleMonedaCompra()"
+                                                     class="text-gray-500 px-2 h-10 border-b border-gray-300">
+                                                     <span x-text="monedaCompraActual?.simbolo || 'S/'"
+                                                         class="w-8 text-center"></span>
+                                                 </button>
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     x-model="nuevoProducto.precio_compra">
+                                                 <input type="hidden" id="moneda_compra" name="moneda_compra"
+                                                     value="0">
+                                             </div>
+                                         </div>
 
+                                         <!-- Venta -->
+                                         <div class="space-y-2">
+                                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                 <i class="fas fa-tags"></i> Precio de venta
+                                             </label>
+                                             <div class="flex items-center gap-2">
+                                                 <button type="button" @click="toggleMonedaVenta()"
+                                                     class="text-gray-500 px-2 h-10 border-b border-gray-300">
+                                                     <span x-text="monedaVentaActual?.simbolo || 'S/'"
+                                                         class="w-8 text-center"></span>
+                                                 </button>
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     x-model="nuevoProducto.precio_venta">
+                                                 <input type="hidden" id="moneda_venta" name="moneda_venta"
+                                                     value="0">
+                                             </div>
+                                         </div>
 
-
-                                     <!-- Peso -->
-                                     <div>
-                                         <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
-                                             <i class="fas fa-weight"></i> Peso (kg)
-                                         </label>
-                                         <input type="number" step="0.01" class="clean-input"
-                                             x-model="nuevoProducto.peso">
-                                     </div>
-
-                                     <!-- Precio Compra -->
-                                     <div>
-                                         <label class="text-sm font-medium text-gray-700">Precio de Compra</label>
-                                         <div class="flex items-center gap-2">
-                                <button type="button" 
-                                    @click="toggleMonedaCompra()"
-                                    class="text-gray-500 px-2 h-10 border-b border-gray-300">
-                                <span x-text="monedaCompraActual?.simbolo || monedaCompraActual?.nombre || 'S/'" 
-                                    class="w-8 text-center"></span>
-                            </button>   
-                                                                  <input type="number" step="0.01" class="clean-input"
-                                                 x-model="nuevoProducto.precio_compra">
-
-                                                <input type="hidden" id="moneda_compra" name="moneda_compra" value="0">
-
+                                         <!-- Mayoreo -->
+                                         <div class="space-y-2">
+                                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                 <i class="fas fa-boxes"></i> Precio por mayoreo
+                                             </label>
+                                             <input type="number" step="0.01" class="clean-input"
+                                                 x-model="nuevoProducto.precio_mayor">
                                          </div>
                                      </div>
 
-                                     <!-- En el modal, en la sección de información del producto -->
-                                     <div>
-                                         <label class="block text-gray-600 text-sm mb-1">Precio de venta<span
-                                                 class="text-red-500 font-semibold">*</span></label>
-                                         <div class="input-with-icon">
-                                                 <button type="button" 
-                                                        @click="toggleMonedaVenta()"
-                                                        class="text-gray-500 px-2 h-10 border-b border-gray-300">
-                                                    <span x-text="monedaVentaActual?.simbolo || monedaVentaActual?.nombre || 'S/'" 
-                                                        class="w-8 text-center"></span>
-                                                </button>                                             <input type="number" step="0.01" class="clean-input"
-                                                 :value="nuevoProducto.precio_venta">
-                                             <input type="hidden" x-model="nuevoProducto.precio_venta">
-
-                                                                     <input type="hidden" id="moneda_venta" name="moneda_venta" value="0">
-
-
-                                         </div>
-                                     </div>
-                                 </div>
-
-                                 <div class="pt-6 flex justify-end">
-                                     <button @click="guardarNuevoProducto" class="btn btn-primary">Guardar
-                                         producto</button>
-                                 </div>
+                                 </section>
                              </div>
                          </template>
-
                      </div>
 
                      <!-- Footer -->
