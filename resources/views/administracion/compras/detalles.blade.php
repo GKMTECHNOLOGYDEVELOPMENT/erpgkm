@@ -74,7 +74,9 @@
                                 <span class="text-gray-600">Fecha:</span>
                             </div>
                             <span
-                                class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">02-09-2025</span>
+                                class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                {{ \Carbon\Carbon::parse($compra->fechaEmision)->format('d-m-Y') }}
+                            </span>
                         </div>
 
                         <div
@@ -83,8 +85,42 @@
                                 <i class="fa-regular fa-user text-blue-500"></i>
                                 <span class="text-gray-600">Registrada por:</span>
                             </div>
-                            <span class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">Kevin
-                                Ruiz</span>
+                            <span class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                {{ $compra->usuario->Nombre }} {{ $compra->usuario->apellidoPaterno }}
+                            </span>
+                        </div>
+
+                        <div
+                            class="flex justify-between items-center py-2.5 px-4 bg-white rounded-xl shadow-sm border border-blue-100">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-hashtag text-blue-500"></i>
+                                <span class="text-gray-600">Serie/Número:</span>
+                            </div>
+                            <span class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                {{ $compra->serie }}-{{ $compra->nro }}
+                            </span>
+                        </div>
+
+                        <div
+                            class="flex justify-between items-center py-2.5 px-4 bg-white rounded-xl shadow-sm border border-blue-100">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-money-bill-wave text-blue-500"></i>
+                                <span class="text-gray-600">Total:</span>
+                            </div>
+                            <span class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                {{ $compra->moneda->simbolo ?? 'S/.' }}{{ number_format($compra->total, 2) }}
+                            </span>
+                        </div>
+
+                        <div
+                            class="flex justify-between items-center py-2.5 px-4 bg-white rounded-xl shadow-sm border border-blue-100">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-coins text-blue-500"></i>
+                                <span class="text-gray-600">Moneda:</span>
+                            </div>
+                            <span class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                                {{ $compra->moneda->nombre ?? 'SOLES' }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -112,7 +148,9 @@
                                 <span class="text-gray-600">Proveedor:</span>
                             </div>
                             <span
-                                class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">Microsoft</span>
+                                class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                                {{ $compra->proveedor->nombre ?? 'N/A' }}
+                            </span>
                         </div>
 
                         <div
@@ -122,8 +160,21 @@
                                 <span class="text-gray-600">Ubicación:</span>
                             </div>
                             <span
-                                class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">Estados
-                                Unidos, California</span>
+                                class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                                {{ $compra->proveedor->direccion ?? 'N/A' }}
+                            </span>
+                        </div>
+
+                        <div
+                            class="flex justify-between items-center py-2.5 px-4 bg-white rounded-xl shadow-sm border border-purple-100">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-phone text-purple-500"></i>
+                                <span class="text-gray-600">Teléfono:</span>
+                            </div>
+                            <span
+                                class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                                {{ $compra->proveedor->telefono ?? 'N/A' }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -162,25 +213,36 @@
                     </thead>
 
                     <tbody class="divide-y divide-gray-100">
-                        <!-- Fila ejemplo -->
+                        @php
+                            $subtotal = 0;
+                            $igv = $compra->igv;
+                            $total = $compra->total;
+                            $monedaSimbolo = $compra->moneda->simbolo ?? 'S/.';
+                        @endphp
+                        
+                        @foreach($compra->detalles as $index => $detalle)
+                        @php
+                            $productSubtotal = $detalle->cantidad * $detalle->precio;
+                            $subtotal += $productSubtotal;
+                        @endphp
                         <tr class="text-gray-700 hover:bg-indigo-50/50 transition-all duration-200">
-                            <td class="px-6 py-4 font-medium">1</td>
+                            <td class="px-6 py-4 font-medium">{{ $index + 1 }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                                         <i class="fa-solid fa-box text-indigo-600"></i>
                                     </div>
-                                    <span class="font-medium">DSSF SDF</span>
+                                    <span class="font-medium">{{ $detalle->producto->nombre ?? 'Producto no disponible' }}</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <span
                                     class="inline-flex items-center justify-center bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-medium">
-                                    10
+                                    {{ $detalle->cantidad }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 font-semibold text-green-600">$10.00 USD</td>
-                            <td class="px-6 py-4 font-semibold text-blue-600">$100.00 USD</td>
+                            <td class="px-6 py-4 font-semibold text-green-600">{{ $monedaSimbolo }}{{ number_format($detalle->precio, 2) }}</td>
+                            <td class="px-6 py-4 font-semibold text-blue-600">{{ $monedaSimbolo }}{{ number_format($productSubtotal, 2) }}</td>
                             <td class="px-6 py-4">
                                 <button class="btn btn-dark items-center gap-2" title="Registrar devolución"
                                     aria-label="Registrar devolución">
@@ -189,34 +251,7 @@
                                 </button>
                             </td>
                         </tr>
-
-                        <!-- Fila adicional de ejemplo -->
-                        <tr class="text-gray-700 hover:bg-indigo-50/50 transition-all duration-200">
-                            <td class="px-6 py-4 font-medium">2</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                                        <i class="fa-solid fa-microchip text-amber-600"></i>
-                                    </div>
-                                    <span class="font-medium">Procesador Intel i7</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span
-                                    class="inline-flex items-center justify-center bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-medium">
-                                    5
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 font-semibold text-green-600">$45.00 USD</td>
-                            <td class="px-6 py-4 font-semibold text-blue-600">$225.00 USD</td>
-                            <td class="px-6 py-4">
-                                <button class="btn btn-dark items-center gap-2" title="Registrar devolución"
-                                    aria-label="Registrar devolución">
-                                    <i class="fa-solid fa-arrow-rotate-left text-sm"></i>
-                                    <span class="text-xs font-medium">Devolver</span>
-                                </button>
-                            </td>
-                        </tr>
+                        @endforeach
                     </tbody>
 
                     <!-- Totales -->
@@ -224,19 +259,19 @@
                         <tr>
                             <td class="px-6 py-4" colspan="3"></td>
                             <td class="px-6 py-4 font-bold text-indigo-700 text-right">SUBTOTAL</td>
-                            <td class="px-6 py-4 font-bold text-blue-600">$325.00 USD</td>
+                            <td class="px-6 py-4 font-bold text-blue-600">{{ $monedaSimbolo }}{{ number_format($subtotal, 2) }}</td>
                             <td class="px-6 py-4"></td>
                         </tr>
                         <tr>
                             <td class="px-6 py-4" colspan="3"></td>
-                            <td class="px-6 py-4 font-bold text-indigo-700 text-right">IVA 16%</td>
-                            <td class="px-6 py-4 font-bold text-blue-600">$52.00 USD</td>
+                            <td class="px-6 py-4 font-bold text-indigo-700 text-right">IGV {{ $compra->sujetoporcentaje ?? 18 }}%</td>
+                            <td class="px-6 py-4 font-bold text-blue-600">{{ $monedaSimbolo }}{{ number_format($igv, 2) }}</td>
                             <td class="px-6 py-4"></td>
                         </tr>
                         <tr class="bg-gradient-to-r from-indigo-100 to-purple-100 border-t-2 border-indigo-200">
                             <td class="px-6 py-4" colspan="3"></td>
                             <td class="px-6 py-4 font-bold text-indigo-900 text-lg text-right">TOTAL</td>
-                            <td class="px-6 py-4 font-bold text-indigo-900 text-lg">$377.00 USD</td>
+                            <td class="px-6 py-4 font-bold text-indigo-900 text-lg">{{ $monedaSimbolo }}{{ number_format($total, 2) }}</td>
                             <td class="px-6 py-4"></td>
                         </tr>
                     </tfoot>

@@ -565,6 +565,34 @@ validarProductoNuevo() {
         return false;
     }
 
+    if (!this.nuevoProducto.sku) {
+        toastr.error('El SKU del producto es obligatorio', 'Error');
+        return false;
+    }
+
+    // Validar stock (cantidad)
+    if (!this.nuevoProducto.stock || parseInt(this.nuevoProducto.stock) <= 0) {
+        toastr.error('El stock debe ser mayor a cero', 'Error');
+        return false;
+    }
+
+    // Validar stock mínimo
+    if (this.nuevoProducto.stock_minimo && parseInt(this.nuevoProducto.stock_minimo) <= 0) {
+        toastr.error('El stock mínimo debe ser mayor a cero', 'Error');
+        return false;
+    }
+    // Validar unidad y modelo
+    if (!this.nuevoProducto.unidad) {
+        toastr.error('Debe seleccionar una unidad', 'Error');
+        return false;
+    }
+    if (!this.nuevoProducto.modelo) {
+        toastr.error('Debe seleccionar un modelo', 'Error');
+        return false;
+    }
+
+
+
     const precioCompra = parseFloat(this.nuevoProducto.precio_compra) || 0;
     const precioVenta = parseFloat(this.nuevoProducto.precio_venta) || 0;
 
@@ -751,18 +779,52 @@ validarProductoNuevo() {
                 this.mostrarErrorPrecio = true;
             }
         },
-        cerrarModal() {
-            this.modalAbierto = false;
-            this.open = false;
-            this.productoEncontrado = {
-                id: null,
-                codigo_barras: '',
-                nombre: '',
-                stock: 0,
-                precio_compra: 0,
-                precio_venta: 0,
-            };
-        },
+       cerrarModal() {
+    this.modalAbierto = false;
+    this.open = false;
+    this.modalType = null;
+    this.modalCargando = false;
+    
+    // Resetear producto encontrado
+    this.productoEncontrado = {
+        id: null,
+        codigo_barras: '',
+        nombre: '',
+        stock: 0,
+        precio_compra: 0,
+        precio_venta: 0,
+    };
+
+    // Resetear nuevo producto COMPLETAMENTE
+    this.nuevoProducto = {
+        codigo_barras: '',
+        sku: '',
+        nombre: '',
+        stock: 0,
+        stock_minimo: 0,
+        unidad: '',
+        modelo: '',
+        peso: 0,
+        precio_compra: 0,
+        precio_venta: 0,
+        precio_mayor: 0,
+        garantia: 0,
+        unidad_tiempo_garantia: 'meses',
+        moneda_compra: 1, // <- Agregar esto
+        moneda_venta: 1   // <- Agregar esto
+    };
+
+    // Resetear campos del modal
+    this.cantidadProducto = 1;
+    this.precioCompra = 0;
+    this.mostrarErrorPrecio = false;
+    this.errorPrecio = '';
+
+    // Resetear las monedas a los valores por defecto
+    this.monedaCompraIndex = 0;
+    this.monedaVentaIndex = 0;
+    this.initMonedaToggles(); // <- Esto reestablecerá las monedas visuales
+},
 
         actualizarSubtotal(producto) {
             producto.subtotal = producto.cantidad * producto.precio;
@@ -817,7 +879,7 @@ validarProductoNuevo() {
 
                 console.log('Datos completos a enviar:', compraData);
 
-                const response = await fetch('/api/guardar-compra', {
+                const response = await fetch('/guardar-compra', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

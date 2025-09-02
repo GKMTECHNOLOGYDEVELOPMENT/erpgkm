@@ -469,7 +469,6 @@ Route::get('/modelos', [ComprasController::class, 'getModelos']);
 Route::post('/guardar-nuevo-articulo', [ComprasController::class, 'guardarNuevoArticuloDesdeCompra']);
 Route::get('/verificar-codigo-barras', [ComprasController::class, 'verificarCodigoBarras']);
 // Ruta para guardar la compra
-Route::post('/guardar-compra', [ComprasController::class, 'guardarCompra'])->name('api.guardar-compra');
 
 // Rutas que ya deberías tener
 // Route::get('/documentos', [ComprasController::class, 'getDocumentos'])->name('api.documentos');
