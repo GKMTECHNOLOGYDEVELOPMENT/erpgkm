@@ -568,7 +568,6 @@
          </div>
 
          <!-- MODAL -->
-         <!-- MODAL -->
          <div x-show="modalAbierto" x-cloak class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition>
              <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModal">
                  <div x-show="modalType !== null" x-transition x-transition.duration.300
@@ -895,52 +894,43 @@
                                          <h3 class="text-lg font-semibold text-gray-800">Precios</h3>
                                      </header>
 
-                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10">
-                                         <!-- Compra -->
-                                         <div class="space-y-2">
-                                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                                 <i class="fas fa-money-bill-wave"></i> Precio de compra
-                                             </label>
-                                             <div class="flex items-center gap-2">
-                                                 <button type="button" @click="toggleMonedaCompra()"
-                                                     class="text-gray-500 px-2 h-10 border-b border-gray-300">
-                                                     <span x-text="monedaCompraActual?.simbolo || 'S/'"
-                                                         class="w-8 text-center"></span>
-                                                 </button>
-                                                 <input type="number" step="0.01" class="clean-input"
-                                                     x-model="nuevoProducto.precio_compra">
-                                                 <input type="hidden" id="moneda_compra" name="moneda_compra"
-                                                     value="0">
-                                             </div>
-                                         </div>
+                                   <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10">
+                                    <!-- Compra -->
+                                    <div class="space-y-2">
+                                        <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                            <i class="fas fa-money-bill-wave"></i> Precio de compra
+                                        </label>
+                                        <div class="flex items-center gap-2">
+                                            <button type="button" @click="toggleMonedaCompra()"
+                                                class="text-gray-500 px-2 h-10 border-b border-gray-300">
+                                                <span x-text="monedaCompraActual?.simbolo || 'S/'"
+                                                    class="w-8 text-center"></span>
+                                            </button>
+                                            <input type="number" step="0.01" class="clean-input"
+                                                x-model="nuevoProducto.precio_compra">
+                                            <input type="hidden" id="moneda_compra" name="moneda_compra"
+                                                x-model="nuevoProducto.moneda_compra">
+                                        </div>
+                                    </div>
 
-                                         <!-- Venta -->
-                                         <div class="space-y-2">
-                                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                                 <i class="fas fa-tags"></i> Precio de venta
-                                             </label>
-                                             <div class="flex items-center gap-2">
-                                                 <button type="button" @click="toggleMonedaVenta()"
-                                                     class="text-gray-500 px-2 h-10 border-b border-gray-300">
-                                                     <span x-text="monedaVentaActual?.simbolo || 'S/'"
-                                                         class="w-8 text-center"></span>
-                                                 </button>
-                                                 <input type="number" step="0.01" class="clean-input"
-                                                     x-model="nuevoProducto.precio_venta">
-                                                 <input type="hidden" id="moneda_venta" name="moneda_venta"
-                                                     value="0">
-                                             </div>
-                                         </div>
-
-                                         <!-- Mayoreo -->
-                                         <div class="space-y-2">
-                                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                                 <i class="fas fa-boxes"></i> Precio por mayoreo
-                                             </label>
-                                             <input type="number" step="0.01" class="clean-input"
-                                                 x-model="nuevoProducto.precio_mayor">
-                                         </div>
-                                     </div>
+                                    <!-- Venta -->
+                                    <div class="space-y-2">
+                                        <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                            <i class="fas fa-tags"></i> Precio de venta
+                                        </label>
+                                        <div class="flex items-center gap-2">
+                                            <button type="button" @click="toggleMonedaVenta()"
+                                                class="text-gray-500 px-2 h-10 border-b border-gray-300">
+                                                <span x-text="monedaVentaActual?.simbolo || 'S/'"
+                                                    class="w-8 text-center"></span>
+                                            </button>
+                                            <input type="number" step="0.01" class="clean-input"
+                                                x-model="nuevoProducto.precio_venta">
+                                            <input type="hidden" id="moneda_venta" name="moneda_venta"
+                                                x-model="nuevoProducto.moneda_venta">
+                                        </div>
+                                    </div>
+                                </div>
 
                                  </section>
                              </div>

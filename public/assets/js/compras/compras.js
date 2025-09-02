@@ -65,6 +65,9 @@ document.addEventListener('alpine:init', () => {
             peso: 0,
             precio_compra: 0,
             precio_venta: 0,
+            moneda_compra: 9, // Valor por defecto (Soles)
+            moneda_venta: 9   // Valor por defecto (Soles)
+
         },
 
         // Nuevas propiedades para unidades y modelos
@@ -115,17 +118,25 @@ document.addEventListener('alpine:init', () => {
             if (this.monedas.length > 0) {
                 this.monedaCompraActual = this.monedas[this.monedaCompraIndex];
                 this.monedaVentaActual = this.monedas[this.monedaVentaIndex];
+
+                // Setear los valores iniciales en el modelo
+                this.nuevoProducto.moneda_compra = this.monedaCompraActual.id;
+                this.nuevoProducto.moneda_venta = this.monedaVentaActual.id;
             }
         },
 
         toggleMonedaCompra() {
             this.monedaCompraIndex = (this.monedaCompraIndex + 1) % this.monedas.length;
             this.monedaCompraActual = this.monedas[this.monedaCompraIndex];
+            // Actualizar el hidden input si es necesario
+    this.nuevoProducto.moneda_compra = this.monedaCompraActual.id;
         },
 
         toggleMonedaVenta() {
             this.monedaVentaIndex = (this.monedaVentaIndex + 1) % this.monedas.length;
             this.monedaVentaActual = this.monedas[this.monedaVentaIndex];
+            // Actualizar el hidden input si es necesario
+    this.nuevoProducto.moneda_venta = this.monedaVentaActual.id;
         },
 
         // MODIFICAR el método cargarMonedas:
@@ -444,46 +455,137 @@ document.addEventListener('alpine:init', () => {
             this.cerrarModal();
             this.codigoBarras = '';
         },
-        // En la función agregarAlCarrito, agregaremos un console.log
-        // Función agregarAlCarrito corregida
-        agregarAlCarrito() {
-            if (!this.productoEncontrado) return;
+       agregarAlCarrito() {
+    if (this.modalType === 'existente') {
+        this.agregarProductoExistente();
+    } else if (this.modalType === 'nuevo') {
+        this.agregarProductoNuevo();
+    }
+},
 
-            // IMPORTANTE: Validar precios ANTES de continuar
-            if (!this.validarPrecios()) {
-                return; // Si la validación falla, NO cerrar el modal
-            }
+agregarProductoExistente() {
+    if (!this.productoEncontrado) return;
 
-            console.log('DEBUG - productoEncontrado:', this.productoEncontrado);
+    // Validar precios ANTES de continuar
+    if (!this.validarPrecios()) {
+        return; // Si la validación falla, NO cerrar el modal
+    }
 
-            // Asegurar que precio_venta tenga un valor válido
-            let precioVenta = this.productoEncontrado.precio_venta;
-            if (!precioVenta || precioVenta == 0) {
-                // Calcular precio de venta con 30% de margen si no tiene valor
-                precioVenta = this.precioCompra * 1.3;
-                console.log('Precio venta calculado:', precioVenta);
-            }
+    console.log('DEBUG - productoEncontrado:', this.productoEncontrado);
 
-            const nuevoProducto = {
-                id: this.productoEncontrado.id,
-                codigo_barras: this.productoEncontrado.codigo_barras,
-                nombre: this.productoEncontrado.nombre,
-                cantidad: this.cantidadProducto,
-                precio: this.precioCompra,
-                precioBase: this.productoEncontrado.precio_compra,
-                subtotal: this.cantidadProducto * this.precioCompra,
-                stock: this.productoEncontrado.stock,
-                precio_venta: precioVenta,
-            };
+    // Asegurar que precio_venta tenga un valor válido
+    let precioVenta = this.productoEncontrado.precio_venta;
+    if (!precioVenta || precioVenta == 0) {
+        // Calcular precio de venta con 30% de margen si no tiene valor
+        precioVenta = this.precioCompra * 1.3;
+        console.log('Precio venta calculado:', precioVenta);
+    }
 
-            console.log('DEBUG - nuevoProducto a agregar:', nuevoProducto);
+    const nuevoProducto = {
+        id: this.productoEncontrado.id,
+        codigo_barras: this.productoEncontrado.codigo_barras,
+        nombre: this.productoEncontrado.nombre,
+        cantidad: this.cantidadProducto,
+        precio: this.precioCompra,
+        precioBase: this.productoEncontrado.precio_compra,
+        subtotal: this.cantidadProducto * this.precioCompra,
+        stock: this.productoEncontrado.stock,
+        precio_venta: precioVenta,
+        tipo: 'existente',
+        // AGREGAR MONEDAS PARA PRODUCTOS EXISTENTES TAMBIÉN
+        moneda_compra: this.productoEncontrado.moneda_compra || this.monedaCompraActual?.id || 9,
+        moneda_venta: this.productoEncontrado.moneda_venta || this.monedaVentaActual?.id || 9,
+    };
 
-            this.productos.push(nuevoProducto);
+    console.log('DEBUG - nuevoProducto a agregar:', nuevoProducto);
 
-            // SOLO cerrar modal si todo está correcto
-            this.cerrarModal();
-            this.codigoBarras = '';
-        },
+    this.productos.push(nuevoProducto);
+
+    // SOLO cerrar modal si todo está correcto
+    this.cerrarModal();
+    this.codigoBarras = '';
+},
+
+agregarProductoNuevo() {
+    // Validar datos básicos del nuevo producto
+    if (!this.validarProductoNuevo()) {
+        return;
+    }
+
+    // Obtener valores - el STOCK es la CANTIDAD que se compra
+    const precioCompra = parseFloat(this.nuevoProducto.precio_compra) || 0;
+    const precioVenta = parseFloat(this.nuevoProducto.precio_venta) || 0;
+    const cantidadCompra = parseInt(this.nuevoProducto.stock) || 0;
+
+    const nuevoProducto = {
+        id: 'temp-' + Date.now(),
+        codigo_barras: this.nuevoProducto.codigo_barras,
+        nombre: this.nuevoProducto.nombre || 'Nuevo Producto',
+        cantidad: cantidadCompra,
+        precio: precioCompra,
+        precioBase: precioCompra,
+        subtotal: cantidadCompra * precioCompra,
+        stock: cantidadCompra,
+        precio_venta: precioVenta,
+        tipo: 'nuevo',
+        // LAS MONEDAS YA VIENEN DIRECTAMENTE DEL MODELO
+        moneda_compra: this.nuevoProducto.moneda_compra,
+        moneda_venta: this.nuevoProducto.moneda_venta,
+        datos_extra: {
+            sku: this.nuevoProducto.sku || '',
+            stock_minimo: parseInt(this.nuevoProducto.stock_minimo) || 0,
+            peso: parseFloat(this.nuevoProducto.peso) || 0,
+            garantia: parseInt(this.nuevoProducto.garantia) || 0,
+            unidad_tiempo_garantia: this.nuevoProducto.unidad_tiempo_garantia || 'meses',
+            idUnidad: parseInt(this.nuevoProducto.unidad) || null,
+            idModelo: parseInt(this.nuevoProducto.modelo) || null,
+            precio_mayor: parseFloat(this.nuevoProducto.precio_mayor) || 0
+        }
+    };
+
+    console.log('DEBUG - Producto nuevo a agregar:', nuevoProducto);
+
+    this.productos.push(nuevoProducto);
+    this.cerrarModal();
+    this.codigoBarras = '';
+
+    toastr.success('Producto agregado al carrito. Se guardará al completar la compra.', 'Éxito');
+},
+
+validarProductoNuevo() {
+    // Validar código de barras
+    if (!this.nuevoProducto.codigo_barras) {
+        toastr.error('El código de barras es obligatorio', 'Error');
+        return false;
+    }
+
+    // Validar nombre
+    if (!this.nuevoProducto.nombre) {
+        toastr.error('El nombre del producto es obligatorio', 'Error');
+        return false;
+    }
+
+    const precioCompra = parseFloat(this.nuevoProducto.precio_compra) || 0;
+    const precioVenta = parseFloat(this.nuevoProducto.precio_venta) || 0;
+
+    // Validar precios
+    if (precioCompra <= 0) {
+        toastr.error('El precio de compra debe ser mayor a cero', 'Error');
+        return false;
+    }
+
+    if (precioVenta <= 0) {
+        toastr.error('El precio de venta debe ser mayor a cero', 'Error');
+        return false;
+    }
+
+    if (precioVenta <= precioCompra) {
+        toastr.error('El precio de venta debe ser mayor al precio de compra', 'Error');
+        return false;
+    }
+
+    return true;
+},
 
         // También necesitas mejorar la función validarPrecios
         validarPrecios() {
