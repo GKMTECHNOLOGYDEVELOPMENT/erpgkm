@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class ComprasController extends Controller
 {
@@ -326,30 +327,249 @@ public function guardarCompra(Request $request)
         foreach ($request->productos as $index => $producto) {
             Log::info("=== PROCESANDO PRODUCTO {$index} ===");
             Log::info("Datos del producto:", $producto);
+
+            $productoId = $producto['id'];
+            $esProductoNuevo = false;
+
+            // VERIFICAR SI ES UN PRODUCTO NUEVO (ID TEMPORAL)
+            if (strpos($producto['id'], 'temp-') === 0) {
+                Log::info("🆕 PRODUCTO NUEVO DETECTADO - Creando artículo en BD");
+                $esProductoNuevo = true;
+
+                // Crear el nuevo artículo en la tabla articulos
+                $articuloData = [
+                    'codigo_barras' => $producto['codigo_barras'],
+                    'nombre' => $producto['nombre'],
+                    'stock_total' => $producto['stock'], // Stock inicial
+                    'stock_minimo' => $producto['datos_extra']['stock_minimo'] ?? 0,
+                    'moneda_compra' => $producto['moneda_compra'] ?? 1, // ID de moneda compra (default: 1 = Soles)
+                    'moneda_venta' => $producto['moneda_venta'] ?? 1,   // ID de moneda venta (default: 1 = Soles)
+                    'precio_compra' => $producto['precio'],
+                    'precio_venta' => $producto['precio_venta'],
+                    'sku' => $producto['datos_extra']['sku'] ?? '',
+                    'peso' => $producto['datos_extra']['peso'] ?? 0,
+                    'garantia_fabrica' => $producto['datos_extra']['garantia'] ?? 0,
+                    'unidad_tiempo_garantia' => $producto['datos_extra']['unidad_tiempo_garantia'] ?? 'meses',
+                    'idUnidad' => $producto['datos_extra']['idUnidad'] ?? null,
+                    'idModelo' => $producto['datos_extra']['idModelo'] ?? null,
+                    'idProveedor' => $request->proveedor_id,
+                    'estado' => 1,
+                    'fecha_ingreso' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+
+                Log::info("Datos para nuevo artículo:", $articuloData);
+
+                // Insertar el nuevo artículo
+                $productoId = DB::table('articulos')->insertGetId($articuloData);
+                Log::info("✅ NUEVO ARTÍCULO CREADO - ID: {$productoId}");
+
+                 // GENERAR CÓDIGOS DE BARRAS PARA EL NUEVO ARTÍCULO
+    Log::info("Generando códigos de barras para el nuevo artículo...");
+    
+    // Generar código de barras para el código de barras
+    if (!empty($producto['codigo_barras'])) {
+        try {
+            $barcodeGenerator = new BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($producto['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
             
-            // Obtener el artículo actual ANTES de actualizar
-            $articuloActual = DB::table('articulos')->where('idArticulos', $producto['id'])->first();
+            DB::table('articulos')
+                ->where('idArticulos', $productoId)
+                ->update(['foto_codigobarras' => $barcode]);
+                
+            Log::info("✅ Código de barras generado para: {$producto['codigo_barras']}");
+        } catch (Exception $e) {
+            Log::error("❌ Error al generar código de barras: " . $e->getMessage());
+        }
+    }
+
+    // Generar código de barras para el SKU
+    if (!empty($producto['datos_extra']['sku'])) {
+        try {
+            $barcodeGenerator = new BarcodeGeneratorPNG();
+            $barcode = $barcodeGenerator->getBarcode($producto['datos_extra']['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
             
-            if (!$articuloActual) {
-                Log::error("Artículo con ID {$producto['id']} no encontrado en la base de datos");
-                throw new Exception("Artículo con ID {$producto['id']} no existe");
+            DB::table('articulos')
+                ->where('idArticulos', $productoId)
+                ->update(['fotosku' => $barcode]);
+                
+            Log::info("✅ Código de barras generado para SKU: {$producto['datos_extra']['sku']}");
+        } catch (Exception $e) {
+            Log::error("❌ Error al generar código de barras para SKU: " . $e->getMessage());
+        }
+    }
+
+                // Crear registro inicial en kardex para el nuevo artículo
+                $kardexData = [
+                    'fecha' => $request->fecha,
+                    'idArticulo' => $productoId,
+                    'unidades_entrada' => $producto['cantidad'], // Cantidad comprada
+                    'costo_unitario_entrada' => $producto['precio'],
+                    'unidades_salida' => 0,
+                    'costo_unitario_salida' => 0,
+                    'inventario_inicial' => 0,
+                    'inventario_actual' => $producto['cantidad'],
+                    'costo_inventario' => $producto['cantidad'] * $producto['precio'],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+
+                DB::table('kardex')->insert($kardexData);
+                Log::info("✅ KARDEX INICIAL CREADO PARA ARTÍCULO NUEVO");
+
+            } else {
+                // ES UN PRODUCTO EXISTENTE - MANTENER TU LÓGICA ORIGINAL
+                Log::info("📦 PRODUCTO EXISTENTE - ID: {$producto['id']}");
+                
+                // Obtener el artículo actual ANTES de actualizar
+                $articuloActual = DB::table('articulos')->where('idArticulos', $producto['id'])->first();
+                
+                if (!$articuloActual) {
+                    Log::error("Artículo con ID {$producto['id']} no encontrado en la base de datos");
+                    throw new Exception("Artículo con ID {$producto['id']} no existe");
+                }
+
+                Log::info("ARTÍCULO ACTUAL - ID: {$articuloActual->idArticulos}, Nombre: {$articuloActual->nombre}");
+                Log::info("ARTÍCULO ACTUAL - Precio compra: {$articuloActual->precio_compra}, Precio venta: {$articuloActual->precio_venta}");
+                Log::info("ARTÍCULO ACTUAL - Proveedor actual: {$articuloActual->idProveedor}");
+                Log::info("NUEVOS VALORES - Precio compra: {$producto['precio']}, Precio venta: " . ($producto['precio_venta'] ?? 'N/A'));
+                Log::info("NUEVO PROVEEDOR: {$request->proveedor_id}");
+                
+                // Verificar si existe precio_venta
+                if (!isset($producto['precio_venta']) || $producto['precio_venta'] == 0) {
+                    Log::warning("⚠️ Producto {$index} tiene precio_venta en 0 o no definido");
+                }
+
+                // Actualizar los precios Y EL PROVEEDOR en la tabla de artículos
+                Log::info("Actualizando artículo ID: {$producto['id']}");
+                
+                $updateData = [
+                    'precio_compra' => $producto['precio'],
+                    'precio_venta' => $producto['precio_venta'] ?? 0,
+                    'moneda_compra' => $producto['moneda_compra'] ?? 1, // Actualizar moneda compra
+                    'moneda_venta' => $producto['moneda_venta'] ?? 1,   // Actualizar moneda venta
+                    'idProveedor' => $request->proveedor_id, // ACTUALIZAR EL PROVEEDOR
+                    'updated_at' => now()
+                ];
+
+                Log::info("Datos para actualizar articulos:", $updateData);
+
+                $actualizados = DB::table('articulos')
+                    ->where('idArticulos', $producto['id'])
+                    ->update($updateData);
+
+                Log::info("Filas actualizadas en articulos: {$actualizados}");
+
+                if ($actualizados === 0) {
+                    Log::warning("⚠️ No se actualizó ninguna fila en articulos para ID: {$producto['id']}");
+                } else {
+                    Log::info("✅ Artículo actualizado correctamente");
+                }
+                
+                // Verificar el artículo DESPUÉS de actualizar
+                $articuloDespues = DB::table('articulos')->where('idArticulos', $producto['id'])->first();
+                Log::info("ARTÍCULO DESPUÉS - Precio compra: {$articuloDespues->precio_compra}, Precio venta: {$articuloDespues->precio_venta}");
+                Log::info("ARTÍCULO DESPUÉS - Nuevo proveedor: {$articuloDespues->idProveedor}");
+
+                // Verificar si los valores se actualizaron correctamente
+                if ($articuloDespues->precio_compra != $producto['precio']) {
+                    Log::error("❌ ERROR: precio_compra no se actualizó correctamente");
+                    Log::error("Esperado: {$producto['precio']}, Obtenido: {$articuloDespues->precio_compra}");
+                }
+
+                if (isset($producto['precio_venta']) && $articuloDespues->precio_venta != $producto['precio_venta']) {
+                    Log::error("❌ ERROR: precio_venta no se actualizó correctamente");
+                    Log::error("Esperado: {$producto['precio_venta']}, Obtenido: {$articuloDespues->precio_venta}");
+                }
+
+                if ($articuloDespues->idProveedor != $request->proveedor_id) {
+                    Log::error("❌ ERROR: idProveedor no se actualizó correctamente");
+                    Log::error("Esperado: {$request->proveedor_id}, Obtenido: {$articuloDespues->idProveedor}");
+                }
+
+                // Aumentar el stock en la tabla 'articulos' (SOLO PARA EXISTENTES)
+                Log::info("Incrementando stock en: {$producto['cantidad']}");
+                DB::table('articulos')->where('idArticulos', $producto['id'])->increment('stock_total', $producto['cantidad']);
+                
+                $articuloConStock = DB::table('articulos')->where('idArticulos', $producto['id'])->first();
+                Log::info("Stock después del incremento: {$articuloConStock->stock_total}");
+                
+                // Obtener el mes y año actual de la compra
+                $fechaCompra = Carbon::parse($request->fecha);
+                $mesCompra = $fechaCompra->format('m');
+                $anioCompra = $fechaCompra->format('Y');
+                
+                Log::info("Fecha compra: {$fechaCompra}, Mes: {$mesCompra}, Año: {$anioCompra}");
+                
+                // Buscar si existe un registro de kardex para este artículo en el mismo mes
+                $kardexExistente = DB::table('kardex')
+                    ->where('idArticulo', $producto['id'])
+                    ->whereMonth('fecha', $mesCompra)
+                    ->whereYear('fecha', $anioCompra)
+                    ->first();
+
+                if ($kardexExistente) {
+                    Log::info("Kardex existente encontrado ID: {$kardexExistente->id}");
+                    
+                    // Actualizar el registro existente del mes
+                    $updateKardex = [
+                        'unidades_entrada' => $kardexExistente->unidades_entrada + $producto['cantidad'],
+                        'costo_unitario_entrada' => $producto['precio'],
+                        'inventario_actual' => $kardexExistente->inventario_actual + $producto['cantidad'],
+                        'costo_inventario' => $kardexExistente->costo_inventario + ($producto['precio'] * $producto['cantidad']),
+                        'updated_at' => now()
+                    ];
+
+                    Log::info("Actualizando kardex existente:", $updateKardex);
+                    
+                    DB::table('kardex')
+                        ->where('id', $kardexExistente->id)
+                        ->update($updateKardex);
+
+                    Log::info("Kardex actualizado correctamente");
+                } else {
+                    Log::info("No hay kardex existente para este mes, creando nuevo registro");
+                    
+                    // Buscar el último registro de kardex para este artículo
+                    $ultimoKardex = DB::table('kardex')
+                        ->where('idArticulo', $producto['id'])
+                        ->orderBy('fecha', 'desc')
+                        ->first();
+                    
+                    // Calcular valores iniciales
+                    $inventarioInicial = $ultimoKardex ? $ultimoKardex->inventario_actual : $articuloActual->stock_total;
+                    $inventarioActual = $inventarioInicial + $producto['cantidad'];
+                    $costoInventario = ($ultimoKardex ? $ultimoKardex->costo_inventario : 0) + ($producto['precio'] * $producto['cantidad']);
+                    
+                    Log::info("Inventario inicial: {$inventarioInicial}, Actual: {$inventarioActual}, Costo: {$costoInventario}");
+                    
+                    // Crear nuevo registro de kardex para el nuevo mes
+                    $nuevoKardex = [
+                        'fecha' => $fechaCompra,
+                        'idArticulo' => $producto['id'],
+                        'unidades_entrada' => $producto['cantidad'],
+                        'costo_unitario_entrada' => $producto['precio'],
+                        'unidades_salida' => 0,
+                        'costo_unitario_salida' => 0,
+                        'inventario_inicial' => $inventarioInicial,
+                        'inventario_actual' => $inventarioActual,
+                        'costo_inventario' => $costoInventario,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
+
+                    Log::info("Insertando nuevo kardex:", $nuevoKardex);
+                    
+                    $kardexId = DB::table('kardex')->insertGetId($nuevoKardex);
+                    Log::info("Nuevo kardex creado con ID: {$kardexId}");
+                }
             }
 
-            Log::info("ARTÍCULO ACTUAL - ID: {$articuloActual->idArticulos}, Nombre: {$articuloActual->nombre}");
-            Log::info("ARTÍCULO ACTUAL - Precio compra: {$articuloActual->precio_compra}, Precio venta: {$articuloActual->precio_venta}");
-            Log::info("ARTÍCULO ACTUAL - Proveedor actual: {$articuloActual->idProveedor}");
-            Log::info("NUEVOS VALORES - Precio compra: {$producto['precio']}, Precio venta: " . ($producto['precio_venta'] ?? 'N/A'));
-            Log::info("NUEVO PROVEEDOR: {$request->proveedor_id}");
-            
-            // Verificar si existe precio_venta
-            if (!isset($producto['precio_venta']) || $producto['precio_venta'] == 0) {
-                Log::warning("⚠️ Producto {$index} tiene precio_venta en 0 o no definido");
-            }
-
-            // Insertar detalle de compra con precio_venta
+            // INSERTAR DETALLE DE COMPRA (para ambos casos - existentes y nuevos)
             $detalleData = [
                 'idCompra' => $compraId,
-                'idProducto' => $producto['id'],
+                'idProducto' => $productoId,
                 'cantidad' => $producto['cantidad'],
                 'precio' => $producto['precio'],
                 'precio_venta' => $producto['precio_venta'] ?? 0,
@@ -362,128 +582,6 @@ public function guardarCompra(Request $request)
             
             $detalleId = DB::table('detalle_compra')->insertGetId($detalleData);
             Log::info("Detalle insertado con ID: {$detalleId}");
-
-            // Actualizar los precios Y EL PROVEEDOR en la tabla de artículos
-            Log::info("Actualizando artículo ID: {$producto['id']}");
-            
-            $updateData = [
-                'precio_compra' => $producto['precio'],
-                'precio_venta' => $producto['precio_venta'] ?? 0,
-                'idProveedor' => $request->proveedor_id, // ACTUALIZAR EL PROVEEDOR
-                'updated_at' => now()
-            ];
-
-            Log::info("Datos para actualizar articulos:", $updateData);
-
-            $actualizados = DB::table('articulos')
-                ->where('idArticulos', $producto['id'])
-                ->update($updateData);
-
-            Log::info("Filas actualizadas en articulos: {$actualizados}");
-
-            if ($actualizados === 0) {
-                Log::warning("⚠️ No se actualizó ninguna fila en articulos para ID: {$producto['id']}");
-            } else {
-                Log::info("✅ Artículo actualizado correctamente");
-            }
-            
-            // Verificar el artículo DESPUÉS de actualizar
-            $articuloDespues = DB::table('articulos')->where('idArticulos', $producto['id'])->first();
-            Log::info("ARTÍCULO DESPUÉS - Precio compra: {$articuloDespues->precio_compra}, Precio venta: {$articuloDespues->precio_venta}");
-            Log::info("ARTÍCULO DESPUÉS - Nuevo proveedor: {$articuloDespues->idProveedor}");
-
-            // Verificar si los valores se actualizaron correctamente
-            if ($articuloDespues->precio_compra != $producto['precio']) {
-                Log::error("❌ ERROR: precio_compra no se actualizó correctamente");
-                Log::error("Esperado: {$producto['precio']}, Obtenido: {$articuloDespues->precio_compra}");
-            }
-
-            if (isset($producto['precio_venta']) && $articuloDespues->precio_venta != $producto['precio_venta']) {
-                Log::error("❌ ERROR: precio_venta no se actualizó correctamente");
-                Log::error("Esperado: {$producto['precio_venta']}, Obtenido: {$articuloDespues->precio_venta}");
-            }
-
-            if ($articuloDespues->idProveedor != $request->proveedor_id) {
-                Log::error("❌ ERROR: idProveedor no se actualizó correctamente");
-                Log::error("Esperado: {$request->proveedor_id}, Obtenido: {$articuloDespues->idProveedor}");
-            }
-
-            // Aumentar el stock en la tabla 'articulos'
-            Log::info("Incrementando stock en: {$producto['cantidad']}");
-            DB::table('articulos')->where('idArticulos', $producto['id'])->increment('stock_total', $producto['cantidad']);
-            
-            $articuloConStock = DB::table('articulos')->where('idArticulos', $producto['id'])->first();
-            Log::info("Stock después del incremento: {$articuloConStock->stock_total}");
-            
-            // Obtener el mes y año actual de la compra
-            $fechaCompra = Carbon::parse($request->fecha);
-            $mesCompra = $fechaCompra->format('m');
-            $anioCompra = $fechaCompra->format('Y');
-            
-            Log::info("Fecha compra: {$fechaCompra}, Mes: {$mesCompra}, Año: {$anioCompra}");
-            
-            // Buscar si existe un registro de kardex para este artículo en el mismo mes
-            $kardexExistente = DB::table('kardex')
-                ->where('idArticulo', $producto['id'])
-                ->whereMonth('fecha', $mesCompra)
-                ->whereYear('fecha', $anioCompra)
-                ->first();
-
-            if ($kardexExistente) {
-                Log::info("Kardex existente encontrado ID: {$kardexExistente->id}");
-                
-                // Actualizar el registro existente del mes
-                $updateKardex = [
-                    'unidades_entrada' => $kardexExistente->unidades_entrada + $producto['cantidad'],
-                    'costo_unitario_entrada' => $producto['precio'],
-                    'inventario_actual' => $kardexExistente->inventario_actual + $producto['cantidad'],
-                    'costo_inventario' => $kardexExistente->costo_inventario + ($producto['precio'] * $producto['cantidad']),
-                    'updated_at' => now()
-                ];
-
-                Log::info("Actualizando kardex existente:", $updateKardex);
-                
-                DB::table('kardex')
-                    ->where('id', $kardexExistente->id)
-                    ->update($updateKardex);
-
-                Log::info("Kardex actualizado correctamente");
-            } else {
-                Log::info("No hay kardex existente para este mes, creando nuevo registro");
-                
-                // Buscar el último registro de kardex para este artículo
-                $ultimoKardex = DB::table('kardex')
-                    ->where('idArticulo', $producto['id'])
-                    ->orderBy('fecha', 'desc')
-                    ->first();
-                
-                // Calcular valores iniciales
-                $inventarioInicial = $ultimoKardex ? $ultimoKardex->inventario_actual : $articuloActual->stock_total;
-                $inventarioActual = $inventarioInicial + $producto['cantidad'];
-                $costoInventario = ($ultimoKardex ? $ultimoKardex->costo_inventario : 0) + ($producto['precio'] * $producto['cantidad']);
-                
-                Log::info("Inventario inicial: {$inventarioInicial}, Actual: {$inventarioActual}, Costo: {$costoInventario}");
-                
-                // Crear nuevo registro de kardex para el nuevo mes
-                $nuevoKardex = [
-                    'fecha' => $fechaCompra,
-                    'idArticulo' => $producto['id'],
-                    'unidades_entrada' => $producto['cantidad'],
-                    'costo_unitario_entrada' => $producto['precio'],
-                    'unidades_salida' => 0,
-                    'costo_unitario_salida' => 0,
-                    'inventario_inicial' => $inventarioInicial,
-                    'inventario_actual' => $inventarioActual,
-                    'costo_inventario' => $costoInventario,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ];
-
-                Log::info("Insertando nuevo kardex:", $nuevoKardex);
-                
-                $kardexId = DB::table('kardex')->insertGetId($nuevoKardex);
-                Log::info("Nuevo kardex creado con ID: {$kardexId}");
-            }
 
             Log::info("=== FIN PROCESAMIENTO PRODUCTO {$index} ===");
         }
@@ -510,8 +608,6 @@ public function guardarCompra(Request $request)
         ], 500);
     }
 }
-
-
 
 
 

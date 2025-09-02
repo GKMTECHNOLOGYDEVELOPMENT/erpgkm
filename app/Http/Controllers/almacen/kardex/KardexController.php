@@ -4,6 +4,7 @@ namespace App\Http\Controllers\almacen\kardex;
 use App\Http\Controllers\Controller;
 
 use App\Models\Articulo;
+use App\Models\DetalleCompra;
 use App\Models\Kardex;
 use App\Models\Modelo;
 use App\Models\Moneda;
@@ -70,6 +71,8 @@ class KardexController extends Controller
     }
 
 
+
+
 public function kardexxproducto($id)
 {
     $articulo = Articulo::findOrFail($id);
@@ -82,17 +85,28 @@ public function kardexxproducto($id)
     return view('almacen.kardex.producto.index', compact('articulo', 'movimientos'));
 }
 
+
+
+
 public function detalles($idArticulo, $id)
 {
     // Obtener el artículo
     $articulo = Articulo::findOrFail($idArticulo);
     
-    // Obtener el movimiento específico del kardex usando el campo 'id'
+    // Obtener el movimiento específico del kardex
     $movimiento = Kardex::where('id', $id)
                        ->where('idArticulo', $idArticulo)
                        ->firstOrFail();
     
-    return view('almacen.kardex.producto.detalles', compact('articulo', 'movimiento'));
+    // Obtener los detalles de compra relacionados
+    $detalleCompra = DetalleCompra::where('idProducto', $idArticulo)
+                                ->whereHas('compra', function($query) use ($movimiento) {
+                                    $query->where('fechaEmision', $movimiento->fecha);
+                                })
+                                ->with(['compra', 'compra.proveedor'])
+                                ->first();
+    
+    return view('almacen.kardex.producto.detalles', compact('articulo', 'movimiento', 'detalleCompra'));
 }
 
 
