@@ -869,10 +869,15 @@
                                              </label>
                                              <select class="clean-input w-full"
                                                  x-model="nuevoProducto.unidad_tiempo_garantia">
+                                                 <option value="">Seleccionar Unidad de tiempo</option>
+                                                 <option value="dia">Dia</option>
                                                  <option value="dias">Días</option>
                                                  <option value="semanas">Semanas</option>
-                                                 <option value="meses">Meses</option>
-                                                 <option value="años">Años</option>
+                                                <option value="semana">Semana</option>
+                                                <option value="mes">Mes</option>
+                                                <option value="meses">Meses</option>
+                                                <option value="año">Año</option>
+                                                <option value="años">Años</option>
                                              </select>
                                          </div>
 
