@@ -128,12 +128,13 @@
              <!-- Sección izquierda - Búsqueda y productos -->
              <div class="lg:col-span-2">
                  <div class="panel mt-6 p-5 max-w-7xl mx-auto">
-                     <h2 class="text-lg font-semibold mb-4">Búsqueda y selección de productos</h2>
-                     <p class="text-gray-600 mb-6">
-                         Escribe el código de barras o el nombre y haz clic en <strong>Buscar producto</strong>.
-                         Te mostraremos las coincidencias en una ventana donde podrás elegir uno o varios productos.
-                         Si no aparece lo que buscas, tendrás la opción de registrarlo.
-                     </p>
+                     <h2 class="text-lg font-semibold mb-4">Búsqueda y selección de producto</h2>
+                    <p class="text-gray-600 mb-6">
+                        Escribe o escanea el <strong>código de barras</strong> del producto y haz clic en <strong>Buscar producto</strong>.
+                        Si el código es válido, se mostrará el producto correspondiente. 
+                        Si no se encuentra, tendrás la opción de registrarlo manualmente.
+                    </p>
+
 
                      <div class="flex items-end gap-4 mb-8">
                          <!-- Input con ancho forzado -->
@@ -838,7 +839,7 @@
                                          </div>
                                      </div>
 
-                                     <div x-init="$nextTick(() => {
+                                     <!-- <div x-init="$nextTick(() => {
                                          const select = $el.querySelector('select');
                                          $(select).select2({
                                              placeholder: 'Seleccione un proveedor',
@@ -851,16 +852,20 @@
                                          <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
                                              <i class="fas fa-truck"></i> Proveedor
                                          </label>
-                                         <select class="clean-input w-full">
-                                             <option value="">Seleccione un proveedor</option>
-                                             <option value="1" :selected="nuevoProducto.proveedor == 1">Tech
-                                                 Solutions S.A.C. - 20481234567</option>
-                                             <option value="2" :selected="nuevoProducto.proveedor == 2">
-                                                 Distribuidora Lima Norte - 20567890123</option>
-                                             <option value="3" :selected="nuevoProducto.proveedor == 3">Global
-                                                 Supplies EIRL - 20345678901</option>
-                                         </select>
-                                     </div>
+                                         <select id="proveedorSelect"
+                                 class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                 x-model="proveedorId">
+                                 <option value="">Seleccione una opción</option>
+                                 <template x-for="proveedor in proveedores" :key="proveedor.id">
+                                     <option :value="proveedor.id"
+                                         x-text="proveedor.nombre + ' - ' + proveedor.numeroDocumento"></option>
+                                 </template>
+                             </select>
+
+                                         <template x-if="cargandoProveedores">
+                                             <div class="text-xs text-gray-500 mt-1">Cargando proveedores...</div>
+                                         </template>
+                                     </div> -->
 
 
 
@@ -877,9 +882,17 @@
                                      <div>
                                          <label class="text-sm font-medium text-gray-700">Precio de Compra</label>
                                          <div class="flex items-center gap-2">
-                                             <span>S/</span>
-                                             <input type="number" step="0.01" class="clean-input"
+                                <button type="button" 
+                                    @click="toggleMonedaCompra()"
+                                    class="text-gray-500 px-2 h-10 border-b border-gray-300">
+                                <span x-text="monedaCompraActual?.simbolo || monedaCompraActual?.nombre || 'S/'" 
+                                    class="w-8 text-center"></span>
+                            </button>   
+                                                                  <input type="number" step="0.01" class="clean-input"
                                                  x-model="nuevoProducto.precio_compra">
+
+                                                <input type="hidden" id="moneda_compra" name="moneda_compra" value="0">
+
                                          </div>
                                      </div>
 
@@ -888,10 +901,17 @@
                                          <label class="block text-gray-600 text-sm mb-1">Precio de venta<span
                                                  class="text-red-500 font-semibold">*</span></label>
                                          <div class="input-with-icon">
-                                             <i class="fas fa-tags input-icon"></i>
-                                             <input type="number" step="0.01" class="clean-input"
+                                                 <button type="button" 
+                                                        @click="toggleMonedaVenta()"
+                                                        class="text-gray-500 px-2 h-10 border-b border-gray-300">
+                                                    <span x-text="monedaVentaActual?.simbolo || monedaVentaActual?.nombre || 'S/'" 
+                                                        class="w-8 text-center"></span>
+                                                </button>                                             <input type="number" step="0.01" class="clean-input"
                                                  :value="nuevoProducto.precio_venta">
                                              <input type="hidden" x-model="nuevoProducto.precio_venta">
+
+                                                                     <input type="hidden" id="moneda_venta" name="moneda_venta" value="0">
+
 
                                          </div>
                                      </div>
@@ -927,6 +947,8 @@
 
 
      </div>
+
+
      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
      <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
      <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>

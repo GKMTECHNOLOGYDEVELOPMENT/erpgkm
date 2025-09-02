@@ -20,6 +20,10 @@ document.addEventListener('alpine:init', () => {
         modalCargando: false,
         garantiaFabrica: 0,
         unidadTiempoGarantia: 'meses',
+        monedaCompraIndex: 0,
+        monedaVentaIndex: 0,
+        monedaCompraActual: null,
+        monedaVentaActual: null,
         // Arrays para datos de la API
         documentos: [],
         proveedores: [],
@@ -104,6 +108,48 @@ document.addEventListener('alpine:init', () => {
         get simboloMoneda() {
             const moneda = this.monedaSeleccionada;
             return moneda ? moneda.simbolo : 'S/';
+        },
+
+         // AGREGAR ESTOS MÉTODOS:
+        initMonedaToggles() {
+            if (this.monedas.length > 0) {
+                this.monedaCompraActual = this.monedas[this.monedaCompraIndex];
+                this.monedaVentaActual = this.monedas[this.monedaVentaIndex];
+            }
+        },
+
+        toggleMonedaCompra() {
+            this.monedaCompraIndex = (this.monedaCompraIndex + 1) % this.monedas.length;
+            this.monedaCompraActual = this.monedas[this.monedaCompraIndex];
+        },
+
+        toggleMonedaVenta() {
+            this.monedaVentaIndex = (this.monedaVentaIndex + 1) % this.monedas.length;
+            this.monedaVentaActual = this.monedas[this.monedaVentaIndex];
+        },
+
+        // MODIFICAR el método cargarMonedas:
+        async cargarMonedas() {
+            try {
+                const response = await fetch('/api/monedas');
+                const data = await response.json();
+
+                if (data.success) {
+                    this.monedas = data.data;
+                    // Inicializar los toggles de moneda
+                    this.initMonedaToggles();
+                    
+                    // Seleccionar Soles por defecto si existe
+                    const soles = this.monedas.find((m) => m.nombre.toLowerCase().includes('sol'));
+                    if (soles && !this.monedaId) {
+                        this.monedaId = soles.id;
+                    }
+                } else {
+                    console.error('Error al cargar monedas:', data.message);
+                }
+            } catch (error) {
+                console.error('Error en la petición de monedas:', error);
+            }
         },
 
         // Métodos para cargar unidades y modelos
@@ -216,6 +262,7 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        
         async cargarSujetos() {
             try {
                 const response = await fetch('/api/sujetos');
