@@ -773,9 +773,27 @@ public function verificarCodigoBarras(Request $request)
 
     public function ticket($id)
     {
-        // Lógica para la página de ticket
-        $compra = Compra::findOrFail($id);
-        return view('administracion.compras.ticket', compact('compra'));
+        // Carga compra con proveedor (asume relación Compra->proveedor())
+        $compra = Compra::with('proveedor')->findOrFail($id);
+
+        // Detalles con nombre de artículo
+        $detalles = DB::table('detalle_compra as dc')
+            ->join('articulos as a', 'dc.idProducto', '=', 'a.idArticulos')
+            ->select('dc.cantidad', 'dc.precio', 'dc.subtotal', 'a.nombre as articulo')
+            ->where('dc.idCompra', $compra->idCompra)
+            ->get();
+
+        // Generar código de barras (ej: “P3Q0Q6P8I6-{{id}}”) o el que prefieras
+        $textBarcode = 'P3Q0Q6P8I6-' . $compra->idCompra;
+        $gen = new BarcodeGeneratorPNG();
+        $barcodePng = base64_encode($gen->getBarcode($textBarcode, BarcodeGeneratorPNG::TYPE_CODE_128));
+
+        return view('administracion.compras.ticket', [
+            'compra'   => $compra,
+            'detalles' => $detalles,
+            'barcode'  => $barcodePng,
+            'barcodeText' => $textBarcode,
+        ]);
     }
 
 

@@ -73,8 +73,7 @@
                                 <i class="fa-regular fa-calendar text-blue-500"></i>
                                 <span class="text-gray-600">Fecha:</span>
                             </div>
-                            <span
-                                class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                            <span class="font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
                                 {{ \Carbon\Carbon::parse($compra->fechaEmision)->format('d-m-Y') }}
                             </span>
                         </div>
@@ -147,8 +146,7 @@
                                 <i class="fa-regular fa-building text-purple-500"></i>
                                 <span class="text-gray-600">Proveedor:</span>
                             </div>
-                            <span
-                                class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                            <span class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
                                 {{ $compra->proveedor->nombre ?? 'N/A' }}
                             </span>
                         </div>
@@ -159,8 +157,7 @@
                                 <i class="fa-solid fa-location-dot text-purple-500"></i>
                                 <span class="text-gray-600">Ubicación:</span>
                             </div>
-                            <span
-                                class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                            <span class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
                                 {{ $compra->proveedor->direccion ?? 'N/A' }}
                             </span>
                         </div>
@@ -171,8 +168,7 @@
                                 <i class="fa-solid fa-phone text-purple-500"></i>
                                 <span class="text-gray-600">Teléfono:</span>
                             </div>
-                            <span
-                                class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                            <span class="font-semibold bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
                                 {{ $compra->proveedor->telefono ?? 'N/A' }}
                             </span>
                         </div>
@@ -203,11 +199,14 @@
                                 DESCRIPCIÓN</th>
                             <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-40">
                                 CANTIDAD</th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-48">
+                            <th
+                                class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-48">
                                 PRECIO</th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-48">
+                            <th
+                                class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-48">
                                 SUBTOTAL</th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-40">
+                            <th
+                                class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-40">
                                 ACCIÓN</th>
                         </tr>
                     </thead>
@@ -219,38 +218,42 @@
                             $total = $compra->total;
                             $monedaSimbolo = $compra->moneda->simbolo ?? 'S/.';
                         @endphp
-                        
-                        @foreach($compra->detalles as $index => $detalle)
-                        @php
-                            $productSubtotal = $detalle->cantidad * $detalle->precio;
-                            $subtotal += $productSubtotal;
-                        @endphp
-                        <tr class="text-gray-700 hover:bg-indigo-50/50 transition-all duration-200">
-                            <td class="px-6 py-4 font-medium">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                        <i class="fa-solid fa-box text-indigo-600"></i>
+
+                        @foreach ($compra->detalles as $index => $detalle)
+                            @php
+                                $productSubtotal = $detalle->cantidad * $detalle->precio;
+                                $subtotal += $productSubtotal;
+                            @endphp
+                            <tr class="text-gray-700 hover:bg-indigo-50/50 transition-all duration-200">
+                                <td class="px-6 py-4 font-medium">{{ $index + 1 }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                            <i class="fa-solid fa-box text-indigo-600"></i>
+                                        </div>
+                                        <span
+                                            class="font-medium">{{ $detalle->producto->nombre ?? 'Producto no disponible' }}</span>
                                     </div>
-                                    <span class="font-medium">{{ $detalle->producto->nombre ?? 'Producto no disponible' }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span
-                                    class="inline-flex items-center justify-center bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-medium">
-                                    {{ $detalle->cantidad }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 font-semibold text-green-600">{{ $monedaSimbolo }}{{ number_format($detalle->precio, 2) }}</td>
-                            <td class="px-6 py-4 font-semibold text-blue-600">{{ $monedaSimbolo }}{{ number_format($productSubtotal, 2) }}</td>
-                            <td class="px-6 py-4">
-                                <button class="btn btn-dark items-center gap-2" title="Registrar devolución"
-                                    aria-label="Registrar devolución">
-                                    <i class="fa-solid fa-arrow-rotate-left text-sm"></i>
-                                    <span class="text-xs font-medium">Devolver</span>
-                                </button>
-                            </td>
-                        </tr>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="inline-flex items-center justify-center bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full font-medium">
+                                        {{ $detalle->cantidad }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 font-semibold text-green-600">
+                                    {{ $monedaSimbolo }}{{ number_format($detalle->precio, 2) }}</td>
+                                <td class="px-6 py-4 font-semibold text-blue-600">
+                                    {{ $monedaSimbolo }}{{ number_format($productSubtotal, 2) }}</td>
+                                <td class="px-6 py-4">
+                                    <button class="btn btn-dark items-center gap-2" title="Registrar devolución"
+                                        aria-label="Registrar devolución">
+                                        <i class="fa-solid fa-arrow-rotate-left text-sm"></i>
+                                        <span class="text-xs font-medium">Devolver</span>
+                                    </button>
+                                </td>
+                            </tr>
                         @endforeach
                     </tbody>
 
@@ -259,19 +262,23 @@
                         <tr>
                             <td class="px-6 py-4" colspan="3"></td>
                             <td class="px-6 py-4 font-bold text-indigo-700 text-right">SUBTOTAL</td>
-                            <td class="px-6 py-4 font-bold text-blue-600">{{ $monedaSimbolo }}{{ number_format($subtotal, 2) }}</td>
+                            <td class="px-6 py-4 font-bold text-blue-600">
+                                {{ $monedaSimbolo }}{{ number_format($subtotal, 2) }}</td>
                             <td class="px-6 py-4"></td>
                         </tr>
                         <tr>
                             <td class="px-6 py-4" colspan="3"></td>
-                            <td class="px-6 py-4 font-bold text-indigo-700 text-right">IGV {{ $compra->sujetoporcentaje ?? 18 }}%</td>
-                            <td class="px-6 py-4 font-bold text-blue-600">{{ $monedaSimbolo }}{{ number_format($igv, 2) }}</td>
+                            <td class="px-6 py-4 font-bold text-indigo-700 text-right">IGV
+                                {{ $compra->sujetoporcentaje ?? 18 }}%</td>
+                            <td class="px-6 py-4 font-bold text-blue-600">
+                                {{ $monedaSimbolo }}{{ number_format($igv, 2) }}</td>
                             <td class="px-6 py-4"></td>
                         </tr>
                         <tr class="bg-gradient-to-r from-indigo-100 to-purple-100 border-t-2 border-indigo-200">
                             <td class="px-6 py-4" colspan="3"></td>
                             <td class="px-6 py-4 font-bold text-indigo-900 text-lg text-right">TOTAL</td>
-                            <td class="px-6 py-4 font-bold text-indigo-900 text-lg">{{ $monedaSimbolo }}{{ number_format($total, 2) }}</td>
+                            <td class="px-6 py-4 font-bold text-indigo-900 text-lg">
+                                {{ $monedaSimbolo }}{{ number_format($total, 2) }}</td>
                             <td class="px-6 py-4"></td>
                         </tr>
                     </tfoot>
@@ -286,10 +293,10 @@
                 <i class="fa-solid fa-file-invoice"></i>
                 <span>IMPRIMIR FACTURA</span>
             </button>
-            <button class="btn btn-success inline-flex items-center gap-2">
-                <i class="fa-solid fa-receipt"></i>
-                <span>IMPRIMIR TICKET</span>
-            </button>
+            <!-- Con esto: -->
+            <a class="btn btn-success" onclick="abrirTicket('{{ route('compras.ticket', $compra->idCompra) }}')">
+                IMPRIMIR TICKET
+            </a>
         </div>
 
 
@@ -352,7 +359,20 @@
                 </div>
             </div>
         </section>
-
-
     </div>
+    <script>
+        function abrirTicket(url) {
+            // Tamaño basado en la imagen de referencia (80mm ≈ 302px)
+            const width = 320; // Un poco más ancho para márgenes
+            const height = 600; // Altura suficiente para el contenido
+
+            // Calcular posición para centrar la ventana
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+
+            // Abrir ventana emergente
+            window.open(url, 'Ticket',
+                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`);
+        }
+    </script>
 </x-layout.default>

@@ -1222,3 +1222,5 @@ Route::get('/buscar-articulo', [ArticulosController::class, 'buscar'])->name('bu
 
 
 Route::post('/guardar-compra', [ComprasController::class, 'guardarCompra'])->name('api.guardar-compra');
+Route::get('/administracion/compras/{id}/ticket', [\App\Http\Controllers\administracion\compras\ComprasController::class, 'ticket'])
+    ->name('compras.ticket');
