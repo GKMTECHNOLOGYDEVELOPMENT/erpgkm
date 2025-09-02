@@ -1221,3 +1221,4 @@ Route::get('/scrumboard/reuniones/{id}/participantes', [ScrumboarddController::c
 Route::get('/buscar-articulo', [ArticulosController::class, 'buscar'])->name('buscar.articulo');
 
 
+Route::post('/guardar-compra', [ComprasController::class, 'guardarCompra'])->name('api.guardar-compra');

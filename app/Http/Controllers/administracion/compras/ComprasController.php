@@ -273,6 +273,26 @@ public function guardarCompra(Request $request)
         Log::info('Productos recibidos:', $request->productos);
         Log::info('Headers:', $request->headers->all());
 
+
+        // OBTENER EL USUARIO AUTENTICADO - AGREGAR ESTAS LÍNEAS
+        $usuario = auth()->user();
+        
+        if (!$usuario) {
+            Log::error('❌ Usuario no autenticado');
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no autenticado'
+            ], 401);
+        }
+
+        Log::info('Usuario autenticado:', [
+            'idUsuario' => $usuario->idUsuario,
+            'Nombre' => $usuario->Nombre,
+            'correo' => $usuario->correo
+        ]);
+
+        
+
         // Validar datos requeridos
         $request->validate([
             'serie' => 'required|string',
@@ -312,6 +332,7 @@ public function guardarCompra(Request $request)
             'idDocumento' => $request->documento_id,
             'idImpuesto' => $request->impuesto_id,
             'idSujeto' => $request->sujeto_id,
+            'idUsuario' => $usuario->idUsuario, // ← AQUÍ AGREGAMOS EL ID DEL USUARIO
             'idCondicionCompra' => $request->condicion_compra_id,
             'idTipoPago' => $request->tipo_pago_id,
             'created_at' => now(),
@@ -366,39 +387,39 @@ public function guardarCompra(Request $request)
                 Log::info("✅ NUEVO ARTÍCULO CREADO - ID: {$productoId}");
 
                  // GENERAR CÓDIGOS DE BARRAS PARA EL NUEVO ARTÍCULO
-    Log::info("Generando códigos de barras para el nuevo artículo...");
-    
-    // Generar código de barras para el código de barras
-    if (!empty($producto['codigo_barras'])) {
-        try {
-            $barcodeGenerator = new BarcodeGeneratorPNG();
-            $barcode = $barcodeGenerator->getBarcode($producto['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
-            
-            DB::table('articulos')
-                ->where('idArticulos', $productoId)
-                ->update(['foto_codigobarras' => $barcode]);
+                Log::info("Generando códigos de barras para el nuevo artículo...");
                 
-            Log::info("✅ Código de barras generado para: {$producto['codigo_barras']}");
-        } catch (Exception $e) {
-            Log::error("❌ Error al generar código de barras: " . $e->getMessage());
-        }
-    }
+                // Generar código de barras para el código de barras
+                if (!empty($producto['codigo_barras'])) {
+                    try {
+                        $barcodeGenerator = new BarcodeGeneratorPNG();
+                        $barcode = $barcodeGenerator->getBarcode($producto['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
+                        
+                        DB::table('articulos')
+                            ->where('idArticulos', $productoId)
+                            ->update(['foto_codigobarras' => $barcode]);
+                            
+                        Log::info("✅ Código de barras generado para: {$producto['codigo_barras']}");
+                    } catch (Exception $e) {
+                        Log::error("❌ Error al generar código de barras: " . $e->getMessage());
+                    }
+                }
 
-    // Generar código de barras para el SKU
-    if (!empty($producto['datos_extra']['sku'])) {
-        try {
-            $barcodeGenerator = new BarcodeGeneratorPNG();
-            $barcode = $barcodeGenerator->getBarcode($producto['datos_extra']['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
-            
-            DB::table('articulos')
-                ->where('idArticulos', $productoId)
-                ->update(['fotosku' => $barcode]);
-                
-            Log::info("✅ Código de barras generado para SKU: {$producto['datos_extra']['sku']}");
-        } catch (Exception $e) {
-            Log::error("❌ Error al generar código de barras para SKU: " . $e->getMessage());
-        }
-    }
+                // Generar código de barras para el SKU
+                if (!empty($producto['datos_extra']['sku'])) {
+                    try {
+                        $barcodeGenerator = new BarcodeGeneratorPNG();
+                        $barcode = $barcodeGenerator->getBarcode($producto['datos_extra']['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
+                        
+                        DB::table('articulos')
+                            ->where('idArticulos', $productoId)
+                            ->update(['fotosku' => $barcode]);
+                            
+                        Log::info("✅ Código de barras generado para SKU: {$producto['datos_extra']['sku']}");
+                    } catch (Exception $e) {
+                        Log::error("❌ Error al generar código de barras para SKU: " . $e->getMessage());
+                    }
+                }
 
                 // Crear registro inicial en kardex para el nuevo artículo
                 $kardexData = [

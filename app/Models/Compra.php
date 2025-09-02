@@ -128,4 +128,15 @@ class Compra extends Model
 	{
 		return $this->belongsTo(\App\Models\Proveedore::class, 'proveedor_id', 'idProveedor');
 	}
+	public function detalles()
+{
+    return $this->hasMany(DetalleCompra::class, 'idCompra', 'idCompra');
+}
+
+public function usuario()
+{
+    return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
+}
+
+
 }

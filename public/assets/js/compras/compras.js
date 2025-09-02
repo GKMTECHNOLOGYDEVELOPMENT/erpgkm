@@ -879,7 +879,7 @@ validarProductoNuevo() {
 
                 console.log('Datos completos a enviar:', compraData);
 
-                const response = await fetch('/api/guardar-compra', {
+                const response = await fetch('/guardar-compra', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
