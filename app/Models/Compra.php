@@ -70,6 +70,7 @@ class Compra extends Model
 
 	protected $fillable = [
 		'serie',
+		'codigocompra',
 		'nro',
 		'fechaEmision',
 		'fechaVencimiento',

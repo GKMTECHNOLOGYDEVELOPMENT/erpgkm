@@ -12,6 +12,8 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Illuminate\Support\Str; // ← ESTA LÍNEA AGREGA
+
 
 class ComprasController extends Controller
 {
@@ -315,8 +317,13 @@ public function guardarCompra(Request $request)
         Log::info('Validación pasada correctamente');
         Log::info('ID Proveedor recibido: ' . $request->proveedor_id);
 
-        // Insertar la compra
+        do {
+            $codigoCompra = strtoupper(Str::random(10));
+        } while (DB::table('compra')->where('codigocompra', $codigoCompra)->exists());
+            Log::info("Código de compra generado: {$codigoCompra}");
+                // Insertar la compra
         $compraData = [
+            'codigocompra' => $codigoCompra,
             'serie' => $request->serie,
             'nro' => $request->nro,
             'fechaEmision' => $request->fecha,
@@ -784,7 +791,7 @@ public function verificarCodigoBarras(Request $request)
             ->get();
 
         // Generar código de barras (ej: “P3Q0Q6P8I6-{{id}}”) o el que prefieras
-        $textBarcode = 'P3Q0Q6P8I6-' . $compra->idCompra;
+        $textBarcode = $compra->codigocompra;
         $gen = new BarcodeGeneratorPNG();
         $barcodePng = base64_encode($gen->getBarcode($textBarcode, BarcodeGeneratorPNG::TYPE_CODE_128));
 
