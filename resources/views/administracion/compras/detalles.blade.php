@@ -27,15 +27,17 @@
         </div>
 
         <!-- Barra de acciones -->
+        <!-- Barra de acciones -->
         <div class="rounded-lg shadow-sm p-4 mb-8">
             <div class="flex flex-wrap items-center justify-center gap-4 md:gap-10 text-gray-700">
-                <a href="#" class="btn btn-primary">
+                <a href="{{ route('compras.create') }}" class="btn btn-primary">
                     <div class="p-2 bg-sky-100 rounded-full group-hover:bg-sky-200 transition-colors">
                         <i class="fa-solid fa-bag-shopping text-sky-600"></i>
                     </div>
                     <span class="font-medium text-sm">NUEVA COMPRA</span>
                 </a>
-                <a href="#" class="btn btn-warning">
+
+                <a href="{{ route('compras.index') }}" class="btn btn-warning">
                     <div class="p-2 bg-sky-100 rounded-full group-hover:bg-sky-200 transition-colors">
                         <i class="fa-solid fa-clipboard-list text-sky-600"></i>
                     </div>
