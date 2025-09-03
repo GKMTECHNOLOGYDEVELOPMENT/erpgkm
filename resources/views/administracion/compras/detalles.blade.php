@@ -247,8 +247,13 @@
                                 <td class="px-6 py-4 font-semibold text-blue-600">
                                     {{ $monedaSimbolo }}{{ number_format($productSubtotal, 2) }}</td>
                                 <td class="px-6 py-4">
-                                    <button class="btn btn-dark items-center gap-2" title="Registrar devolución"
-                                        aria-label="Registrar devolución">
+                                    <button class="btn btn-dark items-center gap-2 devolver-btn" 
+                                            title="Registrar devolución"
+                                            data-id="{{ $detalle->idDetalleCompra }}"
+                                            data-producto="{{ $detalle->producto->nombre ?? 'Producto' }}"
+                                            data-max="{{ $detalle->cantidad }}"
+                                            data-precio="{{ $detalle->precio }}"
+                                            data-subtotal="{{ $productSubtotal }}">
                                         <i class="fa-solid fa-arrow-rotate-left text-sm"></i>
                                         <span class="text-xs font-medium">Devolver</span>
                                     </button>
@@ -287,6 +292,54 @@
         </div>
 
 
+         <!-- Modal para devoluciones -->
+        <div id="modalDevolucion" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <div class="bg-blue-100 p-3 rounded-t-lg">
+                        <h3 class="text-lg font-medium text-blue-800">Registrar Devolución</h3>
+                    </div>
+                    
+                    <form id="devolucionForm" class="px-4 py-3">
+                        @csrf
+                        <input type="hidden" name="idDetalleCompra" id="idDetalleCompra">
+                        <input type="hidden" name="idCompra" value="{{ $compra->idCompra }}">
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="producto">
+                                Producto
+                            </label>
+                            <input type="text" id="producto" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" readonly>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="cantidad">
+                                Cantidad a devolver (Máximo: <span id="maxCantidad"></span>)
+                            </label>
+                            <input type="number" name="cantidad" id="cantidad" min="1" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2" for="motivo">
+                                Motivo de la devolución
+                            </label>
+                            <textarea name="motivo" id="motivo" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required></textarea>
+                        </div>
+                        
+                        <div class="flex items-center justify-between pt-4 border-t">
+                            <button type="button" id="cancelBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                Registrar Devolución
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
         <!-- Botones imprimir -->
         <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
             <button class="btn btn-info inline-flex items-center gap-2">
@@ -300,7 +353,7 @@
         </div>
 
 
-        <!-- DEVOLUCIONES REALIZADAS -->
+      <!-- DEVOLUCIONES REALIZADAS (actualizado para mostrar devoluciones) -->
         <section class="rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
             <!-- Encabezado -->
             <div class="px-6 py-5 bg-gradient-to-r from-rose-500 to-pink-600">
@@ -318,61 +371,163 @@
                     <thead>
                         <tr class="bg-gradient-to-r from-pink-50 to-rose-50 text-rose-800">
                             <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">#</th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">FECHA
-                            </th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">
-                                PRODUCTO</th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">
-                                CANTIDAD</th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">PRECIO
-                            </th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">TOTAL
-                            </th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">
-                                VENDEDOR</th>
-                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">CAJA
-                            </th>
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">FECHA</th>
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">PRODUCTO</th>
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">CANTIDAD</th>
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">PRECIO</th>
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">TOTAL</th>
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-rose-100">VENDEDOR</th>
                         </tr>
                     </thead>
 
-                    <tbody class="divide-y divide-gray-100">
-                        <!-- Fila vacía -->
-                        <tr>
-                            <td colspan="8" class="px-6 py-10 text-center text-gray-400">
-                                <i class="fa-solid fa-inbox text-4xl mb-3"></i>
-                                <p class="text-sm font-medium">No hay devoluciones registradas</p>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody class="divide-y divide-gray-100" id="devoluciones-body">
+    @if($devoluciones && count($devoluciones) > 0)
+        @foreach($devoluciones as $index => $devolucion)
+            <tr>
+                <td class="px-6 py-4">{{ $index + 1 }}</td>
+                <td class="px-6 py-4">{{ \Carbon\Carbon::parse($devolucion->fecha_devolucion)->format('d/m/Y H:i') }}</td>
+                <td class="px-6 py-4">{{ $devolucion->producto_nombre ?? 'N/A' }}</td>
+                <td class="px-6 py-4">{{ $devolucion->cantidad }}</td>
+                <td class="px-6 py-4">{{ $monedaSimbolo }}{{ number_format($devolucion->precio_unitario, 2) }}</td>
+                <td class="px-6 py-4">{{ $monedaSimbolo }}{{ number_format($devolucion->total_devolucion, 2) }}</td>
+                <td class="px-6 py-4">{{ $devolucion->usuario_nombre ?? 'N/A' }} {{ $devolucion->usuario_apellido ?? '' }}</td>
+            </tr>
+        @endforeach
+    @else
+        <tr>
+            <td colspan="7" class="px-6 py-10 text-center text-gray-400">
+                <i class="fa-solid fa-inbox text-4xl mb-3"></i>
+                <p class="text-sm font-medium">No hay devoluciones registradas</p>
+            </td>
+        </tr>
+    @endif
+</tbody>
                 </table>
-            </div>
-
-            <!-- Botones -->
-            <div class="px-6 py-5 border-t bg-gradient-to-r from-gray-50 to-pink-50">
-                <div class="flex flex-wrap items-center justify-center gap-4">
-                    <button class="btn btn-info items-center gap-2">
-                        <i class="fa-solid fa-file-invoice"></i> IMPRIMIR FACTURA
-                    </button>
-                    <button class="btn btn-success items-center gap-2">
-                        <i class="fa-solid fa-receipt"></i> IMPRIMIR TICKET
-                    </button>
-                </div>
             </div>
         </section>
     </div>
-    <script>
-        function abrirTicket(url) {
-            // Tamaño basado en la imagen de referencia (80mm ≈ 302px)
-            const width = 320; // Un poco más ancho para márgenes
-            const height = 600; // Altura suficiente para el contenido
 
-            // Calcular posición para centrar la ventana
+    
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+   <script>
+        function abrirTicket(url) {
+            const width = 320;
+            const height = 600;
             const left = (screen.width - width) / 2;
             const top = (screen.height - height) / 2;
-
-            // Abrir ventana emergente
-            window.open(url, 'Ticket',
-                `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`);
+            
+            window.open(url, 'Ticket', `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`);
         }
+
+        $(document).ready(function() {
+            // Variables globales
+            let monedaSimbolo = '{{ $compra->moneda->simbolo ?? "S/." }}';
+            let porcentajeIGV = {{ $compra->sujetoporcentaje ?? 18 }};
+            let currentDetalleId = null;
+            
+            // Abrir modal de devolución
+            $('.devolver-btn').click(function() {
+                currentDetalleId = $(this).data('id');
+                const producto = $(this).data('producto');
+                const maxCantidad = $(this).data('max');
+                const precio = $(this).data('precio');
+                
+                $('#idDetalleCompra').val(currentDetalleId);
+                $('#producto').val(producto);
+                $('#maxCantidad').text(maxCantidad);
+                $('#cantidad').attr('max', maxCantidad);
+                $('#cantidad').val(1);
+                $('#motivo').val('');
+                
+                $('#modalDevolucion').removeClass('hidden').addClass('flex');
+            });
+            
+            // Cerrar modal
+            $('#cancelBtn').click(function() {
+                $('#modalDevolucion').removeClass('flex').addClass('hidden');
+            });
+            
+            // Enviar formulario de devolución
+            $('#devolucionForm').submit(function(e) {
+                e.preventDefault();
+                
+                const cantidad = parseInt($('#cantidad').val());
+                const maxCantidad = parseInt($('#cantidad').attr('max'));
+                
+                if (cantidad > maxCantidad) {
+                    alert('La cantidad a devolver no puede ser mayor a la cantidad comprada.');
+                    return;
+                }
+                
+                if (cantidad <= 0) {
+                    alert('La cantidad a devolver debe ser mayor a cero.');
+                    return;
+                }
+                
+                // Mostrar loading
+                $('button[type="submit"]').html('<i class="fa fa-spinner fa-spin"></i> Procesando...').prop('disabled', true);
+                
+                // Enviar datos por AJAX
+                $.ajax({
+                    url: '{{ route("compras.devolucion") }}',
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+    if (response.success) {
+        // Recargar la página para actualizar todos los datos
+        location.reload();
+        
+        // O si prefieres no recargar, actualizar la interfaz manualmente:
+        /*
+        // Actualizar la cantidad en la tabla
+        const nuevaCantidad = maxCantidad - cantidad;
+        $(`button[data-id="${currentDetalleId}"]`)
+            .closest('tr')
+            .find('td:eq(2) span') // Ajusta este selector según tu estructura
+            .text(nuevaCantidad);
+        
+        // Actualizar los totales
+        $('#subtotal-total').text(monedaSimbolo + response.nuevos_totales.subtotal.toFixed(2));
+        $('#igv-total').text(monedaSimbolo + response.nuevos_totales.igv.toFixed(2));
+        $('#total-total').text(monedaSimbolo + response.nuevos_totales.total.toFixed(2));
+        
+        // Actualizar tabla de devoluciones
+        $('#devoluciones-body').prepend(`
+            <tr>
+                <td class="px-6 py-4">${$('#devoluciones-body tr').length + 1}</td>
+                <td class="px-6 py-4">${response.fecha_devolucion}</td>
+                <td class="px-6 py-4">${response.producto_nombre}</td>
+                <td class="px-6 py-4">${cantidad}</td>
+                <td class="px-6 py-4">${monedaSimbolo}${response.precio_unitario}</td>
+                <td class="px-6 py-4">${monedaSimbolo}${response.total_devolucion}</td>
+                <td class="px-6 py-4">${response.usuario_nombre}</td>
+            </tr>
+        `);
+        
+        // Actualizar el máximo para futuras devoluciones
+        $(`button[data-id="${currentDetalleId}"]`).data('max', nuevaCantidad);
+        
+        if (nuevaCantidad === 0) {
+            $(`button[data-id="${currentDetalleId}"]`).prop('disabled', true).addClass('opacity-50');
+        }
+        */
+        
+        // Cerrar modal
+        $('#modalDevolucion').removeClass('flex').addClass('hidden');
+    } else {
+        alert('Error: ' + response.message);
+    }
+},
+                    error: function(xhr) {
+                        alert('Error al procesar la devolución. Intente nuevamente.');
+                    },
+                    complete: function() {
+                        $('button[type="submit"]').html('Registrar Devolución').prop('disabled', false);
+                    }
+                });
+            });
+        });
     </script>
 </x-layout.default>

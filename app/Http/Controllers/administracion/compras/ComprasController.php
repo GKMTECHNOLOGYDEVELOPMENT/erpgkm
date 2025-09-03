@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\administracion\compras;
 
 use App\Http\Controllers\Controller;
+use App\Models\Articulo;
 use App\Models\Compra;
+use App\Models\DetalleCompra;
+use App\Models\DevolucionCompra;
 use App\Models\Moneda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Picqer\Barcode\BarcodeGeneratorPNG;
@@ -763,13 +767,32 @@ public function verificarCodigoBarras(Request $request)
 }
 
 
+public function detalles($id)
+{
+    // Buscar la compra con relaciones
+    $compra = Compra::with([
+        'detalles.producto',
+        'moneda',
+        'proveedor',
+        'usuario'
+    ])->findOrFail($id);
 
-    public function detalles($id)
-    {
-        // Lógica para la página de detalles de compra
-        $compra = Compra::findOrFail($id);
-        return view('administracion.compras.detalles', compact('compra'));
-    }
+    // Obtener devoluciones con join
+    $devoluciones = DB::table('devoluciones_compra as dc')
+        ->leftJoin('articulos as a', 'dc.idProducto', '=', 'a.idArticulos')
+        ->leftJoin('usuarios as u', 'dc.idUsuario', '=', 'u.idUsuario')
+        ->where('dc.idCompra', $id)
+        ->select(
+            'dc.*',
+            'a.nombre as producto_nombre',
+            'u.Nombre as usuario_nombre',
+            'u.apellidoPaterno as usuario_apellido'
+        )
+        ->orderByDesc('dc.fecha_devolucion')
+        ->get();
+
+    return view('administracion.compras.detalles', compact('compra', 'devoluciones'));
+}
 
     public function factura($id)
     {
@@ -803,6 +826,103 @@ public function verificarCodigoBarras(Request $request)
         ]);
     }
 
+
+
+    public function procesarDevolucion(Request $request)
+{
+    try {
+        DB::beginTransaction();
+        
+        // Obtener datos de la solicitud
+        $idDetalleCompra = $request->input('idDetalleCompra');
+        $cantidad = $request->input('cantidad');
+        $motivo = $request->input('motivo');
+        
+        // Obtener el detalle de compra
+        $detalleCompra = DetalleCompra::findOrFail($idDetalleCompra);
+        
+        // Verificar que la cantidad a devolver sea válida
+        if ($cantidad > $detalleCompra->cantidad) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La cantidad a devolver excede la cantidad comprada'
+            ]);
+        }
+        
+        // Registrar la devolución
+        $devolucion = new DevolucionCompra();
+        $devolucion->idCompra = $detalleCompra->idCompra;
+        $devolucion->idProducto = $detalleCompra->idProducto;
+        $devolucion->idUsuario = Auth::id();
+        $devolucion->cantidad = $cantidad;
+        $devolucion->precio_unitario = $detalleCompra->precio;
+        $devolucion->total_devolucion = $cantidad * $detalleCompra->precio;
+        $devolucion->motivo = $motivo;
+        $devolucion->fecha_devolucion = now();
+        $devolucion->save();
+        
+        // Actualizar el detalle de compra
+        $detalleCompra->cantidad -= $cantidad;
+        $detalleCompra->subtotal = $detalleCompra->cantidad * $detalleCompra->precio;
+        $detalleCompra->save();
+        
+        // Actualizar el stock del producto
+        $producto = Articulo::find($detalleCompra->idProducto);
+        if ($producto) {
+            $producto->stock_total -= $cantidad;
+            $producto->save();
+        }
+        
+        // Recalcular totales de la compra
+        $compra = Compra::find($detalleCompra->idCompra);
+        $nuevosTotales = $this->recalcularTotalesCompra($compra);
+        
+        DB::commit();
+        
+        return response()->json([
+            'success' => true,
+            'nuevos_totales' => $nuevosTotales,
+            'fecha_devolucion' => $devolucion->fecha_devolucion->format('d/m/Y H:i'),
+            'producto_nombre' => $producto->nombre ?? 'Producto',
+            'precio_unitario' => number_format($devolucion->precio_unitario, 2),
+            'total_devolucion' => number_format($devolucion->total_devolucion, 2),
+            'usuario_nombre' => Auth::user()->Nombre . ' ' . Auth::user()->apellidoPaterno
+        ]);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al procesar la devolución: ' . $e->getMessage()
+        ]);
+    }
+}
+
+private function recalcularTotalesCompra($compra)
+{
+    // Recalcular subtotal
+    $subtotal = $compra->detalles->sum('subtotal');
+    
+    // Recalcular IGV
+    $igv = $subtotal * ($compra->sujetoporcentaje / 100);
+    
+    // Recalcular total
+    $total = $subtotal + $igv;
+    
+    // Actualizar la compra
+    $compra->gravada = $subtotal;
+    $compra->igv = $igv;
+    $compra->total = $total;
+    $compra->save();
+    
+    return [
+        'subtotal' => $subtotal,
+        'igv' => $igv,
+        'total' => $total
+    ];
+}
+
+    
 
     
 }
