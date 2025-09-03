@@ -1226,3 +1226,9 @@ Route::post('/guardar-compra', [ComprasController::class, 'guardarCompra'])->nam
 
 Route::get('/administracion/compras/{id}/ticket', [ComprasController::class, 'ticket'])
     ->name('compras.ticket');
+
+  Route::post('/compras/{id}/devolucion', [ComprasController::class, 'procesarDevolucion']);
+    Route::get('/compras/{id}/devoluciones', [ComprasController::class, 'obtenerDevoluciones']);
+
+
+    Route::post('/compras/devolucion', [ComprasController::class, 'procesarDevolucion'])->name('compras.devolucion');
