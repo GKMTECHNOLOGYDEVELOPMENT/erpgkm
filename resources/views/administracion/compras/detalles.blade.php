@@ -347,9 +347,10 @@
                 <span>IMPRIMIR FACTURA</span>
             </button>
             <!-- Con esto: -->
-            <a class="btn btn-success" onclick="abrirTicket('{{ route('compras.ticket', $compra->idCompra) }}')">
-                IMPRIMIR TICKET
-            </a>
+            <button type="button" class="btn btn-success items-center gap-2"
+                onclick="abrirTicket('{{ route('compras.ticket', $compra->idCompra) }}')">
+                <i class="fa-solid fa-receipt"></i> IMPRIMIR TICKET
+            </button>
         </div>
 
 
