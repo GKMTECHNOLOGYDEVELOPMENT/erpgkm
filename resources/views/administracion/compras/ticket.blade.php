@@ -295,31 +295,34 @@
     </div>
 
     <div class="products-container">
-        @foreach ($compra->detalles as $d)
+        @foreach ($detalles as $d)
             <div class="product-row">
-                <div class="product-name">{{ $d->producto->nombre ?? 'Producto' }}</div>
-                <div class="product-qty">{{ number_format($d->cantidad, 0) }}</div>
+                <div class="product-name">{{ $d->articulo }}</div>
+                <div class="product-qty">{{ number_format($d->cantidad_neta, 0) }}</div>
                 <div class="product-price">{{ $compra->moneda->simbolo ?? '$' }}{{ number_format($d->precio, 2) }}
                 </div>
                 <div class="product-total">
-                    {{ $compra->moneda->simbolo ?? '$' }}{{ number_format($d->cantidad * $d->precio, 2) }}</div>
+                    {{ $compra->moneda->simbolo ?? '$' }}{{ number_format($d->subtotal_neto, 2) }}</div>
             </div>
         @endforeach
     </div>
 
+
     <div class="summary">
         <div class="summary-row">
             <span>Subtotal</span>
-            <span>{{ $compra->moneda->simbolo ?? '$' }}{{ number_format($compra->total - $compra->igv, 2) }}</span>
+            <span>{{ $compra->moneda->simbolo ?? '$' }}{{ number_format($subtotal, 2) }}</span>
         </div>
         <div class="summary-row">
-            <span>IVA ({{ $compra->sujetoporcentaje ?? 16 }}%)</span>
-            <span>{{ $compra->moneda->simbolo ?? '$' }}{{ number_format($compra->igv, 2) }}</span>
+            <span>IVA ({{ $compra->sujetoporcentaje ?? 0 }}%)</span>
+            <span>{{ $compra->moneda->simbolo ?? '$' }}{{ number_format($igv, 2) }}</span>
         </div>
         <div class="summary-row total-row">
             <span>TOTAL</span>
-            <span>{{ $compra->moneda->simbolo ?? '$' }}{{ number_format($compra->total, 2) }}
-                {{ $compra->moneda->codigo ?? 'USD' }}</span>
+            <span>
+                {{ $compra->moneda->simbolo ?? 'S/.' }}{{ number_format($total, 2) }}
+                {{ $compra->moneda->codigo ?? 'PEN' }}
+            </span>
         </div>
     </div>
 

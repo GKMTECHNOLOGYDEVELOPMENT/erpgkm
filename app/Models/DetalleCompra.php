@@ -84,4 +84,8 @@ class DetalleCompra extends Model
     {
         return $this->belongsTo(Articulo::class, 'idProducto', 'idArticulos');
     }
+    public function devoluciones()
+    {
+        return $this->hasMany(DevolucionCompra::class, 'idDetalleCompra');
+    }
 }
