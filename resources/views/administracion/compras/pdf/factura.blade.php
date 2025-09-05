@@ -1,18 +1,48 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <title>Factura de Compra</title>
     <style>
-        body { font-family: sans-serif; font-size: 12px; color: #333; padding: 20px; }
-        h2 { margin-bottom: 0; }
-        p { margin: 2px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #ccc; padding: 8px; }
-        th { background-color: #f1f1f1; }
-        .totales td { font-weight: bold; text-align: right; }
+        body {
+            font-family: sans-serif;
+            font-size: 12px;
+            color: #333;
+            padding: 20px;
+        }
+
+        h2 {
+            margin-bottom: 0;
+        }
+
+        p {
+            margin: 2px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f1f1f1;
+        }
+
+        .totales td {
+            font-weight: bold;
+            text-align: right;
+        }
     </style>
 </head>
+
 <body>
     <h2>Factura de Compra</h2>
     <p><strong>Proveedor:</strong> {{ $compra->proveedor->nombre ?? 'N/A' }}</p>
@@ -70,4 +100,5 @@
         </tfoot>
     </table>
 </body>
+
 </html>
