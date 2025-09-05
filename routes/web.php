@@ -1230,6 +1230,9 @@ Route::get('/administracion/compras/{id}/ticket', [ComprasController::class, 'ti
 Route::get('/administracion/compras/{id}/ticket-devolucion', [ComprasController::class, 'ticketDevolucion'])
     ->name('compras.ticket.devolucion');
 
+Route::get('/administracion/compras/{id}/factura-pdf', [ComprasController::class, 'facturaPdf'])
+    ->name('compras.factura.pdf');
+
 
 Route::post('/compras/{id}/devolucion', [ComprasController::class, 'procesarDevolucion']);
 Route::get('/compras/{id}/devoluciones', [ComprasController::class, 'obtenerDevoluciones']);

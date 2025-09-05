@@ -419,10 +419,12 @@
 
         <!-- Botones imprimir -->
         <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
-            <button class="btn btn-info inline-flex items-center gap-2">
+            <a href="{{ route('compras.factura.pdf', $compra->idCompra) }}" target="_blank"
+                class="btn btn-info inline-flex items-center gap-2">
                 <i class="fa-solid fa-file-invoice"></i>
                 <span>IMPRIMIR FACTURA</span>
-            </button>
+            </a>
+
             <!-- Con esto: -->
             <button type="button" class="btn btn-success items-center gap-2"
                 onclick="abrirTicket('{{ route('compras.ticket', $compra->idCompra) }}')">

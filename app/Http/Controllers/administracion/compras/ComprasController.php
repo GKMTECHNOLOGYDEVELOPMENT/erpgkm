@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Str; // ← ESTA LÍNEA AGREGA
 
 
@@ -909,7 +910,21 @@ class ComprasController extends Controller
         ]);
     }
 
+    public function facturaPdf($id)
+    {
+        $compra = Compra::with(['proveedor', 'usuario', 'moneda', 'detalles.producto'])->findOrFail($id);
 
+        $html = view('administracion.compras.pdf.factura', compact('compra'))->render();
+
+        return response(
+            Browsershot::html($html)
+                ->format('A4')
+                ->margins(15, 10, 15, 10)
+                ->waitUntilNetworkIdle()
+                ->noSandbox()
+                ->pdf()
+        )->header('Content-Type', 'application/pdf');
+    }
 
     public function procesarDevolucion(Request $request)
     {
