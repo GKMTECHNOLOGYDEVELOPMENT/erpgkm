@@ -14,50 +14,89 @@ use Illuminate\Support\Facades\Log;
 
 class SeleccionSeguimientoController extends Controller
 {
-
 public function store(Request $request)
 {
-    $request->validate([
-        'idseguimiento'   => 'required|exists:seguimientos,idSeguimiento',
-        'idprospecto'     => 'required|integer',
-        'tipo_prospecto'  => 'required|in:empresa,contacto',
-        'idpersona'       => 'required|integer'
+    Log::info('Iniciando método store en SeleccionarSeguimientoController', [
+        'request' => $request->all(),
+        'usuario_id' => Auth::id()
     ]);
 
-    // Registrar la selección
-    $seleccion = SeleccionarSeguimiento::updateOrCreate(
-        ['idseguimiento' => $request->idseguimiento],
-        [
-            'idprospecto'       => $request->idprospecto,
-            'idusuario'         => Auth::id(),
-            'idpersona'         => $request->idpersona,
-            'fecha_seleccionada'=> now()
-        ]
-    );
-
-    // Definir los estados que deben crearse POR PERSONA
-    $estadosRequeridos = ['Lista de proyectos', 'cotizacion', 'reunion', 'levantamiento', 'observado', 'ganado', 'rechazado'];
-
-    // Verificar y crear los proyectos si no existen PARA ESTA PERSONA
-    foreach ($estadosRequeridos as $estado) {
-        $proyectoExistente = Project::where('idpersona', $request->idpersona)
-            ->where('title', $estado)
-            ->first();
-
-        if (!$proyectoExistente) {
-            Project::create([
-                'title' => $estado,
-                'idseguimiento' => $request->idseguimiento,
-                'idpersona' => $request->idpersona
-            ]);
-        }
+    // Validación
+    try {
+        $request->validate([
+            'idseguimiento'   => 'required|exists:seguimientos,idSeguimiento',
+            'idprospecto'     => 'required|integer',
+            'tipo_prospecto'  => 'required|in:empresa,contacto',
+            'idpersona'       => 'required|integer'
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('Error de validación en store', [
+            'errors' => $e->errors()
+        ]);
+        throw $e;
     }
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Selección guardada correctamente y proyectos verificados para la persona',
-        'data'    => $seleccion
-    ]);
+    try {
+        // Registrar la selección
+        $seleccion = SeleccionarSeguimiento::updateOrCreate(
+            ['idseguimiento' => $request->idseguimiento],
+            [
+                'idprospecto'        => $request->idprospecto,
+                'idusuario'          => Auth::id(),
+                'idpersona'          => $request->idpersona,
+                'fecha_seleccionada' => now()
+            ]
+        );
+
+        Log::info('Selección registrada o actualizada', [
+            'seleccion' => $seleccion->toArray()
+        ]);
+
+        // Estados requeridos
+        $estadosRequeridos = ['Lista de proyectos', 'cotizacion', 'reunion', 'levantamiento', 'observado', 'ganado', 'rechazado'];
+
+        foreach ($estadosRequeridos as $estado) {
+            $proyectoExistente = Project::where('idpersona', $request->idpersona)
+                ->where('title', $estado)
+                ->first();
+
+            if (!$proyectoExistente) {
+                $nuevoProyecto = Project::create([
+                    'title'         => $estado,
+                    'idseguimiento' => $request->idseguimiento,
+                    'idpersona'     => $request->idpersona
+                ]);
+
+                Log::info("Proyecto creado para estado: {$estado}", [
+                    'proyecto' => $nuevoProyecto->toArray()
+                ]);
+            } else {
+                Log::info("Proyecto ya existe para estado: {$estado}", [
+                    'proyecto_id' => $proyectoExistente->id
+                ]);
+            }
+        }
+
+        Log::info('Finalización exitosa del método store');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Selección guardada correctamente y proyectos verificados para la persona',
+            'data'    => $seleccion
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error en el método store de SeleccionarSeguimientoController', [
+            'exception' => $e->getMessage(),
+            'trace'     => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al guardar la selección o crear proyectos.',
+            'error'   => $e->getMessage()
+        ], 500);
+    }
 }
 
 

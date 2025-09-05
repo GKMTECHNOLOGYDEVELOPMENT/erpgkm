@@ -26,7 +26,7 @@ public function store(Request $request)
 
         return response()->json([
             'success' => true,
-            'data' => $contacto,
+            'data' => $contacto, 
             'message' => 'Contacto creado exitosamente'
         ], 201);
     }
