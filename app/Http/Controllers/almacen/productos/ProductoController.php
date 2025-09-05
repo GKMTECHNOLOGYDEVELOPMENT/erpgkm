@@ -18,8 +18,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Picqer\Barcode\BarcodeGeneratorPNG;
+use Illuminate\Support\Str;
+
 
 class ProductoController extends Controller
 {
@@ -96,13 +99,12 @@ class ProductoController extends Controller
     }
 
 
-
 public function store(Request $request)
 {
-    DB::beginTransaction(); // Iniciar transacción para operaciones atómicas
+    DB::beginTransaction();
 
     try {
-        // Validación de datos (agregar los nuevos campos)
+        // Validar datos
         $validatedData = $request->validate([
             'codigo_barras' => 'required|string|max:255|unique:articulos,codigo_barras',
             'sku' => 'required|string|max:255|unique:articulos,sku',
@@ -118,100 +120,144 @@ public function store(Request $request)
             'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120',
             'idUnidad' => 'required|nullable|integer',
             'idModelo' => 'integer|exists:modelo,idModelo',
-            // Nuevos campos agregados
             'garantia_fabrica' => 'nullable|integer|min:0',
             'unidad_tiempo_garantia' => 'nullable|in:dias,semanas,meses,años',
             'idProveedor' => 'nullable|exists:proveedores,idProveedor',
         ]);
-        
-        // Asignación de valores por defecto
+
+        // Asignar valores por defecto
         $dataArticulo = $validatedData;
         $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
-        $dataArticulo['idTipoArticulo'] = 1; // Tipo de artículo por defecto
-        $dataArticulo['fecha_ingreso'] = now(); // Fecha de ingreso actual
-        $dataArticulo['stock_total'] = $dataArticulo['stock_total'] ?? 0; // Asegurar valor por defecto
-        $dataArticulo['precio_compra'] = $dataArticulo['precio_compra'] ?? 0; // Asegurar valor por defecto
-        
-        // Valores por defecto para los nuevos campos
+        $dataArticulo['idTipoArticulo'] = 1;
+        $dataArticulo['fecha_ingreso'] = now();
+        $dataArticulo['stock_total'] = $dataArticulo['stock_total'] ?? 0;
+        $dataArticulo['precio_compra'] = $dataArticulo['precio_compra'] ?? 0;
         $dataArticulo['garantia_fabrica'] = $dataArticulo['garantia_fabrica'] ?? 0;
         $dataArticulo['unidad_tiempo_garantia'] = $dataArticulo['unidad_tiempo_garantia'] ?? 'meses';
-        
-        // Crear el artículo
+
+        // Crear artículo
         $articulo = Articulo::create($dataArticulo);
 
-        // Registrar movimiento inicial en el Kardex (solo si hay stock)
+        // Crear Kardex inicial
         if ($dataArticulo['stock_total'] > 0) {
             Kardex::create([
                 'fecha' => now(),
                 'idArticulo' => $articulo->idArticulos,
                 'unidades_entrada' => $dataArticulo['stock_total'],
-                'costo_unitario_entrada' => $dataArticulo['stock_total'] * $dataArticulo['precio_compra'],
+                'costo_unitario_entrada' => $dataArticulo['precio_compra'],
                 'unidades_salida' => 0,
                 'costo_unitario_salida' => 0,
-                'inventario_inicial' => $dataArticulo['stock_total'], 
+                'inventario_inicial' => $dataArticulo['stock_total'],
                 'inventario_actual' => $dataArticulo['stock_total'],
                 'costo_inventario' => $dataArticulo['stock_total'] * $dataArticulo['precio_compra']
             ]);
         }
 
-        // Generar códigos de barras
+        // Código de barras y SKU como imagen
+        $barcodeGenerator = new BarcodeGeneratorPNG();
+
         if (!empty($dataArticulo['codigo_barras'])) {
-            $barcodeGenerator = new BarcodeGeneratorPNG();
             $barcode = $barcodeGenerator->getBarcode($dataArticulo['codigo_barras'], BarcodeGeneratorPNG::TYPE_CODE_128);
             $articulo->update(['foto_codigobarras' => $barcode]);
         }
 
         if (!empty($dataArticulo['sku'])) {
-            $barcodeGenerator = new BarcodeGeneratorPNG();
             $barcode = $barcodeGenerator->getBarcode($dataArticulo['sku'], BarcodeGeneratorPNG::TYPE_CODE_128);
             $articulo->update(['fotosku' => $barcode]);
         }
 
-        // Manejo de archivos
+        // Imagen del artículo
         if ($request->hasFile('foto')) {
-            $photoPath = $request->file('foto')->getRealPath();
-            $photoData = file_get_contents($photoPath);
+            $photoData = file_get_contents($request->file('foto')->getRealPath());
             $articulo->update(['foto' => $photoData]);
         }
 
+        // Ficha técnica PDF
         if ($request->hasFile('ficha_tecnica')) {
-            $pdf = $request->file('ficha_tecnica');
-            $pdfPath = $pdf->store('fichas', 'public');
-            $fileName = basename($pdfPath);
-            $articulo->update(['ficha_tecnica' => $fileName]);
+            $pdfPath = $request->file('ficha_tecnica')->store('fichas', 'public');
+            $articulo->update(['ficha_tecnica' => basename($pdfPath)]);
         }
 
-        DB::commit(); // Confirmar todas las operaciones
+        // Crear COMPRA automática
+        $usuario = Auth::user();
+        if (!$usuario) {
+            throw new \Exception("Usuario no autenticado");
+        }
+
+        // Generar código compra único
+        do {
+            $codigoCompra = strtoupper(Str::random(10));
+        } while (DB::table('compra')->where('codigocompra', $codigoCompra)->exists());
+
+        $totalCompra = $dataArticulo['stock_total'] * $dataArticulo['precio_compra'];
+
+        // Insertar en tabla compra
+        $compraId = DB::table('compra')->insertGetId([
+            'codigocompra' => $codigoCompra,
+            'serie' => 'MR',
+            'nro' => '0000',
+            'descripcion' => 'Compra inicial por creación de artículo ' . $articulo->nombre,
+            'fechaEmision' => now(),
+            'fechaVencimiento' => now(),
+            'idDocumento' => null,
+            'imagen' => null,
+            'sujetoporcentaje' => null,
+            'cantidad' => $dataArticulo['stock_total'],
+            'gravada' => null,
+            'igv' => 0,
+            'total' => $totalCompra,
+            'idMonedas' => $dataArticulo['moneda_compra'],
+            'idDocumento' => null,
+            'idImpuesto' => null,
+            'idSujeto' => null,
+            'idUsuario' => $usuario->idUsuario,
+            'proveedor_id' => $dataArticulo['idProveedor'],
+            'idCondicionCompra' => null,
+            'idTipoPago' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Insertar detalle de compra
+        DB::table('detalle_compra')->insert([
+            'idCompra' => $compraId,
+            'idProducto' => $articulo->idArticulos,
+            'cantidad' => $dataArticulo['stock_total'],
+            'precio' => $dataArticulo['precio_compra'],
+            'precio_venta' => $dataArticulo['precio_venta'],
+            'subtotal' => $totalCompra,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::commit();
 
         return response()->json([
             'success' => true,
-            'message' => 'Artículo agregado correctamente',
+            'message' => 'Artículo y compra registrada correctamente',
             'data' => [
                 'articulo_id' => $articulo->idArticulos,
-                'kardex_created' => $dataArticulo['stock_total'] > 0,
+                'compra_id' => $compraId,
                 'stock_inicial' => $dataArticulo['stock_total'],
                 'garantia' => $dataArticulo['garantia_fabrica'] . ' ' . $dataArticulo['unidad_tiempo_garantia'],
-                'proveedor_id' => $dataArticulo['idProveedor'] ?? null
+                'proveedor_id' => $dataArticulo['idProveedor'] ?? null,
             ]
         ]);
 
     } catch (\Illuminate\Validation\ValidationException $e) {
-        DB::rollBack(); // Revertir en caso de error de validación
-        
+        DB::rollBack();
         return response()->json([
             'success' => false,
             'message' => 'Error de validación',
             'errors' => $e->errors()
         ], 422);
-        
+
     } catch (\Exception $e) {
-        DB::rollBack(); // Revertir en caso de error
-        
+        DB::rollBack();
         return response()->json([
             'success' => false,
-            'message' => 'Ocurrió un error al guardar el artículo.',
+            'message' => 'Ocurrió un error al guardar el artículo y compra',
             'error' => $e->getMessage()
-            // 'trace' => $e->getTraceAsString() // Solo para desarrollo, quitar en producción
         ], 500);
     }
 }
