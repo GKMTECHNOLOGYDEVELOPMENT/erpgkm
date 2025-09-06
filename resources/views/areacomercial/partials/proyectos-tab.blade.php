@@ -480,14 +480,14 @@
                                         type="text" class="form-input" placeholder="Nombre del responsable" />
                                 </div>
                                 <div>
-                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
-                                <select id="nivelPorcentajeCotizacion" x-model="paramsTask.nivelPorcentajeCotizacion"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
+                                    <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
+                                    <select id="nivelPorcentajeCotizacion"
+                                        x-model="paramsTask.nivelPorcentajeCotizacion" class="form-select">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
                                 </div>
 
                                 <div class="md:col-span-2">
@@ -497,7 +497,7 @@
                                 </div>
 
 
-                               
+
                             </div>
 
                             <!-- Botones para agregar/actualizar cotización -->
@@ -652,19 +652,18 @@
                                     <input id="motivoreunion" x-model="paramsTask.motivoreunion" type="text"
                                         class="form-input" placeholder="Motivo principal" />
                                 </div>
-                            <div x-data="scrumboard" x-init="fetchUsuarios()" id="scrumboard">
-                            <label for="participantesreunion">Participantes</label>
-                            <select id="participantesreunion"
-                                    x-ref="participantesSelect"
-                                    multiple
-                                    class="form-select w-full">
-                                <template x-if="usuarios && usuarios.length > 0">
-                                    <template x-for="usuario in usuarios" :key="usuario.id">
-                        <option :value="usuario.id" x-text="usuario.nombre_completo"></option>
-                                    </template>
-                                </template>
-                            </select>
-                        </div>
+                                <div x-data="scrumboard" x-init="fetchUsuarios()" id="scrumboard">
+                                    <label for="participantesreunion">Participantes</label>
+                                    <select id="participantesreunion" x-ref="participantesSelect" multiple
+                                        class="form-select w-full">
+                                        <template x-if="usuarios && usuarios.length > 0">
+                                            <template x-for="usuario in usuarios" :key="usuario.id">
+                                                <option :value="usuario.id" x-text="usuario.nombre_completo">
+                                                </option>
+                                            </template>
+                                        </template>
+                                    </select>
+                                </div>
 
 
                                 <div style="display: none;">
@@ -685,16 +684,16 @@
                                         class="form-input" placeholder="Dirección para reunión presencial" />
                                 </div>
 
-                                <div> 
+                                <div>
 
-                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
-                                <select id="nivelPorcentajeReunion" x-model="paramsTask.nivelPorcentajeReunion"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
+                                    <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
+                                    <select id="nivelPorcentajeReunion" x-model="paramsTask.nivelPorcentajeReunion"
+                                        class="form-select">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
 
                                 </div>
 
@@ -837,14 +836,14 @@
                                 </div>
 
                                 <div>
-                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
-                                <select id="nivelPorcentajeLevantamiento" x-model="paramsTask.nivelPorcentajeLevantamiento"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
+                                    <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
+                                    <select id="nivelPorcentajeLevantamiento"
+                                        x-model="paramsTask.nivelPorcentajeLevantamiento" class="form-select">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
                                 </div>
 
                                 <div class="md:col-span-2">
@@ -985,29 +984,30 @@
                                         type="text" class="form-input" placeholder="Código asociado" />
                                 </div>
 
-                               <div>
-                                <label for="tiporelacion">Tipo de Relación</label>
-                                <select id="tiporelacion" x-model="paramsTask.tiporelacion" class="form-input">
-                                    <option value="">Selecciona una opción</option>
-                                    <option value="Nuevo Cliente">Nuevo Cliente</option>
-                                    <option value="Cliente Recurrente">Cliente Recurrente</option>
-                                    <option value="Cliente Potencial">Cliente Potencial</option>
-                                    <option value="Cliente Inactivo">Cliente Inactivo</option>
-                                    <option value="Socio Estratégico">Socio Estratégico</option>
-                                    <option value="Proveedor">Proveedor</option>
-                                    <option value="Aliado Comercial">Aliado Comercial</option>
-                                    <option value="Distribuidor">Distribuidor</option>
-                                    <option value="Revendedor">Revendedor</option>
-                                    <option value="Consultor">Consultor</option>
-                                    <option value="Partner Tecnológico">Partner Tecnológico</option>
-                                    <option value="Cliente VIP">Cliente VIP</option>
-                                    <option value="Cliente Referido">Cliente Referido</option>
-                                    <option value="Interno">Interno</option>
-                                    <option value="Gobierno / Institución Pública">Gobierno / Institución Pública</option>
-                                    <option value="ONG / Fundación">ONG / Fundación</option>
-                                    <option value="Otro">Otro</option>
-                                </select>
-                            </div>
+                                <div>
+                                    <label for="tiporelacion">Tipo de Relación</label>
+                                    <select id="tiporelacion" x-model="paramsTask.tiporelacion" class="form-input">
+                                        <option value="">Selecciona una opción</option>
+                                        <option value="Nuevo Cliente">Nuevo Cliente</option>
+                                        <option value="Cliente Recurrente">Cliente Recurrente</option>
+                                        <option value="Cliente Potencial">Cliente Potencial</option>
+                                        <option value="Cliente Inactivo">Cliente Inactivo</option>
+                                        <option value="Socio Estratégico">Socio Estratégico</option>
+                                        <option value="Proveedor">Proveedor</option>
+                                        <option value="Aliado Comercial">Aliado Comercial</option>
+                                        <option value="Distribuidor">Distribuidor</option>
+                                        <option value="Revendedor">Revendedor</option>
+                                        <option value="Consultor">Consultor</option>
+                                        <option value="Partner Tecnológico">Partner Tecnológico</option>
+                                        <option value="Cliente VIP">Cliente VIP</option>
+                                        <option value="Cliente Referido">Cliente Referido</option>
+                                        <option value="Interno">Interno</option>
+                                        <option value="Gobierno / Institución Pública">Gobierno / Institución Pública
+                                        </option>
+                                        <option value="ONG / Fundación">ONG / Fundación</option>
+                                        <option value="Otro">Otro</option>
+                                    </select>
+                                </div>
 
 
                                 <div>
@@ -1034,16 +1034,16 @@
                                         type="text" class="form-input" placeholder="Ej: 6 meses" />
                                 </div>
 
-                        <div>
-                                  <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
-                                <select id="nivelPorcentajeGanado" x-model="paramsTask.nivelPorcentajeGanado"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
-                        </div>
+                                <div>
+                                    <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
+                                    <select id="nivelPorcentajeGanado" x-model="paramsTask.nivelPorcentajeGanado"
+                                        class="form-select">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
 
                                 <div class="md:col-span-2">
                                     <label for="observacionesganado">Observaciones</label>
@@ -1161,7 +1161,7 @@
                                         class="form-input" />
                                 </div>
 
-                              <div>
+                                <div>
                                     <label for="estadoactual">Estado Actual</label>
                                     <select id="estadoactual" x-model="paramsTask.estadoactual" class="form-input">
                                         <option value="">Selecciona un estado</option>
@@ -1201,19 +1201,19 @@
                                         placeholder="Detalle específico de la observación"></textarea>
                                 </div>
 
-                                    <div>                                   
-                                        
-                                <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
-                                <select id="nivelPorcentajeObservado" x-model="paramsTask.nivelPorcentajeObservado"
-                                    class="form-select">
-                                    <option value="">Seleccionar estado</option>
-                                    <option value="0">Inicial (0%)</option>
-                                    <option value="0.5">En Proceso (50%)</option>
-                                    <option value="1">Finalizado (100%)</option>
-                                </select>
-                                    </div>
+                                <div>
 
-                             
+                                    <label for="NiveldePorcentaje">Nivel de Porcentaje</label>
+                                    <select id="nivelPorcentajeObservado"
+                                        x-model="paramsTask.nivelPorcentajeObservado" class="form-select">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="0">Inicial (0%)</option>
+                                        <option value="0.5">En Proceso (50%)</option>
+                                        <option value="1">Finalizado (100%)</option>
+                                    </select>
+                                </div>
+
+
 
 
 
@@ -1221,14 +1221,15 @@
 
                             <!-- Botones para agregar/actualizar proyecto observado -->
                             <div class="flex justify-end space-x-3 mt-4">
-                                <button type="button" x-show="observadoEditId" @click="limpiarFormularioObservado()"
-                                    class="btn btn-outline-danger">
+                                <button type="button" x-show="observadoEditId"
+                                    @click="limpiarFormularioObservado()" class="btn btn-outline-danger">
                                     Cancelar Edición
                                 </button>
                                 <button type="button" @click="agregarObservado()" class="btn btn-primary"
                                     :disabled="!paramsTask.fechaobservado && !paramsTask.estadoactual && !paramsTask
                                         .detallesobservado">
-                                    <span x-text="observadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
+                                    <span
+                                        x-text="observadoEditId ? 'Actualizar Proyecto' : 'Agregar Proyecto'"></span>
                                 </button>
                             </div>
 
@@ -1240,7 +1241,8 @@
                                 <!-- Filtros de búsqueda -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div>
-                                        <label for="filtroEstadoObservado" class="text-sm">Buscar por estado:</label>
+                                        <label for="filtroEstadoObservado" class="text-sm">Buscar por
+                                            estado:</label>
                                         <input id="filtroEstadoObservado" x-model="filtroEstadoObservado"
                                             type="text" class="form-input" placeholder="Estado actual">
                                     </div>
@@ -1335,7 +1337,7 @@
                                         <textarea id="comentarioscliente" x-model="paramsTask.comentarioscliente" class="form-textarea"
                                             placeholder="Comentarios o feedback del cliente"></textarea>
                                     </div>
-<!-- 
+                                    <!--
                                 <div>
                                     <label for="nivelPorcentajeCotizacion">Estado de tarea</label>
                                     <select id="nivelPorcentajeCotizacion"
@@ -1469,17 +1471,17 @@
 
     <!-- Modal para ver detalles completos -->
     <div x-show="mostrarModalDetalles" x-transition.opacity x-cloak
-        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-        style="display: none;">
-        <div class="bg-white p-6 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <!-- Header -->
-            <div class="flex justify-between items-center mb-6 pb-4 border-b">
-                <h3 class="text-2xl font-bold text-primary"
+        class="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-center justify-center p-4"
+        @click.self="backToAddTask()">
+        <div
+            class="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-300">
+                <h3 class="text-2xl font-bold text-gray-800"
                     x-text="'Detalles de ' + (detalleSeleccionado ? detalleSeleccionado.tipo : 'Registro')">
                 </h3>
-                <button @click="mostrarModalDetalles = false"
-                    class="text-gray-500 hover:text-gray-700 transition-colors">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button @click="backToAddTask()"
+                    class="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -1489,136 +1491,199 @@
             <!-- Contenido -->
             <template x-if="detalleSeleccionado && detalleSeleccionado.data">
                 <div class="space-y-6">
-                    <!-- Información básica -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-lg mb-3 text-gray-800">Información General</h4>
-                            <div class="space-y-2">
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">ID:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.data.id"></span>
+                    <!-- Header con información principal -->
+                    <div
+                        class="rounded-xl p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 shadow-sm">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800" x-text="detalleSeleccionado.tipo"></h2>
+                                <p class="text-gray-600 mt-1" x-text="'ID: ' + detalleSeleccionado.data.id"></p>
+                            </div>
+                            <div class="mt-3 md:mt-0 text-right">
+                                <span
+                                    class="inline-block bg-blue-200 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full"
+                                    x-text="detalleSeleccionado.fecha"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Secciones específicas según tipo -->
+                    <template x-if="detalleSeleccionado.tipo === 'Cotización'">
+                        <div class="border border-blue-100 rounded-xl overflow-hidden bg-white shadow-md">
+                            <div
+                                class="bg-gradient-to-r from-blue-100 to-blue-200 px-5 py-3 border-b border-blue-200">
+                                <h3 class="font-semibold text-blue-800 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                                        <path fill-rule="evenodd"
+                                            d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    Detalles de Cotización
+                                </h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
+                                <div class="space-y-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500">Código</p>
+                                    <p class="font-medium text-gray-800"
+                                        x-text="detalleSeleccionado.data.codigo_cotizacion"></p>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Tipo:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.tipo"></span>
+                                <div class="space-y-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500">Producto</p>
+                                    <p class="font-medium text-gray-800"
+                                        x-text="detalleSeleccionado.data.detalle_producto"></p>
                                 </div>
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">Fecha:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.fecha"></span>
+                                <div class="space-y-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500">Total</p>
+                                    <p class="font-medium text-green-600"
+                                        x-text="'S/ ' + detalleSeleccionado.data.total_cotizacion"></p>
                                 </div>
-                                <div class="flex justify-between" x-show="detalleSeleccionado.data.task_id">
-                                    <span class="text-gray-600">Task ID:</span>
-                                    <span class="font-medium" x-text="detalleSeleccionado.data.task_id"></span>
+                                <div class="space-y-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500">Validez</p>
+                                    <p class="font-medium text-gray-800"
+                                        x-text="detalleSeleccionado.data.validez_cotizacion + ' días'"></p>
                                 </div>
                             </div>
                         </div>
+                    </template>
 
-                        <!-- Detalles específicos según el tipo -->
-                        <template x-if="detalleSeleccionado.tipo === 'Cotización'">
-                            <div class="bg-blue-50 p-4 rounded-lg">
-                                <h4 class="font-semibold text-lg mb-3 text-blue-800">Detalles de Cotización</h4>
-                                <div class="space-y-2">
-                                    <div class="flex justify-between">
-                                        <span class="text-blue-600">Código:</span>
-                                        <span class="font-medium"
-                                            x-text="detalleSeleccionado.data.codigo_cotizacion"></span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-blue-600">Producto:</span>
-                                        <span class="font-medium"
-                                            x-text="detalleSeleccionado.data.detalle_producto"></span>
-                                    </div>
-                                    <div class="flex justify-between"
-                                        x-show="detalleSeleccionado.data.total_cotizacion">
-                                        <span class="text-blue-600">Total:</span>
-                                        <span class="font-medium"
-                                            x-text="'S/ ' + detalleSeleccionado.data.total_cotizacion"></span>
-                                    </div>
-                                    <div class="flex justify-between"
-                                        x-show="detalleSeleccionado.data.validez_cotizacion">
-                                        <span class="text-blue-600">Validez:</span>
-                                        <span class="font-medium"
-                                            x-text="detalleSeleccionado.data.validez_cotizacion + ' días'"></span>
-                                    </div>
+                    <template x-if="detalleSeleccionado.tipo === 'Reunión'">
+                        <div class="border border-green-100 rounded-xl overflow-hidden bg-white shadow-md">
+                            <div
+                                class="bg-gradient-to-r from-green-100 to-green-200 px-5 py-3 border-b border-green-200">
+                                <h3 class="font-semibold text-green-800 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    Detalles de Reunión
+                                </h3>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-5">
+                                <div class="space-y-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500">Tipo</p>
+                                    <p class="font-medium text-gray-800"
+                                        x-text="detalleSeleccionado.data.tipo_reunion"></p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500">Motivo</p>
+                                    <p class="font-medium text-gray-800"
+                                        x-text="detalleSeleccionado.data.motivo_reunion"></p>
+                                </div>
+                                <div x-show="detalleSeleccionado.data.responsable_reunion" class="space-y-1">
+                                    <p class="text-xs uppercase tracking-wide text-gray-500">Responsable</p>
+                                    <p class="font-medium text-gray-800"
+                                        x-text="detalleSeleccionado.data.responsable_reunion"></p>
                                 </div>
                             </div>
-                        </template>
+                        </div>
+                    </template>
 
-                        <template x-if="detalleSeleccionado.tipo === 'Reunión'">
-                            <div class="bg-green-50 p-4 rounded-lg">
-                                <h4 class="font-semibold text-lg mb-3 text-green-800">Detalles de Reunión</h4>
-                                <div class="space-y-2">
-                                    <div class="flex justify-between">
-                                        <span class="text-green-600">Tipo:</span>
-                                        <span class="font-medium"
-                                            x-text="detalleSeleccionado.data.tipo_reunion"></span>
+                    <!-- Información adicional en cards organizadas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Campos adicionales -->
+                        <div class="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-md">
+                            <div
+                                class="bg-gradient-to-r from-gray-100 to-gray-200 px-5 py-3 border-b border-gray-200">
+                                <h3 class="font-semibold text-gray-800 flex items-center">
+                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    Información Adicional
+                                </h3>
+                            </div>
+                            <div class="divide-y divide-gray-100 p-5">
+                                <template x-for="(value, key) in detalleSeleccionado.data">
+                                    <div x-show="value && !['id', 'task_id', 'created_at', 'updated_at'].includes(key) && 
+                                 !['codigo_cotizacion', 'detalle_producto', 'total_cotizacion', 'validez_cotizacion', 
+                                 'tipo_reunion', 'motivo_reunion', 'responsable_reunion', 
+                                 'observaciones', 'condiciones_comerciales'].includes(key)"
+                                        class="py-3 first:pt-0 last:pb-0">
+                                        <p class="text-xs uppercase tracking-wide text-gray-500"
+                                            x-text="key.replace(/_/g, ' ')"></p>
+                                        <p class="font-medium text-gray-800 mt-1" x-text="value"></p>
                                     </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-green-600">Motivo:</span>
-                                        <span class="font-medium"
-                                            x-text="detalleSeleccionado.data.motivo_reunion"></span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Campos de texto largos -->
+                        <div class="space-y-6">
+                            <template x-if="detalleSeleccionado.data.observaciones">
+                                <div class="border border-yellow-100 rounded-xl overflow-hidden bg-white shadow-md">
+                                    <div
+                                        class="bg-gradient-to-r from-yellow-100 to-yellow-200 px-5 py-3 border-b border-yellow-200">
+                                        <h3 class="font-semibold text-yellow-800 flex items-center">
+                                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                    clip-rule="evenodd"></path>
+                                            </svg>
+                                            Observaciones
+                                        </h3>
                                     </div>
-                                    <div class="flex justify-between"
-                                        x-show="detalleSeleccionado.data.responsable_reunion">
-                                        <span class="text-green-600">Responsable:</span>
-                                        <span class="font-medium"
-                                            x-text="detalleSeleccionado.data.responsable_reunion"></span>
+                                    <div class="p-5">
+                                        <p class="text-gray-700" x-text="detalleSeleccionado.data.observaciones">
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
-                        </template>
+                            </template>
 
-                        <!-- Agrega más templates para otros tipos aquí -->
-                    </div>
-
-                    <!-- Campos adicionales -->
-                    <div class="bg-white border rounded-lg p-4">
-                        <h4 class="font-semibold text-lg mb-3 text-gray-800">Información Adicional</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <template x-for="(value, key) in detalleSeleccionado.data">
-                                <div x-show="value && !['id', 'task_id', 'created_at', 'updated_at'].includes(key)"
-                                    class="flex justify-between items-start">
-                                    <span class="text-gray-600 capitalize"
-                                        x-text="key.replace(/_/g, ' ') + ':'"></span>
-                                    <span class="font-medium text-right ml-2"
-                                        x-text="typeof value === 'string' && value.length > 50 ? value.substring(0, 50) + '...' : value">
-                                    </span>
+                            <template x-if="detalleSeleccionado.data.condiciones_comerciales">
+                                <div class="border border-purple-100 rounded-xl overflow-hidden bg-white shadow-md">
+                                    <div
+                                        class="bg-gradient-to-r from-purple-100 to-purple-200 px-5 py-3 border-b border-purple-200">
+                                        <h3 class="font-semibold text-purple-800 flex items-center">
+                                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                                                    clip-rule="evenodd"></path>
+                                            </svg>
+                                            Condiciones Comerciales
+                                        </h3>
+                                    </div>
+                                    <div class="p-5">
+                                        <p class="text-gray-700"
+                                            x-text="detalleSeleccionado.data.condiciones_comerciales"></p>
+                                    </div>
                                 </div>
                             </template>
                         </div>
                     </div>
 
-                    <!-- Campos de texto largos -->
-                    <template x-if="detalleSeleccionado.data.observaciones">
-                        <div class="bg-yellow-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-lg mb-2 text-yellow-800">Observaciones</h4>
-                            <p class="text-gray-700" x-text="detalleSeleccionado.data.observaciones"></p>
-                        </div>
-                    </template>
-
-                    <template x-if="detalleSeleccionado.data.condiciones_comerciales">
-                        <div class="bg-purple-50 p-4 rounded-lg">
-                            <h4 class="font-semibold text-lg mb-2 text-purple-800">Condiciones Comerciales</h4>
-                            <p class="text-gray-700" x-text="detalleSeleccionado.data.condiciones_comerciales"></p>
-                        </div>
-                    </template>
-
                     <!-- Timestamps -->
-                    <div class="bg-gray-100 p-3 rounded-lg text-sm text-gray-500">
-                        <div class="flex justify-between">
-                            <span>Creación:</span>
-                            <span x-text="new Date(detalleSeleccionado.data.created_at).toLocaleString()"></span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Actualización:</span>
-                            <span x-text="new Date(detalleSeleccionado.data.updated_at).toLocaleString()"></span>
+                    <div
+                        class="bg-gradient-to-r from-gray-100 to-gray-200 border border-gray-200 rounded-xl p-5 shadow-md">
+                        <h3 class="font-semibold text-gray-700 text-sm uppercase mb-3 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
+                            Historial
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <p class="text-xs text-gray-500">Creación</p>
+                                <p class="text-sm font-medium text-gray-800"
+                                    x-text="new Date(detalleSeleccionado.data.created_at).toLocaleString()"></p>
+                            </div>
+                            <div class="space-y-1">
+                                <p class="text-xs text-gray-500">Actualización</p>
+                                <p class="text-sm font-medium text-gray-800"
+                                    x-text="new Date(detalleSeleccionado.data.updated_at).toLocaleString()"></p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </template>
 
-            <div class="mt-6 pt-4 border-t flex justify-end">
-                <button @click="mostrarModalDetalles = false" class="btn btn-primary">
+            <div class="mt-6 pt-4 border-t border-gray-300 flex justify-end">
+                <button @click="backToAddTask()"
+                    class="btn btn-primary">
                     Cerrar
                 </button>
             </div>

@@ -3,8 +3,8 @@ document.addEventListener('alpine:init', () => {
         idSeguimiento: document.getElementById('idSeguimientoHidden')?.value || '',
         idPersona: document.getElementById('idPersonaHidden')?.value || '',
         activeTab: 'general', // Agregar esta variable
-        currentProjectName: '', 
-        
+        currentProjectName: '',
+
         // Agregar esta variable para almacenar el nombre del proyecto actual
         filtroUbicacion: '',
         filtroFechalevantamiento: '',
@@ -20,8 +20,8 @@ document.addEventListener('alpine:init', () => {
         filtroFecha: '',
         filteredCotizaciones: '',
         filteredReuniones: '',
+        wasAddTaskOpen: false,
 
-        
         nivelPorcentajeCotizacion: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
         nivelPorcentajeReunion: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
         nivelPorcentajeLevantamiento: '', // 0, 50, 100 (Inicial, En proceso, Finalizado)
@@ -51,7 +51,6 @@ document.addEventListener('alpine:init', () => {
         cotizaciones: [], // ← ESTA ES LA QUE FALTA
         reuniones: [],
         usuarios: [],
-
 
         estadoOpciones: ['Lista de proyectos', 'cotizacion', 'reunion', 'levantamiento', 'observado', 'ganado', 'rechazado'],
 
@@ -124,32 +123,31 @@ document.addEventListener('alpine:init', () => {
 
         // Inicialización
         init() {
-    this.loadProjects();
-    this.initializeSortable();
-    this.fetchUsuarios();
+            this.loadProjects();
+            this.initializeSortable();
+            this.fetchUsuarios();
 
-    // Auto-asignar el responsable de reunión con el usuario autenticado
-    if (window.USUARIO_AUTH) {
-        this.paramsTask.responsablereunion = window.USUARIO_AUTH;
-        this.paramsTask.responsablecotizacion = window.USUARIO_AUTH;
-    }
-    
-    // Inicializar el select2 si lo estás usando (opcional)
-    this.initParticipantesSelect();
-},
-             fetchUsuarios() {
-        fetch('/api/usuarios/comercial')
-            .then(res => res.json())
-            .then(data => {
-                this.usuarios = data; // ← Ahora usuarios está inicializado
-                this.initParticipantesSelect();
-            })
-            .catch(error => {
-                console.error('Error fetching usuarios:', error);
-                this.usuarios = []; // ← En caso de error, mantener array vacío
-            });
-    },
+            // Auto-asignar el responsable de reunión con el usuario autenticado
+            if (window.USUARIO_AUTH) {
+                this.paramsTask.responsablereunion = window.USUARIO_AUTH;
+                this.paramsTask.responsablecotizacion = window.USUARIO_AUTH;
+            }
 
+            // Inicializar el select2 si lo estás usando (opcional)
+            this.initParticipantesSelect();
+        },
+        fetchUsuarios() {
+            fetch('/api/usuarios/comercial')
+                .then((res) => res.json())
+                .then((data) => {
+                    this.usuarios = data; // ← Ahora usuarios está inicializado
+                    this.initParticipantesSelect();
+                })
+                .catch((error) => {
+                    console.error('Error fetching usuarios:', error);
+                    this.usuarios = []; // ← En caso de error, mantener array vacío
+                });
+        },
 
         // Cargar proyectos desde el servidor
         loadProjects() {
@@ -210,8 +208,7 @@ document.addEventListener('alpine:init', () => {
             const url = '/scrumboard/cotizaciones/handle';
             const method = 'POST';
 
-                const responsable = this.paramsTask.responsablecotizacion || window.USUARIO_AUTH || '';
-
+            const responsable = this.paramsTask.responsablecotizacion || window.USUARIO_AUTH || '';
 
             const data = {
                 task_id: this.paramsTask.id,
@@ -335,214 +332,210 @@ document.addEventListener('alpine:init', () => {
                 });
         },
 
-       // Método para agregar o actualizar reunión
-// Método para agregar o actualizar reunión
-agregarReunion() {
-    // Validar que haya al menos un campo lleno
-    const hasData = this.paramsTask.fechareunion || this.paramsTask.tiporeunion || this.paramsTask.motivoreunion;
+        // Método para agregar o actualizar reunión
+        // Método para agregar o actualizar reunión
+        agregarReunion() {
+            // Validar que haya al menos un campo lleno
+            const hasData = this.paramsTask.fechareunion || this.paramsTask.tiporeunion || this.paramsTask.motivoreunion;
 
-    if (!hasData) {
-        this.showMessage('Debe ingresar al menos un campo para la reunión', 'error');
-        return;
-    }
+            if (!hasData) {
+                this.showMessage('Debe ingresar al menos un campo para la reunión', 'error');
+                return;
+            }
 
-    // Obtener participantes seleccionados del select múltiple
-    let participantesSeleccionados = [];
-    try {
-        const participantesSelect = document.getElementById('participantesreunion');
-        if (participantesSelect) {
-            participantesSeleccionados = Array.from(participantesSelect.selectedOptions)
-                .map(option => option.value)
-                .filter(value => value !== '');
-        }
-    } catch (error) {
-        console.warn('Error al obtener participantes:', error);
-        // Continuar con array vacío si hay error
-        participantesSeleccionados = [];
-    }
-
-    const url = '/scrumboard/reuniones/handle';
-    const method = 'POST';
-
-    // Auto-asignar responsable si está vacío
-    const responsable = this.paramsTask.responsablereunion || window.USUARIO_AUTH || '';
-
-    const data = {
-        task_id: this.paramsTask.id,
-        fecha_reunion: this.paramsTask.fechareunion,
-        tipo_reunion: this.paramsTask.tiporeunion,
-        motivo_reunion: this.paramsTask.motivoreunion,
-        participantes: participantesSeleccionados,
-        responsable_reunion: responsable,
-        link_reunion: this.paramsTask.linkreunion,
-        direccion_fisica: this.paramsTask.direccionfisica,
-        minuta: this.paramsTask.minutareunion,
-        actividades: this.paramsTask.actividadesReunion,
-        nivelPorcentajeReunion: this.paramsTask.nivelPorcentajeReunion,
-        reunion_id: this.reunionEditId || null,
-    };
-
-    fetch(url, {
-        method: method,
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-        },
-        body: JSON.stringify(data),
-    })
-    .then((response) => {
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-            throw new Error('El servidor devolvió una respuesta no válida');
-        }
-        return response.json();
-    })
-    .then((data) => {
-        if (data.success) {
-            if (this.reunionEditId) {
-                // Actualizar en la lista
-                const index = this.reuniones.findIndex((r) => r.id === this.reunionEditId);
-                if (index !== -1) {
-                    // Actualizar la reunión con los datos nuevos incluyendo participantes
-                    this.reuniones[index] = {
-                        ...data.reunion,
-                        participantes: data.participantes || []
-                    };
+            // Obtener participantes seleccionados del select múltiple
+            let participantesSeleccionados = [];
+            try {
+                const participantesSelect = document.getElementById('participantesreunion');
+                if (participantesSelect) {
+                    participantesSeleccionados = Array.from(participantesSelect.selectedOptions)
+                        .map((option) => option.value)
+                        .filter((value) => value !== '');
                 }
-                this.showMessage(data.message || 'Reunión actualizada correctamente');
-            } else {
-                // Agregar a la lista con participantes
-                this.reuniones.push({
-                    ...data.reunion,
-                    participantes: data.participantes || []
+            } catch (error) {
+                console.warn('Error al obtener participantes:', error);
+                // Continuar con array vacío si hay error
+                participantesSeleccionados = [];
+            }
+
+            const url = '/scrumboard/reuniones/handle';
+            const method = 'POST';
+
+            // Auto-asignar responsable si está vacío
+            const responsable = this.paramsTask.responsablereunion || window.USUARIO_AUTH || '';
+
+            const data = {
+                task_id: this.paramsTask.id,
+                fecha_reunion: this.paramsTask.fechareunion,
+                tipo_reunion: this.paramsTask.tiporeunion,
+                motivo_reunion: this.paramsTask.motivoreunion,
+                participantes: participantesSeleccionados,
+                responsable_reunion: responsable,
+                link_reunion: this.paramsTask.linkreunion,
+                direccion_fisica: this.paramsTask.direccionfisica,
+                minuta: this.paramsTask.minutareunion,
+                actividades: this.paramsTask.actividadesReunion,
+                nivelPorcentajeReunion: this.paramsTask.nivelPorcentajeReunion,
+                reunion_id: this.reunionEditId || null,
+            };
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify(data),
+            })
+                .then((response) => {
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        throw new Error('El servidor devolvió una respuesta no válida');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        if (this.reunionEditId) {
+                            // Actualizar en la lista
+                            const index = this.reuniones.findIndex((r) => r.id === this.reunionEditId);
+                            if (index !== -1) {
+                                // Actualizar la reunión con los datos nuevos incluyendo participantes
+                                this.reuniones[index] = {
+                                    ...data.reunion,
+                                    participantes: data.participantes || [],
+                                };
+                            }
+                            this.showMessage(data.message || 'Reunión actualizada correctamente');
+                        } else {
+                            // Agregar a la lista con participantes
+                            this.reuniones.push({
+                                ...data.reunion,
+                                participantes: data.participantes || [],
+                            });
+                            this.showMessage(data.message || 'Reunión agregada correctamente');
+                        }
+
+                        // Limpiar formulario
+                        this.limpiarFormularioReunion();
+                    } else {
+                        throw new Error(data.message || 'Error desconocido');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error saving reunion:', error);
+                    this.showMessage(error.message || 'Error al guardar la reunión', 'error');
                 });
-                this.showMessage(data.message || 'Reunión agregada correctamente');
-            }
+        },
+        // Limpiar formulario de reunión
+        limpiarFormularioReunion() {
+            this.paramsTask.fechareunion = '';
+            this.paramsTask.tiporeunion = '';
+            this.paramsTask.motivoreunion = '';
+            this.paramsTask.responsablereunion = window.USUARIO_AUTH || ''; // Mantener usuario autenticado
+            this.paramsTask.linkreunion = '';
+            this.paramsTask.direccionfisica = '';
+            this.paramsTask.minutareunion = '';
+            this.paramsTask.actividadesReunion = '';
+            this.paramsTask.nivelPorcentajeReunion = '';
 
-            // Limpiar formulario
-            this.limpiarFormularioReunion();
-        } else {
-            throw new Error(data.message || 'Error desconocido');
-        }
-    })
-    .catch((error) => {
-        console.error('Error saving reunion:', error);
-        this.showMessage(error.message || 'Error al guardar la reunión', 'error');
-    });
-},
-// Limpiar formulario de reunión
-limpiarFormularioReunion() {
-    this.paramsTask.fechareunion = '';
-    this.paramsTask.tiporeunion = '';
-    this.paramsTask.motivoreunion = '';
-    this.paramsTask.responsablereunion = window.USUARIO_AUTH || ''; // Mantener usuario autenticado
-    this.paramsTask.linkreunion = '';
-    this.paramsTask.direccionfisica = '';
-    this.paramsTask.minutareunion = '';
-    this.paramsTask.actividadesReunion = '';
-    this.paramsTask.nivelPorcentajeReunion = '';
-    
-    // Limpiar selección de participantes
-    try {
-        const select = document.getElementById('participantesreunion');
-        if (select) {
-            Array.from(select.options).forEach(option => {
-                option.selected = false;
-            });
-        }
-    } catch (error) {
-        console.warn('Error al limpiar participantes:', error);
-    }
-    
-    this.reunionEditId = null;
-},
-
-// Editar reunión
-async editarReunion(reunion) {
-    // Cargar datos básicos de la reunión
-    this.paramsTask.fechareunion = reunion.fecha_reunion || '';
-    this.paramsTask.tiporeunion = reunion.tipo_reunion || '';
-    this.paramsTask.motivoreunion = reunion.motivo_reunion || '';
-    this.paramsTask.responsablereunion = reunion.responsable_reunion || '';
-    this.paramsTask.linkreunion = reunion.link_reunion || '';
-    this.paramsTask.direccionfisica = reunion.direccion_fisica || '';
-    this.paramsTask.minutareunion = reunion.minuta || '';
-    this.paramsTask.actividadesReunion = reunion.actividades || '';
-    this.paramsTask.nivelPorcentajeReunion = reunion.nivel_porcentaje || '';
-
-    // Verificar si el objeto reunion ya trae participantes
-    if (!reunion.participantes) {
-        try {
-            const response = await fetch(`/api/reunion/${reunion.id}/participantes`);
-            const data = await response.json();
-
-            if (data.success) {
-                reunion.participantes = data.participantes;
-            } else {
-                reunion.participantes = [];
-                console.warn('No se pudieron cargar participantes de la reunión');
-            }
-        } catch (error) {
-            reunion.participantes = [];
-            console.error('Error al cargar participantes de la reunión:', error);
-        }
-    }
-
-    // Seleccionar participantes en el select múltiple
-    try {
-        const select = document.getElementById('participantesreunion');
-        if (select && reunion.participantes && reunion.participantes.length > 0) {
-            Array.from(select.options).forEach(option => {
-                // Aquí comparo por usuario_id porque tu backend manda eso
-                const participanteEnReunion = reunion.participantes.some(part =>
-                    String(part.usuario_id || part.id) === String(option.value)
-                );
-                option.selected = participanteEnReunion;
-            });
-
-            // Forzar actualización si usas Select2 o algún plugin
-            $(select).trigger('change');
-        }
-    } catch (error) {
-        console.warn('Error al seleccionar participantes:', error);
-    }
-
-    // Guardar id de la reunión que estás editando (si usas para update)
-    this.reunionEditId = reunion.id;
-}
-,
-
-// Eliminar reunión
-eliminarReunion(id) {
-    if (confirm('¿Estás seguro de eliminar esta reunión?')) {
-        fetch(`/scrumboard/reuniones/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    return response.json().then((err) => {
-                        throw err;
+            // Limpiar selección de participantes
+            try {
+                const select = document.getElementById('participantesreunion');
+                if (select) {
+                    Array.from(select.options).forEach((option) => {
+                        option.selected = false;
                     });
                 }
-                return response.json();
-            })
-            .then((data) => {
-                if (data.success) {
-                    this.reuniones = this.reuniones.filter((r) => r.id !== id);
-                    this.showMessage('Reunión eliminada correctamente');
-                } else {
-                    throw new Error(data.message || 'Error al eliminar');
+            } catch (error) {
+                console.warn('Error al limpiar participantes:', error);
+            }
+
+            this.reunionEditId = null;
+        },
+
+        // Editar reunión
+        async editarReunion(reunion) {
+            // Cargar datos básicos de la reunión
+            this.paramsTask.fechareunion = reunion.fecha_reunion || '';
+            this.paramsTask.tiporeunion = reunion.tipo_reunion || '';
+            this.paramsTask.motivoreunion = reunion.motivo_reunion || '';
+            this.paramsTask.responsablereunion = reunion.responsable_reunion || '';
+            this.paramsTask.linkreunion = reunion.link_reunion || '';
+            this.paramsTask.direccionfisica = reunion.direccion_fisica || '';
+            this.paramsTask.minutareunion = reunion.minuta || '';
+            this.paramsTask.actividadesReunion = reunion.actividades || '';
+            this.paramsTask.nivelPorcentajeReunion = reunion.nivel_porcentaje || '';
+
+            // Verificar si el objeto reunion ya trae participantes
+            if (!reunion.participantes) {
+                try {
+                    const response = await fetch(`/api/reunion/${reunion.id}/participantes`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        reunion.participantes = data.participantes;
+                    } else {
+                        reunion.participantes = [];
+                        console.warn('No se pudieron cargar participantes de la reunión');
+                    }
+                } catch (error) {
+                    reunion.participantes = [];
+                    console.error('Error al cargar participantes de la reunión:', error);
                 }
-            })
-            .catch((error) => {
-                console.error('Error deleting reunion:', error);
-                this.showMessage(error.message || 'Error al eliminar la reunión', 'error');
-            });
-    }
-},
+            }
+
+            // Seleccionar participantes en el select múltiple
+            try {
+                const select = document.getElementById('participantesreunion');
+                if (select && reunion.participantes && reunion.participantes.length > 0) {
+                    Array.from(select.options).forEach((option) => {
+                        // Aquí comparo por usuario_id porque tu backend manda eso
+                        const participanteEnReunion = reunion.participantes.some((part) => String(part.usuario_id || part.id) === String(option.value));
+                        option.selected = participanteEnReunion;
+                    });
+
+                    // Forzar actualización si usas Select2 o algún plugin
+                    $(select).trigger('change');
+                }
+            } catch (error) {
+                console.warn('Error al seleccionar participantes:', error);
+            }
+
+            // Guardar id de la reunión que estás editando (si usas para update)
+            this.reunionEditId = reunion.id;
+        },
+        // Eliminar reunión
+        eliminarReunion(id) {
+            if (confirm('¿Estás seguro de eliminar esta reunión?')) {
+                fetch(`/scrumboard/reuniones/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            return response.json().then((err) => {
+                                throw err;
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        if (data.success) {
+                            this.reuniones = this.reuniones.filter((r) => r.id !== id);
+                            this.showMessage('Reunión eliminada correctamente');
+                        } else {
+                            throw new Error(data.message || 'Error al eliminar');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error deleting reunion:', error);
+                        this.showMessage(error.message || 'Error al eliminar la reunión', 'error');
+                    });
+            }
+        },
 
         loadTarea(taskId) {
             if (!taskId) {
@@ -572,14 +565,39 @@ eliminarReunion(id) {
                 });
         },
 
-        // En tu Alpine.js data
         verDetalles(relacion) {
-            console.log('📋 Detalles de:', relacion.tipo, relacion);
+            // recordar si el modal anterior estaba abierto y ocultarlo
+            this.wasAddTaskOpen = this.isAddTaskModal === true;
+            this.isAddTaskModal = false;
 
-            // Asigna los datos y muestra el modal
-            this.detalleSeleccionado = relacion;
+            // si ya trae .data úsalo; si no, el propio objeto es el data
+            const payload = relacion && typeof relacion === 'object' && 'data' in relacion ? relacion.data || {} : relacion || {};
+
+            // normalizar fechas comunes (si no existen, deja vacío)
+            const fecha =
+                relacion?.fecha ??
+                payload.fecha_cotizacion ??
+                payload.fecha_reunion ??
+                payload.fecha_requerimiento ??
+                payload.fecha_ganado ??
+                payload.fecha_observado ??
+                payload.fecha_rechazo ??
+                '';
+
+            this.detalleSeleccionado = {
+                tipo: relacion?.tipo ?? payload.tipo ?? 'Registro',
+                fecha,
+                data: payload, // <- SIEMPRE bajo .data
+            };
+
             this.mostrarModalDetalles = true;
         },
+
+        backToAddTask() {
+            this.mostrarModalDetalles = false;
+            if (this.wasAddTaskOpen) this.isAddTaskModal = true;
+        },
+
         // Cargar reuniones de la tarea
         loadReuniones(taskId) {
             if (!taskId) {
@@ -728,7 +746,6 @@ eliminarReunion(id) {
             }
         },
 
-        
         initParticipantesSelect() {
             const select = this.$refs.participantesSelect;
 
@@ -747,8 +764,6 @@ eliminarReunion(id) {
                 this.paramsTask.participantesreunion = $(select).val();
                 console.log('[LOG] Participantes actualizados:', this.paramsTask.participantesreunion);
             });
-
-            
         },
 
         // Cargar levantamientos de la tarea
@@ -1729,7 +1744,7 @@ eliminarReunion(id) {
                     return response.json();
                 })
                 .then((data) => {
-                    this.showMessage('Task saved successfully!');
+                    this.showMessage('Detalles Cargados!');
                     this.isAddTaskModal = false;
                     this.loadProjects();
 
