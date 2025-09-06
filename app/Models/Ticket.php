@@ -102,7 +102,8 @@ class Ticket extends Model
         'lat',
         'lng',
         'nrmcotizacion',
-        'evaluaciontienda'
+        'evaluaciontienda',
+        'es_custodia'
     ];
 
     public function tipoticket()
@@ -238,4 +239,10 @@ class Ticket extends Model
     {
         return $this->hasMany(ConstanciaEntrega::class, 'idticket');
     }
+
+    public function custodia()
+    {
+        return $this->hasOne(Custodia::class, 'id_ticket', 'idTickets');
+    }
+
 }
