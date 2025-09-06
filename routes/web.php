@@ -53,6 +53,7 @@ use App\Exports\ModeloExport;
 use App\Http\Controllers\administracion\compras\ComprasController;
 use App\Http\Controllers\administracion\movimiento\entrada\EntradaController;
 use App\Http\Controllers\administracion\movimiento\salida\SalidaController;
+use App\Http\Controllers\almacen\custodia\CustodiaController;
 use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\devoluciones\DevolucionesController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
@@ -83,6 +84,7 @@ use App\Http\Controllers\solicitud\SolicitudarticuloController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Cliente;
+use App\Models\Custodia;
 use App\Models\Marca;
 use App\Models\Modelo;
 use App\Models\Subcategoria;
@@ -1245,6 +1247,16 @@ Route::get('/compras/{id}/devoluciones', [ComprasController::class, 'obtenerDevo
 
 Route::post('/compras/devolucion', [ComprasController::class, 'procesarDevolucion'])->name('compras.devolucion');
 if (app()->environment('local')) {
-    Route::view('/__preview/custodia', 'solicitud.solicitudcustodia.index')
-        ->name('solicitudcustodia.index'); // así tu sidebar sigue funcionando
+
+
+
+
+
+
+
+
 }
+// Route::view('/__preview/custodia', 'solicitud.solicitudcustodia.index')->name('solicitudcustodia.index');}
+Route::get('/__preview/custodia', [CustodiaController::class, 'index'])->name('solicitudcustodia.index');
+Route::post('/tickets/{id}/actualizar-custodia', [CustodiaController::class, 'actualizarCustodia']);
+Route::get('/tickets/{id}/custodia', [CustodiaController::class, 'verificarCustodia']);

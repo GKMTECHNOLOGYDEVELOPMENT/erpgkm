@@ -480,7 +480,7 @@
 
              <div class="flex gap-12">
                     <div class="flex-1 mb-6">
-                        <label for="EsCustonia" class="block text-sm font-medium mb-2">Custonia</label>
+                        <label for="EsCustonia" class="block text-sm font-medium mb-2">Custodia</label>
                         <div>
                             <label class="w-12 h-6 relative mt-3">
                                 <input type="checkbox" id="EsCustonia" name="EsCustonia"
@@ -539,6 +539,109 @@
     });
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ticketId = '{{ $id }}';
+        const checkbox = document.getElementById('EsCustonia');
+
+        // Traer estado actual del ticket para marcar el checkbox si corresponde
+        fetch(`/tickets/${ticketId}/custodia`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.es_custodia === 1) {
+                    checkbox.checked = true;
+                }
+            });
+
+        if (checkbox) {
+            checkbox.addEventListener('change', function () {
+                const nuevoEstado = this.checked ? 1 : 0;
+
+                const enviarPeticion = () => {
+                    fetch(`/tickets/${ticketId}/actualizar-custodia`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ es_custodia: nuevoEstado })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => { throw data; });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(
+                                '¡Confirmado!',
+                                nuevoEstado === 1
+                                    ? 'El equipo ha sido puesto en custodia.'
+                                    : 'Custodia desactivada correctamente.',
+                                'success'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        if (error.message) {
+                            Swal.fire(
+                                'Acción no permitida',
+                                error.message,
+                                'warning'
+                            );
+                            checkbox.checked = true; // Revertimos a marcado si falla desmarcado
+                        } else {
+                            Swal.fire(
+                                'Error',
+                                'Ocurrió un error inesperado al procesar la solicitud.',
+                                'error'
+                            );
+                        }
+                    });
+                };
+
+                if (this.checked) {
+                    // Confirmar poner en custodia
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "¿Deseas poner el equipo en custodia?",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, poner en custodia',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            enviarPeticion();
+                        } else {
+                            checkbox.checked = false;
+                        }
+                    });
+                } else {
+                    // Confirmar quitar de custodia
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "¿Deseas quitar al equipo de custodia?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, quitar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            enviarPeticion();
+                        } else {
+                            checkbox.checked = true;
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>
 
 
 
