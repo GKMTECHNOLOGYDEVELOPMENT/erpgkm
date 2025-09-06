@@ -54,6 +54,7 @@ use App\Http\Controllers\administracion\compras\ComprasController;
 use App\Http\Controllers\administracion\movimiento\entrada\EntradaController;
 use App\Http\Controllers\administracion\movimiento\salida\SalidaController;
 use App\Http\Controllers\almacen\despacho\DespachoController;
+use App\Http\Controllers\almacen\devoluciones\DevolucionesController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kardex\KardexController;
 use App\Http\Controllers\almacen\productos\ProductoController;
@@ -402,7 +403,7 @@ Route::post('/guardar-repuesto', [ArticulosController::class, 'store']);
 Route::post('/articulosmodal', [ArticulosController::class, 'storeModal'])->name('articulos.store');
 /// INICIO DEVOLUCIONES ///
 Route::prefix('devoluciones')->name('devoluciones.')->group(function () {
-    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/', [DevolucionesController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo

@@ -478,6 +478,21 @@
             </div>
 
 
+             <div class="flex gap-12">
+                    <div class="flex-1 mb-6">
+                        <label for="EsCustonia" class="block text-sm font-medium mb-2">Custonia</label>
+                        <div>
+                            <label class="w-12 h-6 relative mt-3">
+                                <input type="checkbox" id="EsCustonia" name="EsCustonia"
+                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
+                                <span
+                                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+
 
             <!-- Botón de Guardar -->
             <div class="md:col-span-2 flex justify-end space-x-4">
