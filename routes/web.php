@@ -1257,6 +1257,8 @@ if (app()->environment('local')) {
 
 }
 // Route::view('/__preview/custodia', 'solicitud.solicitudcustodia.index')->name('solicitudcustodia.index');}
-Route::get('/__preview/custodia', [CustodiaController::class, 'index'])->name('solicitudcustodia.index');
+
+
+Route::get('/preview/custodia', [CustodiaController::class, 'index'])->name('solicitudcustodia.index');
 Route::post('/tickets/{id}/actualizar-custodia', [CustodiaController::class, 'actualizarCustodia']);
 Route::get('/tickets/{id}/custodia', [CustodiaController::class, 'verificarCustodia']);
