@@ -1180,6 +1180,9 @@
                         <li>
                             <a href="{{ route('solicitudarticulo.index') }}">Solicitud de Articulo</a>
                         </li>
+                        <li>
+                            <a href="{{ route('solicitudcustodia.index') }}">Solicitud de Custodia</a>
+                        </li>
                     </ul>
                 </li>
 

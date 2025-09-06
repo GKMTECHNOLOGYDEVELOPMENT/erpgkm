@@ -90,6 +90,7 @@ use App\Models\Tienda;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+
 Auth::routes();
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 // Ruta para mostrar el formulario de login
@@ -370,7 +371,7 @@ Route::prefix('ventas')->name('ventas.')->group(function () {
 /// INICIO COMPRAS ///
 Route::prefix('compras')->name('compras.')->group(function () {
     Route::get('/', [ComprasController::class, 'index'])->name('index'); // Mostrar la vista principal
-        Route::get('/data', [ComprasController::class, 'data'])->name('data'); // Mostrar la vista principal
+    Route::get('/data', [ComprasController::class, 'data'])->name('data'); // Mostrar la vista principal
 
     Route::get('/create', [ComprasController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
@@ -385,10 +386,10 @@ Route::prefix('compras')->name('compras.')->group(function () {
     Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
 
     // Rutas para las acciones de compras
-// Rutas para las acciones de compras
-Route::get('/{id}/detalles', [ComprasController::class, 'detalles'])->name('compras.detalles');
-Route::get('/{id}/factura', [ComprasController::class, 'factura'])->name('compras.factura');
-Route::get('/{id}/ticket', [ComprasController::class, 'ticket'])->name('compras.ticket');
+    // Rutas para las acciones de compras
+    Route::get('/{id}/detalles', [ComprasController::class, 'detalles'])->name('compras.detalles');
+    Route::get('/{id}/factura', [ComprasController::class, 'factura'])->name('compras.factura');
+    Route::get('/{id}/ticket', [ComprasController::class, 'ticket'])->name('compras.ticket');
 
 
     Route::get('/exportar-excel', function () {
@@ -423,7 +424,7 @@ Route::prefix('heramientas')->name('heramientas.')->group(function () {
     Route::get('/', [HeramientasController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [HeramientasController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [HeramientasController::class, 'store'])->name('store'); // Guardar un nuevo artículo
-      Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
     Route::get('/{id}/edit', [HeramientasController::class, 'edit'])->name('edit'); // Editar un artículo
     Route::get('/{id}/detalles', [HeramientasController::class, 'detalle'])->name('detalles'); // Editar un artículo
@@ -478,7 +479,7 @@ Route::prefix('kardex')->name('kardex.')->group(function () {
     Route::get('/producto/{id}/kardex', [KardexController::class, 'kardexxproducto'])->name('kardexxproducto'); // Editar un artículo
 
     Route::get('/producto/{idArticulo}/detalles/{id}', [KardexController::class, 'detalles'])
-    ->name('kardex.detalles');
+        ->name('kardex.detalles');
 });
 
 
@@ -525,8 +526,8 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     Route::get('/create', [SolicitudarticuloController::class, 'create'])->name('create'); // Guardar una nueva categoría
     Route::post('/store', [SolicitudarticuloController::class, 'store'])->name('store'); // Guardar una nueva categoría
     Route::get('/{id}/edit', [SolicitudarticuloController::class, 'edit'])->name('edit'); // Editar una categoría
-        Route::get('/{id}/show', [SolicitudarticuloController::class, 'show'])->name('show'); // Editar una categoría
-        Route::get('/{id}/opciones', [SolicitudarticuloController::class, 'opciones'])->name('opciones'); // Editar una categoría
+    Route::get('/{id}/show', [SolicitudarticuloController::class, 'show'])->name('show'); // Editar una categoría
+    Route::get('/{id}/opciones', [SolicitudarticuloController::class, 'opciones'])->name('opciones'); // Editar una categoría
 
     Route::put('/update/{id}', [SolicitudarticuloController::class, 'update'])->name('update'); // Actualizar una categoría
     // Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
@@ -1043,8 +1044,8 @@ Route::middleware('auth')->group(function () {
     Route::get('Seguimiento-Cliente/{id}/edit', [ClienteSeguimientoController::class, 'edit'])->name('Seguimiento.edit');
     Route::get('Seguimiento-Cliente/{id}', [ClienteSeguimientoController::class, 'show'])->name('Seguimiento.show');
     Route::put('Seguimiento-Cliente/{id}/update', [ClienteSeguimientoController::class, 'update'])->name('Seguimiento.update');
-    Route::delete('Seguimiento-Cliente/{id}', [ClienteSeguimientoController::class, 'destroy'])->name('Seguimiento.destroy'); 
-    Route::get('Seguimiento-Cliente/{id}/historial', [ClienteSeguimientoController::class, 'historial'])->name('Seguimiento.historial');  
+    Route::delete('Seguimiento-Cliente/{id}', [ClienteSeguimientoController::class, 'destroy'])->name('Seguimiento.destroy');
+    Route::get('Seguimiento-Cliente/{id}/historial', [ClienteSeguimientoController::class, 'historial'])->name('Seguimiento.historial');
 });
 
 Route::post('/contactosone', [ContactoController::class, 'store'])->name('contactos.store')->middleware('auth');
@@ -1056,7 +1057,10 @@ Route::get('/seguimiento/{id}/edit', [ClienteSeguimientoController::class, 'edit
 Route::get('/seguimiento/{id}/edit-tab', [ClienteSeguimientoController::class, 'editTab'])
     ->name('seguimiento.edit-tab');
 Route::resource('observaciones', ObservacionController::class)->only([
-    'index', 'store', 'update', 'destroy'
+    'index',
+    'store',
+    'update',
+    'destroy'
 ]);
 
 Route::get('observaciones/{task}/edit', [ObservacionController::class, 'edit'])
@@ -1066,13 +1070,13 @@ Route::get('observaciones/{task}/edit', [ObservacionController::class, 'edit'])
 Route::prefix('scrumboard')->group(function () {
     // Obtener proyectos
     Route::get('/projects', [ScrumboarddController::class, 'index']);
-    
+
     // Proyectos CRUD
     Route::post('/projects', [ScrumboarddController::class, 'store']);
     Route::put('/projects/{project}', [ScrumboarddController::class, 'update']);
     Route::delete('/projects/{project}', [ScrumboarddController::class, 'destroy']);
     Route::post('/projects/{project}/clear-tasks', [ScrumboarddController::class, 'clearTasks']);
-    
+
     // Tareas CRUD
     Route::post('/tasks', [ScrumboarddController::class, 'storeTask']);
     Route::put('/tasks/{task}', [ScrumboarddController::class, 'updateTask']);
@@ -1133,40 +1137,40 @@ Route::put('/empresasformularioprio/{empresa}', [EmpresaController::class, 'upda
 
 
 Route::prefix('cronograma')->name('cronograma.')->group(function () {
-    
+
     // Obtener datos del cronograma
     Route::get('/{idSeguimiento}/data', [CronogramaController::class, 'getData'])
         ->name('data');
-    
+
     // Operaciones con tareas
     Route::post('/{idSeguimiento}/task', [CronogramaController::class, 'saveTask'])
         ->name('task.save');
-    
+
     Route::put('/{idSeguimiento}/task/{taskId}', [CronogramaController::class, 'saveTask'])
         ->name('task.update');
-    
+
     Route::delete('/{idSeguimiento}/task/{taskId}', [CronogramaController::class, 'deleteTask'])
         ->name('task.delete');
-    
+
     // Operaciones con dependencias (links)
     Route::post('/{idSeguimiento}/link', [CronogramaController::class, 'saveLink'])
         ->name('link.save');
-    
+
     Route::delete('/{idSeguimiento}/link/{linkId}', [CronogramaController::class, 'deleteLink'])
         ->name('link.delete');
-    
+
     // Configuración
     Route::post('/{idSeguimiento}/config', [CronogramaController::class, 'saveConfig'])
         ->name('config.save');
-    
+
     // Histórico
     Route::get('/{idSeguimiento}/historico', [CronogramaController::class, 'getHistorico'])
         ->name('historico');
-    
+
     // Importar datos
     Route::post('/{idSeguimiento}/import', [CronogramaController::class, 'importData'])
         ->name('import');
-    
+
     // Exportar datos
     Route::get('/{idSeguimiento}/export/{format}', [CronogramaController::class, 'exportData'])
         ->name('export')
@@ -1187,30 +1191,30 @@ Route::middleware('web')->group(function () {
 
 
     // Rutas para reuniones
-Route::post('/scrumboard/reuniones/handle', [ScrumboarddController::class, 'handleReunion']);
-Route::get('/scrumboard/tasks/{taskId}/reuniones', [ScrumboarddController::class, 'getReuniones']);
-Route::delete('/scrumboard/reuniones/{id}', [ScrumboarddController::class, 'deleteReunion']);
+    Route::post('/scrumboard/reuniones/handle', [ScrumboarddController::class, 'handleReunion']);
+    Route::get('/scrumboard/tasks/{taskId}/reuniones', [ScrumboarddController::class, 'getReuniones']);
+    Route::delete('/scrumboard/reuniones/{id}', [ScrumboarddController::class, 'deleteReunion']);
 
-// Rutas para levantamientos
-Route::post('/scrumboard/levantamientos/handle', [ScrumboarddController::class, 'handleLevantamiento']);
-Route::get('/scrumboard/tasks/{taskId}/levantamientos', [ScrumboarddController::class, 'getLevantamientos']);
-Route::delete('/scrumboard/levantamientos/{id}', [ScrumboarddController::class, 'deleteLevantamiento']);
-// Rutas para proyectos ganados
-Route::post('/scrumboard/ganados/handle', [ScrumboarddController::class, 'handleGanado']);
-Route::get('/scrumboard/tasks/{taskId}/ganados', [ScrumboarddController::class, 'getGanados']);
-Route::delete('/scrumboard/ganados/{id}', [ScrumboarddController::class, 'deleteGanado']);
+    // Rutas para levantamientos
+    Route::post('/scrumboard/levantamientos/handle', [ScrumboarddController::class, 'handleLevantamiento']);
+    Route::get('/scrumboard/tasks/{taskId}/levantamientos', [ScrumboarddController::class, 'getLevantamientos']);
+    Route::delete('/scrumboard/levantamientos/{id}', [ScrumboarddController::class, 'deleteLevantamiento']);
+    // Rutas para proyectos ganados
+    Route::post('/scrumboard/ganados/handle', [ScrumboarddController::class, 'handleGanado']);
+    Route::get('/scrumboard/tasks/{taskId}/ganados', [ScrumboarddController::class, 'getGanados']);
+    Route::delete('/scrumboard/ganados/{id}', [ScrumboarddController::class, 'deleteGanado']);
 
 
-// Rutas para proyectos observados
-Route::post('/scrumboard/observados/handle', [ScrumboarddController::class, 'handleObservado']);
-Route::get('/scrumboard/tasks/{taskId}/observados', [ScrumboarddController::class, 'getObservados']);
-Route::delete('/scrumboard/observados/{id}', [ScrumboarddController::class, 'deleteObservado']);
-// Rutas para proyectos rechazados
-Route::post('/scrumboard/rechazados/handle', [ScrumboarddController::class, 'handleRechazado']);
-Route::get('/scrumboard/tasks/{taskId}/rechazados', [ScrumboarddController::class, 'getRechazados']);
-Route::delete('/scrumboard/rechazados/{id}', [ScrumboarddController::class, 'deleteRechazado']);
+    // Rutas para proyectos observados
+    Route::post('/scrumboard/observados/handle', [ScrumboarddController::class, 'handleObservado']);
+    Route::get('/scrumboard/tasks/{taskId}/observados', [ScrumboarddController::class, 'getObservados']);
+    Route::delete('/scrumboard/observados/{id}', [ScrumboarddController::class, 'deleteObservado']);
+    // Rutas para proyectos rechazados
+    Route::post('/scrumboard/rechazados/handle', [ScrumboarddController::class, 'handleRechazado']);
+    Route::get('/scrumboard/tasks/{taskId}/rechazados', [ScrumboarddController::class, 'getRechazados']);
+    Route::delete('/scrumboard/rechazados/{id}', [ScrumboarddController::class, 'deleteRechazado']);
 
-// routes/web.php o routes/api.php
+    // routes/web.php o routes/api.php
 
 });
 
@@ -1239,3 +1243,7 @@ Route::get('/compras/{id}/devoluciones', [ComprasController::class, 'obtenerDevo
 
 
 Route::post('/compras/devolucion', [ComprasController::class, 'procesarDevolucion'])->name('compras.devolucion');
+if (app()->environment('local')) {
+    Route::view('/__preview/custodia', 'solicitud.solicitudcustodia.index')
+        ->name('solicitudcustodia.index'); // así tu sidebar sigue funcionando
+}
