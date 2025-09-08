@@ -62,15 +62,15 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             <div class="bg-primary from-blue-500 to-indigo-600 rounded-xl shadow-lg p-5 text-white">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-sm font-medium">Total en Custodia</h3>
+                    <h3 class="text-sm font-medium">Total de Solicitudes</h3>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-75" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 7l9-4 9 4-9 4-9-4zm0 0v10l9 4 9-4V7" />
                     </svg>
                 </div>
-                <p class="text-2xl font-bold mt-2">{{ $totalCustodias }}</p>
-                <p class="text-xs opacity-75 mt-1">Equipos en custodia</p>
+                <p class="text-2xl font-bold mt-2">{{ $totalSolicitudes  }}</p>
+                <p class="text-xs opacity-75 mt-1">Solicitudes</p>
             </div>
 
             <div class="bg-warning from-amber-500 to-orange-500 rounded-xl shadow-lg p-5 text-white">
@@ -136,16 +136,16 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                                         </svg>
-                                        #{{ $custodia->idCustodias }}
+                                        #{{ $custodia->codigocustodias }}
                                     </span>
 
                                     <span
                                         class="px-3 py-1 
-                        @if ($custodia->estado == 'Pendiente') bg-red-100 text-red-800
-                        @elseif($custodia->estado == 'En revisión') bg-yellow-100 text-yellow-800
-                        @elseif($custodia->estado == 'Aprobado') bg-blue-100 text-blue-800
-                        @elseif($custodia->estado == 'Rechazado') bg-purple-100 text-purple-800
-                        @elseif($custodia->estado == 'Devuelto') bg-green-100 text-green-800
+                        @if ($custodia->estado == 'Pendiente') bg-warning text-white
+                        @elseif($custodia->estado == 'En revisión') bg-secondary text-white
+                        @elseif($custodia->estado == 'Aprobado') bg-succsess text-white
+                        @elseif($custodia->estado == 'Rechazado') bg-danger text-white
+                        @elseif($custodia->estado == 'Devuelto') bg-info text-white
                         @else bg-gray-100 text-gray-800 @endif
                         text-xs font-medium rounded-full">
                                         {{ $custodia->estado }}
