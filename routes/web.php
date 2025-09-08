@@ -1262,3 +1262,5 @@ if (app()->environment('local')) {
 Route::get('/preview/custodia', [CustodiaController::class, 'index'])->name('solicitudcustodia.index');
 Route::post('/tickets/{id}/actualizar-custodia', [CustodiaController::class, 'actualizarCustodia']);
 Route::get('/tickets/{id}/custodia', [CustodiaController::class, 'verificarCustodia']);
+Route::get('/solicitud/custodia/opciones/{id}', [CustodiaController::class, 'opciones'])->name('solicitudcustodia.opciones');
+

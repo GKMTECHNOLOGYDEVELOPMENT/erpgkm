@@ -23,7 +23,7 @@
             </div>
             <ul class="perfect-scrollbar relative font-semibold space-y-0.5 h-[calc(100vh-80px)] overflow-y-auto overflow-x-hidden  p-4 py-0"
                 x-data="{ activeDropdown: null }">
-                 <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'dashboard' }"
                         @click="activeDropdown === 'dashboard' ? activeDropdown = null : activeDropdown = 'dashboard'">
                         <div class="flex items-center">
@@ -64,9 +64,9 @@
                             <a href="{{ route('commercial') }}">Comercial</a>
                         </li>
                     </ul>
-                </li> 
+                </li>
 
-                 <h2
+                <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
                     <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"
@@ -74,11 +74,11 @@
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                     <span>Apps GKM</span>
-                </h2> 
+                </h2>
 
                 <li class="nav-item">
                     <ul>
-                         <li class="nav-item">
+                        <li class="nav-item">
                             <a href="{{ route('apps.chat') }}" class="group">
                                 <div class="flex items-center">
 
@@ -95,8 +95,8 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Chat</span>
                                 </div>
                             </a>
-                        </li> 
-                         <li class="nav-item">
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('apps.mailbox') }}" class="group">
                                 <div class="flex items-center">
 
@@ -119,8 +119,8 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Correo</span>
                                 </div>
                             </a>
-                        </li> 
-                         <li class="nav-item">
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('apps.todolist') }}" class="group">
                                 <div class="flex items-center">
 
@@ -138,8 +138,8 @@
                                         Correo</span>
                                 </div>
                             </a>
-                        </li> 
-                         <li class="nav-item">
+                        </li>
+                        <li class="nav-item">
                             <a href="{{ route('apps.notes') }}" class="group">
                                 <div class="flex items-center">
 
@@ -162,7 +162,7 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Notas</span>
                                 </div>
                             </a>
-                        </li> 
+                        </li>
                         <li class="nav-item">
                             <a href="/apps/scrumboard" class="group">
                                 <div class="flex items-center">
@@ -183,7 +183,7 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Scrumboard</span>
                                 </div>
                             </a>
-                        </li> 
+                        </li>
                         <li class="nav-item">
                             <a href="{{ route('apps.contacts') }}" class="group">
                                 <div class="flex items-center">
@@ -202,74 +202,75 @@
                                         class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Contactos</span>
                                 </div>
                             </a>
-                        </li> 
+                        </li>
                         @php
                             use Illuminate\Support\Facades\Auth;
                         @endphp
-                        @if(Auth::check() && Auth::user()->idRol != 6)
+                        @if (Auth::check() && Auth::user()->idRol != 6)
+                            <li class="menu nav-item">
+                                <button type="button" class="nav-link group"
+                                    :class="{ 'active': activeDropdown === 'invoice' }"
+                                    @click="activeDropdown === 'invoice' ? activeDropdown = null : activeDropdown = 'invoice'">
+                                    <div class="flex items-center">
 
-                        <li class="menu nav-item">
-                            <button type="button" class="nav-link group"
-                                :class="{ 'active': activeDropdown === 'invoice' }"
-                                @click="activeDropdown === 'invoice' ? activeDropdown = null : activeDropdown = 'invoice'">
-                                <div class="flex items-center">
+                                        <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                            viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd"
+                                                d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+                                                fill="currentColor" />
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                d="M12 5.25C12.4142 5.25 12.75 5.58579 12.75 6V6.31673C14.3804 6.60867 15.75 7.83361 15.75 9.5C15.75 9.91421 15.4142 10.25 15 10.25C14.5858 10.25 14.25 9.91421 14.25 9.5C14.25 8.82154 13.6859 8.10339 12.75 7.84748V11.3167C14.3804 11.6087 15.75 12.8336 15.75 14.5C15.75 16.1664 14.3804 17.3913 12.75 17.6833V18C12.75 18.4142 12.4142 18.75 12 18.75C11.5858 18.75 11.25 18.4142 11.25 18V17.6833C9.61957 17.3913 8.25 16.1664 8.25 14.5C8.25 14.0858 8.58579 13.75 9 13.75C9.41421 13.75 9.75 14.0858 9.75 14.5C9.75 15.1785 10.3141 15.8966 11.25 16.1525V12.6833C9.61957 12.3913 8.25 11.1664 8.25 9.5C8.25 7.83361 9.61957 6.60867 11.25 6.31673V6C11.25 5.58579 11.5858 5.25 12 5.25ZM11.25 7.84748C10.3141 8.10339 9.75 8.82154 9.75 9.5C9.75 10.1785 10.3141 10.8966 11.25 11.1525V7.84748ZM14.25 14.5C14.25 13.8215 13.6859 13.1034 12.75 12.8475V16.1525C13.6859 15.8966 14.25 15.1785 14.25 14.5Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        <span
+                                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Invoice</span>
+                                    </div>
+                                    <div class="rtl:rotate-180"
+                                        :class="{ '!rotate-90': activeDropdown === 'invoice' }">
 
-                                    <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
-                                        viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
-                                            fill="currentColor" />
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M12 5.25C12.4142 5.25 12.75 5.58579 12.75 6V6.31673C14.3804 6.60867 15.75 7.83361 15.75 9.5C15.75 9.91421 15.4142 10.25 15 10.25C14.5858 10.25 14.25 9.91421 14.25 9.5C14.25 8.82154 13.6859 8.10339 12.75 7.84748V11.3167C14.3804 11.6087 15.75 12.8336 15.75 14.5C15.75 16.1664 14.3804 17.3913 12.75 17.6833V18C12.75 18.4142 12.4142 18.75 12 18.75C11.5858 18.75 11.25 18.4142 11.25 18V17.6833C9.61957 17.3913 8.25 16.1664 8.25 14.5C8.25 14.0858 8.58579 13.75 9 13.75C9.41421 13.75 9.75 14.0858 9.75 14.5C9.75 15.1785 10.3141 15.8966 11.25 16.1525V12.6833C9.61957 12.3913 8.25 11.1664 8.25 9.5C8.25 7.83361 9.61957 6.60867 11.25 6.31673V6C11.25 5.58579 11.5858 5.25 12 5.25ZM11.25 7.84748C10.3141 8.10339 9.75 8.82154 9.75 9.5C9.75 10.1785 10.3141 10.8966 11.25 11.1525V7.84748ZM14.25 14.5C14.25 13.8215 13.6859 13.1034 12.75 12.8475V16.1525C13.6859 15.8966 14.25 15.1785 14.25 14.5Z"
-                                            fill="currentColor" />
-                                    </svg>
-                                    <span
-                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Invoice</span>
-                                </div>
-                                <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'invoice' }">
-
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                            stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </div>
-                            </button>
-                            <ul x-cloak x-show="activeDropdown === 'invoice'" x-collapse class="sub-menu text-gray-500">
-                                <li>
-                                    <a href="/apps/invoice/list">List</a>
-                                </li>
-                                <li>
-                                    <a href="/apps/invoice/preview">Preview</a>
-                                </li>
-                                <li>
-                                    <a href="/apps/invoice/add">Add</a>
-                                </li>
-                                <li>
-                                    <a href="/apps/invoice/edit">Edit</a>
-                                </li>
-                            </ul>
-                        </li> 
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                </button>
+                                <ul x-cloak x-show="activeDropdown === 'invoice'" x-collapse
+                                    class="sub-menu text-gray-500">
+                                    <li>
+                                        <a href="/apps/invoice/list">List</a>
+                                    </li>
+                                    <li>
+                                        <a href="/apps/invoice/preview">Preview</a>
+                                    </li>
+                                    <li>
+                                        <a href="/apps/invoice/add">Add</a>
+                                    </li>
+                                    <li>
+                                        <a href="/apps/invoice/edit">Edit</a>
+                                    </li>
+                                </ul>
+                            </li>
 
 
-                        <li class="nav-item">
-                            <a href="{{ route('apps.calendar') }}" class="group">
-                                <div class="flex items-center">
+                            <li class="nav-item">
+                                <a href="{{ route('apps.calendar') }}" class="group">
+                                    <div class="flex items-center">
 
-                                    <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
-                                        viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M6.94028 2C7.35614 2 7.69326 2.32421 7.69326 2.72414V4.18487C8.36117 4.17241 9.10983 4.17241 9.95219 4.17241H13.9681C14.8104 4.17241 15.5591 4.17241 16.227 4.18487V2.72414C16.227 2.32421 16.5641 2 16.98 2C17.3958 2 17.733 2.32421 17.733 2.72414V4.24894C19.178 4.36022 20.1267 4.63333 20.8236 5.30359C21.5206 5.97385 21.8046 6.88616 21.9203 8.27586L22 9H2.92456H2V8.27586C2.11571 6.88616 2.3997 5.97385 3.09665 5.30359C3.79361 4.63333 4.74226 4.36022 6.1873 4.24894V2.72414C6.1873 2.32421 6.52442 2 6.94028 2Z"
-                                            fill="currentColor" />
-                                        <path opacity="0.5"
-                                            d="M21.9995 14.0001V12.0001C21.9995 11.161 21.9963 9.66527 21.9834 9H2.00917C1.99626 9.66527 1.99953 11.161 1.99953 12.0001V14.0001C1.99953 17.7713 1.99953 19.6569 3.1711 20.8285C4.34267 22.0001 6.22829 22.0001 9.99953 22.0001H13.9995C17.7708 22.0001 19.6564 22.0001 20.828 20.8285C21.9995 19.6569 21.9995 17.7713 21.9995 14.0001Z"
-                                            fill="currentColor" />
-                                    </svg>
-                                    <span
-                                        class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Calendario</span>
-                                </div>
-                            </a>
-                        </li>
+                                        <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                            viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M6.94028 2C7.35614 2 7.69326 2.32421 7.69326 2.72414V4.18487C8.36117 4.17241 9.10983 4.17241 9.95219 4.17241H13.9681C14.8104 4.17241 15.5591 4.17241 16.227 4.18487V2.72414C16.227 2.32421 16.5641 2 16.98 2C17.3958 2 17.733 2.32421 17.733 2.72414V4.24894C19.178 4.36022 20.1267 4.63333 20.8236 5.30359C21.5206 5.97385 21.8046 6.88616 21.9203 8.27586L22 9H2.92456H2V8.27586C2.11571 6.88616 2.3997 5.97385 3.09665 5.30359C3.79361 4.63333 4.74226 4.36022 6.1873 4.24894V2.72414C6.1873 2.32421 6.52442 2 6.94028 2Z"
+                                                fill="currentColor" />
+                                            <path opacity="0.5"
+                                                d="M21.9995 14.0001V12.0001C21.9995 11.161 21.9963 9.66527 21.9834 9H2.00917C1.99626 9.66527 1.99953 11.161 1.99953 12.0001V14.0001C1.99953 17.7713 1.99953 19.6569 3.1711 20.8285C4.34267 22.0001 6.22829 22.0001 9.99953 22.0001H13.9995C17.7708 22.0001 19.6564 22.0001 20.828 20.8285C21.9995 19.6569 21.9995 17.7713 21.9995 14.0001Z"
+                                                fill="currentColor" />
+                                        </svg>
+                                        <span
+                                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Calendario</span>
+                                    </div>
+                                </a>
+                            </li>
                     </ul>
                 </li>
 
@@ -677,7 +678,7 @@
                     <span>ALMACEN</span>
                 </h2>
 
-                 <li class="menu nav-item">
+                <li class="menu nav-item">
                     <a href="/tables" class="nav-link group">
                         <div class="flex items-center">
 
@@ -700,7 +701,7 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Tables</span>
                         </div>
                     </a>
-                </li> 
+                </li>
 
 
 
@@ -782,7 +783,7 @@
                     </ul>
                 </li>
 
-                 <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'forms' }"
                         @click="activeDropdown === 'forms' ? activeDropdown = null : activeDropdown = 'forms'">
@@ -862,7 +863,7 @@
                             <a href="/forms/clipboard">Clipboard</a>
                         </li>
                     </ul>
-                </li> 
+                </li>
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -1373,10 +1374,7 @@
                         </li>
                     </ul>
                 </li>
-
-
-
-                        @endif
+                @endif
 
 
                 <h2
@@ -1395,12 +1393,12 @@
                         @click="activeDropdown === 'users' ? activeDropdown = null : activeDropdown = 'users'">
                         <div class="flex items-center">
 
-                            <!-- Icono relacionado con Ordenes de Trabajo (Martillo - Trabajo manual) -->
-                            <svg class="group-hover:!text-primary shrink-0 w-6 h-6" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0 w-6 h-6"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 2l6 6-10 10-6-6L16 2z" />
+                                    d="M9 2h6a2 2 0 012 2v2h-2V4H9v2H7V4a2 2 0 012-2zM5 8h14v12a2 2 0 01-2 2H7a2 2 0 01-2-2V8zm7 4a3 3 0 110 6 3 3 0 010-6zm0 0v-2m0 8v2" />
                             </svg>
+
 
                             <span
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes
@@ -1415,11 +1413,10 @@
                         </div>
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
-                        @if(Auth::check() && Auth::user()->idRol != 6)
-
-                        <li>
-                            <a href="{{ route('ordenes.smart') }}">Smart-Tv</a>
-                        </li>
+                        @if (Auth::check() && Auth::user()->idRol != 6)
+                            <li>
+                                <a href="{{ route('ordenes.smart') }}">Smart-Tv</a>
+                            </li>
                         @endif
 
                         <li>
@@ -1438,7 +1435,7 @@
 
 
 
-                
+
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
@@ -1456,14 +1453,18 @@
                         <div class="flex items-center">
 
                             <!-- Icono relacionado con Ordenes de Trabajo (Martillo - Trabajo manual) -->
-                            <svg class="group-hover:!text-primary shrink-0 w-6 h-6" xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 2l6 6-10 10-6-6L16 2z" />
+                            <svg class="group-hover:!text-primary shrink-0 w-6 h-6" fill="none"
+                                stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16 16l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
+                                <circle cx="8" cy="7" r="3" />
+                                <path d="M4 21c0-2.5 2-4.5 4.5-4.5S13 18.5 13 21" stroke-linecap="round" />
                             </svg>
 
+
                             <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Seguimiento Cliente</span>
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Seguimiento
+                                Cliente</span>
                         </div>
                         <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'seguimiento' }">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -1474,11 +1475,10 @@
                         </div>
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'seguimiento'" x-collapse class="sub-menu text-gray-500">
-                        @if(Auth::check() && Auth::user()->idRol != 6)
-
-                        <li>
-                            <a href="{{ route('Seguimiento.index') }}">Clientes</a>
-                        </li>
+                        @if (Auth::check() && Auth::user()->idRol != 6)
+                            <li>
+                                <a href="{{ route('Seguimiento.index') }}">Clientes</a>
+                            </li>
                         @endif
                     </ul>
                 </li>
@@ -1636,34 +1636,32 @@
                     </ul>
                 </li> --}}
 
-                @if(Auth::check() && Auth::user()->idRol != 6)
+                @if (Auth::check() && Auth::user()->idRol != 6)
+                    <h2
+                        class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
-                <h2
-                    class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
+                        <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>CONFIGURACIÓN</span>
+                    </h2>
 
-                    <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                    <span>CONFIGURACIÓN</span>
-                </h2>
+                    <li class="menu nav-item">
+                        <a href="{{ route('configuracion') }}" class="nav-link group">
+                            <div class="flex items-center">
 
-                <li class="menu nav-item">
-                    <a href="{{ route('configuracion') }}" class="nav-link group">
-                        <div class="flex items-center">
-
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
-                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M12 2C12.5523 2 13 2.44772 13 3V5.05884C14.1143 5.27789 15.1627 5.73961 16.07 6.41L17.657 4.82322C18.047 4.43317 18.6806 4.43317 19.0706 4.82322L19.1768 4.92941C19.5668 5.31946 19.5668 5.95302 19.1768 6.34307L17.59 7.93C18.2604 8.83734 18.7221 9.88569 18.9412 11H21C21.5523 11 22 11.4477 22 12C22 12.5523 21.5523 13 21 13H18.9412C18.7221 14.1143 18.2604 15.1627 17.59 16.07L19.1768 17.657C19.5668 18.047 19.5668 18.6806 19.1768 19.0706L19.0706 19.1768C18.6806 19.5668 18.047 19.5668 17.657 19.1768L16.07 17.59C15.1627 18.2604 14.1143 18.7221 13 18.9412V21C13 21.5523 12.5523 22 12 22C11.4477 22 11 21.5523 11 21V18.9412C9.88569 18.7221 8.83734 18.2604 7.93 17.59L6.34315 19.1768C5.9531 19.5668 5.31954 19.5668 4.92949 19.1768L4.8233 19.0706C4.43325 18.6806 4.43325 18.047 4.8233 17.657L6.41 16.07C5.73961 15.1627 5.27789 14.1143 5.05884 13H3C2.44772 13 2 12.5523 2 12C2 11.4477 2.44772 11 3 11H5.05884C5.27789 9.88569 5.73961 8.83734 6.41 7.93L4.82322 6.34315C4.43317 5.9531 4.43317 5.31954 4.82322 4.92949L4.92941 4.8233C5.31946 4.43325 5.95302 4.43325 6.34307 4.8233L7.93 6.41C8.83734 5.73961 9.88569 5.27789 11 5.05884V3C11 2.44772 11.4477 2 12 2ZM12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8Z"
-                                    fill="currentColor" />
-                            </svg>
-                            <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Configuración</span>
-                        </div>
-                    </a>
-                </li>
-
+                                <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd"
+                                        d="M12 2C12.5523 2 13 2.44772 13 3V5.05884C14.1143 5.27789 15.1627 5.73961 16.07 6.41L17.657 4.82322C18.047 4.43317 18.6806 4.43317 19.0706 4.82322L19.1768 4.92941C19.5668 5.31946 19.5668 5.95302 19.1768 6.34307L17.59 7.93C18.2604 8.83734 18.7221 9.88569 18.9412 11H21C21.5523 11 22 11.4477 22 12C22 12.5523 21.5523 13 21 13H18.9412C18.7221 14.1143 18.2604 15.1627 17.59 16.07L19.1768 17.657C19.5668 18.047 19.5668 18.6806 19.1768 19.0706L19.0706 19.1768C18.6806 19.5668 18.047 19.5668 17.657 19.1768L16.07 17.59C15.1627 18.2604 14.1143 18.7221 13 18.9412V21C13 21.5523 12.5523 22 12 22C11.4477 22 11 21.5523 11 21V18.9412C9.88569 18.7221 8.83734 18.2604 7.93 17.59L6.34315 19.1768C5.9531 19.5668 5.31954 19.5668 4.92949 19.1768L4.8233 19.0706C4.43325 18.6806 4.43325 18.047 4.8233 17.657L6.41 16.07C5.73961 15.1627 5.27789 14.1143 5.05884 13H3C2.44772 13 2 12.5523 2 12C2 11.4477 2.44772 11 3 11H5.05884C5.27789 9.88569 5.73961 8.83734 6.41 7.93L4.82322 6.34315C4.43317 5.9531 4.43317 5.31954 4.82322 4.92949L4.92941 4.8233C5.31946 4.43325 5.95302 4.43325 6.34307 4.8233L7.93 6.41C8.83734 5.73961 9.88569 5.27789 11 5.05884V3C11 2.44772 11.4477 2 12 2ZM12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8Z"
+                                        fill="currentColor" />
+                                </svg>
+                                <span
+                                    class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Configuración</span>
+                            </div>
+                        </a>
+                    </li>
                 @endif
 
 

@@ -125,5 +125,17 @@ public function verificarCustodia($id)
     return response()->json(['success' => true, 'es_custodia' => $ticket->es_custodia]);
 }
 
+public function opciones($id)
+{
+    $custodia = Custodia::with([
+        'ticket',
+        'ticket.cliente',
+        'ticket.cliente.tipoDocumento',
+        'ticket.marca',
+        'ticket.modelo'
+    ])->findOrFail($id);
+
+    return view('solicitud.solicitudcustodia.opciones', compact('custodia'));
+}
 
 }
