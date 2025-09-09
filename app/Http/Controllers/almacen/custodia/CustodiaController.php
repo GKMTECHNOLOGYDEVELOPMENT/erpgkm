@@ -4,10 +4,13 @@ namespace App\Http\Controllers\almacen\custodia;
 
 use App\Http\Controllers\Controller;
 use App\Models\Custodia;
+use App\Models\CustodiaUbicacion;
 use Illuminate\Support\Facades\DB;
 use App\Models\Ticket;
+use App\Models\Ubicacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 
@@ -70,7 +73,7 @@ class CustodiaController extends Controller
                     'fecha_ingreso_custodia' => now()->toDateString(),
                     'ubicacion_actual'       => $ubicacion,               // 👈 guarda ubicación
                     'responsable_entrega'    => null,
-                    'responsable_recepcion'  => auth()->id(),
+                    'id_responsable_recepcion'  => auth()->id(),
                     'observaciones'          => null,
                     'fecha_devolucion'       => null,
                 ]);
@@ -141,37 +144,75 @@ class CustodiaController extends Controller
             'responsableRecepcion' 
         ])->findOrFail($id);
 
-        return view('solicitud.solicitudcustodia.opciones', compact('custodia'));
+            $ubicaciones = Ubicacion::with('sucursal')->get();
+
+
+        return view('solicitud.solicitudcustodia.opciones', compact('custodia', 'ubicaciones'));
     }
 
-
-
-      public function update(Request $request, $id)
-    {
-        $custodia = Custodia::findOrFail($id);
-        
-        // Validar los datos
-        $validated = $request->validate([
-            'estado' => 'required|in:Pendiente,En revisión,Aprobado,Rechazado,Devuelto',
-            'ubicacion_actual' => 'required_if:estado,Aprobado|max:100',
-            'observaciones' => 'nullable|string',
-        ]);
-        
-        // Si ya está aprobado, no permitir cambiar la ubicación
-        if ($custodia->estado === 'Aprobado' && $request->estado !== 'Aprobado') {
-            $validated['ubicacion_actual'] = $custodia->ubicacion_actual;
-        }
-        
+public function update(Request $request, $id)
+{
+    $custodia = Custodia::findOrFail($id);
+    
+    // Validar los datos
+    $validated = $request->validate([
+        'estado' => 'required|in:Pendiente,En revisión,Aprobado,Rechazado,Devuelto',
+        'ubicacion_actual' => 'required_if:estado,Aprobado|max:100',
+        'observaciones' => 'nullable|string',
+        'idubicacion' => 'required_if:estado,Aprobado|exists:ubicacion,idUbicacion',
+        'observacion_almacen' => 'nullable|string',
+        'cantidad' => 'sometimes|integer|min:1'
+    ]);
+    
+    // Desactivar verificaciones de FK temporalmente (SOLO DESARROLLO)
+    DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+    
+    DB::beginTransaction();
+    
+    try {
         // Actualizar la custodia
         $custodia->update($validated);
         
-        // Siempre devolver respuesta JSON
+        // Si el estado es Aprobado, guardar en custodia_ubicacion
+        if ($request->estado === 'Aprobado') {
+            $ubicacion = Ubicacion::find($request->idubicacion);
+            
+            // Usar updateOrCreate con el formato correcto
+            CustodiaUbicacion::updateOrCreate(
+                ['idCustodia' => $custodia->id],
+                [
+                    'idUbicacion' => $request->idubicacion,
+                    'observacion' => $request->observacion_almacen,
+                    'cantidad' => $request->cantidad ?? 1,
+                    'updated_at' => now(),
+                    'created_at' => now() // Asegurar created_at
+                ]
+            );
+        } else if ($request->estado !== 'Aprobado') {
+            CustodiaUbicacion::where('idCustodia', $custodia->id)->delete();
+        }
+        
+        DB::commit();
+        
+        // Reactivar verificaciones de FK
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
         return response()->json([
             'success' => true,
             'message' => 'Custodia actualizada correctamente',
             'estado_actualizado' => $custodia->estado
         ]);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar la custodia: ' . $e->getMessage()
+        ], 500);
     }
+}
 
   
 }

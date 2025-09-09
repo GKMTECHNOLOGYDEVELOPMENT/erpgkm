@@ -34,4 +34,9 @@ class Custodia extends Model
         return $this->belongsTo(Usuario::class, 'id_responsable_recepcion', 'idUsuario');
     }
 
+    public function custodiaUbicacion()
+    {
+        return $this->hasOne(CustodiaUbicacion::class, 'idCustodia', 'id');
+    }
+
 }
