@@ -8,6 +8,7 @@ use Illuminate\Support\Carbon;
 use App\Models\Asistencia;
 use App\Models\Observacion;
 use App\Models\Usuario;
+use Illuminate\Support\Facades\Log;
 
 class AsistenciaController extends Controller
 {
@@ -47,10 +48,12 @@ class AsistenciaController extends Controller
         $agrupadas = $asistencias->groupBy(fn($a) => $a->idUsuario . '-' . Carbon::parse($a->fechaHora)->format('Y-m-d'));
 
         $datos = [];
+        $toleranciaAcumulada = []; // ✅ variable global por semana y usuario
+
 
         foreach ($usuarios as $usuario) {
             $tieneHistorial = Observacion::where('idUsuario', $usuario->idUsuario)->exists();
-            $periodo = Carbon::parse($fechaInicio)->toPeriod(Carbon::parse($fechaFin));
+            $periodo = collect(Carbon::parse($fechaInicio)->toPeriod(Carbon::parse($fechaFin)))->sort()->values();
             $obsUsuario = $observaciones[$usuario->idUsuario] ?? collect();
             $obsPorDia = $obsUsuario->groupBy(fn($obs) => Carbon::parse($obs->fechaHora)->format('Y-m-d'));
 
@@ -64,16 +67,29 @@ class AsistenciaController extends Controller
 
                 if ($entrada) {
                     $horaEntrada = Carbon::parse($entrada->fechaHora);
-                    $limiteHora = $fecha->isSaturday() ? $fecha->copy()->setTime(9, 0, 59) : $fecha->copy()->setTime(8, 0, 59);
+                    $limiteHora = $fecha->isSaturday()
+                        ? $fecha->copy()->setTime(9, 0, 0)
+                        : $fecha->copy()->setTime(8, 0, 0);
 
                     if ($fecha->isSunday()) {
                         $estadoColor = 'azul';
                     } elseif ($horaEntrada->lte($limiteHora)) {
                         $estadoColor = 'azul';
                     } else {
-                        $estadoColor = 'rojo';
+                        $minTarde = max(0, ceil(($horaEntrada->timestamp - $limiteHora->timestamp) / 60));
+                        $semanaKey = $usuario->idUsuario . '-' . $fecha->copy()->startOfWeek()->format('Y-m-d');
+                        $toleranciaAcumulada[$semanaKey] = ($toleranciaAcumulada[$semanaKey] ?? 0) + $minTarde;
+
+                        Log::debug("Usuario: {$usuario->idUsuario}, Fecha: {$fecha->toDateString()}, Tardanza: {$minTarde} min, Acumulado semana ({$semanaKey}): {$toleranciaAcumulada[$semanaKey]}");
+
+                        if ($toleranciaAcumulada[$semanaKey] <= 5) {
+                            $estadoColor = 'amarillo';
+                        } else {
+                            $estadoColor = 'rojo';
+                        }
                     }
                 }
+
 
                 $obsDelDiaTodas = $obsPorDia[$fecha->format('Y-m-d')] ?? collect();
                 $obsAprobada = $obsDelDiaTodas->firstWhere('estado', 1);
