@@ -144,88 +144,34 @@ class CustodiaController extends Controller
         return view('solicitud.solicitudcustodia.opciones', compact('custodia'));
     }
 
-    public function update(Request $request, $id)
+
+
+      public function update(Request $request, $id)
     {
-        $custodia = Custodia::with('ticket')->findOrFail($id);
-
-        $request->validate([
-            'estado'               => 'required|in:Pendiente,En revisión,Aprobado,Rechazado,Devuelto',
-            'ubicacion_actual'     => 'nullable|string|max:100',
-            'observaciones'        => 'nullable|string',
-            'fecha_devolucion'     => 'nullable|date',
-            'responsable_recepcion' => 'nullable|string|max:100',
+        $custodia = Custodia::findOrFail($id);
+        
+        // Validar los datos
+        $validated = $request->validate([
+            'estado' => 'required|in:Pendiente,En revisión,Aprobado,Rechazado,Devuelto',
+            'ubicacion_actual' => 'required_if:estado,Aprobado|max:100',
+            'observaciones' => 'nullable|string',
         ]);
-
-        $estado = $request->input('estado');
-
-        // Reglas condicionales
-        if ($estado === 'Aprobado') {
-            $request->validate([
-                'ubicacion_actual' => 'required|string|max:100',
-            ]);
+        
+        // Si ya está aprobado, no permitir cambiar la ubicación
+        if ($custodia->estado === 'Aprobado' && $request->estado !== 'Aprobado') {
+            $validated['ubicacion_actual'] = $custodia->ubicacion_actual;
         }
-
-        if ($estado === 'Devuelto') {
-            $request->validate([
-                'fecha_devolucion'      => 'required|date',
-                'responsable_recepcion' => 'required|string|max:100',
-            ]);
-        }
-
-        DB::transaction(function () use ($request, $custodia, $estado) {
-            // Campos comunes
-            $custodia->estado           = $estado;
-            $custodia->ubicacion_actual = $request->input('ubicacion_actual');
-            $custodia->observaciones    = $request->input('observaciones');
-
-            switch ($estado) {
-                case 'Pendiente':
-                case 'En revisión':
-                    // En proceso → sigue apareciendo en lista y tarjetas
-                    $custodia->fecha_devolucion      = null;
-                    $custodia->responsable_recepcion = null;
-                    if ($custodia->ticket) {
-                        $custodia->ticket->es_custodia = 1;
-                        $custodia->ticket->save();
-                    }
-                    break;
-
-                case 'Aprobado':
-                    // “En custodia” real para las tarjetas
-                    $custodia->fecha_devolucion      = null;
-                    $custodia->responsable_recepcion = null;
-                    if ($custodia->ticket) {
-                        $custodia->ticket->es_custodia = 1;
-                        $custodia->ticket->save();
-                    }
-                    break;
-
-                case 'Devuelto':
-                    // Sale de “En Custodia”, sigue mostrándose pero en “Devueltos”
-                    $custodia->fecha_devolucion      = $request->input('fecha_devolucion');
-                    $custodia->responsable_recepcion = $request->input('responsable_recepcion');
-                    if ($custodia->ticket) {
-                        $custodia->ticket->es_custodia = 0;
-                        $custodia->ticket->save();
-                    }
-                    break;
-
-                case 'Rechazado':
-                    // Ya no aparecerá en el index (tu query lo excluye)
-                    $custodia->fecha_devolucion      = null;
-                    $custodia->responsable_recepcion = null;
-                    if ($custodia->ticket) {
-                        $custodia->ticket->es_custodia = 0;
-                        $custodia->ticket->save();
-                    }
-                    break;
-            }
-
-            $custodia->save();
-        });
-
-        return redirect()
-            ->route('solicitudcustodia.opciones', $custodia->id)
-            ->with('ok', 'Custodia actualizada correctamente.');
+        
+        // Actualizar la custodia
+        $custodia->update($validated);
+        
+        // Siempre devolver respuesta JSON
+        return response()->json([
+            'success' => true,
+            'message' => 'Custodia actualizada correctamente',
+            'estado_actualizado' => $custodia->estado
+        ]);
     }
+
+  
 }
