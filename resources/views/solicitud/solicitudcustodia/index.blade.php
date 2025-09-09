@@ -69,7 +69,7 @@
                             d="M3 7l9-4 9 4-9 4-9-4zm0 0v10l9 4 9-4V7" />
                     </svg>
                 </div>
-                <p class="text-2xl font-bold mt-2">{{ $totalSolicitudes  }}</p>
+                <p class="text-2xl font-bold mt-2">{{ $totalSolicitudes }}</p>
                 <p class="text-xs opacity-75 mt-1">Solicitudes</p>
             </div>
 
@@ -143,7 +143,7 @@
                                         class="px-3 py-1 
                         @if ($custodia->estado == 'Pendiente') bg-warning text-white
                         @elseif($custodia->estado == 'En revisión') bg-secondary text-white
-                        @elseif($custodia->estado == 'Aprobado') bg-succsess text-white
+                        @elseif($custodia->estado == 'Aprobado') bg-success text-white
                         @elseif($custodia->estado == 'Rechazado') bg-danger text-white
                         @elseif($custodia->estado == 'Devuelto') bg-info text-white
                         @else bg-gray-100 text-gray-800 @endif
@@ -217,9 +217,10 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-blue-500"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 极速2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    d="M3 12h13m0 0l-4-4m4 4l-4 4m7-9v10a2 2 0 01-2 2H7" />
                                             </svg>
-                                            <span class="text-sm text-gray-600">Ingreso:</span>
+
+                                            <span class="text-sm font-bold block mb-1">Ingreso:</span>
                                         </div>
                                         <span
                                             class="text-sm font-medium text-gray-900">{{ date('d/m/Y', strtotime($custodia->fecha_ingreso_custodia)) }}</span>
@@ -233,23 +234,23 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                                             </svg>
-                                            <span class="text-sm text-gray-600">Ticket:</span>
+                                            <span class="text-sm font-bold block mb-1">Ticket:</span>
                                         </div>
                                         <span
                                             class="text-sm font-medium text-purple-600">#{{ $custodia->ticket->numero_ticket ?? 'N/A' }}</span>
                                     </div>
 
                                     @if ($custodia->fecha_devolucion)
-                                        <div class="flex items-center justify-between p-2 bg-green-50 rounded-md">
+                                        <div class="flex items-center justify-between p-2 bg-dark-light rounded-md">
                                             <div class="flex items-center">
                                                 <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-4 w-4 mr-2 text-green-500" fill="none"
+                                                    class="h-4 w-4 mr-2 text-dark-light" fill="none"
                                                     viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2"
                                                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                                 </svg>
-                                                <span class="text-sm text-gray-600">Devolución:</span>
+                                                <span class="text-sm font-bold block mb-1">Devolución:</span>
                                             </div>
                                             <span
                                                 class="text-sm font-medium text-gray-900">{{ date('d/m/Y', strtotime($custodia->fecha_devolucion)) }}</span>
@@ -264,7 +265,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
-                                            <span class="text-sm text-gray-600">Tiempo:</span>
+                                            <span class="text-sm font-bold block mb-1">Tiempo:</span>
                                         </div>
                                         <span class="text-sm font-medium text-amber-600">
                                             @php
@@ -293,7 +294,7 @@
                                     <div class="p-2 bg-success-light rounded-md">
                                         <div class="flex items-start">
                                             <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 mr-2 text-teal-500 mt-0.5" fill="none"
+                                                class="h-4 w-4 mr-2 text-success mt-0.5" fill="none"
                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -301,13 +302,36 @@
                                                     d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                             </svg>
                                             <div class="w-full">
-                                                <span class="text-sm text-gray-600 block mb-1">Ubicación:</span>
+                                                <span class="text-sm font-bold block mb-1">Ubicación de
+                                                    Recepción:</span>
                                                 <p class="text-sm text-gray-900 break-words">
                                                     {{ $custodia->ubicacion_actual ?? 'Sin ubicación especificada' }}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
+                                    @if ($custodia->estado === 'Aprobado')
+                                        <div class="p-2 bg-danger-light rounded-md">
+                                            <div class="flex items-start">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    class="h-4 w-4 mr-2 text-danger mt-0.5" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M3 10h1l1 9a1 1 0 001 1h12a1 1 0 001-1l1-9h1M5 10h14M9 21v-5h6v5" />
+                                                </svg>
+                                                <div class="w-full">
+                                                    <span class="text-sm font-bold block mb-1">Ubicación de
+                                                        Almacén:</span>
+
+                                                    <p class="text-sm text-gray-900 break-words">
+                                                        Almacén Principal - Sede Lima
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                 </div>
                             </div>
 
