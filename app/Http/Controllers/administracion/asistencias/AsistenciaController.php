@@ -26,11 +26,11 @@ class AsistenciaController extends Controller
         $search = $request->input('search.value');
 
         $usuarios = \App\Models\Usuario::where('estado', 1)
-        ->where('departamento', 3926) // Solo departamento Lima
-        ->where('idTipoUsuario', '!=', 7) // Excluir tipo Invitado
-        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno')
-        ->get();
-    
+            ->where('departamento', 3926) // Solo departamento Lima
+            ->where('idTipoUsuario', '!=', 7) // Excluir tipo Invitado
+            ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno')
+            ->get();
+
 
         $usuarioIds = $usuarios->pluck('idUsuario');
 
@@ -64,13 +64,12 @@ class AsistenciaController extends Controller
 
                 if ($entrada) {
                     $horaEntrada = Carbon::parse($entrada->fechaHora);
-                    $limiteAzul = $fecha->isSaturday() ? $horaEntrada->copy()->setTime(9, 0, 59) : $horaEntrada->copy()->setTime(8, 0, 59);
-                    $limiteAmarillo = $fecha->isSaturday() ? $horaEntrada->copy()->setTime(9, 5, 59) : $horaEntrada->copy()->setTime(8, 5, 59);
+                    $limiteHora = $fecha->isSaturday() ? $fecha->copy()->setTime(9, 0, 59) : $fecha->copy()->setTime(8, 0, 59);
 
-                    if ($fecha->isSunday() || $horaEntrada->lte($limiteAzul)) {
+                    if ($fecha->isSunday()) {
                         $estadoColor = 'azul';
-                    } elseif ($horaEntrada->lte($limiteAmarillo)) {
-                        $estadoColor = 'amarillo';
+                    } elseif ($horaEntrada->lte($limiteHora)) {
+                        $estadoColor = 'azul';
                     } else {
                         $estadoColor = 'rojo';
                     }
@@ -152,28 +151,28 @@ class AsistenciaController extends Controller
 
         $order = $request->input('order', []);
         $columns = $request->input('columns', []);
-        
+
         if (!empty($order)) {
             foreach ($order as $ord) {
                 $colIdx = $ord['column'];
                 $dir = $ord['dir'];
                 $colName = $columns[$colIdx]['data'] ?? null;
-        
+
                 $filtrados = $filtrados->sortBy(function ($item) use ($colName) {
                     // Orden especial para fecha
                     if ($colName === 'fecha') {
                         return strtotime($item['fecha'] ?? '0000-00-00');
                     }
-        
+
                     // Orden especial para asistencia
                     if ($colName === 'asistencia') {
                         return $item['asistencia'] === 'ASISTIÓ' ? 1 : 0;
                     }
-        
+
                     // Resto
                     return strtolower($item[$colName] ?? '');
                 }, SORT_REGULAR, $dir === 'desc');
-        
+
                 $filtrados = $filtrados->values(); // resetear índices después del sort
             }
         } else {
@@ -183,14 +182,13 @@ class AsistenciaController extends Controller
                 fn($a, $b) => strtotime($b['entrada'] ?? '') <=> strtotime($a['entrada'] ?? '')
             ])->values();
         }
-        
+
         return response()->json([
             'draw' => intval($draw),
             'recordsTotal' => count($datos),
             'recordsFiltered' => $filtrados->count(),
             'data' => $filtrados->slice($start)->take($length)->values()
         ]);
-        
     }
 
 
@@ -205,7 +203,7 @@ class AsistenciaController extends Controller
         $observacion->estado = $request->estado;
         $observacion->respuesta = $request->respuesta ?? null; // importante: también puede ser cadena vacía
         $observacion->save();
-        
+
 
         return response()->json(['success' => true]);
     }
