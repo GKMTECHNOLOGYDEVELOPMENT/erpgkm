@@ -20,7 +20,7 @@ class Custodia extends Model
         'observaciones',
         'ubicacion_actual',
         'responsable_entrega',
-        'responsable_recepcion',
+        'id_responsable_recepcion',
     ];
 
     // Relación con Ticket
@@ -28,4 +28,10 @@ class Custodia extends Model
     {
         return $this->belongsTo(Ticket::class, 'id_ticket', 'idTickets');
     }
+
+    public function responsableRecepcion()
+    {
+        return $this->belongsTo(Usuario::class, 'id_responsable_recepcion', 'idUsuario');
+    }
+
 }

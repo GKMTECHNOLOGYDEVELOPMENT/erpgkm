@@ -137,7 +137,8 @@ class CustodiaController extends Controller
             'ticket.cliente',
             'ticket.cliente.tipoDocumento',
             'ticket.marca',
-            'ticket.modelo'
+            'ticket.modelo',
+            'responsableRecepcion' 
         ])->findOrFail($id);
 
         return view('solicitud.solicitudcustodia.opciones', compact('custodia'));

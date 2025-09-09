@@ -271,12 +271,12 @@
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </span>
-                            <input type="text" id="responsable_recepcion" name="responsable_recepcion"
+                            <input type="text" id="id_responsable_recepcion" name="id_responsable_recepcion"
                                 maxlength="100"
-                                value="{{ old('responsable_recepcion', $custodia->responsable_recepcion) }}"
+                                value="{{ $custodia->responsableRecepcion ? $custodia->responsableRecepcion->Nombre . ' ' . $custodia->responsableRecepcion->apellidoPaterno : '' }}"
                                 class="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
-                                placeholder="Nombre y apellido"
-                                {{ $custodia->estado === 'Devuelto' ? '' : 'disabled' }}>
+                                placeholder="Nombre y apellido" disabled>
+
                         </div>
                         @error('responsable_recepcion')
                             <p class="mt-1 text-sm textred-600 flex items-center gap-1.5"><svg
