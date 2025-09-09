@@ -69,8 +69,8 @@ class CustodiaController extends Controller
                     'estado'                 => 'Pendiente',
                     'fecha_ingreso_custodia' => now()->toDateString(),
                     'ubicacion_actual'       => $ubicacion,               // 👈 guarda ubicación
-                    'responsable_entrega'    => Auth::user()->name ?? null,
-                    'responsable_recepcion'  => null,
+                    'responsable_entrega'    => null,
+                    'responsable_recepcion'  => auth()->id(),
                     'observaciones'          => null,
                     'fecha_devolucion'       => null,
                 ]);
