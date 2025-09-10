@@ -12,7 +12,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v极速6m0 0v6m0-6h6m-6 0H6" />
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     Nueva Custodia
                 </button>
@@ -21,41 +21,55 @@
 
         <!-- Filtros -->
         <div class="panel rounded-xl shadow-sm p-4 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                <div class="md:col-span-2">
-                    <div class="relative">
-                        <input type="text" placeholder="Buscar por cliente, modelo o serie..."
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 outline-none transition-colors duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+            <form method="GET" action="{{ route('solicitudcustodia.index') }}">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <div class="md:col-span-2">
+                        <div class="relative">
+                            <input type="text" name="search" placeholder="Buscar por cliente, modelo o serie..."
+                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 outline-none transition-colors duration-300"
+                                value="{{ request('search') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <select name="estado"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 outline-none transition-colors duration-300">
+                            <option value="Todos los estados" {{ request('estado') == 'Todos los estados' ? 'selected' : '' }}>Todos los estados</option>
+                            <option value="Pendiente" {{ request('estado') == 'Pendiente' ? 'selected' : '' }}>Pendiente</option>
+                            <option value="En revisión" {{ request('estado') == 'En revisión' ? 'selected' : '' }}>En revisión</option>
+                            <option value="Aprobado" {{ request('estado') == 'Aprobado' ? 'selected' : '' }}>Aprobado</option>
+                            <option value="Rechazado" {{ request('estado') == 'Rechazado' ? 'selected' : '' }}>Rechazado</option>
+                            <option value="Devuelto" {{ request('estado') == 'Devuelto' ? 'selected' : '' }}>Devuelto</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit"
+                            class="w-full bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                            </svg>
+                            Filtrar
+                        </button>
+                    </div>
+                    <div>
+                        @if(request('search') || request('estado'))
+                            <a href="{{ route('solicitudcustodia.index') }}"
+                                class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Limpiar
+                            </a>
+                        @endif
                     </div>
                 </div>
-                <div>
-                    <select
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 outline-none transition-colors duration-300">
-                        <option selected>Todos los estados</option>
-                        <option>Pendiente</option>
-                        <option>En revisión</option>
-                        <option>Aprobado</option>
-                        <option>Rechazado</option>
-                        <option>Devuelto</option>
-                    </select>
-                </div>
-                <div>
-                    <button
-                        class="w-full bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5极速 w-5 mr-1" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        Filtrar
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
 
         <!-- Tarjetas de estadísticas -->
@@ -112,8 +126,8 @@
                     </svg>
 
                 </div>
-                <p class="text-2xl font-bold mt极速-2">{{ $devueltos }}</p>
-                <p class="text-xs opacity-极速75 mt-1">Equipos devueltos</p>
+                <p class="text-2xl font-bold mt-2">{{ $devueltos }}</p>
+                <p class="text-xs opacity-75 mt-1">Equipos devueltos</p>
             </div>
         </div>
 
@@ -315,18 +329,26 @@
                                             <div class="flex items-start">
                                                 <svg xmlns="http://www.w3.org/2000/svg"
                                                     class="h-4 w-4 mr-2 text-danger mt-0.5" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    viewBox="0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2"
                                                         d="M3 10h1l1 9a1 1 0 001 1h12a1 1 0 001-1l1-9h1M5 10h14M9 21v-5h6v5" />
                                                 </svg>
                                                 <div class="w-full">
-                                                    <span class="text-sm font-bold block mb-1">Ubicación de
-                                                        Almacén:</span>
-
-                                                    <p class="text-sm text-gray-900 break-words">
-                                                        Almacén Principal - Sede Lima
-                                                    </p>
+                                                    <span class="text-sm font-bold block mb-1">Ubicación de Almacén:</span>
+                                                    
+                                                    @if(isset($custodia->custodiaUbicacion) && isset($custodia->custodiaUbicacion->ubicacion))
+                                                        <p class="text-sm text-gray-900 break-words">
+                                                            {{ $custodia->custodiaUbicacion->ubicacion->nombre }}
+                                                        </p>
+                                                        @if($custodia->custodiaUbicacion->observacion)
+                                                            <p class="text-xs text-gray-600 mt-1">
+                                                                Obs: {{ $custodia->custodiaUbicacion->observacion }}
+                                                            </p>
+                                                        @endif
+                                                    @else
+                                                        <p class="text-sm text-gray-500 italic">Sin ubicación asignada</p>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>

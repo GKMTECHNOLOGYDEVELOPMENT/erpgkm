@@ -265,7 +265,12 @@ public function deleteCotizacion($id)
         DB::table('cronograma_tareas')
             ->where('idSeguimiento', $task->idseguimiento)
             ->where('idpersona', $task->idpersona)
+            ->where(function ($query) {
+                $query->where('parent_task_id', 0)
+                    ->orWhereNull('parent_task_id');
+            })
             ->update(['nombre' => $taskData['title'], 'updated_at' => now()]);
+
 
 
         // Actualizar datos específicos

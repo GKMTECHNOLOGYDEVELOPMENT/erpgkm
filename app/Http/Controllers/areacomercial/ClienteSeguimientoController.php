@@ -417,6 +417,9 @@ class ClienteSeguimientoController extends Controller
             'cliente' => $cliente
         ]);
     }
+
+
+    
     public function destroy(string $id)
     {
         $cliente = Cliente::find($id);
