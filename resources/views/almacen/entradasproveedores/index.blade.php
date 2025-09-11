@@ -163,7 +163,6 @@
 
 
                      <!-- Tabla de productos -->
-                     <!-- Tabla de productos -->
                      <div class="overflow-x-auto">
                          <table class="min-w-full divide-y divide-gray-200">
                              <thead class="bg-gray-50">
@@ -209,20 +208,7 @@
                                                  x-model="producto.cantidad" @change="actualizarSubtotal(producto)"
                                                  min="1">
                                          </td>
-                                         <!-- En la tabla de productos, reemplazar el campo oculto por uno visible -->
-                                         <td class="px-4 py-4 whitespace-nowrap">
-                                             <input type="number" step="0.01"
-                                                 class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
-                                                 x-model="producto.precio" @change="actualizarSubtotal(producto)">
-                                         </td>
-                                         <td class="px-4 py-4 whitespace-nowrap" style="display: none;">
-                                             <input type="number" step="0.01"
-                                                 class="w-24 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-right bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
-                                                 x-model="producto.precio_venta" placeholder="Precio venta">
-                                         </td>
-                                         <td class="px-4 py-4 whitespace-nowrap text-right text-gray-800 dark:text-gray-100"
-                                             x-text="formatCurrency(producto.subtotal)">
-                                         </td>
+                                        
                                          <td class="px-4 py-4 whitespace-nowrap text-center">
                                              <button
                                                  class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
@@ -734,7 +720,8 @@
                                             <button type="button" @click="toggleMonedaVenta()"
                                                 class="text-gray-500 px-2 h-10 border-b border-gray-300">
                                                 <span x-text="monedaVentaActual?.simbolo || 'S/'"
-                                                    class="w-8 text-center"></span>
+                                      
+                             class="w-8 text-center"></span>
                                             </button>
                                             <input type="number" step="0.01" class="clean-input"
                                                 x-model="nuevoProducto.precio_venta">
