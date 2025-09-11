@@ -2888,7 +2888,58 @@ class OrdenesHelpdeskController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="LEVANTAMIENTO TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
+    public function generateConformidadLevantamientoPdf($idOt)
+    {
+        try {
+            $data = $this->obtenerDatosCompartidos($idOt);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+        }
+        // ✅ Convierte la imagen de fondo en base64
+        $backgroundPath = public_path('assets/images/hojamembretada.jpg');
+        $backgroundBase64 = null;
+        if (file_exists($backgroundPath)) {
+            $backgroundBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($backgroundPath));
+        }
+        $html = view(
+            'tickets.ordenes-trabajo.helpdesk.levantamiento.conformidad.pdf.index',
+            array_merge($data, [
+                'modoVistaPrevia' => false,
+                'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
+                'backgroundBase64' => $backgroundBase64 // 👈 lo paso a la vista
+            ])
+        )->render();
 
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(0, 0, 0, 0)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
+
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        $cmd = "\"C:\\Program Files\\gs\\gs10.05.1\\bin\\gswin64c.exe\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json(['success' => false, 'message' => 'Ghostscript no logró comprimir el PDF.'], 500);
+        }
+
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
+
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename=\"CONFORMIDAD LEVANTAMIENTO ' . $data['orden']->numero_ticket . '.pdf\"');
+    }
 
     public function generateLevantamientoPdfVisita($idOt, $idVisita)
     {
@@ -3292,6 +3343,62 @@ class OrdenesHelpdeskController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
+
+    public function generateConformidadLaboratorioPdf($idOt)
+    {
+        try {
+            $data = $this->obtenerDatosCompartidos($idOt);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+        }
+
+        // ✅ Convierte la imagen de fondo en base64
+        $backgroundPath = public_path('assets/images/hojamembretada.jpg');
+        $backgroundBase64 = null;
+        if (file_exists($backgroundPath)) {
+            $backgroundBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($backgroundPath));
+        }
+
+        $html = view(
+            'tickets.ordenes-trabajo.helpdesk.laboratorio.conformidad.pdf.index', // 👈 ruta laboratorio
+            array_merge($data, [
+                'modoVistaPrevia' => false,
+                'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
+                'backgroundBase64' => $backgroundBase64
+            ])
+        )->render();
+
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(0, 0, 0, 0)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
+
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        $cmd = "\"C:\\Program Files\\gs\\gs10.05.1\\bin\\gswin64c.exe\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json(['success' => false, 'message' => 'Ghostscript no logró comprimir el PDF.'], 500);
+        }
+
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
+
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename=\"CONFORMIDAD LABORATORIO ' . $data['orden']->numero_ticket . '.pdf\"');
+    }
+
 
     public function generateLabPdfVisitaApp($idOt, $idVisita)
     {
@@ -3719,8 +3826,140 @@ class OrdenesHelpdeskController extends Controller
             ->header('Content-Type', 'application/pdf')
             ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
+    private function mapUbigeos($data)
+    {
+        $map = [];
+        foreach ($data as $grupo) {
+            if (is_array($grupo)) {
+                foreach ($grupo as $item) {
+                    // Guardamos solo el nombre_ubigeo
+                    $map[$item['id_ubigeo']] = $item['nombre_ubigeo'];
+                }
+            }
+        }
+        return $map;
+    }
+
+    private function obtenerDatosCompartidos($idOt)
+    {
+        $orden = Ticket::with([
+            'cliente.tipodocumento',
+            'clienteGeneral',
+            'tecnico.tipodocumento',
+            'tienda',
+            'marca',
+            'modelo.categoria',
+            'transicion_status_tickets.estado_ot',
+            'visitas.tecnico.tipodocumento',
+            'visitas.anexos_visitas',
+            'visitas.fotostickest',
+        ])->findOrFail($idOt);
+
+        $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
+
+        $logoClienteGeneral = $orden->clienteGeneral && !empty($orden->clienteGeneral->foto)
+            ? $this->procesarLogoMarca($orden->clienteGeneral->foto)
+            : null;
+
+        // ✅ Rutas corregidas
+        $provinciasData = file_exists(public_path('ubigeos/provincias.json'))
+            ? json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true)
+            : [];
+
+        $distritosData = file_exists(public_path('ubigeos/distritos.json'))
+            ? json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true)
+            : [];
+
+        // Aplanar JSON con nombres
+        $provincias = $this->mapUbigeos($provinciasData);
+        $distritos  = $this->mapUbigeos($distritosData);
+
+        $tienda = $orden->tienda;
+
+        // Obtener nombres
+        $provinciaNombre = $provincias[$tienda->provincia] ?? 'N/A';
+        $distritoNombre  = $distritos[$tienda->distrito] ?? 'N/A';
 
 
+        $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
+        if (!$seleccionada) {
+            throw new \Exception('No se encontró una visita seleccionada.');
+        }
+        $backgroundPath = public_path('assets/images/hojamembretada.jpg');
+        $backgroundBase64 = null;
+
+        if (file_exists($backgroundPath)) {
+            $backgroundBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($backgroundPath));
+        }
+        $idVisita = $seleccionada->idVisitas;
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisita)->first();
+        $tecnico = $visitaSeleccionada->tecnico ?? null;
+
+        $visitas = collect();
+        if ($visitaSeleccionada) {
+            $visitas = collect([[
+                'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                'fecha_programada' => $visitaSeleccionada->fecha_programada
+                    ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada))
+                    : 'N/A',
+                'tecnico' => trim(($visitaSeleccionada->tecnico->Nombre ?? '') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? '')),
+                'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'DNI',
+                'documento' => $visitaSeleccionada->tecnico->documento ?? 'N/A',
+            ]]);
+        }
+
+        $firma = DB::table('firmas')->where('idTickets', $idOt)->where('idVisitas', $idVisita)->first();
+
+        $firmaCliente = $firma && $firma->firma_cliente
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            : null;
+
+        $firmaTecnico = $visitaSeleccionada && $visitaSeleccionada->tecnico && $visitaSeleccionada->tecnico->firma
+            ? 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma)
+            : null;
+
+        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
+            ? \Carbon\Carbon::parse($visitaSeleccionada->fecha_inicio)->format('d/m/Y')
+            : 'N/A';
+
+        return compact(
+            'orden',
+            'fechaCreacion',
+            'visitas',
+            'firma',
+            'firmaCliente',
+            'firmaTecnico',
+            'logoGKM',
+            'logoClienteGeneral',
+            'backgroundBase64',
+            'provinciaNombre',
+            'distritoNombre'
+        );
+    }
+
+
+    public function generateConformidadPdf($idOt)
+    {
+        try {
+            $data = $this->obtenerDatosCompartidos($idOt);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+        }
+        $html = view('tickets.ordenes-trabajo.helpdesk.soporte.conformidad.pdf.index', array_merge($data, ['modoVistaPrevia' => false, 'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],]))->render();
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+        Browsershot::html($html)->format('A4')->fullPage()->noSandbox()->setDelay(2000)->margins(0, 0, 0, 0)->emulateMedia('screen')->waitUntilNetworkIdle()->showBackground()->save($tempOriginal);
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        $cmd = "\"C:\\Program Files\\gs\\gs10.05.1\\bin\\gswin64c.exe\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json(['success' => false, 'message' => 'Ghostscript no logró comprimir el PDF.'], 500);
+        }
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
+        return response($pdfOutput)->header('Content-Type', 'application/pdf')->header('Content-Disposition', 'inline; filename="CONFORMIDAD CLIENTE ' . $data['orden']->numero_ticket . '.pdf"');
+    }
 
 
     public function generateEjecucionPdf($idOt)
@@ -3905,7 +4144,7 @@ class OrdenesHelpdeskController extends Controller
             ->fullPage()
             ->noSandbox()
             ->setDelay(2000)
-            ->margins(2.5, 2.5, 2.5, 2.5)
+            ->margins(0, 0, 0, 0)
             ->emulateMedia('screen')
             ->waitUntilNetworkIdle()
             ->showBackground()
@@ -3938,6 +4177,59 @@ class OrdenesHelpdeskController extends Controller
             ->header('Content-Disposition', 'inline; filename="INFORME TECNICO ' . $orden->numero_ticket . '.pdf"');
     }
 
+    public function generateConformidadEjecucionPdf($idOt)
+    {
+
+        try {
+            $data = $this->obtenerDatosCompartidos($idOt);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 404);
+        }
+        // ✅ Convierte la imagen de fondo en base64
+        $backgroundPath = public_path('assets/images/hojamembretada.jpg');
+        $backgroundBase64 = null;
+        if (file_exists($backgroundPath)) {
+            $backgroundBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($backgroundPath));
+        }
+        $html = view(
+            'tickets.ordenes-trabajo.helpdesk.ejecucion.conformidad.pdf.index',
+            array_merge($data, [
+                'modoVistaPrevia' => false,
+                'emitente' => (object)['nome' => 'GKM TECHNOLOGY S.A.C.'],
+                'backgroundBase64' => $backgroundBase64 // 👈 lo paso a la vista
+            ])
+        )->render();
+
+        $tempOriginal = tempnam(sys_get_temp_dir(), 'pdf_raw_') . '.pdf';
+
+        Browsershot::html($html)
+            ->format('A4')
+            ->fullPage()
+            ->noSandbox()
+            ->setDelay(2000)
+            ->margins(0, 0, 0, 0)
+            ->emulateMedia('screen')
+            ->waitUntilNetworkIdle()
+            ->showBackground()
+            ->save($tempOriginal);
+
+        $tempCompressed = tempnam(sys_get_temp_dir(), 'pdf_compressed_') . '.pdf';
+        $cmd = "\"C:\\Program Files\\gs\\gs10.05.1\\bin\\gswin64c.exe\" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH -sOutputFile=\"{$tempCompressed}\" \"{$tempOriginal}\"";
+        exec($cmd, $output, $exitCode);
+
+        if ($exitCode !== 0 || !file_exists($tempCompressed) || filesize($tempCompressed) === 0) {
+            @unlink($tempOriginal);
+            return response()->json(['success' => false, 'message' => 'Ghostscript no logró comprimir el PDF.'], 500);
+        }
+
+        $pdfOutput = file_get_contents($tempCompressed);
+        @unlink($tempOriginal);
+        @unlink($tempCompressed);
+
+        return response($pdfOutput)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'inline; filename=\"CONFORMIDAD EJECUCION ' . $data['orden']->numero_ticket . '.pdf\"');
+    }
 
     public function generateSoportePdfVisita($idOt, $idVisita)
     {

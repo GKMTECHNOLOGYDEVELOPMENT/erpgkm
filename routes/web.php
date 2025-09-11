@@ -659,6 +659,9 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
         ->name('helpdesk.laboratorio.edit');
     Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLaboratorioPdf'])
         ->name('helpdesk.pdf.laboratorio');
+    Route::get('/helpdesk/pdf/conformidad/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateConformidadLaboratorioPdf'])
+    ->name('helpdesk.pdf.conformidad.laboratorio');
+
     Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])
         ->name('helpdesk.pdf.laboratorio');
     //EJECUCION
@@ -667,6 +670,12 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/helpdesk/pdf/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateLevantamientoPdf'])
         ->name('helpdesk.pdf.levantamiento');
     Route::get('/helpdesk/pdf/soporte/{idOt}', [OrdenesHelpdeskController::class, 'generateSoportePdf'])->name('helpdesk.pdf.soporte');
+    Route::get('/helpdesk/pdf/conformidad/{idOt}', [OrdenesHelpdeskController::class, 'generateConformidadPdf'])
+        ->name('helpdesk.pdf.conformidad');
+    Route::get('/helpdesk/pdf/conformidad/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateConformidadLevantamientoPdf'])
+    ->name('helpdesk.pdf.conformidad.levantamiento');
+    Route::get('/helpdesk/pdf/conformidad/ejecucion/{idOt}', [OrdenesHelpdeskController::class, 'generateConformidadEjecucionPdf'])
+    ->name('helpdesk.pdf.conformidad.ejecucion');
     Route::get('/helpdesk/pdf/ejecucion/{idOt}', [OrdenesHelpdeskController::class, 'generateEjecucionPdf'])->name('helpdesk.pdf.ejecucion');
     // ***** RUTAS GENERALES *****
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update');
@@ -1247,14 +1256,6 @@ Route::get('/compras/{id}/devoluciones', [ComprasController::class, 'obtenerDevo
 
 Route::post('/compras/devolucion', [ComprasController::class, 'procesarDevolucion'])->name('compras.devolucion');
 if (app()->environment('local')) {
-
-
-
-
-
-
-
-
 }
 // Route::view('/__preview/custodia', 'solicitud.solicitudcustodia.index')->name('solicitudcustodia.index');}
 
@@ -1272,4 +1273,3 @@ Route::get('/solicitud/custodia/opciones/{id}', [CustodiaController::class, 'opc
 
 Route::put('/solicitud/custodia/{id}', [CustodiaController::class, 'update'])
     ->name('solicitudcustodia.update');
-

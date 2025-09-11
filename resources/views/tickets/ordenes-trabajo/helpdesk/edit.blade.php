@@ -85,6 +85,19 @@
             iframe.onload = () => loadingSpinner.classList.add('hidden');
     
             window.cargarPdfDesdeAlpine = this.cargarPdf;
+        },
+        cargarConformidadPdf() {
+            const iframe = document.getElementById('conformidadPdfFrame');
+            const loadingSpinner = document.getElementById('loadingSpinnerConformidad');
+    
+            loadingSpinner.classList.remove('hidden');
+    
+            const ruta = iframe.getAttribute('data-src');
+            iframe.src = ruta + '?' + new Date().getTime();
+    
+            iframe.onload = () => loadingSpinner.classList.add('hidden');
+    
+            window.cargarConformidadPdfDesdeAlpine = this.cargarConformidadPdf;
         }
     }">
 
@@ -219,6 +232,21 @@
                         Informe
                     </a>
                 </li>
+                <li>
+                    <a href="javascript:;"
+                        class="p-5 sm:p-7 py-2 sm:py-3 flex flex-col items-center justify-center rounded-lg 
+               bg-[#f1f2f3] dark:bg-[#191e3a] hover:!bg-success hover:text-white hover:shadow-md 
+               transition-all text-xs sm:text-sm"
+                        :class="{ '!bg-success text-white': tab === 'conformidad' }"
+                        @click="tab = 'conformidad'; $nextTick(() => cargarConformidadPdf())">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 mb-1" fill="none" stroke="currentColor"
+                            stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h16v16H4V4zM8 10h8M8 14h4" />
+                        </svg>
+                        Conformidad
+                    </a>
+                </li>
+
 
                 @if ($existeFlujo25)
                     <li>
@@ -308,6 +336,20 @@
                         </div>
                     </div>
                 </div>
+                <div x-show="tab === 'conformidad'">
+                    @include('tickets.ordenes-trabajo.helpdesk.levantamiento.conformidad.index')
+
+                    <!-- Spinner -->
+                    <div id="loadingSpinnerConformidad"
+                        class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                            role="status">
+                            <span class="w-5 h-5 m-auto mb-10">
+                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             @elseif ($tipoServicio == 6)
                 {{-- Laboratorio --}}
                 <div x-show="tab === 'detalle'">
@@ -333,6 +375,20 @@
                 <div x-show="tab === 'informe'">
                     @include('tickets.ordenes-trabajo.helpdesk.laboratorio.informe.index')
                     <div id="loadingSpinner"
+                        class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                            role="status">
+                            <span class="w-5 h-5 m-auto mb-10">
+                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div x-show="tab === 'conformidad'">
+                    @include('tickets.ordenes-trabajo.helpdesk.laboratorio.conformidad.index')
+
+                    <!-- Spinner -->
+                    <div id="loadingSpinnerConformidad"
                         class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
                         <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
                             role="status">
@@ -373,6 +429,20 @@
                         </div>
                     </div>
                 </div>
+                <div x-show="tab === 'conformidad'">
+                    @include('tickets.ordenes-trabajo.helpdesk.ejecucion.conformidad.index')
+
+                    <!-- Spinner -->
+                    <div id="loadingSpinnerConformidad"
+                        class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                            role="status">
+                            <span class="w-5 h-5 m-auto mb-10">
+                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             @elseif ($tipoServicio == 1)
                 {{-- Soporte On Site --}}
                 <div x-show="tab === 'detalle'">
@@ -398,6 +468,20 @@
                 <div x-show="tab === 'informe'">
                     @include('tickets.ordenes-trabajo.helpdesk.soporte.informe.index')
                     <div id="loadingSpinner"
+                        class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
+                        <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
+                            role="status">
+                            <span class="w-5 h-5 m-auto mb-10">
+                                <span class="animate-ping inline-flex h-full w-full rounded-full bg-info"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div x-show="tab === 'conformidad'">
+                    @include('tickets.ordenes-trabajo.helpdesk.soporte.conformidad.index')
+
+                    <!-- Spinner -->
+                    <div id="loadingSpinnerConformidad"
                         class="absolute inset-0 flex items-center justify-center bg-gray-200 bg-opacity-70 z-10 hidden">
                         <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 border-t-4 border-gray-200 rounded-full"
                             role="status">
