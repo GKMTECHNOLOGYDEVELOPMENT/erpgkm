@@ -17,33 +17,68 @@ use Illuminate\Support\Str;
 class CustodiaController extends Controller
 {
 
-    public function index()
-    {
-        $custodias = Custodia::with([
-            'ticket',
-            'ticket.cliente',
-            'ticket.cliente.tipoDocumento',
-            'ticket.marca',
-            'ticket.modelo'
-        ])
-            ->where('estado', '!=', 'Rechazado')   // ⬅️ ocultar rechazados en la lista
-            ->orderBy('created_at', 'desc')
-            ->paginate(9);
+   public function index(Request $request)
+{
+    $query = Custodia::with([
+        'ticket',
+        'ticket.cliente',
+        'ticket.cliente.tipoDocumento',
+        'ticket.marca',
+        'ticket.modelo'
+    ])
+    ->where('estado', '!=', 'Rechazado');
 
-        // Tarjetas (sin Rechazado en el total)
-        $totalSolicitudes = Custodia::where('estado', '!=', 'Rechazado')->count(); // total sin rechazados
-        $pendientes       = Custodia::where('estado', 'Pendiente')->count();
-        $enCustodia       = Custodia::where('estado', 'Aprobado')->count();      // SOLO aprobados
-        $devueltos        = Custodia::where('estado', 'Devuelto')->count();
-
-        return view('solicitud.solicitudcustodia.index', compact(
-            'custodias',
-            'totalSolicitudes',
-            'pendientes',
-            'enCustodia',
-            'devueltos'
-        ));
+    // Filtro de búsqueda
+    if ($request->has('search') && !empty($request->search)) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('codigocustodias', 'like', "%{$search}%")
+              ->orWhereHas('ticket', function($q2) use ($search) {
+                  $q2->where('serie', 'like', "%{$search}%")
+                     ->orWhere('numero_ticket', 'like', "%{$search}%")
+                     ->orWhereHas('cliente', function($q3) use ($search) {
+                         $q3->where('nombre', 'like', "%{$search}%")
+                            ->orWhere('documento', 'like', "%{$search}%");
+                     })
+                     ->orWhereHas('marca', function($q3) use ($search) {
+                         $q3->where('nombre', 'like', "%{$search}%");
+                     })
+                     ->orWhereHas('modelo', function($q3) use ($search) {
+                         $q3->where('nombre', 'like', "%{$search}%");
+                     });
+              });
+        });
     }
+
+    // Filtro por estado
+    if ($request->has('estado') && $request->estado != 'Todos los estados') {
+        $query->where('estado', $request->estado);
+    }
+
+    $custodias = $query->orderBy('created_at', 'desc')->paginate(9);
+
+    // Estadísticas (siempre sin incluir rechazados)
+    $totalSolicitudes = Custodia::where('estado', '!=', 'Rechazado')->count();
+    $pendientes = Custodia::where('estado', 'Pendiente')->count();
+    $enCustodia = Custodia::where('estado', 'Aprobado')->count();
+    $devueltos = Custodia::where('estado', 'Devuelto')->count();
+
+    // Mantener los filtros en la paginación
+    if ($request->has('search')) {
+        $custodias->appends(['search' => $request->search]);
+    }
+    if ($request->has('estado')) {
+        $custodias->appends(['estado' => $request->estado]);
+    }
+
+    return view('solicitud.solicitudcustodia.index', compact(
+        'custodias',
+        'totalSolicitudes',
+        'pendientes',
+        'enCustodia',
+        'devueltos'
+    ));
+}
 
 
     public function actualizarCustodia(Request $request, $id)

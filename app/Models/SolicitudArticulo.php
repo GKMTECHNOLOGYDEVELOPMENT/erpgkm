@@ -26,7 +26,12 @@ class SolicitudArticulo extends Model
         return $this->belongsTo(Solicitud::class, 'idSolicitud');
     }
 
-    
+
+      // Relación con el artículo
+    public function articulo()
+    {
+        return $this->belongsTo(Articulo::class, 'idArticulo', 'idArticulos');
+    }
 
     
 }
