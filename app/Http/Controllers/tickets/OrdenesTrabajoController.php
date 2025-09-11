@@ -1221,11 +1221,13 @@ class OrdenesTrabajoController extends Controller
                     'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')
                         ->latest('fecha_programada')
                         ->limit(1),
-                    'transicion_status_tickets' => fn($q) => $q->when($request->filled('idVisita'), 
-                    fn($q2) => $q2->whereHas('seleccionarVisita', 
-                        fn($q3) => $q3->where('idVisitas', $request->idVisita)
-                    )->where('idEstadoots', 3)
-                )
+                    'transicion_status_tickets' => fn($q) => $q->when(
+                        $request->filled('idVisita'),
+                        fn($q2) => $q2->whereHas(
+                            'seleccionarVisita',
+                            fn($q3) => $q3->where('idVisitas', $request->idVisita)
+                        )->where('idEstadoots', 3)
+                    )
                 ])
                 ->where('idTipotickets', $tipoTicket);
 
@@ -1253,11 +1255,11 @@ class OrdenesTrabajoController extends Controller
                         ->orWhere('serie', 'LIKE', "%{$searchValue}%")
                         ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
                         ->orWhereHas('modelo', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('cliente', function ($q) use ($searchValue) {
-                            $q->where('nombre', 'LIKE', "%{$searchValue}%");
-                        });
+                        ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                        ->orWhereHas('ticketflujo.estadoflujo', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%"));
                 });
             }
+
 
             // Ordenación
             $query->orderBy('fecha_creacion', 'desc');
