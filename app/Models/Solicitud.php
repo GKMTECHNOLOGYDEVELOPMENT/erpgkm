@@ -99,5 +99,29 @@ public function articulos() {
 }
 
 
+ public function solicitudArticulos()
+    {
+        return $this->hasMany(SolicitudArticulo::class, 'idSolicitud', 'idSolicitud');
+    }
+
+	 // Relación con el usuario solicitante
+    public function usuarioSolicitante()
+    {
+        return $this->belongsTo(User::class, 'idUsuariosoli', 'id');
+    }
+
+	 // Relación con el área/departamento a través del usuario
+    public function area()
+    {
+        return $this->hasOneThrough(
+            TipoArea::class,
+            User::class,
+            'id', // Foreign key on users table...
+            'idTipoArea', // Foreign key on tipo_areas table...
+            'idUsuariosoli', // Local key on solicitud table...
+            'id' // Local key on users table...
+        );
+    }
+
 
 }

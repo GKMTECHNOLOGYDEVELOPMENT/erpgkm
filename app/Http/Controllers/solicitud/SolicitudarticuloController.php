@@ -181,12 +181,76 @@ class SolicitudarticuloController extends Controller
         return view('solicitud.solicitudarticulo.opciones', compact('solicitud'));
     }
 
+public function edit($id)
+{
+    // Obtener el usuario autenticado con su relación tipoArea
+    $usuario = auth()->user()->load('tipoArea');
 
-    public function edit($id)
-    {
+    // Obtener todas las áreas
+    $areas = \App\Models\TipoArea::all();
 
-        $solicitud  = SolicitudArticulo::findOrFail($id);
+    // Obtener todos los artículos activos con su relación tipoArticulo
+    $articulos = \App\Models\Articulo::with('tipoArticulo')
+        ->where('estado', 1)
+        ->get();
 
-        return view('solicitud.solicitudarticulo.edit', compact('solicitud'));
+    // Obtener la solicitud específica a editar con sus artículos relacionados
+    $solicitud = \App\Models\Solicitud::with(['solicitudArticulos.articulo', 'usuarioSolicitante'])
+        ->findOrFail($id);
+
+    // Retornar la vista con todos los datos necesarios
+    return view("solicitud.solicitudarticulo.edit", [
+        'usuario' => $usuario,
+        'areas' => $areas,
+        'articulos' => $articulos,
+        'solicitud' => $solicitud
+    ]);
+}
+
+// MÉTODO UPDATE
+public function update(Request $request, $id)
+{
+    // Validar los datos recibidos
+    $validated = $request->validate([
+        'codigoSolicitud' => 'required|string',
+        'articulos' => 'required|array',
+        'articulos.*.articulo_id' => 'required|exists:articulos,idArticulos',
+        'articulos.*.cantidad' => 'required|integer|min:1',
+        'urgencia' => 'required|in:1,2,3',
+        'fecha_requerida' => 'required|date',
+        'notas' => 'nullable|string'
+    ]);
+
+    try {
+        // Encontrar la solicitud existente
+        $solicitud = Solicitud::findOrFail($id);
+        
+        // Actualizar los datos de la solicitud
+        $solicitud->codigoSolicitud = $request->codigoSolicitud;
+        $solicitud->nivelUrgencia = $request->urgencia;
+        $solicitud->fecharequerida = $request->fecha_requerida;
+        $solicitud->comentario = $request->notas;
+        $solicitud->save();
+
+        // Eliminar los artículos anteriores
+        SolicitudArticulo::where('idSolicitud', $solicitud->idSolicitud)->delete();
+
+        // Agregar los nuevos artículos
+        foreach ($request->articulos as $articuloData) {
+            SolicitudArticulo::create([
+                'idSolicitud' => $solicitud->idSolicitud,
+                'codigoSolicitud' => $solicitud->codigoSolicitud,
+                'idArticulo' => $articuloData['articulo_id'],
+                'cantidad' => $articuloData['cantidad'],
+                'descripcion' => $articuloData['descripcion'] ?? null
+            ]);
+        }
+
+        return redirect()->route('solicitudarticulo.index')
+            ->with('success', 'Solicitud actualizada correctamente.');
+            
+    } catch (\Exception $e) {
+        return back()->withInput()->with('error', 'Error al actualizar la solicitud: ' . $e->getMessage());
     }
+}
 }

@@ -6,17 +6,7 @@
                 <h1 class="text-3xl font-bold text-indigo-700">Sistema de Custodia de Equipos</h1>
                 <p class="text-gray-600 mt-2">Gestión y seguimiento de equipos en custodia</p>
             </div>
-            <div class="mt-4 md:mt-0">
-                <button
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center transition-all duration-300 transform hover:scale-105">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Nueva Custodia
-                </button>
-            </div>
+            
         </div>
 
         <!-- Filtros -->
@@ -48,7 +38,7 @@
                     </div>
                     <div>
                         <button type="submit"
-                            class="w-full bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                            class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

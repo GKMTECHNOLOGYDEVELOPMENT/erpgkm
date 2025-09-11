@@ -1264,7 +1264,7 @@
                             <a href="{{ route('compras.index') }}">Compras</a>
                         </li>
                         <li>
-                            <a href="{{ route('compras.index') }}">Lista de Compras</a>
+                            <a href="{{ route('entradasproveedores.index') }}">Entradas de proveedores</a>
                         </li>
                     </ul>
                 </li>
