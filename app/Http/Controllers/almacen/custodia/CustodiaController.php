@@ -17,68 +17,68 @@ use Illuminate\Support\Str;
 class CustodiaController extends Controller
 {
 
-   public function index(Request $request)
-{
-    $query = Custodia::with([
-        'ticket',
-        'ticket.cliente',
-        'ticket.cliente.tipoDocumento',
-        'ticket.marca',
-        'ticket.modelo'
-    ])
-    ->where('estado', '!=', 'Rechazado');
+    public function index(Request $request)
+    {
+        $query = Custodia::with([
+            'ticket',
+            'ticket.cliente',
+            'ticket.cliente.tipoDocumento',
+            'ticket.marca',
+            'ticket.modelo'
+        ])
+            ->where('estado', '!=', 'Rechazado');
 
-    // Filtro de búsqueda
-    if ($request->has('search') && !empty($request->search)) {
-        $search = $request->search;
-        $query->where(function($q) use ($search) {
-            $q->where('codigocustodias', 'like', "%{$search}%")
-              ->orWhereHas('ticket', function($q2) use ($search) {
-                  $q2->where('serie', 'like', "%{$search}%")
-                     ->orWhere('numero_ticket', 'like', "%{$search}%")
-                     ->orWhereHas('cliente', function($q3) use ($search) {
-                         $q3->where('nombre', 'like', "%{$search}%")
-                            ->orWhere('documento', 'like', "%{$search}%");
-                     })
-                     ->orWhereHas('marca', function($q3) use ($search) {
-                         $q3->where('nombre', 'like', "%{$search}%");
-                     })
-                     ->orWhereHas('modelo', function($q3) use ($search) {
-                         $q3->where('nombre', 'like', "%{$search}%");
-                     });
-              });
-        });
+        // Filtro de búsqueda
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('codigocustodias', 'like', "%{$search}%")
+                    ->orWhereHas('ticket', function ($q2) use ($search) {
+                        $q2->where('serie', 'like', "%{$search}%")
+                            ->orWhere('numero_ticket', 'like', "%{$search}%")
+                            ->orWhereHas('cliente', function ($q3) use ($search) {
+                                $q3->where('nombre', 'like', "%{$search}%")
+                                    ->orWhere('documento', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('marca', function ($q3) use ($search) {
+                                $q3->where('nombre', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('modelo', function ($q3) use ($search) {
+                                $q3->where('nombre', 'like', "%{$search}%");
+                            });
+                    });
+            });
+        }
+
+        // Filtro por estado
+        if ($request->has('estado') && $request->estado != 'Todos los estados') {
+            $query->where('estado', $request->estado);
+        }
+
+        $custodias = $query->orderBy('created_at', 'desc')->paginate(9);
+
+        // Estadísticas (siempre sin incluir rechazados)
+        $totalSolicitudes = Custodia::where('estado', '!=', 'Rechazado')->count();
+        $pendientes = Custodia::where('estado', 'Pendiente')->count();
+        $enCustodia = Custodia::where('estado', 'Aprobado')->count();
+        $devueltos = Custodia::where('estado', 'Devuelto')->count();
+
+        // Mantener los filtros en la paginación
+        if ($request->has('search')) {
+            $custodias->appends(['search' => $request->search]);
+        }
+        if ($request->has('estado')) {
+            $custodias->appends(['estado' => $request->estado]);
+        }
+
+        return view('solicitud.solicitudcustodia.index', compact(
+            'custodias',
+            'totalSolicitudes',
+            'pendientes',
+            'enCustodia',
+            'devueltos'
+        ));
     }
-
-    // Filtro por estado
-    if ($request->has('estado') && $request->estado != 'Todos los estados') {
-        $query->where('estado', $request->estado);
-    }
-
-    $custodias = $query->orderBy('created_at', 'desc')->paginate(9);
-
-    // Estadísticas (siempre sin incluir rechazados)
-    $totalSolicitudes = Custodia::where('estado', '!=', 'Rechazado')->count();
-    $pendientes = Custodia::where('estado', 'Pendiente')->count();
-    $enCustodia = Custodia::where('estado', 'Aprobado')->count();
-    $devueltos = Custodia::where('estado', 'Devuelto')->count();
-
-    // Mantener los filtros en la paginación
-    if ($request->has('search')) {
-        $custodias->appends(['search' => $request->search]);
-    }
-    if ($request->has('estado')) {
-        $custodias->appends(['estado' => $request->estado]);
-    }
-
-    return view('solicitud.solicitudcustodia.index', compact(
-        'custodias',
-        'totalSolicitudes',
-        'pendientes',
-        'enCustodia',
-        'devueltos'
-    ));
-}
 
 
     public function actualizarCustodia(Request $request, $id)
@@ -99,28 +99,29 @@ class CustodiaController extends Controller
         // ✅ PONER EN CUSTODIA
         if ($nuevoEstado === 1) {
             $ubicacion = trim($request->input('ubicacion_actual'));
+            $fechaIngreso = $request->input('fecha_ingreso_custodia'); // 👈 viene del frontend
 
             if (!$custodia) {
                 $custodia = Custodia::create([
                     'codigocustodias'        => strtoupper(Str::random(10)),
                     'id_ticket'              => $ticket->idTickets,
                     'estado'                 => 'Pendiente',
-                    'fecha_ingreso_custodia' => now()->toDateString(),
-                    'ubicacion_actual'       => $ubicacion,               // 👈 guarda ubicación
+                    'fecha_ingreso_custodia' => $fechaIngreso ?? now()->toDateString(), // 👈 usa la enviada
+                    'ubicacion_actual'       => $ubicacion,
                     'responsable_entrega'    => null,
                     'id_responsable_recepcion'  => auth()->id(),
                     'observaciones'          => null,
                     'fecha_devolucion'       => null,
                 ]);
             } else {
-                // Si existía, actualiza ubicación (y revive si estaba Rechazado)
-                $custodia->ubicacion_actual = $ubicacion;               // 👈 actualiza ubicación
+                // Si existía, actualiza ubicación y fecha
+                $custodia->ubicacion_actual = $ubicacion;
+                $custodia->fecha_ingreso_custodia = $fechaIngreso ?? $custodia->fecha_ingreso_custodia;
+
                 if ($custodia->estado === 'Rechazado') {
                     $custodia->estado = 'Pendiente';
                 }
-                if (empty($custodia->fecha_ingreso_custodia)) {
-                    $custodia->fecha_ingreso_custodia = now()->toDateString();
-                }
+
                 $custodia->save();
             }
 
@@ -131,8 +132,10 @@ class CustodiaController extends Controller
                 'success' => true,
                 'es_custodia' => 1,
                 'ubicacion_actual' => $custodia->ubicacion_actual,
+                'fecha_ingreso_custodia' => $custodia->fecha_ingreso_custodia
             ]);
         }
+
 
         // ✅ QUITAR DE CUSTODIA
         if ($nuevoEstado === 0) {
@@ -176,78 +179,75 @@ class CustodiaController extends Controller
             'ticket.cliente.tipoDocumento',
             'ticket.marca',
             'ticket.modelo',
-            'responsableRecepcion' 
+            'responsableRecepcion'
         ])->findOrFail($id);
 
-            $ubicaciones = Ubicacion::with('sucursal')->get();
+        $ubicaciones = Ubicacion::with('sucursal')->get();
 
 
         return view('solicitud.solicitudcustodia.opciones', compact('custodia', 'ubicaciones'));
     }
 
-public function update(Request $request, $id)
-{
-    $custodia = Custodia::findOrFail($id);
-    
-    // Validar los datos
-    $validated = $request->validate([
-        'estado' => 'required|in:Pendiente,En revisión,Aprobado,Rechazado,Devuelto',
-        'ubicacion_actual' => 'required_if:estado,Aprobado|max:100',
-        'observaciones' => 'nullable|string',
-        'idubicacion' => 'required_if:estado,Aprobado|exists:ubicacion,idUbicacion',
-        'observacion_almacen' => 'nullable|string',
-        'cantidad' => 'sometimes|integer|min:1'
-    ]);
-    
-    // Desactivar verificaciones de FK temporalmente (SOLO DESARROLLO)
-    DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-    
-    DB::beginTransaction();
-    
-    try {
-        // Actualizar la custodia
-        $custodia->update($validated);
-        
-        // Si el estado es Aprobado, guardar en custodia_ubicacion
-        if ($request->estado === 'Aprobado') {
-            $ubicacion = Ubicacion::find($request->idubicacion);
-            
-            // Usar updateOrCreate con el formato correcto
-            CustodiaUbicacion::updateOrCreate(
-                ['idCustodia' => $custodia->id],
-                [
-                    'idUbicacion' => $request->idubicacion,
-                    'observacion' => $request->observacion_almacen,
-                    'cantidad' => $request->cantidad ?? 1,
-                    'updated_at' => now(),
-                    'created_at' => now() // Asegurar created_at
-                ]
-            );
-        } else if ($request->estado !== 'Aprobado') {
-            CustodiaUbicacion::where('idCustodia', $custodia->id)->delete();
-        }
-        
-        DB::commit();
-        
-        // Reactivar verificaciones de FK
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Custodia actualizada correctamente',
-            'estado_actualizado' => $custodia->estado
-        ]);
-        
-    } catch (\Exception $e) {
-        DB::rollBack();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar la custodia: ' . $e->getMessage()
-        ], 500);
-    }
-}
+    public function update(Request $request, $id)
+    {
+        $custodia = Custodia::findOrFail($id);
 
-  
+        // Validar los datos
+        $validated = $request->validate([
+            'estado' => 'required|in:Pendiente,En revisión,Aprobado,Rechazado,Devuelto',
+            'ubicacion_actual' => 'required_if:estado,Aprobado|max:100',
+            'observaciones' => 'nullable|string',
+            'idubicacion' => 'required_if:estado,Aprobado|exists:ubicacion,idUbicacion',
+            'observacion_almacen' => 'nullable|string',
+            'cantidad' => 'sometimes|integer|min:1'
+        ]);
+
+        // Desactivar verificaciones de FK temporalmente (SOLO DESARROLLO)
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        DB::beginTransaction();
+
+        try {
+            // Actualizar la custodia
+            $custodia->update($validated);
+
+            // Si el estado es Aprobado, guardar en custodia_ubicacion
+            if ($request->estado === 'Aprobado') {
+                $ubicacion = Ubicacion::find($request->idubicacion);
+
+                // Usar updateOrCreate con el formato correcto
+                CustodiaUbicacion::updateOrCreate(
+                    ['idCustodia' => $custodia->id],
+                    [
+                        'idUbicacion' => $request->idubicacion,
+                        'observacion' => $request->observacion_almacen,
+                        'cantidad' => $request->cantidad ?? 1,
+                        'updated_at' => now(),
+                        'created_at' => now() // Asegurar created_at
+                    ]
+                );
+            } else if ($request->estado !== 'Aprobado') {
+                CustodiaUbicacion::where('idCustodia', $custodia->id)->delete();
+            }
+
+            DB::commit();
+
+            // Reactivar verificaciones de FK
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Custodia actualizada correctamente',
+                'estado_actualizado' => $custodia->estado
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la custodia: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

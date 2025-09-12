@@ -541,123 +541,149 @@
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const ticketId = '{{ $id }}';
-    const checkbox = document.getElementById('EsCustonia');
+    document.addEventListener('DOMContentLoaded', function() {
+        const ticketId = '{{ $id }}';
+        const checkbox = document.getElementById('EsCustonia');
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // Estado inicial
-    fetch(`/tickets/${ticketId}/custodia`)
-        .then(r => r.json())
-        .then(data => {
-            if (data.success && data.es_custodia === 1) {
-                checkbox.checked = true;
-            }
-        });
+        // Estado inicial
+        fetch(`/tickets/${ticketId}/custodia`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.es_custodia === 1) {
+                    checkbox.checked = true;
+                }
+            });
 
-    const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        // Función para enviar peticiones
+        const enviarPeticion = (payload) => {
+            return fetch(`/tickets/${ticketId}/actualizar-custodia`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf
+                },
+                body: JSON.stringify(payload)
+            }).then(async (response) => {
+                const data = await response.json();
+                if (!response.ok) throw data;
+                return data;
+            });
+        };
 
-    const enviarPeticion = (payload) => {
-        return fetch(`/tickets/${ticketId}/actualizar-custodia`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrf
-            },
-            body: JSON.stringify(payload)
-        }).then(async (response) => {
-            const data = await response.json();
-            if (!response.ok) throw data;
-            return data;
-        });
-    };
+        // Listener del switch de custodia
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                const marcado = this.checked;
 
-    if (checkbox) {
-        checkbox.addEventListener('change', function () {
-            const marcado = this.checked;
+                if (marcado) {
+                    // ACTIVAR custodia
+                    Swal.fire({
+                        title: 'Datos de custodia',
+                        html: `
+                        <input type="text" id="ubicacion" class="swal2-input"
+                               placeholder="Ej: Laboratorio, Zona TCL" maxlength="100">
+                        <input type="date" id="fecha" class="swal2-input">
+                    `,
+                        focusConfirm: false,
+                        showCancelButton: true,
+                        confirmButtonText: 'Guardar y poner en custodia',
+                        cancelButtonText: 'Cancelar',
+                        preConfirm: () => {
+                            const ubicacion = document.getElementById('ubicacion').value
+                                .trim();
+                            const fecha = document.getElementById('fecha').value;
 
-            if (marcado) {
-                // Pedir ubicación antes de confirmar
-                Swal.fire({
-                    title: 'Ingresa la ubicación del equipo',
-                    input: 'text',
-                    inputPlaceholder: 'Ej: Laboratorio, Zona TCL',
-                    inputAttributes: { maxlength: 100 },
-                    showCancelButton: true,
-                    confirmButtonText: 'Guardar y poner en custodia',
-                    cancelButtonText: 'Cancelar',
-                    preConfirm: (value) => {
-                        if (!value || !value.trim()) {
-                            Swal.showValidationMessage('La ubicación es obligatoria');
+                            if (!ubicacion) {
+                                Swal.showValidationMessage('La ubicación es obligatoria');
+                                return false;
+                            }
+                            if (!fecha) {
+                                Swal.showValidationMessage(
+                                    'La fecha de ingreso es obligatoria');
+                                return false;
+                            }
+                            return {
+                                ubicacion,
+                                fecha
+                            };
                         }
-                        return value.trim();
-                    }
-                }).then((result) => {
-                    if (!result.isConfirmed) {
-                        checkbox.checked = false;
-                        return;
-                    }
+                    }).then((result) => {
+                        if (!result.isConfirmed) {
+                            checkbox.checked = false;
+                            return;
+                        }
 
-                    const ubicacion = result.value;
+                        const {
+                            ubicacion,
+                            fecha
+                        } = result.value;
 
-                    enviarPeticion({
-                        es_custodia: 1,
-                        ubicacion_actual: ubicacion
-                    })
-                    .then(data => {
-                        Swal.fire(
-                            '¡Confirmado!',
-                            'El equipo ha sido puesto en custodia y se guardó la ubicación.',
-                            'success'
-                        );
-                    })
-                    .catch(error => {
-                        Swal.fire(
-                            'Error',
-                            error.message || 'Ocurrió un error al guardar.',
-                            'error'
-                        );
-                        checkbox.checked = false;
+                        enviarPeticion({
+                                es_custodia: 1,
+                                ubicacion_actual: ubicacion,
+                                fecha_ingreso_custodia: fecha // 🔹 Se puede modificar
+                            })
+                            .then(() => {
+                                Swal.fire(
+                                    '¡Confirmado!',
+                                    'El equipo ha sido puesto en custodia.',
+                                    'success'
+                                );
+                            })
+                            .catch(error => {
+                                Swal.fire(
+                                    'Error',
+                                    error.message || 'Ocurrió un error al guardar.',
+                                    'error'
+                                );
+                                checkbox.checked = false;
+                            });
                     });
-                });
 
-            } else {
-                // Quitar de custodia (sin pedir ubicación)
-                Swal.fire({
-                    title: '¿Estás seguro?',
-                    text: '¿Deseas quitar al equipo de custodia?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Sí, quitar',
-                    cancelButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (!result.isConfirmed) {
-                        checkbox.checked = true;
-                        return;
-                    }
-
-                    enviarPeticion({ es_custodia: 0 })
-                        .then(data => {
-                            Swal.fire(
-                                'Listo',
-                                'Custodia desactivada correctamente.',
-                                'success'
-                            );
-                        })
-                        .catch(error => {
-                            Swal.fire(
-                                'Error',
-                                error.message || 'Ocurrió un error al procesar la solicitud.',
-                                'error'
-                            );
+                } else {
+                    // DESACTIVAR custodia
+                    Swal.fire({
+                        title: '¿Quitar custodia?',
+                        text: 'Se registrará la fecha de devolución automáticamente.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, quitar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (!result.isConfirmed) {
                             checkbox.checked = true;
-                        });
-                });
-            }
-        });
-    }
-});
+                            return;
+                        }
+
+                        enviarPeticion({
+                                es_custodia: 0,
+                                fecha_devolucion: new Date().toISOString().split('T')[
+                                    0] // 🔹 Fecha actual
+                            })
+                            .then(() => {
+                                Swal.fire(
+                                    'Listo',
+                                    'Custodia desactivada correctamente.',
+                                    'success'
+                                );
+                            })
+                            .catch(error => {
+                                Swal.fire(
+                                    'Error',
+                                    error.message ||
+                                    'Ocurrió un error al procesar la solicitud.',
+                                    'error'
+                                );
+                                checkbox.checked = true;
+                            });
+                    });
+                }
+            });
+        }
+    });
 </script>
 
 
@@ -1477,7 +1503,7 @@ document.addEventListener('DOMContentLoaded', function () {
             let clienteGeneralId = document.getElementById('idClienteGeneral').value;
             if (!clienteGeneralId) {
                 cargarTodasLasMarcas
-            (); // Si no hay cliente general seleccionado al cargar la página, cargamos todas las marcas
+                    (); // Si no hay cliente general seleccionado al cargar la página, cargamos todas las marcas
             }
         };
 
@@ -1630,7 +1656,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let formData = new FormData(this); // Obtener los datos del formulario
             console.log('Datos del formulario:', Object.fromEntries(formData
-        .entries())); // Ver los datos del formulario
+                .entries())); // Ver los datos del formulario
 
             fetch('/guardar-cliente', {
                     method: 'POST',
@@ -1643,7 +1669,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         // Mostrar solo el primer error
                         for (let field in data.errors) {
                             toastr.error(data.errors[field][
-                            0]); // Mostrar solo el primer error del campo
+                                0
+                            ]); // Mostrar solo el primer error del campo
                             break; // Salir del bucle después de mostrar el primer error
                         }
                     } else {
@@ -1669,7 +1696,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let formData = new FormData(this); // Obtener los datos del formulario
             console.log('Datos del formulario:', Object.fromEntries(formData
-        .entries())); // Ver los datos del formulario
+                .entries())); // Ver los datos del formulario
 
             fetch('/guardar-cliente-general-smart', {
                     method: 'POST',
@@ -1705,7 +1732,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let formData = new FormData(this); // Obtener los datos del formulario
             console.log('Datos del formulario:', Object.fromEntries(formData
-        .entries())); // Ver los datos del formulario
+                .entries())); // Ver los datos del formulario
 
             fetch('/guardar-marca-smart', {
                     method: 'POST',
@@ -1719,7 +1746,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         // Mostrar solo el primer error de validación
                         for (let field in data.errors) {
                             toastr.error(data.errors[field][
-                            0]); // Mostrar solo el primer error de cada campo
+                                0
+                            ]); // Mostrar solo el primer error de cada campo
                             break; // Salir del bucle después de mostrar el primer error
                         }
                     } else if (data.error) {
@@ -1749,7 +1777,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             let formData = new FormData(this); // Obtener los datos del formulario
             console.log('Datos del formulario:', Object.fromEntries(formData
-        .entries())); // Ver los datos del formulario
+                .entries())); // Ver los datos del formulario
 
             fetch('/guardar-modelo-smart', {
                     method: 'POST',
