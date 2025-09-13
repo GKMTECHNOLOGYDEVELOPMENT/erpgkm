@@ -228,16 +228,19 @@
                                          <td class="px-4 py-4 whitespace-nowrap text-right text-gray-800 dark:text-gray-100"
                                              x-text="formatCurrency(producto.subtotal)">
                                          </td>
-                                         <td class="px-4 py-4 whitespace-nowrap text-center">
+                                         <td class="px-4 py-4 whitespace-nowrap text-center flex gap-2 justify-center">
+                                             <!-- Botón agregar series -->
+                                             <button @click="abrirModalSeries(producto)"
+                                                 class="text-blue-500 hover:text-blue-700" title="Agregar series">
+                                                 <i class="fa-solid fa-list-ol"></i>
+                                             </button>
+
+                                             <!-- Botón remover -->
                                              <button
                                                  class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                                                  @click="removerProducto(index)">
-                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                     viewBox="0 0 20 20" fill="currentColor">
-                                                     <path fill-rule="evenodd"
-                                                         d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                                         clip-rule="evenodd" />
-                                                 </svg>
+                                                 <i class="fa-regular fa-trash-can"></i>
+
                                              </button>
                                          </td>
                                      </tr>
@@ -247,6 +250,58 @@
                      </div>
                  </div>
              </div>
+             <div x-show="mostrarModalSeries" x-transition @keydown.window.escape="mostrarModalSeries=false"
+                 class="fixed inset-0 z-[999] flex items-center justify-center">
+                 <!-- overlay -->
+                 <div class="absolute inset-0 bg-black/60" @click="mostrarModalSeries=false"></div>
+
+                 <!-- dialog -->
+                 <div class="relative mx-auto w-full max-w-3xl px-4">
+                     <!-- contenedor modal -->
+                     <div class="bg-white rounded-xl shadow-xl flex flex-col overflow-hidden" style="height:85vh;">
+
+                         <!-- header -->
+                         <div class="px-6 py-4 border-b flex justify-between items-start shrink-0">
+                             <div>
+                                 <h2 class="text-lg font-semibold">Registrar series</h2>
+                                 <p class="text-xs text-gray-500">
+                                     Producto: <span x-text="productoSeleccionado?.nombre || ''"></span> ·
+                                     Cant.: <span x-text="productoSeleccionado?.cantidad || 0"></span>
+                                 </p>
+                             </div>
+                             <button @click="mostrarModalSeries=false"
+                                 class="text-gray-400 hover:text-gray-600 text-lg">×</button>
+                         </div>
+
+                         <!-- body scrollable -->
+                         <div class="px-6 py-4 flex-1 overflow-y-auto">
+                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                 <template x-for="(serie, idx) in seriesTemp" :key="idx">
+                                     <div class="space-y-1">
+                                         <label class="block text-sm font-medium text-gray-700">
+                                             Serie <span x-text="idx + 1"></span>
+                                         </label>
+                                         <input type="text" x-model="seriesTemp[idx]"
+                                             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                             :placeholder="'Serie ' + (idx + 1)">
+                                     </div>
+                                 </template>
+                             </div>
+                         </div>
+
+                         <!-- footer -->
+                         <div class="px-6 py-3 border-t flex justify-end gap-2 shrink-0">
+                             <button @click="mostrarModalSeries=false"
+                                 class="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Cancelar</button>
+                             <button @click="guardarSeries()"
+                                 class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">Guardar</button>
+                         </div>
+
+                     </div>
+                 </div>
+             </div>
+
+
 
              <!-- Sección derecha - Datos de la compra -->
              <div class="lg:col-span-1">
@@ -446,16 +501,21 @@
                                  const f = e.target.files[0];
                                  if (!f) return this.clear();
                                  const max = 5 * 1024 * 1024; // 5MB
-                                 if (f.size > max) { if (window.toastr) toastr.error('El archivo supera 5MB');
-                                     this.clear(); return; }
+                                 if (f.size > max) {
+                                     if (window.toastr) toastr.error('El archivo supera 5MB');
+                                     this.clear();
+                                     return;
+                                 }
                                  this.file = f;
                                  this.fileName = f.name;
                                  this.fileSize = f.size;
                              },
-                             clear() { this.file = null;
+                             clear() {
+                                 this.file = null;
                                  this.fileName = '';
                                  this.fileSize = 0;
-                                 $refs.fileInput.value = ''; }
+                                 $refs.fileInput.value = '';
+                             }
                          }">
                              <label class="block text-sm font-medium text-gray-700 mb-2">Adjuntar archivo</label>
 
@@ -873,11 +933,11 @@
                                                  <option value="dia">Dia</option>
                                                  <option value="dias">Días</option>
                                                  <option value="semanas">Semanas</option>
-                                                <option value="semana">Semana</option>
-                                                <option value="mes">Mes</option>
-                                                <option value="meses">Meses</option>
-                                                <option value="año">Año</option>
-                                                <option value="años">Años</option>
+                                                 <option value="semana">Semana</option>
+                                                 <option value="mes">Mes</option>
+                                                 <option value="meses">Meses</option>
+                                                 <option value="año">Año</option>
+                                                 <option value="años">Años</option>
                                              </select>
                                          </div>
 
@@ -899,43 +959,43 @@
                                          <h3 class="text-lg font-semibold text-gray-800">Precios</h3>
                                      </header>
 
-                                   <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10">
-                                    <!-- Compra -->
-                                    <div class="space-y-2">
-                                        <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                            <i class="fas fa-money-bill-wave"></i> Precio de compra
-                                        </label>
-                                        <div class="flex items-center gap-2">
-                                            <button type="button" @click="toggleMonedaCompra()"
-                                                class="text-gray-500 px-2 h-10 border-b border-gray-300">
-                                                <span x-text="monedaCompraActual?.simbolo || 'S/'"
-                                                    class="w-8 text-center"></span>
-                                            </button>
-                                            <input type="number" step="0.01" class="clean-input"
-                                                x-model="nuevoProducto.precio_compra">
-                                            <input type="hidden" id="moneda_compra" name="moneda_compra"
-                                                x-model="nuevoProducto.moneda_compra">
-                                        </div>
-                                    </div>
+                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-10">
+                                         <!-- Compra -->
+                                         <div class="space-y-2">
+                                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                 <i class="fas fa-money-bill-wave"></i> Precio de compra
+                                             </label>
+                                             <div class="flex items-center gap-2">
+                                                 <button type="button" @click="toggleMonedaCompra()"
+                                                     class="text-gray-500 px-2 h-10 border-b border-gray-300">
+                                                     <span x-text="monedaCompraActual?.simbolo || 'S/'"
+                                                         class="w-8 text-center"></span>
+                                                 </button>
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     x-model="nuevoProducto.precio_compra">
+                                                 <input type="hidden" id="moneda_compra" name="moneda_compra"
+                                                     x-model="nuevoProducto.moneda_compra">
+                                             </div>
+                                         </div>
 
-                                    <!-- Venta -->
-                                    <div class="space-y-2">
-                                        <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                            <i class="fas fa-tags"></i> Precio de venta
-                                        </label>
-                                        <div class="flex items-center gap-2">
-                                            <button type="button" @click="toggleMonedaVenta()"
-                                                class="text-gray-500 px-2 h-10 border-b border-gray-300">
-                                                <span x-text="monedaVentaActual?.simbolo || 'S/'"
-                                                    class="w-8 text-center"></span>
-                                            </button>
-                                            <input type="number" step="0.01" class="clean-input"
-                                                x-model="nuevoProducto.precio_venta">
-                                            <input type="hidden" id="moneda_venta" name="moneda_venta"
-                                                x-model="nuevoProducto.moneda_venta">
-                                        </div>
-                                    </div>
-                                </div>
+                                         <!-- Venta -->
+                                         <div class="space-y-2">
+                                             <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                 <i class="fas fa-tags"></i> Precio de venta
+                                             </label>
+                                             <div class="flex items-center gap-2">
+                                                 <button type="button" @click="toggleMonedaVenta()"
+                                                     class="text-gray-500 px-2 h-10 border-b border-gray-300">
+                                                     <span x-text="monedaVentaActual?.simbolo || 'S/'"
+                                                         class="w-8 text-center"></span>
+                                                 </button>
+                                                 <input type="number" step="0.01" class="clean-input"
+                                                     x-model="nuevoProducto.precio_venta">
+                                                 <input type="hidden" id="moneda_venta" name="moneda_venta"
+                                                     x-model="nuevoProducto.moneda_venta">
+                                             </div>
+                                         </div>
+                                     </div>
 
                                  </section>
                              </div>

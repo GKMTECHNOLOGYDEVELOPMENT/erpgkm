@@ -6,7 +6,7 @@
                 <h1 class="text-3xl font-bold text-indigo-700">Sistema de Custodia de Equipos</h1>
                 <p class="text-gray-600 mt-2">Gestión y seguimiento de equipos en custodia</p>
             </div>
-            
+
         </div>
 
         <!-- Filtros -->
@@ -18,8 +18,9 @@
                             <input type="text" name="search" placeholder="Buscar por cliente, modelo o serie..."
                                 class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 outline-none transition-colors duration-300"
                                 value="{{ request('search') }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
@@ -28,17 +29,23 @@
                     <div>
                         <select name="estado"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-200 focus:border-indigo-500 outline-none transition-colors duration-300">
-                            <option value="Todos los estados" {{ request('estado') == 'Todos los estados' ? 'selected' : '' }}>Todos los estados</option>
-                            <option value="Pendiente" {{ request('estado') == 'Pendiente' ? 'selected' : '' }}>Pendiente</option>
-                            <option value="En revisión" {{ request('estado') == 'En revisión' ? 'selected' : '' }}>En revisión</option>
-                            <option value="Aprobado" {{ request('estado') == 'Aprobado' ? 'selected' : '' }}>Aprobado</option>
-                            <option value="Rechazado" {{ request('estado') == 'Rechazado' ? 'selected' : '' }}>Rechazado</option>
-                            <option value="Devuelto" {{ request('estado') == 'Devuelto' ? 'selected' : '' }}>Devuelto</option>
+                            <option value="Todos los estados"
+                                {{ request('estado') == 'Todos los estados' ? 'selected' : '' }}>Todos los estados
+                            </option>
+                            <option value="Pendiente" {{ request('estado') == 'Pendiente' ? 'selected' : '' }}>Pendiente
+                            </option>
+                            <option value="En revisión" {{ request('estado') == 'En revisión' ? 'selected' : '' }}>En
+                                revisión</option>
+                            <option value="Aprobado" {{ request('estado') == 'Aprobado' ? 'selected' : '' }}>Aprobado
+                            </option>
+                            <option value="Rechazado" {{ request('estado') == 'Rechazado' ? 'selected' : '' }}>Rechazado
+                            </option>
+                            <option value="Devuelto" {{ request('estado') == 'Devuelto' ? 'selected' : '' }}>Devuelto
+                            </option>
                         </select>
                     </div>
                     <div>
-                        <button type="submit"
-                            class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -48,11 +55,13 @@
                         </button>
                     </div>
                     <div>
-                        @if(request('search') || request('estado'))
+                        @if (request('search') || request('estado'))
                             <a href="{{ route('solicitudcustodia.index') }}"
                                 class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                                 Limpiar
                             </a>
@@ -279,19 +288,20 @@
                                                     : new DateTime();
                                                 $diferencia = $fechaInicio->diff($fechaFin);
 
+                                                // Forzar mínimo de 1 día
+                                                $dias = max(1, $diferencia->days);
+
                                                 if ($diferencia->y > 0) {
                                                     echo $diferencia->y . ' año' . ($diferencia->y > 1 ? 's ' : ' ');
                                                 }
                                                 if ($diferencia->m > 0) {
                                                     echo $diferencia->m . ' mes' . ($diferencia->m > 1 ? 'es ' : ' ');
                                                 }
-                                                if ($diferencia->d > 0) {
-                                                    echo $diferencia->d . ' día' . ($diferencia->d > 1 ? 's' : '');
-                                                }
-                                                if ($diferencia->y == 0 && $diferencia->m == 0 && $diferencia->d == 0) {
-                                                    echo 'Menos de 1 día';
-                                                }
+
+                                                // Ahora los días nunca mostrarán "0" ni "menos de 1 día"
+                                                echo $dias . ' día' . ($dias > 1 ? 's' : '');
                                             @endphp
+
                                         </span>
                                     </div>
 
@@ -325,19 +335,21 @@
                                                         d="M3 10h1l1 9a1 1 0 001 1h12a1 1 0 001-1l1-9h1M5 10h14M9 21v-5h6v5" />
                                                 </svg>
                                                 <div class="w-full">
-                                                    <span class="text-sm font-bold block mb-1">Ubicación de Almacén:</span>
-                                                    
-                                                    @if(isset($custodia->custodiaUbicacion) && isset($custodia->custodiaUbicacion->ubicacion))
+                                                    <span class="text-sm font-bold block mb-1">Ubicación de
+                                                        Almacén:</span>
+
+                                                    @if (isset($custodia->custodiaUbicacion) && isset($custodia->custodiaUbicacion->ubicacion))
                                                         <p class="text-sm text-gray-900 break-words">
                                                             {{ $custodia->custodiaUbicacion->ubicacion->nombre }}
                                                         </p>
-                                                        @if($custodia->custodiaUbicacion->observacion)
+                                                        @if ($custodia->custodiaUbicacion->observacion)
                                                             <p class="text-xs text-gray-600 mt-1">
                                                                 Obs: {{ $custodia->custodiaUbicacion->observacion }}
                                                             </p>
                                                         @endif
                                                     @else
-                                                        <p class="text-sm text-gray-500 italic">Sin ubicación asignada</p>
+                                                        <p class="text-sm text-gray-500 italic">Sin ubicación asignada
+                                                        </p>
                                                     @endif
                                                 </div>
                                             </div>
