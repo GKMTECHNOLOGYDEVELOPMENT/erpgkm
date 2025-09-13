@@ -1291,3 +1291,16 @@ Route::get('/solicitud/custodia/opciones/{id}', [CustodiaController::class, 'opc
 
 Route::put('/solicitud/custodia/{id}', [CustodiaController::class, 'update'])
     ->name('solicitudcustodia.update');
+
+
+
+
+    //PRODUCTOS 
+// Ruta para mostrar la vista principal
+Route::get('/entradas-proveedores', [EntradasproveedoresController::class, 'index'])->name('entradas-proveedores.index');
+
+// Ruta para buscar productos (AJAX)
+Route::get('/buscar-producto-entrada', [EntradasproveedoresController::class, 'buscarProductoEntrada'])->name('buscar-producto-entrada');
+
+// Ruta para guardar la entrada (POST)
+Route::post('/guardar-entrada-proveedor', [EntradasproveedoresController::class, 'guardarEntradaProveedor'])->name('guardar-entrada-proveedor');
