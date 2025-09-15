@@ -588,6 +588,7 @@ public function getAll(Request $request)
             'modelo' => $modeloNombres ?: 'Sin Modelo',
             'subcategoria' => $subcategoriaNombre, // 👈 nuevo campo
             'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
+            'cliente_general_select' => '', // 👈 campo vacío para el select
         ];
     });
 

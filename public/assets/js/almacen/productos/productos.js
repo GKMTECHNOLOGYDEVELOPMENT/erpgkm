@@ -32,7 +32,7 @@ document.addEventListener('alpine:init', () => {
                     { data: 'modelo', className: 'text-center' },
                     { data: 'stock_total', className: 'text-center' },
                     {
-                        data: 'cliente_general_select',
+                        data: null, // <- OBLIGATORIO si quieres renderizar HTML personalizado
                         className: 'text-center',
                         render: function () {
                             return `
@@ -45,7 +45,6 @@ document.addEventListener('alpine:init', () => {
         `;
                         },
                     },
-
                     {
                         data: 'estado',
                         className: 'text-center',
@@ -111,13 +110,14 @@ document.addEventListener('alpine:init', () => {
                 responsive: true,
                 autoWidth: false,
                 pageLength: 10,
-                // 👇 AQUÍ va tu drawCallback
                 drawCallback: function () {
-                    $('.select-cliente-general').select2({
-                        width: 'resolve',
-                        placeholder: 'Seleccione cliente',
-                        minimumResultsForSearch: Infinity, // oculta buscador si hay pocas opciones
-                    });
+                    setTimeout(() => {
+                        $('.select-cliente-general').select2({
+                            width: 'resolve',
+                            placeholder: 'Seleccione cliente',
+                            minimumResultsForSearch: 0, // ✅ mostrar siempre el buscador
+                        });
+                    }, 10);
                 },
                 language: {
                     search: 'Buscar...',

@@ -362,6 +362,7 @@ public function cambiarEstado($id)
             'marca' => $articulo->modelo->marca->nombre ?? 'Sin Marca',
             'categoria' => $articulo->modelo->categoria->nombre ?? 'Sin Categoría',
             'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
+            'cliente_general_select' => '', // 👈 campo vacío para el select
         ];
     });
 
