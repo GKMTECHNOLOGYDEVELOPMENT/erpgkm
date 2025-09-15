@@ -158,7 +158,7 @@
 
         @if (!empty($motivoCondicion))
             <!-- Sección de Motivo de Condición (igual a Falla Reportada) -->
-            <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
+            <div class="red-bg mt-4 text-left">Motivo por el que no se atendió</div>
             <div class="w-full text-xs mt-3">
                 <p class="uppercase indent-paragraph">{{ $motivoCondicion }}</p>
             </div>

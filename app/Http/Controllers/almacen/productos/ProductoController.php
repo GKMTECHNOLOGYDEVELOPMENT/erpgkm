@@ -482,6 +482,7 @@ public function update(Request $request, $id)
                 'marca' => $articulo->modelo->marca->nombre ?? 'Sin Marca',
                 'categoria' => $articulo->modelo->categoria->nombre ?? 'Sin Categoría',
                 'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
+                'cliente_general_select' => '',
             ];
         });
     

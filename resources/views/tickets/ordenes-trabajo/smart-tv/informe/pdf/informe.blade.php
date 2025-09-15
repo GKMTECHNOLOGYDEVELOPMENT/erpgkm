@@ -155,10 +155,14 @@
                 <div class="red-bg mt-4 text-left">Datos del Producto</div>
                 <div class="w-full text-xs mt-3">
                     <div class="flex justify-between flex-wrap gap-4">
-                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> <span class="uppercase">{{ $producto['categoria'] }}</span></p>
-                        <p><span class="font-bold">MARCA:</span> <span class="uppercase">{{ $producto['marca'] }}</span></p>
-                        <p><span class="font-bold">MODELO:</span> <span class="uppercase">{{ $producto['modelo'] }}</span></p>
-                        <p><span class="font-bold">SERIE:</span> <span class="uppercase">{{ $producto['serie'] }}</span></p>                        
+                        <p><span class="font-bold">TIPO DE PRODUCTO:</span> <span
+                                class="uppercase">{{ $producto['categoria'] }}</span></p>
+                        <p><span class="font-bold">MARCA:</span> <span class="uppercase">{{ $producto['marca'] }}</span>
+                        </p>
+                        <p><span class="font-bold">MODELO:</span> <span
+                                class="uppercase">{{ $producto['modelo'] }}</span></p>
+                        <p><span class="font-bold">SERIE:</span> <span
+                                class="uppercase">{{ $producto['serie'] }}</span></p>
                     </div>
                 </div>
             @endif
@@ -171,7 +175,7 @@
             @endif
 
             @if (trim($motivoCondicion ?? '') !== '')
-                <div class="red-bg mt-4 text-left">Motivo de la Condición</div>
+                <div class="red-bg mt-4 text-left">Motivo por el que no se atendió</div>
                 <div class="w-full text-xs mt-3">
                     <p class="uppercase indent-paragraph">{{ $motivoCondicion }}</p>
                 </div>
