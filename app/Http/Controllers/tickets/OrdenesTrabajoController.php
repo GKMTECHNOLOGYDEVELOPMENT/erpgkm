@@ -2011,6 +2011,7 @@ class OrdenesTrabajoController extends Controller
     }
 
 
+  
 
     public function actualizarVisita(Request $request, $id)
     {
