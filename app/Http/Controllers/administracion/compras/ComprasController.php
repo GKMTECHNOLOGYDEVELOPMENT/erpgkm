@@ -621,8 +621,24 @@ class ComprasController extends Controller
                 $detalleId = DB::table('detalle_compra')->insertGetId($detalleData);
                 Log::info("Detalle insertado con ID: {$detalleId}");
 
+                // ✅ Insertar en inventario_ingresos_clientes
+                DB::table('inventario_ingresos_clientes')->insert([
+                    'compra_id' => $compraId,
+                    'articulo_id' => $productoId,
+                    'tipo_ingreso' => 'compra',
+                    'ingreso_id' => $detalleId, // ← ESTE es el detalle de compra
+                    'cliente_general_id' => 8,
+                    'cantidad' => $producto['cantidad'],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+
+                Log::info("Registro de inventario_ingresos_clientes insertado con detalle_compra ID: {$detalleId}");
+
                 Log::info("=== FIN PROCESAMIENTO PRODUCTO {$index} ===");
-            }
+
+}
 
             DB::commit();
             Log::info("✅ COMPRA GUARDADA EXITOSAMENTE - ID: {$compraId}");

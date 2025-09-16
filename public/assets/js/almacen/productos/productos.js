@@ -34,17 +34,10 @@ document.addEventListener('alpine:init', () => {
                     {
                         data: null, // <- OBLIGATORIO si quieres renderizar HTML personalizado
                         className: 'text-center',
-                        render: function () {
-                            return `
-            <select class="select-cliente-general w-full text-sm rounded">
-                <option value="">Seleccione...</option>
-                <option value="1">Cliente General 1</option>
-                <option value="2">Cliente General 2</option>
-                <option value="3">Cliente General 3</option>
-            </select>
-        `;
-                        },
+                        render: (html) => html // 👈 Renderiza directamente el HTML del backend
                     },
+
+
                     {
                         data: 'estado',
                         className: 'text-center',
