@@ -148,7 +148,7 @@
                             <div class="mb-5">
                                 <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
                                 <!-- Campo de archivo -->
-                                <input id="ctnFile" type="file" name="foto" accept="image/*" required
+                                <input id="ctnFile" type="file" name="foto" accept="image/*" 
                                     class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full"
                                     @change="imagenPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : imagenActual" />
 
