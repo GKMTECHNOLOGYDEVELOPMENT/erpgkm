@@ -1,7 +1,8 @@
 <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-
+<link rel="stylesheet" href="https://unpkg.com/viewerjs/dist/viewer.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js"></script>
+<script src="https://unpkg.com/viewerjs/dist/viewer.min.js"></script>
 
 <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge" style="background-color: {{ $colorEstado }};">Detalles
     de los Estados</span>
@@ -43,8 +44,8 @@
 
 
 <div id="cardFotos" class="hidden mt-6 p-5 rounded-lg">
-        <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge"
-            style="background-color: {{ $colorEstado }};">Fotos</span>
+    <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge"
+        style="background-color: {{ $colorEstado }};">Fotos</span>
 
     <!-- Botón para abrir el modal -->
     <button id="abrirModalAgregarImagen" class="btn btn-primary mt-4" @click="$dispatch('toggle-modal-agregar-imagen')">
@@ -223,56 +224,6 @@
         };
 
 
-        // ✅ Renderizar imágenes existentes en el Swiper
-        function renderizarImagenes() {
-            swiperWrapper.innerHTML = ""; // Limpiar el swiper antes de agregar nuevas imágenes
-
-            fetch(`/api/imagenes/${ticketId}/${visitaId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.imagenes) {
-                        data.imagenes.forEach((img, index) => {
-                            let swiperSlide = document.createElement("div");
-                            swiperSlide.classList.add("swiper-slide", "relative", "flex",
-                                "items-center", "justify-center");
-
-                            swiperSlide.innerHTML = `
-                                <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
-                                    <img src="${img.src}" alt="Imagen ${index + 1}" class="w-full h-full object-cover rounded-lg" />
-
-                                    <!-- Botón "X" para eliminar -->
-                                    <button onclick="eliminarImagen(${img.id})"
-                                        class="absolute top-2 right-2 w-8 h-8 bg-danger hover:bg-red-700 text-white transition-colors duration-200
-                                            rounded-full shadow-md flex items-center justify-center z-10">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-
-
-
-                                    <!-- Descripción -->
-                                    <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium 
-                                                max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
-                                        <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
-                                            ${img.description ? img.description : "Sin descripción"}
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-
-                            swiperWrapper.appendChild(swiperSlide);
-                        });
-
-                        // 🔹 Asegurar que el Swiper se actualiza correctamente
-                        setTimeout(() => swiper5.update(), 100);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al cargar las imágenes:", error);
-                });
-        }
-
         // ✅ Guardar imágenes en la base de datos
         if (guardarImagenBtn) {
             guardarImagenBtn.addEventListener("click", function() {
@@ -405,6 +356,92 @@
         // ✅ Renderizar imágenes al cargar la página
         renderizarImagenes();
     });
+
+    function renderizarImagenes() {
+        const swiperWrapper = document.getElementById("swiperWrapper");
+        const ticketId = "{{ $ticket->idTickets }}";
+        const visitaId = "{{ $visitaId ?? 'null' }}";
+
+        if (!swiperWrapper) return;
+
+        swiperWrapper.innerHTML = "";
+
+        fetch(`/api/imagenes/${ticketId}/${visitaId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.imagenes) {
+                    data.imagenes.forEach((img, index) => {
+                        let swiperSlide = document.createElement("div");
+                        swiperSlide.classList.add("swiper-slide", "relative", "flex",
+                            "items-center", "justify-center");
+
+                        swiperSlide.innerHTML = `
+                        <div class="w-[350px] h-[250px] flex items-center justify-center bg-gray-100 overflow-hidden rounded-lg relative">
+                            <img src="${img.src}" alt="Imagen ${index + 1}" class="w-full h-full object-cover rounded-lg" />
+                            <button onclick="eliminarImagen(${img.id})" class="absolute top-2 right-2 w-8 h-8 bg-danger hover:bg-red-700 text-white transition-colors duration-200 rounded-full shadow-md flex items-center justify-center z-10">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div class="absolute bottom-0 left-0 w-full bg-black/60 text-white text-center px-3 py-2 text-sm font-medium max-h-[60px] overflow-y-auto rounded-b-lg leading-tight">
+                                <div class="max-h-[60px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300">
+                                    ${img.description ? img.description : "Sin descripción"}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                        swiperWrapper.appendChild(swiperSlide);
+                    });
+
+                    setTimeout(() => {
+                        if (typeof swiper5 !== 'undefined') {
+                            swiper5.update();
+                        }
+
+                        const container = document.getElementById('swiperWrapper');
+                        if (window.swiperViewer) {
+                            window.swiperViewer.destroy();
+                        }
+                        window.swiperViewer = new Viewer(container, {
+                            navbar: false,
+                            toolbar: true,
+                            title: false,
+                            transition: true,
+                            zoomable: true,
+                            movable: true,
+                            scalable: false,
+                            fullscreen: false
+                        });
+                    }, 100);
+                }
+            })
+            .catch(error => {
+                console.error("Error al cargar las imágenes:", error);
+            });
+    }
+
+    function eliminarImagen(imagenId) {
+        fetch(`/api/eliminarImagen/${imagenId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success("Imagen eliminada correctamente.");
+                    renderizarImagenes();
+                } else {
+                    toastr.error("Error al eliminar la imagen.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                toastr.error("Hubo un error al eliminar la imagen.");
+            });
+    }
 </script>
 
 
@@ -484,7 +521,7 @@
             // ✅ Obtener justificación desde API
             fetch(
                     `/api/obtenerJustificacion?ticketId=${ticketId}&visitaId=${visitaId}&estadoId=${estadoId}`
-                    )
+                )
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
