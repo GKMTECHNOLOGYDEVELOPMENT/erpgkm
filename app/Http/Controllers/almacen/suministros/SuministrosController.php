@@ -324,7 +324,7 @@ public function cambiarEstado($id)
 
    public function getAll(Request $request)
 {
-    $query = Articulo::with(['unidad', 'tipoarticulo',   'modelo.marca', 'modelo.categoria']) // <= Aquí
+    $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo.marca', 'modelo.categoria'])
         ->where('idTipoArticulo', 4); // Solo repuestos
 
     $total = $query->count();
@@ -345,24 +345,44 @@ public function cambiarEstado($id)
         ->get();
 
     $data = $articulos->map(function ($articulo) {
-     
+        // 🔽 Obtener clientes generales con stock de este artículo
+        $clientes = DB::table('inventario_ingresos_clientes as iic')
+            ->join('clientegeneral as cg', 'cg.idClienteGeneral', '=', 'iic.cliente_general_id')
+            ->select(
+                'cg.idClienteGeneral',
+                'cg.descripcion',
+                DB::raw('SUM(iic.cantidad) as total')
+            )
+            ->where('iic.articulo_id', $articulo->idArticulos)
+            ->groupBy('cg.idClienteGeneral', 'cg.descripcion')
+            ->get();
+
+        // 🔽 Construir el select HTML
+        $selectHtml = '<select class="select-cliente-general w-full text-sm rounded">';
+        $selectHtml .= '<option value="">Seleccionar cliente</option>'; // ✅ opción inicial fija
+
+        foreach ($clientes as $cliente) {
+            $selectHtml .= '<option value="' . $cliente->idClienteGeneral . '">' .
+                $cliente->descripcion . ' - ' . $cliente->total . ' unidades' .
+                '</option>';
+        }
+
+        $selectHtml .= '</select>';
 
         return [
             'idArticulos' => $articulo->idArticulos,
             'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
             'codigo_barras' => $articulo->codigo_barras,
-            'sku' => $articulo->nombre,
+            'sku' => $articulo->sku,
             'nombre' => $articulo->nombre,
             'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
-            'codigo_barras' => $articulo->codigo_barras,
             'stock_total' => $articulo->stock_total,
-            'sku' => $articulo->sku,
             'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
-            'modelo' => $articulo->modelo ? $articulo->modelo->nombre : 'Sin Modelo',
+            'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
             'marca' => $articulo->modelo->marca->nombre ?? 'Sin Marca',
             'categoria' => $articulo->modelo->categoria->nombre ?? 'Sin Categoría',
             'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
-            'cliente_general_select' => '', // 👈 campo vacío para el select
+            'cliente_general_select' => $selectHtml,
         ];
     });
 
@@ -373,6 +393,7 @@ public function cambiarEstado($id)
         'data' => $data,
     ]);
 }
+
 
 
 

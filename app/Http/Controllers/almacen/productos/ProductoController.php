@@ -438,87 +438,85 @@ public function update(Request $request, $id)
 
 
 
+public function getAll(Request $request)
+{
+    $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo.marca', 'modelo.categoria'])
+        ->where('idTipoArticulo', 1); // Solo repuestos
 
-    public function getAll(Request $request)
-    {
-        $query = Articulo::with(['unidad', 'tipoarticulo', 'modelo.marca', 'modelo.categoria'])
-            ->where('idTipoArticulo', 1); // Solo repuestos
-    
-        $total = $query->count();
-    
-        if ($search = $request->input('search.value')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nombre', 'like', "%$search%")
-                  ->orWhere('codigo_barras', 'like', "%$search%")
-                  ->orWhere('sku', 'like', "%$search%")
-                  ->orWhere('stock_total', 'like', "%$search%")
-                  ->orWhereHas('unidad', fn($u) => $u->where('nombre', 'like', "%$search%"))
-                  ->orWhereHas('modelo', function ($m) use ($search) {
-                      $m->where('nombre', 'like', "%$search%")
-                        ->orWhereHas('marca', fn($marca) => $marca->where('nombre', 'like', "%$search%"))
-                        ->orWhereHas('categoria', fn($cat) => $cat->where('nombre', 'like', "%$search%"));
-                  });
-            });
-        }
-    
-        $filtered = $query->count();
-    
-        $articulos = $query
-            ->skip($request->start)
-            ->take($request->length)
-            ->get();
-    
-        $data = $articulos->map(function ($articulo) {
-    // Obtener los clientes generales que tienen stock de este artículo
-    $clientes = DB::table('inventario_ingresos_clientes as iic')
-        ->join('clientegeneral as cg', 'cg.idClienteGeneral', '=', 'iic.cliente_general_id')
-        ->select(
-            'cg.idClienteGeneral',
-            'cg.descripcion',
-            DB::raw('SUM(iic.cantidad) as total')
-        )
-        ->where('iic.articulo_id', $articulo->idArticulos)
-        ->groupBy('cg.idClienteGeneral', 'cg.descripcion')
+    $total = $query->count();
+
+    if ($search = $request->input('search.value')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('nombre', 'like', "%$search%")
+              ->orWhere('codigo_barras', 'like', "%$search%")
+              ->orWhere('sku', 'like', "%$search%")
+              ->orWhere('stock_total', 'like', "%$search%")
+              ->orWhereHas('unidad', fn($u) => $u->where('nombre', 'like', "%$search%"))
+              ->orWhereHas('modelo', function ($m) use ($search) {
+                  $m->where('nombre', 'like', "%$search%")
+                    ->orWhereHas('marca', fn($marca) => $marca->where('nombre', 'like', "%$search%"))
+                    ->orWhereHas('categoria', fn($cat) => $cat->where('nombre', 'like', "%$search%"));
+              });
+        });
+    }
+
+    $filtered = $query->count();
+
+    $articulos = $query
+        ->skip($request->start)
+        ->take($request->length)
         ->get();
 
-    // Construir el select HTML
-    $selectHtml = '<select class="select-cliente-general w-full text-sm rounded">';
-    if ($clientes->isEmpty()) {
-        $selectHtml .= '<option value="">Sin cliente</option>';
-    } else {
+    $data = $articulos->map(function ($articulo) {
+        // Obtener los clientes generales que tienen stock de este artículo
+        $clientes = DB::table('inventario_ingresos_clientes as iic')
+            ->join('clientegeneral as cg', 'cg.idClienteGeneral', '=', 'iic.cliente_general_id')
+            ->select(
+                'cg.idClienteGeneral',
+                'cg.descripcion',
+                DB::raw('SUM(iic.cantidad) as total')
+            )
+            ->where('iic.articulo_id', $articulo->idArticulos)
+            ->groupBy('cg.idClienteGeneral', 'cg.descripcion')
+            ->get();
+
+        // Construir el select HTML
+        $selectHtml = '<select class="select-cliente-general w-full text-sm rounded">';
+        $selectHtml .= '<option value="">Seleccionar cliente</option>'; // 👈 clave
+
         foreach ($clientes as $cliente) {
             $selectHtml .= '<option value="' . $cliente->idClienteGeneral . '">' .
                 $cliente->descripcion . ' - ' . $cliente->total . ' unidades' .
                 '</option>';
         }
-    }
-    $selectHtml .= '</select>';
 
-    return [
-        'idArticulos' => $articulo->idArticulos,
-        'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
-        'codigo_barras' => $articulo->codigo_barras,
-        'sku' => $articulo->sku,
-        'nombre' => $articulo->nombre,
-        'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
-        'stock_total' => $articulo->stock_total,
-        'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
-        'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
-        'marca' => $articulo->modelo->marca->nombre ?? 'Sin Marca',
-        'categoria' => $articulo->modelo->categoria->nombre ?? 'Sin Categoría',
-        'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
-        'cliente_general_select' => $selectHtml,
-    ];
-});
+        $selectHtml .= '</select>';
 
-    
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $total,
-            'recordsFiltered' => $filtered,
-            'data' => $data,
-        ]);
-    }
+        return [
+            'idArticulos' => $articulo->idArticulos,
+            'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
+            'codigo_barras' => $articulo->codigo_barras,
+            'sku' => $articulo->sku,
+            'nombre' => $articulo->nombre,
+            'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
+            'stock_total' => $articulo->stock_total,
+            'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
+            'modelo' => $articulo->modelo->nombre ?? 'Sin Modelo',
+            'marca' => $articulo->modelo->marca->nombre ?? 'Sin Marca',
+            'categoria' => $articulo->modelo->categoria->nombre ?? 'Sin Categoría',
+            'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
+            'cliente_general_select' => $selectHtml,
+        ];
+    });
+
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $total,
+        'recordsFiltered' => $filtered,
+        'data' => $data,
+    ]);
+}
+
     
     
     

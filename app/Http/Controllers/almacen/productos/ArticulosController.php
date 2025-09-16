@@ -152,7 +152,6 @@ class ArticulosController extends Controller
         }
 
         $query = DB::table('articulos')
-            ->where('idTipoArticulo', 1)
             ->where('codigo_barras', $busqueda); // búsqueda exacta
 
         $total = $query->count();

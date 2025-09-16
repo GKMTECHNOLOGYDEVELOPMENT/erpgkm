@@ -29,19 +29,12 @@ document.addEventListener('alpine:init', () => {
                     { data: 'stock_total', className: 'text-center' },
                     { data: 'stock_total', className: 'text-center' },
                     { data: 'stock_total', className: 'text-center' },
-                    {
-                        data: null, // <- OBLIGATORIO si quieres renderizar HTML personalizado
+                     {
+                        data: 'cliente_general_select',
                         className: 'text-center',
-                        render: function () {
-                            return `
-            <select class="select-cliente-general w-full text-sm rounded">
-                <option value="">Seleccione...</option>
-                <option value="1">Cliente General 1</option>
-                <option value="2">Cliente General 2</option>
-                <option value="3">Cliente General 3</option>
-            </select>
-        `;
-                        },
+                        orderable: false,
+                        searchable: false,
+                        render: (html) => html
                     },
                     {
                         data: 'estado',
