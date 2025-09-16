@@ -479,16 +479,63 @@
             </div>
 
 
-            <div class="flex gap-12">
-                <div class="flex-1 mb-6">
-                    <label for="EsCustonia" class="block text-sm font-medium mb-2">Custodia</label>
-                    <div>
-                        <label class="w-12 h-6 relative mt-3">
-                            <input type="checkbox" id="EsCustonia" name="EsCustonia"
-                                class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                            <span
-                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-                        </label>
+            <div x-data="custodiaModal()" class="mb-5">
+                <!-- Switch Custodia -->
+                <div class="flex gap-12">
+                    <div class="flex-1 mb-6">
+                        <label for="EsCustonia" class="block text-sm font-medium mb-2">Custodia</label>
+                        <div>
+                            <label class="w-12 h-6 relative mt-3">
+                                <input type="checkbox" id="EsCustonia" name="EsCustonia"
+                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                    @change="toggleCustodia($event)" />
+                                <span
+                                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Activar Custodia -->
+                <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
+                    <div class="flex items-start justify-center min-h-screen px-4" @click.self="close()">
+                        <div x-show="open" x-transition x-transition.duration.300
+                            class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg">
+
+                            <!-- Header -->
+                            <div class="flex bg-gray-100 dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                                <div class="font-bold text-lg">Datos de custodia</div>
+                                <button type="button" class="text-gray-500 hover:text-dark"
+                                    @click="close()">✕</button>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="p-5 space-y-4">
+                                <div>
+                                    <label for="ubicacion" class="block text-sm font-semibold text-gray-700 mb-1">
+                                        Ubicación Entrada
+                                    </label>
+                                    <input type="text" id="ubicacion" x-model="ubicacion"
+                                        class="form-input w-full border rounded-lg px-3 py-2"
+                                        placeholder="Ej: Laboratorio, Zona TCL" maxlength="100">
+                                </div>
+
+                                <div>
+                                    <label for="fecha" class="block text-sm font-semibold text-gray-700 mb-1">
+                                        Fecha Ingreso
+                                    </label>
+                                    <input type="date" id="fecha" x-model="fecha"
+                                        class="form-input w-full border rounded-lg px-3 py-2">
+                                </div>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="flex justify-end items-center gap-3 px-5 py-3 border-t">
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="cancelar()">Cancelar</button>
+                                <button type="button" class="btn btn-primary" @click="guardar()">Guardar</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -541,150 +588,114 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const ticketId = '{{ $id }}';
-        const checkbox = document.getElementById('EsCustonia');
-        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    document.addEventListener("alpine:init", () => {
+        Alpine.data("custodiaModal", () => ({
+            open: false,
+            ubicacion: "",
+            fecha: "",
+            ticketId: "{{ $id }}",
+            csrf: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
 
-        // Estado inicial
-        fetch(`/tickets/${ticketId}/custodia`)
-            .then(r => r.json())
-            .then(data => {
-                if (data.success && data.es_custodia === 1) {
-                    checkbox.checked = true;
-                }
-            });
-
-        // Función para enviar peticiones
-        const enviarPeticion = (payload) => {
-            return fetch(`/tickets/${ticketId}/actualizar-custodia`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrf
-                },
-                body: JSON.stringify(payload)
-            }).then(async (response) => {
-                const data = await response.json();
-                if (!response.ok) throw data;
-                return data;
-            });
-        };
-
-        // Listener del switch de custodia
-        if (checkbox) {
-            checkbox.addEventListener('change', function() {
-                const marcado = this.checked;
-
-                if (marcado) {
-                    // ACTIVAR custodia
-                    Swal.fire({
-                        title: 'Datos de custodia',
-                        html: `
-                        <input type="text" id="ubicacion" class="swal2-input"
-                               placeholder="Ej: Laboratorio, Zona TCL" maxlength="100">
-                        <input type="date" id="fecha" class="swal2-input">
-                    `,
-                        focusConfirm: false,
-                        showCancelButton: true,
-                        confirmButtonText: 'Guardar y poner en custodia',
-                        cancelButtonText: 'Cancelar',
-                        preConfirm: () => {
-                            const ubicacion = document.getElementById('ubicacion').value
-                                .trim();
-                            const fecha = document.getElementById('fecha').value;
-
-                            if (!ubicacion) {
-                                Swal.showValidationMessage('La ubicación es obligatoria');
-                                return false;
-                            }
-                            if (!fecha) {
-                                Swal.showValidationMessage(
-                                    'La fecha de ingreso es obligatoria');
-                                return false;
-                            }
-                            return {
-                                ubicacion,
-                                fecha
-                            };
+            init() {
+                // Estado inicial desde backend
+                fetch(`/tickets/${this.ticketId}/custodia`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.es_custodia === 1) {
+                            document.getElementById('EsCustonia').checked = true;
                         }
-                    }).then((result) => {
-                        if (!result.isConfirmed) {
-                            checkbox.checked = false;
-                            return;
-                        }
-
-                        const {
-                            ubicacion,
-                            fecha
-                        } = result.value;
-
-                        enviarPeticion({
-                                es_custodia: 1,
-                                ubicacion_actual: ubicacion,
-                                fecha_ingreso_custodia: fecha // 🔹 Se puede modificar
-                            })
-                            .then(() => {
-                                Swal.fire(
-                                    '¡Confirmado!',
-                                    'El equipo ha sido puesto en custodia.',
-                                    'success'
-                                );
-                            })
-                            .catch(error => {
-                                Swal.fire(
-                                    'Error',
-                                    error.message || 'Ocurrió un error al guardar.',
-                                    'error'
-                                );
-                                checkbox.checked = false;
-                            });
                     });
+            },
 
+            toggleCustodia(event) {
+                if (event.target.checked) {
+                    // abrir modal para activar
+                    this.open = true;
                 } else {
-                    // DESACTIVAR custodia
-                    Swal.fire({
-                        title: '¿Quitar custodia?',
-                        text: 'Se registrará la fecha de devolución automáticamente.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Sí, quitar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (!result.isConfirmed) {
-                            checkbox.checked = true;
-                            return;
-                        }
-
-                        enviarPeticion({
-                                es_custodia: 0,
-                                fecha_devolucion: new Date().toISOString().split('T')[
-                                    0] // 🔹 Fecha actual
-                            })
-                            .then(() => {
-                                Swal.fire(
-                                    'Listo',
-                                    'Custodia desactivada correctamente.',
-                                    'success'
-                                );
-                            })
-                            .catch(error => {
-                                Swal.fire(
-                                    'Error',
-                                    error.message ||
-                                    'Ocurrió un error al procesar la solicitud.',
-                                    'error'
-                                );
-                                checkbox.checked = true;
-                            });
-                    });
+                    // desactivar directo
+                    this.quitarCustodia();
                 }
-            });
-        }
+            },
+
+            close() {
+                this.open = false;
+                document.getElementById('EsCustonia').checked = false;
+            },
+
+            cancelar() {
+                this.open = false;
+                document.getElementById('EsCustonia').checked = false;
+            },
+
+            guardar() {
+                if (!this.ubicacion.trim()) {
+                    toastr.error("La ubicación es obligatoria");
+                    return;
+                }
+                if (!this.fecha) {
+                    toastr.error("La fecha de ingreso es obligatoria");
+                    return;
+                }
+
+                fetch(`/tickets/${this.ticketId}/actualizar-custodia`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": this.csrf,
+                        },
+                        body: JSON.stringify({
+                            es_custodia: 1,
+                            ubicacion_actual: this.ubicacion,
+                            fecha_ingreso_custodia: this.fecha,
+                        }),
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success("El equipo ha sido puesto en custodia");
+                            this.open = false;
+                            document.getElementById('EsCustonia').checked = true;
+                        } else {
+                            throw new Error("Error al guardar");
+                        }
+                    })
+                    .catch(err => {
+                        toastr.error("❌ " + err.message);
+                        document.getElementById('EsCustonia').checked = false;
+                        this.open = false;
+                    });
+            },
+
+            quitarCustodia() {
+                fetch(`/tickets/${this.ticketId}/actualizar-custodia`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": this.csrf,
+                        },
+                        body: JSON.stringify({
+                            es_custodia: 0,
+                            fecha_devolucion: new Date().toISOString().split("T")[0],
+                        }),
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success("Custodia desactivada correctamente");
+                            document.getElementById('EsCustonia').checked = false;
+                        } else {
+                            throw new Error("Error al quitar custodia");
+                        }
+                    })
+                    .catch(err => {
+                        toastr.error("❌ " + err.message);
+                        document.getElementById('EsCustonia').checked = true;
+                    });
+            },
+        }));
     });
 </script>
+
 
 
 

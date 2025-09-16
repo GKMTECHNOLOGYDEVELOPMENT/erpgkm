@@ -16,6 +16,11 @@
             background-image: none;
             /* Opcional, elimina cualquier ícono */
         }
+        .select-cliente-general {
+    min-width: 180px !important;
+    max-width: 180px !important;
+}
+
     </style>
     <div x-data="multipleTable">
         <div>
