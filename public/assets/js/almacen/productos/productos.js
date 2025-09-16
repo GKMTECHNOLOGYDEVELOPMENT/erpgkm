@@ -32,10 +32,13 @@ document.addEventListener('alpine:init', () => {
                     { data: 'modelo', className: 'text-center' },
                     { data: 'stock_total', className: 'text-center' },
                     {
-                        data: null, // <- OBLIGATORIO si quieres renderizar HTML personalizado
+                        data: 'cliente_general_select',
                         className: 'text-center',
-                        render: (html) => html // 👈 Renderiza directamente el HTML del backend
+                        orderable: false,
+                        searchable: false,
+                        render: (html) => html
                     },
+
 
 
                     {
