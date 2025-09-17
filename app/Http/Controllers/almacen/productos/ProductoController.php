@@ -485,9 +485,10 @@ public function getAll(Request $request)
         $selectHtml .= '<option value="">Seleccionar cliente</option>'; // 👈 clave
 
         foreach ($clientes as $cliente) {
-            $selectHtml .= '<option value="' . $cliente->idClienteGeneral . '">' .
-                $cliente->descripcion . ' - ' . $cliente->total . ' unidades' .
-                '</option>';
+            $selectHtml .= '<option value="' . $cliente->idClienteGeneral . '" data-id="' . $cliente->idClienteGeneral . '">' . 
+    $cliente->descripcion . ' - ' . $cliente->total . ' unidades' . 
+    '</option>';
+
         }
 
         $selectHtml .= '</select>';
@@ -567,6 +568,23 @@ public function updateFoto(Request $request, $id)
 
     return response()->json(['success' => false]);
 }
+
+
+
+public function verInventarioPorCliente($cliente_general_id)
+{
+    // Puedes obtener el inventario de este cliente
+    $inventarios = DB::table('inventario_ingresos_clientes as iic')
+        ->join('articulos as a', 'a.idArticulos', '=', 'iic.articulo_id')
+        ->where('iic.cliente_general_id', $cliente_general_id)
+        ->select('a.nombre as articulo', 'iic.cantidad', 'iic.created_at')
+        ->get();
+
+    $cliente = DB::table('clientegeneral')->where('idClienteGeneral', $cliente_general_id)->first();
+
+    return view('almacen.inventario.porcliente', compact('inventarios', 'cliente'));
+}
+
 
 }
 

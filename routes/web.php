@@ -1304,3 +1304,6 @@ Route::get('/buscar-producto-entrada', [EntradasproveedoresController::class, 'b
 
 // Ruta para guardar la entrada (POST)
 Route::post('/guardar-entrada-proveedor', [EntradasproveedoresController::class, 'guardarEntradaProveedor'])->name('guardar-entrada-proveedor');
+
+
+Route::get('/inventarioporcliente/{cliente_general_id}', [ProductoController::class, 'verInventarioPorCliente'])->name('inventario.cliente');

@@ -107,6 +107,17 @@ document.addEventListener('alpine:init', () => {
                 autoWidth: false,
                 pageLength: 10,
                 drawCallback: function () {
+
+                       $('.select-cliente-general').off('change').on('change', function () {
+                        const clienteId = $(this).val();
+                        if (clienteId) {
+                            const url = `/inventarioporcliente/${clienteId}`;
+                            window.open(url, '_blank');
+                        }
+                    });
+
+
+
                     setTimeout(() => {
                         $('.select-cliente-general').select2({
                             width: 'resolve',
