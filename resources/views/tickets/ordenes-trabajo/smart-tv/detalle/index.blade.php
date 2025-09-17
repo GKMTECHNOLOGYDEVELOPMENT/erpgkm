@@ -18,8 +18,7 @@
         font-size: 0.875rem;
         /* text-sm */
     }
-</style>
-<style>
+
     /* Estilo cuando el formulario está "tachado" */
     .formulario-tachado {
         position: relative;
@@ -47,6 +46,18 @@
     .formulario-tachado form {
         pointer-events: none;
         opacity: 0.7;
+    }
+
+    .custom_switch:disabled+span {
+        background-color: #f3f4f6 !important;
+    }
+
+    .custom_switch:disabled+span:before {
+        background-color: #d1d5db !important;
+    }
+
+    .peer:checked~.custom_switch-indicator {
+        left: 1.75rem;
     }
 </style>
 <!-- Contenedor Alpine.js para el botón y el modal -->
@@ -471,74 +482,145 @@
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
-            <!-- erma -->
-            <div>
+            <div x-data="{ erma: '{{ $orden->erma }}' }" class="mb-5">
                 <label class="text-sm font-medium">N. erma</label>
                 <input id="erma" name="erma" type="text" class="form-input w-full"
                     value="{{ $orden->erma }}">
-            </div>
+                <div x-data="custodiaModal()" class="mt-5">
+                    <!-- Switch Custodia -->
+                    <div class="flex gap-12">
+                        <div class="flex-1 mb-6">
+                            <div class="flex items-center gap-2 mb-2">
+                                <label for="EsCustonia" class="block text-sm font-medium">Custodia</label>
 
-
-            <div x-data="custodiaModal()" class="mb-5">
-                <!-- Switch Custodia -->
-                <div class="flex gap-12">
-                    <div class="flex-1 mb-6">
-                        <label for="EsCustonia" class="block text-sm font-medium mb-2">Custodia</label>
-                        <div>
-                            <label class="w-12 h-6 relative mt-3">
-                                <input type="checkbox" id="EsCustonia" name="EsCustonia"
-                                    class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-                                    @change="toggleCustodia($event)" />
-                                <span
-                                    class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Modal Activar Custodia -->
-                <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
-                    <div class="flex items-start justify-center min-h-screen px-4" @click.self="close()">
-                        <div x-show="open" x-transition x-transition.duration.300
-                            class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg">
-
-                            <!-- Header -->
-                            <div class="flex bg-gray-100 dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                                <div class="font-bold text-lg">Datos de custodia</div>
-                                <button type="button" class="text-gray-500 hover:text-dark"
-                                    @click="close()">✕</button>
-                            </div>
-
-                            <!-- Body -->
-                            <div class="p-5 space-y-4">
-                                <div>
-                                    <label for="ubicacion" class="block text-sm font-semibold text-gray-700 mb-1">
-                                        Ubicación Entrada
-                                    </label>
-                                    <input type="text" id="ubicacion" x-model="ubicacion"
-                                        class="form-input w-full border rounded-lg px-3 py-2"
-                                        placeholder="Ej: Laboratorio, Zona TCL" maxlength="100">
-                                </div>
-
-                                <div>
-                                    <label for="fecha" class="block text-sm font-semibold text-gray-700 mb-1">
-                                        Fecha Ingreso
-                                    </label>
-                                    <input type="date" id="fecha" x-model="fecha"
-                                        class="form-input w-full border rounded-lg px-3 py-2">
+                                <!-- Icono de ayuda con tooltip mejorado -->
+                                <div class="relative group">
+                                    <div
+                                        class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center cursor-pointer">
+                                        <i class="fa fa-question text-blue-500 text-xs"></i>
+                                    </div>
+                                    <div
+                                        class="absolute left-7 -top-2 w-72 bg-blue-50 border border-blue-100 text-blue-700 text-sm rounded-lg p-3 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                                        <div class="flex items-start gap-2">
+                                            <div class="mt-0.5">
+                                                <i class="fa fa-info-circle text-blue-500"></i>
+                                            </div>
+                                            <p>La custodia permite registrar la ubicación y la fecha en la que un equipo
+                                                o artículo quedó en resguardo temporal. Activa el switch para ingresar
+                                                los datos.</p>
+                                        </div>
+                                        <div
+                                            class="absolute -left-1.5 top-3 w-3 h-3 rotate-45 bg-blue-50 border-l border-b border-blue-100">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Footer -->
-                            <div class="flex justify-end items-center gap-3 px-5 py-3 border-t">
-                                <button type="button" class="btn btn-outline-danger"
-                                    @click="cancelar()">Cancelar</button>
-                                <button type="button" class="btn btn-primary" @click="guardar()">Guardar</button>
+                            <!-- Switch mejorado -->
+                            <div class="relative">
+                                <label class="w-12 h-6 relative mt-3 block">
+                                    <input type="checkbox" id="EsCustonia" name="EsCustonia"
+                                        class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                        @change="toggleCustodia($event)"
+                                        {{ empty($orden->erma) ? 'disabled' : '' }} />
+                                    <span
+                                        class="bg-gray-200 dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300 {{ empty($orden->erma) ? 'opacity-70 cursor-not-allowed' : 'opacity-100' }}">
+                                    </span>
+                                </label>
+
+                                @if (empty($orden->erma))
+                                    <!-- Indicador de estado deshabilitado -->
+                                    <div class="absolute -right-36 top-0 flex items-center text-xs text-gray-500 mt-1">
+                                        <i class="fa fa-lock mr-1"></i>
+                                        <span>Agrega el erma y modifica</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Activar Custodia -->
+                    <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
+                        <div class="flex items-start justify-center min-h-screen px-4" @click.self="close()">
+                            <div x-show="open" x-transition x-transition.duration.300
+                                class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg bg-white shadow-xl">
+
+                                <!-- Header mejorado -->
+                                <div class="flex bg-primary items-center justify-between px-5 py-4 text-white">
+                                    <div class="font-bold text-lg flex items-center gap-2">
+                                        <i class="fa fa-box-archive"></i>
+                                        <span>Datos de custodia</span>
+                                    </div>
+                                    <button type="button" class="text-white hover:text-gray-200 transition-colors"
+                                        @click="close()">
+                                        <i class="fa fa-times text-lg"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Body mejorado -->
+                                <div class="p-6 space-y-5">
+                                    <div class="bg-blue-50 rounded-lg p-3 border border-blue-100 mb-2">
+                                        <p class="text-sm text-blue-700 flex items-start gap-2">
+                                            <i class="fa fa-circle-info text-blue-500 mt-0.5"></i>
+                                            <span>Complete la información de ubicación y fecha de ingreso para el
+                                                registro de custodia.</span>
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label for="ubicacion"
+                                            class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                            <span>Ubicación Entrada</span>
+                                            <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input type="text" id="ubicacion" x-model="ubicacion"
+                                                class="form-input w-full border rounded-lg px-4 py-2.5 pl-10 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                                                placeholder="Ej: Laboratorio, Zona TCL" maxlength="100">
+                                            <i
+                                                class="fa fa-location-dot absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label for="fecha"
+                                            class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+                                            <span>Fecha Ingreso</span>
+                                            <span class="text-red-500">*</span>
+                                        </label>
+                                        <div class="relative">
+                                            <input type="date" id="fecha" x-model="fecha"
+                                                class="form-input w-full border rounded-lg px-4 py-2.5 pl-10 focus:border-blue-500 focus:ring-blue-500 transition-colors">
+                                            <i
+                                                class="fa fa-calendar-days absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Footer mejorado -->
+                                <div
+                                    class="flex justify-end items-center gap-3 px-6 py-4 border-t bg-gray-50 rounded-b-lg">
+                                    <button type="button"
+                                        class="btn btn-outline-danger px-4 py-2 rounded-lg flex items-center gap-2"
+                                        @click="cancelar()">
+                                        <i class="fa fa-times"></i>
+                                        <span>Cancelar</span>
+                                    </button>
+                                    <button type="button"
+                                        class="btn btn-primary px-4 py-2 rounded-lg flex items-center gap-2 bg-blue-500 hover:bg-blue-600 transition-colors"
+                                        @click="guardar()">
+                                        <i class="fa fa-check"></i>
+                                        <span>Guardar</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+
 
 
 

@@ -38,10 +38,6 @@
                                 revisión</option>
                             <option value="Aprobado" {{ request('estado') == 'Aprobado' ? 'selected' : '' }}>Aprobado
                             </option>
-                            <option value="Rechazado" {{ request('estado') == 'Rechazado' ? 'selected' : '' }}>Rechazado
-                            </option>
-                            <option value="Devuelto" {{ request('estado') == 'Devuelto' ? 'selected' : '' }}>Devuelto
-                            </option>
                         </select>
                     </div>
                     <div>
@@ -72,7 +68,7 @@
         </div>
 
         <!-- Tarjetas de estadísticas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
             <div class="bg-primary from-blue-500 to-indigo-600 rounded-xl shadow-lg p-5 text-white">
                 <div class="flex justify-between items-center">
                     <h3 class="text-sm font-medium">Total de Solicitudes</h3>
@@ -114,20 +110,6 @@
                 <p class="text-2xl font-bold mt-2">{{ $enCustodia }}</p>
                 <p class="text-xs opacity-75 mt-1">Equipos activos</p>
             </div>
-
-            <div class="bg-danger from-red-500 to-pink-600 rounded-xl shadow-lg p-5 text-white">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-sm font-medium">Devueltos</h3>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-75" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 14l-4-4 4-4m11 4H5" />
-                    </svg>
-
-                </div>
-                <p class="text-2xl font-bold mt-2">{{ $devueltos }}</p>
-                <p class="text-xs opacity-75 mt-1">Equipos devueltos</p>
-            </div>
         </div>
 
         <!-- Lista de custodias -->
@@ -157,8 +139,6 @@
                         @if ($custodia->estado == 'Pendiente') bg-warning text-white
                         @elseif($custodia->estado == 'En revisión') bg-secondary text-white
                         @elseif($custodia->estado == 'Aprobado') bg-success text-white
-                        @elseif($custodia->estado == 'Rechazado') bg-danger text-white
-                        @elseif($custodia->estado == 'Devuelto') bg-info text-white
                         @else bg-gray-100 text-gray-800 @endif
                         text-xs font-medium rounded-full">
                                         {{ $custodia->estado }}
@@ -252,23 +232,6 @@
                                         <span
                                             class="text-sm font-medium text-purple-600">#{{ $custodia->ticket->numero_ticket ?? 'N/A' }}</span>
                                     </div>
-
-                                    @if ($custodia->fecha_devolucion)
-                                        <div class="flex items-center justify-between p-2 bg-dark-light rounded-md">
-                                            <div class="flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-4 w-4 mr-2 text-dark-light" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                </svg>
-                                                <span class="text-sm font-bold block mb-1">Devolución:</span>
-                                            </div>
-                                            <span
-                                                class="text-sm font-medium text-gray-900">{{ date('d/m/Y', strtotime($custodia->fecha_devolucion)) }}</span>
-                                        </div>
-                                    @endif
 
                                     <div class="flex items-center justify-between p-2 bg-warning-light rounded-md">
                                         <div class="flex items-center">

@@ -59,8 +59,6 @@
                 'Pendiente' => 'bg-warning text-white',
                 'En revisión' => 'bg-secondary text-white',
                 'Aprobado' => 'bg-success text-white',
-                'Rechazado' => 'bg-danger text-white',
-                'Devuelto' => 'bg-info text-white',
                 default => 'bg-gray-100 text-white',
             };
             // Determinar si el formulario debe estar deshabilitado
@@ -195,7 +193,7 @@
                             <select id="estado" name="estado"
                                 class="w-full appearance-none border border-gray-300 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                 {{ $isDisabled ? 'disabled' : '' }}>
-                                @foreach (['Pendiente', 'En revisión', 'Aprobado', 'Rechazado', 'Devuelto'] as $op)
+                                @foreach (['Pendiente', 'En revisión', 'Aprobado'] as $op)
                                     <option value="{{ $op }}" @selected(old('estado', $custodia->estado) === $op)>
                                         {{ $op }}
                                     </option>
@@ -495,12 +493,6 @@
                     break;
                 case 'Aprobado':
                     badgeClass = 'bg-success text-white';
-                    break;
-                case 'Rechazado':
-                    badgeClass = 'bg-danger text-white';
-                    break;
-                case 'Devuelto':
-                    badgeClass = 'bg-info text-white';
                     break;
                 default:
                     badgeClass = 'bg-gray-100 text-white';
