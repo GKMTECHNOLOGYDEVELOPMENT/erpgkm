@@ -593,32 +593,28 @@ Route::get('/obtener-numero-visitas/{ticketId}', function ($ticketId) {
     if ($idEstadflujo === null) {
         return response()->json(['error' => 'Flujo del ticket no encontrado'], 404);
     }
-    // Lógica del tipo de nombre
-    $nombre = 'Visita';
+
+    // Determinar el tipo de nombre base
+    $nombreBase = 'Visita';
 
     if ($idEstadflujo == 8) {
-        $nombre = 'Recojo';
+        $nombreBase = 'Recojo';
     } elseif ($idEstadflujo == 18) {
-        $nombre = 'Entrega';
+        $nombreBase = 'Entrega';
     } elseif ($idEstadflujo == 1) {
-        if ($ticket->evaluaciontienda == 1) {
-            $nombre = 'EvaluacionTienda';
-        } else {
-            $nombre = 'Visita';
-        }
+        $nombreBase = ($ticket->evaluaciontienda == 1) ? 'EvaluacionTienda' : 'Visita';
     }
-    // Si no es Recojo, contar visitas
-    $numeroVisitas = 0;
-    if ($nombre !== 'Recojo') {
-        $numeroVisitas = DB::table('visitas')
-            ->where('idTickets', $ticketId)
-            ->where('nombre', $nombre) // aquí filtras solo por el tipo actual
-            ->count();
-    }
+
+    // Contar las visitas con LIKE (ej: "Visita%", "Recojo%", etc.)
+    $numeroVisitas = DB::table('visitas')
+        ->where('idTickets', $ticketId)
+        ->where('nombre', 'LIKE', $nombreBase . '%')
+        ->count();
+
     return response()->json([
         'numeroVisitas' => $numeroVisitas,
-        'idEstadflujo' => $idEstadflujo,
-        'tipoNombre' => $nombre // lo devolvemos para mayor claridad
+        'idEstadflujo'  => $idEstadflujo,
+        'tipoNombre'    => $nombreBase
     ]);
 });
 Route::get('/ticket/{id}/historial-modificaciones', [OrdenesTrabajoController::class, 'obtenerHistorialModificaciones']);

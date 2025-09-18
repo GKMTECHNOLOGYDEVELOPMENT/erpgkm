@@ -429,7 +429,7 @@
 
 <!-- Modal de Detalles -->
 <div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-80">
-    <div class="modal-content bg-white rounded-lg shadow-lg w-full sm:w-3/4 md:w-1/3 p-4 overflow-auto">
+    <div class="modal-content panel rounded-lg shadow-lg w-full sm:w-3/4 md:w-1/3 p-4 overflow-auto">
         <!-- Cabecera del Modal -->
         <div class="modal-header flex justify-between items-center mb-4 border-b pb-2">
             <h2 id="detalleNombre" class="text-xl font-semibold text-gray-800"></h2>
