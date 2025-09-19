@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 
 use App\Models\Articulo;
 use App\Models\DetalleCompra;
+use App\Models\InventarioIngresoCliente;
 use App\Models\Kardex;
 use App\Models\Modelo;
 use App\Models\Moneda;
@@ -108,6 +109,59 @@ public function detalles($idArticulo, $id)
     
     return view('almacen.kardex.producto.detalles', compact('articulo', 'movimiento', 'detalleCompra'));
 }
+
+
+public function kardexProductoPorCliente($articulo_id, $cliente_id)
+{
+    $articulo = Articulo::findOrFail($articulo_id);
+    $cliente = DB::table('clientegeneral')->where('idClienteGeneral', $cliente_id)->first();
+
+    $movimientos = Kardex::where('idArticulo', $articulo_id)
+                        ->where('cliente_general_id', $cliente_id)
+                        ->orderBy('fecha', 'desc')
+                        ->paginate(10);
+
+    return view('almacen.inventario.porcliente', compact('articulo', 'cliente', 'movimientos', 'cliente_id'));
+}
+
+// Nuevo método para ver el detalle de movimientos de un mes completo
+public function detalleMovimientosKardex($kardex_id)
+{
+    // Obtener el registro del kardex
+    $kardex = Kardex::findOrFail($kardex_id);
+    
+    // Obtener el artículo y cliente
+    $articulo = Articulo::findOrFail($kardex->idArticulo);
+    $cliente = DB::table('clientegeneral')->where('idClienteGeneral', $kardex->cliente_general_id)->first();
+    
+    // Obtener el año y mes del registro del kardex
+    $fechaKardex = \Carbon\Carbon::parse($kardex->fecha);
+    $year = $fechaKardex->year;
+    $month = $fechaKardex->month;
+    
+    // Buscar los movimientos de TODO EL MES del kardex
+    $movimientos = DB::table('inventario_ingresos_clientes')
+                    ->where('articulo_id', $kardex->idArticulo)
+                    ->where('cliente_general_id', $kardex->cliente_general_id)
+                    ->whereYear('created_at', $year)
+                    ->whereMonth('created_at', $month)
+                    ->orderBy('created_at', 'asc')
+                    ->get();
+
+    $mostrarPrecios = ($kardex->cliente_general_id == 8);
+
+    return view('almacen.inventario.detalle-movimientos', compact(
+        'articulo', 
+        'cliente', 
+        'movimientos', 
+        'kardex',
+        'mostrarPrecios',
+        'year',
+        'month'
+    ));
+}
+
+
 
 
     

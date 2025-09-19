@@ -38,6 +38,7 @@ class Kardex extends Model
     protected $fillable = [
         'fecha',
         'idArticulo',
+        'cliente_general_id',
         'unidades_entrada',
         'costo_unitario_entrada',
         'unidades_salida',
@@ -55,6 +56,7 @@ class Kardex extends Model
     protected $casts = [
         'fecha' => 'date',
         'unidades_entrada' => 'integer',
+        'idArticulo' => 'integer',
         'costo_unitario_entrada' => 'decimal:2',
         'unidades_salida' => 'integer',
         'costo_unitario_salida' => 'decimal:2',

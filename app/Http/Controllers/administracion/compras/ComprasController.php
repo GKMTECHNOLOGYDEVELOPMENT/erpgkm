@@ -450,6 +450,7 @@ class ComprasController extends Controller
                         'inventario_inicial' => 0,
                         'inventario_actual' => $producto['cantidad'],
                         'costo_inventario' => $producto['cantidad'] * $producto['precio'],
+                        'cliente_general_id' => 8, // ⬅️ AÑADE ESTA LÍNEA
                         'created_at' => now(),
                         'updated_at' => now()
                     ];
@@ -543,6 +544,7 @@ class ComprasController extends Controller
                     // Buscar si existe un registro de kardex para este artículo en el mismo mes
                     $kardexExistente = DB::table('kardex')
                         ->where('idArticulo', $producto['id'])
+                        ->where('cliente_general_id', 8) // ⬅️ AÑADE ESTA CONDICIÓN
                         ->whereMonth('fecha', $mesCompra)
                         ->whereYear('fecha', $anioCompra)
                         ->first();
@@ -572,6 +574,7 @@ class ComprasController extends Controller
                         // Buscar el último registro de kardex para este artículo
                         $ultimoKardex = DB::table('kardex')
                             ->where('idArticulo', $producto['id'])
+                            ->where('cliente_general_id', 8) // ⬅️ AÑADE ESTA CONDICIÓN
                             ->orderBy('fecha', 'desc')
                             ->first();
 
@@ -593,6 +596,7 @@ class ComprasController extends Controller
                             'inventario_inicial' => $inventarioInicial,
                             'inventario_actual' => $inventarioActual,
                             'costo_inventario' => $costoInventario,
+                            'cliente_general_id' => 8, // ← 🔥 ESTE ES EL CAMPO QUE FALTABA
                             'created_at' => now(),
                             'updated_at' => now()
                         ];
@@ -620,6 +624,42 @@ class ComprasController extends Controller
 
                 $detalleId = DB::table('detalle_compra')->insertGetId($detalleData);
                 Log::info("Detalle insertado con ID: {$detalleId}");
+
+
+                // ✅ GUARDAR SERIES DEL ARTÍCULO SI EXISTEN
+                if (isset($producto['series']) && is_array($producto['series']) && count($producto['series']) > 0) {
+                    Log::info("Guardando " . count($producto['series']) . " series para el producto ID: {$productoId}");
+                    
+                    foreach ($producto['series'] as $serie) {
+                        $serie = trim($serie);
+                        if (!empty($serie)) {
+                            // Verificar si la serie ya existe
+                            $serieExistente = DB::table('compra_serie_articulos')
+                                ->where('serie', $serie)
+                                ->first();
+                                
+                            if ($serieExistente) {
+                                Log::warning("⚠️ Serie duplicada: {$serie} - Omitiendo");
+                                continue; // Saltar esta serie
+                            }
+                            
+                            // Insertar la serie
+                            DB::table('compra_serie_articulos')->insert([
+                                'compra_id' => $compraId,
+                                'detalle_compra_id' => $detalleId,
+                                'articulo_id' => $productoId,
+                                'serie' => $serie,
+                                'estado' => 'disponible',
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]);
+                            
+                            Log::info("✅ Serie guardada: {$serie}");
+                        }
+                    }
+                } else {
+                    Log::info("ℹ️ No hay series para guardar para el producto ID: {$productoId}");
+                }
 
                 // ✅ Insertar en inventario_ingresos_clientes
                 DB::table('inventario_ingresos_clientes')->insert([
@@ -737,6 +777,7 @@ class ComprasController extends Controller
                     'inventario_inicial' => 0,
                     'inventario_actual' => $validatedData['stock_total'],
                     'costo_inventario' => $validatedData['stock_total'] * $validatedData['precio_compra'],
+                    'cliente_general_id' => 8, // ⬅️ AÑADE ESTA LÍNEA
                     'created_at' => now(),
                     'updated_at' => now()
                 ];

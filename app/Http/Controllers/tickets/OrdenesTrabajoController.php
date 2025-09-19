@@ -497,7 +497,7 @@ class OrdenesTrabajoController extends Controller
                 } elseif ($idEstadflujo == 2) {
                     // Si el idEstadflujo es 2, solo mostrar los estados con idEstadflujo 3
                     $estadosFlujo = DB::table('estado_flujo')
-                        ->whereIn('idEstadflujo', [3, 10, 7, 35])  // Obtener los estados con idEstadflujo 3 y 4
+                        ->whereIn('idEstadflujo', [ 10, 7, 35])  // Obtener los estados con idEstadflujo 3 y 4
                         ->get();
                 } elseif ($idEstadflujo == 11) {
                     // Si el idEstadflujo es 3, solo mostrar los estados con idEstadflujo 4
@@ -842,6 +842,15 @@ class OrdenesTrabajoController extends Controller
 
 
 
+
+
+          // Verificar si se deben ocultar los estados de flujo
+if ($idEstadflujo == 2) {
+    Log::info("EstadosFlujo ocultos: El idEstadflujo es 2. No se mostrarán estados.");
+    $estadosFlujo = collect(); // Vaciar los estados si el estado flujo es 2
+} else {
+    Log::info("EstadosFlujo visibles: idEstadflujo diferente de 2. Mostrando estados, incluso si ultimaVisitaConEstado1 es false.");
+}
 
 
 

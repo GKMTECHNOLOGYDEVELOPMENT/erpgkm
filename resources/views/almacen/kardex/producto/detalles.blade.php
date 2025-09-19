@@ -32,14 +32,13 @@
                         class="text-primary hover:underline">
                         Kardex por Producto
                     </a>
-
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                     <span>Detalles</span>
                 </li>
             </ul>
         </div>
-        <div x-data="kardexApp()" x-cloak class="container mx-auto px-4 py-8">
+        <div x-data="kardexApp({{ Js::from($data) }})" x-cloak class="container mx-auto px-4 py-8">
 
             <!-- Header -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -63,7 +62,6 @@
                 </div>
             </div>
 
-            <!-- Filtros -->
             <!-- Filtros -->
             <div class="panel rounded-xl shadow-md p-6 mb-8 card-hover">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">FILTRAR KARDEX</h2>
@@ -99,26 +97,24 @@
                 </div>
             </div>
 
-
             <!-- Stats Section -->
             <div class="panel rounded-xl shadow-md p-6 mb-8 card-hover">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">INVENTARIO ACTUAL</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="stat-card bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
                         <p class="text-sm text-gray-500">Inventario inicial</p>
-                        <p class="text-2xl font-bold text-gray-800">5</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="inventarioInicial"></p>
                     </div>
                     <div class="stat-card bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
                         <p class="text-sm text-gray-500">Inventario actual</p>
-                        <p class="text-2xl font-bold text-gray-800">5</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="inventarioActual"></p>
                     </div>
                     <div class="stat-card bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
                         <p class="text-sm text-gray-500">Costo inventario actual</p>
-                        <p class="text-2xl font-bold text-gray-800">$50.00 USD</p>
+                        <p class="text-2xl font-bold text-gray-800" x-text="`$${costoInventario} USD`"></p>
                     </div>
                 </div>
             </div>
-
 
             <!-- Product Info -->
             <div class="panel rounded-xl shadow-md p-6 mb-8 card-hover">
@@ -173,7 +169,6 @@
                     </div>
                 </div>
             </div>
-
 
             <!-- Kardex Details Table -->
             <div class="panel rounded-xl shadow-md overflow-hidden mb-8 card-hover">
@@ -240,10 +235,10 @@
                                         x-text="`$${movimiento.total} USD`"></td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <!-- Ver detalles -->
-                                        <button @click="viewDetails(movimiento)"
+                                        <a :href="movimiento.detalle_url" 
                                             class="text-blue-500 hover:text-blue-700 mr-2" title="Ver Detalles">
                                             <i class="fas fa-eye"></i>
-                                        </button>
+                                        </a>
 
                                         <!-- Editar -->
                                         <button @click="editMovimiento(movimiento)"
@@ -256,7 +251,6 @@
                                             <i class="fas fa-file-alt"></i>
                                         </button>
                                     </td>
-
                                 </tr>
                             </template>
                             <tr x-show="filteredMovimientos.length === 0">
@@ -285,8 +279,7 @@
                         <template x-for="page in totalPages" :key="page">
                             <button @click="currentPage = page"
                                 :class="{
-                                    'bg-blue-500 text-white': currentPage ===
-                                        page,
+                                    'bg-blue-500 text-white': currentPage === page,
                                     'text-gray-700 hover:bg-gray-200': currentPage !== page
                                 }"
                                 class="px-3 py-1 rounded border border-gray-300" x-text="page">
@@ -294,8 +287,7 @@
                         </template>
                         <button @click="currentPage++" :disabled="currentPage === totalPages"
                             :class="{
-                                'opacity-50 cursor-not-allowed': currentPage ===
-                                    totalPages,
+                                'opacity-50 cursor-not-allowed': currentPage === totalPages,
                                 'hover:bg-gray-200': currentPage < totalPages
                             }"
                             class="px-3 py-1 rounded border border-gray-300">
@@ -304,59 +296,11 @@
                     </div>
                 </div>
             </div>
-
-
-            <!-- Modal Detalles -->
-            <div x-show="showModal"
-                class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div class="panel rounded-lg shadow-xl w-full max-w-2xl">
-                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h3 class="text-xl font-semibold text-gray-800">DETALLES DEL MOVIMIENTO</h3>
-                        <button @click="showModal = false" class="text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="px-6 py-4" x-show="selectedMovimiento">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-gray-500">Fecha</p>
-                                <p class="font-medium" x-text="formatDate(selectedMovimiento.fecha)"></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Tipo</p>
-                                <p class="font-medium" x-text="selectedMovimiento.tipo.toUpperCase()"></p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <p class="text-sm text-gray-500">Descripción</p>
-                                <p class="font-medium" x-text="selectedMovimiento.descripcion"></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Unidades</p>
-                                <p class="font-medium" x-text="selectedMovimiento.unidades"></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Precio Unitario</p>
-                                <p class="font-medium" x-text="`$${selectedMovimiento.precio} USD`"></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Total</p>
-                                <p class="font-medium" x-text="`$${selectedMovimiento.total} USD`"></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
-                        <button @click="showModal = false"
-                            class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg">
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
-        function kardexApp() {
+        function kardexApp(data) {
             return {
                 showFilters: false,
                 showModal: false,
@@ -370,52 +314,10 @@
                     endDate: '',
                     type: ''
                 },
-                movimientos: [{
-                        id: 1,
-                        fecha: '2025-08-29',
-                        tipo: 'entrada',
-                        descripcion: 'Compra de producto (Mediante registro)',
-                        unidades: 5,
-                        precio: 10.00,
-                        total: 50.00
-                    },
-                    {
-                        id: 2,
-                        fecha: '2025-08-15',
-                        tipo: 'salida',
-                        descripcion: 'Venta a cliente (Factura #001-123)',
-                        unidades: 2,
-                        precio: 15.00,
-                        total: 30.00
-                    },
-                    {
-                        id: 3,
-                        fecha: '2025-08-10',
-                        tipo: 'entrada',
-                        descripcion: 'Ajuste de inventario positivo',
-                        unidades: 3,
-                        precio: 12.00,
-                        total: 36.00
-                    },
-                    {
-                        id: 4,
-                        fecha: '2025-08-05',
-                        tipo: 'salida',
-                        descripcion: 'Traslado a otra sucursal',
-                        unidades: 1,
-                        precio: 10.00,
-                        total: 10.00
-                    },
-                    {
-                        id: 5,
-                        fecha: '2025-07-28',
-                        tipo: 'entrada',
-                        descripcion: 'Compra de producto (Proveedor ABC)',
-                        unidades: 10,
-                        precio: 9.50,
-                        total: 95.00
-                    }
-                ],
+                movimientos: data.movimientos,
+                inventarioInicial: data.inventario_inicial,
+                inventarioActual: data.inventario_actual,
+                costoInventario: data.costo_inventario,
                 get filteredMovimientos() {
                     let result = [...this.movimientos];
 

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\entradasproveedores;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -94,7 +95,10 @@ public function buscarProductoEntrada(Request $request)
     }
 }
 
-  public function guardarEntradaProveedor(Request $request)
+
+
+
+public function guardarEntradaProveedor(Request $request)
 {
     try {
         DB::beginTransaction();
@@ -103,33 +107,49 @@ public function buscarProductoEntrada(Request $request)
         $request->validate([
             'tipo_entrada' => 'required|string',
             'fecha_ingreso' => 'required|date',
-            'productos' => 'required|string'
+            'productos' => 'required|string',
+            'cliente_general_id' => 'nullable|integer' // añadir validación si se espera
         ]);
 
         $productos = json_decode($request->productos, true);
-        
+
         if (empty($productos)) {
             throw new \Exception('No se encontraron productos para procesar');
         }
+
+        // Log de inicio
+        Log::info('=== INICIO GUARDAR ENTRADA PROVEEDOR ===');
+        Log::info('Datos recibidos:', [
+            'tipo_entrada' => $request->tipo_entrada,
+            'fecha_ingreso' => $request->fecha_ingreso,
+            'cliente_general_id' => $request->cliente_general_id,
+            'productos' => $productos
+        ]);
 
         // Insertar entrada principal
         $entradaId = DB::table('entradas_proveedores')->insertGetId([
             'tipo_entrada' => $request->tipo_entrada,
             'fecha_ingreso' => $request->fecha_ingreso,
             'cliente_general_id' => $request->cliente_general_id ?: null,
-            'observaciones' => $request->observaciones,
+            'observaciones' => $request->observaciones ?? null,
             'estado' => 1,
             'created_at' => now(),
             'updated_at' => now()
         ]);
 
-        // Insertar detalles de productos y actualizar stock
+        Log::info("Entrada_proveedor creada con ID: {$entradaId}");
+
         foreach ($productos as $producto) {
+            Log::info("Procesando producto:", $producto);
+
+            $articuloId = $producto['id'];
+            $cantidad = $producto['cantidad'] ?? 0;
+
             // Insertar detalle
             $detalleId = DB::table('entradas_proveedores_detalle')->insertGetId([
                 'entrada_id' => $entradaId,
-                'articulo_id' => $producto['id'],
-                'cantidad' => $producto['cantidad'],
+                'articulo_id' => $articuloId,
+                'cantidad' => $cantidad,
                 'precio_unitario' => $producto['precio_unitario'] ?? 0,
                 'subtotal' => $producto['subtotal'] ?? 0,
                 'ubicacion' => $producto['ubicacion'] ?? null,
@@ -139,22 +159,94 @@ public function buscarProductoEntrada(Request $request)
                 'updated_at' => now()
             ]);
 
+            Log::info("Detalle de entrada registrado detalleId: {$detalleId}");
+
             // Actualizar stock del artículo
             DB::table('articulos')
-                ->where('idArticulos', $producto['id'])
-                ->increment('stock_total', $producto['cantidad']);
+                ->where('idArticulos', $articuloId)
+                ->increment('stock_total', $cantidad);
 
-            // ✅ Insertar en inventario_ingresos_clientes
+            Log::info("Stock incrementado para articuloId: {$articuloId}, cantidad: {$cantidad}");
+
+            // Insertar en inventario_ingresos_clientes
             DB::table('inventario_ingresos_clientes')->insert([
                 'compra_id' => $entradaId,
-                'articulo_id' => $producto['id'],
+                'articulo_id' => $articuloId,
                 'tipo_ingreso' => 'entrada_proveedor',
                 'ingreso_id' => $detalleId,
                 'cliente_general_id' => $request->cliente_general_id ?: null,
-                'cantidad' => $producto['cantidad'],
+                'cantidad' => $cantidad,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
+
+            Log::info("Inventario_ingresos_clientes insertado articuloID: {$articuloId}, cliente_general_id: " . ($request->cliente_general_id ?: 'null'));
+
+            // === Crear o actualizar en KARDEX ===
+            $fechaIngreso = Carbon::parse($request->fecha_ingreso);
+            $mes = $fechaIngreso->format('m');
+            $anio = $fechaIngreso->format('Y');
+            $clienteId = $request->cliente_general_id ?: null;
+
+            // Ver si ya existe kardex para este artículo + mes + cliente
+            $kardexExistente = DB::table('kardex')
+                ->where('idArticulo', $articuloId)
+                ->where('cliente_general_id', $clienteId) // ⬅️ YA TIENES ESTA CONDICIÓN
+                ->whereMonth('fecha', $mes)
+                ->whereYear('fecha', $anio)
+                ->where('cliente_general_id', $clienteId)
+                ->first();
+
+            if ($kardexExistente) {
+                // Actualizar registro existente
+                $nuevoInventarioActual = $kardexExistente->inventario_actual + $cantidad;
+
+                $updateData = [
+                    'unidades_entrada' => $kardexExistente->unidades_entrada + $cantidad,
+                    // costo_unitario_entrada puede quedar igual, porque no hay costo real para esta entrada
+                    'inventario_actual' => $nuevoInventarioActual,
+                    'updated_at' => now()
+                ];
+
+                DB::table('kardex')
+                    ->where('id', $kardexExistente->id)
+                    ->update($updateData);
+
+                Log::info("🔄 KARDEX actualizado para articuloId: {$articuloId}, cliente_general_id: {$clienteId}", $updateData);
+            } else {
+                // Crear nuevo registro
+                $ultimoKardex = DB::table('kardex')
+                    ->where('idArticulo', $articuloId)
+                    ->where('cliente_general_id', $clienteId) // ⬅️ AÑADE ESTA CONDICIÓN
+                    ->orderBy('fecha', 'desc')
+                    ->first();
+
+                $inventarioInicial = $ultimoKardex ? $ultimoKardex->inventario_actual : 0;
+                $costoInventarioPrevio = $ultimoKardex ? $ultimoKardex->costo_inventario : 0;
+
+                $nuevoInventarioActual = $inventarioInicial + $cantidad;
+
+                $kardexData = [
+                    'fecha' => $fechaIngreso,
+                    'idArticulo' => $articuloId,
+                    'unidades_entrada' => $cantidad,
+                    'costo_unitario_entrada' => 0,
+                    'unidades_salida' => 0,
+                    'costo_unitario_salida' => 0,
+                    'inventario_inicial' => $inventarioInicial,
+                    'inventario_actual' => $nuevoInventarioActual,
+                    'costo_inventario' => $costoInventarioPrevio,
+                    'cliente_general_id' => $clienteId,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+
+                Log::info("📝 Insertando nuevo KARDEX para articuloId: {$articuloId}, cliente_general_id: {$clienteId}", $kardexData);
+
+                $kardexId = DB::table('kardex')->insertGetId($kardexData);
+
+                Log::info("✅ Nuevo KARDEX creado con ID: {$kardexId}");
+            }
         }
 
         // Manejar archivo adjunto si existe
@@ -162,13 +254,17 @@ public function buscarProductoEntrada(Request $request)
             $archivo = $request->file('archivo');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
             $archivo->storeAs('entradas_proveedores', $nombreArchivo, 'public');
-            
+
             DB::table('entradas_proveedores')
                 ->where('id', $entradaId)
                 ->update(['archivo_adjunto' => $nombreArchivo]);
+            
+            Log::info("Archivo adjunto guardado como: {$nombreArchivo}");
         }
 
         DB::commit();
+
+        Log::info("✅ ENTRADA PROVEEDOR GUARDADA EXITOSAMENTE ID: {$entradaId}");
 
         return response()->json([
             'success' => true,
@@ -178,6 +274,8 @@ public function buscarProductoEntrada(Request $request)
 
     } catch (\Exception $e) {
         DB::rollback();
+        Log::error('❌ ERROR AL GUARDAR ENTRADA DE PROVEEDOR: ' . $e->getMessage());
+        Log::error('Stack trace: ' . $e->getTraceAsString());
         return response()->json([
             'success' => false,
             'message' => 'Error al guardar la entrada: ' . $e->getMessage()

@@ -480,18 +480,17 @@ public function getAll(Request $request)
             ->groupBy('cg.idClienteGeneral', 'cg.descripcion')
             ->get();
 
-        // Construir el select HTML
-        $selectHtml = '<select class="select-cliente-general w-full text-sm rounded">';
-        $selectHtml .= '<option value="">Seleccionar cliente</option>'; // 👈 clave
+      // Construir el select HTML con el data-articulo-id
+$selectHtml = '<select class="select-cliente-general w-full text-sm rounded" data-articulo-id="' . $articulo->idArticulos . '">';
+$selectHtml .= '<option value="">Seleccionar cliente</option>';
 
-        foreach ($clientes as $cliente) {
-            $selectHtml .= '<option value="' . $cliente->idClienteGeneral . '" data-id="' . $cliente->idClienteGeneral . '">' . 
-    $cliente->descripcion . ' - ' . $cliente->total . ' unidades' . 
+foreach ($clientes as $cliente) {
+    $selectHtml .= '<option value="' . $cliente->idClienteGeneral . '">' . 
+        $cliente->descripcion . ' - ' . $cliente->total . ' unidades' . 
     '</option>';
+}
 
-        }
-
-        $selectHtml .= '</select>';
+$selectHtml .= '</select>';
 
         return [
             'idArticulos' => $articulo->idArticulos,
@@ -571,20 +570,67 @@ public function updateFoto(Request $request, $id)
 
 
 
-public function verInventarioPorCliente($cliente_general_id)
+public function kardexProductoPorCliente($articulo_id, $cliente_id)
 {
-    // Puedes obtener el inventario de este cliente
-    $inventarios = DB::table('inventario_ingresos_clientes as iic')
-        ->join('articulos as a', 'a.idArticulos', '=', 'iic.articulo_id')
-        ->where('iic.cliente_general_id', $cliente_general_id)
-        ->select('a.nombre as articulo', 'iic.cantidad', 'iic.created_at')
-        ->get();
+    $articulo = Articulo::findOrFail($articulo_id);
+    $cliente = DB::table('clientegeneral')->where('idClienteGeneral', $cliente_id)->first();
 
-    $cliente = DB::table('clientegeneral')->where('idClienteGeneral', $cliente_general_id)->first();
+    $movimientos = Kardex::where('idArticulo', $articulo_id)
+                        ->where('cliente_general_id', $cliente_id)
+                        ->orderBy('fecha', 'desc')
+                        ->paginate(10);
 
-    return view('almacen.inventario.porcliente', compact('inventarios', 'cliente'));
+    return view('almacen.kardex.producto.porcliente', compact('articulo', 'cliente', 'movimientos'));
 }
 
+
+
+
+public function verSeries($id)
+{
+    $articulo = Articulo::with(['unidad', 'modelo.marca', 'modelo.categoria'])
+        ->findOrFail($id);
+    
+    // Obtener todas las series de este artículo
+    $series = DB::table('compra_serie_articulos as csa')
+        ->join('compra as c', 'c.idCompra', '=', 'csa.compra_id')
+        ->join('detalle_compra as dc', 'dc.idDetalleCompra', '=', 'csa.detalle_compra_id')
+        ->leftJoin('proveedores as p', 'p.idProveedor', '=', 'c.proveedor_id')
+        ->select(
+            'csa.serie',
+            'csa.estado',
+            'csa.fecha_ingreso',
+            'c.codigocompra',
+            'c.fechaEmision',
+            'p.nombre as proveedor',
+            'dc.cantidad',
+            'dc.precio'
+        )
+        ->where('csa.articulo_id', $id)
+        ->orderBy('csa.fecha_ingreso', 'desc')
+        ->get();
+    
+    return view('almacen.productos.articulos.series', compact('articulo', 'series'));
+}
+
+
+// En ArticuloController.php
+public function cambiarEstadoSerie(Request $request)
+{
+    $request->validate([
+        'serie' => 'required|string',
+        'estado' => 'required|in:disponible,vendido,defectuoso,garantia'
+    ]);
+
+    $actualizado = DB::table('compra_serie_articulos')
+        ->where('serie', $request->serie)
+        ->update(['estado' => $request->estado]);
+
+    return response()->json([
+        'success' => (bool) $actualizado,
+        'message' => $actualizado ? 'Estado actualizado' : 'Error al actualizar'
+    ]);
+}
 
 }
 
