@@ -92,7 +92,7 @@
             <table id="tablaAsistencias" class="table whitespace-nowrap">
                 <thead>
                     <tr>
-                        <th class="font-bold text-center">DETALLE</th>
+                        <th class="font-bold text-center">OBSERVACIÓN</th>
                         <th class="font-bold text-center w-[200px] break-words whitespace-normal col-ubicacion">EMPLEADO
                         </th>
                         <th class="font-bold text-center">ASISTENCIA</th>
@@ -160,7 +160,8 @@
                                         placeholder="Escribe tu respuesta aquí..."></textarea>
                                 </div>
                             </div>
-
+                            <!-- Estado final -->
+                            <p id="observacionEstadoFinal" class="mt-2 text-sm font-bold hidden text-center"></p>
                             <!-- Botones -->
                             <div id="observacionAcciones" class="flex justify-start gap-4 pt-4 border-t mt-4">
                                 <button type="button" class="btn btn-outline-danger"
@@ -178,17 +179,24 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="flex justify-between items-center px-5 pb-4 mt-2 border-t pt-3">
+                        <button id="btnAnteriorObs" class="btn btn-outline-primary"
+                            onclick="navegarObservacion(-1)">← Anterior</button>
+                        <span id="paginadorObs" class="text-sm font-semibold text-gray-700 dark:text-white"></span>
+                        <button id="btnSiguienteObs" class="btn btn-outline-primary"
+                            onclick="navegarObservacion(1)">Siguiente →</button>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-        <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/viewerjs/dist/viewer.min.js"></script>
-        <!-- Toastify JS -->
-        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-        <script src="{{ asset('assets/js/asistencias/asistencia.js') }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-        <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/viewerjs/dist/viewer.min.js"></script>
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="{{ asset('assets/js/asistencias/asistencia.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
 </x-layout.default>

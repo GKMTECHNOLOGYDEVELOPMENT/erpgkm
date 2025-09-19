@@ -206,23 +206,63 @@ class AsistenciaController extends Controller
             'data' => $filtrados->slice($start)->take($length)->values()
         ]);
     }
+    public function observacionesPorDia($idUsuario, $fecha)
+    {
+        return Observacion::where('idUsuario', $idUsuario)
+            ->whereDate('fechaHora', $fecha)
+            ->orderBy('fechaHora')
+            ->get()
+            ->map(function ($o) {
+                return [
+                    'idObservaciones' => $o->idObservaciones,
+                    'mensaje' => $o->mensaje,
+                    'estado' => $o->estado,
+                    'idTipoAsunto' => $o->idTipoAsunto,
+                    'fechaHora' => $o->fechaHora,
+                    'ubicacion' => $o->ubicacion,
+                    'lat' => $o->lat,
+                    'lng' => $o->lng,
+                    'respuesta' => $o->respuesta,
+                    'idUsuario' => $o->idUsuario,
+                ];
+            });
+    }
 
 
     public function actualizarEstadoObservacion(Request $request)
     {
-        $request->validate([
-            'id' => 'required|integer|exists:observaciones,idObservaciones',
-            'estado' => 'required|in:1,2'
-        ]);
+        try {
+            Log::info('📥 Datos recibidos en actualizarEstadoObservacion:', $request->all());
 
-        $observacion = \App\Models\Observacion::findOrFail($request->id);
-        $observacion->estado = $request->estado;
-        $observacion->respuesta = $request->respuesta ?? null; // importante: también puede ser cadena vacía
-        $observacion->save();
+            $request->validate([
+                'id' => 'required|integer|exists:observaciones,idObservaciones',
+                'estado' => 'required|in:1,2',
+            ]);
 
+            $observacion = \App\Models\Observacion::findOrFail($request->id);
+            $observacion->estado = $request->estado;
+            $observacion->respuesta = $request->respuesta ?? null;
+            $observacion->encargado = auth()->id(); // 👈 guarda el usuario autenticado
+            $observacion->save();
 
-        return response()->json(['success' => true]);
+            Log::info('✅ Observación actualizada correctamente', [
+                'id' => $observacion->idObservaciones,
+                'estado' => $observacion->estado,
+                'encargado' => $observacion->encargado,
+            ]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error en actualizarEstadoObservacion: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
+
     public function obtenerImagenesObservacion($id)
     {
         $observacion = Observacion::with('anexos')->findOrFail($id);
@@ -235,7 +275,7 @@ class AsistenciaController extends Controller
     {
         $usuario = \App\Models\Usuario::findOrFail($idUsuario);
 
-        $observaciones = \App\Models\Observacion::with('anexos')
+        $observaciones = Observacion::with(['anexos', 'tipoAsunto', 'encargadoUsuario'])
             ->where('idUsuario', $idUsuario)
             ->orderBy('fechaHora', 'desc')
             ->get();

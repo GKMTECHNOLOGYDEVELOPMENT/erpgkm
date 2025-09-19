@@ -1670,28 +1670,24 @@ if ($idEstadflujo == 2) {
 
     public function guardarModificacion(Request $request, $id)
     {
-        // Validar los datos recibidos
         $request->validate([
             'field' => 'required|string',
-            'oldValue' => 'required|string',
-            'newValue' => 'required|string',
+            'oldValue' => 'nullable|string',
+            'newValue' => 'nullable|string',
             'usuario' => 'required|string',
         ]);
 
-        // Obtener el valor de idTickets desde el parámetro $id
-        $idTickets = $id;  // El valor de $id proviene de la URL del controlador
-
-        // Crear la modificación en la base de datos
         Modificacion::create([
-            'idTickets' => $idTickets,  // Usamos el idTickets que proviene de la URL
-            'campo' => $request->input('field'),
-            'valor_antiguo' => $request->input('oldValue'),
-            'valor_nuevo' => $request->input('newValue'),
-            'usuario' => $request->input('usuario'),
+            'idTickets'     => $id,
+            'campo'         => $request->input('field'),
+            'valor_antiguo' => $request->input('oldValue') ?? '',
+            'valor_nuevo'   => $request->input('newValue') ?? '',
+            'usuario'       => $request->input('usuario'),
         ]);
 
-        return response()->json(['success' => 'Modificación guardada correctamente']);
+        return response()->json(['success' => true, 'message' => 'Modificación guardada correctamente']);
     }
+
 
 
     public function obtenerUltimaModificacion($idTickets)
@@ -1902,21 +1898,22 @@ if ($idEstadflujo == 2) {
     {
         Log::info('Obteniendo visitas para el ticket: ' . $ticketId);
 
-        // Obtener todas las visitas del ticket, incluyendo el técnico, los anexos y las condiciones
-        $visitas = Visita::with(['tecnico', 'anexos_visitas' => function ($query) {
-            $query->whereIn('idTipovisita', [2, 3, 4]);
-        }, 'condicionesTickets'])
+        $visitas = Visita::with([
+            'tecnico',
+            'anexos_visitas' => function ($query) {
+                $query->whereIn('idTipovisita', [2, 3, 4]);
+            },
+            'condicionesTickets'
+        ])
             ->where('idTickets', $ticketId)
             ->get();
 
         Log::info('Visitas obtenidas para ticket ' . $ticketId, ['total_visitas' => $visitas->count()]);
 
-        // Verificar si se han obtenido visitas
         if ($visitas->isEmpty()) {
             Log::warning('No se encontraron visitas para el ticket: ' . $ticketId);
         }
 
-        // Convertir las fechas a formato ISO 8601
         $visitas->each(function ($visita) {
             Log::info('Procesando visita ID: ' . $visita->idVisitas, [
                 'nombre' => $visita->nombre,
@@ -1924,78 +1921,66 @@ if ($idEstadflujo == 2) {
                 'fecha_final_hora' => $visita->fecha_final_hora
             ]);
 
+            // Fechas en formato ISO
             $visita->fecha_inicio_hora = $visita->fecha_inicio_hora?->toIso8601String();
             $visita->fecha_final_hora = $visita->fecha_final_hora?->toIso8601String();
-            // Incluir el nombre del técnico
-            $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;
 
+            // Técnico
+            $visita->nombre_tecnico = $visita->tecnico ? $visita->tecnico->Nombre : null;
             $visita->idTipoUsuario = $visita->tecnico ? $visita->tecnico->idTipoUsuario : null;
 
-            $visita->recojo = $visita->recojo ?? 0; // Asegurar que siempre tenga un valor
-
-
-
-            // Incluir tipoServicio
-            $visita->tipoServicio = $visita->tipoServicio;  // Trae el campo tipoServi
-
-
+            // Valores adicionales
+            $visita->recojo = $visita->recojo ?? 0;
+            $visita->tipoServicio = $visita->tipoServicio;
             $visita->idTicket = $visita->idTickets;
             $visita->idVisita = $visita->idVisitas;
+
+            // ✅ Nombre de la visita (siempre del registro en la tabla visitas)
             $visita->nombre_visita = $visita->nombre;
 
-            Log::info('Visita procesada', ['nombre_tecnico' => $visita->nombre_tecnico, 'idTicket' => $visita->idTicket]);
+            // ✅ Nombre del titular (si viene de condicionesTickets)
+            $visita->nombre_titular = $visita->condicionesTickets->isNotEmpty()
+                ? $visita->condicionesTickets[0]->nombre
+                : null;
 
+            Log::info('Visita procesada', [
+                'nombre_visita' => $visita->nombre_visita,
+                'nombre_titular' => $visita->nombre_titular,
+                'nombre_tecnico' => $visita->nombre_tecnico,
+                'idTicket' => $visita->idTicket
+            ]);
+
+            // Datos extra de condiciones
             $visita->servicio = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->servicio : null;
             $visita->motivo = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->motivo : null;
             $visita->titular = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->titular : null;
-
-            $visita->nombre = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->nombre : null;
             $visita->dni = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->dni : null;
             $visita->telefono = $visita->condicionesTickets->isNotEmpty() ? $visita->condicionesTickets[0]->telefono : null;
 
-            // Excluir la firma y avatar del técnico si existe
+            // Ocultar datos sensibles del técnico
             if ($visita->tecnico) {
                 $visita->tecnico->makeHidden(['firma', 'avatar']);
             }
 
+            // Anexos
             $visita->anexos_visitas->each(function ($anexovisita) {
-                Log::info('Procesando anexo de visita', [
-                    'idTipovisita' => $anexovisita->idTipovisita,
-                    'ubicacion' => $anexovisita->ubicacion
-                ]);
-
                 if ($anexovisita->foto) {
                     $anexovisita->foto = base64_encode($anexovisita->foto);
-                    Log::info('Foto de anexo convertida a base64');
                 }
-
-                $anexovisita->descripcion = $anexovisita->descripcion;
-                $anexovisita->lat = $anexovisita->lat;
-                $anexovisita->lng = $anexovisita->lng;
-                $anexovisita->ubicacion = $anexovisita->ubicacion;
             });
 
+            // Condiciones
             if ($visita->condicionesTickets) {
-                Log::info('Condiciones encontradas para la visita ID: ' . $visita->idVisitas);
-
                 $visita->condicionesTickets->each(function ($condicion) {
-                    Log::info('Procesando condición', [
-                        'servicio' => $condicion->servicio,
-                        'motivo' => $condicion->motivo
-                    ]);
-
                     if ($condicion->imagen) {
                         $condicion->imagen = base64_encode($condicion->imagen);
-                        Log::info('Imagen de condición convertida a base64');
                     }
                 });
             } else {
-                Log::warning('No se encontraron condiciones para la visita ID: ' . $visita->idVisitas);
                 $visita->condicionesTickets = [];
             }
         });
 
-        // Devolver las visitas como respuesta JSON
         return response()->json($visitas);
     }
 
@@ -2004,11 +1989,15 @@ if ($idEstadflujo == 2) {
 
 
 
+
     public function obtenerHistorialModificaciones($ticketId)
     {
+        $page = request()->get('page', 1);
+        $perPage = request()->get('per_page', 10);
+
         $historial = Modificacion::where('idTickets', $ticketId)
             ->orderBy('fecha_modificacion', 'desc')
-            ->paginate(10); // 10 registros por página
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'data' => $historial->items(),
@@ -2020,7 +2009,6 @@ if ($idEstadflujo == 2) {
     }
 
 
-  
 
     public function actualizarVisita(Request $request, $id)
     {
