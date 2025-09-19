@@ -89,113 +89,95 @@
         x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
         x-transition:leave="transition ease-in-out duration-300 transform"
         x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
-        class="fixed top-0 right-0 w-80 sm:w-[600px] md:w-[700px] lg:w-[800px] h-full bg-white dark:bg-gray-900 shadow-lg z-50 p-6 flex flex-col rounded-l-lg">
+        class="panel fixed inset-y-0 right-0 z-50 w-full sm:w-[600px] md:w-[700px] lg:w-[800px] 
+             dark:bg-gray-900 shadow-lg flex flex-col rounded-l-lg">
 
-        <!-- Encabezado del modal -->
-        <div class="flex justify-between items-center border-b pb-3 border-gray-300 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
-            <button @click="openModal = false"
-                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-        </div>
 
-        <!-- Tabs dentro del modal -->
-        <div class="mt-4">
-            <div x-data="{ activeTab: 'estados' }" class="flex flex-col h-full">
+        <!-- Panel lateral -->
+        <div
+            class="relative h-full w-full sm:w-[600px] md:w-[700px] lg:w-[800px] 
+                 dark:bg-gray-900 shadow-lg flex flex-col rounded-l-lg">
 
-                <!-- Botones de Tabs -->
-                <div class="flex space-x-4 border-b border-gray-300 dark:border-gray-700">
-                    <button @click="activeTab = 'estados'"
-                        :class="activeTab === 'estados' ? 'border-b-2 border-red-600 text-red-600' :
-                            'text-gray-500 hover:text-gray-700'"
-                        class="pb-2 font-semibold text-sm uppercase">
-                        Estados
-                    </button>
-                    <button
-                        @click="() => { 
-      activeTab = 'historial'; 
-      cargarHistorialModificaciones(ticketId); 
-  }"
-                        :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
-                            'text-gray-500 hover:text-gray-700'"
-                        class="pb-2 font-semibold text-sm uppercase">
-                        Historial de Cambios
-                    </button>
+            <!-- Header fijo -->
+            <div
+                class="flex justify-between items-center border-b px-4 sm:px-6 py-3 border-gray-300 dark:border-gray-700">
+                <h2 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
+                <button @click="openModal = false"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
 
-                </div>
+            <!-- Contenido scrolleable -->
+            <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+                <div x-data="{ activeTab: 'estados' }" class="flex flex-col h-full">
 
-                <!-- TAB: Estados -->
-                <div x-show="activeTab === 'estados'" class="overflow-x-auto mt-4">
-                    <table class="min-w-[600px] border-collapse w-full">
-                        <thead>
-                            <tr class="bg-gray-200 dark:bg-gray-800">
-                                <th class="px-4 py-2 text-center">Estado</th>
-                                <th class="px-4 py-2 text-center">Usuario</th>
-                                <th class="px-4 py-2 text-center">Fecha</th>
-                                <th class="px-4 py-2 text-center">Más</th>
-                            </tr>
-                        </thead>
-                        <tbody id="estadosTableBody">
-                            <!-- Aquí se llenarán los estados de flujo -->
-                        </tbody>
-                    </table>
-                </div>
+                    <!-- Tabs -->
+                    <div class="flex space-x-4 border-b border-gray-300 dark:border-gray-700">
+                        <button @click="activeTab = 'estados'"
+                            :class="activeTab === 'estados' ? 'border-b-2 border-red-600 text-red-600' :
+                                'text-gray-500 hover:text-gray-700'"
+                            class="pb-2 font-semibold text-xs sm:text-sm uppercase">
+                            Estados
+                        </button>
+                        <button @click="() => { activeTab = 'historial'; cargarHistorialModificaciones(ticketId); }"
+                            :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
+                                'text-gray-500 hover:text-gray-700'"
+                            class="pb-2 font-semibold text-xs sm:text-sm uppercase">
+                            Historial de Cambios
+                        </button>
+                    </div>
 
-                <!-- TAB: Historial -->
-                <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
-                    <table class="w-full border-collapse border border-gray-300 dark:border-gray-700">
-                        <thead class="bg-gray-100 dark:bg-gray-800">
-                            <tr>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Campo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Valor Antiguo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Valor Nuevo</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Fecha de Modificación</th>
-                                <th
-                                    class="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200">
-                                    Usuario</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historialModificaciones">
-                            <!-- Preload visible mientras se cargan los datos -->
-                            <tr id="preload" style="display: none;">
-                                <td colspan="5" class="text-center text-gray-900 dark:text-gray-200">
-                                    <span class="w-5 h-5 m-auto mb-10">
-                                        <span
-                                            class="animate-ping inline-flex h-full w-full rounded-full bg-info dark:bg-blue-500"></span>
-                                    </span>
-                                    Cargando datos...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <!-- TAB: Estados -->
+                    <div x-show="activeTab === 'estados'" class="overflow-x-auto mt-4">
+                        <table class="min-w-[500px] w-full border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-gray-200 dark:bg-gray-800">
+                                    <th class="px-2 sm:px-4 py-2 text-center">Estado</th>
+                                    <th class="px-2 sm:px-4 py-2 text-center">Usuario</th>
+                                    <th class="px-2 sm:px-4 py-2 text-center">Fecha</th>
+                                    <th class="px-2 sm:px-4 py-2 text-center">Más</th>
+                                </tr>
+                            </thead>
+                            <tbody id="estadosTableBody"></tbody>
+                        </table>
+                    </div>
 
-                    <!-- Paginación para historial -->
-                    <div class="flex justify-center mt-4">
-                        <ul id="pagination" class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
-                            <!-- Se genera dinámicamente -->
-                        </ul>
+                    <!-- TAB: Historial -->
+                    <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
+                        <div class="overflow-x-auto rounded-lg shadow border border-gray-300 dark:border-gray-700">
+                            <table
+                                class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
+                                <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-2 sm:px-6 py-3">Campo</th>
+                                        <th class="px-2 sm:px-6 py-3">Valor Antiguo</th>
+                                        <th class="px-2 sm:px-6 py-3">Valor Nuevo</th>
+                                        <th class="px-2 sm:px-6 py-3">Fecha</th>
+                                        <th class="px-2 sm:px-6 py-3">Usuario</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historialModificaciones"
+                                    class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr id="preload" style="display:none;">
+                                        <td colspan="5" class="px-6 py-4 text-center">Cargando datos...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginación -->
+                        <div class="flex justify-center mt-4">
+                            <ul id="pagination"
+                                class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
-        <!-- Contenedor de paginación -->
-        <div class="flex justify-center mt-4">
-            <ul id="pagination" class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
-                <!-- Los botones de paginación se generarán dinámicamente -->
-            </ul>
-        </div>
     </div>
+
 
 </div>
 
@@ -239,120 +221,97 @@
     let paginaActual = 1;
     const registrosPorPagina = 10;
     // Función para cargar el historial con paginación
-    function cargarHistorialModificaciones(ticketId) {
-        const labels = obtenerLabelsFormulario(); // Obtener los labels del formulario
+    function cargarHistorialModificaciones(ticketId, page = 1) {
+        const labels = obtenerLabelsFormulario();
 
         $.ajax({
-            url: `/ticket/${ticketId}/historial-modificaciones`,
+            url: `/ticket/${ticketId}/historial-modificaciones?page=${page}&per_page=${registrosPorPagina}`,
             method: 'GET',
             success: function(response) {
-                console.log(response);
-                historialCompleto = response.data; // Guardar el historial completo
-                paginaActual = 1; // Reiniciar a la primera página
-                mostrarPagina(labels); // Mostrar la primera página
-            },
-            error: function(xhr, status, error) {
-                console.error("Error al cargar el historial de modificaciones", error);
+                mostrarPagina(labels, response);
             }
         });
     }
 
+
     // Función para mostrar una página específica
-    function mostrarPagina(labels) {
+    function mostrarPagina(labels, response) {
         const tbody = document.getElementById('historialModificaciones');
         tbody.innerHTML = '';
 
-        const inicio = (paginaActual - 1) * registrosPorPagina;
-        const fin = inicio + registrosPorPagina;
-        const paginaDatos = historialCompleto.slice(inicio, fin);
-
-        paginaDatos.forEach(modificacion => {
+        response.data.forEach(modificacion => {
             const tr = document.createElement('tr');
-
-            // Usar el label en lugar del nombre del campo
             const campoLabel = labels[modificacion.campo] || modificacion.campo;
 
             tr.innerHTML = `
-            <td class="border border-gray-300 px-4 py-2 text-sm">${campoLabel}</td>
-            <td class="border border-gray-300 px-4 py-2 text-sm">${modificacion.valor_antiguo ?? '—'}</td>
-            <td class="border border-gray-300 px-4 py-2 text-sm">${modificacion.valor_nuevo ?? '—'}</td>
-            <td class="border border-gray-300 px-4 py-2 text-sm">${modificacion.fecha_modificacion}</td>
-            <td class="border border-gray-300 px-4 py-2 text-sm">${modificacion.usuario}</td>
+            <td>${campoLabel}</td>
+            <td>${modificacion.valor_antiguo ?? '—'}</td>
+            <td>${modificacion.valor_nuevo ?? '—'}</td>
+            <td>${modificacion.fecha_modificacion}</td>
+            <td>${modificacion.usuario}</td>
         `;
-
             tbody.appendChild(tr);
         });
 
-        actualizarPaginacion();
+        actualizarPaginacion(response.current_page, response.last_page);
     }
 
-    // Función para actualizar la paginación dinámica con botones numerados
-    function actualizarPaginacion() {
-        const totalPaginas = Math.ceil(historialCompleto.length / registrosPorPagina);
+
+    function actualizarPaginacion(currentPage, lastPage) {
         const paginationContainer = document.getElementById('pagination');
         paginationContainer.innerHTML = '';
 
-        // Botón "Anterior"
+        // Botón Anterior
         const prevButton = document.createElement('li');
         prevButton.innerHTML = `
-        <button id="prevPage" class="flex justify-center font-semibold p-2 rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" ${paginaActual === 1 ? 'disabled' : ''}>
+        <button 
+            class="px-3 py-1 rounded-full text-sm font-semibold transition 
+                   ${currentPage === 1 
+                       ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                       : 'bg-white-light text-dark hover:bg-primary hover:text-white dark:bg-[#191e3a] dark:text-white-light'}">
             <i class="fa-solid fa-chevron-left"></i>
-        </button>
-    `;
+        </button>`;
+        if (currentPage > 1) {
+            prevButton.querySelector('button').addEventListener('click', () => {
+                cargarHistorialModificaciones(ticketId, currentPage - 1);
+            });
+        }
         paginationContainer.appendChild(prevButton);
 
-        // Números de páginas
-        for (let i = 1; i <= totalPaginas; i++) {
+        // Botones numéricos
+        for (let i = 1; i <= lastPage; i++) {
             const pageButton = document.createElement('li');
             pageButton.innerHTML = `
-            <button data-page="${i}" class="flex justify-center font-semibold px-3.5 py-2 rounded-full transition ${paginaActual === i ? 'bg-primary text-white' : 'bg-white-light text-dark hover:text-white hover:bg-primary'} dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary">
+            <button 
+                class="px-3 py-1 rounded-full text-sm font-semibold transition 
+                       ${i === currentPage 
+                           ? 'bg-primary text-white shadow' 
+                           : 'bg-white-light text-dark hover:bg-primary hover:text-white dark:bg-[#191e3a] dark:text-white-light'}">
                 ${i}
-            </button>
-        `;
+            </button>`;
+            pageButton.querySelector('button').addEventListener('click', () => {
+                cargarHistorialModificaciones(ticketId, i);
+            });
             paginationContainer.appendChild(pageButton);
         }
 
-        // Botón "Siguiente"
+        // Botón Siguiente
         const nextButton = document.createElement('li');
         nextButton.innerHTML = `
-        <button id="nextPage" class="flex justify-center font-semibold p-2 rounded-full transition bg-white-light text-dark hover:text-white hover:bg-primary dark:text-white-light dark:bg-[#191e3a] dark:hover:bg-primary" ${paginaActual === totalPaginas ? 'disabled' : ''}>
+        <button 
+            class="px-3 py-1 rounded-full text-sm font-semibold transition 
+                   ${currentPage === lastPage 
+                       ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                       : 'bg-white-light text-dark hover:bg-primary hover:text-white dark:bg-[#191e3a] dark:text-white-light'}">
             <i class="fa-solid fa-chevron-right"></i>
-        </button>
-    `;
-        paginationContainer.appendChild(nextButton);
-
-        // Eventos de paginación
-        document.getElementById('prevPage').addEventListener('click', () => {
-            if (paginaActual > 1) {
-                paginaActual--;
-                mostrarPagina(obtenerLabelsFormulario());
-            }
-        });
-
-        document.getElementById('nextPage').addEventListener('click', () => {
-            if (paginaActual < totalPaginas) {
-                paginaActual++;
-                mostrarPagina(obtenerLabelsFormulario());
-            }
-        });
-
-        // Evento para los números de página
-        document.querySelectorAll('[data-page]').forEach(button => {
-            button.addEventListener('click', (event) => {
-                paginaActual = parseInt(event.target.getAttribute('data-page'));
-                mostrarPagina(obtenerLabelsFormulario());
+        </button>`;
+        if (currentPage < lastPage) {
+            nextButton.querySelector('button').addEventListener('click', () => {
+                cargarHistorialModificaciones(ticketId, currentPage + 1);
             });
-        });
+        }
+        paginationContainer.appendChild(nextButton);
     }
-    document.getElementById('botonFlotante').addEventListener('click', function() {
-        // Mostrar el preload cuando se haga clic en el botón
-        const tbody = document.getElementById('historialModificaciones');
-        const preload = document.getElementById('preload');
-        preload.style.display = 'table-row'; // Mostrar el preload
-
-        // Llamar la función que carga las modificaciones
-        cargarHistorialModificaciones(ticketId, tbody, preload);
-    });
 </script>
 
 
@@ -527,14 +486,6 @@
                                         class="bg-gray-200 dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300 {{ empty($orden->erma) ? 'opacity-70 cursor-not-allowed' : 'opacity-100' }}">
                                     </span>
                                 </label>
-
-                                @if (empty($orden->erma))
-                                    <!-- Indicador de estado deshabilitado -->
-                                    <div class="absolute -right-36 top-0 flex items-center text-xs text-gray-500 mt-1">
-                                        <i class="fa fa-lock mr-1"></i>
-                                        <span>Agrega el erma y modifica</span>
-                                    </div>
-                                @endif
                             </div>
                         </div>
                     </div>
@@ -570,8 +521,7 @@
                                     <div>
                                         <label for="ubicacion"
                                             class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                            <span>Ubicación Entrada</span>
-                                            <span class="text-red-500">*</span>
+                                            <span>Ubicación Entrada - Custodia</span>
                                         </label>
                                         <div class="relative">
                                             <input type="text" id="ubicacion" x-model="ubicacion"
@@ -585,8 +535,7 @@
                                     <div>
                                         <label for="fecha"
                                             class="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
-                                            <span>Fecha Ingreso</span>
-                                            <span class="text-red-500">*</span>
+                                            <span>Fecha Ingreso - Custodia</span>
                                         </label>
                                         <div class="relative">
                                             <input type="date" id="fecha" x-model="fecha"
@@ -687,14 +636,34 @@
                             document.getElementById('EsCustonia').checked = true;
                         }
                     });
+
+                // 👉 Detectar input erma y habilitar el switch en tiempo real
+                const ermaInput = document.getElementById("erma");
+                const custodiaSwitch = document.getElementById("EsCustonia");
+                const custodiaSpan = custodiaSwitch.nextElementSibling;
+
+                const actualizarEstadoSwitch = () => {
+                    if (ermaInput.value.trim() !== "") {
+                        custodiaSwitch.disabled = false;
+                        custodiaSpan.classList.remove("opacity-70", "cursor-not-allowed");
+                        custodiaSpan.classList.add("opacity-100", "cursor-pointer");
+                    } else {
+                        custodiaSwitch.checked = false;
+                        custodiaSwitch.disabled = true;
+                        custodiaSpan.classList.remove("opacity-100", "cursor-pointer");
+                        custodiaSpan.classList.add("opacity-70", "cursor-not-allowed");
+                    }
+                };
+
+                // Estado inicial y escuchar cambios
+                actualizarEstadoSwitch();
+                ermaInput.addEventListener("input", actualizarEstadoSwitch);
             },
 
             toggleCustodia(event) {
                 if (event.target.checked) {
-                    // abrir modal para activar
                     this.open = true;
                 } else {
-                    // desactivar directo
                     this.quitarCustodia();
                 }
             },
@@ -719,6 +688,8 @@
                     return;
                 }
 
+                const erma = document.getElementById("erma").value.trim();
+
                 fetch(`/tickets/${this.ticketId}/actualizar-custodia`, {
                         method: "POST",
                         headers: {
@@ -729,6 +700,7 @@
                             es_custodia: 1,
                             ubicacion_actual: this.ubicacion,
                             fecha_ingreso_custodia: this.fecha,
+                            erma: erma // 👈 se envía junto
                         }),
                     })
                     .then(r => r.json())
@@ -737,8 +709,18 @@
                             toastr.success("El equipo ha sido puesto en custodia");
                             this.open = false;
                             document.getElementById('EsCustonia').checked = true;
+
+                            if (window.updateModificationLog) {
+                                window.updateModificationLog(
+                                    "Custodia",
+                                    "Desactivada",
+                                    `Activada (${this.ubicacion}, ${this.fecha}, ${erma})`
+                                );
+                            }
                         } else {
-                            throw new Error("Error al guardar");
+                            toastr.warning(data.message || "No se pudo activar custodia");
+                            document.getElementById('EsCustonia').checked = false;
+                            this.open = false;
                         }
                     })
                     .catch(err => {
@@ -747,6 +729,7 @@
                         this.open = false;
                     });
             },
+
 
             quitarCustodia() {
                 fetch(`/tickets/${this.ticketId}/actualizar-custodia`, {
@@ -765,6 +748,14 @@
                         if (data.success) {
                             toastr.success("Custodia desactivada correctamente");
                             document.getElementById('EsCustonia').checked = false;
+
+                            if (window.updateModificationLog) {
+                                window.updateModificationLog(
+                                    "Custodia",
+                                    "Activada",
+                                    "Desactivada"
+                                );
+                            }
                         } else {
                             throw new Error("Error al quitar custodia");
                         }
@@ -777,6 +768,7 @@
         }));
     });
 </script>
+
 
 
 
@@ -1191,38 +1183,36 @@
         });
 
         // Función para actualizar el log de modificación cuando se haga un cambio
-        function updateModificationLog(field, oldValue, newValue) {
+        window.updateModificationLog = function(field, oldValue, newValue) {
             console.log("Actualizando log de modificación:", {
                 field,
                 oldValue,
                 newValue
             });
-            const usuario = "{{ auth()->user()->Nombre }}";
-            console.log("Usuario:", usuario);
 
-            const fecha = formatDate(new Date());
+            // 🔹 Normalizar valores vacíos a "N/A"
+            oldValue = oldValue && oldValue.trim() !== "" ? oldValue : "N/A";
+            newValue = newValue && newValue.trim() !== "" ? newValue : "N/A";
+
+            const usuario = "{{ auth()->user()->Nombre }}";
+            const fecha = new Date().toLocaleString();
             const idTickets = "{{ $orden->idTickets }}";
-            console.log("Fecha:", fecha, "idTickets:", idTickets);
 
             document.getElementById('ultimaModificacion').textContent =
                 `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            console.log("CSRF Token:", csrfToken);
-
-            const data = {
-                field: field,
-                oldValue: oldValue,
-                newValue: newValue,
-                usuario: usuario,
-                _token: csrfToken
-            };
-            console.log("Datos a enviar:", data);
 
             $.ajax({
                 url: '/guardar-modificacion/' + idTickets,
                 method: 'POST',
-                data: data,
+                data: {
+                    field,
+                    oldValue,
+                    newValue,
+                    usuario,
+                    _token: csrfToken
+                },
                 success: function(response) {
                     console.log('Modificación guardada correctamente:', response);
                 },
@@ -1230,7 +1220,9 @@
                     console.error('Error al guardar la modificación:', error, xhr);
                 }
             });
-        }
+        };
+
+
 
         // Pasa los estados de flujo desde Blade a JavaScript
         const estadosFlujo = @json($estadosFlujo);
@@ -1355,32 +1347,51 @@
             console.warn("Elemento dropZone no encontrado en el DOM");
         }
 
-        // Función para inicializar valores de campos
+        // Solo inicializa los valores iniciales una vez
         function initializeFieldValues() {
-            const form = document.getElementById(
-                'tuFormulario'); // Cambia 'tuFormulario' por el ID real de tu formulario
-            if (!form) {
-                console.error("Formulario no encontrado");
-                return;
-            }
-
-            form.querySelectorAll(
-                    "input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea")
-                .forEach(function(field) {
-                    if (!field.name && !field.id) {
-                        console.log("Ignorando campo sin nombre/ID:", field);
-                        return;
-                    }
-
-                    console.log("Inicializando campo:", field.id || field.name);
-                    if (field.tagName.toLowerCase() === "select") {
-                        field.dataset.oldValue = field.options[field.selectedIndex].text;
-                    } else {
+            document.querySelectorAll('#tuFormulario input, #tuFormulario textarea, #tuFormulario select')
+                .forEach(field => {
+                    if (field.type !== 'hidden') {
                         field.dataset.oldValue = field.value;
                     }
-                    console.log("Valor inicial guardado:", field.dataset.oldValue);
                 });
         }
+
+        // Guardar cambios al salir del campo (blur)
+        document.addEventListener('blur', function(e) {
+            const field = e.target;
+            if (!field.matches('#tuFormulario input, #tuFormulario textarea')) return;
+
+            const oldVal = field.dataset.oldValue || '';
+            const newVal = field.value;
+
+            if (oldVal !== newVal) {
+                const label = document.querySelector(`label[for="${field.id}"]`);
+                const fieldLabel = label ? label.textContent.trim() : field.name || field.id;
+                updateModificationLog(fieldLabel, oldVal, newVal);
+                field.dataset.oldValue = newVal; // actualizar valor base
+            }
+        }, true);
+
+        // Guardar cambios en selects
+        document.addEventListener('change', function(e) {
+            const field = e.target;
+            if (!field.matches('#tuFormulario select')) return;
+
+            const oldVal = field.dataset.oldValue || '';
+            const newVal = field.options[field.selectedIndex]?.text || '';
+
+            if (oldVal !== newVal) {
+                const label = document.querySelector(`label[for="${field.id}"]`);
+                const fieldLabel = label ? label.textContent.trim() : field.name || field.id;
+                updateModificationLog(fieldLabel, oldVal, newVal);
+                field.dataset.oldValue = newVal;
+            }
+        }, true);
+
+        // Inicializar valores al cargar
+        initializeFieldValues();
+
 
         // Función para manejar cambios en campos de texto/textarea con debounce
         function handleInputChange(e) {
@@ -1486,17 +1497,40 @@
         // Reemplaza todas las inicializaciones de Select2 con esta versión más robusta
         function initializeSelect2(selector) {
             $(selector).each(function() {
-                if ($(this).hasClass("select2-hidden-accessible")) {
-                    $(this).select2('destroy');
+                const $select = $(this);
+
+                if ($select.hasClass("select2-hidden-accessible")) {
+                    $select.select2('destroy');
                 }
-                $(this).select2({
+
+                $select.select2({
                     placeholder: 'Seleccionar opción',
                     allowClear: true,
                     width: '100%',
-                    dropdownParent: $(this).parent()
+                    dropdownParent: $select.parent()
+                });
+
+                // 👉 Escuchar cambios de Select2
+                $select.on('select2:select select2:clear', function(e) {
+                    let field = this;
+                    let oldVal = field.dataset.oldValue || '';
+                    let newVal = field.options[field.selectedIndex] ?
+                        field.options[field.selectedIndex].text :
+                        '';
+
+                    if (oldVal !== newVal) {
+                        let fieldLabel = document.querySelector('label[for="' + field.id +
+                            '"]');
+                        let labelText = fieldLabel ? fieldLabel.textContent.trim() : field
+                            .name || field.id;
+
+                        updateModificationLog(labelText, oldVal, newVal);
+                        field.dataset.oldValue = newVal;
+                    }
                 });
             });
         }
+
 
         // Inicializar una sola vez al cargar la página
         $(document).ready(function() {
@@ -1924,7 +1958,7 @@
                 fechaCompra: $('input[name="fechaCompra"]').val(),
                 fechaCreacion: $('input[name="fechaCreacion"]').val(), // <--- Aquí la agregas
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
-                erma: $('input[name="erma"]').val(), // Este campo ya no será obligatorio
+                erma: $('input[name="erma"]').val(),
             };
 
             // Mostrar los datos del formulario en la consola

@@ -1661,28 +1661,24 @@ class OrdenesTrabajoController extends Controller
 
     public function guardarModificacion(Request $request, $id)
     {
-        // Validar los datos recibidos
         $request->validate([
             'field' => 'required|string',
-            'oldValue' => 'required|string',
-            'newValue' => 'required|string',
+            'oldValue' => 'nullable|string',
+            'newValue' => 'nullable|string',
             'usuario' => 'required|string',
         ]);
 
-        // Obtener el valor de idTickets desde el parámetro $id
-        $idTickets = $id;  // El valor de $id proviene de la URL del controlador
-
-        // Crear la modificación en la base de datos
         Modificacion::create([
-            'idTickets' => $idTickets,  // Usamos el idTickets que proviene de la URL
-            'campo' => $request->input('field'),
-            'valor_antiguo' => $request->input('oldValue'),
-            'valor_nuevo' => $request->input('newValue'),
-            'usuario' => $request->input('usuario'),
+            'idTickets'     => $id,
+            'campo'         => $request->input('field'),
+            'valor_antiguo' => $request->input('oldValue') ?? '',
+            'valor_nuevo'   => $request->input('newValue') ?? '',
+            'usuario'       => $request->input('usuario'),
         ]);
 
-        return response()->json(['success' => 'Modificación guardada correctamente']);
+        return response()->json(['success' => true, 'message' => 'Modificación guardada correctamente']);
     }
+
 
 
     public function obtenerUltimaModificacion($idTickets)
@@ -1987,9 +1983,12 @@ class OrdenesTrabajoController extends Controller
 
     public function obtenerHistorialModificaciones($ticketId)
     {
+        $page = request()->get('page', 1);
+        $perPage = request()->get('per_page', 10);
+
         $historial = Modificacion::where('idTickets', $ticketId)
             ->orderBy('fecha_modificacion', 'desc')
-            ->paginate(10); // 10 registros por página
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'data' => $historial->items(),
@@ -1999,7 +1998,6 @@ class OrdenesTrabajoController extends Controller
             'total' => $historial->total()
         ]);
     }
-
 
 
 

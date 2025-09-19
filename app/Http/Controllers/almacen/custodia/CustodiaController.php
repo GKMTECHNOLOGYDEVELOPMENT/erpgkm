@@ -86,6 +86,7 @@ class CustodiaController extends Controller
         $request->validate([
             'es_custodia' => 'required|boolean',
             'ubicacion_actual' => 'required_if:es_custodia,1|string|max:100',
+            'erma' => 'nullable|string|max:50',
         ]);
 
         $ticket = Ticket::find($id);
@@ -95,18 +96,36 @@ class CustodiaController extends Controller
 
         $nuevoEstado = (int) $request->input('es_custodia');
         $custodia = Custodia::where('id_ticket', $ticket->idTickets)->first();
+        $erma = trim($request->input('erma'));
+
+        // 🚨 Si no hay ERMA, automáticamente desactivar custodia
+        if ($nuevoEstado === 1 && empty($erma)) {
+            if ($custodia) {
+                $custodia->estado = 'Rechazado';
+                $custodia->save();
+            }
+
+            $ticket->es_custodia = 0;
+            $ticket->save();
+
+            return response()->json([
+                'success' => false,
+                'message' => '❌ No se puede activar custodia sin N. erma. Custodia desactivada automáticamente.',
+                'es_custodia' => 0
+            ], 400);
+        }
 
         // ✅ PONER EN CUSTODIA
         if ($nuevoEstado === 1) {
             $ubicacion = trim($request->input('ubicacion_actual'));
-            $fechaIngreso = $request->input('fecha_ingreso_custodia'); // 👈 viene del frontend
+            $fechaIngreso = $request->input('fecha_ingreso_custodia');
 
             if (!$custodia) {
                 $custodia = Custodia::create([
                     'codigocustodias'        => strtoupper(Str::random(10)),
                     'id_ticket'              => $ticket->idTickets,
                     'estado'                 => 'Pendiente',
-                    'fecha_ingreso_custodia' => $fechaIngreso ?? now()->toDateString(), // 👈 usa la enviada
+                    'fecha_ingreso_custodia' => $fechaIngreso ?? now()->toDateString(),
                     'ubicacion_actual'       => $ubicacion,
                     'responsable_entrega'    => null,
                     'id_responsable_recepcion'  => auth()->id(),
@@ -114,7 +133,6 @@ class CustodiaController extends Controller
                     'fecha_devolucion'       => null,
                 ]);
             } else {
-                // Si existía, actualiza ubicación y fecha
                 $custodia->ubicacion_actual = $ubicacion;
                 $custodia->fecha_ingreso_custodia = $fechaIngreso ?? $custodia->fecha_ingreso_custodia;
 
@@ -126,16 +144,18 @@ class CustodiaController extends Controller
             }
 
             $ticket->es_custodia = 1;
+            $ticket->erma = $erma; // ✅ Guardar erma si existe
             $ticket->save();
 
             return response()->json([
                 'success' => true,
+                'message' => '✅ Equipo puesto en custodia correctamente.',
                 'es_custodia' => 1,
                 'ubicacion_actual' => $custodia->ubicacion_actual,
-                'fecha_ingreso_custodia' => $custodia->fecha_ingreso_custodia
+                'fecha_ingreso_custodia' => $custodia->fecha_ingreso_custodia,
+                'erma' => $ticket->erma
             ]);
         }
-
 
         // ✅ QUITAR DE CUSTODIA
         if ($nuevoEstado === 0) {
@@ -150,14 +170,22 @@ class CustodiaController extends Controller
                     ], 403);
                 }
             }
+
             $ticket->es_custodia = 0;
             $ticket->save();
 
-            return response()->json(['success' => true, 'es_custodia' => 0]);
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Custodia desactivada correctamente.',
+                'es_custodia' => 0
+            ]);
         }
 
         return response()->json(['success' => false, 'message' => 'Acción no válida.'], 400);
     }
+
+
+
 
 
     public function verificarCustodia($id)
