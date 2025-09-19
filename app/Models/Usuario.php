@@ -11,7 +11,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 use Carbon\Carbon;
-use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
@@ -64,7 +63,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Usuario extends Authenticatable implements CanResetPassword
+class Usuario extends Authenticatable
 {
 	use Notifiable;
 
@@ -109,19 +108,6 @@ class Usuario extends Authenticatable implements CanResetPassword
 		'firma',
 		'estadocivil'
 	];
-
-
-	// Especifica el campo de email
-    public function getEmailForPasswordReset()
-    {
-        return $this->correo;
-    }
-
-    // Especifica cómo enviar notificaciones
-    public function routeNotificationForMail($notification)
-    {
-        return $this->correo;
-    }
 
 	public function sucursal()
 	{
@@ -233,7 +219,6 @@ class Usuario extends Authenticatable implements CanResetPassword
 	{
 		return $this->hasOne(Vehiculo::class, 'idUsuario', 'idUsuario');
 	}
-
 	public function etiquetas()
 	{
 		return $this->hasMany(Etiqueta::class, 'user_id', 'idUsuario');
@@ -255,5 +240,4 @@ class Usuario extends Authenticatable implements CanResetPassword
     {
     return $this->hasMany(Tag::class, 'user_id', 'idUsuario');
     }
-
 }

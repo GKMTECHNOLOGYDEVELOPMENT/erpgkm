@@ -187,6 +187,7 @@ Route::post('/asistencias/actualizar-observacion', [AsistenciaController::class,
 Route::get('/asistencias/observacion/{id}', [AsistenciaController::class, 'obtenerImagenesObservacion']);
 Route::get('/asistencias/historial/{id}', [AsistenciaController::class, 'verHistorialUsuario'])->name('asistencias.historial.usuario');
 Route::post('/asistencias/responder-observacion', [AsistenciaController::class, 'responderObservacion']);
+Route::get('/asistencias/observaciones-dia/{idUsuario}/{fecha}', [AsistenciaController::class, 'observacionesPorDia']);
 Route::get('/asistencias/listado', [AsistenciaController::class, 'getAsistencias'])->name('asistencias.listado');
 //Ruta para Administracion Proveedores
 Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
