@@ -646,7 +646,7 @@ public function getAll(Request $request)
             ->get();
 
         // 🔽 Construimos el select HTML
-        $selectHtml = '<select class="select-cliente-general w-full text-sm rounded">';
+$selectHtml = '<select class="select-cliente-general w-full text-sm rounded" data-articulo-id="' . $articulo->idArticulos . '">';
         $selectHtml .= '<option value="">Seleccionar cliente</option>'; // 👈 línea agregada
 
         foreach ($clientes as $cliente) {

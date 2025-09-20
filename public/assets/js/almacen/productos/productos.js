@@ -89,6 +89,16 @@ document.addEventListener('alpine:init', () => {
                                         </svg>
                                     </a>
 
+                                    <!-- Nuevo botón para ver series -->
+                <a href="/producto/${row.idArticulos}/series" class="ltr:mr-2 rtl:ml-2" x-tooltip="Ver series">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                        <path d="M3 10H21M7 15H11M17 15H17.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M12 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V12" stroke="currentColor" stroke-width="2"/>
+                        <path d="M16 5.24194C16 5.24194 16.5 3 19 3C21.5 3 22 5.24194 22 5.24194" stroke="currentColor" stroke-width="2"/>
+                        <path d="M21.5 8V12" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </a>
+                
 
                                     <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteArticulo(${row.idArticulos})" x-tooltip="Eliminar">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
@@ -107,25 +117,33 @@ document.addEventListener('alpine:init', () => {
                 autoWidth: false,
                 pageLength: 10,
                 drawCallback: function () {
+    // Eliminar eventos anteriores para evitar duplicados
+    $('#myTable1').off('change', '.select-cliente-general');
+    
+    // Asignar nuevo evento a los selects
+    $('#myTable1').on('change', '.select-cliente-general', function () {
+        const clienteId = $(this).val();
+        const articuloId = $(this).data('articulo-id'); // Obtenemos el ID del artículo
+        
+        if (clienteId) {
+            // Usamos la ruta correcta que me compartiste
+            const url = `/kardex/producto/${articuloId}/cliente/${clienteId}`;
+            window.open(url, '_blank');
+            
+            // Resetear el select después de la selección
+            $(this).val('').trigger('change');
+        }
+    });
 
-                       $('.select-cliente-general').off('change').on('change', function () {
-                        const clienteId = $(this).val();
-                        if (clienteId) {
-                            const url = `/inventarioporcliente/${clienteId}`;
-                            window.open(url, '_blank');
-                        }
-                    });
-
-
-
-                    setTimeout(() => {
-                        $('.select-cliente-general').select2({
-                            width: 'resolve',
-                            placeholder: 'Seleccione cliente',
-                            minimumResultsForSearch: 0, // ✅ mostrar siempre el buscador
-                        });
-                    }, 10);
-                },
+    // Inicializar Select2
+    setTimeout(() => {
+        $('.select-cliente-general').select2({
+            width: 'resolve',
+            placeholder: 'Seleccione cliente',
+            minimumResultsForSearch: 0,
+        });
+    }, 10);
+},
                 language: {
                     search: 'Buscar...',
                     zeroRecords: 'No se encontraron registros',

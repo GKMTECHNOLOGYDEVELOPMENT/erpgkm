@@ -1303,4 +1303,15 @@ Route::get('/buscar-producto-entrada', [EntradasproveedoresController::class, 'b
 Route::post('/guardar-entrada-proveedor', [EntradasproveedoresController::class, 'guardarEntradaProveedor'])->name('guardar-entrada-proveedor');
 
 
-Route::get('/inventarioporcliente/{cliente_general_id}', [ProductoController::class, 'verInventarioPorCliente'])->name('inventario.cliente');
+Route::get('/kardex/producto/{articulo_id}/cliente/{cliente_id}', [KardexController::class, 'kardexProductoPorCliente']);
+
+
+
+// Ruta para el detalle de movimientos de un registro específico del kardex
+Route::get('/kardex/detalle-movimientos/{kardex_id}', [KardexController::class, 'detalleMovimientosKardex'])
+    ->name('kardex.detalle-movimientos');
+
+
+    // Ruta para ver las series de un producto
+Route::get('/producto/{id}/series', [ProductoController::class, 'verSeries'])->name('producto.series');
+Route::post('/series/cambiar-estado', [ProductoController::class, 'cambiarEstadoSerie']);

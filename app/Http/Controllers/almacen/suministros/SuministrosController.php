@@ -358,7 +358,7 @@ public function cambiarEstado($id)
             ->get();
 
         // 🔽 Construir el select HTML
-        $selectHtml = '<select class="select-cliente-general w-full text-sm rounded">';
+$selectHtml = '<select class="select-cliente-general w-full text-sm rounded" data-articulo-id="' . $articulo->idArticulos . '">';
         $selectHtml .= '<option value="">Seleccionar cliente</option>'; // ✅ opción inicial fija
 
         foreach ($clientes as $cliente) {

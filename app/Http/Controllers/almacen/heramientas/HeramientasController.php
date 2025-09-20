@@ -331,7 +331,7 @@ class HeramientasController extends Controller
             ->get();
 
         // 🔽 Construir el select HTML
-        $selectHtml = '<select class="select-cliente-general w-full text-sm rounded">';
+$selectHtml = '<select class="select-cliente-general w-full text-sm rounded" data-articulo-id="' . $articulo->idArticulos . '">';
         $selectHtml .= '<option value="">Seleccionar cliente</option>'; // 👈 esta es la línea clave
 
         foreach ($clientes as $cliente) {

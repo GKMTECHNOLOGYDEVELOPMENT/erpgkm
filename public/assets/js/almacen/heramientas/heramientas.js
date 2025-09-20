@@ -86,15 +86,34 @@ document.addEventListener('alpine:init', () => {
                 responsive: true,
                 autoWidth: false,
                 pageLength: 10,
-                drawCallback: function () {
-                    setTimeout(() => {
-                        $('.select-cliente-general').select2({
-                            width: 'resolve',
-                            placeholder: 'Seleccione cliente',
-                            minimumResultsForSearch: 0, // ✅ mostrar siempre el buscador
-                        });
-                    }, 10);
-                },
+                       drawCallback: function () {
+    // Eliminar eventos anteriores para evitar duplicados
+    $('#myTable1').off('change', '.select-cliente-general');
+    
+    // Asignar nuevo evento a los selects
+    $('#myTable1').on('change', '.select-cliente-general', function () {
+        const clienteId = $(this).val();
+        const articuloId = $(this).data('articulo-id'); // Obtenemos el ID del artículo
+        
+        if (clienteId) {
+            // Usamos la ruta correcta que me compartiste
+            const url = `/kardex/producto/${articuloId}/cliente/${clienteId}`;
+            window.open(url, '_blank');
+            
+            // Resetear el select después de la selección
+            $(this).val('').trigger('change');
+        }
+    });
+
+    // Inicializar Select2
+    setTimeout(() => {
+        $('.select-cliente-general').select2({
+            width: 'resolve',
+            placeholder: 'Seleccione cliente',
+            minimumResultsForSearch: 0,
+        });
+    }, 10);
+},
                 language: {
                     search: 'Buscar...',
                     zeroRecords: 'No se encontraron registros',
