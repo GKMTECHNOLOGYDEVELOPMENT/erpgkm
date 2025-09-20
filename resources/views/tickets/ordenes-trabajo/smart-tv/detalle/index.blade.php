@@ -325,17 +325,22 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Ticket -->
             <div>
-                <label class="text-sm font-medium">Ticket</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-ticket text-gray-500"></i>
+                    Ticket
+                </label>
                 <input type="text" class="form-input w-full bg-gray-100" value="{{ $orden->numero_ticket }}"
                     readonly>
             </div>
 
             <!-- Cliente -->
             <div>
-                <label class="text-sm font-medium">Cliente</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-user text-gray-500"></i>
+                    Cliente
+                </label>
                 <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100">
                     <option value="">Seleccionar Cliente prueba</option>
-                    <!-- Permite seleccionar un valor vacío -->
                     @foreach ($clientes as $cliente)
                         <option value="{{ $cliente->idCliente }}"
                             {{ optional($orden->cliente)->idCliente == $cliente->idCliente ? 'selected' : '' }}>
@@ -345,10 +350,12 @@
                 </select>
             </div>
 
-
             <!-- Cliente General -->
             <div>
-                <label class="text-sm font-medium">Cliente General</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-users text-gray-500"></i>
+                    Cliente General
+                </label>
                 <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full select2">
                     <option value="" selected>Seleccionar Cliente General</option>
                     @if ($orden->clienteGeneral)
@@ -360,9 +367,12 @@
             </div>
 
             <!-- Tienda -->
-            <div id="selectTiendaContainer"> <!-- Este contenedor es importante -->
+            <div id="selectTiendaContainer">
                 <div>
-                    <label class="text-sm font-medium">Tienda</label>
+                    <label class="text-sm font-medium flex items-center gap-2">
+                        <i class="fa-solid fa-store text-gray-500"></i>
+                        Tienda
+                    </label>
                     <select id="idTienda" name="idTienda" class="form-input w-full select2">
                         <option value="" disabled selected>Seleccionar Tienda</option>
                         @if (isset($tiendas) && count($tiendas) > 0)
@@ -378,16 +388,23 @@
                     </select>
                 </div>
             </div>
+
             <!-- Dirección -->
             <div>
-                <label class="text-sm font-medium">Dirección</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-map-marker-alt text-gray-500"></i>
+                    Dirección
+                </label>
                 <input id="direccion" name="direccion" type="text" class="form-input w-full"
                     value="{{ $orden->direccion }}">
             </div>
 
             <!-- Marca -->
             <div>
-                <label class="text-sm font-medium">Marca</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-tag text-gray-500"></i>
+                    Marca
+                </label>
                 <select id="idMarca" name="idMarca" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Marca</option>
                     @foreach ($marcas as $marca)
@@ -402,7 +419,10 @@
 
             <!-- Modelo -->
             <div>
-                <label class="text-sm font-medium">Modelo</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-cube text-gray-500"></i>
+                    Modelo
+                </label>
                 <select id="idModelo" name="idModelo" class="select2 w-full">
                     <option value="" disabled selected>Seleccionar Modelo</option>
                     @if ($orden->modelo)
@@ -415,34 +435,47 @@
                     <i class="fas fa-spinner fa-spin"></i> Cargando modelos...
                 </div>
             </div>
+
             <!-- Serie -->
             <div>
-                <label class="text-sm font-medium">N. Serie</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-barcode text-gray-500"></i>
+                    N. Serie
+                </label>
                 <input id="serie" name="serie" type="text" class="form-input w-full"
                     value="{{ $orden->serie }}">
             </div>
 
             <!-- Fecha de Compra -->
             <div>
-                <label class="text-sm font-medium">Fecha de Compra</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-check text-gray-500"></i>
+                    Fecha de Compra
+                </label>
                 <input id="fechaCompra" name="fechaCompra" type="text" class="form-input w-full"
                     value="{{ \Carbon\Carbon::parse($orden->fechaCompra)->format('Y-m-d') }}">
             </div>
+
+            <!-- Fecha de Creación -->
             <div>
-                <label class="text-sm font-medium">Fecha de Creación</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-plus text-gray-500"></i>
+                    Fecha de Creación
+                </label>
                 <input id="fechaCreacion" name="fechaCreacion" type="text" class="form-input w-full"
                     value="{{ \Carbon\Carbon::parse($orden->fecha_creacion)->format('Y-m-d H:i') }}" readonly>
-
             </div>
 
             <!-- Falla Reportada -->
             <div class="md:col-span-2">
-                <label class="text-sm font-medium">Falla Reportada</label>
+                <label class="text-sm font-medium"><i class="fa-solid fa-triangle-exclamation text-gray-500"></i>
+                    Falla Reportada</label>
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
             <div x-data="{ erma: '{{ $orden->erma }}' }" class="mb-5">
-                <label class="text-sm font-medium">N. erma</label>
+                <label class="text-sm font-medium"><i class="fa-solid fa-file-signature text-gray-500"></i> N.
+                    erma</label>
                 <input id="erma" name="erma" type="text" class="form-input w-full"
                     value="{{ $orden->erma }}">
                 <div x-data="custodiaModal()" class="mt-5">
@@ -464,8 +497,8 @@
                                             <div class="mt-0.5">
                                                 <i class="fa fa-info-circle text-blue-500"></i>
                                             </div>
-                                            <p>La custodia permite registrar la ubicación y la fecha en la que un equipo
-                                                o artículo quedó en resguardo temporal. Activa el switch para ingresar
+                                            <p>La custodia permite registrar la ubicación y la fecha en la que una
+                                                pantalla quedó en resguardo temporal. Activa el switch para ingresar
                                                 los datos.</p>
                                         </div>
                                         <div
@@ -1357,10 +1390,10 @@
                 });
         }
 
-        // Guardar cambios al salir del campo (blur)
+        // Guardar cambios al salir del campo (input/textarea con blur)
         document.addEventListener('blur', function(e) {
             const field = e.target;
-            if (!field.matches('#tuFormulario input, #tuFormulario textarea')) return;
+            if (!field.matches('#tuFormulario input[type="text"], #tuFormulario textarea')) return;
 
             const oldVal = field.dataset.oldValue || '';
             const newVal = field.value;
@@ -1368,6 +1401,9 @@
             if (oldVal !== newVal) {
                 const label = document.querySelector(`label[for="${field.id}"]`);
                 const fieldLabel = label ? label.textContent.trim() : field.name || field.id;
+
+                console.log("Cambio detectado en:", fieldLabel, oldVal, "=>", newVal);
+
                 updateModificationLog(fieldLabel, oldVal, newVal);
                 field.dataset.oldValue = newVal; // actualizar valor base
             }
@@ -1389,103 +1425,10 @@
             }
         }, true);
 
-        // Inicializar valores al cargar
-        initializeFieldValues();
-
-
-        // Función para manejar cambios en campos de texto/textarea con debounce
-        function handleInputChange(e) {
-            const field = e.target;
-
-            // Solo campos de texto y textarea dentro del formulario
-            if (!field.matches('#tuFormulario input[type="text"], #tuFormulario textarea')) {
-                return;
-            }
-
-            if (!field.name && !field.id) {
-                return;
-            }
-
-            console.log("Evento input detectado en campo:", field.id || field.name);
-
-            let oldVal = field.dataset.oldValue || '';
-            let newVal = field.value;
-
-            // Debounce para evitar múltiples llamadas mientras se escribe
-            clearTimeout(field.debounceTimer);
-            field.debounceTimer = setTimeout(() => {
-                if (oldVal !== newVal) {
-                    let fieldLabel = "";
-                    if (field.id) {
-                        const label = document.querySelector('label[for="' + field.id + '"]');
-                        if (label) {
-                            fieldLabel = label.textContent.trim();
-                        }
-                    }
-                    if (!fieldLabel) {
-                        fieldLabel = field.getAttribute("name") || field.getAttribute("id") ||
-                            "campo desconocido";
-                    }
-                    console.log("Cambio detectado en:", fieldLabel, "de", oldVal, "a", newVal);
-
-                    updateModificationLog(fieldLabel, oldVal, newVal);
-                    field.dataset.oldValue = newVal;
-                }
-            }, 500); // 500ms de retraso después de la última tecla presionada
-        }
-
-        // Función para manejar cambios en selects y otros campos
-        function handleFieldChange(e) {
-            const field = e.target;
-
-            // Filtra solo los campos que nos interesan (excepto text/textarea)
-            if (!field.matches(
-                    '#tuFormulario select, #tuFormulario input:not([type="text"]):not([type="hidden"])')) {
-                return;
-            }
-
-            if (!field.name && !field.id) {
-                return;
-            }
-
-            console.log("Evento change detectado en campo:", field.id || field.name);
-
-            let oldVal = field.dataset.oldValue || '';
-            let newVal;
-
-            if (field.tagName.toLowerCase() === "select") {
-                newVal = field.options[field.selectedIndex].text;
-            } else {
-                newVal = field.value;
-            }
-
-            console.log("Valor anterior:", oldVal, "Nuevo valor:", newVal);
-
-            if (oldVal !== newVal) {
-                let fieldLabel = "";
-                if (field.id) {
-                    const label = document.querySelector('label[for="' + field.id + '"]');
-                    if (label) {
-                        fieldLabel = label.textContent.trim();
-                    }
-                }
-                if (!fieldLabel) {
-                    fieldLabel = field.getAttribute("name") || field.getAttribute("id") || "campo desconocido";
-                }
-                console.log("Etiqueta del campo:", fieldLabel);
-
-                updateModificationLog(fieldLabel, oldVal, newVal);
-                field.dataset.oldValue = newVal;
-                console.log("Valor antiguo actualizado a:", newVal);
-            }
-        }
 
         // Inicialización
         initializeFieldValues();
 
-        // Escuchar eventos
-        document.addEventListener('input', handleInputChange, true); // Para cambios de texto en tiempo real
-        document.addEventListener('change', handleFieldChange, true); // Para selects, checkboxes, etc.
     });
 </script>
 
