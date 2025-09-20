@@ -84,6 +84,16 @@ document.addEventListener('alpine:init', () => {
                                         </svg>
                                     </a>
 
+                                               <!-- Nuevo botón para ver series -->
+                <a href="/producto/${row.idArticulos}/series" class="ltr:mr-2 rtl:ml-2" x-tooltip="Ver series">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                        <path d="M3 10H21M7 15H11M17 15H17.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M12 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V12" stroke="currentColor" stroke-width="2"/>
+                        <path d="M16 5.24194C16 5.24194 16.5 3 19 3C21.5 3 22 5.24194 22 5.24194" stroke="currentColor" stroke-width="2"/>
+                        <path d="M21.5 8V12" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </a>
+
                                     <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteArticulo(${row.idArticulos})" x-tooltip="Eliminar">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                         <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />

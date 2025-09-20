@@ -62,6 +62,16 @@ document.addEventListener('alpine:init', () => {
                                         <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
                                         </svg>
                                     </a>
+
+                                               <!-- Nuevo botón para ver series -->
+                                    <a href="/producto/${row.idArticulos}/series" class="ltr:mr-2 rtl:ml-2" x-tooltip="Ver series">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                                            <path d="M3 10H21M7 15H11M17 15H17.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                            <path d="M12 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V12" stroke="currentColor" stroke-width="2"/>
+                                            <path d="M16 5.24194C16 5.24194 16.5 3 19 3C21.5 3 22 5.24194 22 5.24194" stroke="currentColor" stroke-width="2"/>
+                                            <path d="M21.5 8V12" stroke="currentColor" stroke-width="2"/>
+                                        </svg>
+                                    </a>
                                     
                                     <a href="/heramientas/${row.idArticulos}/detalles" class="ltr:mr-2 rtl:ml-2" x-tooltip="Información detallada">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">

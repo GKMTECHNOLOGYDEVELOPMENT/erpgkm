@@ -7,6 +7,16 @@
         .badge-defectuoso { background-color: #f59e0b; color: white; }
         .badge-garantia { background-color: #3b82f6; color: white; }
         .info-card { background: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        
+        /* Ocultar el buscador de DataTables */
+        .dataTables_filter {
+            display: none !important;
+        }
+        
+        /* Ocultar el control de longitud de registros */
+        .dataTables_length {
+            display: none !important;
+        }
     </style>
 
     <div x-data="seriesTable">
@@ -93,50 +103,49 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($series as $index => $serie)
-                        <tr>
-                            <td class="text-center">{{ $index + 1 }}</td>
-                            <td class="font-mono">{{ $serie->serie }}</td>
-                            <td>
-                                @php
-                                    $badgeClass = [
-                                        'disponible' => 'badge-disponible',
-                                        'vendido' => 'badge-vendido', 
-                                        'defectuoso' => 'badge-defectuoso',
-                                        'garantia' => 'badge-garantia'
-                                    ][$serie->estado] ?? 'badge-secondary';
-                                @endphp
-                                <span class="badge {{ $badgeClass }}">
-                                    {{ ucfirst($serie->estado) }}
-                                </span>
-                            </td>
-                            <td>{{ \Carbon\Carbon::parse($serie->fecha_ingreso)->format('d/m/Y') }}</td>
-                            <td>{{ $serie->codigocompra }}</td>
-                            <td>{{ $serie->proveedor ?? 'N/A' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($serie->fechaEmision)->format('d/m/Y') }}</td>
-                            <td class="text-center">
-                                <div class="flex justify-center space-x-2">
-                                    <button type="button" class="btn btn-info btn-sm" 
-                                            @click="verDetalleSerie('{{ $serie->serie }}')"
-                                            x-tooltip="Ver detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-warning btn-sm" 
-                                            @click="cambiarEstado('{{ $serie->serie }}')"
-                                            x-tooltip="Cambiar estado">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-4 text-gray-500">
-                                No se encontraron series para este producto.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
+    @if($series->isEmpty())
+        {{-- Deja el cuerpo vacío para evitar problemas con DataTables --}}
+    @else
+        @foreach($series as $index => $serie)
+            <tr>
+                <td class="text-center">{{ $index + 1 }}</td>
+                <td class="font-mono">{{ $serie->serie }}</td>
+                <td>
+                    @php
+                        $badgeClass = [
+                            'disponible' => 'badge-disponible',
+                            'vendido' => 'badge-vendido', 
+                            'defectuoso' => 'badge-defectuoso',
+                            'garantia' => 'badge-garantia'
+                        ][$serie->estado] ?? 'badge-secondary';
+                    @endphp
+                    <span class="badge {{ $badgeClass }}">
+                        {{ ucfirst($serie->estado) }}
+                    </span>
+                </td>
+                <td>{{ \Carbon\Carbon::parse($serie->fecha_ingreso)->format('d/m/Y') }}</td>
+                <td>{{ $serie->codigocompra }}</td>
+                <td>{{ $serie->proveedor ?? 'N/A' }}</td>
+                <td>{{ \Carbon\Carbon::parse($serie->fechaEmision)->format('d/m/Y') }}</td>
+                <td class="text-center">
+                    <div class="flex justify-center space-x-2">
+                        <button type="button" class="btn btn-info btn-sm" 
+                                @click="verDetalleSerie('{{ $serie->serie }}')"
+                                x-tooltip="Ver detalles">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm" 
+                                @click="cambiarEstado('{{ $serie->serie }}')"
+                                x-tooltip="Cambiar estado">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        @endforeach
+    @endif
+</tbody>
+
                 </table>
             </div>
         </div>
@@ -190,12 +199,12 @@
                         responsive: true,
                         autoWidth: false,
                         pageLength: 10,
+                        dom: 'rtip', // Elimina el filtro (f) y el control de longitud (l)
                         language: {
-                            search: 'Buscar:',
                             zeroRecords: 'No se encontraron registros',
                             info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
                             infoEmpty: 'Mostrando 0 a 0 de 0 registros',
-                            lengthMenu: 'Mostrar _MENU_ registros',
+                            infoFiltered: '(filtrado de _MAX_ registros totales)',
                             paginate: {
                                 first: 'Primero',
                                 last: 'Último',
@@ -207,8 +216,13 @@
                 },
 
                 filtrarSeries() {
-                    this.datatable.column(1).search(this.busquedaSerie).draw();
-                    this.datatable.column(2).search(this.filtroEstado).draw();
+                    // Aplicar ambos filtros simultáneamente
+                    this.datatable
+                        .column(1) // Columna de número de serie
+                        .search(this.busquedaSerie)
+                        .column(2) // Columna de estado
+                        .search(this.filtroEstado)
+                        .draw();
                 },
 
                 verDetalleSerie(serie) {
