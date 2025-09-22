@@ -306,10 +306,10 @@
                                     class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                     placeholder="Detalles específicos sobre la ubicación en almacén, condición del equipo, etc."
                                     {{ $isDisabled ? 'readonly' : '' }}>
-@if (isset($custodia->custodiaUbicacion))
+                                @if (isset($custodia->custodiaUbicacion))
 {{ $custodia->custodiaUbicacion->observacion }}
 @endif{{ old('observacion_almacen') }}
-</textarea>
+                                </textarea>
                             </div>
                         </div>
                         <!-- Campo oculto para la cantidad (siempre será 1) -->
@@ -375,8 +375,27 @@
                     </div>
                 </div>
 
+                <!-- Campos adicionales para estado En revisión -->
+                <div id="campos-revision"
+                    class="{{ $custodia->estado === 'En revisión' ? '' : 'hidden' }} space-y-6">
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293L18.707 8.707A1 1 0 0119 9.414V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Observaciones de Revisión
+                        </h3>
+                        <textarea id="observacion_revision" name="observacion_revision" rows="3"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                            placeholder="Detalles de revisión (pendientes, ajustes, comentarios internos)"
+                            {{ $isDisabled ? 'readonly' : '' }}>{{ old('observacion_revision', $custodia->observacion_revision ?? '') }}</textarea>
+                    </div>
+                </div>
+
                 <!-- Observaciones generales -->
-                <div>
+                {{-- <div>
                     <label for="observaciones"
                         class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 text-indigo-500"
@@ -389,7 +408,7 @@
                     <textarea id="observaciones" name="observaciones" rows="4"
                         class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                         placeholder="Notas internas, detalles del estado, accesorios, etc." {{ $isDisabled ? 'readonly' : '' }}>{{ old('observaciones', $custodia->observaciones) }}</textarea>
-                </div>
+                </div> --}}
 
                 <!-- Sticky actions -->
                 <div
@@ -504,21 +523,30 @@
         }
 
         // Mostrar u ocultar campos adicionales para estado Aprobado
-        function toggleCamposAprobado() {
+        function toggleCamposPorEstado() {
             const estado = document.getElementById('estado').value;
             const camposAprobado = document.getElementById('campos-aprobado');
+            const camposRevision = document.getElementById('campos-revision');
             const ubicacionInput = document.getElementById('ubicacion_actual');
 
             if (estado === 'Aprobado') {
                 camposAprobado.classList.remove('hidden');
+                camposRevision.classList.add('hidden');
                 ubicacionInput.setAttribute('readonly', true);
                 ubicacionInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            } else if (estado === 'En revisión') {
+                camposRevision.classList.remove('hidden');
+                camposAprobado.classList.add('hidden');
+                ubicacionInput.removeAttribute('readonly');
+                ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
             } else {
                 camposAprobado.classList.add('hidden');
+                camposRevision.classList.add('hidden');
                 ubicacionInput.removeAttribute('readonly');
                 ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
             }
         }
+
 
         document.addEventListener('DOMContentLoaded', function() {
             @if (!$isDisabled)
@@ -527,11 +555,11 @@
                 const ubicacionInput = document.getElementById('ubicacion_actual');
 
                 // Inicializar visibilidad de campos según el estado actual
-                toggleCamposAprobado();
+                toggleCamposPorEstado();
 
                 // Cambiar cuando se modifique el estado
                 estadoSelect.addEventListener('change', function() {
-                    toggleCamposAprobado();
+                    toggleCamposPorEstado();
                 });
 
                 // Manejar clic en guardar
