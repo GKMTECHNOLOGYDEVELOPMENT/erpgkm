@@ -127,26 +127,11 @@
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                             <thead class="bg-gray-50 dark:bg-gray-800">
                                 <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Campo
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Valor Antiguo
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Valor Nuevo
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Fecha de Modificación
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                                        Usuario
-                                    </th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
                                 </tr>
                             </thead>
                             <tbody id="historialModificaciones"

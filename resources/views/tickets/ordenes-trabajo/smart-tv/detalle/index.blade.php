@@ -149,13 +149,13 @@
                             <table
                                 class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
                                 <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider">
-                                    <tr>
-                                        <th class="px-2 sm:px-6 py-3">Campo</th>
-                                        <th class="px-2 sm:px-6 py-3">Valor Antiguo</th>
-                                        <th class="px-2 sm:px-6 py-3">Valor Nuevo</th>
-                                        <th class="px-2 sm:px-6 py-3">Fecha</th>
-                                        <th class="px-2 sm:px-6 py-3">Usuario</th>
-                                    </tr>
+                                <tr>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
+                                </tr>
                                 </thead>
                                 <tbody id="historialModificaciones"
                                     class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">

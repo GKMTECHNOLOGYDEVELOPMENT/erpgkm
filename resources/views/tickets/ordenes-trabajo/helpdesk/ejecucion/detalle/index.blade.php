@@ -127,11 +127,11 @@
                             class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
                             <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider">
                                 <tr>
-                                    <th class="px-2 sm:px-6 py-3">Campo</th>
-                                    <th class="px-2 sm:px-6 py-3">Valor Antiguo</th>
-                                    <th class="px-2 sm:px-6 py-3">Valor Nuevo</th>
-                                    <th class="px-2 sm:px-6 py-3">Fecha</th>
-                                    <th class="px-2 sm:px-6 py-3">Usuario</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
                                 </tr>
                             </thead>
                             <tbody id="historialModificaciones"
@@ -166,14 +166,20 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Ticket -->
             <div>
-                <label class="text-sm font-medium">Ticket</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-ticket text-gray-500"></i>
+                    Ticket
+                </label>
                 <input type="text" id="numero_ticket" name="numero_ticket" class="form-input w-full bg-gray-100"
                     value="{{ $orden->numero_ticket }}">
             </div>
 
             <!-- Cliente -->
             <div>
-                <label class="text-sm font-medium">Cliente</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-user text-gray-500"></i>
+                    Cliente
+                </label>
                 <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100">
                     <option value="">Seleccionar Cliente</option>
                     @foreach ($clientes as $cliente)
@@ -187,7 +193,10 @@
 
             <!-- Cliente General -->
             <div>
-                <label class="text-sm font-medium">Cliente General</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-users text-gray-500"></i>
+                    Cliente General
+                </label>
                 <select id="idClienteGeneral" name="Cliente General" class="form-input w-full select2">
                     <option value="" selected>Seleccionar Cliente General</option>
                     @if ($orden->clienteGeneral)
@@ -199,7 +208,10 @@
             </div>
             <!-- Tienda -->
             <div>
-                <label class="text-sm font-medium">Tienda</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-store text-gray-500"></i>
+                    Tienda
+                </label>
                 <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Tienda</option>
                     @foreach ($tiendas as $tienda)
@@ -211,7 +223,10 @@
                 </select>
             </div>
             <div>
-                <label class="text-sm font-medium">Direción</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-map-marker-alt text-gray-500"></i>
+                    Dirección
+                </label>
                 <input type="text" id="direccion" class="form-input w-full bg-gray-100"
                     value="{{ $orden->tienda->direccion ?? '' }}" readonly>
             </div>
@@ -234,7 +249,10 @@
 
             <!-- Tipo de Servicio -->
             <div>
-                <label class="text-sm font-medium">Tipo de Servicio</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase text-gray-600"></i>
+                    Tipo de Servicio
+                </label>
                 <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Tipo de Servicio</option>
                     @foreach ($tiposServicio as $tipo)
@@ -250,12 +268,17 @@
 
             <!-- Falla Reportada -->
             <div class="md:col-span-2">
-                <label class="text-sm font-medium">Falla Reportada</label>
+                <label class="text-sm font-medium"><i class="fa-solid fa-triangle-exclamation text-gray-500"></i>
+                    Falla Reportada</label>
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
             <!-- Nrm. Cotizacion -->
             <div>
-                <label class="text-sm font-medium">Nrm. Cotizacion</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice text-gray-500"></i>
+                    Nrm. Cotización
+                </label>
+
                 <input id="nrmcotizacion" name="nrmcotizacion" type="text" class="form-input w-full bg-gray-100"
                     value="{{ $orden->nrmcotizacion }}">
             </div>

@@ -127,14 +127,11 @@
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 text-sm">
                             <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider text-left">
                                 <tr>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Campo</th>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Valor Antiguo
-                                    </th>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Valor Nuevo
-                                    </th>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Fecha de
-                                        Modificación</th>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Usuario</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
                                 </tr>
                             </thead>
                             <tbody id="historialModificaciones"
