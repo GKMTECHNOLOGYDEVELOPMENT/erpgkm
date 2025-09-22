@@ -23,6 +23,8 @@
             const mobilePdfMessage = document.getElementById('mobilePdfMessageConformidadLaboratorio');
 
             function ajustarVista() {
+                if (!pdfContainer || !mobilePdfMessage) return; // 🔥 Previene el error si no existen
+
                 if (window.innerWidth < 640) {
                     pdfContainer.classList.add("hidden");
                     mobilePdfMessage.classList.remove("hidden");

@@ -184,6 +184,7 @@
                 <input type="text" id="numero_ticket" name="numero_ticket" class="form-input w-full bg-gray-100"
                     value="{{ $orden->numero_ticket }}">
             </div>
+            
 
             <!-- Cliente -->
             <div>
@@ -191,7 +192,7 @@
                     <i class="fa-solid fa-user text-gray-500"></i>
                     Cliente
                 </label>
-                <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100">
+                <select id="idCliente" name="Cliente" class="select2 w-full bg-gray-100">
                     <option value="">Seleccionar Cliente</option>
                     @foreach ($clientes as $cliente)
                         <option value="{{ $cliente->idCliente }}"
@@ -208,7 +209,7 @@
                     <i class="fa-solid fa-users text-gray-500"></i>
                     Cliente General
                 </label>
-                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full select2">
+                <select id="idClienteGeneral" name="Cliente General" class="form-input w-full select2">
                     <option value="" selected>Seleccionar Cliente General</option>
                     @if ($orden->clienteGeneral)
                         <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
@@ -223,7 +224,7 @@
                     <i class="fa-solid fa-store text-gray-500"></i>
                     Tienda
                 </label>
-                <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100">
+                <select id="idTienda" name="Tienda" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Tienda</option>
                     @foreach ($tiendas as $tienda)
                         <option value="{{ $tienda->idTienda }}"
@@ -238,7 +239,7 @@
                     <i class="fa-solid fa-map-marker-alt text-gray-500"></i>
                     Dirección
                 </label>
-                <input type="text" id="direccion" class="form-input w-full bg-gray-100"
+                <input type="text" id="direccion" name="Direccion" class="form-input w-full bg-gray-100"
                     value="{{ $orden->tienda->direccion ?? '' }}" readonly>
             </div>
 
@@ -246,7 +247,7 @@
             @if ($existeFlujo25)
                 <div>
                     <label class="text-sm font-medium">Ejecutor</label>
-                    <select id="ejecutor" name="ejecutor" class="select2 w-full">
+                    <select id="ejecutor" name="Ejecutor" class="select2 w-full">
                         <option value="" disabled>Seleccionar Ejecutador</option>
                         @foreach ($usuarios as $usuario)
                             <option value="{{ $usuario->idUsuario }}"
@@ -265,7 +266,7 @@
                     Tipo de Servicio
                 </label>
 
-                <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100">
+                <select id="tipoServicio" name="Tipo Servicio" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Tipo de Servicio</option>
                     @foreach ($tiposServicio as $tipo)
                         <option value="{{ $tipo->idTipoServicio }}"
@@ -282,7 +283,7 @@
             <div class="md:col-span-2">
                 <label class="text-sm font-medium"><i class="fa-solid fa-triangle-exclamation text-gray-500"></i>
                     Falla Reportada</label>
-                <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
+                <textarea id="fallaReportada" name="Falla Reportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
             @if ($idRol != 6)
@@ -394,10 +395,10 @@
                 tbody.append(`
                 <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td class="px-4 py-2 whitespace-nowrap">${labels[modificacion.campo] || modificacion.campo}</td>
-                    <td class="px-4 py-2">${valorAntiguo || '—'}</td>
-                    <td class="px-4 py-2">${valorNuevo || '—'}</td>
+                    <td class="px-4 py-2">${valorAntiguo || 'N/A'}</td>
+                    <td class="px-4 py-2">${valorNuevo || 'N/A'}</td>
                     <td class="px-4 py-2 whitespace-nowrap">${formatDateTime(modificacion.fecha_modificacion)}</td>
-                    <td class="px-4 py-2">${modificacion.usuario || '—'}</td>
+                    <td class="px-4 py-2">${modificacion.usuario || 'N/A'}</td>
                 </tr>
             `);
             });
@@ -671,7 +672,7 @@
                 }
 
                 // Cargar clientes generales
-                $clienteGeneral.prop('disabled', true).html('<option value="">Cargando...</option>');
+                $clienteGeneral.prop('disabled', true).empty();
                 $.get(`/clientes-generales/${clienteId}`)
                     .then(data => {
                         $clienteGeneral.empty().append(
@@ -694,7 +695,7 @@
                     });
 
                 // Cargar tiendas
-                $tienda.prop('disabled', true).html('<option value="">Cargando...</option>');
+                $tienda.prop('disabled', true).empty();
                 $.get(`/api/cliente/${clienteId}`)
                     .then(clienteData => {
                         if (clienteData.idTipoDocumento == 8) {
