@@ -72,22 +72,6 @@ document.addEventListener('alpine:init', () => {
                                             <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
                                     </a>
-                                   <a href="/kardex/producto/${row.idArticulos}/kardex" class="ltr:mr-2 rtl:ml-2" x-tooltip="Kardex">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                                            <!-- Caja que representa inventario -->
-                                            <path d="M3 7L12 3L21 7V18A2 2 0 0 1 19 20H5A2 2 0 0 1 3 18V7Z" 
-                                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <!-- División interna de la caja -->
-                                            <path d="M12 3V20" 
-                                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <!-- Líneas simulando el contenido del Kardex -->
-                                            <path d="M8 10H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                            <path d="M8 14H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                            <path d="M14 10H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                            <path d="M14 14H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                        </svg>
-                                    </a>
 
                                     <!-- Nuevo botón para ver series -->
                 <a href="/producto/${row.idArticulos}/series" class="ltr:mr-2 rtl:ml-2" x-tooltip="Ver series">
