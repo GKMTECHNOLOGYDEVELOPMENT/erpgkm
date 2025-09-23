@@ -123,32 +123,22 @@
                 <!-- TAB: Historial -->
                 <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
                     <div class="overflow-x-auto rounded-lg shadow border border-gray-300 dark:border-gray-700">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 text-sm">
-                            <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider text-left">
+                        <table
+                            class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
+                            <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider">
                                 <tr>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Campo</th>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Valor Antiguo
-                                    </th>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Valor Nuevo
-                                    </th>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Fecha de
-                                        Modificación</th>
-                                    <th class="px-6 py-3 font-semibold text-gray-700 dark:text-gray-300">Usuario</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                    <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
                                 </tr>
                             </thead>
                             <tbody id="historialModificaciones"
                                 class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                <!-- Preload visible mientras se cargan los datos -->
-                                <tr id="preload" style="display: none;">
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">
-                                        <span class="inline-flex items-center space-x-2">
-                                            <span
-                                                class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-info dark:border-blue-500"></span>
-                                            <span>Cargando datos...</span>
-                                        </span>
-                                    </td>
+                                <tr id="preload" style="display:none;">
+                                    <td colspan="5" class="px-6 py-4 text-center">Cargando datos...</td>
                                 </tr>
-                                <!-- Datos dinámicos -->
                             </tbody>
                         </table>
                     </div>
@@ -176,14 +166,20 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Ticket -->
             <div>
-                <label class="text-sm font-medium">Ticket</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-ticket text-gray-500"></i>
+                    Ticket
+                </label>
                 <input type="text" id="numero_ticket" name="numero_ticket" class="form-input w-full bg-gray-100"
                     value="{{ $orden->numero_ticket }}">
             </div>
 
             <!-- Cliente -->
             <div>
-                <label class="text-sm font-medium">Cliente</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-user text-gray-500"></i>
+                    Cliente
+                </label>
                 <select id="idCliente" name="idCliente" class="select2 w-full bg-gray-100">
                     <option value="">Seleccionar Cliente</option>
                     @foreach ($clientes as $cliente)
@@ -197,8 +193,11 @@
 
             <!-- Cliente General -->
             <div>
-                <label class="text-sm font-medium">Cliente General</label>
-                <select id="idClienteGeneral" name="idClienteGeneral" class="form-input w-full select2">
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-users text-gray-500"></i>
+                    Cliente General
+                </label>
+                <select id="idClienteGeneral" name="Cliente General" class="form-input w-full select2">
                     <option value="" selected>Seleccionar Cliente General</option>
                     @if ($orden->clienteGeneral)
                         <option value="{{ $orden->clienteGeneral->idClienteGeneral }}" selected>
@@ -209,7 +208,10 @@
             </div>
             <!-- Tienda -->
             <div>
-                <label class="text-sm font-medium">Tienda</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-store text-gray-500"></i>
+                    Tienda
+                </label>
                 <select id="idTienda" name="idTienda" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Tienda</option>
                     @foreach ($tiendas as $tienda)
@@ -221,7 +223,10 @@
                 </select>
             </div>
             <div>
-                <label class="text-sm font-medium">Direción</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-map-marker-alt text-gray-500"></i>
+                    Dirección
+                </label>
                 <input type="text" id="direccion" class="form-input w-full bg-gray-100"
                     value="{{ $orden->tienda->direccion ?? '' }}" readonly>
             </div>
@@ -244,7 +249,10 @@
 
             <!-- Tipo de Servicio -->
             <div>
-                <label class="text-sm font-medium">Tipo de Servicio</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase text-gray-600"></i>
+                    Tipo de Servicio
+                </label>
                 <select id="tipoServicio" name="tipoServicio" class="select2 w-full bg-gray-100">
                     <option value="" disabled>Seleccionar Tipo de Servicio</option>
                     @foreach ($tiposServicio as $tipo)
@@ -260,12 +268,17 @@
 
             <!-- Falla Reportada -->
             <div class="md:col-span-2">
-                <label class="text-sm font-medium">Falla Reportada</label>
+                <label class="text-sm font-medium"><i class="fa-solid fa-triangle-exclamation text-gray-500"></i>
+                    Falla Reportada</label>
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
             <!-- Nrm. Cotizacion -->
             <div>
-                <label class="text-sm font-medium">Nrm. Cotizacion</label>
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice text-gray-500"></i>
+                    Nrm. Cotización
+                </label>
+
                 <input id="nrmcotizacion" name="nrmcotizacion" type="text" class="form-input w-full bg-gray-100"
                     value="{{ $orden->nrmcotizacion }}">
             </div>
@@ -323,8 +336,9 @@
     const ticketId = '{{ $orden->idTickets }}';
     const estadosFlujo = @json($estadosFlujo);
 
-    // Función para cargar el historial con paginación
-    // Función para cargar el historial con paginación
+    // -----------------------
+    // 🔹 HISTORIAL DE CAMBIOS
+    // -----------------------
     function cargarHistorialModificaciones(page = 1) {
         const tbody = $('#historialModificaciones');
         const preload = $('#preload');
@@ -336,19 +350,16 @@
             url: `/ticket/${ticketId}/historial-modificaciones`,
             method: 'GET',
             data: {
-                page: page,
+                page,
                 per_page: 10
             },
-            success: function(response) {
-                renderHistorial(response);
-            },
-            error: function(xhr) {
-                console.error("Error al cargar el historial", xhr);
+            success: renderHistorial,
+            error: () => {
                 tbody.html(
                     '<tr><td colspan="5" class="text-center py-4 text-red-500">Error al cargar datos</td></tr>'
                 );
             },
-            complete: function() {
+            complete: () => {
                 preload.hide();
                 tbody.show();
             }
@@ -360,16 +371,16 @@
         const tbody = $('#historialModificaciones');
         tbody.empty();
 
-        if (response.data && response.data.length > 0) {
+        if (response.data?.length) {
             const labels = {
-                'idCliente': 'Cliente',
-                'idTienda': 'Tienda',
-                'numero_ticket': 'Ticket',
-                'fallaReportada': 'Falla Reportada',
-                'tipoServicio': 'Tipo de Servicio',
-                'ejecutor': 'Ejecutor',
-                'estado': 'Estado'
-                // Agrega más mapeos según necesites
+                idCliente: 'Cliente',
+                idTienda: 'Tienda',
+                numero_ticket: 'Ticket',
+                fallaReportada: 'Falla Reportada',
+                tipoServicio: 'Tipo de Servicio',
+                ejecutor: 'Ejecutor',
+                estado: 'Estado',
+                nrmcotizacion: 'N° Cotización'
             };
 
             response.data.forEach(modificacion => {
@@ -380,13 +391,14 @@
                 tbody.append(`
                 <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td class="px-4 py-2 whitespace-nowrap">${labels[modificacion.campo] || modificacion.campo}</td>
-                    <td class="px-4 py-2">${valorAntiguo || '—'}</td>
-                    <td class="px-4 py-2">${valorNuevo || '—'}</td>
+                    <td class="px-4 py-2">${valorAntiguo || 'N/A'}</td>
+                    <td class="px-4 py-2">${valorNuevo || 'N/A'}</td>
                     <td class="px-4 py-2 whitespace-nowrap">${formatDateTime(modificacion.fecha_modificacion)}</td>
-                    <td class="px-4 py-2">${modificacion.usuario || '—'}</td>
+                    <td class="px-4 py-2">${modificacion.usuario || 'N/A'}</td>
                 </tr>
             `);
             });
+
 
             renderPaginationHistorial(response);
         } else {
@@ -397,18 +409,11 @@
     // Función para formatear valores específicos del historial
     function formatHistorialValue(campo, valor) {
         if (!valor) return '';
-
-        // Casos especiales para ciertos campos
         if (campo === 'estado') {
             const estado = estadosFlujo.find(e => e.idEstadflujo == valor);
             return estado ? estado.descripcion : valor;
         }
-
-        // Para fechas
-        if (campo.includes('fecha') || campo.includes('Fecha')) {
-            return formatDateTime(valor);
-        }
-
+        if (campo.toLowerCase().includes('fecha')) return formatDateTime(valor);
         return valor;
     }
 
@@ -656,7 +661,7 @@
                 }
 
                 // Cargar clientes generales
-                $clienteGeneral.prop('disabled', true).html('<option value="">Cargando...</option>');
+                $clienteGeneral.prop('disabled', true).empty();
                 $.get(`/clientes-generales/${clienteId}`)
                     .then(data => {
                         $clienteGeneral.empty().append(
@@ -679,7 +684,7 @@
                     });
 
                 // Cargar tiendas
-                $tienda.prop('disabled', true).html('<option value="">Cargando...</option>');
+                $tienda.prop('disabled', true).empty();
                 $.get(`/api/cliente/${clienteId}`)
                     .then(clienteData => {
                         if (clienteData.idTipoDocumento == 8) {
@@ -906,11 +911,8 @@
         function initializeFieldValues() {
             $('#tuFormulario').find('input, select, textarea').each(function() {
                 const field = $(this);
-                if (field.is('select')) {
-                    field.data('old-value', field.find('option:selected').text());
-                } else {
-                    field.data('old-value', field.val());
-                }
+                field.data('old-value', field.is('select') ? field.find('option:selected').text() :
+                    field.val());
             });
         }
 
@@ -954,9 +956,36 @@
             });
         }
 
-        // Escuchar cambios en el formulario
-        $('#tuFormulario').on('input change', 'input, select, textarea', handleFieldChange);
+        // Manejar blur en inputs de texto y textarea
+        $('#tuFormulario').on('blur', 'input[type="text"], textarea', function() {
+            const field = $(this);
+            const fieldName = field.attr('name') || field.attr('id');
+            if (!fieldName) return;
 
+            let oldValue = field.data('old-value') || '';
+            let newValue = field.val();
+
+            if (oldValue !== newValue) {
+                updateModificationLog(fieldName, oldValue, newValue);
+                field.data('old-value', newValue);
+            }
+        });
+
+        // Manejar cambios inmediatos en selects y otros inputs
+        $('#tuFormulario').on('change', 'select, input:not([type="text"]):not([type="hidden"])', function() {
+            const field = $(this);
+            const fieldName = field.attr('name') || field.attr('id');
+            if (!fieldName) return;
+
+            let oldValue = field.data('old-value') || '';
+            let newValue = field.is('select') ? field.find('option:selected').text() : field.val();
+
+            if (oldValue !== newValue) {
+                const fieldLabel = $(`label[for="${field.attr('id')}"]`).text().trim() || fieldName;
+                updateModificationLog(fieldLabel, oldValue, newValue);
+                field.data('old-value', newValue);
+            }
+        });
         // Iniciar todo cuando el DOM esté listo
         init();
     });

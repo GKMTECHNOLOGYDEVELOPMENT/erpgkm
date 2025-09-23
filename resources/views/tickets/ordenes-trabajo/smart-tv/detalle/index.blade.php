@@ -150,11 +150,11 @@
                                 class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
                                 <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider">
                                     <tr>
-                                        <th class="px-2 sm:px-6 py-3">Campo</th>
-                                        <th class="px-2 sm:px-6 py-3">Valor Antiguo</th>
-                                        <th class="px-2 sm:px-6 py-3">Valor Nuevo</th>
-                                        <th class="px-2 sm:px-6 py-3">Fecha</th>
-                                        <th class="px-2 sm:px-6 py-3">Usuario</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
                                     </tr>
                                 </thead>
                                 <tbody id="historialModificaciones"
@@ -497,16 +497,21 @@
                                             <div class="mt-0.5">
                                                 <i class="fa fa-info-circle text-blue-500"></i>
                                             </div>
-                                            <p>La custodia permite registrar la ubicación y la fecha en la que una
-                                                pantalla quedó en resguardo temporal. Activa el switch para ingresar
-                                                los datos.</p>
+                                            <p>Habilitar custodia si el equipo será almacenado.</p>
                                         </div>
                                         <div
                                             class="absolute -left-1.5 top-3 w-3 h-3 rotate-45 bg-blue-50 border-l border-b border-blue-100">
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Mensaje con candado -->
+                                <div class="flex items-center gap-1 text-danger text-xs ml-3">
+                                    <i class="fa fa-lock"></i>
+                                    <span>Debe haber un N. erma para activar la custodia</span>
+                                </div>
                             </div>
+
 
                             <!-- Switch mejorado -->
                             <div class="relative">
@@ -546,8 +551,8 @@
                                     <div class="bg-blue-50 rounded-lg p-3 border border-blue-100 mb-2">
                                         <p class="text-sm text-blue-700 flex items-start gap-2">
                                             <i class="fa fa-circle-info text-blue-500 mt-0.5"></i>
-                                            <span>Complete la información de ubicación y fecha de ingreso para el
-                                                registro de custodia.</span>
+                                            <span>Indica la ubicación del equipo previa a su ingreso al almacén, junto
+                                                con la fecha de habilitación del ERMA.</span>
                                         </p>
                                     </div>
 
