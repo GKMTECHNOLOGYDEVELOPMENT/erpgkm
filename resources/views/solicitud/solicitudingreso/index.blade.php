@@ -92,59 +92,69 @@
         </div>
     </div>
 
-    <!-- Modal para editar producto individual - SIMPLIFICADO -->
-    <div id="modal-editar-producto" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
-            <div class="px-6 py-4 border-b">
-                <h3 class="text-xl font-semibold text-gray-800">Editar Estado del Producto</h3>
-            </div>
-            <div class="p-6">
-                <form id="form-editar-producto">
-                    <input type="hidden" id="solicitud-id">
-                    <input type="hidden" id="articulo-id">
+   <!-- Modal para editar producto individual - CORREGIDO -->
+<div id="modal-editar-producto" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div class="px-6 py-4 border-b">
+            <h3 class="text-xl font-semibold text-gray-800">Editar Estado y Ubicaciones</h3>
+        </div>
+        <div class="p-6 max-h-[70vh] overflow-y-auto">
+            <form id="form-editar-producto">
+                <input type="hidden" id="solicitud-id">
+                <input type="hidden" id="articulo-id">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Artículo</label>
+                    <p class="font-semibold" id="producto-nombre"></p>
+                    <p class="text-sm text-gray-500" id="producto-id-text"></p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad Total</label>
+                    <p class="font-semibold" id="producto-cantidad"></p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                    <select id="producto-estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="recibido">Recibido</option>
+                        <option value="ubicado">Ubicado</option>
+                    </select>
+                </div>
+
+                <!-- Sección de ubicaciones - CORREGIDA -->
+                <div class="mb-4" id="ubicacion-section">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-medium text-gray-700">Ubicaciones del Artículo</label>
+                        <button type="button" id="agregar-ubicacion-btn" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
+                            + Agregar
+                        </button>
+                    </div>
                     
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Artículo</label>
-                        <p class="font-semibold" id="producto-nombre"></p>
-                        <p class="text-sm text-gray-500" id="producto-id-text"></p>
+                    <!-- CONTENEDOR CORREGIDO -->
+                    <div id="contenedor-ubicaciones" class="space-y-3">
+                        <!-- Las ubicaciones se agregarán aquí dinámicamente -->
                     </div>
                     
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                        <p class="font-semibold" id="producto-cantidad"></p>
+                    <div id="total-distribuido" class="mt-3 p-2 bg-gray-50 rounded text-sm">
+                        <span class="font-medium">Total distribuido: </span>
+                        <span id="cantidad-distribuida">0</span> / <span id="cantidad-total">0</span> unidades
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                        <select id="producto-estado" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="pendiente">Pendiente</option>
-                            <option value="recibido">Recibido</option>
-                            <option value="ubicado">Ubicado</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-4" id="ubicacion-container" style="display: none;">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
-                        <select id="producto-ubicacion" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Seleccionar ubicación</option>
-                            @foreach($ubicaciones as $ubicacion)
-                                <option value="{{ $ubicacion->idUbicacion }}">{{ $ubicacion->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-                        <textarea id="producto-observaciones" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="px-6 py-4 border-t flex justify-end space-x-3">
-                <button id="cancelar-editar-btn" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
-                <button id="guardar-editar-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Guardar</button>
-            </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
+                    <textarea id="producto-observaciones" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="px-6 py-4 border-t flex justify-end space-x-3">
+            <button id="cancelar-editar-btn" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+            <button id="guardar-editar-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Guardar</button>
         </div>
     </div>
+</div>
 
     <!-- Pasar datos de PHP a JavaScript -->
     <script>
@@ -340,9 +350,15 @@
                             ${solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'N/A'}
                         </span>
                     </td>
+
                     <td class="px-4 py-3">
-                        ${solicitud.ubicacion ? solicitud.ubicacion : '<span class="text-red-500">Por asignar</span>'}
-                    </td>
+    ${solicitud.ubicaciones && solicitud.ubicaciones.length > 0 ? 
+        solicitud.ubicaciones.map(u => 
+            `<div class="text-xs">${u.cantidad} en ${u.ubicacion_nombre}</div>`
+        ).join('') 
+        : '<span class="text-red-500">Sin ubicación</span>'
+    }
+</td>
                     <td class="px-4 py-3">
                         <button class="editar-producto-btn px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm" 
                                 data-id="${solicitud.id}">
@@ -356,106 +372,286 @@
             agregarEventListenersTablaProductos();
         }
 
-        // Función para abrir modal de edición - SIMPLIFICADA
-        function abrirModalEditarProducto(solicitudId) {
-            const solicitud = todasLasSolicitudes.find(s => s.id == solicitudId);
-            
-            if (solicitud) {
-                document.getElementById('solicitud-id').value = solicitudId;
-                document.getElementById('articulo-id').value = solicitud.articulo_id || 'N/A';
-                document.getElementById('producto-nombre').textContent = solicitud.articulo || 'N/A';
-                document.getElementById('producto-id-text').textContent = `ID Artículo: ${solicitud.articulo_id || 'N/A'}`;
-                document.getElementById('producto-cantidad').textContent = `${solicitud.cantidad} unidades`;
-                document.getElementById('producto-estado').value = solicitud.estado || 'pendiente';
-                document.getElementById('producto-observaciones').value = solicitud.observaciones || '';
-
-                // Si ya tiene ubicación, seleccionarla
-                if (solicitud.ubicacion) {
-                    const ubicacionEncontrada = ubicaciones.find(u => u.nombre === solicitud.ubicacion);
-                    if (ubicacionEncontrada) {
-                        document.getElementById('producto-ubicacion').value = ubicacionEncontrada.idUbicacion;
-                    }
-                }
-
-                // Mostrar/ocultar campo de ubicación según estado
-                toggleUbicacionField();
-                
-                document.getElementById('modal-editar-producto').classList.remove('hidden');
-                document.getElementById('modal-editar-producto').classList.add('flex');
-            }
+ // Función para abrir modal de edición - CORREGIDA
+function abrirModalEditarProducto(solicitudId) {
+    console.log('Abriendo modal para solicitud ID:', solicitudId);
+    
+    const solicitud = todasLasSolicitudes.find(s => s.id == solicitudId);
+    console.log('Solicitud encontrada:', solicitud);
+    
+    if (solicitud) {
+        // Verificar que los elementos existan antes de usarlos
+        const contenedorUbicaciones = document.getElementById('contenedor-ubicaciones');
+        const solicitudIdInput = document.getElementById('solicitud-id');
+        const articuloIdInput = document.getElementById('articulo-id');
+        const productoNombre = document.getElementById('producto-nombre');
+        const productoIdText = document.getElementById('producto-id-text');
+        const productoCantidad = document.getElementById('producto-cantidad');
+        const productoEstado = document.getElementById('producto-estado');
+        const productoObservaciones = document.getElementById('producto-observaciones');
+        
+        if (!contenedorUbicaciones) {
+            console.error('❌ ERROR: No se encontró el elemento contenedor-ubicaciones');
+            return;
         }
+        
+        if (solicitudIdInput && articuloIdInput && productoNombre && productoCantidad && productoEstado) {
+            // Asignar valores básicos
+            solicitudIdInput.value = solicitudId;
+            articuloIdInput.value = solicitud.articulo_id || 'N/A';
+            productoNombre.textContent = solicitud.articulo || 'N/A';
+            productoIdText.textContent = `ID: ${solicitud.articulo_id || 'N/A'}`;
+            productoCantidad.textContent = `${solicitud.cantidad} unidades`;
+            productoEstado.value = solicitud.estado || 'pendiente';
+            productoObservaciones.value = solicitud.observaciones || '';
 
-        // Función para mostrar/ocultar campo de ubicación
-        function toggleUbicacionField() {
-            const estado = document.getElementById('producto-estado').value;
-            const ubicacionContainer = document.getElementById('ubicacion-container');
+            // Configurar contadores
+            document.getElementById('cantidad-total').textContent = solicitud.cantidad;
+            document.getElementById('cantidad-distribuida').textContent = '0';
+
+            // LIMPIAR Y CARGAR UBICACIONES - CORREGIDO
+            contenedorUbicaciones.innerHTML = ''; // ✅ ESTA LÍNEA ESTABA CAUSANDO EL ERROR
             
-            if (estado === 'ubicado') {
-                ubicacionContainer.style.display = 'block';
-            } else {
-                ubicacionContainer.style.display = 'none';
-            }
-        }
-
-        // Función para guardar cambios - SIMPLIFICADA
-        async function guardarEdicion() {
-            const solicitudId = document.getElementById('solicitud-id').value;
-            const estado = document.getElementById('producto-estado').value;
-            const ubicacionId = document.getElementById('producto-ubicacion').value;
-            const observaciones = document.getElementById('producto-observaciones').value;
-
-            // Validar ubicación si el estado es "ubicado"
-            if (estado === 'ubicado' && !ubicacionId) {
-                alert('Por favor selecciona una ubicación para el estado "Ubicado"');
-                return;
-            }
-
-            // Obtener nombre de la ubicación seleccionada
-            const ubicacionSeleccionada = ubicaciones.find(u => u.idUbicacion == ubicacionId);
-            const nombreUbicacion = ubicacionSeleccionada ? ubicacionSeleccionada.nombre : null;
-
-            try {
-                const response = await fetch('/solicitudes-ingreso/procesar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        id: solicitudId,
-                        estado: estado,
-                        ubicacion_id: ubicacionId,
-                        ubicacion_nombre: nombreUbicacion,
-                        observaciones: observaciones
-                    })
+            // Cargar ubicaciones existentes o agregar una vacía
+            if (solicitud.ubicaciones && solicitud.ubicaciones.length > 0) {
+                console.log('Cargando ubicaciones existentes:', solicitud.ubicaciones);
+                solicitud.ubicaciones.forEach((ubicacion, index) => {
+                    agregarFilaUbicacion(ubicacion.idUbicacion, ubicacion.cantidad);
                 });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Actualizar la solicitud en el array local
-                    const index = todasLasSolicitudes.findIndex(s => s.id == solicitudId);
-                    if (index !== -1) {
-                        todasLasSolicitudes[index].estado = estado;
-                        todasLasSolicitudes[index].ubicacion = nombreUbicacion;
-                        todasLasSolicitudes[index].observaciones = observaciones;
-                    }
-
-                    // Re-renderizar la tabla
-                    renderizarTablaProductos(todasLasSolicitudes);
-                    
-                    document.getElementById('modal-editar-producto').classList.add('hidden');
-                    document.getElementById('modal-editar-producto').classList.remove('flex');
-                    
-                    alert('Solicitud actualizada correctamente');
-                } else {
-                    alert('Error al actualizar la solicitud');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al procesar la solicitud');
+            } else {
+                console.log('No hay ubicaciones existentes, agregando una vacía');
+                agregarFilaUbicacion();
             }
+
+            actualizarTotalDistribuido();
+            toggleUbicacionField();
+            
+            // Mostrar modal
+            document.getElementById('modal-editar-producto').classList.remove('hidden');
+            document.getElementById('modal-editar-producto').classList.add('flex');
+        } else {
+            console.error('❌ ERROR: Faltan elementos del modal');
+            // Debug: mostrar qué elementos faltan
+            if (!solicitudIdInput) console.error('Falta: solicitud-id');
+            if (!articuloIdInput) console.error('Falta: articulo-id');
+            if (!productoNombre) console.error('Falta: producto-nombre');
+            if (!productoCantidad) console.error('Falta: producto-cantidad');
+            if (!productoEstado) console.error('Falta: producto-estado');
         }
+    } else {
+        console.error('❌ ERROR: No se encontró la solicitud con ID:', solicitudId);
+    }
+}
+
+
+// Función para agregar fila de ubicación - CORREGIDA
+function agregarFilaUbicacion(ubicacionId = '', cantidad = '') {
+    const contenedor = document.getElementById('contenedor-ubicaciones');
+    if (!contenedor) {
+        console.error('❌ ERROR: No se encontró el contenedor de ubicaciones');
+        return;
+    }
+    
+    const index = contenedor.children.length;
+    const cantidadValor = cantidad || '';
+    
+    const filaHTML = `
+        <div class="fila-ubicacion grid grid-cols-12 gap-2 items-end border border-gray-200 rounded p-3 bg-white">
+            <div class="col-span-7">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Ubicación</label>
+                <select class="select-ubicacion w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                    <option value="">Seleccionar ubicación</option>
+                    ${ubicaciones.map(u => 
+                        `<option value="${u.idUbicacion}" ${u.idUbicacion == ubicacionId ? 'selected' : ''}>${u.nombre}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <div class="col-span-4">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Cantidad</label>
+                <input type="number" class="input-cantidad w-full px-2 py-1 border border-gray-300 rounded text-sm" 
+                       min="1" value="${cantidadValor}" placeholder="Cantidad">
+            </div>
+            <div class="col-span-1">
+                <button type="button" class="quitar-ubicacion px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
+                    ×
+                </button>
+            </div>
+        </div>
+    `;
+    
+    contenedor.insertAdjacentHTML('beforeend', filaHTML);
+    
+    // Agregar event listeners a la nueva fila
+    const nuevaFila = contenedor.lastElementChild;
+    const inputCantidad = nuevaFila.querySelector('.input-cantidad');
+    const btnQuitar = nuevaFila.querySelector('.quitar-ubicacion');
+    
+    if (inputCantidad) {
+        inputCantidad.addEventListener('input', actualizarTotalDistribuido);
+    }
+    
+    if (btnQuitar) {
+        btnQuitar.addEventListener('click', function() {
+            if (contenedor.children.length > 1) {
+                this.closest('.fila-ubicacion').remove();
+                actualizarTotalDistribuido();
+            } else {
+                alert('Debe haber al menos una ubicación');
+            }
+        });
+    }
+}
+
+
+// Función para actualizar el total distribuido - CORREGIDA
+function actualizarTotalDistribuido() {
+    const inputsCantidad = document.querySelectorAll('.input-cantidad');
+    let totalDistribuido = 0;
+    
+    inputsCantidad.forEach(input => {
+        totalDistribuido += parseInt(input.value) || 0;
+    });
+    
+    const cantidadDistribuidaElem = document.getElementById('cantidad-distribuida');
+    if (cantidadDistribuidaElem) {
+        cantidadDistribuidaElem.textContent = totalDistribuido;
+    }
+}
+
+
+
+
+
+       // Función para mostrar/ocultar sección de ubicaciones - CORREGIDA
+function toggleUbicacionField() {
+    const estado = document.getElementById('producto-estado').value;
+    const ubicacionSection = document.getElementById('ubicacion-section');
+    
+    if (ubicacionSection) {
+        if (estado === 'ubicado') {
+            ubicacionSection.style.display = 'block';
+        } else {
+            ubicacionSection.style.display = 'none';
+        }
+    }
+}
+
+
+// Función para inicializar event listeners - CORREGIDA
+function inicializarEventListenersModal() {
+    // Botón agregar ubicación
+    const btnAgregarUbicacion = document.getElementById('agregar-ubicacion-btn');
+    if (btnAgregarUbicacion) {
+        btnAgregarUbicacion.addEventListener('click', function() {
+            agregarFilaUbicacion();
+        });
+    } else {
+        console.error('❌ No se encontró el botón agregar-ubicacion-btn');
+    }
+    
+    // Botón guardar
+    const btnGuardar = document.getElementById('guardar-editar-btn');
+    if (btnGuardar) {
+        btnGuardar.addEventListener('click', guardarEdicion);
+    } else {
+        console.error('❌ No se encontró el botón guardar-editar-btn');
+    }
+    
+    // Botón cancelar
+    const btnCancelar = document.getElementById('cancelar-editar-btn');
+    if (btnCancelar) {
+        btnCancelar.addEventListener('click', function() {
+            document.getElementById('modal-editar-producto').classList.add('hidden');
+        });
+    } else {
+        console.error('❌ No se encontró el botón cancelar-editar-btn');
+    }
+    
+    // Cambio de estado
+    const selectEstado = document.getElementById('producto-estado');
+    if (selectEstado) {
+        selectEstado.addEventListener('change', toggleUbicacionField);
+    }
+}
+
+       // Función para guardar cambios
+async function guardarEdicion() {
+    const solicitudId = document.getElementById('solicitud-id').value;
+    const articuloId = document.getElementById('articulo-id').value;
+    const estado = document.getElementById('producto-estado').value;
+    const observaciones = document.getElementById('producto-observaciones').value;
+
+    // Recolectar datos de ubicaciones
+    const filasUbicacion = document.querySelectorAll('.fila-ubicacion');
+    const ubicacionesData = [];
+    let totalDistribuido = 0;
+
+    for (const fila of filasUbicacion) {
+        const selectUbicacion = fila.querySelector('.select-ubicacion');
+        const inputCantidad = fila.querySelector('.input-cantidad');
+        
+        if (!selectUbicacion || !inputCantidad) continue;
+        
+        const ubicacionId = selectUbicacion.value;
+        const cantidad = parseInt(inputCantidad.value) || 0;
+        
+        if (!ubicacionId || cantidad <= 0) {
+            alert('Por favor completa todas las ubicaciones y cantidades');
+            return;
+        }
+        
+        ubicacionesData.push({
+            idUbicacion: parseInt(ubicacionId),
+            cantidad: cantidad
+        });
+        
+        totalDistribuido += cantidad;
+    }
+
+    // Validar cantidad total
+    const cantidadTotal = parseInt(document.getElementById('producto-cantidad').textContent);
+    if (totalDistribuido !== cantidadTotal) {
+        const confirmar = confirm(`La distribución suma ${totalDistribuido} unidades, pero el total es ${cantidadTotal}. ¿Desea guardar de todas formas?`);
+        if (!confirmar) return;
+    }
+
+    try {
+        const response = await fetch('/solicitudes-ingreso/procesar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                id: solicitudId,
+                articulo_id: articuloId,
+                estado: estado,
+                ubicaciones: ubicacionesData,
+                observaciones: observaciones
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Recargar los datos
+            const compraId = todasLasSolicitudes[0]?.compra_id;
+            if (compraId) {
+                const solicitudesActualizadas = await cargarSolicitudesCompra(compraId);
+                todasLasSolicitudes = solicitudesActualizadas;
+                renderizarTablaProductos(todasLasSolicitudes);
+            }
+            
+            document.getElementById('modal-editar-producto').classList.add('hidden');
+            alert('Solicitud actualizada correctamente');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al procesar la solicitud');
+    }
+}
 
         // Función para inicializar event listeners
         function inicializarEventListeners() {
@@ -493,6 +689,9 @@
 
         // Event Listeners globales
         document.addEventListener('DOMContentLoaded', function() {
+
+                inicializarEventListenersModal();
+
             // Inicializar event listeners
             inicializarEventListeners();
             

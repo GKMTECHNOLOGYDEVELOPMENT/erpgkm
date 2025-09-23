@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\solicitud;
 
 use App\Http\Controllers\Controller;
+use App\Models\ArticuloUbicacion;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SolicitudingresoController extends Controller
 {
-    public function index()
+   public function index()
     {
         // Obtener las compras que TIENEN solicitudes de ingreso
         $comprasConSolicitudes = DB::table('compra as c')
@@ -49,7 +50,6 @@ class SolicitudingresoController extends Controller
                 'si.codigo_solicitud',
                 'si.estado',
                 'si.cantidad',
-                'si.ubicacion',
                 'si.observaciones',
                 'a.nombre as articulo',
                 'a.idArticulos as articulo_id'
@@ -58,6 +58,19 @@ class SolicitudingresoController extends Controller
             ->where('si.compra_id', $compraId)
             ->orderBy('si.idSolicitudIngreso')
             ->get();
+
+        // Obtener las ubicaciones de cada artículo
+        foreach ($solicitudes as $solicitud) {
+            $solicitud->ubicaciones = DB::table('articulo_ubicaciones as au')
+                ->select(
+                    'au.cantidad',
+                    'u.nombre as ubicacion_nombre',
+                    'u.idUbicacion'
+                )
+                ->leftJoin('ubicacion as u', 'au.ubicacion_id', '=', 'u.idUbicacion')
+                ->where('au.articulo_id', $solicitud->articulo_id)
+                ->get();
+        }
 
         return response()->json(['solicitudes' => $solicitudes]);
     }
@@ -69,12 +82,17 @@ class SolicitudingresoController extends Controller
         try {
             $data = $request->validate([
                 'id' => 'required|integer|exists:solicitud_ingreso,idSolicitudIngreso',
+                'articulo_id' => 'required|integer|exists:articulos,idArticulos',
                 'estado' => 'required|in:pendiente,recibido,ubicado',
-                'ubicacion_id' => 'nullable|integer|exists:ubicacion,idUbicacion',
-                'ubicacion_nombre' => 'nullable|string|max:255',
+                'ubicaciones' => 'required|array|min:1',
+                'ubicaciones.*.idUbicacion' => 'required|integer|exists:ubicacion,idUbicacion',
+                'ubicaciones.*.cantidad' => 'required|integer|min:1',
                 'observaciones' => 'nullable|string'
             ]);
 
+            DB::beginTransaction();
+
+            // 1. Actualizar el estado de la solicitud
             $updateData = [
                 'estado' => $data['estado'],
                 'observaciones' => $data['observaciones'],
@@ -82,23 +100,63 @@ class SolicitudingresoController extends Controller
             ];
 
             if ($data['estado'] === 'ubicado') {
-                $updateData['ubicacion'] = $data['ubicacion_nombre'];
                 $updateData['fecha_ubicado'] = now();
             } elseif ($data['estado'] === 'recibido') {
                 $updateData['fecha_recibido'] = now();
-                $updateData['ubicacion'] = null;
-            } else {
-                $updateData['ubicacion'] = null;
             }
 
             DB::table('solicitud_ingreso')
                 ->where('idSolicitudIngreso', $data['id'])
                 ->update($updateData);
 
-            return response()->json(['success' => true, 'message' => 'Solicitud actualizada correctamente']);
+            // 2. Guardar las ubicaciones en la nueva tabla
+            if ($data['estado'] === 'ubicado') {
+                // Eliminar ubicaciones anteriores del artículo
+                DB::table('articulo_ubicaciones')
+                    ->where('articulo_id', $data['articulo_id'])
+                    ->delete();
+
+                // Insertar nuevas ubicaciones
+                foreach ($data['ubicaciones'] as $ubicacion) {
+                    ArticuloUbicacion::create([
+                        'articulo_id' => $data['articulo_id'],
+                        'ubicacion_id' => $ubicacion['idUbicacion'],
+                        'cantidad' => $ubicacion['cantidad']
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true, 
+                'message' => 'Solicitud actualizada correctamente'
+            ]);
 
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error al procesar la solicitud: ' . $e->getMessage()]);
+            DB::rollBack();
+            return response()->json([
+                'success' => false, 
+                'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
+            ]);
         }
+    }
+
+
+     // Método para obtener las ubicaciones de un artículo
+    public function obtenerUbicacionesArticulo($articuloId)
+    {
+        $ubicaciones = DB::table('articulo_ubicaciones as au')
+            ->select(
+                'au.idArticuloUbicacion',
+                'au.cantidad',
+                'u.idUbicacion',
+                'u.nombre as ubicacion_nombre'
+            )
+            ->leftJoin('ubicacion as u', 'au.ubicacion_id', '=', 'u.idUbicacion')
+            ->where('au.articulo_id', $articuloId)
+            ->get();
+
+        return response()->json(['ubicaciones' => $ubicaciones]);
     }
 }
