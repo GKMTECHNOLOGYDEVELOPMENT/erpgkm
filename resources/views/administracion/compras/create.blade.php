@@ -230,10 +230,10 @@
                                          </td>
                                          <td class="px-4 py-4 whitespace-nowrap text-center flex gap-2 justify-center">
                                              <!-- Botón agregar series -->
-                                             <button @click="abrirModalSeries(producto)"
+                                             <!-- <button @click="abrirModalSeries(producto)"
                                                  class="text-blue-500 hover:text-blue-700" title="Agregar series">
                                                  <i class="fa-solid fa-list-ol"></i>
-                                             </button>
+                                             </button> -->
 
                                              <!-- Botón remover -->
                                              <button
@@ -250,17 +250,16 @@
                      </div>
                  </div>
              </div>
-             <div x-show="mostrarModalSeries" x-transition @keydown.window.escape="mostrarModalSeries=false"
+
+
+
+             <!-- <div x-show="mostrarModalSeries" x-transition @keydown.window.escape="mostrarModalSeries=false"
                  class="fixed inset-0 z-[999] flex items-center justify-center">
-                 <!-- overlay -->
                  <div class="absolute inset-0 bg-black/60" @click="mostrarModalSeries=false"></div>
 
-                 <!-- dialog -->
                  <div class="relative mx-auto w-full max-w-3xl px-4">
-                     <!-- contenedor modal -->
                      <div class="bg-white rounded-xl shadow-xl flex flex-col overflow-hidden" style="height:85vh;">
 
-                         <!-- header -->
                          <div class="px-6 py-4 border-b flex justify-between items-start shrink-0">
                              <div>
                                  <h2 class="text-lg font-semibold">Registrar series</h2>
@@ -273,7 +272,6 @@
                                  class="text-gray-400 hover:text-gray-600 text-lg">×</button>
                          </div>
 
-                         <!-- body scrollable -->
                          <div class="px-6 py-4 flex-1 overflow-y-auto">
                              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                  <template x-for="(serie, idx) in seriesTemp" :key="idx">
@@ -289,7 +287,6 @@
                              </div>
                          </div>
 
-                         <!-- footer -->
                          <div class="px-6 py-3 border-t flex justify-end gap-2 shrink-0">
                              <button @click="mostrarModalSeries=false"
                                  class="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Cancelar</button>
@@ -300,7 +297,7 @@
                      </div>
                  </div>
              </div>
-
+ -->
 
 
              <!-- Sección derecha - Datos de la compra -->

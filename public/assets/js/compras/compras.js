@@ -24,9 +24,9 @@ document.addEventListener('alpine:init', () => {
         monedaVentaIndex: 0,
         monedaCompraActual: null,
         monedaVentaActual: null,
-        mostrarModalSeries: false,
-        productoSeleccionado: null,
-        seriesTemp: [],
+        // mostrarModalSeries: false,
+        // productoSeleccionado: null,
+        // seriesTemp: [],
         // Arrays para datos de la API
         documentos: [],
         proveedores: [],
@@ -165,19 +165,19 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        abrirModalSeries(producto) {
-            this.productoSeleccionado = producto;
-            // Generar array de inputs según la cantidad
-            this.seriesTemp = Array.from({ length: producto.cantidad }, (_, i) => producto.series?.[i] || '');
-            this.mostrarModalSeries = true;
-        },
+        // abrirModalSeries(producto) {
+        //     this.productoSeleccionado = producto;
+        //     // Generar array de inputs según la cantidad
+        //     this.seriesTemp = Array.from({ length: producto.cantidad }, (_, i) => producto.series?.[i] || '');
+        //     this.mostrarModalSeries = true;
+        // },
 
-        guardarSeries() {
-            if (this.productoSeleccionado) {
-                this.productoSeleccionado.series = [...this.seriesTemp];
-            }
-            this.mostrarModalSeries = false;
-        },
+        // guardarSeries() {
+        //     if (this.productoSeleccionado) {
+        //         this.productoSeleccionado.series = [...this.seriesTemp];
+        //     }
+        //     this.mostrarModalSeries = false;
+        // },
         // Métodos para cargar unidades y modelos
         async cargarUnidades() {
             this.cargandoUnidades = true;

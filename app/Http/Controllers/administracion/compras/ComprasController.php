@@ -529,7 +529,7 @@ class ComprasController extends Controller
 
                     // Aumentar el stock en la tabla 'articulos' (SOLO PARA EXISTENTES)
                     Log::info("Incrementando stock en: {$producto['cantidad']}");
-                    DB::table('articulos')->where('idArticulos', $producto['id'])->increment('stock_total', $producto['cantidad']);
+                    // DB::table('articulos')->where('idArticulos', $producto['id'])->increment('stock_total', $producto['cantidad']);
 
                     $articuloConStock = DB::table('articulos')->where('idArticulos', $producto['id'])->first();
                     Log::info("Stock después del incremento: {$articuloConStock->stock_total}");
@@ -626,40 +626,7 @@ class ComprasController extends Controller
                 Log::info("Detalle insertado con ID: {$detalleId}");
 
 
-                // ✅ GUARDAR SERIES DEL ARTÍCULO SI EXISTEN
-                if (isset($producto['series']) && is_array($producto['series']) && count($producto['series']) > 0) {
-                    Log::info("Guardando " . count($producto['series']) . " series para el producto ID: {$productoId}");
-                    
-                    foreach ($producto['series'] as $serie) {
-                        $serie = trim($serie);
-                        if (!empty($serie)) {
-                            // Verificar si la serie ya existe
-                            $serieExistente = DB::table('compra_serie_articulos')
-                                ->where('serie', $serie)
-                                ->first();
-                                
-                            if ($serieExistente) {
-                                Log::warning("⚠️ Serie duplicada: {$serie} - Omitiendo");
-                                continue; // Saltar esta serie
-                            }
-                            
-                            // Insertar la serie
-                            DB::table('compra_serie_articulos')->insert([
-                                'compra_id' => $compraId,
-                                'detalle_compra_id' => $detalleId,
-                                'articulo_id' => $productoId,
-                                'serie' => $serie,
-                                'estado' => 'disponible',
-                                'created_at' => now(),
-                                'updated_at' => now()
-                            ]);
-                            
-                            Log::info("✅ Serie guardada: {$serie}");
-                        }
-                    }
-                } else {
-                    Log::info("ℹ️ No hay series para guardar para el producto ID: {$productoId}");
-                }
+            
 
                 // ✅ Insertar en inventario_ingresos_clientes
                 DB::table('inventario_ingresos_clientes')->insert([
@@ -677,6 +644,51 @@ class ComprasController extends Controller
                 Log::info("Registro de inventario_ingresos_clientes insertado con detalle_compra ID: {$detalleId}");
 
                 Log::info("=== FIN PROCESAMIENTO PRODUCTO {$index} ===");
+
+                // ✅ CREAR SOLICITUD DE INGRESO AUTOMÁTICAMENTE PARA ESTE PRODUCTO
+    try {
+        // Generar código de solicitud (SI-001, SI-002, etc.)
+        $ultimaSolicitud = DB::table('solicitud_ingreso')
+            ->orderBy('idSolicitudIngreso', 'desc')
+            ->first();
+        
+        $numeroSiguiente = $ultimaSolicitud ? 
+            intval(substr($ultimaSolicitud->codigo_solicitud, 3)) + 1 : 1;
+        $codigoSolicitud = 'SI-' . str_pad($numeroSiguiente, 3, '0', STR_PAD_LEFT);
+
+        // Obtener nombre del artículo
+        $nombreArticulo = $esProductoNuevo ? $producto['nombre'] : $articuloActual->nombre;
+
+        // Crear la solicitud de ingreso
+        $solicitudData = [
+            'compra_id' => $compraId,
+            'codigo_solicitud' => $codigoSolicitud,
+            'articulo_id' => $productoId,
+            'cantidad' => $producto['cantidad'],
+            'precio_compra' => $producto['precio'],
+            'numero_factura' => $request->nro,
+            'serie_factura' => $request->serie,
+            'fecha_compra' => $request->fecha,
+            'fecha_esperada_ingreso' => $request->fecha_vencimiento,
+            'proveedor_id' => $request->proveedor_id,
+            'cliente_general_id' => 8,
+            'estado' => 'pendiente',
+            'ubicacion' => null,
+            'observaciones' => "Compra: {$codigoCompra} - Artículo: {$nombreArticulo}",
+            'fecha_recibido' => null,
+            'fecha_ubicado' => null,
+            'usuario_id' => $usuario->idUsuario,
+            'created_at' => now(),
+            'updated_at' => now()
+        ];
+
+        $solicitudId = DB::table('solicitud_ingreso')->insertGetId($solicitudData);
+        Log::info("✅ SOLICITUD DE INGRESO CREADA - ID: {$solicitudId}, Código: {$codigoSolicitud}");
+
+    } catch (Exception $e) {
+        Log::error("❌ ERROR al crear solicitud de ingreso: " . $e->getMessage());
+        // No hacemos rollback aquí para no afectar la compra completa
+    }
 
 }
 

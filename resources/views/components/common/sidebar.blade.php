@@ -1178,6 +1178,9 @@
                         </div>
                     </button>
                     <ul x-cloak x-show="activeDropdown === 'solicitud'" x-collapse class="sub-menu text-gray-500">
+                         <li>
+                            <a href="{{ route('solicitudingreso.index') }}">Solicitud de Ingreso</a>
+                        </li>
                         <li>
                             <a href="{{ route('solicitudarticulo.index') }}">Solicitud de Articulo</a>
                         </li>
