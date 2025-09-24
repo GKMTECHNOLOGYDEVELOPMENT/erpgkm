@@ -298,16 +298,33 @@
         let todasLasSolicitudes = [];
 
         // Función para cargar las solicitudes de una compra específica
-        async function cargarSolicitudesCompra(compraId) {
-            try {
-                const response = await fetch(`/solicitudes-ingreso/por-compra/${compraId}`);
-                const data = await response.json();
-                return data.solicitudes;
-            } catch (error) {
-                console.error('Error cargando solicitudes:', error);
+async function cargarSolicitudesCompra(compraId) {
+    try {
+        const response = await fetch(`/solicitudes-ingreso/por-compra/${compraId}`);
+        
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.error('Compra no encontrada');
                 return [];
             }
+            throw new Error('Error en la respuesta del servidor');
         }
+        
+        const data = await response.json();
+        
+        // Verificar si hay un error en la respuesta JSON
+        if (data.error) {
+            console.error('Error del servidor:', data.error);
+            return [];
+        }
+        
+        return data.solicitudes || [];
+    } catch (error) {
+        console.error('Error cargando solicitudes:', error);
+        return [];
+    }
+}
+
 
         // Función para renderizar las compras
         function renderizarCompras(filtroEstado = '', busqueda = '') {
@@ -357,6 +374,11 @@
                         <i class="fa-solid fa-cart-shopping text-blue-600"></i>
                         ${compra.codigocompra}
                     </h3>
+
+                    <p class="text-xs text-green-600 font-medium mt-1">
+                        <i class="fa-solid fa-warehouse"></i>
+                        Estado: ${compra.estado_compra || 'enviado_almacen'}
+                    </p>
 
                     <p class="text-sm text-gray-600 flex items-center gap-2 mt-1">
                         <i class="fa-solid fa-truck text-gray-400"></i>
@@ -499,73 +521,77 @@
             }
         }
 
-        // Función para renderizar la tabla de productos - SIMPLIFICADA
-        function renderizarTablaProductos(solicitudes) {
-            const tbody = document.getElementById('tabla-productos');
+       
+ // Función para renderizar la tabla de productos - MEJORADA
+function renderizarTablaProductos(solicitudes) {
+    const tbody = document.getElementById('tabla-productos');
+    
+    if (!tbody) {
+        console.error('No se encontró el elemento tabla-productos');
+        return;
+    }
 
-            if (solicitudes.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="px-4 py-4 text-center text-gray-500">
-                            No hay productos para esta compra
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tbody.innerHTML = solicitudes.map(solicitud => `
-            <tr class="border-b hover:bg-gray-50">
-                <!-- Artículo -->
-                <td class="px-4 py-3 text-center">
-                    <div>
-                        <p class="font-medium">${solicitud.articulo || 'N/A'}</p>
-                        <p class="text-sm text-gray-500">${solicitud.codigo_solicitud}</p>
-                    </div>
-                </td>
-
-                <!-- Cantidad -->
-                <td class="px-4 py-3 text-center">
-                    ${solicitud.cantidad} unidades
-                </td>
-
-                <!-- Estado -->
-                <td class="px-4 py-3 text-center">
-                    <span class="badge ${solicitud.estado === 'pendiente' 
-                        ? 'badge bg-warning' 
-                        : solicitud.estado === 'recibido' 
-                        ? 'badge bg-secondary' 
-                        : 'badge bg-success'}">
-                        ${solicitud.estado 
-                            ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) 
-                            : 'N/A'}
-                    </span>
-                </td>
-
-                <!-- Ubicaciones -->
-                <td class="px-4 py-3 text-center">
-                    ${solicitud.ubicaciones && solicitud.ubicaciones.length > 0 
-                        ? solicitud.ubicaciones.map(u => 
-                            `<div class="text-xs">${u.cantidad} en ${u.ubicacion_nombre}</div>`
-                        ).join('') 
-                        : '<span class="text-red-500">Sin ubicación</span>'
-                    }
-                </td>
-
-                <!-- Acciones -->
-                <td class="px-4 py-3 text-center">
-                    <button class="editar-producto-btn px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm" 
-                            data-id="${solicitud.id}">
-                        Editar
-                    </button>
+    // Verificar que solicitudes sea un array
+    if (!Array.isArray(solicitudes)) {
+        console.error('solicitudes no es un array:', solicitudes);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-4 text-center text-red-500">
+                    Error al cargar los datos
                 </td>
             </tr>
-        `).join('');
+        `;
+        return;
+    }
+
+    if (solicitudes.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-4 text-center text-gray-500">
+                    No hay productos para esta compra
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = solicitudes.map(solicitud => `
+        <tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-3">
+                <div>
+                    <p class="font-medium">${solicitud.articulo || 'N/A'}</p>
+                    <p class="text-sm text-gray-500">${solicitud.codigo_solicitud}</p>
+                </div>
+            </td>
+            <td class="px-4 py-3">${solicitud.cantidad} unidades</td>
+            <td class="px-4 py-3">
+                <span class="badge ${solicitud.estado === 'pendiente' ? 'badge-pendiente' : solicitud.estado === 'recibido' ? 'badge-recibido' : 'badge-ubicado'}">
+                    ${solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'N/A'}
+                </span>
+            </td>
+            <td class="px-4 py-3">
+                ${solicitud.ubicaciones && solicitud.ubicaciones.length > 0 ? 
+                    solicitud.ubicaciones.map(u => 
+                        `<div class="text-xs">${u.cantidad} en ${u.ubicacion_nombre}</div>`
+                    ).join('') 
+                    : '<span class="text-red-500">Sin ubicación</span>'
+                }
+            </td>
+            <td class="px-4 py-3">
+                <button class="editar-producto-btn px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm" 
+                        data-id="${solicitud.id}">
+                    Editar
+                </button>
+            </td>
+        </tr>
+    `).join('');
+
+    // Agregar event listeners a los botones de editar
+    agregarEventListenersTablaProductos();
+}
 
 
-            // Agregar event listeners a los botones de editar
-            agregarEventListenersTablaProductos();
-        }
+
 
         // Función para abrir modal de edición - ACTUALIZADA CON SERIES
         function abrirModalEditarProducto(solicitudId) {
@@ -958,143 +984,146 @@
         }
         // Actualizar la función guardarEdicion para incluir series
         async function guardarEdicion() {
-            const solicitudId = document.getElementById('solicitud-id').value;
-            const articuloId = document.getElementById('articulo-id').value;
-            const compraId = document.getElementById('compra-id').value;
-            const estado = document.getElementById('producto-estado').value;
-            const observaciones = document.getElementById('producto-observaciones').value;
-            const manejaSerie = document.getElementById('series-section').classList.contains('hidden') === false;
+    const solicitudId = document.getElementById('solicitud-id').value;
+    const articuloId = document.getElementById('articulo-id').value;
+    const compraId = document.getElementById('compra-id').value;
+    const estado = document.getElementById('producto-estado').value;
+    const observaciones = document.getElementById('producto-observaciones').value;
+    const manejaSerie = document.getElementById('series-section').classList.contains('hidden') === false;
 
-            // Validar que sea artículo válido
-            if (!articuloId || articuloId === 'N/A') {
-                toastr.error('Error: ID de artículo inválido');
-                return;
+    // Validar que sea artículo válido
+    if (!articuloId || articuloId === 'N/A') {
+        alert('Error: ID de artículo inválido');
+        return;
+    }
+
+    // Recolectar datos de ubicaciones
+    const filasUbicacion = document.querySelectorAll('.fila-ubicacion');
+    const ubicacionesData = [];
+    let totalDistribuido = 0;
+
+    for (const fila of filasUbicacion) {
+        const selectUbicacion = fila.querySelector('.select-ubicacion');
+        const inputCantidad = fila.querySelector('.input-cantidad');
+        
+        if (!selectUbicacion || !inputCantidad) continue;
+        
+        const ubicacionId = selectUbicacion.value;
+        const cantidad = parseInt(inputCantidad.value) || 0;
+        
+        if (!ubicacionId || cantidad <= 0) {
+            alert('Por favor completa todas las ubicaciones y cantidades');
+            return;
+        }
+        
+        ubicacionesData.push({
+            idUbicacion: parseInt(ubicacionId),
+            cantidad: cantidad
+        });
+        
+        totalDistribuido += cantidad;
+    }
+
+    // Recolectar datos de series si el artículo maneja series
+    const seriesData = manejaSerie ? recolectarDatosSeries() : [];
+
+    // Validar series si el artículo maneja series y está siendo ubicado
+    if (manejaSerie && estado === 'ubicado') {
+        const cantidadRequerida = parseInt(document.getElementById('cantidad-requerida').textContent);
+        const cantidadIngresada = seriesData.length;
+        
+        if (cantidadIngresada !== cantidadRequerida) {
+            const confirmar = confirm(`Has ingresado ${cantidadIngresada} series, pero se requieren ${cantidadRequerida}. ¿Deseas continuar de todas formas?`);
+            if (!confirmar) return;
+        }
+        
+        // Validar series duplicadas
+        const seriesUnicas = new Set(seriesData.map(s => s.serie));
+        if (seriesUnicas.size !== seriesData.length) {
+            alert('Error: Hay series duplicadas. Por favor revisa los números de serie.');
+            return;
+        }
+    }
+
+    // Validar cantidad total solo si está en estado "ubicado"
+    if (estado === 'ubicado') {
+        const cantidadTotal = parseInt(document.getElementById('producto-cantidad').textContent);
+        if (totalDistribuido !== cantidadTotal) {
+            const confirmar = confirm(`La distribución suma ${totalDistribuido} unidades, pero el total es ${cantidadTotal}. ¿Desea guardar de todas formas?`);
+            if (!confirmar) return;
+        }
+    }
+
+    try {
+        const response = await fetch('/solicitudes-ingreso/procesar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                id: solicitudId,
+                articulo_id: articuloId,
+                compra_id: compraId,
+                estado: estado,
+                ubicaciones: ubicacionesData,
+                series: seriesData,
+                observaciones: observaciones
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            let mensaje = 'Solicitud actualizada correctamente';
+            
+            if (data.stock_actualizado) {
+                mensaje += `\nStock actualizado: ${data.stock_anterior} → ${data.stock_actual} unidades`;
+                if (data.diferencia > 0) {
+                    mensaje += ` (+${data.diferencia})`;
+                } else if (data.diferencia < 0) {
+                    mensaje += ` (${data.diferencia})`;
+                }
             }
 
-            // Recolectar datos de ubicaciones
-            const filasUbicacion = document.querySelectorAll('.fila-ubicacion');
-            const ubicacionesData = [];
-            let totalDistribuido = 0;
-
-            for (const fila of filasUbicacion) {
-                const selectUbicacion = fila.querySelector('.select-ubicacion');
-                const inputCantidad = fila.querySelector('.input-cantidad');
-
-                if (!selectUbicacion || !inputCantidad) continue;
-
-                const ubicacionId = selectUbicacion.value;
-                const cantidad = parseInt(inputCantidad.value) || 0;
-
-                if (!ubicacionId || cantidad <= 0) {
-                    toastr.warning('Por favor completa todas las ubicaciones y cantidades');
-                    return;
-                }
-
-                ubicacionesData.push({
-                    idUbicacion: parseInt(ubicacionId),
-                    cantidad: cantidad
-                });
-
-                totalDistribuido += cantidad;
+            if (data.series_procesadas > 0) {
+                mensaje += `\nSe procesaron ${data.series_procesadas} series correctamente.`;
             }
 
-            // Recolectar datos de series si el artículo maneja series
-            const seriesData = manejaSerie ? recolectarDatosSeries() : [];
-
-            // Validar series si el artículo maneja series y está siendo ubicado
-            if (manejaSerie && estado === 'ubicado') {
-                const cantidadRequerida = parseInt(document.getElementById('cantidad-requerida').textContent);
-                const cantidadIngresada = seriesData.length;
-
-                if (cantidadIngresada !== cantidadRequerida) {
-                    const confirmar = confirm(
-                        `Has ingresado ${cantidadIngresada} series, pero se requieren ${cantidadRequerida}. ¿Deseas continuar de todas formas?`
-                    );
-                    if (!confirmar) return;
-                }
-
-                // Validar series duplicadas
-                const seriesUnicas = new Set(seriesData.map(s => s.serie));
-                if (seriesUnicas.size !== seriesData.length) {
-                    toastr.error('Error: Hay series duplicadas. Por favor revisa los números de serie.');
-                    return;
-                }
-            }
-
-            // Validar cantidad total solo si está en estado "ubicado"
-            if (estado === 'ubicado') {
-                const cantidadTotal = parseInt(document.getElementById('producto-cantidad').textContent);
-                if (totalDistribuido !== cantidadTotal) {
-                    const confirmar = confirm(
-                        `La distribución suma ${totalDistribuido} unidades, pero el total es ${cantidadTotal}. ¿Desea guardar de todas formas?`
-                    );
-
-                    if (!confirmar) {
-                        toastr.info("❌ Acción cancelada por el usuario", "Cancelado");
-                        return;
-                    }
-                }
-            }
-
-
-
-            try {
-                const response = await fetch('/solicitudes-ingreso/procesar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content')
-                    },
-                    body: JSON.stringify({
-                        id: solicitudId,
-                        articulo_id: articuloId,
-                        compra_id: compraId,
-                        estado: estado,
-                        ubicaciones: ubicacionesData,
-                        series: seriesData,
-                        observaciones: observaciones
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    let mensaje = 'Solicitud actualizada correctamente';
-
-                    if (data.stock_actualizado) {
-                        mensaje += `\nStock actualizado: ${data.stock_anterior} → ${data.stock_actual} unidades`;
-                        if (data.diferencia > 0) {
-                            mensaje += ` (+${data.diferencia})`;
-                        } else if (data.diferencia < 0) {
-                            mensaje += ` (${data.diferencia})`;
-                        }
-                    }
-
-                    if (data.series_procesadas > 0) {
-                        mensaje += `\nSe procesaron ${data.series_procesadas} series correctamente.`;
-                    }
-
-                    // Recargar los datos
-                    const compraId = todasLasSolicitudes[0]?.compra_id;
-                    if (compraId) {
-                        const solicitudesActualizadas = await cargarSolicitudesCompra(compraId);
+            // Cerrar el modal primero
+            document.getElementById('modal-editar-producto').classList.add('hidden');
+            
+            // Mostrar mensaje de éxito
+            alert(mensaje);
+            
+            // Recargar los datos después de un pequeño delay
+            setTimeout(async () => {
+                try {
+                    const solicitudesActualizadas = await cargarSolicitudesCompra(compraId);
+                    if (solicitudesActualizadas.length > 0) {
                         todasLasSolicitudes = solicitudesActualizadas;
                         renderizarTablaProductos(todasLasSolicitudes);
+                    } else {
+                        // Si no hay solicitudes, cerrar el modal principal también
+                        document.getElementById('modal-detalle-compra').classList.add('hidden');
+                        // Recargar la lista de compras
+                        renderizarCompras();
                     }
-
-                    document.getElementById('modal-editar-producto').classList.add('hidden');
-                    toastr.success(mensaje);
-                } else {
-                    toastr.error('Error: ' + data.message);
+                } catch (error) {
+                    console.error('Error recargando datos:', error);
+                    // Recargar la página como fallback
+                    location.reload();
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                toastr.error('Error al procesar la solicitud');
-            }
+            }, 500);
+            
+        } else {
+            alert('Error: ' + data.message);
         }
-
-
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al procesar la solicitud');
+    }
+}
         // Función para inicializar event listeners
         function inicializarEventListeners() {
             // Botón guardar

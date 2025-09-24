@@ -7,42 +7,53 @@ use App\Models\ArticuloUbicacion;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SolicitudingresoController extends Controller
 {
     public function index()
-    {
-        // Obtener las compras que TIENEN solicitudes de ingreso
-        $comprasConSolicitudes = DB::table('compra as c')
-            ->select(
-                'c.idCompra',
-                'c.codigocompra',
-                'c.fechaEmision as fecha_compra',
-                'c.total',
-                'p.nombre as proveedor',
-                DB::raw('COUNT(si.idSolicitudIngreso) as total_solicitudes'),
-                DB::raw('SUM(CASE WHEN si.estado = "pendiente" THEN 1 ELSE 0 END) as pendientes'),
-                DB::raw('SUM(CASE WHEN si.estado = "recibido" THEN 1 ELSE 0 END) as recibidos'),
-                DB::raw('SUM(CASE WHEN si.estado = "ubicado" THEN 1 ELSE 0 END) as ubicados')
-            )
-            ->join('solicitud_ingreso as si', 'c.idCompra', '=', 'si.compra_id')
-            ->leftJoin('proveedores as p', 'c.proveedor_id', '=', 'p.idProveedor')
-            ->groupBy('c.idCompra', 'c.codigocompra', 'c.fechaEmision', 'c.total', 'p.nombre')
-            ->having('total_solicitudes', '>', 0)
-            ->orderBy('c.fechaEmision', 'desc')
-            ->get();
+{
+    // Obtener las compras que TIENEN solicitudes de ingreso Y están en estado 'enviado_almacen'
+    $comprasConSolicitudes = DB::table('compra as c')
+        ->select(
+            'c.idCompra',
+            'c.codigocompra',
+            'c.fechaEmision as fecha_compra',
+            'c.total',
+            'c.estado as estado_compra', // Agregar el estado de la compra
+            'p.nombre as proveedor',
+            DB::raw('COUNT(si.idSolicitudIngreso) as total_solicitudes'),
+            DB::raw('SUM(CASE WHEN si.estado = "pendiente" THEN 1 ELSE 0 END) as pendientes'),
+            DB::raw('SUM(CASE WHEN si.estado = "recibido" THEN 1 ELSE 0 END) as recibidos'),
+            DB::raw('SUM(CASE WHEN si.estado = "ubicado" THEN 1 ELSE 0 END) as ubicados')
+        )
+        ->join('solicitud_ingreso as si', 'c.idCompra', '=', 'si.compra_id')
+        ->leftJoin('proveedores as p', 'c.proveedor_id', '=', 'p.idProveedor')
+        ->where('c.estado', 'enviado_almacen') // FILTRO IMPORTANTE: solo compras enviadas al almacén
+        ->groupBy('c.idCompra', 'c.codigocompra', 'c.fechaEmision', 'c.total', 'c.estado', 'p.nombre')
+        ->having('total_solicitudes', '>', 0)
+        ->orderBy('c.fechaEmision', 'desc')
+        ->get();
 
-        // Obtener las ubicaciones
-        $ubicaciones = DB::table('ubicacion')
-            ->select('idUbicacion', 'nombre')
-            ->orderBy('nombre')
-            ->get();
+    // Obtener las ubicaciones
+    $ubicaciones = DB::table('ubicacion')
+        ->select('idUbicacion', 'nombre')
+        ->orderBy('nombre')
+        ->get();
 
-        return view('solicitud.solicitudingreso.index', compact('comprasConSolicitudes', 'ubicaciones'));
+    return view('solicitud.solicitudingreso.index', compact('comprasConSolicitudes', 'ubicaciones'));
+}
+public function porCompra($compraId)
+{
+    // Primero verificar que la compra existe (sin importar el estado)
+    $compra = DB::table('compra')
+        ->where('idCompra', $compraId)
+        ->first();
+
+    if (!$compra) {
+        return response()->json(['error' => 'Compra no encontrada'], 404);
     }
 
- public function porCompra($compraId)
-{
     $solicitudes = DB::table('solicitud_ingreso as si')
         ->select(
             'si.idSolicitudIngreso as id',
@@ -70,7 +81,7 @@ class SolicitudingresoController extends Controller
             )
             ->leftJoin('ubicacion as u', 'au.ubicacion_id', '=', 'u.idUbicacion')
             ->where('au.articulo_id', $solicitud->articulo_id)
-            ->where('au.compra_id', $compraId) // FILTRAR POR COMPRA
+            ->where('au.compra_id', $compraId)
             ->get();
         
         if (!isset($solicitud->maneja_serie)) {
@@ -124,7 +135,7 @@ public function procesar(Request $request)
         // 2. Obtener las ubicaciones actuales del artículo PARA ESTA COMPRA
         $ubicacionesActuales = DB::table('articulo_ubicaciones')
             ->where('articulo_id', $data['articulo_id'])
-            ->where('compra_id', $data['compra_id']) // FILTRAR POR COMPRA
+            ->where('compra_id', $data['compra_id'])
             ->get();
 
         // 3. Actualizar el estado de la solicitud
@@ -157,7 +168,7 @@ public function procesar(Request $request)
             foreach ($data['ubicaciones'] as $ubicacionData) {
                 $ubicacionesInsertar[] = [
                     'articulo_id' => $data['articulo_id'],
-                    'compra_id' => $data['compra_id'], // IMPORTANTE: agregar compra_id
+                    'compra_id' => $data['compra_id'],
                     'ubicacion_id' => $ubicacionData['idUbicacion'],
                     'cantidad' => $ubicacionData['cantidad'],
                     'created_at' => now(),
@@ -194,6 +205,9 @@ public function procesar(Request $request)
                 );
             }
 
+            // 7. VERIFICAR SI TODOS LOS ARTÍCULOS DE LA COMPRA ESTÁN UBICADOS
+            $this->verificarEstadoCompra($data['compra_id']);
+
         } else {
             // Si no está ubicado, ELIMINAR las ubicaciones de esta compra
             DB::table('articulo_ubicaciones')
@@ -217,6 +231,9 @@ public function procesar(Request $request)
                     ->where('articulo_id', $data['articulo_id'])
                     ->delete();
             }
+
+            // Si se cambia de "ubicado" a otro estado, verificar también el estado de la compra
+            $this->verificarEstadoCompra($data['compra_id']);
         }
 
         DB::commit();
@@ -242,6 +259,67 @@ public function procesar(Request $request)
             'message' => 'Error al procesar la solicitud: ' . $e->getMessage()
         ]);
     }
+}
+
+/**
+ * Verifica si todos los artículos de una compra están ubicados y actualiza el estado de la compra
+ */
+private function verificarEstadoCompra($compraId)
+{
+    Log::info("🧾 Verificando estado de la compra ID: {$compraId}");
+
+    // Obtener todas las solicitudes de ingreso de esta compra
+    $solicitudes = DB::table('solicitud_ingreso')
+        ->where('compra_id', $compraId)
+        ->get();
+
+    if ($solicitudes->isEmpty()) {
+        Log::warning("⚠️ No se encontraron solicitudes de ingreso para la compra ID: {$compraId}");
+        return;
+    }
+
+    // Contar solicitudes por estado
+    $totalSolicitudes = $solicitudes->count();
+    $solicitudesUbicadas = $solicitudes->where('estado', 'ubicado')->count();
+    $solicitudesPendientes = $solicitudes->where('estado', 'pendiente')->count();
+    $solicitudesRecibidas = $solicitudes->where('estado', 'recibido')->count();
+
+    Log::info("📊 Estados de solicitudes para compra ID: {$compraId}", [
+        'Total' => $totalSolicitudes,
+        'Ubicadas' => $solicitudesUbicadas,
+        'Pendientes' => $solicitudesPendientes,
+        'Recibidas' => $solicitudesRecibidas
+    ]);
+
+    // Determinar el nuevo estado de la compra
+    $nuevoEstado = 'pendiente';
+
+    if ($solicitudesUbicadas === $totalSolicitudes) {
+        $nuevoEstado = 'aprobado';
+        Log::info("✅ Todos los artículos están ubicados. Estado actualizado a: {$nuevoEstado}");
+    } elseif ($solicitudesUbicadas > 0 || $solicitudesRecibidas > 0) {
+        if ($solicitudesPendientes === 0) {
+            $nuevoEstado = 'recibido';
+            Log::info("📦 Artículos ubicados o recibidos sin pendientes. Estado actualizado a: {$nuevoEstado}");
+        } else {
+            $nuevoEstado = 'enviado_almacen';
+            Log::info("📬 Mezcla de estados. Estado actualizado a: {$nuevoEstado}");
+        }
+    } else {
+        Log::info("⏳ Artículos aún pendientes. Estado permanece como: {$nuevoEstado}");
+    }
+
+    // Actualizar el estado de la compra
+    DB::table('compra')
+        ->where('idCompra', $compraId)
+        ->update([
+            'estado' => $nuevoEstado,
+            'updated_at' => now()
+        ]);
+
+    Log::info("📝 Compra ID {$compraId} actualizada con estado: {$nuevoEstado}");
+
+    return $nuevoEstado;
 }
 
 private function procesarSeriesArticulo($compraId, $detalleCompraId, $articuloId, $seriesData)
