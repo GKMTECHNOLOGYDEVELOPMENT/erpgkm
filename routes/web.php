@@ -378,7 +378,7 @@ Route::prefix('ventas')->name('ventas.')->group(function () {
 Route::prefix('compras')->name('compras.')->group(function () {
     Route::get('/', [ComprasController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/data', [ComprasController::class, 'data'])->name('data'); // Mostrar la vista principal
-
+    Route::put('/{idCompra}/estado', [ComprasController::class, 'updateEstado'])->name('compras.update-estado');
     Route::get('/create', [ComprasController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
@@ -1340,3 +1340,6 @@ Route::get('/kardex/detalle-movimientos/{kardex_id}', [KardexController::class, 
     // Ruta para ver las series de un producto
 Route::get('/producto/{id}/series', [ProductoController::class, 'verSeries'])->name('producto.series');
 Route::post('/series/cambiar-estado', [ProductoController::class, 'cambiarEstadoSerie']);
+Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [SolicitudingresoController::class, 'obtenerSeries']);
+
+Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [SolicitudingresoController::class, 'obtenerSeries']);

@@ -109,16 +109,17 @@
         </div>
     </div>
 
-   <!-- Modal para editar producto individual - CORREGIDO -->
+  <!-- Modal para editar producto individual - CON CAMPO DE SERIES -->
 <div id="modal-editar-producto" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4">
         <div class="px-6 py-4 border-b">
-            <h3 class="text-xl font-semibold text-gray-800">Editar Estado y Ubicaciones</h3>
+            <h3 class="text-xl font-semibold text-gray-800">Editar Estado, Ubicaciones y Series</h3>
         </div>
         <div class="p-6 max-h-[70vh] overflow-y-auto">
             <form id="form-editar-producto">
                 <input type="hidden" id="solicitud-id">
                 <input type="hidden" id="articulo-id">
+                <input type="hidden" id="compra-id">
                 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Artículo</label>
@@ -140,16 +141,38 @@
                     </select>
                 </div>
 
-                <!-- Sección de ubicaciones - CORREGIDA -->
-                <div class="mb-4" id="ubicacion-section">
+                <!-- Sección de series - SOLO PARA ARTÍCULOS QUE MANEJAN SERIES -->
+                <div class="mb-4 hidden" id="series-section">
                     <div class="flex justify-between items-center mb-3">
-                        <label class="block text-sm font-medium text-gray-700">Ubicaciones del Artículo</label>
-                        <button type="button" id="agregar-ubicacion-btn" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
-                            + Agregar
+                        <label class="block text-sm font-medium text-gray-700">Series del Artículo</label>
+                        <button type="button" id="agregar-serie-btn" class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm">
+                            + Agregar Serie
                         </button>
                     </div>
                     
-                    <!-- CONTENEDOR CORREGIDO -->
+                    <div class="mb-2 text-xs text-gray-500">
+                        Ingresa las series que vienen en los productos. Cantidad requerida: <span id="cantidad-series-requeridas">0</span> series
+                    </div>
+                    
+                    <div id="contenedor-series" class="space-y-2">
+                        <!-- Las series se agregarán aquí dinámicamente -->
+                    </div>
+                    
+                    <div id="total-series" class="mt-3 p-2 bg-gray-50 rounded text-sm">
+                        <span class="font-medium">Series ingresadas: </span>
+                        <span id="cantidad-ingresada">0</span> / <span id="cantidad-requerida">0</span>
+                    </div>
+                </div>
+
+                <!-- Sección de ubicaciones -->
+                <div class="mb-4 hidden" id="ubicacion-section">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-medium text-gray-700">Ubicaciones del Artículo</label>
+                        <button type="button" id="agregar-ubicacion-btn" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm">
+                            + Agregar Ubicación
+                        </button>
+                    </div>
+                    
                     <div id="contenedor-ubicaciones" class="space-y-3">
                         <!-- Las ubicaciones se agregarán aquí dinámicamente -->
                     </div>
@@ -459,33 +482,36 @@
             agregarEventListenersTablaProductos();
         }
 
-     // Función para abrir modal de edición - CORREGIDA
+// Función para abrir modal de edición - ACTUALIZADA CON SERIES
 function abrirModalEditarProducto(solicitudId) {
     console.log('Abriendo modal para solicitud ID:', solicitudId);
     
     const solicitud = todasLasSolicitudes.find(s => s.id == solicitudId);
     console.log('Solicitud encontrada:', solicitud);
+    console.log('¿Maneja serie?:', solicitud?.maneja_serie);
+    console.log('Tipo de dato:', typeof solicitud?.maneja_serie);
     
     if (solicitud) {
-        // Verificar que los elementos existan antes de usarlos
-        const contenedorUbicaciones = document.getElementById('contenedor-ubicaciones');
+        // Elementos del formulario
         const solicitudIdInput = document.getElementById('solicitud-id');
         const articuloIdInput = document.getElementById('articulo-id');
+        const compraIdInput = document.getElementById('compra-id');
         const productoNombre = document.getElementById('producto-nombre');
         const productoIdText = document.getElementById('producto-id-text');
         const productoCantidad = document.getElementById('producto-cantidad');
         const productoEstado = document.getElementById('producto-estado');
         const productoObservaciones = document.getElementById('producto-observaciones');
         
-        if (!contenedorUbicaciones) {
-            console.error('❌ ERROR: No se encontró el elemento contenedor-ubicaciones');
-            return;
-        }
+        
+        // Secciones
+        const seriesSection = document.getElementById('series-section');
+        const ubicacionSection = document.getElementById('ubicacion-section');
         
         if (solicitudIdInput && articuloIdInput && productoNombre && productoCantidad && productoEstado) {
             // Asignar valores básicos
             solicitudIdInput.value = solicitudId;
             articuloIdInput.value = solicitud.articulo_id || 'N/A';
+            compraIdInput.value = solicitud.compra_id;
             productoNombre.textContent = solicitud.articulo || 'N/A';
             productoIdText.textContent = `ID: ${solicitud.articulo_id || 'N/A'}`;
             productoCantidad.textContent = `${solicitud.cantidad} unidades`;
@@ -493,13 +519,25 @@ function abrirModalEditarProducto(solicitudId) {
             productoObservaciones.value = solicitud.observaciones || '';
 
             // Configurar contadores
-            document.getElementById('cantidad-total').textContent = solicitud.cantidad;
+            const cantidadTotal = parseInt(solicitud.cantidad);
+            document.getElementById('cantidad-total').textContent = cantidadTotal;
             document.getElementById('cantidad-distribuida').textContent = '0';
+            document.getElementById('cantidad-requerida').textContent = cantidadTotal;
+            document.getElementById('cantidad-series-requeridas').textContent = cantidadTotal;
+            document.getElementById('cantidad-ingresada').textContent = '0';
 
-            // LIMPIAR Y CARGAR UBICACIONES - CORREGIDO
-            contenedorUbicaciones.innerHTML = ''; // ✅ ESTA LÍNEA ESTABA CAUSANDO EL ERROR
+            // Mostrar/ocultar sección de series si el artículo maneja series
+            if (solicitud.maneja_serie) {
+                seriesSection.classList.remove('hidden');
+                cargarSeriesExistentes(solicitud.compra_id, solicitud.articulo_id);
+            } else {
+                seriesSection.classList.add('hidden');
+            }
+
+            // LIMPIAR Y CARGAR UBICACIONES
+            const contenedorUbicaciones = document.getElementById('contenedor-ubicaciones');
+            contenedorUbicaciones.innerHTML = '';
             
-            // Cargar ubicaciones existentes o agregar una vacía
             if (solicitud.ubicaciones && solicitud.ubicaciones.length > 0) {
                 console.log('Cargando ubicaciones existentes:', solicitud.ubicaciones);
                 solicitud.ubicaciones.forEach((ubicacion, index) => {
@@ -510,6 +548,10 @@ function abrirModalEditarProducto(solicitudId) {
                 agregarFilaUbicacion();
             }
 
+            // LIMPIAR SERIES
+            const contenedorSeries = document.getElementById('contenedor-series');
+            contenedorSeries.innerHTML = '';
+
             actualizarTotalDistribuido();
             toggleUbicacionField();
             
@@ -518,17 +560,140 @@ function abrirModalEditarProducto(solicitudId) {
             document.getElementById('modal-editar-producto').classList.add('flex');
         } else {
             console.error('❌ ERROR: Faltan elementos del modal');
-            // Debug: mostrar qué elementos faltan
-            if (!solicitudIdInput) console.error('Falta: solicitud-id');
-            if (!articuloIdInput) console.error('Falta: articulo-id');
-            if (!productoNombre) console.error('Falta: producto-nombre');
-            if (!productoCantidad) console.error('Falta: producto-cantidad');
-            if (!productoEstado) console.error('Falta: producto-estado');
         }
     } else {
         console.error('❌ ERROR: No se encontró la solicitud con ID:', solicitudId);
     }
 }
+
+
+// Función para cargar series existentes
+async function cargarSeriesExistentes(compraId, articuloId) {
+    try {
+        const response = await fetch(`/solicitudes-ingreso/series/${compraId}/${articuloId}`);
+        const data = await response.json();
+        
+        const contenedorSeries = document.getElementById('contenedor-series');
+        contenedorSeries.innerHTML = '';
+        
+        if (data.series && data.series.length > 0) {
+            data.series.forEach(serie => {
+                agregarFilaSerie(serie.serie, serie.estado, serie.id);
+            });
+        } else {
+            // Agregar campos vacíos según la cantidad
+            const cantidad = parseInt(document.getElementById('producto-cantidad').textContent);
+            for (let i = 0; i < cantidad; i++) {
+                agregarFilaSerie();
+            }
+        }
+        
+        actualizarTotalSeries();
+    } catch (error) {
+        console.error('Error cargando series:', error);
+    }
+}
+
+// Función para agregar fila de serie
+function agregarFilaSerie(serie = '', estado = 'disponible', serieId = null) {
+    const contenedor = document.getElementById('contenedor-series');
+    if (!contenedor) return;
+    
+    const index = contenedor.children.length;
+    const id = serieId || `nueva-${index}`;
+    
+    const filaHTML = `
+        <div class="fila-serie grid grid-cols-12 gap-2 items-end border border-gray-200 rounded p-2 bg-white">
+            <div class="col-span-8">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Número de Serie</label>
+                <input type="text" class="input-serie w-full px-2 py-1 border border-gray-300 rounded text-sm" 
+                       value="${serie}" placeholder="Ej: SN123456789" maxlength="255">
+            </div>
+            <div class="col-span-3">
+                <label class="block text-xs font-medium text-gray-700 mb-1">Estado</label>
+                <select class="select-estado w-full px-2 py-1 border border-gray-300 rounded text-sm">
+                    <option value="disponible" ${estado === 'disponible' ? 'selected' : ''}>Disponible</option>
+                    <option value="vendido" ${estado === 'vendido' ? 'selected' : ''}>Vendido</option>
+                    <option value="defectuoso" ${estado === 'defectuoso' ? 'selected' : ''}>Defectuoso</option>
+                    <option value="garantia" ${estado === 'garantia' ? 'selected' : ''}>En Garantía</option>
+                </select>
+            </div>
+            <div class="col-span-1">
+                <button type="button" class="quitar-serie px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                        ${contenedor.children.length <= 1 ? 'disabled' : ''}>
+                    ×
+                </button>
+            </div>
+            <input type="hidden" class="serie-id" value="${id}">
+        </div>
+    `;
+    
+    contenedor.insertAdjacentHTML('beforeend', filaHTML);
+    
+    // Agregar event listeners a la nueva fila
+    const nuevaFila = contenedor.lastElementChild;
+    const btnQuitar = nuevaFila.querySelector('.quitar-serie');
+    const inputSerie = nuevaFila.querySelector('.input-serie');
+    
+    if (inputSerie) {
+        inputSerie.addEventListener('input', actualizarTotalSeries);
+    }
+    
+    if (btnQuitar) {
+        btnQuitar.addEventListener('click', function() {
+            if (contenedor.children.length > 1) {
+                this.closest('.fila-serie').remove();
+                actualizarTotalSeries();
+            }
+        });
+    }
+}
+
+// Función para actualizar el contador de series
+function actualizarTotalSeries() {
+    const inputsSerie = document.querySelectorAll('.input-serie');
+    let seriesIngresadas = 0;
+    
+    inputsSerie.forEach(input => {
+        if (input.value.trim() !== '') {
+            seriesIngresadas++;
+        }
+    });
+    
+    const cantidadIngresadaElem = document.getElementById('cantidad-ingresada');
+    if (cantidadIngresadaElem) {
+        cantidadIngresadaElem.textContent = seriesIngresadas;
+    }
+}
+
+// Función para recolectar datos de series
+function recolectarDatosSeries() {
+    const filasSeries = document.querySelectorAll('.fila-serie');
+    const seriesData = [];
+    
+    for (const fila of filasSeries) {
+        const inputSerie = fila.querySelector('.input-serie');
+        const selectEstado = fila.querySelector('.select-estado');
+        const hiddenId = fila.querySelector('.serie-id');
+        
+        if (!inputSerie || !selectEstado) continue;
+        
+        const serie = inputSerie.value.trim();
+        const estado = selectEstado.value;
+        const id = hiddenId ? hiddenId.value : null;
+        
+        if (serie !== '') {
+            seriesData.push({
+                id: id,
+                serie: serie,
+                estado: estado
+            });
+        }
+    }
+    
+    return seriesData;
+}
+
 
 
 // Función para agregar fila de ubicación - CORREGIDA
@@ -666,12 +831,20 @@ function inicializarEventListenersModal() {
         selectEstado.addEventListener('change', toggleUbicacionField);
     }
 }
-// Función para guardar cambios
+// Actualizar la función guardarEdicion para incluir series
 async function guardarEdicion() {
     const solicitudId = document.getElementById('solicitud-id').value;
     const articuloId = document.getElementById('articulo-id').value;
+    const compraId = document.getElementById('compra-id').value;
     const estado = document.getElementById('producto-estado').value;
     const observaciones = document.getElementById('producto-observaciones').value;
+    const manejaSerie = document.getElementById('series-section').classList.contains('hidden') === false;
+
+    // Validar que sea artículo válido
+    if (!articuloId || articuloId === 'N/A') {
+        alert('Error: ID de artículo inválido');
+        return;
+    }
 
     // Recolectar datos de ubicaciones
     const filasUbicacion = document.querySelectorAll('.fila-ubicacion');
@@ -700,11 +873,34 @@ async function guardarEdicion() {
         totalDistribuido += cantidad;
     }
 
-    // Validar cantidad total
-    const cantidadTotal = parseInt(document.getElementById('producto-cantidad').textContent);
-    if (totalDistribuido !== cantidadTotal) {
-        const confirmar = confirm(`La distribución suma ${totalDistribuido} unidades, pero el total es ${cantidadTotal}. ¿Desea guardar de todas formas?`);
-        if (!confirmar) return;
+    // Recolectar datos de series si el artículo maneja series
+    const seriesData = manejaSerie ? recolectarDatosSeries() : [];
+
+    // Validar series si el artículo maneja series y está siendo ubicado
+    if (manejaSerie && estado === 'ubicado') {
+        const cantidadRequerida = parseInt(document.getElementById('cantidad-requerida').textContent);
+        const cantidadIngresada = seriesData.length;
+        
+        if (cantidadIngresada !== cantidadRequerida) {
+            const confirmar = confirm(`Has ingresado ${cantidadIngresada} series, pero se requieren ${cantidadRequerida}. ¿Deseas continuar de todas formas?`);
+            if (!confirmar) return;
+        }
+        
+        // Validar series duplicadas
+        const seriesUnicas = new Set(seriesData.map(s => s.serie));
+        if (seriesUnicas.size !== seriesData.length) {
+            alert('Error: Hay series duplicadas. Por favor revisa los números de serie.');
+            return;
+        }
+    }
+
+    // Validar cantidad total solo si está en estado "ubicado"
+    if (estado === 'ubicado') {
+        const cantidadTotal = parseInt(document.getElementById('producto-cantidad').textContent);
+        if (totalDistribuido !== cantidadTotal) {
+            const confirmar = confirm(`La distribución suma ${totalDistribuido} unidades, pero el total es ${cantidadTotal}. ¿Desea guardar de todas formas?`);
+            if (!confirmar) return;
+        }
     }
 
     try {
@@ -717,8 +913,10 @@ async function guardarEdicion() {
             body: JSON.stringify({
                 id: solicitudId,
                 articulo_id: articuloId,
+                compra_id: compraId,
                 estado: estado,
                 ubicaciones: ubicacionesData,
+                series: seriesData,
                 observaciones: observaciones
             })
         });
@@ -726,6 +924,21 @@ async function guardarEdicion() {
         const data = await response.json();
 
         if (data.success) {
+            let mensaje = 'Solicitud actualizada correctamente';
+            
+            if (data.stock_actualizado) {
+                mensaje += `\nStock actualizado: ${data.stock_anterior} → ${data.stock_actual} unidades`;
+                if (data.diferencia > 0) {
+                    mensaje += ` (+${data.diferencia})`;
+                } else if (data.diferencia < 0) {
+                    mensaje += ` (${data.diferencia})`;
+                }
+            }
+
+            if (data.series_procesadas > 0) {
+                mensaje += `\nSe procesaron ${data.series_procesadas} series correctamente.`;
+            }
+
             // Recargar los datos
             const compraId = todasLasSolicitudes[0]?.compra_id;
             if (compraId) {
@@ -735,7 +948,7 @@ async function guardarEdicion() {
             }
             
             document.getElementById('modal-editar-producto').classList.add('hidden');
-            alert('Solicitud actualizada correctamente');
+            alert(mensaje);
         } else {
             alert('Error: ' + data.message);
         }
@@ -744,6 +957,8 @@ async function guardarEdicion() {
         alert('Error al procesar la solicitud');
     }
 }
+
+
         // Función para inicializar event listeners
         function inicializarEventListeners() {
             // Botón guardar

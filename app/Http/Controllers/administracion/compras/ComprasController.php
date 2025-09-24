@@ -24,20 +24,18 @@ class ComprasController extends Controller
 {
     public function index()
     {
-
         return view('administracion.compras.index');
     }
 
-
     public function data(Request $request)
     {
-        // 1) Valida también 'q'
         $validator = Validator::make($request->all(), [
             'per_page'      => 'sometimes|integer|min:1|max:100',
             'page'          => 'sometimes|integer|min:1',
             'fecha_inicio'  => 'sometimes|nullable|date',
             'fecha_fin'     => 'sometimes|nullable|date',
             'q'             => 'sometimes|nullable|string|max:100',
+            'estado'        => 'sometimes|nullable|in:pendiente,recibido,enviado_almacen,anulado', // Nuevo filtro
         ]);
 
         if ($validator->fails()) {
@@ -49,9 +47,9 @@ class ComprasController extends Controller
 
         $perPage = (int)($request->per_page ?? 10);
         $page    = (int)($request->page ?? 1);
-        $q       = trim((string)$request->input('q', ''));   // <<— Toma q del request
+        $q       = trim((string)$request->input('q', ''));
+        $estado  = $request->input('estado'); // Nuevo filtro
 
-        // 2) Base query (incluye proveedor_id para resolver la relación)
         $query = Compra::with('proveedor:idProveedor,nombre')
             ->select([
                 'idCompra',
@@ -60,10 +58,11 @@ class ComprasController extends Controller
                 'fechaEmision',
                 'total',
                 'proveedor_id',
+                'estado', // ← Agregar estado
                 'created_at'
             ]);
 
-        // 3) Filtros por fecha
+        // Filtros existentes...
         if ($request->filled('fecha_inicio')) {
             $query->whereDate('fechaEmision', '>=', $request->fecha_inicio);
         }
@@ -71,27 +70,28 @@ class ComprasController extends Controller
             $query->whereDate('fechaEmision', '<=', $request->fecha_fin);
         }
 
-        // 4) Filtro de búsqueda (mínimo 3 chars)
+        // Nuevo filtro por estado
+        if ($estado) {
+            $query->where('estado', $estado);
+        }
+
         if (strlen($q) >= 3) {
             $query->where(function ($qq) use ($q) {
                 if (ctype_digit($q)) {
-                    // si es número, prioriza nro
                     $qq->where('nro', $q)
                         ->orWhere('nro', 'like', $q . '%');
                 }
-                // serie y proveedor por prefijo para usar índices
                 $qq->orWhere('serie', 'like', $q . '%')
                     ->orWhereHas('proveedor', fn($p) => $p->where('nombre', 'like', $q . '%'));
             });
         }
 
-        // 5) Orden: últimos creados primero
         $compras = $query->orderByDesc('created_at')
             ->orderByDesc('idCompra')
             ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
-            'data' => $compras->items(), // incluye compra.proveedor.nombre
+            'data' => $compras->items(),
             'pagination' => [
                 'current_page' => $compras->currentPage(),
                 'last_page'    => $compras->lastPage(),
@@ -103,6 +103,45 @@ class ComprasController extends Controller
         ]);
     }
 
+    // Nuevo método para actualizar el estado
+    public function updateEstado(Request $request, $idCompra)
+    {
+        $validator = Validator::make($request->all(), [
+            'estado' => 'required|in:pendiente,recibido,enviado_almacen,anulado'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $compra = Compra::findOrFail($idCompra);
+            $compra->estado = $request->estado;
+            $compra->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente',
+                'data' => [
+                    'idCompra' => $compra->idCompra,
+                    'estado' => $compra->estado,
+                    'estado_badge_class' => $compra->getEstadoBadgeClass(),
+                    'estado_text' => Compra::getEstados()[$compra->estado]
+                ]
+            ]);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
 
     public function create()
