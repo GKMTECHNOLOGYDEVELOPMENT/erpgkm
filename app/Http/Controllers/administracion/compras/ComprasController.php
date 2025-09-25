@@ -685,49 +685,36 @@ class ComprasController extends Controller
                 Log::info("=== FIN PROCESAMIENTO PRODUCTO {$index} ===");
 
                 // ✅ CREAR SOLICITUD DE INGRESO AUTOMÁTICAMENTE PARA ESTE PRODUCTO
-    try {
-        // Generar código de solicitud (SI-001, SI-002, etc.)
-        $ultimaSolicitud = DB::table('solicitud_ingreso')
-            ->orderBy('idSolicitudIngreso', 'desc')
-            ->first();
-        
-        $numeroSiguiente = $ultimaSolicitud ? 
-            intval(substr($ultimaSolicitud->codigo_solicitud, 3)) + 1 : 1;
-        $codigoSolicitud = 'SI-' . str_pad($numeroSiguiente, 3, '0', STR_PAD_LEFT);
-
-        // Obtener nombre del artículo
-        $nombreArticulo = $esProductoNuevo ? $producto['nombre'] : $articuloActual->nombre;
-
-        // Crear la solicitud de ingreso
+  try {
+    // Crear solicitud de ingreso basada en nueva estructura
         $solicitudData = [
-            'compra_id' => $compraId,
-            'codigo_solicitud' => $codigoSolicitud,
+            'origen' => 'compra',
+            'origen_id' => $compraId,
             'articulo_id' => $productoId,
             'cantidad' => $producto['cantidad'],
-            'precio_compra' => $producto['precio'],
-            'numero_factura' => $request->nro,
-            'serie_factura' => $request->serie,
-            'fecha_compra' => $request->fecha,
-            'fecha_esperada_ingreso' => $request->fecha_vencimiento,
+            'fecha_origen' => $request->fecha,
             'proveedor_id' => $request->proveedor_id,
             'cliente_general_id' => 8,
-            'estado' => 'pendiente',
             'ubicacion' => null,
-            'observaciones' => "Compra: {$codigoCompra} - Artículo: {$nombreArticulo}",
-            'fecha_recibido' => null,
-            'fecha_ubicado' => null,
+            'lote' => $producto['lote'] ?? null,
+            'fecha_vencimiento' => $producto['fecha_vencimiento'] ?? null,
+            'observaciones' => "Compra: {$codigoCompra} - Artículo: {$productoId}",
+            'estado' => 'pendiente',
             'usuario_id' => $usuario->idUsuario,
             'created_at' => now(),
             'updated_at' => now()
         ];
 
-        $solicitudId = DB::table('solicitud_ingreso')->insertGetId($solicitudData);
-        Log::info("✅ SOLICITUD DE INGRESO CREADA - ID: {$solicitudId}, Código: {$codigoSolicitud}");
 
-    } catch (Exception $e) {
-        Log::error("❌ ERROR al crear solicitud de ingreso: " . $e->getMessage());
-        // No hacemos rollback aquí para no afectar la compra completa
-    }
+    // Insertar la solicitud
+    $solicitudId = DB::table('solicitud_ingreso')->insertGetId($solicitudData);
+
+    Log::info("✅ Solicitud de ingreso creada (ID: {$solicitudId}) para artículo ID: {$productoId}");
+
+} catch (Exception $e) {
+    Log::error("❌ Error al crear solicitud_ingreso: " . $e->getMessage());
+    // NO se hace rollback aquí, se sigue con el flujo
+}
 
 }
 

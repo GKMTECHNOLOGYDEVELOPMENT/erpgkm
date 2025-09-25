@@ -1343,3 +1343,12 @@ Route::post('/series/cambiar-estado', [ProductoController::class, 'cambiarEstado
 Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [SolicitudingresoController::class, 'obtenerSeries']);
 
 Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [SolicitudingresoController::class, 'obtenerSeries']);
+
+// En web.php
+Route::post('/solicitud-ingreso/cambiar-estado-grupo', [SolicitudIngresoController::class, 'cambiarEstadoGrupo'])->name('solicitud-ingreso.cambiar-estado-grupo');
+
+Route::post('/solicitud-ingreso/{id}/cambiar-estado', [SolicitudIngresoController::class, 'cambiarEstado']);
+Route::post('/solicitud-ingreso/guardar-ubicacion', [SolicitudIngresoController::class, 'guardarUbicacion']);
+
+
+Route::post('/solicitud-ingreso/{id}/cambiar-estado', [SolicitudIngresoController::class, 'cambiarEstado'])->name('solicitud-ingreso.cambiar-estado');

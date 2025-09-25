@@ -186,54 +186,32 @@ public function guardarEntradaProveedor(Request $request)
             ]);
 
             Log::info("Inventario_ingresos_clientes insertado articuloID: {$articuloId}, cliente_general_id: " . ($request->cliente_general_id ?: 'null'));
-            // === CREAR SOLICITUD DE INGRESO SIMPLIFICADA ===
-            try {
-                // Generar código de solicitud (EP-001, EP-002, etc.)
-                $ultimaSolicitud = DB::table('solicitud_ingreso')
-                    ->orderBy('idSolicitudIngreso', 'desc')
-                    ->first();
-                
-                $numeroSiguiente = $ultimaSolicitud ? 
-                    intval(substr($ultimaSolicitud->codigo_solicitud, 3)) + 1 : 1;
-                $codigoSolicitud = 'EP-' . str_pad($numeroSiguiente, 3, '0', STR_PAD_LEFT);
+           // === CREAR SOLICITUD DE INGRESO CON NUEVA ESTRUCTURA ===
+try {
+    $solicitudData = [
+        'origen' => 'entrada_proveedor',
+        'origen_id' => $entradaId,
+        'articulo_id' => $articuloId,
+        'cantidad' => $cantidad,
+        'fecha_origen' => $request->fecha_ingreso,
+        'proveedor_id' => $request->cliente_general_id ?: null,
+        'cliente_general_id' => $request->cliente_general_id ?: null,
+        'ubicacion' => $producto['ubicacion'] ?? null,
+        'lote' => $producto['lote'] ?? null,
+        'fecha_vencimiento' => $producto['fecha_vencimiento'] ?? null,
+        'observaciones' => "Entrada Proveedor: {$request->tipo_entrada}" .
+                           ($request->observaciones ? " - Obs: {$request->observaciones}" : ""),
+        'estado' => 'pendiente',
+        'usuario_id' => $usuario->idUsuario,
+        'created_at' => now(),
+        'updated_at' => now()
+    ];
 
-                // Obtener nombre del artículo
-                $articulo = DB::table('articulos')->where('idArticulos', $articuloId)->first();
-                $nombreArticulo = $articulo ? $articulo->nombre : 'Artículo ID: ' . $articuloId;
-
-                // Crear la solicitud de ingreso simplificada
-                $solicitudData = [
-                    'compra_id' => null, // No hay compra asociada
-                    'entrada_id' => $entradaId, // ← NUEVO CAMPO para entrada_proveedor
-                    'codigo_solicitud' => $codigoSolicitud,
-                    'articulo_id' => $articuloId,
-                    'cantidad' => $cantidad,
-                    'precio_compra' => $producto['precio_unitario'] ?? 0,
-                    'numero_factura' => null,
-                    'serie_factura' => null,
-                    'fecha_compra' => null,
-                    'fecha_esperada_ingreso' => $request->fecha_ingreso,
-                    'proveedor_id' => null,
-                    'cliente_general_id' => $request->cliente_general_id ?: null,
-                    'estado' => 'pendiente',
-                    'ubicacion' => $producto['ubicacion'] ?? null,
-                    'observaciones' => "Entrada Proveedor: {$request->tipo_entrada} - Artículo: {$nombreArticulo}" . 
-                                    ($request->observaciones ? " - Obs: {$request->observaciones}" : ""),
-                    'fecha_recibido' => null,
-                    'fecha_ubicado' => null,
-                    'usuario_id' => $usuario->idUsuario,
-                    'tipo_origen' => 'entrada_proveedor',
-                    'origen_id' => $entradaId,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ];
-
-                $solicitudId = DB::table('solicitud_ingreso')->insertGetId($solicitudData);
-                Log::info("✅ SOLICITUD DE INGRESO CREADA - ID: {$solicitudId}, Código: {$codigoSolicitud}, Entrada ID: {$entradaId}");
-
-            } catch (Exception $e) {
-                Log::error("❌ ERROR al crear solicitud de ingreso: " . $e->getMessage());
-            }
+    $solicitudId = DB::table('solicitud_ingreso')->insertGetId($solicitudData);
+    Log::info("✅ SOLICITUD DE INGRESO CREADA - ID: {$solicitudId} | Entrada ID: {$entradaId}");
+} catch (Exception $e) {
+    Log::error("❌ ERROR al crear solicitud de ingreso: " . $e->getMessage());
+}
 
             // === Crear o actualizar en KARDEX ===
             $fechaIngreso = Carbon::parse($request->fecha_ingreso);

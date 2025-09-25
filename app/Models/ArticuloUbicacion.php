@@ -15,6 +15,8 @@ class ArticuloUbicacion extends Model
     protected $fillable = [
         'articulo_id',
         'ubicacion_id',
+        'origen_id',
+        'origen',
         'cantidad'
     ];
 
