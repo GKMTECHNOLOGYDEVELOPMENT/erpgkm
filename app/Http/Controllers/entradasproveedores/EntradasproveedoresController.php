@@ -3,6 +3,7 @@ namespace App\Http\Controllers\entradasproveedores;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -96,8 +97,6 @@ public function buscarProductoEntrada(Request $request)
 }
 
 
-
-
 public function guardarEntradaProveedor(Request $request)
 {
     try {
@@ -108,7 +107,7 @@ public function guardarEntradaProveedor(Request $request)
             'tipo_entrada' => 'required|string',
             'fecha_ingreso' => 'required|date',
             'productos' => 'required|string',
-            'cliente_general_id' => 'nullable|integer' // añadir validación si se espera
+            'cliente_general_id' => 'nullable|integer'
         ]);
 
         $productos = json_decode($request->productos, true);
@@ -125,6 +124,12 @@ public function guardarEntradaProveedor(Request $request)
             'cliente_general_id' => $request->cliente_general_id,
             'productos' => $productos
         ]);
+
+        // Obtener usuario autenticado
+        $usuario = auth()->user();
+        if (!$usuario) {
+            throw new \Exception('Usuario no autenticado');
+        }
 
         // Insertar entrada principal
         $entradaId = DB::table('entradas_proveedores')->insertGetId([
@@ -181,6 +186,54 @@ public function guardarEntradaProveedor(Request $request)
             ]);
 
             Log::info("Inventario_ingresos_clientes insertado articuloID: {$articuloId}, cliente_general_id: " . ($request->cliente_general_id ?: 'null'));
+            // === CREAR SOLICITUD DE INGRESO SIMPLIFICADA ===
+            try {
+                // Generar código de solicitud (EP-001, EP-002, etc.)
+                $ultimaSolicitud = DB::table('solicitud_ingreso')
+                    ->orderBy('idSolicitudIngreso', 'desc')
+                    ->first();
+                
+                $numeroSiguiente = $ultimaSolicitud ? 
+                    intval(substr($ultimaSolicitud->codigo_solicitud, 3)) + 1 : 1;
+                $codigoSolicitud = 'EP-' . str_pad($numeroSiguiente, 3, '0', STR_PAD_LEFT);
+
+                // Obtener nombre del artículo
+                $articulo = DB::table('articulos')->where('idArticulos', $articuloId)->first();
+                $nombreArticulo = $articulo ? $articulo->nombre : 'Artículo ID: ' . $articuloId;
+
+                // Crear la solicitud de ingreso simplificada
+                $solicitudData = [
+                    'compra_id' => null, // No hay compra asociada
+                    'entrada_id' => $entradaId, // ← NUEVO CAMPO para entrada_proveedor
+                    'codigo_solicitud' => $codigoSolicitud,
+                    'articulo_id' => $articuloId,
+                    'cantidad' => $cantidad,
+                    'precio_compra' => $producto['precio_unitario'] ?? 0,
+                    'numero_factura' => null,
+                    'serie_factura' => null,
+                    'fecha_compra' => null,
+                    'fecha_esperada_ingreso' => $request->fecha_ingreso,
+                    'proveedor_id' => null,
+                    'cliente_general_id' => $request->cliente_general_id ?: null,
+                    'estado' => 'pendiente',
+                    'ubicacion' => $producto['ubicacion'] ?? null,
+                    'observaciones' => "Entrada Proveedor: {$request->tipo_entrada} - Artículo: {$nombreArticulo}" . 
+                                    ($request->observaciones ? " - Obs: {$request->observaciones}" : ""),
+                    'fecha_recibido' => null,
+                    'fecha_ubicado' => null,
+                    'usuario_id' => $usuario->idUsuario,
+                    'tipo_origen' => 'entrada_proveedor',
+                    'origen_id' => $entradaId,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+
+                $solicitudId = DB::table('solicitud_ingreso')->insertGetId($solicitudData);
+                Log::info("✅ SOLICITUD DE INGRESO CREADA - ID: {$solicitudId}, Código: {$codigoSolicitud}, Entrada ID: {$entradaId}");
+
+            } catch (Exception $e) {
+                Log::error("❌ ERROR al crear solicitud de ingreso: " . $e->getMessage());
+            }
 
             // === Crear o actualizar en KARDEX ===
             $fechaIngreso = Carbon::parse($request->fecha_ingreso);
@@ -191,10 +244,9 @@ public function guardarEntradaProveedor(Request $request)
             // Ver si ya existe kardex para este artículo + mes + cliente
             $kardexExistente = DB::table('kardex')
                 ->where('idArticulo', $articuloId)
-                ->where('cliente_general_id', $clienteId) // ⬅️ YA TIENES ESTA CONDICIÓN
+                ->where('cliente_general_id', $clienteId)
                 ->whereMonth('fecha', $mes)
                 ->whereYear('fecha', $anio)
-                ->where('cliente_general_id', $clienteId)
                 ->first();
 
             if ($kardexExistente) {
@@ -203,7 +255,6 @@ public function guardarEntradaProveedor(Request $request)
 
                 $updateData = [
                     'unidades_entrada' => $kardexExistente->unidades_entrada + $cantidad,
-                    // costo_unitario_entrada puede quedar igual, porque no hay costo real para esta entrada
                     'inventario_actual' => $nuevoInventarioActual,
                     'updated_at' => now()
                 ];
@@ -217,7 +268,7 @@ public function guardarEntradaProveedor(Request $request)
                 // Crear nuevo registro
                 $ultimoKardex = DB::table('kardex')
                     ->where('idArticulo', $articuloId)
-                    ->where('cliente_general_id', $clienteId) // ⬅️ AÑADE ESTA CONDICIÓN
+                    ->where('cliente_general_id', $clienteId)
                     ->orderBy('fecha', 'desc')
                     ->first();
 
@@ -230,12 +281,12 @@ public function guardarEntradaProveedor(Request $request)
                     'fecha' => $fechaIngreso,
                     'idArticulo' => $articuloId,
                     'unidades_entrada' => $cantidad,
-                    'costo_unitario_entrada' => 0,
+                    'costo_unitario_entrada' => $producto['precio_unitario'] ?? 0,
                     'unidades_salida' => 0,
                     'costo_unitario_salida' => 0,
                     'inventario_inicial' => $inventarioInicial,
                     'inventario_actual' => $nuevoInventarioActual,
-                    'costo_inventario' => $costoInventarioPrevio,
+                    'costo_inventario' => $costoInventarioPrevio + (($producto['precio_unitario'] ?? 0) * $cantidad),
                     'cliente_general_id' => $clienteId,
                     'created_at' => now(),
                     'updated_at' => now()
@@ -282,5 +333,4 @@ public function guardarEntradaProveedor(Request $request)
         ], 500);
     }
 }
-
 }
