@@ -2,10 +2,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
-        .badge-disponible { background-color: #10b981; color: white; }
-        .badge-vendido { background-color: #ef4444; color: white; }
-        .badge-defectuoso { background-color: #f59e0b; color: white; }
-        .badge-garantia { background-color: #3b82f6; color: white; }
+        .badge-activo { background-color: #10b981; color: white; }
+        .badge-inactivo { background-color: #ef4444; color: white; }
         .info-card { background: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
         
         /* Ocultar el buscador de DataTables */
@@ -17,15 +15,19 @@
         .dataTables_length {
             display: none !important;
         }
+        
+        .badge-compra { background-color: #3b82f6; color: white; }
+        .badge-entrada_proveedor { background-color: #8b5cf6; color: white; }
     </style>
 
     <div x-data="seriesTable">
         <!-- Breadcrumb -->
         <div class="mb-6">
             <ul class="flex space-x-2 rtl:space-x-reverse">
-                <li><a href="#" class="text-primary hover:underline">Dashboard</a></li>
-                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                    <a href="#" class="text-primary hover:underline">Artículos</a>
+                <li>
+                    <a href="{{ route('producto.index') }}" class="text-primary hover:underline">
+                        <i class="fas fa-arrow-left mr-1"></i> Productos
+                    </a>
                 </li>
                 <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                     <span>Series - {{ $articulo->nombre }}</span>
@@ -58,7 +60,10 @@
             <div class="flex justify-between items-center mb-5">
                 <h5 class="font-semibold text-lg">Gestión de Series</h5>
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('articulos.index') }}" class="btn btn-secondary btn-sm">
+                    <span class="text-sm text-gray-600">
+                        Total de series: <strong>{{ $series->count() }}</strong>
+                    </span>
+                    <a href="{{ route('producto.index') }}" class="btn btn-secondary btn-sm">
                         <i class="fas fa-arrow-left mr-2"></i> Volver
                     </a>
                 </div>
@@ -70,20 +75,21 @@
                     <label class="block text-sm font-medium mb-1">Filtrar por estado</label>
                     <select class="form-select" x-model="filtroEstado" @change="filtrarSeries">
                         <option value="">Todos los estados</option>
-                        <option value="disponible">Disponible</option>
-                        <option value="vendido">Vendido</option>
-                        <option value="defectuoso">Defectuoso</option>
-                        <option value="garantia">En garantía</option>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Filtrar por origen</label>
+                    <select class="form-select" x-model="filtroOrigen" @change="filtrarSeries">
+                        <option value="">Todos los orígenes</option>
+                        <option value="compra">Compra</option>
+                        <option value="entrada_proveedor">Entrada Proveedor</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Buscar por serie</label>
-                    <input type="text" class="form-input" placeholder="Buscar serie..." x-model="busquedaSerie" @input="filtrarSeries">
-                </div>
-                <div class="flex items-end">
-                    <button class="btn btn-primary" @click="exportarExcel">
-                        <i class="fas fa-file-excel mr-2"></i> Exportar Excel
-                    </button>
+                    <input type="text" class="form-input" placeholder="Buscar número de serie..." x-model="busquedaSerie" @input="filtrarSeries">
                 </div>
             </div>
 
@@ -95,57 +101,72 @@
                             <th class="text-center">#</th>
                             <th>Número de Serie</th>
                             <th>Estado</th>
+                            <th>Origen</th>
+                            <th>ID Origen</th>
+                            <th>Ubicación ID</th>
                             <th>Fecha de Ingreso</th>
-                            <th>Código de Compra</th>
-                            <th>Proveedor</th>
-                            <th>Fecha Compra</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-    @if($series->isEmpty())
-        {{-- Deja el cuerpo vacío para evitar problemas con DataTables --}}
-    @else
-        @foreach($series as $index => $serie)
-            <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
-                <td class="font-mono">{{ $serie->serie }}</td>
-                <td>
-                    @php
-                        $badgeClass = [
-                            'disponible' => 'badge-disponible',
-                            'vendido' => 'badge-vendido', 
-                            'defectuoso' => 'badge-defectuoso',
-                            'garantia' => 'badge-garantia'
-                        ][$serie->estado] ?? 'badge-secondary';
-                    @endphp
-                    <span class="badge {{ $badgeClass }}">
-                        {{ ucfirst($serie->estado) }}
-                    </span>
-                </td>
-                <td>{{ \Carbon\Carbon::parse($serie->fecha_ingreso)->format('d/m/Y') }}</td>
-                <td>{{ $serie->codigocompra }}</td>
-                <td>{{ $serie->proveedor ?? 'N/A' }}</td>
-                <td>{{ \Carbon\Carbon::parse($serie->fechaEmision)->format('d/m/Y') }}</td>
-                <td class="text-center">
-                    <div class="flex justify-center space-x-2">
-                        <button type="button" class="btn btn-info btn-sm" 
-                                @click="verDetalleSerie('{{ $serie->serie }}')"
-                                x-tooltip="Ver detalles">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button type="button" class="btn btn-warning btn-sm" 
-                                @click="cambiarEstado('{{ $serie->serie }}')"
-                                x-tooltip="Cambiar estado">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        @endforeach
-    @endif
-</tbody>
-
+                        @forelse($series as $index => $serie)
+                            <tr>
+                                <td class="text-center">{{ $index + 1 }}</td>
+                                <td class="font-mono font-semibold">{{ $serie->numero_serie }}</td>
+                                <td>
+                                    @php
+                                        $badgeClass = [
+                                            'activo' => 'badge-activo',
+                                            'inactivo' => 'badge-inactivo'
+                                        ][$serie->estado] ?? 'badge-secondary';
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">
+                                        {{ ucfirst($serie->estado) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @php
+                                        $origenBadgeClass = [
+                                            'compra' => 'badge-compra',
+                                            'entrada_proveedor' => 'badge-entrada_proveedor'
+                                        ][$serie->origen] ?? 'badge-secondary';
+                                    @endphp
+                                    <span class="badge {{ $origenBadgeClass }}">
+                                        {{ ucfirst(str_replace('_', ' ', $serie->origen)) }}
+                                    </span>
+                                </td>
+                                <td class="text-center">{{ $serie->origen_id }}</td>
+                                <td class="text-center">{{ $serie->ubicacion_id ?? 'N/A' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($serie->fecha_ingreso)->format('d/m/Y H:i') }}</td>
+                                <td class="text-center">
+                                    <div class="flex justify-center space-x-2">
+                                        <button type="button" class="btn btn-info btn-sm" 
+                                                @click="verDetalleSerie({{ $serie->idArticuloSerie }})"
+                                                x-tooltip="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-warning btn-sm" 
+                                                @click="cambiarEstado({{ $serie->idArticuloSerie }}, '{{ $serie->numero_serie }}', '{{ $serie->estado }}')"
+                                                x-tooltip="Cambiar estado">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-sm" 
+                                                @click="eliminarSerie({{ $serie->idArticuloSerie }}, '{{ $serie->numero_serie }}')"
+                                                x-tooltip="Eliminar serie">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center py-8">
+                                    <i class="fas fa-box-open text-gray-400 text-4xl mb-4"></i>
+                                    <p class="text-gray-500">No se encontraron series para este artículo.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -161,19 +182,39 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium mb-2">Nuevo Estado</label>
                         <select class="form-select" x-model="nuevoEstado">
-                            <option value="disponible">Disponible</option>
-                            <option value="vendido">Vendido</option>
-                            <option value="defectuoso">Defectuoso</option>
-                            <option value="garantia">En garantía</option>
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
                         </select>
                     </div>
                 </div>
                 <div class="px-6 py-4 border-t flex justify-end gap-2">
-                    <button type="button" class="btn btn-outline-secondary" @click="mostrarModalEstado = false">
+                    <button type="button" class="btn btn-outline-secondary" @click="cerrarModal">
                         Cancelar
                     </button>
                     <button type="button" class="btn btn-primary" @click="guardarNuevoEstado">
                         Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Eliminar Serie -->
+        <div x-show="mostrarModalEliminar" x-cloak class="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg w-full max-w-md">
+                <div class="px-6 py-4 border-b">
+                    <h5 class="text-lg font-semibold text-red-600">Eliminar Serie</h5>
+                </div>
+                <div class="p-6">
+                    <p class="mb-4">¿Estás seguro de que deseas eliminar la serie?</p>
+                    <p class="font-mono font-semibold text-lg text-center" x-text="serieAEliminar"></p>
+                    <p class="text-sm text-gray-500 mt-2 text-center">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="px-6 py-4 border-t flex justify-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary" @click="cerrarModal">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-danger" @click="confirmarEliminar">
+                        <i class="fas fa-trash mr-2"></i> Eliminar
                     </button>
                 </div>
             </div>
@@ -184,10 +225,15 @@
         document.addEventListener('alpine:init', () => {
             Alpine.data('seriesTable', () => ({
                 filtroEstado: '',
+                filtroOrigen: '',
                 busquedaSerie: '',
                 mostrarModalEstado: false,
+                mostrarModalEliminar: false,
                 serieSeleccionada: '',
-                nuevoEstado: 'disponible',
+                serieSeleccionadaId: null,
+                serieAEliminar: '',
+                serieAEliminarId: null,
+                nuevoEstado: 'activo',
                 datatable: null,
 
                 init() {
@@ -199,7 +245,7 @@
                         responsive: true,
                         autoWidth: false,
                         pageLength: 10,
-                        dom: 'rtip', // Elimina el filtro (f) y el control de longitud (l)
+                        dom: 'rtip',
                         language: {
                             zeroRecords: 'No se encontraron registros',
                             info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
@@ -211,40 +257,65 @@
                                 next: 'Siguiente',
                                 previous: 'Anterior'
                             }
-                        }
+                        },
+                        columnDefs: [
+                            { orderable: false, targets: [7] } // Deshabilitar ordenamiento en columna de acciones
+                        ]
                     });
                 },
 
                 filtrarSeries() {
-                    // Aplicar ambos filtros simultáneamente
+                    // Aplicar filtros simultáneamente
                     this.datatable
                         .column(1) // Columna de número de serie
                         .search(this.busquedaSerie)
                         .column(2) // Columna de estado
                         .search(this.filtroEstado)
+                        .column(3) // Columna de origen
+                        .search(this.filtroOrigen)
                         .draw();
                 },
 
-                verDetalleSerie(serie) {
-                    // Aquí puedes implementar la lógica para ver detalles de la serie
-                    alert('Detalles de la serie: ' + serie);
+                verDetalleSerie(idSerie) {
+                    // Implementar lógica para ver detalles
+                    alert('Detalles de la serie ID: ' + idSerie);
+                    // window.location.href = '/series/' + idSerie + '/detalle';
                 },
 
-                cambiarEstado(serie) {
-                    this.serieSeleccionada = serie;
+                cambiarEstado(idSerie, numeroSerie, estadoActual) {
+                    this.serieSeleccionadaId = idSerie;
+                    this.serieSeleccionada = numeroSerie;
+                    this.nuevoEstado = estadoActual;
                     this.mostrarModalEstado = true;
                 },
 
+                eliminarSerie(idSerie, numeroSerie) {
+                    this.serieAEliminarId = idSerie;
+                    this.serieAEliminar = numeroSerie;
+                    this.mostrarModalEliminar = true;
+                },
+
+                cerrarModal() {
+                    this.mostrarModalEstado = false;
+                    this.mostrarModalEliminar = false;
+                    this.serieSeleccionadaId = null;
+                    this.serieSeleccionada = '';
+                    this.serieAEliminarId = null;
+                    this.serieAEliminar = '';
+                },
+
                 async guardarNuevoEstado() {
+                    if (!this.serieSeleccionadaId) return;
+
                     try {
-                        const response = await fetch('/api/series/cambiar-estado', {
-                            method: 'POST',
+                        const response = await fetch(`/articulo-series/${this.serieSeleccionadaId}/cambiar-estado`, {
+                            method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-Requested-With': 'XMLHttpRequest'
                             },
                             body: JSON.stringify({
-                                serie: this.serieSeleccionada,
                                 estado: this.nuevoEstado
                             })
                         });
@@ -253,11 +324,47 @@
 
                         if (data.success) {
                             toastr.success('Estado actualizado correctamente');
-                            location.reload();
+                            this.cerrarModal();
+                            // Recargar después de 1 segundo para ver los cambios
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
                         } else {
-                            toastr.error('Error al actualizar el estado');
+                            toastr.error(data.message || 'Error al actualizar el estado');
                         }
                     } catch (error) {
+                        console.error('Error:', error);
+                        toastr.error('Error de conexión');
+                    }
+                },
+
+                async confirmarEliminar() {
+                    if (!this.serieAEliminarId) return;
+
+                    try {
+                        const response = await fetch(`/articulo-series/${this.serieAEliminarId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            toastr.success('Serie eliminada correctamente');
+                            this.cerrarModal();
+                            // Recargar después de 1 segundo para ver los cambios
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error(data.message || 'Error al eliminar la serie');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
                         toastr.error('Error de conexión');
                     }
                 },

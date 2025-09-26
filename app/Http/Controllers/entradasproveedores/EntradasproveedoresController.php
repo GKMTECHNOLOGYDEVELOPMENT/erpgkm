@@ -96,7 +96,6 @@ public function buscarProductoEntrada(Request $request)
     }
 }
 
-
 public function guardarEntradaProveedor(Request $request)
 {
     try {
@@ -166,12 +165,20 @@ public function guardarEntradaProveedor(Request $request)
 
             Log::info("Detalle de entrada registrado detalleId: {$detalleId}");
 
+            // =============================================
+            // ⬇️⬇️⬇️ COMENTADO: YA NO INCREMENTA STOCK TOTAL ⬇️⬇️⬇️
+            // =============================================
+            /*
             // Actualizar stock del artículo
             DB::table('articulos')
                 ->where('idArticulos', $articuloId)
                 ->increment('stock_total', $cantidad);
 
             Log::info("Stock incrementado para articuloId: {$articuloId}, cantidad: {$cantidad}");
+            */
+            // =============================================
+            // ⬆️⬆️⬆️ FIN DE SECCIÓN COMENTADA ⬆️⬆️⬆️
+            // =============================================
 
             // Insertar en inventario_ingresos_clientes
             DB::table('inventario_ingresos_clientes')->insert([
@@ -186,32 +193,33 @@ public function guardarEntradaProveedor(Request $request)
             ]);
 
             Log::info("Inventario_ingresos_clientes insertado articuloID: {$articuloId}, cliente_general_id: " . ($request->cliente_general_id ?: 'null'));
-           // === CREAR SOLICITUD DE INGRESO CON NUEVA ESTRUCTURA ===
-try {
-    $solicitudData = [
-        'origen' => 'entrada_proveedor',
-        'origen_id' => $entradaId,
-        'articulo_id' => $articuloId,
-        'cantidad' => $cantidad,
-        'fecha_origen' => $request->fecha_ingreso,
-        'proveedor_id' => $request->cliente_general_id ?: null,
-        'cliente_general_id' => $request->cliente_general_id ?: null,
-        'ubicacion' => $producto['ubicacion'] ?? null,
-        'lote' => $producto['lote'] ?? null,
-        'fecha_vencimiento' => $producto['fecha_vencimiento'] ?? null,
-        'observaciones' => "Entrada Proveedor: {$request->tipo_entrada}" .
-                           ($request->observaciones ? " - Obs: {$request->observaciones}" : ""),
-        'estado' => 'pendiente',
-        'usuario_id' => $usuario->idUsuario,
-        'created_at' => now(),
-        'updated_at' => now()
-    ];
 
-    $solicitudId = DB::table('solicitud_ingreso')->insertGetId($solicitudData);
-    Log::info("✅ SOLICITUD DE INGRESO CREADA - ID: {$solicitudId} | Entrada ID: {$entradaId}");
-} catch (Exception $e) {
-    Log::error("❌ ERROR al crear solicitud de ingreso: " . $e->getMessage());
-}
+            // === CREAR SOLICITUD DE INGRESO CON NUEVA ESTRUCTURA ===
+            try {
+                $solicitudData = [
+                    'origen' => 'entrada_proveedor',
+                    'origen_id' => $entradaId,
+                    'articulo_id' => $articuloId,
+                    'cantidad' => $cantidad,
+                    'fecha_origen' => $request->fecha_ingreso,
+                    'proveedor_id' => $request->cliente_general_id ?: null,
+                    'cliente_general_id' => $request->cliente_general_id ?: null,
+                    'ubicacion' => $producto['ubicacion'] ?? null,
+                    'lote' => $producto['lote'] ?? null,
+                    'fecha_vencimiento' => $producto['fecha_vencimiento'] ?? null,
+                    'observaciones' => "Entrada Proveedor: {$request->tipo_entrada}" .
+                                       ($request->observaciones ? " - Obs: {$request->observaciones}" : ""),
+                    'estado' => 'pendiente',
+                    'usuario_id' => $usuario->idUsuario,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+
+                $solicitudId = DB::table('solicitud_ingreso')->insertGetId($solicitudData);
+                Log::info("✅ SOLICITUD DE INGRESO CREADA - ID: {$solicitudId} | Entrada ID: {$entradaId}");
+            } catch (Exception $e) {
+                Log::error("❌ ERROR al crear solicitud de ingreso: " . $e->getMessage());
+            }
 
             // === Crear o actualizar en KARDEX ===
             $fechaIngreso = Carbon::parse($request->fecha_ingreso);
