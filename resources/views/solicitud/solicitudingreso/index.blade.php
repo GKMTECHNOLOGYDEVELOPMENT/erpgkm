@@ -1,6 +1,11 @@
 <x-layout.default>
     <!-- Incluir Axios CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
     <style>
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -273,11 +278,6 @@
 
         <!-- Modal de Ubicación con Series -->
         <div x-data="{ open: false }">
-            <!-- Botón para abrir -->
-            <div class="flex items-center justify-center mb-5">
-                <button type="button" class="btn btn-primary" @click="open = true">Ubicar Artículo</button>
-            </div>
-
             <!-- Modal -->
             <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
                 :class="modalUbicacionAbierto && '!block'">
@@ -364,8 +364,7 @@
                                         </div>
                                         <div class="pt-6">
                                             <button type="button" @click="eliminarUbicacion(index)"
-                                                class="text-red-600 hover:text-red-800 p-1"
-                                                :disabled="ubicacionesForm.length === 1">
+                                                class="btn btn-danger" :disabled="ubicacionesForm.length === 1">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </div>
@@ -446,8 +445,6 @@
                                                             class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10 text-sm"
                                                             maxlength="50"
                                                             @input="$nextTick(() => console.log('Serie actualizada:', serie.numero_serie))">
-                                                        <i
-                                                            class="fas fa-barcode absolute right-3 top-3 text-gray-400"></i>
                                                     </div>
 
                                                     <!-- Validación de series duplicadas -->
@@ -485,13 +482,15 @@
                             <!-- Footer -->
                             <div
                                 class="flex justify-end items-center gap-3 px-5 py-3 border-t bg-[#fbfbfb] dark:bg-[#121c2c]">
-                                <button type="button" class="btn btn-outline-danger" @click="open = false">
+                                <button type="button" class="btn btn-outline-danger"
+                                    @click="cerrarModalUbicacion()">
                                     Cancelar
                                 </button>
+
                                 <button type="button" class="btn btn-primary" :disabled="!puedeGuardar"
                                     @click="guardarUbicaciones">
                                     <i class="fas fa-save mr-2"></i>
-                                    Guardar
+                                    Guardar&nbsp;
                                     <span x-show="articuloRequiereSeries">Ubicaciones y Series</span>
                                     <span x-show="!articuloRequiereSeries">Ubicaciones</span>
                                 </button>
@@ -508,7 +507,9 @@
             display: none !important;
         }
     </style>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
         function solicitudApp() {
             return {
@@ -1056,20 +1057,23 @@
                     return 'ubicado';
                 },
 
-                mostrarNotificacion(mensaje, tipo) {
-                    const alerta = document.createElement('div');
-                    alerta.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-                        tipo === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-                    }`;
-                    alerta.textContent = mensaje;
-                    document.body.appendChild(alerta);
-
-                    setTimeout(() => {
-                        if (document.body.contains(alerta)) {
-                            document.body.removeChild(alerta);
-                        }
-                    }, 3000);
+                mostrarNotificacion(mensaje, tipo = 'info') {
+                    switch (tipo) {
+                        case 'success':
+                            toastr.success(mensaje, 'Éxito');
+                            break;
+                        case 'error':
+                            toastr.error(mensaje, 'Error');
+                            break;
+                        case 'warning':
+                            toastr.warning(mensaje, 'Advertencia');
+                            break;
+                        default:
+                            toastr.info(mensaje, 'Información');
+                            break;
+                    }
                 }
+
             }
         }
     </script>

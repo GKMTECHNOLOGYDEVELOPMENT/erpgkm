@@ -1,4 +1,6 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
     <div x-data="comprasList" x-init="init()">
         <!-- Filtros - Agregar filtro por estado -->
         <div
@@ -357,6 +359,8 @@
         </div>
 
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         document.addEventListener('alpine:init', () => {
@@ -512,8 +516,20 @@
                 },
 
                 showNotification(message, type = 'info') {
-                    // Implementar notificación (puedes usar Toast, SweetAlert, etc.)
-                    alert(`${type.toUpperCase()}: ${message}`);
+                    switch (type) {
+                        case 'success':
+                            toastr.success(message, 'Éxito');
+                            break;
+                        case 'error':
+                            toastr.error(message, 'Error');
+                            break;
+                        case 'warning':
+                            toastr.warning(message, 'Advertencia');
+                            break;
+                        default:
+                            toastr.info(message, 'Información');
+                            break;
+                    }
                 },
 
                 // ... resto de tus métodos existentes
