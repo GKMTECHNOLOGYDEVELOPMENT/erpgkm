@@ -71,6 +71,7 @@ class Articulo extends Model
 		'nombre',
 		'stock_total',
 		'stock_minimo',
+		'maneja_serie',
 		'moneda_compra',
 		'moneda_venta',
 		'precio_compra',

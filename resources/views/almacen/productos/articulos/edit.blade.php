@@ -189,6 +189,22 @@
                     </div>
                 </div>
 
+                <!-- ✅ Maneja Serie (NUEVO CAMPO) -->
+                <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Maneja Serie</label>
+                    <div class="flex items-center mt-1">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input id="maneja_serie" name="maneja_serie" type="checkbox" value="1" 
+                                class="form-checkbox text-primary rounded"
+                                {{ $articulo->maneja_serie ? 'checked' : '' }}>
+                            <span class="ml-2 text-sm text-gray-600">¿Este producto maneja números de serie?</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Si está marcado, el producto requerirá números de serie únicos para cada unidad
+                    </p>
+                </div>
+
                 <!-- Unidad de Medida -->
                 <div class="relative">
                     <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
