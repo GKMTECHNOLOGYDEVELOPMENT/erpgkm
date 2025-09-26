@@ -73,6 +73,7 @@ class SolicitudingresoController extends Controller
                     'articulo' => $solicitud->articulo,
                     'cantidad' => $solicitud->cantidad,
                     'estado' => $solicitud->estado,
+                    'ubicacion' => $solicitud->ubicacion, // ✅ AGREGAR ESTA LÍNEA
                     // ✅ INCLUIR LAS UBICACIONES CON SU NOMBRE
                     'ubicaciones' => $solicitud->ubicaciones->map(function($ubicacion) {
                         return [
@@ -102,7 +103,8 @@ class SolicitudingresoController extends Controller
         return view('solicitud.solicitudingreso.index', compact('solicitudesAgrupadas', 'ubicaciones'));
     }
 
- public function guardarUbicacion(Request $request)
+
+public function guardarUbicacion(Request $request)
 {
     try {
         DB::beginTransaction();
@@ -119,15 +121,27 @@ class SolicitudingresoController extends Controller
             ], 422);
         }
 
+        // ✅ VERIFICAR SI ES LA PRIMERA VEZ QUE SE UBICA (para evitar duplicar stock)
+        $esPrimeraUbicacion = ($solicitud->estado !== 'ubicado');
+        
+        if ($esPrimeraUbicacion) {
+            Log::info("📍 Primera ubicación para solicitud ID: {$solicitud->idSolicitudIngreso}. Aumentando stock.");
+        } else {
+            Log::info("🔄 Re-ubicación para solicitud ID: {$solicitud->idSolicitudIngreso}. Stock ya fue aumentado anteriormente.");
+        }
+
         // ✅ ELIMINAR UBICACIONES EXISTENTES ANTES DE CREAR NUEVAS
         ArticuloUbicacion::where('origen', $solicitud->origen)
             ->where('articulo_id', $solicitud->articulo_id)
             ->where('origen_id', $solicitud->origen_id)
             ->delete();
 
+        // ✅ OBTENER NOMBRES DE UBICACIONES PARA GUARDAR EN SOLICITUD_INGRESO
+        $nombresUbicaciones = [];
+        
         // Guardar cada ubicación
         foreach ($request->ubicaciones as $ubicacionData) {
-            ArticuloUbicacion::create([
+            $articuloUbicacion = ArticuloUbicacion::create([
                 'origen' => $solicitud->origen,
                 'articulo_id' => $solicitud->articulo_id,
                 'origen_id' => $solicitud->origen_id,
@@ -136,9 +150,37 @@ class SolicitudingresoController extends Controller
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
+
+            // ✅ OBTENER SOLO EL NOMBRE DE LA UBICACIÓN
+            $ubicacion = \App\Models\Ubicacion::find($ubicacionData['ubicacion_id']);
+            if ($ubicacion) {
+                $nombresUbicaciones[] = $ubicacion->nombre;
+            }
         }
 
-        // Actualizar el estado de la solicitud a "ubicado"
+        // ✅ AUMENTAR STOCK DEL ARTÍCULO SOLO SI ES LA PRIMERA VEZ QUE SE UBICA
+        if ($esPrimeraUbicacion) {
+            $articulo = \App\Models\Articulo::find($solicitud->articulo_id);
+            
+            if ($articulo) {
+                $stockAnterior = $articulo->stock_total;
+                $nuevoStock = $stockAnterior + $solicitud->cantidad;
+                
+                // Actualizar el stock
+                $articulo->stock_total = $nuevoStock;
+                $articulo->save();
+                
+                Log::info("📦 Stock actualizado - Artículo ID: {$articulo->idArticulos}");
+                Log::info("📦 Stock anterior: {$stockAnterior}, Cantidad añadida: {$solicitud->cantidad}, Nuevo stock: {$nuevoStock}");
+            } else {
+                Log::error("❌ Artículo con ID {$solicitud->articulo_id} no encontrado");
+            }
+        }
+
+        // ✅ ACTUALIZAR EL CAMPO 'ubicacion' EN SOLICITUD_INGRESO
+        $ubicacionTexto = !empty($nombresUbicaciones) ? implode(', ', $nombresUbicaciones) : 'Sin ubicación';
+        
+        $solicitud->ubicacion = $ubicacionTexto;
         $solicitud->estado = 'ubicado';
         $solicitud->save();
 
@@ -160,12 +202,16 @@ class SolicitudingresoController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Artículo ubicado correctamente en '.count($request->ubicaciones).' ubicación(es)',
-            'ubicaciones' => $ubicacionesActualizadas // ✅ ENVIAR UBICACIONES ACTUALIZADAS
+            'message' => 'Artículo ubicado correctamente en '.count($request->ubicaciones).' ubicación(es)' . 
+                        ($esPrimeraUbicacion ? ' y stock actualizado' : ''),
+            'ubicaciones' => $ubicacionesActualizadas,
+            'ubicacion_texto' => $ubicacionTexto,
+            'stock_actualizado' => $esPrimeraUbicacion
         ]);
 
     } catch (\Exception $e) {
         DB::rollBack();
+        Log::error('Error al guardar ubicación: ' . $e->getMessage());
         return response()->json([
             'success' => false,
             'message' => 'Error al guardar la ubicación: '.$e->getMessage()

@@ -91,7 +91,7 @@
                 <p class="text-gray-500 text-lg">No se encontraron solicitudes agrupadas</p>
             </div>
         </template>
-        
+
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6">
             <template x-for="grupo in solicitudesAgrupadasFiltradas" :key="grupo.origen + '_' + grupo.origen_id">
                 <div class="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
@@ -118,8 +118,8 @@
                             <div>
                                 <h3 class="font-semibold text-gray-800"
                                     x-text="grupo.origen === 'compra' ? grupo.origen_especifico.codigocompra : grupo.origen_especifico.codigo_entrada"></h3>
-                                <p class="text-sm text-gray-600" 
-                                   x-text="grupo.mostrar_cliente ? 'Cliente: ' + grupo.cliente_general.descripcion : 'Proveedor: ' + grupo.proveedor.nombre"></p>
+                                <p class="text-sm text-gray-600"
+                                    x-text="grupo.mostrar_cliente ? 'Cliente: ' + grupo.cliente_general.descripcion : 'Proveedor: ' + grupo.proveedor.nombre"></p>
                             </div>
                             <div class="text-right">
                                 <p class="text-sm font-medium text-gray-800" x-text="grupo.total_articulos + ' artículos'"></p>
@@ -157,7 +157,7 @@
                                             <span class="font-medium ml-1" x-text="solicitud.cantidad"></span>
                                         </div>
                                         <div>
-                                            <span class="text-gray-500">Ubicación:</span>
+                                            <span class="text-gray-500">Ubicación aqui:</span>
                                             <span class="font-medium ml-1" x-text="getUbicacionesTexto(solicitud)"></span>
                                         </div>
                                     </div>
@@ -221,7 +221,7 @@
                         <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
                         Ubicar Artículo
                     </h3>
-                    
+
                     <!-- Información del artículo -->
                     <div class="bg-gray-50 p-4 rounded-lg mb-4" x-show="solicitudSeleccionada">
                         <p class="font-medium" x-text="'Artículo: ' + getNombreArticulo(solicitudSeleccionada?.articulo)"></p>
@@ -234,26 +234,35 @@
                             <div class="flex gap-3 items-start border border-gray-200 rounded-lg p-3">
                                 <div class="flex-1">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
-                                    <select x-model="ubicacion.ubicacion_id" 
-                                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                    <select x-model="ubicacion.ubicacion_id"
+                                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                         <option value="">Seleccionar ubicación</option>
                                         <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
-                                            <option :value="ubic.idUbicacion" x-text="ubic.nombre"></option>
+                                            <option :value="ubic.idUbicacion"
+                                                x-text="ubic.nombre"
+                                                :selected="ubicacion.ubicacion_id == ubic.idUbicacion || ubic.nombre === ubicacion.nombre_ubicacion"></option>
                                         </template>
                                     </select>
+                                    <!-- Mostrar nombre temporal si no hay ID pero sí nombre -->
+                                    <template x-if="ubicacion.nombre_ubicacion && !ubicacion.ubicacion_id">
+                                        <p class="text-xs text-orange-600 mt-1">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Ubicación temporal: <span x-text="ubicacion.nombre_ubicacion"></span>
+                                        </p>
+                                    </template>
                                 </div>
                                 <div class="w-32">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                                    <input type="number" x-model="ubicacion.cantidad" 
-                                           :max="cantidadDisponible"
-                                           min="1" 
-                                           class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                    <input type="number" x-model="ubicacion.cantidad"
+                                        :max="cantidadDisponible + (parseInt(ubicacion.cantidad) || 0)"
+                                        min="1"
+                                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                 </div>
                                 <div class="pt-6">
-                                    <button type="button" 
-                                            @click="eliminarUbicacion(index)"
-                                            class="text-red-600 hover:text-red-800 p-1"
-                                            :disabled="ubicacionesForm.length === 1">
+                                    <button type="button"
+                                        @click="eliminarUbicacion(index)"
+                                        class="text-red-600 hover:text-red-800 p-1"
+                                        :disabled="ubicacionesForm.length === 1">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>
@@ -269,10 +278,10 @@
                         </div>
 
                         <!-- Botón para agregar más ubicaciones -->
-                        <button type="button" 
-                                @click="agregarUbicacion"
-                                :disabled="cantidadDisponible === 0"
-                                class="flex items-center gap-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed">
+                        <button type="button"
+                            @click="agregarUbicacion"
+                            :disabled="cantidadDisponible === 0"
+                            class="flex items-center gap-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed">
                             <i class="fas fa-plus"></i>
                             Agregar otra ubicación
                         </button>
@@ -280,13 +289,13 @@
 
                     <!-- Botones del modal -->
                     <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
-                        <button @click="cerrarModalUbicacion" 
-                                class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">
+                        <button @click="cerrarModalUbicacion"
+                            class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">
                             Cancelar
                         </button>
-                        <button @click="guardarUbicaciones" 
-                                :disabled="!puedeGuardar"
-                                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <button @click="guardarUbicaciones"
+                            :disabled="!puedeGuardar"
+                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
                             <i class="fas fa-save mr-2"></i>
                             Guardar Ubicaciones
                         </button>
@@ -297,7 +306,9 @@
     </div>
 
     <style>
-        [x-cloak] { display: none !important; }
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 
     <script>
@@ -308,7 +319,7 @@
                 modalUbicacionAbierto: false,
                 solicitudSeleccionada: null,
                 ubicacionesForm: [],
-                
+
                 filtroEstado: 'todos',
                 filtroOrigen: 'todos',
                 searchTerm: '',
@@ -351,14 +362,14 @@
 
                 get puedeGuardar() {
                     if (this.ubicacionesForm.length === 0) return false;
-                    
+
                     const totalAsignado = this.ubicacionesForm.reduce((sum, ubic) => sum + (parseInt(ubic.cantidad) || 0), 0);
                     const cantidadTotal = this.solicitudSeleccionada?.cantidad || 0;
-                    
-                    const ubicacionesValidas = this.ubicacionesForm.every(ubic => 
+
+                    const ubicacionesValidas = this.ubicacionesForm.every(ubic =>
                         ubic.ubicacion_id && ubic.cantidad > 0
                     );
-                    
+
                     return ubicacionesValidas && totalAsignado === cantidadTotal;
                 },
 
@@ -374,22 +385,59 @@
                 },
 
                 // Función para mostrar las ubicaciones del artículo
-getUbicacionesTexto(solicitud) {
-    if (!solicitud.ubicaciones || solicitud.ubicaciones.length === 0) {
-        return 'Sin ubicar';
-    }
-    
-    // ✅ USAR nombre_ubicacion SI EXISTE, SINO BUSCAR EL NOMBRE
-    return solicitud.ubicaciones.map(ubic => {
-        if (ubic.nombre_ubicacion) {
-            return `${ubic.nombre_ubicacion} (${ubic.cantidad})`;
-        } else {
-            // Buscar el nombre en el array de ubicaciones
-            const nombre = this.getNombreUbicacion(ubic.ubicacion_id);
-            return `${nombre} (${ubic.cantidad})`;
-        }
-    }).join(', ');
-},
+                getUbicacionesTexto(solicitud) {
+                    console.log('=== DEBUG getUbicacionesTexto ===');
+                    console.log('Solicitud completa:', solicitud);
+                    console.log('ID Solicitud:', solicitud.idSolicitudIngreso);
+                    console.log('Campo ubicacion directo:', solicitud.ubicacion);
+                    console.log('Tipo de campo ubicacion:', typeof solicitud.ubicacion);
+                    console.log('¿Es null?:', solicitud.ubicacion === null);
+                    console.log('¿Es undefined?:', solicitud.ubicacion === undefined);
+                    console.log('¿Es string vacío?:', solicitud.ubicacion === '');
+                    console.log('¿Es string "null"?:', solicitud.ubicacion === 'null');
+
+                    // ✅ PRIMERO INTENTAR DESDE EL CAMPO 'ubicacion' DE SOLICITUD_INGRESO
+                    if (solicitud.ubicacion && solicitud.ubicacion !== 'null' && solicitud.ubicacion !== '') {
+                        console.log('✅ Usando ubicacion directo de solicitud:', solicitud.ubicacion);
+                        return solicitud.ubicacion;
+                    }
+
+                    console.log('❌ No hay dato en ubicacion directo, buscando en relaciones...');
+
+                    // ✅ SI NO HAY DATO EN SOLICITUD_INGRESO, BUSCAR EN LAS UBICACIONES RELACIONADAS
+                    console.log('Ubicaciones relacionadas:', solicitud.ubicaciones);
+                    console.log('Cantidad de ubicaciones relacionadas:', solicitud.ubicaciones ? solicitud.ubicaciones.length : 0);
+
+                    if (!solicitud.ubicaciones || solicitud.ubicaciones.length === 0) {
+                        console.log('❌ No hay ubicaciones relacionadas, retornando "Sin ubicar"');
+                        return 'Sin ubicar';
+                    }
+
+                    console.log('✅ Procesando ubicaciones relacionadas:');
+
+                    const resultado = solicitud.ubicaciones.map(ubic => {
+                        console.log('Ubicación individual:', ubic);
+                        console.log('Nombre_ubicacion:', ubic.nombre_ubicacion);
+                        console.log('Ubicacion_id:', ubic.ubicacion_id);
+                        console.log('Cantidad:', ubic.cantidad);
+
+                        if (ubic.nombre_ubicacion) {
+                            const texto = `${ubic.nombre_ubicacion} (${ubic.cantidad})`;
+                            console.log('✅ Usando nombre_ubicacion:', texto);
+                            return texto;
+                        } else {
+                            const nombre = this.getNombreUbicacion(ubic.ubicacion_id);
+                            const texto = `${nombre} (${ubic.cantidad})`;
+                            console.log('🔄 Buscando nombre por ID:', texto);
+                            return texto;
+                        }
+                    }).join(', ');
+
+                    console.log('📋 Resultado final:', resultado);
+                    console.log('=== FIN DEBUG ===');
+
+                    return resultado;
+                },
 
                 // Función para mostrar el nombre correcto del tipo de artículo
                 getTipoArticulo(idTipoArticulo) {
@@ -426,29 +474,122 @@ getUbicacionesTexto(solicitud) {
                 },
 
                 abrirModalUbicacion(solicitud) {
+                    console.log('=== DEBUG abrirModalUbicacion ===');
+                    console.log('Solicitud seleccionada:', solicitud);
+                    console.log('Ubicaciones existentes:', solicitud.ubicaciones);
+                    console.log('Campo ubicacion directo:', solicitud.ubicacion);
+                    console.log('Longitud de ubicaciones:', solicitud.ubicaciones ? solicitud.ubicaciones.length : 0);
+
                     this.solicitudSeleccionada = solicitud;
-                    
-                    // ✅ VERIFICAR SI YA EXISTEN UBICACIONES Y CARGARLAS
+
+                    // ✅ VERIFICAR PRIMERO SI HAY DATO EN EL CAMPO DIRECTO
+                    if (solicitud.ubicacion && solicitud.ubicacion !== 'null' && solicitud.ubicacion !== '' && solicitud.ubicacion !== 'undefined') {
+                        console.log('✅ Intentando parsear ubicacion directo:', solicitud.ubicacion);
+
+                        try {
+                            // Intentar parsear el formato "Nombre Ubicación (Cantidad)"
+                            const ubicacionesParseadas = this.parsearUbicacionDesdeTexto(solicitud.ubicacion);
+                            console.log('Ubicaciones parseadas:', ubicacionesParseadas);
+
+                            if (ubicacionesParseadas.length > 0) {
+                                this.ubicacionesForm = ubicacionesParseadas;
+                                console.log('✅ Cargado desde campo directo');
+                            } else {
+                                throw new Error('No se pudieron parsear las ubicaciones');
+                            }
+                        } catch (error) {
+                            console.log('❌ Error parseando, usando ubicaciones relacionadas o formulario vacío');
+                            this.cargarUbicacionesPorRelacion(solicitud);
+                        }
+                    } else {
+                        // ✅ SI NO HAY CAMPO DIRECTO, USAR RELACIONES
+                        this.cargarUbicacionesPorRelacion(solicitud);
+                    }
+
+                    console.log('Cantidad disponible inicial:', this.cantidadDisponible);
+                    console.log('Ubicaciones form final:', this.ubicacionesForm);
+
+                    this.modalUbicacionAbierto = true;
+                },
+
+                // ✅ NUEVA FUNCIÓN PARA PARSEAR EL TEXTO DE UBICACIÓN
+                parsearUbicacionDesdeTexto(textoUbicacion) {
+                    console.log('Parseando texto:', textoUbicacion);
+
+                    // Ejemplo de formato: "A-4-1 (1)" o "A-4-1 (1), B-2-3 (2)"
+                    const ubicaciones = [];
+
+                    // Dividir por comas si hay múltiples ubicaciones
+                    const partes = textoUbicacion.split(',');
+
+                    partes.forEach(parte => {
+                        parte = parte.trim();
+
+                        // Buscar el patrón "Nombre (Cantidad)"
+                        const match = parte.match(/(.+)\s+\((\d+)\)/);
+
+                        if (match && match.length === 3) {
+                            const nombreUbicacion = match[1].trim();
+                            const cantidad = parseInt(match[2]);
+
+                            console.log('Encontrada ubicación:', {
+                                nombre: nombreUbicacion,
+                                cantidad: cantidad
+                            });
+
+                            // Buscar el ID de la ubicación por nombre
+                            const ubicacionEncontrada = this.ubicaciones.find(ubic =>
+                                ubic.nombre === nombreUbicacion
+                            );
+
+                            if (ubicacionEncontrada) {
+                                ubicaciones.push({
+                                    ubicacion_id: ubicacionEncontrada.idUbicacion,
+                                    cantidad: cantidad,
+                                    nombre_ubicacion: nombreUbicacion
+                                });
+                                console.log('✅ Ubicación encontrada en lista:', ubicacionEncontrada);
+                            } else {
+                                console.log('❌ Ubicación no encontrada en lista:', nombreUbicacion);
+                                // Si no encontramos la ubicación, crear un objeto con nombre pero sin ID
+                                ubicaciones.push({
+                                    ubicacion_id: '', // Dejar vacío para que el usuario seleccione
+                                    cantidad: cantidad,
+                                    nombre_ubicacion: nombreUbicacion
+                                });
+                            }
+                        } else {
+                            console.log('❌ No coincide con el patrón esperado:', parte);
+                        }
+                    });
+
+                    return ubicaciones;
+                },
+
+                // ✅ FUNCIÓN PARA CARGAR DESDE RELACIONES O INICIAR VACÍO
+                cargarUbicacionesPorRelacion(solicitud) {
                     if (solicitud.ubicaciones && solicitud.ubicaciones.length > 0) {
-                        // Cargar las ubicaciones existentes
+                        console.log('✅ Cargando ubicaciones existentes desde relaciones:', solicitud.ubicaciones);
+
                         this.ubicacionesForm = solicitud.ubicaciones.map(ubic => ({
                             ubicacion_id: ubic.ubicacion_id,
-                            cantidad: ubic.cantidad
+                            cantidad: parseInt(ubic.cantidad),
+                            nombre_ubicacion: ubic.nombre_ubicacion
                         }));
                     } else {
+                        console.log('🆕 No hay ubicaciones existentes, iniciando con formulario vacío');
+
                         // Si no hay ubicaciones, empezar con una vacía
                         this.ubicacionesForm = [{
                             ubicacion_id: '',
                             cantidad: solicitud.cantidad
                         }];
-                        
+
                         // Si la cantidad es mayor a 1, permitir distribución automática
                         if (solicitud.cantidad > 1) {
                             this.ubicacionesForm[0].cantidad = 1;
                         }
                     }
-                    
-                    this.modalUbicacionAbierto = true;
                 },
 
                 cerrarModalUbicacion() {
@@ -459,66 +600,111 @@ getUbicacionesTexto(solicitud) {
 
                 agregarUbicacion() {
                     if (this.cantidadDisponible > 0) {
-                        this.ubicacionesForm.push({
+                        const nuevaUbicacion = {
                             ubicacion_id: '',
-                            cantidad: Math.min(this.cantidadDisponible, 1)
-                        });
+                            cantidad: Math.min(this.cantidadDisponible, 1) // Solo agregar 1 unidad por defecto
+                        };
+
+                        this.ubicacionesForm.push(nuevaUbicacion);
+                        console.log('➕ Nueva ubicación agregada. Disponible:', this.cantidadDisponible);
+                    } else {
+                        console.log('❌ No se puede agregar más ubicaciones - cantidad agotada');
                     }
                 },
 
                 eliminarUbicacion(index) {
                     if (this.ubicacionesForm.length > 1) {
+                        const ubicacionEliminada = this.ubicacionesForm[index];
+                        console.log('🗑️ Eliminando ubicación:', ubicacionEliminada);
+
                         this.ubicacionesForm.splice(index, 1);
+                        console.log('✅ Ubicación eliminada. Nueva cantidad disponible:', this.cantidadDisponible);
+                    } else {
+                        console.log('⚠️ No se puede eliminar la única ubicación');
                     }
                 },
 
-               async guardarUbicaciones() {
-    if (!this.puedeGuardar) return;
+                async guardarUbicaciones() {
+                    console.log('=== DEBUG guardarUbicaciones ===');
+                    console.log('Solicitud seleccionada:', this.solicitudSeleccionada);
+                    console.log('Ubicaciones a guardar:', this.ubicacionesForm);
+                    console.log('Puede guardar?:', this.puedeGuardar);
+                    console.log('Cantidad disponible:', this.cantidadDisponible);
 
-    try {
-        const response = await axios.post('/solicitud-ingreso/guardar-ubicacion', {
-            solicitud_id: this.solicitudSeleccionada.idSolicitudIngreso,
-            ubicaciones: this.ubicacionesForm
-        });
-
-        if (response.data.success) {
-            this.mostrarNotificacion(response.data.message, 'success');
-            
-            // ✅ ACTUALIZAR CORRECTAMENTE LAS UBICACIONES EN LA SOLICITUD
-            this.solicitudesAgrupadas.forEach(grupo => {
-                grupo.solicitudes.forEach(solicitud => {
-                    if (solicitud.idSolicitudIngreso === this.solicitudSeleccionada.idSolicitudIngreso) {
-                        // Actualizar estado
-                        solicitud.estado = 'ubicado';
-                        
-                        // ✅ ACTUALIZAR LAS UBICACIONES CON LOS DATOS CORRECTOS
-                        solicitud.ubicaciones = this.ubicacionesForm.map(ubic => ({
-                            ubicacion_id: ubic.ubicacion_id,
-                            cantidad: parseInt(ubic.cantidad),
-                            // ✅ AGREGAR EL NOMBRE DE LA UBICACIÓN BUSCÁNDOLO EN EL ARRAY
-                            nombre_ubicacion: this.getNombreUbicacion(ubic.ubicacion_id)
-                        }));
-                        
-                        // Recalcular estado general del grupo
-                        grupo.estado_general = this.calcularEstadoGeneral(grupo.solicitudes);
+                    if (!this.puedeGuardar) {
+                        console.log('❌ Validaciones no pasadas - no se puede guardar');
+                        this.mostrarNotificacion('Por favor completa todas las ubicaciones correctamente', 'error');
+                        return;
                     }
-                });
-            });
 
-            this.cerrarModalUbicacion();
-        }
-    } catch (error) {
-        console.error('Error al guardar ubicaciones:', error);
-        const message = error.response?.data?.message || 'Error al guardar las ubicaciones';
-        this.mostrarNotificacion(message, 'error');
-    }
-},
+                    try {
+                        const response = await axios.post('/solicitud-ingreso/guardar-ubicacion', {
+                            solicitud_id: this.solicitudSeleccionada.idSolicitudIngreso,
+                            ubicaciones: this.ubicacionesForm
+                        });
 
-// ✅ AGREGAR ESTA FUNCIÓN PARA OBTENER EL NOMBRE DE LA UBICACIÓN
-getNombreUbicacion(ubicacionId) {
-    const ubicacion = this.ubicaciones.find(u => u.idUbicacion == ubicacionId);
-    return ubicacion ? ubicacion.nombre : 'Ubicación desconocida';
-},
+                        console.log('Respuesta del servidor:', response.data);
+
+                        if (response.data.success) {
+                            this.mostrarNotificacion(response.data.message, 'success');
+
+                            // ✅ ACTUALIZAR CORRECTAMENTE LAS UBICACIONES EN LA SOLICITUD
+                            this.solicitudesAgrupadas.forEach(grupo => {
+                                grupo.solicitudes.forEach(solicitud => {
+                                    if (solicitud.idSolicitudIngreso === this.solicitudSeleccionada.idSolicitudIngreso) {
+                                        // Actualizar estado
+                                        solicitud.estado = 'ubicado';
+
+                                        // ✅ ACTUALIZAR EL CAMPO 'ubicacion' DIRECTAMENTE
+                                        solicitud.ubicacion = response.data.ubicacion_texto || this.generarTextoUbicaciones(this.ubicacionesForm);
+
+                                        // ✅ ACTUALIZAR LAS UBICACIONES CON LOS DATOS CORRECTOS
+                                        solicitud.ubicaciones = this.ubicacionesForm.map(ubic => ({
+                                            ubicacion_id: ubic.ubicacion_id,
+                                            cantidad: parseInt(ubic.cantidad),
+                                            nombre_ubicacion: this.getNombreUbicacion(ubic.ubicacion_id)
+                                        }));
+
+                                        console.log('✅ Solicitud actualizada:', solicitud);
+
+                                        // Recalcular estado general del grupo
+                                        grupo.estado_general = this.calcularEstadoGeneral(grupo.solicitudes);
+                                    }
+                                });
+                            });
+
+                            this.cerrarModalUbicacion();
+                        }
+                    } catch (error) {
+                        console.error('❌ Error al guardar ubicaciones:', error);
+                        const message = error.response?.data?.message || 'Error al guardar las ubicaciones';
+                        this.mostrarNotificacion(message, 'error');
+                    }
+                },
+
+                // ✅ FUNCIÓN AUXILIAR PARA GENERAR TEXTO DE UBICACIONES
+                generarTextoUbicaciones(ubicacionesForm) {
+                    return ubicacionesForm.map(ubic => {
+                        const nombre = this.getNombreUbicacion(ubic.ubicacion_id);
+                        return `${nombre} (${ubic.cantidad})`;
+                    }).join(', ');
+                },
+
+                // ✅ AGREGAR ESTA FUNCIÓN PARA OBTENER EL NOMBRE DE LA UBICACIÓN
+                getNombreUbicacion(ubicacionId) {
+                    console.log('🔍 Buscando nombre para ubicacion_id:', ubicacionId);
+
+                    // Buscar por ID
+                    const ubicacion = this.ubicaciones.find(u => u.idUbicacion == ubicacionId);
+
+                    if (ubicacion) {
+                        console.log('✅ Ubicación encontrada por ID:', ubicacion.nombre);
+                        return ubicacion.nombre;
+                    }
+
+                    console.log('❌ Ubicación no encontrada por ID:', ubicacionId);
+                    return 'Ubicación desconocida';
+                },
 
                 async cambiarEstado(id, nuevoEstado) {
                     if (nuevoEstado === 'ubicado') {
@@ -528,7 +714,7 @@ getNombreUbicacion(ubicacionId) {
                             const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
                             if (solicitud) solicitudEncontrada = solicitud;
                         });
-                        
+
                         if (solicitudEncontrada) {
                             this.abrirModalUbicacion(solicitudEncontrada);
                         }
