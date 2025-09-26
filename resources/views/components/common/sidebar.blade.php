@@ -284,7 +284,7 @@
                     <span>Administracion</span>
                 </h2>
 
-                <li class="menu nav-item">
+                <!-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'components' }"
                         @click="activeDropdown === 'components' ? activeDropdown = null : activeDropdown = 'components'">
@@ -358,7 +358,7 @@
                             <a href="/components/lightbox">Lightbox</a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -678,7 +678,7 @@
                     <span>ALMACEN</span>
                 </h2>
 
-                <li class="menu nav-item">
+                <!-- <li class="menu nav-item">
                     <a href="/tables" class="nav-link group">
                         <div class="flex items-center">
 
@@ -701,11 +701,11 @@
                                 class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Tables</span>
                         </div>
                     </a>
-                </li>
+                </li> -->
 
 
 
-                <li class="menu nav-item">
+                <!-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'datatables' }"
                         @click="activeDropdown === 'datatables' ? activeDropdown = null : activeDropdown = 'datatables'">
@@ -781,9 +781,9 @@
                             <a href="/datatables/column-chooser">Column Chooser</a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
 
-                <li class="menu nav-item">
+                <!-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'forms' }"
                         @click="activeDropdown === 'forms' ? activeDropdown = null : activeDropdown = 'forms'">
@@ -863,7 +863,7 @@
                             <a href="/forms/clipboard">Clipboard</a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -1350,7 +1350,7 @@
                 </li>
 
 
-                <li class="menu nav-item">
+                <!-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'kardex' }"
                         @click="activeDropdown === 'kardex' ? activeDropdown = null : activeDropdown = 'kardex'">
@@ -1380,7 +1380,7 @@
                             <a href="{{ route('kardex.index') }}">Kardex General</a>
                         </li>
                     </ul>
-                </li>
+                </li> -->
                 @endif
 
 
