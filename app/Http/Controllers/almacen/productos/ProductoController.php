@@ -603,24 +603,19 @@ public function verSeries($id)
     $articulo = Articulo::with(['unidad', 'modelo.marca', 'modelo.categoria'])
         ->findOrFail($id);
     
-    // Obtener todas las series de este artículo
-    $series = DB::table('compra_serie_articulos as csa')
-        ->join('compra as c', 'c.idCompra', '=', 'csa.compra_id')
-        ->join('detalle_compra as dc', 'dc.idDetalleCompra', '=', 'csa.detalle_compra_id')
-        ->leftJoin('proveedores as p', 'p.idProveedor', '=', 'c.proveedor_id')
-        ->select(
-            'csa.serie',
-            'csa.estado',
-            'csa.fecha_ingreso',
-            'c.codigocompra',
-            'c.fechaEmision',
-            'p.nombre as proveedor',
-            'dc.cantidad',
-            'dc.precio'
-        )
-        ->where('csa.articulo_id', $id)
-        ->orderBy('csa.fecha_ingreso', 'desc')
-        ->get();
+    // Consulta simple para la nueva tabla
+    $series = DB::table('articulo_series')
+        ->where('articulo_id', $id)
+        ->orderBy('created_at', 'desc')
+        ->get([
+            'idArticuloSerie',
+            'numero_serie',
+            'estado',
+            'origen',
+            'origen_id',
+            'ubicacion_id',
+            'created_at as fecha_ingreso'
+        ]);
     
     return view('almacen.productos.articulos.series', compact('articulo', 'series'));
 }
