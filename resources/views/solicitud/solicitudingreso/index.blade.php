@@ -118,7 +118,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6">
             <template x-for="grupo in solicitudesAgrupadasFiltradas" :key="grupo.origen + '_' + grupo.origen_id">
                 <div
-                    class="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                    class="panel rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
                     <!-- Header de la Card Grupal -->
                     <div class="border-b border-gray-200 p-4 bg-gray-50">
                         <div class="flex justify-between items-start mb-2">
@@ -166,109 +166,116 @@
                         </div>
 
                         <!-- Contenedor fijo para artículos con scroll -->
-                        <div class="relative max-h-72 overflow-y-auto pr-2 custom-scrollbar">
-                            <div class="space-y-3">
-                                <template x-for="solicitud in grupo.solicitudes" :key="solicitud.idSolicitudIngreso">
-                                    <div class="border border-gray-200 rounded-lg p-3 bg-white">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <div class="flex-1">
-                                                <div class="flex items-center gap-2">
-                                                    <p class="font-medium text-gray-800"
-                                                        x-text="getNombreArticulo(solicitud.articulo)"></p>
-                                                    <!-- Indicador de serie -->
-                                                    <template
-                                                        x-if="solicitud.articulo && solicitud.articulo.maneja_serie === 1">
-                                                        <span
-                                                            class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                            <i class="fas fa-barcode mr-1"></i>
-                                                            Serie
-                                                        </span>
-                                                    </template>
+                        <div class="border border-gray-200 rounded-md bg-gray-50">
+                            <div class="relative h-64 overflow-y-auto pr-2 custom-scrollbar p-2">
+                                <div class="space-y-3">
+                                    <template x-for="solicitud in grupo.solicitudes"
+                                        :key="solicitud.idSolicitudIngreso">
+                                        <div class="border border-gray-200 rounded-lg p-3 bg-white shadow-sm">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div class="flex-1">
+                                                    <div class="flex items-center gap-2">
+                                                        <p class="font-medium text-gray-800"
+                                                            x-text="getNombreArticulo(solicitud.articulo)"></p>
+                                                        <!-- Indicador de serie -->
+                                                        <template
+                                                            x-if="solicitud.articulo && solicitud.articulo.maneja_serie === 1">
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                                <i class="fas fa-barcode mr-1"></i>
+                                                                Serie
+                                                            </span>
+                                                        </template>
+                                                    </div>
+                                                    <p class="text-xs text-gray-500"
+                                                        x-text="'Tipo: ' + getTipoArticulo(solicitud.articulo?.idTipoArticulo)">
+                                                    </p>
                                                 </div>
-                                                <p class="text-xs text-gray-500"
-                                                    x-text="'Tipo: ' + getTipoArticulo(solicitud.articulo?.idTipoArticulo)">
-                                                </p>
+                                                <span
+                                                    class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ml-2"
+                                                    :class="getEstadoClasses(solicitud.estado)">
+                                                    <span x-text="solicitud.estado"></span>
+                                                </span>
                                             </div>
-                                            <span
-                                                class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ml-2"
-                                                :class="getEstadoClasses(solicitud.estado)">
-                                                <span x-text="solicitud.estado"></span>
-                                            </span>
-                                        </div>
 
-                                        <!-- Info cantidad y ubicación -->
-                                        <div class="grid grid-cols-1 gap-2 text-xs">
-                                            <div class="flex justify-between">
-                                                <div>
-                                                    <span class="text-gray-500">Cantidad:</span>
-                                                    <span class="font-medium ml-1" x-text="solicitud.cantidad"></span>
+                                            <!-- Info cantidad y ubicación -->
+                                            <div class="grid grid-cols-1 gap-2 text-xs">
+                                                <div class="flex justify-between">
+                                                    <div>
+                                                        <span class="text-gray-500">Cantidad:</span>
+                                                        <span class="font-medium ml-1"
+                                                            x-text="solicitud.cantidad"></span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="text-gray-500">Ubicación:</span>
+                                                        <span class="font-medium ml-1"
+                                                            x-text="getUbicacionesTexto(solicitud)"></span>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <span class="text-gray-500">Ubicación:</span>
-                                                    <span class="font-medium ml-1"
-                                                        x-text="getUbicacionesTexto(solicitud)"></span>
-                                                </div>
+                                                <!-- Series -->
+                                                <template x-if="solicitud.series && solicitud.series.length > 0">
+                                                    <div>
+                                                        <span class="text-gray-500">Series:</span>
+                                                        <span class="font-medium ml-1"
+                                                            x-text="getSeriesTexto(solicitud.series)"></span>
+                                                    </div>
+                                                </template>
                                             </div>
-                                            <!-- Series -->
-                                            <template x-if="solicitud.series && solicitud.series.length > 0">
-                                                <div>
-                                                    <span class="text-gray-500">Series:</span>
-                                                    <span class="font-medium ml-1"
-                                                        x-text="getSeriesTexto(solicitud.series)"></span>
-                                                </div>
-                                            </template>
-                                        </div>
 
-                                        <!-- Botones -->
-                                        <div class="flex space-x-1 mt-2">
-                                            <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'pendiente')"
-                                                class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                                :class="solicitud.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
-                                                Pendiente
-                                            </button>
-                                            <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'recibido')"
-                                                class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                                :class="solicitud.estado === 'recibido' ? 'bg-green-100 text-green-800' :
-                                                    'bg-gray-100 text-gray-600 hover:bg-green-50'">
-                                                Recibido
-                                            </button>
-                                            <button @click="abrirModalUbicacion(solicitud)"
-                                                class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                                :class="solicitud.estado === 'ubicado' ? 'bg-purple-100 text-purple-800' :
-                                                    'bg-gray-100 text-gray-600 hover:bg-purple-50'">
-                                                Ubicar
-                                            </button>
+                                            <!-- Botones -->
+                                            <div class="flex space-x-1 mt-2">
+                                                <button
+                                                    @click="cambiarEstado(solicitud.idSolicitudIngreso, 'pendiente')"
+                                                    class="flex-1 px-2 py-1 text-xs rounded transition-colors"
+                                                    :class="solicitud.estado === 'pendiente' ?
+                                                        'bg-yellow-100 text-yellow-800' :
+                                                        'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
+                                                    Pendiente
+                                                </button>
+                                                <button
+                                                    @click="cambiarEstado(solicitud.idSolicitudIngreso, 'recibido')"
+                                                    class="flex-1 px-2 py-1 text-xs rounded transition-colors"
+                                                    :class="solicitud.estado === 'recibido' ? 'bg-green-100 text-green-800' :
+                                                        'bg-gray-100 text-gray-600 hover:bg-green-50'">
+                                                    Recibido
+                                                </button>
+                                                <button @click="abrirModalUbicacion(solicitud)"
+                                                    class="flex-1 px-2 py-1 text-xs rounded transition-colors"
+                                                    :class="solicitud.estado === 'ubicado' ? 'bg-purple-100 text-purple-800' :
+                                                        'bg-gray-100 text-gray-600 hover:bg-purple-50'">
+                                                    Ubicar
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </template>
+                                    </template>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Footer de la Card Grupal -->
-                        <div class="border-t border-gray-200 p-4 bg-gray-50">
-                            <div class="flex justify-between items-center">
-                                <span class="text-xs text-gray-500"
-                                    x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
-                                <div class="flex space-x-2">
-                                    <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
-                                        class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                        :class="grupo.estado_general === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                                            'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
-                                        Todos Pendiente
-                                    </button>
-                                    <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
-                                        class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                        :class="grupo.estado_general === 'recibido' ? 'bg-green-100 text-green-800' :
-                                            'bg-gray-100 text-gray-600 hover:bg-green-50'">
-                                        Todos Recibido
-                                    </button>
-                                    <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
-                                        class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                        :class="grupo.estado_general === 'ubicado' ? 'bg-purple-100 text-purple-800' :
-                                            'bg-gray-100 text-gray-600 hover:bg-purple-50'">
-                                        Todos Ubicado
-                                    </button>
+                            <!-- Footer de la Card Grupal -->
+                            <div class="border-t border-gray-200 p-4 bg-gray-50">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-500"
+                                        x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
+                                    <div class="flex space-x-2">
+                                        <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
+                                            class="px-3 py-1 text-xs rounded-lg transition-colors"
+                                            :class="grupo.estado_general === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                                                'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
+                                            Todos Pendiente
+                                        </button>
+                                        <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
+                                            class="px-3 py-1 text-xs rounded-lg transition-colors"
+                                            :class="grupo.estado_general === 'recibido' ? 'bg-green-100 text-green-800' :
+                                                'bg-gray-100 text-gray-600 hover:bg-green-50'">
+                                            Todos Recibido
+                                        </button>
+                                        <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
+                                            class="px-3 py-1 text-xs rounded-lg transition-colors"
+                                            :class="grupo.estado_general === 'ubicado' ? 'bg-purple-100 text-purple-800' :
+                                                'bg-gray-100 text-gray-600 hover:bg-purple-50'">
+                                            Todos Ubicado
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
