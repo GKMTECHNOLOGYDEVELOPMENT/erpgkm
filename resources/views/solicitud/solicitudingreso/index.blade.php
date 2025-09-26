@@ -161,8 +161,8 @@
                         </div>
 
                         <!-- Contenedor fijo para artículos con scroll -->
-                <div class="relative max-h-72 overflow-y-auto pr-2 custom-scrollbar">
-                    <div class="space-y-3">
+                        <div class="relative max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+                            <div class="space-y-3">
                                 <template x-for="solicitud in grupo.solicitudes" :key="solicitud.idSolicitudIngreso">
                                     <div class="border border-gray-200 rounded-lg p-3 bg-white">
                                         <div class="flex justify-between items-start mb-2">
@@ -272,207 +272,231 @@
         </div>
 
         <!-- Modal de Ubicación con Series -->
-        <div x-show="modalUbicacionAbierto" x-cloak
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] overflow-y-auto">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
-                        Ubicar Artículo
-                        <template
-                            x-if="solicitudSeleccionada && solicitudSeleccionada.articulo && solicitudSeleccionada.articulo.maneja_serie === 1">
-                            <span class="text-sm font-normal text-blue-600 ml-2">
-                                <i class="fas fa-barcode mr-1"></i>
-                                (Requiere Series)
-                            </span>
-                        </template>
-                    </h3>
+        <div x-data="{ open: false }">
+            <!-- Botón para abrir -->
+            <div class="flex items-center justify-center mb-5">
+                <button type="button" class="btn btn-primary" @click="open = true">Ubicar Artículo</button>
+            </div>
 
-                    <!-- Información del artículo -->
-                    <div class="bg-gray-50 p-4 rounded-lg mb-4" x-show="solicitudSeleccionada">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-medium"
-                                    x-text="'Artículo: ' + getNombreArticulo(solicitudSeleccionada?.articulo)"></p>
-                                <p class="text-sm text-gray-600"
-                                    x-text="'Cantidad total: ' + (solicitudSeleccionada?.cantidad || 0)"></p>
-                            </div>
-                            <template
-                                x-if="solicitudSeleccionada && solicitudSeleccionada.articulo && solicitudSeleccionada.articulo.maneja_serie === 1">
-                                <div class="text-right">
-                                    <span
-                                        class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                        <i class="fas fa-barcode mr-1"></i>
-                                        Maneja Series
+            <!-- Modal -->
+            <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+                :class="modalUbicacionAbierto && '!block'">
+                <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalUbicacion()">
+                    <div x-show="modalUbicacionAbierto" x-transition x-transition.duration.300
+                        class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-4xl max-h-[95vh]">
+
+                        <!-- Header -->
+                        <div
+                            class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3 border-b">
+                            <div class="font-bold text-lg text-gray-800 flex items-center">
+                                <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
+                                Ubicar Artículo
+                                <template x-if="solicitudSeleccionada?.articulo?.maneja_serie === 1">
+                                    <span class="text-sm font-normal text-blue-600 ml-2 flex items-center">
+                                        <i class="fas fa-barcode mr-1"></i> (Requiere Series)
                                     </span>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
+                            <button type="button" class="text-gray-400 hover:text-gray-600" @click="open = false">
+                                <i class="fas fa-times text-lg"></i>
+                            </button>
                         </div>
-                    </div>
 
-                    <!-- Formulario de ubicaciones -->
-                    <div class="space-y-4 mb-6">
-                        <h4 class="text-md font-medium text-gray-800">
-                            <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
-                            Ubicaciones
-                        </h4>
-                        <template x-for="(ubicacion, index) in ubicacionesForm" :key="index">
-                            <div class="flex gap-3 items-start border border-gray-200 rounded-lg p-3">
-                                <div class="flex-1">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
-                                    <select x-model="ubicacion.ubicacion_id"
-                                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                                        <option value="">Seleccionar ubicación</option>
-                                        <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
-                                            <option :value="ubic.idUbicacion" x-text="ubic.nombre"
-                                                :selected="ubicacion.ubicacion_id == ubic.idUbicacion || ubic.nombre === ubicacion
-                                                    .nombre_ubicacion">
-                                            </option>
-                                        </template>
-                                    </select>
-                                    <template x-if="ubicacion.nombre_ubicacion && !ubicacion.ubicacion_id">
-                                        <p class="text-xs text-orange-600 mt-1">
-                                            <i class="fas fa-exclamation-triangle mr-1"></i>
-                                            Ubicación temporal: <span x-text="ubicacion.nombre_ubicacion"></span>
+                        <!-- Contenido -->
+                        <div class="p-5 overflow-y-auto max-h-[75vh]">
+                            <!-- Información del artículo -->
+                            <div class="bg-gray-50 p-4 rounded-lg mb-4" x-show="solicitudSeleccionada">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-medium"
+                                            x-text="'Artículo: ' + getNombreArticulo(solicitudSeleccionada?.articulo)">
                                         </p>
+                                        <p class="text-sm text-gray-600"
+                                            x-text="'Cantidad total: ' + (solicitudSeleccionada?.cantidad || 0)">
+                                        </p>
+                                    </div>
+                                    <template x-if="solicitudSeleccionada?.articulo?.maneja_serie === 1">
+                                        <span
+                                            class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                            <i class="fas fa-barcode mr-1"></i> Maneja Series
+                                        </span>
                                     </template>
                                 </div>
-                                <div class="w-32">
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
-                                    <input type="number" x-model="ubicacion.cantidad"
-                                        :max="cantidadDisponible + (parseInt(ubicacion.cantidad) || 0)" min="1"
-                                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                                </div>
-                                <div class="pt-6">
-                                    <button type="button" @click="eliminarUbicacion(index)"
-                                        class="text-red-600 hover:text-red-800 p-1"
-                                        :disabled="ubicacionesForm.length === 1">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- Cantidad disponible -->
-                        <div class="bg-blue-50 p-3 rounded-lg">
-                            <p class="text-sm text-blue-800">
-                                <span x-text="'Cantidad disponible: ' + cantidadDisponible"></span>
-                                <span x-show="cantidadDisponible === 0" class="text-red-600 font-medium"> - ¡Toda la
-                                    cantidad ha sido distribuida!</span>
-                            </p>
-                        </div>
-
-                        <!-- Botón para agregar más ubicaciones -->
-                        <button type="button" @click="agregarUbicacion" :disabled="cantidadDisponible === 0"
-                            class="flex items-center gap-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed">
-                            <i class="fas fa-plus"></i>
-                            Agregar otra ubicación
-                        </button>
-                    </div>
-
-                    <!-- Sección de Series (solo si maneja_serie = 1) -->
-                    <div x-show="articuloRequiereSeries" class="border-t border-gray-200 pt-6">
-                        <h4 class="text-md font-medium text-gray-800 mb-3">
-                            <i class="fas fa-barcode mr-2 text-blue-500"></i>
-                            Números de Serie Requeridos
-                        </h4>
-
-                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-                            <p class="text-sm text-amber-800">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Este artículo requiere números de serie únicos. Debe ingresar
-                                <span class="font-bold" x-text="solicitudSeleccionada?.cantidad || 0"></span>
-                                número(s) de serie.
-                            </p>
-                        </div>
-
-                        <!-- Contador de progreso -->
-                        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-blue-800">
-                                    Series completadas:
-                                    <span class="font-bold" x-text="seriesCompletadas"></span> /
-                                    <span x-text="solicitudSeleccionada?.cantidad || 0"></span>
-                                </span>
-                                <span x-show="seriesCompletadas === (solicitudSeleccionada?.cantidad || 0)"
-                                    class="text-success font-medium text-sm">
-                                    <i class="fas fa-check-circle"></i> Completo
-                                </span>
                             </div>
 
-                            <!-- Barra de progreso -->
-                            <div class="w-full bg-blue-200 rounded-full h-2 mt-2">
-                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                    :style="`width: ${((seriesCompletadas / (solicitudSeleccionada?.cantidad || 1)) * 100)}%`">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Lista de campos de series -->
-                        <div
-                            class="space-y-3 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-                            <template x-for="(serie, index) in seriesForm" :key="index">
-                                <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
-                                    <div class="flex gap-3 items-start">
-                                        <!-- Número de serie -->
+                            <!-- Formulario de ubicaciones -->
+                            <div class="space-y-4 mb-6">
+                                <h4 class="text-md font-medium text-gray-800">
+                                    <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
+                                    Ubicaciones
+                                </h4>
+                                <template x-for="(ubicacion, index) in ubicacionesForm" :key="index">
+                                    <div class="flex gap-3 items-start border border-gray-200 rounded-lg p-3">
                                         <div class="flex-1">
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                                <i class="fas fa-hashtag mr-1"></i>
-                                                <span x-text="'Serie #' + (index + 1)"></span>
-                                            </label>
-                                            <div class="relative">
-                                                <input type="text" x-model="serie.numero_serie"
-                                                    :placeholder="'Ej: SN' + String(index + 1).padStart(3, '0') + '12345'"
-                                                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10 text-sm"
-                                                    maxlength="50"
-                                                    @input="$nextTick(() => console.log('Serie actualizada:', serie.numero_serie))">
-                                                <i class="fas fa-barcode absolute right-3 top-3 text-gray-400"></i>
-                                            </div>
-
-                                            <!-- Validación de series duplicadas -->
-                                            <template x-if="validarSerieDuplicada(serie.numero_serie, index)">
-                                                <p class="text-xs text-red-600 mt-1 flex items-center">
+                                            <label
+                                                class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
+                                            <select x-model="ubicacion.ubicacion_id"
+                                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                                <option value="">Seleccionar ubicación</option>
+                                                <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
+                                                    <option :value="ubic.idUbicacion" x-text="ubic.nombre"
+                                                        :selected="ubicacion.ubicacion_id == ubic.idUbicacion || ubic.nombre ===
+                                                            ubicacion
+                                                            .nombre_ubicacion">
+                                                    </option>
+                                                </template>
+                                            </select>
+                                            <template x-if="ubicacion.nombre_ubicacion && !ubicacion.ubicacion_id">
+                                                <p class="text-xs text-orange-600 mt-1">
                                                     <i class="fas fa-exclamation-triangle mr-1"></i>
-                                                    Este número de serie ya está siendo usado
-                                                </p>
-                                            </template>
-
-                                            <!-- Indicador de campo completo -->
-                                            <template
-                                                x-if="serie.numero_serie && serie.numero_serie.trim() !== '' && serie.ubicacion_id">
-                                                <p class="text-xs text-green-600 mt-1 flex items-center">
-                                                    <i class="fas fa-check-circle mr-1"></i>
-                                                    Serie válida
+                                                    Ubicación temporal: <span
+                                                        x-text="ubicacion.nombre_ubicacion"></span>
                                                 </p>
                                             </template>
                                         </div>
+                                        <div class="w-32">
+                                            <label
+                                                class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                            <input type="number" x-model="ubicacion.cantidad"
+                                                :max="cantidadDisponible + (parseInt(ubicacion.cantidad) || 0)"
+                                                min="1"
+                                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                        </div>
+                                        <div class="pt-6">
+                                            <button type="button" @click="eliminarUbicacion(index)"
+                                                class="text-red-600 hover:text-red-800 p-1"
+                                                :disabled="ubicacionesForm.length === 1">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Cantidad disponible -->
+                                <div class="bg-blue-50 p-3 rounded-lg">
+                                    <p class="text-sm text-blue-800">
+                                        <span x-text="'Cantidad disponible: ' + cantidadDisponible"></span>
+                                        <span x-show="cantidadDisponible === 0" class="text-red-600 font-medium"> -
+                                            ¡Toda la
+                                            cantidad ha sido distribuida!</span>
+                                    </p>
+                                </div>
+
+                                <!-- Botón para agregar más ubicaciones -->
+                                <button type="button" @click="agregarUbicacion" :disabled="cantidadDisponible === 0"
+                                    class="flex items-center gap-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                    <i class="fas fa-plus"></i>
+                                    Agregar otra ubicación
+                                </button>
+                            </div>
+
+                            <!-- Sección de Series (solo si maneja_serie = 1) -->
+                            <div x-show="articuloRequiereSeries" class="border-t border-gray-200 pt-6">
+                                <h4 class="text-md font-medium text-gray-800 mb-3">
+                                    <i class="fas fa-barcode mr-2 text-blue-500"></i>
+                                    Números de Serie Requeridos
+                                </h4>
+
+                                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                                    <p class="text-sm text-amber-800">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Este artículo requiere números de serie únicos. Debe ingresar
+                                        <span class="font-bold" x-text="solicitudSeleccionada?.cantidad || 0"></span>
+                                        número(s) de serie.
+                                    </p>
+                                </div>
+
+                                <!-- Contador de progreso -->
+                                <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-sm text-blue-800">
+                                            Series completadas:
+                                            <span class="font-bold" x-text="seriesCompletadas"></span> /
+                                            <span x-text="solicitudSeleccionada?.cantidad || 0"></span>
+                                        </span>
+                                        <span x-show="seriesCompletadas === (solicitudSeleccionada?.cantidad || 0)"
+                                            class="text-success font-medium text-sm">
+                                            <i class="fas fa-check-circle"></i> Completo
+                                        </span>
+                                    </div>
+
+                                    <!-- Barra de progreso -->
+                                    <div class="w-full bg-blue-200 rounded-full h-2 mt-2">
+                                        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                            :style="`width: ${((seriesCompletadas / (solicitudSeleccionada?.cantidad || 1)) * 100)}%`">
+                                        </div>
                                     </div>
                                 </div>
-                            </template>
-                        </div>
 
-                        <!-- Mensaje si no hay series para mostrar -->
-                        <template x-if="seriesForm.length === 0">
-                            <div class="text-center py-4 text-gray-500 text-sm">
-                                <i class="fas fa-barcode text-2xl mb-2"></i>
-                                <p>No se han inicializado campos de series</p>
+                                <!-- Lista de campos de series -->
+                                <div
+                                    class="space-y-3 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                    <template x-for="(serie, index) in seriesForm" :key="index">
+                                        <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                                            <div class="flex gap-3 items-start">
+                                                <!-- Número de serie -->
+                                                <div class="flex-1">
+                                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                        <i class="fas fa-hashtag mr-1"></i>
+                                                        <span x-text="'Serie #' + (index + 1)"></span>
+                                                    </label>
+                                                    <div class="relative">
+                                                        <input type="text" x-model="serie.numero_serie"
+                                                            :placeholder="'Ej: SN' + String(index + 1).padStart(3, '0') + '12345'"
+                                                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10 text-sm"
+                                                            maxlength="50"
+                                                            @input="$nextTick(() => console.log('Serie actualizada:', serie.numero_serie))">
+                                                        <i
+                                                            class="fas fa-barcode absolute right-3 top-3 text-gray-400"></i>
+                                                    </div>
+
+                                                    <!-- Validación de series duplicadas -->
+                                                    <template x-if="validarSerieDuplicada(serie.numero_serie, index)">
+                                                        <p class="text-xs text-red-600 mt-1 flex items-center">
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                            Este número de serie ya está siendo usado
+                                                        </p>
+                                                    </template>
+
+                                                    <!-- Indicador de campo completo -->
+                                                    <template
+                                                        x-if="serie.numero_serie && serie.numero_serie.trim() !== ''">
+                                                        <p class="text-xs text-green-600 mt-1 flex items-center">
+                                                            <i class="fas fa-check-circle mr-1"></i>
+                                                            Serie válida
+                                                        </p>
+                                                    </template>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                <!-- Mensaje si no hay series para mostrar -->
+                                <template x-if="seriesForm.length === 0">
+                                    <div class="text-center py-4 text-gray-500 text-sm">
+                                        <i class="fas fa-barcode text-2xl mb-2"></i>
+                                        <p>No se han inicializado campos de series</p>
+                                    </div>
+                                </template>
                             </div>
-                        </template>
-                    </div>
 
-                    <!-- Botones del modal -->
-                    <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
-                        <button @click="cerrarModalUbicacion"
-                            class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">
-                            Cancelar
-                        </button>
-                        <button @click="guardarUbicaciones" :disabled="!puedeGuardar"
-                            class="px-4 py-2 btn btn-primary">
-                            <i class="fas fa-save mr-2"></i>
-                            Guardar
-                            <span x-show="articuloRequiereSeries">Ubicaciones y Series</span>
-                            <span x-show="!articuloRequiereSeries">Ubicaciones</span>
-                        </button>
+                            <!-- Footer -->
+                            <div
+                                class="flex justify-end items-center gap-3 px-5 py-3 border-t bg-[#fbfbfb] dark:bg-[#121c2c]">
+                                <button type="button" class="btn btn-outline-danger" @click="open = false">
+                                    Cancelar
+                                </button>
+                                <button type="button" class="btn btn-primary" :disabled="!puedeGuardar"
+                                    @click="guardarUbicaciones">
+                                    <i class="fas fa-save mr-2"></i>
+                                    Guardar
+                                    <span x-show="articuloRequiereSeries">Ubicaciones y Series</span>
+                                    <span x-show="!articuloRequiereSeries">Ubicaciones</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
