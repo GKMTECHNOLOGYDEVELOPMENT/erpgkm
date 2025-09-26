@@ -1141,6 +1141,10 @@
                         <li>
                             <a href="{{ route('ubicaciones.index') }}">Ubicaciones</a>
                         </li>
+
+                        <li>
+                            <a href="{{ route('ubicacionesarticulo.index') }}">Ubicaciones Articulo</a>
+                        </li>
                     </ul>
                 </li>
 

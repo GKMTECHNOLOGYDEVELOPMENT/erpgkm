@@ -17,6 +17,7 @@ use App\Http\Controllers\almacen\productos\ProductoController;
 use App\Http\Controllers\almacen\repuestos\RepuestosController;
 use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
+use App\Http\Controllers\almacen\ubicaciones\UbicacionesArticuloController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
 use App\Http\Controllers\Apps\ActividadController;
 use App\Http\Controllers\Apps\CalendarController;
@@ -75,6 +76,8 @@ Route::get('/suministros', [SuministrosController::class, 'getAll']);
 Route::get('/ubicaciones', [UbicacionesController::class, 'getAllUbicaciones']);
 Route::get('/kits', [KitsController::class, 'getAll']);
 Route::get('subcategoria', [SubcategoriaController::class, 'getAll']);
+
+Route::get('/ubicaciones-articulo', [UbicacionesArticuloController::class, 'getUbicacionesArticulo']);
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);

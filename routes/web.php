@@ -62,6 +62,7 @@ use App\Http\Controllers\almacen\productos\ProductoController;
 use App\Http\Controllers\almacen\repuestos\RepuestosController;
 use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
+use App\Http\Controllers\almacen\ubicaciones\UbicacionesArticuloController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
 use App\Http\Controllers\Apps\ActividadController;
 use App\Http\Controllers\Apps\EtiquetaController;
@@ -246,6 +247,32 @@ Route::prefix('ubicaciones')->name('ubicaciones.')->group(function () {
         return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
     })->name('exportExcel');
 });
+
+
+// INICIO CATEGORIA ///
+Route::prefix('ubicacionesarticulo')->name('ubicacionesarticulo.')->group(function () {
+    Route::get('/', [UbicacionesArticuloController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [UbicacionesController::class, 'create'])->name('create'); // Guardar una nueva categoría
+    Route::post('/store', [UbicacionesController::class, 'store'])->name('store'); // Guardar una nueva categoría
+    Route::get('/{id}/edit', [UbicacionesController::class, 'edit'])->name('edit'); // Editar una categoría
+    Route::put('/update/{id}', [UbicacionesController::class, 'update'])->name('update'); // Actualizar una categoría
+    // Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
+    Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
+    Route::get('/get-all', [UbicacionesController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
+    Route::post('/check-nombre', [UbicacionesController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
+    })->name('exportExcel');
+});
+
+
+
+
+
+
+
+
 Route::delete('categorias/{id}', [CategoriaController::class, 'destroy'])->name('destroy');
 /// FIN CATEGORIA ///
 /// INICIO MARCA ///
