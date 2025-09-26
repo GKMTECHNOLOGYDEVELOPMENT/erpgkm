@@ -139,8 +139,17 @@
                                 <div class="border border-gray-200 rounded-lg p-3">
                                     <div class="flex justify-between items-start mb-2">
                                         <div class="flex-1">
-                                            <p class="font-medium text-gray-800"
-                                                x-text="getNombreArticulo(solicitud.articulo)"></p>
+                                            <div class="flex items-center gap-2">
+                                                <p class="font-medium text-gray-800"
+                                                    x-text="getNombreArticulo(solicitud.articulo)"></p>
+                                                <!-- Indicador de serie -->
+                                                <template x-if="solicitud.articulo && solicitud.articulo.maneja_serie === 1">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                        <i class="fas fa-barcode mr-1"></i>
+                                                        Serie
+                                                    </span>
+                                                </template>
+                                            </div>
                                             <p class="text-xs text-gray-500"
                                                 x-text="'Tipo: ' + getTipoArticulo(solicitud.articulo?.idTipoArticulo)"></p>
                                         </div>
@@ -150,16 +159,25 @@
                                         </span>
                                     </div>
 
-                                    <!-- MODIFICADO: Quitamos Lote y Vence, solo mostramos Cantidad y Ubicación -->
-                                    <div class="grid grid-cols-2 gap-2 text-xs">
-                                        <div>
-                                            <span class="text-gray-500">Cantidad:</span>
-                                            <span class="font-medium ml-1" x-text="solicitud.cantidad"></span>
+                                    <!-- Información de cantidad, ubicación y series -->
+                                    <div class="grid grid-cols-1 gap-2 text-xs">
+                                        <div class="flex justify-between">
+                                            <div>
+                                                <span class="text-gray-500">Cantidad:</span>
+                                                <span class="font-medium ml-1" x-text="solicitud.cantidad"></span>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500">Ubicación:</span>
+                                                <span class="font-medium ml-1" x-text="getUbicacionesTexto(solicitud)"></span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span class="text-gray-500">Ubicación aqui:</span>
-                                            <span class="font-medium ml-1" x-text="getUbicacionesTexto(solicitud)"></span>
-                                        </div>
+                                        <!-- Mostrar series si las hay -->
+                                        <template x-if="solicitud.series && solicitud.series.length > 0">
+                                            <div>
+                                                <span class="text-gray-500">Series:</span>
+                                                <span class="font-medium ml-1" x-text="getSeriesTexto(solicitud.series)"></span>
+                                            </div>
+                                        </template>
                                     </div>
 
                                     <!-- Botones de estado individuales -->
@@ -213,23 +231,45 @@
             </template>
         </div>
 
-        <!-- Modal de Ubicación -->
+        <!-- Modal de Ubicación con Series -->
         <div x-show="modalUbicacionAbierto" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] overflow-y-auto">
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">
                         <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
                         Ubicar Artículo
+                        <template x-if="solicitudSeleccionada && solicitudSeleccionada.articulo && solicitudSeleccionada.articulo.maneja_serie === 1">
+                            <span class="text-sm font-normal text-blue-600 ml-2">
+                                <i class="fas fa-barcode mr-1"></i>
+                                (Requiere Series)
+                            </span>
+                        </template>
                     </h3>
 
                     <!-- Información del artículo -->
                     <div class="bg-gray-50 p-4 rounded-lg mb-4" x-show="solicitudSeleccionada">
-                        <p class="font-medium" x-text="'Artículo: ' + getNombreArticulo(solicitudSeleccionada?.articulo)"></p>
-                        <p class="text-sm text-gray-600" x-text="'Cantidad total: ' + (solicitudSeleccionada?.cantidad || 0)"></p>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-medium" x-text="'Artículo: ' + getNombreArticulo(solicitudSeleccionada?.articulo)"></p>
+                                <p class="text-sm text-gray-600" x-text="'Cantidad total: ' + (solicitudSeleccionada?.cantidad || 0)"></p>
+                            </div>
+                            <template x-if="solicitudSeleccionada && solicitudSeleccionada.articulo && solicitudSeleccionada.articulo.maneja_serie === 1">
+                                <div class="text-right">
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-barcode mr-1"></i>
+                                        Maneja Series
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
                     </div>
 
                     <!-- Formulario de ubicaciones -->
-                    <div class="space-y-4">
+                    <div class="space-y-4 mb-6">
+                        <h4 class="text-md font-medium text-gray-800">
+                            <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
+                            Ubicaciones
+                        </h4>
                         <template x-for="(ubicacion, index) in ubicacionesForm" :key="index">
                             <div class="flex gap-3 items-start border border-gray-200 rounded-lg p-3">
                                 <div class="flex-1">
@@ -243,7 +283,6 @@
                                                 :selected="ubicacion.ubicacion_id == ubic.idUbicacion || ubic.nombre === ubicacion.nombre_ubicacion"></option>
                                         </template>
                                     </select>
-                                    <!-- Mostrar nombre temporal si no hay ID pero sí nombre -->
                                     <template x-if="ubicacion.nombre_ubicacion && !ubicacion.ubicacion_id">
                                         <p class="text-xs text-orange-600 mt-1">
                                             <i class="fas fa-exclamation-triangle mr-1"></i>
@@ -287,6 +326,109 @@
                         </button>
                     </div>
 
+                    <!-- Sección de Series (solo si maneja_serie = 1) -->
+                    <div x-show="articuloRequiereSeries" class="border-t border-gray-200 pt-6">
+                        <h4 class="text-md font-medium text-gray-800 mb-3">
+                            <i class="fas fa-barcode mr-2 text-blue-500"></i>
+                            Números de Serie Requeridos
+                        </h4>
+                        
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                            <p class="text-sm text-amber-800">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Este artículo requiere números de serie únicos. Debe ingresar 
+                                <span class="font-bold" x-text="solicitudSeleccionada?.cantidad || 0"></span> número(s) de serie.
+                            </p>
+                        </div>
+
+                        <!-- Contador de progreso -->
+                        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-blue-800">
+                                    Series completadas: 
+                                    <span class="font-bold" x-text="seriesCompletadas"></span> / 
+                                    <span x-text="solicitudSeleccionada?.cantidad || 0"></span>
+                                </span>
+                                <span x-show="seriesCompletadas === (solicitudSeleccionada?.cantidad || 0)" 
+                                      class="text-green-600 font-medium text-sm">
+                                    <i class="fas fa-check-circle"></i> Completo
+                                </span>
+                            </div>
+                            
+                            <!-- Barra de progreso -->
+                            <div class="w-full bg-blue-200 rounded-full h-2 mt-2">
+                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                     :style="`width: ${((seriesCompletadas / (solicitudSeleccionada?.cantidad || 1)) * 100)}%`"></div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de campos de series -->
+                        <div class="space-y-3 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                            <template x-for="(serie, index) in seriesForm" :key="index">
+                                <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                                    <div class="flex gap-3 items-start">
+                                        <!-- Número de serie -->
+                                        <div class="flex-1">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                <i class="fas fa-hashtag mr-1"></i>
+                                                <span x-text="'Serie #' + (index + 1)"></span>
+                                            </label>
+                                            <div class="relative">
+                                                <input type="text" 
+                                                       x-model="serie.numero_serie"
+                                                       :placeholder="'Ej: SN' + String(index + 1).padStart(3, '0') + '12345'"
+                                                       class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10 text-sm"
+                                                       maxlength="50"
+                                                       @input="$nextTick(() => console.log('Serie actualizada:', serie.numero_serie))">
+                                                <i class="fas fa-barcode absolute right-3 top-3 text-gray-400"></i>
+                                            </div>
+                                            
+                                            <!-- Validación de series duplicadas -->
+                                            <template x-if="validarSerieDuplicada(serie.numero_serie, index)">
+                                                <p class="text-xs text-red-600 mt-1 flex items-center">
+                                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                    Este número de serie ya está siendo usado
+                                                </p>
+                                            </template>
+                                            
+                                            <!-- Indicador de campo completo -->
+                                            <template x-if="serie.numero_serie && serie.numero_serie.trim() !== '' && serie.ubicacion_id">
+                                                <p class="text-xs text-green-600 mt-1 flex items-center">
+                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                    Serie válida
+                                                </p>
+                                            </template>
+                                        </div>
+                                        
+                                        <!-- Ubicación de la serie -->
+                                        <div class="w-48">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                                Ubicación
+                                            </label>
+                                            <select x-model="serie.ubicacion_id"
+                                                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm"
+                                                    @change="console.log('Ubicación seleccionada:', serie.ubicacion_id)">
+                                                <option value="">Seleccionar ubicación</option>
+                                                <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
+                                                    <option :value="ubic.idUbicacion" x-text="ubic.nombre"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Mensaje si no hay series para mostrar -->
+                        <template x-if="seriesForm.length === 0">
+                            <div class="text-center py-4 text-gray-500 text-sm">
+                                <i class="fas fa-barcode text-2xl mb-2"></i>
+                                <p>No se han inicializado campos de series</p>
+                            </div>
+                        </template>
+                    </div>
+
                     <!-- Botones del modal -->
                     <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
                         <button @click="cerrarModalUbicacion"
@@ -297,7 +439,9 @@
                             :disabled="!puedeGuardar"
                             class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
                             <i class="fas fa-save mr-2"></i>
-                            Guardar Ubicaciones
+                            Guardar 
+                            <span x-show="articuloRequiereSeries">Ubicaciones y Series</span>
+                            <span x-show="!articuloRequiereSeries">Ubicaciones</span>
                         </button>
                     </div>
                 </div>
@@ -319,6 +463,7 @@
                 modalUbicacionAbierto: false,
                 solicitudSeleccionada: null,
                 ubicacionesForm: [],
+                seriesForm: [], // Nueva propiedad para series
 
                 filtroEstado: 'todos',
                 filtroOrigen: 'todos',
@@ -360,6 +505,20 @@
                     return (this.solicitudSeleccionada?.cantidad || 0) - totalAsignado;
                 },
 
+                // Nuevas propiedades computed para series
+                get articuloRequiereSeries() {
+                    return this.solicitudSeleccionada?.articulo?.maneja_serie === 1;
+                },
+
+                get seriesCompletadas() {
+                    if (!this.articuloRequiereSeries) return 0;
+                    
+                    return this.seriesForm.filter(serie => 
+                        serie.numero_serie && serie.numero_serie.trim() !== '' && 
+                        serie.ubicacion_id
+                    ).length;
+                },
+
                 get puedeGuardar() {
                     if (this.ubicacionesForm.length === 0) return false;
 
@@ -369,6 +528,15 @@
                     const ubicacionesValidas = this.ubicacionesForm.every(ubic =>
                         ubic.ubicacion_id && ubic.cantidad > 0
                     );
+
+                    // Si requiere series, validar que estén completas
+                    if (this.articuloRequiereSeries) {
+                        const seriesValidas = this.seriesForm.length === cantidadTotal && 
+                                             this.seriesCompletadas === cantidadTotal &&
+                                             !this.tieneSerieDuplicada();
+                        
+                        return ubicacionesValidas && totalAsignado === cantidadTotal && seriesValidas;
+                    }
 
                     return ubicacionesValidas && totalAsignado === cantidadTotal;
                 },
@@ -386,57 +554,31 @@
 
                 // Función para mostrar las ubicaciones del artículo
                 getUbicacionesTexto(solicitud) {
-                    console.log('=== DEBUG getUbicacionesTexto ===');
-                    console.log('Solicitud completa:', solicitud);
-                    console.log('ID Solicitud:', solicitud.idSolicitudIngreso);
-                    console.log('Campo ubicacion directo:', solicitud.ubicacion);
-                    console.log('Tipo de campo ubicacion:', typeof solicitud.ubicacion);
-                    console.log('¿Es null?:', solicitud.ubicacion === null);
-                    console.log('¿Es undefined?:', solicitud.ubicacion === undefined);
-                    console.log('¿Es string vacío?:', solicitud.ubicacion === '');
-                    console.log('¿Es string "null"?:', solicitud.ubicacion === 'null');
-
-                    // ✅ PRIMERO INTENTAR DESDE EL CAMPO 'ubicacion' DE SOLICITUD_INGRESO
                     if (solicitud.ubicacion && solicitud.ubicacion !== 'null' && solicitud.ubicacion !== '') {
-                        console.log('✅ Usando ubicacion directo de solicitud:', solicitud.ubicacion);
                         return solicitud.ubicacion;
                     }
 
-                    console.log('❌ No hay dato en ubicacion directo, buscando en relaciones...');
-
-                    // ✅ SI NO HAY DATO EN SOLICITUD_INGRESO, BUSCAR EN LAS UBICACIONES RELACIONADAS
-                    console.log('Ubicaciones relacionadas:', solicitud.ubicaciones);
-                    console.log('Cantidad de ubicaciones relacionadas:', solicitud.ubicaciones ? solicitud.ubicaciones.length : 0);
-
                     if (!solicitud.ubicaciones || solicitud.ubicaciones.length === 0) {
-                        console.log('❌ No hay ubicaciones relacionadas, retornando "Sin ubicar"');
                         return 'Sin ubicar';
                     }
 
-                    console.log('✅ Procesando ubicaciones relacionadas:');
-
-                    const resultado = solicitud.ubicaciones.map(ubic => {
-                        console.log('Ubicación individual:', ubic);
-                        console.log('Nombre_ubicacion:', ubic.nombre_ubicacion);
-                        console.log('Ubicacion_id:', ubic.ubicacion_id);
-                        console.log('Cantidad:', ubic.cantidad);
-
+                    return solicitud.ubicaciones.map(ubic => {
                         if (ubic.nombre_ubicacion) {
-                            const texto = `${ubic.nombre_ubicacion} (${ubic.cantidad})`;
-                            console.log('✅ Usando nombre_ubicacion:', texto);
-                            return texto;
+                            return `${ubic.nombre_ubicacion} (${ubic.cantidad})`;
                         } else {
                             const nombre = this.getNombreUbicacion(ubic.ubicacion_id);
-                            const texto = `${nombre} (${ubic.cantidad})`;
-                            console.log('🔄 Buscando nombre por ID:', texto);
-                            return texto;
+                            return `${nombre} (${ubic.cantidad})`;
                         }
                     }).join(', ');
+                },
 
-                    console.log('📋 Resultado final:', resultado);
-                    console.log('=== FIN DEBUG ===');
+                // Nueva función para mostrar las series
+                getSeriesTexto(series) {
+                    if (!series || series.length === 0) {
+                        return 'Sin series';
+                    }
 
-                    return resultado;
+                    return series.map(serie => serie.numero_serie).join(', ');
                 },
 
                 // Función para mostrar el nombre correcto del tipo de artículo
@@ -473,21 +615,73 @@
                     return new Date(fecha).toLocaleDateString('es-ES');
                 },
 
+                // Nuevos métodos para series
+                validarSerieDuplicada(numeroSerie, indiceActual) {
+                    if (!numeroSerie || numeroSerie.trim() === '') return false;
+                    
+                    return this.seriesForm.some((serie, index) => 
+                        index !== indiceActual && 
+                        serie.numero_serie === numeroSerie
+                    );
+                },
+
+                tieneSerieDuplicada() {
+                    const series = this.seriesForm.map(s => s.numero_serie).filter(s => s && s.trim() !== '');
+                    return series.length !== [...new Set(series)].length;
+                },
+
+                inicializarSeries() {
+                    console.log('🔍 Verificando si requiere series:', this.articuloRequiereSeries);
+                    console.log('📋 Artículo maneja_serie:', this.solicitudSeleccionada?.articulo?.maneja_serie);
+                    
+                    if (!this.articuloRequiereSeries) {
+                        this.seriesForm = [];
+                        return;
+                    }
+
+                    const cantidad = this.solicitudSeleccionada?.cantidad || 0;
+                    
+                    // Si ya hay series existentes, cargarlas
+                    if (this.solicitudSeleccionada?.series && this.solicitudSeleccionada.series.length > 0) {
+                        console.log('✅ Cargando series existentes:', this.solicitudSeleccionada.series);
+                        this.seriesForm = this.solicitudSeleccionada.series.map(serie => ({
+                            numero_serie: serie.numero_serie,
+                            ubicacion_id: serie.ubicacion_id
+                        }));
+                        
+                        // Si faltan series, completar con campos vacíos
+                        while (this.seriesForm.length < cantidad) {
+                            this.seriesForm.push({
+                                numero_serie: '',
+                                ubicacion_id: ''
+                            });
+                        }
+                    } else {
+                        // Crear campos vacíos para todas las series necesarias
+                        console.log('🆕 Inicializando series vacías para cantidad:', cantidad);
+                        this.seriesForm = Array.from({length: cantidad}, () => ({
+                            numero_serie: '',
+                            ubicacion_id: ''
+                        }));
+                    }
+                    
+                    console.log('📝 Series form inicializado:', this.seriesForm);
+                },
+
                 abrirModalUbicacion(solicitud) {
                     console.log('=== DEBUG abrirModalUbicacion ===');
                     console.log('Solicitud seleccionada:', solicitud);
                     console.log('Ubicaciones existentes:', solicitud.ubicaciones);
+                    console.log('Series existentes:', solicitud.series);
                     console.log('Campo ubicacion directo:', solicitud.ubicacion);
-                    console.log('Longitud de ubicaciones:', solicitud.ubicaciones ? solicitud.ubicaciones.length : 0);
 
                     this.solicitudSeleccionada = solicitud;
 
-                    // ✅ VERIFICAR PRIMERO SI HAY DATO EN EL CAMPO DIRECTO
+                    // Cargar ubicaciones existentes
                     if (solicitud.ubicacion && solicitud.ubicacion !== 'null' && solicitud.ubicacion !== '' && solicitud.ubicacion !== 'undefined') {
                         console.log('✅ Intentando parsear ubicacion directo:', solicitud.ubicacion);
 
                         try {
-                            // Intentar parsear el formato "Nombre Ubicación (Cantidad)"
                             const ubicacionesParseadas = this.parsearUbicacionDesdeTexto(solicitud.ubicacion);
                             console.log('Ubicaciones parseadas:', ubicacionesParseadas);
 
@@ -502,42 +696,34 @@
                             this.cargarUbicacionesPorRelacion(solicitud);
                         }
                     } else {
-                        // ✅ SI NO HAY CAMPO DIRECTO, USAR RELACIONES
                         this.cargarUbicacionesPorRelacion(solicitud);
                     }
 
+                    // Inicializar series después de cargar ubicaciones
+                    this.inicializarSeries();
+
                     console.log('Cantidad disponible inicial:', this.cantidadDisponible);
                     console.log('Ubicaciones form final:', this.ubicacionesForm);
+                    console.log('Series form inicial:', this.seriesForm);
+                    console.log('Requiere series:', this.articuloRequiereSeries);
 
                     this.modalUbicacionAbierto = true;
                 },
 
-                // ✅ NUEVA FUNCIÓN PARA PARSEAR EL TEXTO DE UBICACIÓN
                 parsearUbicacionDesdeTexto(textoUbicacion) {
                     console.log('Parseando texto:', textoUbicacion);
 
-                    // Ejemplo de formato: "A-4-1 (1)" o "A-4-1 (1), B-2-3 (2)"
                     const ubicaciones = [];
-
-                    // Dividir por comas si hay múltiples ubicaciones
                     const partes = textoUbicacion.split(',');
 
                     partes.forEach(parte => {
                         parte = parte.trim();
-
-                        // Buscar el patrón "Nombre (Cantidad)"
                         const match = parte.match(/(.+)\s+\((\d+)\)/);
 
                         if (match && match.length === 3) {
                             const nombreUbicacion = match[1].trim();
                             const cantidad = parseInt(match[2]);
 
-                            console.log('Encontrada ubicación:', {
-                                nombre: nombreUbicacion,
-                                cantidad: cantidad
-                            });
-
-                            // Buscar el ID de la ubicación por nombre
                             const ubicacionEncontrada = this.ubicaciones.find(ubic =>
                                 ubic.nombre === nombreUbicacion
                             );
@@ -548,25 +734,19 @@
                                     cantidad: cantidad,
                                     nombre_ubicacion: nombreUbicacion
                                 });
-                                console.log('✅ Ubicación encontrada en lista:', ubicacionEncontrada);
                             } else {
-                                console.log('❌ Ubicación no encontrada en lista:', nombreUbicacion);
-                                // Si no encontramos la ubicación, crear un objeto con nombre pero sin ID
                                 ubicaciones.push({
-                                    ubicacion_id: '', // Dejar vacío para que el usuario seleccione
+                                    ubicacion_id: '',
                                     cantidad: cantidad,
                                     nombre_ubicacion: nombreUbicacion
                                 });
                             }
-                        } else {
-                            console.log('❌ No coincide con el patrón esperado:', parte);
                         }
                     });
 
                     return ubicaciones;
                 },
 
-                // ✅ FUNCIÓN PARA CARGAR DESDE RELACIONES O INICIAR VACÍO
                 cargarUbicacionesPorRelacion(solicitud) {
                     if (solicitud.ubicaciones && solicitud.ubicaciones.length > 0) {
                         console.log('✅ Cargando ubicaciones existentes desde relaciones:', solicitud.ubicaciones);
@@ -579,13 +759,11 @@
                     } else {
                         console.log('🆕 No hay ubicaciones existentes, iniciando con formulario vacío');
 
-                        // Si no hay ubicaciones, empezar con una vacía
                         this.ubicacionesForm = [{
                             ubicacion_id: '',
                             cantidad: solicitud.cantidad
                         }];
 
-                        // Si la cantidad es mayor a 1, permitir distribución automática
                         if (solicitud.cantidad > 1) {
                             this.ubicacionesForm[0].cantidad = 1;
                         }
@@ -596,31 +774,25 @@
                     this.modalUbicacionAbierto = false;
                     this.solicitudSeleccionada = null;
                     this.ubicacionesForm = [];
+                    this.seriesForm = []; // Limpiar series también
                 },
 
                 agregarUbicacion() {
                     if (this.cantidadDisponible > 0) {
                         const nuevaUbicacion = {
                             ubicacion_id: '',
-                            cantidad: Math.min(this.cantidadDisponible, 1) // Solo agregar 1 unidad por defecto
+                            cantidad: Math.min(this.cantidadDisponible, 1)
                         };
 
                         this.ubicacionesForm.push(nuevaUbicacion);
                         console.log('➕ Nueva ubicación agregada. Disponible:', this.cantidadDisponible);
-                    } else {
-                        console.log('❌ No se puede agregar más ubicaciones - cantidad agotada');
                     }
                 },
 
                 eliminarUbicacion(index) {
                     if (this.ubicacionesForm.length > 1) {
-                        const ubicacionEliminada = this.ubicacionesForm[index];
-                        console.log('🗑️ Eliminando ubicación:', ubicacionEliminada);
-
                         this.ubicacionesForm.splice(index, 1);
                         console.log('✅ Ubicación eliminada. Nueva cantidad disponible:', this.cantidadDisponible);
-                    } else {
-                        console.log('⚠️ No se puede eliminar la única ubicación');
                     }
                 },
 
@@ -628,42 +800,67 @@
                     console.log('=== DEBUG guardarUbicaciones ===');
                     console.log('Solicitud seleccionada:', this.solicitudSeleccionada);
                     console.log('Ubicaciones a guardar:', this.ubicacionesForm);
+                    console.log('Series a guardar:', this.seriesForm);
+                    console.log('Requiere series:', this.articuloRequiereSeries);
                     console.log('Puede guardar?:', this.puedeGuardar);
-                    console.log('Cantidad disponible:', this.cantidadDisponible);
 
                     if (!this.puedeGuardar) {
-                        console.log('❌ Validaciones no pasadas - no se puede guardar');
-                        this.mostrarNotificacion('Por favor completa todas las ubicaciones correctamente', 'error');
+                        let mensaje = 'Por favor completa todas las ubicaciones correctamente';
+                        
+                        if (this.articuloRequiereSeries && this.seriesCompletadas < (this.solicitudSeleccionada?.cantidad || 0)) {
+                            mensaje = `Debe completar todos los números de serie. Faltan ${(this.solicitudSeleccionada?.cantidad || 0) - this.seriesCompletadas} serie(s)`;
+                        }
+                        
+                        if (this.articuloRequiereSeries && this.tieneSerieDuplicada()) {
+                            mensaje = 'No puede haber números de serie duplicados';
+                        }
+                        
+                        console.log('❌ Validaciones no pasadas:', mensaje);
+                        this.mostrarNotificacion(mensaje, 'error');
                         return;
                     }
 
                     try {
-                        const response = await axios.post('/solicitud-ingreso/guardar-ubicacion', {
+                        const requestData = {
                             solicitud_id: this.solicitudSeleccionada.idSolicitudIngreso,
                             ubicaciones: this.ubicacionesForm
-                        });
+                        };
+
+                        // Solo agregar series si el artículo las requiere
+                        if (this.articuloRequiereSeries) {
+                            requestData.series = this.seriesForm.filter(serie => 
+                                serie.numero_serie && serie.numero_serie.trim() !== ''
+                            );
+                        }
+
+                        console.log('📤 Datos a enviar:', requestData);
+
+                        const response = await axios.post('/solicitud-ingreso/guardar-ubicacion', requestData);
 
                         console.log('Respuesta del servidor:', response.data);
 
                         if (response.data.success) {
                             this.mostrarNotificacion(response.data.message, 'success');
 
-                            // ✅ ACTUALIZAR CORRECTAMENTE LAS UBICACIONES EN LA SOLICITUD
+                            // Actualizar la solicitud en la vista
                             this.solicitudesAgrupadas.forEach(grupo => {
                                 grupo.solicitudes.forEach(solicitud => {
                                     if (solicitud.idSolicitudIngreso === this.solicitudSeleccionada.idSolicitudIngreso) {
                                         // Actualizar estado
                                         solicitud.estado = 'ubicado';
 
-                                        // ✅ ACTUALIZAR EL CAMPO 'ubicacion' DIRECTAMENTE
+                                        // Actualizar ubicaciones
                                         solicitud.ubicacion = response.data.ubicacion_texto || this.generarTextoUbicaciones(this.ubicacionesForm);
-
-                                        // ✅ ACTUALIZAR LAS UBICACIONES CON LOS DATOS CORRECTOS
                                         solicitud.ubicaciones = this.ubicacionesForm.map(ubic => ({
                                             ubicacion_id: ubic.ubicacion_id,
                                             cantidad: parseInt(ubic.cantidad),
                                             nombre_ubicacion: this.getNombreUbicacion(ubic.ubicacion_id)
                                         }));
+
+                                        // Actualizar series si las hay
+                                        if (response.data.series) {
+                                            solicitud.series = response.data.series;
+                                        }
 
                                         console.log('✅ Solicitud actualizada:', solicitud);
 
@@ -682,7 +879,6 @@
                     }
                 },
 
-                // ✅ FUNCIÓN AUXILIAR PARA GENERAR TEXTO DE UBICACIONES
                 generarTextoUbicaciones(ubicacionesForm) {
                     return ubicacionesForm.map(ubic => {
                         const nombre = this.getNombreUbicacion(ubic.ubicacion_id);
@@ -690,11 +886,9 @@
                     }).join(', ');
                 },
 
-                // ✅ AGREGAR ESTA FUNCIÓN PARA OBTENER EL NOMBRE DE LA UBICACIÓN
                 getNombreUbicacion(ubicacionId) {
                     console.log('🔍 Buscando nombre para ubicacion_id:', ubicacionId);
 
-                    // Buscar por ID
                     const ubicacion = this.ubicaciones.find(u => u.idUbicacion == ubicacionId);
 
                     if (ubicacion) {
