@@ -96,6 +96,32 @@ public function buscarProductoEntrada(Request $request)
     }
 }
 
+
+private function generarCodigoEntrada()
+{
+    $prefix = 'ENT'; // Prefijo para identificar que es una entrada
+    $fecha = date('Ymd'); // Fecha en formato YYYYMMDD
+    $random = strtoupper(substr(uniqid(), -6)); // 6 caracteres aleatorios
+    
+    return $prefix . '-' . $fecha . '-' . $random;
+}
+
+private function generarCodigoUnico()
+{
+    do {
+        $codigo = $this->generarCodigoEntrada();
+        
+        // Verificar si el código ya existe en la base de datos
+        $existe = DB::table('entradas_proveedores')
+            ->where('codigo_entrada', $codigo)
+            ->exists();
+            
+    } while ($existe); // Repetir hasta encontrar un código único
+    
+    return $codigo;
+}
+
+
 public function guardarEntradaProveedor(Request $request)
 {
     try {
@@ -129,6 +155,27 @@ public function guardarEntradaProveedor(Request $request)
         if (!$usuario) {
             throw new \Exception('Usuario no autenticado');
         }
+
+
+         // Generar código único para la entrada
+        $codigoEntrada = $this->generarCodigoUnico();
+        Log::info("Código de entrada generado: {$codigoEntrada}");
+
+        // Insertar entrada principal
+        $entradaId = DB::table('entradas_proveedores')->insertGetId([
+            'codigo_entrada' => $codigoEntrada, // ← AQUÍ SE AGREGA EL CÓDIGO
+            'tipo_entrada' => $request->tipo_entrada,
+            'fecha_ingreso' => $request->fecha_ingreso,
+            'cliente_general_id' => $request->cliente_general_id ?: null,
+            'observaciones' => $request->observaciones ?? null,
+            'estado' => 1,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        Log::info("Entrada_proveedor creada con ID: {$entradaId}, Código: {$codigoEntrada}");
+
+
 
         // Insertar entrada principal
         $entradaId = DB::table('entradas_proveedores')->insertGetId([
@@ -165,20 +212,6 @@ public function guardarEntradaProveedor(Request $request)
 
             Log::info("Detalle de entrada registrado detalleId: {$detalleId}");
 
-            // =============================================
-            // ⬇️⬇️⬇️ COMENTADO: YA NO INCREMENTA STOCK TOTAL ⬇️⬇️⬇️
-            // =============================================
-            /*
-            // Actualizar stock del artículo
-            DB::table('articulos')
-                ->where('idArticulos', $articuloId)
-                ->increment('stock_total', $cantidad);
-
-            Log::info("Stock incrementado para articuloId: {$articuloId}, cantidad: {$cantidad}");
-            */
-            // =============================================
-            // ⬆️⬆️⬆️ FIN DE SECCIÓN COMENTADA ⬆️⬆️⬆️
-            // =============================================
 
             // Insertar en inventario_ingresos_clientes
             DB::table('inventario_ingresos_clientes')->insert([
@@ -301,12 +334,17 @@ public function guardarEntradaProveedor(Request $request)
 
         DB::commit();
 
+
+        Log::info("✅ ENTRADA PROVEEDOR GUARDADA EXITOSAMENTE ID: {$entradaId}, Código: {$codigoEntrada}");
+
         Log::info("✅ ENTRADA PROVEEDOR GUARDADA EXITOSAMENTE ID: {$entradaId}");
 
         return response()->json([
             'success' => true,
             'message' => 'Entrada guardada exitosamente',
-            'entrada_id' => $entradaId
+            'entrada_id' => $entradaId,
+            'codigo_entrada' => $codigoEntrada // ← También devolver el código en la respuesta
+
         ]);
 
     } catch (\Exception $e) {
