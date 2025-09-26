@@ -1279,6 +1279,7 @@ Route::get('/buscar-articulo', [ArticulosController::class, 'buscar'])->name('bu
 
 Route::post('/guardar-compra', [ComprasController::class, 'guardarCompra'])->name('api.guardar-compra');
 
+Route::get('/compras/create', [ComprasController::class, 'create'])->name('compras.create');
 
 Route::get('/administracion/compras/{id}/ticket', [ComprasController::class, 'ticket'])
     ->name('compras.ticket');

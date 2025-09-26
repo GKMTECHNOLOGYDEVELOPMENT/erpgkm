@@ -2,8 +2,7 @@
     <div x-data="comprasList" x-init="init()">
         <!-- Filtros - Agregar filtro por estado -->
         <div
-            class="bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/30 
-            p-6 rounded-2xl shadow-lg border border-white/60 backdrop-blur-sm space-y-6">
+            class="bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/30 p-6 rounded-2xl shadow-lg border border-white/60 backdrop-blur-sm space-y-6">
 
             <!-- Título de Filtros -->
             <div class="flex items-center gap-2 border-b pb-3">
@@ -13,7 +12,6 @@
                 <h3 class="text-lg font-bold text-gray-800">Filtros de Búsqueda</h3>
             </div>
 
-            <!-- Grid de Filtros -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <!-- Fecha Inicio -->
                 <div class="group">
@@ -26,8 +24,8 @@
                     </label>
                     <input type="date" x-model="filters.fecha_inicio" @change="handleDateChange('fecha_inicio')"
                         class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
-                       focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
-                       bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11">
+               focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
+               bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11">
                 </div>
 
                 <!-- Fecha Fin -->
@@ -41,8 +39,8 @@
                     </label>
                     <input type="date" x-model="filters.fecha_fin" @change="handleDateChange('fecha_fin')"
                         class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
-                       focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
-                       bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11">
+               focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
+               bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11">
                 </div>
 
                 <!-- Estado -->
@@ -56,8 +54,8 @@
                     </label>
                     <select x-model="filters.estado" @change="loadCompras()"
                         class="form-select w-full rounded-xl border border-gray-200 focus:border-purple-500 
-                       focus:ring-2 focus:ring-purple-100 transition-all duration-300 hover:border-purple-400
-                       bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 cursor-pointer">
+               focus:ring-2 focus:ring-purple-100 transition-all duration-300 hover:border-purple-400
+               bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 cursor-pointer">
                         <option value="">✨ Todos los estados</option>
                         <option value="pendiente">🟡 Pendiente</option>
                         <option value="recibido">🟢 Recibido</option>
@@ -68,7 +66,7 @@
 
                 <!-- Botón Buscar -->
                 <div class="flex items-end">
-                    <button @click="buscar()" class="btn btn-primary gap-2">
+                    <button @click="buscar()" class="btn btn-info gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 116.15 13.65z" />
@@ -98,8 +96,8 @@
                     <input type="text" x-model="filters.q" @keyup.enter="buscar()"
                         placeholder="Serie, N° o Proveedor... ✨"
                         class="form-input w-full pl-12 pr-4 rounded-xl border border-gray-200 focus:border-green-500 
-                       focus:ring-2 focus:ring-green-100 transition-all duration-300 hover:border-green-400
-                       bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 placeholder-gray-400">
+               focus:ring-2 focus:ring-green-100 transition-all duration-300 hover:border-green-400
+               bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 placeholder-gray-400">
                 </div>
                 <p class="mt-2 text-xs text-gray-500 flex items-center gap-1">
                     <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,10 +109,22 @@
             </div>
         </div>
 
+        <!-- Botón Nueva Compra - CON ESPACIOS -->
+        <div class="flex justify-end mt-6">
+            <a href="{{ route('compras.create') }}"
+                class="inline-flex items-center gap-2 px-6 py-3 
+               btn btn-primary space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Nueva Compra</span>
+            </a>
+        </div>
 
         <!-- Tabla de Compras - Agregar columna Estado -->
         <div x-show="!loading && !error && compras.length > 0"
-            class="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 mt-4">
+            class="panel rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 mt-4">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -215,7 +225,7 @@
                                         </button>
 
                                         <!-- Botón Detalles de Compra -->
-                                        <button @click="detallesCompra(compra.idCompra)" class="btn btn-info">
+                                        <button @click="detallesCompra(compra.idCompra)" class="btn btn-warning">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -226,7 +236,7 @@
                                         </button>
 
                                         <!-- Botón Imprimir Factura -->
-                                        <button @click="imprimirFactura(compra.idCompra)" class="btn btn-warning">
+                                        {{-- <button @click="imprimirFactura(compra.idCompra)" class="btn btn-warning">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -234,10 +244,10 @@
                                                 </path>
                                             </svg>
                                             Factura
-                                        </button>
+                                        </button> --}}
 
                                         <!-- Botón Imprimir Ticket -->
-                                        <button @click="imprimirTicket(compra.idCompra)" class="btn btn-success">
+                                        {{-- <button @click="imprimirTicket(compra.idCompra)" class="btn btn-success">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -245,7 +255,7 @@
                                                 </path>
                                             </svg>
                                             Ticket
-                                        </button>
+                                        </button> --}}
                                     </div>
                                 </td>
                             </tr>

@@ -1,6 +1,22 @@
 <x-layout.default>
     <!-- Incluir Axios CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.7);
+            /* gris */
+            border-radius: 9999px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+    </style>
+
     <div x-data="solicitudApp()" class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="mb-8">
@@ -9,11 +25,12 @@
         </div>
 
         <!-- Filtros -->
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="panel rounded-lg shadow p-6 mb-6">
             <div class="flex flex-wrap gap-4 items-center">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por estado:</label>
-                    <select x-model="filtroEstado" class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    <select x-model="filtroEstado"
+                        class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                         <option value="todos">Todos</option>
                         <option value="pendiente">Pendiente</option>
                         <option value="recibido">Recibido</option>
@@ -22,7 +39,8 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por origen:</label>
-                    <select x-model="filtroOrigen" class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                    <select x-model="filtroOrigen"
+                        class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                         <option value="todos">Todos</option>
                         <option value="compra">Compra</option>
                         <option value="entrada_proveedor">Entrada Proveedor</option>
@@ -94,7 +112,8 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6">
             <template x-for="grupo in solicitudesAgrupadasFiltradas" :key="grupo.origen + '_' + grupo.origen_id">
-                <div class="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
+                <div
+                    class="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
                     <!-- Header de la Card Grupal -->
                     <div class="border-b border-gray-200 p-4 bg-gray-50">
                         <div class="flex justify-between items-start mb-2">
@@ -102,13 +121,16 @@
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
                                     :class="getEstadoClasses(grupo.estado_general)">
                                     <i :class="getEstadoIcon(grupo.estado_general)" class="mr-1"></i>
-                                    <span x-text="grupo.estado_general.charAt(0).toUpperCase() + grupo.estado_general.slice(1)"></span>
+                                    <span
+                                        x-text="grupo.estado_general.charAt(0).toUpperCase() + grupo.estado_general.slice(1)"></span>
                                 </span>
                             </div>
                             <div class="text-right">
                                 <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-                                    :class="grupo.origen === 'compra' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
-                                    <i :class="grupo.origen === 'compra' ? 'fas fa-shopping-cart' : 'fas fa-truck'" class="mr-1"></i>
+                                    :class="grupo.origen === 'compra' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-green-100 text-green-800'">
+                                    <i :class="grupo.origen === 'compra' ? 'fas fa-shopping-cart' : 'fas fa-truck'"
+                                        class="mr-1"></i>
                                     <span x-text="grupo.origen === 'compra' ? 'Compra' : 'Entrada Proveedor'"></span>
                                 </span>
                             </div>
@@ -117,13 +139,17 @@
                         <div class="flex justify-between items-center">
                             <div>
                                 <h3 class="font-semibold text-gray-800"
-                                    x-text="grupo.origen === 'compra' ? grupo.origen_especifico.codigocompra : grupo.origen_especifico.codigo_entrada"></h3>
+                                    x-text="grupo.origen === 'compra' ? grupo.origen_especifico.codigocompra : grupo.origen_especifico.codigo_entrada">
+                                </h3>
                                 <p class="text-sm text-gray-600"
-                                    x-text="grupo.mostrar_cliente ? 'Cliente: ' + grupo.cliente_general.descripcion : 'Proveedor: ' + grupo.proveedor.nombre"></p>
+                                    x-text="grupo.mostrar_cliente ? 'Cliente: ' + grupo.cliente_general.descripcion : 'Proveedor: ' + grupo.proveedor.nombre">
+                                </p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-medium text-gray-800" x-text="grupo.total_articulos + ' artículos'"></p>
-                                <p class="text-sm text-gray-600" x-text="'Total: ' + grupo.total_cantidad + ' unidades'"></p>
+                                <p class="text-sm font-medium text-gray-800"
+                                    x-text="grupo.total_articulos + ' artículos'"></p>
+                                <p class="text-sm text-gray-600"
+                                    x-text="'Total: ' + grupo.total_cantidad + ' unidades'"></p>
                             </div>
                         </div>
                     </div>
@@ -134,111 +160,127 @@
                             <p class="text-sm font-medium text-gray-700">Artículos en esta solicitud:</p>
                         </div>
 
-                        <div class="space-y-3 max-h-60 overflow-y-auto">
-                            <template x-for="solicitud in grupo.solicitudes" :key="solicitud.idSolicitudIngreso">
-                                <div class="border border-gray-200 rounded-lg p-3">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div class="flex-1">
-                                            <div class="flex items-center gap-2">
-                                                <p class="font-medium text-gray-800"
-                                                    x-text="getNombreArticulo(solicitud.articulo)"></p>
-                                                <!-- Indicador de serie -->
-                                                <template x-if="solicitud.articulo && solicitud.articulo.maneja_serie === 1">
-                                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                                        <i class="fas fa-barcode mr-1"></i>
-                                                        Serie
-                                                    </span>
-                                                </template>
+                        <!-- Contenedor fijo para artículos con scroll -->
+                <div class="relative max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+                    <div class="space-y-3">
+                                <template x-for="solicitud in grupo.solicitudes" :key="solicitud.idSolicitudIngreso">
+                                    <div class="border border-gray-200 rounded-lg p-3 bg-white">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-2">
+                                                    <p class="font-medium text-gray-800"
+                                                        x-text="getNombreArticulo(solicitud.articulo)"></p>
+                                                    <!-- Indicador de serie -->
+                                                    <template
+                                                        x-if="solicitud.articulo && solicitud.articulo.maneja_serie === 1">
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                            <i class="fas fa-barcode mr-1"></i>
+                                                            Serie
+                                                        </span>
+                                                    </template>
+                                                </div>
+                                                <p class="text-xs text-gray-500"
+                                                    x-text="'Tipo: ' + getTipoArticulo(solicitud.articulo?.idTipoArticulo)">
+                                                </p>
                                             </div>
-                                            <p class="text-xs text-gray-500"
-                                                x-text="'Tipo: ' + getTipoArticulo(solicitud.articulo?.idTipoArticulo)"></p>
+                                            <span
+                                                class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ml-2"
+                                                :class="getEstadoClasses(solicitud.estado)">
+                                                <span x-text="solicitud.estado"></span>
+                                            </span>
                                         </div>
-                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium ml-2"
-                                            :class="getEstadoClasses(solicitud.estado)">
-                                            <span x-text="solicitud.estado"></span>
-                                        </span>
-                                    </div>
 
-                                    <!-- Información de cantidad, ubicación y series -->
-                                    <div class="grid grid-cols-1 gap-2 text-xs">
-                                        <div class="flex justify-between">
-                                            <div>
-                                                <span class="text-gray-500">Cantidad:</span>
-                                                <span class="font-medium ml-1" x-text="solicitud.cantidad"></span>
+                                        <!-- Info cantidad y ubicación -->
+                                        <div class="grid grid-cols-1 gap-2 text-xs">
+                                            <div class="flex justify-between">
+                                                <div>
+                                                    <span class="text-gray-500">Cantidad:</span>
+                                                    <span class="font-medium ml-1" x-text="solicitud.cantidad"></span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-gray-500">Ubicación:</span>
+                                                    <span class="font-medium ml-1"
+                                                        x-text="getUbicacionesTexto(solicitud)"></span>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <span class="text-gray-500">Ubicación:</span>
-                                                <span class="font-medium ml-1" x-text="getUbicacionesTexto(solicitud)"></span>
-                                            </div>
+                                            <!-- Series -->
+                                            <template x-if="solicitud.series && solicitud.series.length > 0">
+                                                <div>
+                                                    <span class="text-gray-500">Series:</span>
+                                                    <span class="font-medium ml-1"
+                                                        x-text="getSeriesTexto(solicitud.series)"></span>
+                                                </div>
+                                            </template>
                                         </div>
-                                        <!-- Mostrar series si las hay -->
-                                        <template x-if="solicitud.series && solicitud.series.length > 0">
-                                            <div>
-                                                <span class="text-gray-500">Series:</span>
-                                                <span class="font-medium ml-1" x-text="getSeriesTexto(solicitud.series)"></span>
-                                            </div>
-                                        </template>
-                                    </div>
 
-                                    <!-- Botones de estado individuales -->
-                                    <div class="flex space-x-1 mt-2">
-                                        <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'pendiente')"
-                                            class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                            :class="solicitud.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
-                                            Pendiente
-                                        </button>
-                                        <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'recibido')"
-                                            class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                            :class="solicitud.estado === 'recibido' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600 hover:bg-green-50'">
-                                            Recibido
-                                        </button>
-                                        <button @click="abrirModalUbicacion(solicitud)"
-                                            class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                            :class="solicitud.estado === 'ubicado' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-600 hover:bg-purple-50'">
-                                            Ubicar
-                                        </button>
+                                        <!-- Botones -->
+                                        <div class="flex space-x-1 mt-2">
+                                            <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'pendiente')"
+                                                class="flex-1 px-2 py-1 text-xs rounded transition-colors"
+                                                :class="solicitud.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                                                    'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
+                                                Pendiente
+                                            </button>
+                                            <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'recibido')"
+                                                class="flex-1 px-2 py-1 text-xs rounded transition-colors"
+                                                :class="solicitud.estado === 'recibido' ? 'bg-green-100 text-green-800' :
+                                                    'bg-gray-100 text-gray-600 hover:bg-green-50'">
+                                                Recibido
+                                            </button>
+                                            <button @click="abrirModalUbicacion(solicitud)"
+                                                class="flex-1 px-2 py-1 text-xs rounded transition-colors"
+                                                :class="solicitud.estado === 'ubicado' ? 'bg-purple-100 text-purple-800' :
+                                                    'bg-gray-100 text-gray-600 hover:bg-purple-50'">
+                                                Ubicar
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Footer de la Card Grupal -->
-                    <div class="border-t border-gray-200 p-4 bg-gray-50">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500"
-                                x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
-                            <div class="flex space-x-2">
-                                <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
-                                    class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                    :class="grupo.estado_general === 'pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
-                                    Todos Pendiente
-                                </button>
-                                <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
-                                    class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                    :class="grupo.estado_general === 'recibido' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600 hover:bg-green-50'">
-                                    Todos Recibido
-                                </button>
-                                <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
-                                    class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                    :class="grupo.estado_general === 'ubicado' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-600 hover:bg-purple-50'">
-                                    Todos Ubicado
-                                </button>
+                        <!-- Footer de la Card Grupal -->
+                        <div class="border-t border-gray-200 p-4 bg-gray-50">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500"
+                                    x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
+                                <div class="flex space-x-2">
+                                    <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
+                                        class="px-3 py-1 text-xs rounded-lg transition-colors"
+                                        :class="grupo.estado_general === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
+                                        Todos Pendiente
+                                    </button>
+                                    <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
+                                        class="px-3 py-1 text-xs rounded-lg transition-colors"
+                                        :class="grupo.estado_general === 'recibido' ? 'bg-green-100 text-green-800' :
+                                            'bg-gray-100 text-gray-600 hover:bg-green-50'">
+                                        Todos Recibido
+                                    </button>
+                                    <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
+                                        class="px-3 py-1 text-xs rounded-lg transition-colors"
+                                        :class="grupo.estado_general === 'ubicado' ? 'bg-purple-100 text-purple-800' :
+                                            'bg-gray-100 text-gray-600 hover:bg-purple-50'">
+                                        Todos Ubicado
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
             </template>
         </div>
 
         <!-- Modal de Ubicación con Series -->
-        <div x-show="modalUbicacionAbierto" x-cloak class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div x-show="modalUbicacionAbierto" x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[95vh] overflow-y-auto">
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">
                         <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
                         Ubicar Artículo
-                        <template x-if="solicitudSeleccionada && solicitudSeleccionada.articulo && solicitudSeleccionada.articulo.maneja_serie === 1">
+                        <template
+                            x-if="solicitudSeleccionada && solicitudSeleccionada.articulo && solicitudSeleccionada.articulo.maneja_serie === 1">
                             <span class="text-sm font-normal text-blue-600 ml-2">
                                 <i class="fas fa-barcode mr-1"></i>
                                 (Requiere Series)
@@ -250,12 +292,16 @@
                     <div class="bg-gray-50 p-4 rounded-lg mb-4" x-show="solicitudSeleccionada">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="font-medium" x-text="'Artículo: ' + getNombreArticulo(solicitudSeleccionada?.articulo)"></p>
-                                <p class="text-sm text-gray-600" x-text="'Cantidad total: ' + (solicitudSeleccionada?.cantidad || 0)"></p>
+                                <p class="font-medium"
+                                    x-text="'Artículo: ' + getNombreArticulo(solicitudSeleccionada?.articulo)"></p>
+                                <p class="text-sm text-gray-600"
+                                    x-text="'Cantidad total: ' + (solicitudSeleccionada?.cantidad || 0)"></p>
                             </div>
-                            <template x-if="solicitudSeleccionada && solicitudSeleccionada.articulo && solicitudSeleccionada.articulo.maneja_serie === 1">
+                            <template
+                                x-if="solicitudSeleccionada && solicitudSeleccionada.articulo && solicitudSeleccionada.articulo.maneja_serie === 1">
                                 <div class="text-right">
-                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                    <span
+                                        class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-800">
                                         <i class="fas fa-barcode mr-1"></i>
                                         Maneja Series
                                     </span>
@@ -278,9 +324,10 @@
                                         class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                         <option value="">Seleccionar ubicación</option>
                                         <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
-                                            <option :value="ubic.idUbicacion"
-                                                x-text="ubic.nombre"
-                                                :selected="ubicacion.ubicacion_id == ubic.idUbicacion || ubic.nombre === ubicacion.nombre_ubicacion"></option>
+                                            <option :value="ubic.idUbicacion" x-text="ubic.nombre"
+                                                :selected="ubicacion.ubicacion_id == ubic.idUbicacion || ubic.nombre === ubicacion
+                                                    .nombre_ubicacion">
+                                            </option>
                                         </template>
                                     </select>
                                     <template x-if="ubicacion.nombre_ubicacion && !ubicacion.ubicacion_id">
@@ -293,13 +340,11 @@
                                 <div class="w-32">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
                                     <input type="number" x-model="ubicacion.cantidad"
-                                        :max="cantidadDisponible + (parseInt(ubicacion.cantidad) || 0)"
-                                        min="1"
+                                        :max="cantidadDisponible + (parseInt(ubicacion.cantidad) || 0)" min="1"
                                         class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                 </div>
                                 <div class="pt-6">
-                                    <button type="button"
-                                        @click="eliminarUbicacion(index)"
+                                    <button type="button" @click="eliminarUbicacion(index)"
                                         class="text-red-600 hover:text-red-800 p-1"
                                         :disabled="ubicacionesForm.length === 1">
                                         <i class="fas fa-times"></i>
@@ -312,14 +357,13 @@
                         <div class="bg-blue-50 p-3 rounded-lg">
                             <p class="text-sm text-blue-800">
                                 <span x-text="'Cantidad disponible: ' + cantidadDisponible"></span>
-                                <span x-show="cantidadDisponible === 0" class="text-red-600 font-medium"> - ¡Toda la cantidad ha sido distribuida!</span>
+                                <span x-show="cantidadDisponible === 0" class="text-red-600 font-medium"> - ¡Toda la
+                                    cantidad ha sido distribuida!</span>
                             </p>
                         </div>
 
                         <!-- Botón para agregar más ubicaciones -->
-                        <button type="button"
-                            @click="agregarUbicacion"
-                            :disabled="cantidadDisponible === 0"
+                        <button type="button" @click="agregarUbicacion" :disabled="cantidadDisponible === 0"
                             class="flex items-center gap-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed">
                             <i class="fas fa-plus"></i>
                             Agregar otra ubicación
@@ -332,12 +376,13 @@
                             <i class="fas fa-barcode mr-2 text-blue-500"></i>
                             Números de Serie Requeridos
                         </h4>
-                        
+
                         <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
                             <p class="text-sm text-amber-800">
                                 <i class="fas fa-info-circle mr-1"></i>
-                                Este artículo requiere números de serie únicos. Debe ingresar 
-                                <span class="font-bold" x-text="solicitudSeleccionada?.cantidad || 0"></span> número(s) de serie.
+                                Este artículo requiere números de serie únicos. Debe ingresar
+                                <span class="font-bold" x-text="solicitudSeleccionada?.cantidad || 0"></span>
+                                número(s) de serie.
                             </p>
                         </div>
 
@@ -345,25 +390,27 @@
                         <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-blue-800">
-                                    Series completadas: 
-                                    <span class="font-bold" x-text="seriesCompletadas"></span> / 
+                                    Series completadas:
+                                    <span class="font-bold" x-text="seriesCompletadas"></span> /
                                     <span x-text="solicitudSeleccionada?.cantidad || 0"></span>
                                 </span>
-                                <span x-show="seriesCompletadas === (solicitudSeleccionada?.cantidad || 0)" 
-                                      class="text-green-600 font-medium text-sm">
+                                <span x-show="seriesCompletadas === (solicitudSeleccionada?.cantidad || 0)"
+                                    class="text-success font-medium text-sm">
                                     <i class="fas fa-check-circle"></i> Completo
                                 </span>
                             </div>
-                            
+
                             <!-- Barra de progreso -->
                             <div class="w-full bg-blue-200 rounded-full h-2 mt-2">
-                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                                     :style="`width: ${((seriesCompletadas / (solicitudSeleccionada?.cantidad || 1)) * 100)}%`"></div>
+                                <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                    :style="`width: ${((seriesCompletadas / (solicitudSeleccionada?.cantidad || 1)) * 100)}%`">
+                                </div>
                             </div>
                         </div>
 
                         <!-- Lista de campos de series -->
-                        <div class="space-y-3 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <div
+                            class="space-y-3 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
                             <template x-for="(serie, index) in seriesForm" :key="index">
                                 <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
                                     <div class="flex gap-3 items-start">
@@ -374,15 +421,14 @@
                                                 <span x-text="'Serie #' + (index + 1)"></span>
                                             </label>
                                             <div class="relative">
-                                                <input type="text" 
-                                                       x-model="serie.numero_serie"
-                                                       :placeholder="'Ej: SN' + String(index + 1).padStart(3, '0') + '12345'"
-                                                       class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10 text-sm"
-                                                       maxlength="50"
-                                                       @input="$nextTick(() => console.log('Serie actualizada:', serie.numero_serie))">
+                                                <input type="text" x-model="serie.numero_serie"
+                                                    :placeholder="'Ej: SN' + String(index + 1).padStart(3, '0') + '12345'"
+                                                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10 text-sm"
+                                                    maxlength="50"
+                                                    @input="$nextTick(() => console.log('Serie actualizada:', serie.numero_serie))">
                                                 <i class="fas fa-barcode absolute right-3 top-3 text-gray-400"></i>
                                             </div>
-                                            
+
                                             <!-- Validación de series duplicadas -->
                                             <template x-if="validarSerieDuplicada(serie.numero_serie, index)">
                                                 <p class="text-xs text-red-600 mt-1 flex items-center">
@@ -390,30 +436,15 @@
                                                     Este número de serie ya está siendo usado
                                                 </p>
                                             </template>
-                                            
+
                                             <!-- Indicador de campo completo -->
-                                            <template x-if="serie.numero_serie && serie.numero_serie.trim() !== '' && serie.ubicacion_id">
+                                            <template
+                                                x-if="serie.numero_serie && serie.numero_serie.trim() !== '' && serie.ubicacion_id">
                                                 <p class="text-xs text-green-600 mt-1 flex items-center">
                                                     <i class="fas fa-check-circle mr-1"></i>
                                                     Serie válida
                                                 </p>
                                             </template>
-                                        </div>
-                                        
-                                        <!-- Ubicación de la serie -->
-                                        <div class="w-48">
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                                <i class="fas fa-map-marker-alt mr-1"></i>
-                                                Ubicación
-                                            </label>
-                                            <select x-model="serie.ubicacion_id"
-                                                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 text-sm"
-                                                    @change="console.log('Ubicación seleccionada:', serie.ubicacion_id)">
-                                                <option value="">Seleccionar ubicación</option>
-                                                <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
-                                                    <option :value="ubic.idUbicacion" x-text="ubic.nombre"></option>
-                                                </template>
-                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -435,11 +466,10 @@
                             class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">
                             Cancelar
                         </button>
-                        <button @click="guardarUbicaciones"
-                            :disabled="!puedeGuardar"
-                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <button @click="guardarUbicaciones" :disabled="!puedeGuardar"
+                            class="px-4 py-2 btn btn-primary">
                             <i class="fas fa-save mr-2"></i>
-                            Guardar 
+                            Guardar
                             <span x-show="articuloRequiereSeries">Ubicaciones y Series</span>
                             <span x-show="!articuloRequiereSeries">Ubicaciones</span>
                         </button>
@@ -481,8 +511,10 @@
 
                 get solicitudesAgrupadasFiltradas() {
                     return this.solicitudesAgrupadas.filter(grupo => {
-                        const coincideEstado = this.filtroEstado === 'todos' || grupo.estado_general === this.filtroEstado;
-                        const coincideOrigen = this.filtroOrigen === 'todos' || grupo.origen === this.filtroOrigen;
+                        const coincideEstado = this.filtroEstado === 'todos' || grupo.estado_general === this
+                            .filtroEstado;
+                        const coincideOrigen = this.filtroOrigen === 'todos' || grupo.origen === this
+                            .filtroOrigen;
 
                         const codigoOrigen = grupo.origen === 'compra' ?
                             grupo.origen_especifico.codigocompra : grupo.origen_especifico.codigo_entrada;
@@ -501,7 +533,8 @@
                 },
 
                 get cantidadDisponible() {
-                    const totalAsignado = this.ubicacionesForm.reduce((sum, ubic) => sum + (parseInt(ubic.cantidad) || 0), 0);
+                    const totalAsignado = this.ubicacionesForm.reduce((sum, ubic) => sum + (parseInt(ubic.cantidad) ||
+                        0), 0);
                     return (this.solicitudSeleccionada?.cantidad || 0) - totalAsignado;
                 },
 
@@ -512,17 +545,18 @@
 
                 get seriesCompletadas() {
                     if (!this.articuloRequiereSeries) return 0;
-                    
-                    return this.seriesForm.filter(serie => 
-                        serie.numero_serie && serie.numero_serie.trim() !== '' && 
-                        serie.ubicacion_id
+
+                    return this.seriesForm.filter(serie =>
+                        serie.numero_serie && serie.numero_serie.trim() !== ''
                     ).length;
                 },
+
 
                 get puedeGuardar() {
                     if (this.ubicacionesForm.length === 0) return false;
 
-                    const totalAsignado = this.ubicacionesForm.reduce((sum, ubic) => sum + (parseInt(ubic.cantidad) || 0), 0);
+                    const totalAsignado = this.ubicacionesForm.reduce((sum, ubic) => sum + (parseInt(ubic.cantidad) ||
+                        0), 0);
                     const cantidadTotal = this.solicitudSeleccionada?.cantidad || 0;
 
                     const ubicacionesValidas = this.ubicacionesForm.every(ubic =>
@@ -531,10 +565,10 @@
 
                     // Si requiere series, validar que estén completas
                     if (this.articuloRequiereSeries) {
-                        const seriesValidas = this.seriesForm.length === cantidadTotal && 
-                                             this.seriesCompletadas === cantidadTotal &&
-                                             !this.tieneSerieDuplicada();
-                        
+                        const seriesValidas = this.seriesForm.length === cantidadTotal &&
+                            this.seriesCompletadas === cantidadTotal &&
+                            !this.tieneSerieDuplicada();
+
                         return ubicacionesValidas && totalAsignado === cantidadTotal && seriesValidas;
                     }
 
@@ -618,9 +652,9 @@
                 // Nuevos métodos para series
                 validarSerieDuplicada(numeroSerie, indiceActual) {
                     if (!numeroSerie || numeroSerie.trim() === '') return false;
-                    
-                    return this.seriesForm.some((serie, index) => 
-                        index !== indiceActual && 
+
+                    return this.seriesForm.some((serie, index) =>
+                        index !== indiceActual &&
                         serie.numero_serie === numeroSerie
                     );
                 },
@@ -633,14 +667,14 @@
                 inicializarSeries() {
                     console.log('🔍 Verificando si requiere series:', this.articuloRequiereSeries);
                     console.log('📋 Artículo maneja_serie:', this.solicitudSeleccionada?.articulo?.maneja_serie);
-                    
+
                     if (!this.articuloRequiereSeries) {
                         this.seriesForm = [];
                         return;
                     }
 
                     const cantidad = this.solicitudSeleccionada?.cantidad || 0;
-                    
+
                     // Si ya hay series existentes, cargarlas
                     if (this.solicitudSeleccionada?.series && this.solicitudSeleccionada.series.length > 0) {
                         console.log('✅ Cargando series existentes:', this.solicitudSeleccionada.series);
@@ -648,7 +682,7 @@
                             numero_serie: serie.numero_serie,
                             ubicacion_id: serie.ubicacion_id
                         }));
-                        
+
                         // Si faltan series, completar con campos vacíos
                         while (this.seriesForm.length < cantidad) {
                             this.seriesForm.push({
@@ -659,12 +693,14 @@
                     } else {
                         // Crear campos vacíos para todas las series necesarias
                         console.log('🆕 Inicializando series vacías para cantidad:', cantidad);
-                        this.seriesForm = Array.from({length: cantidad}, () => ({
+                        this.seriesForm = Array.from({
+                            length: cantidad
+                        }, () => ({
                             numero_serie: '',
                             ubicacion_id: ''
                         }));
                     }
-                    
+
                     console.log('📝 Series form inicializado:', this.seriesForm);
                 },
 
@@ -678,7 +714,8 @@
                     this.solicitudSeleccionada = solicitud;
 
                     // Cargar ubicaciones existentes
-                    if (solicitud.ubicacion && solicitud.ubicacion !== 'null' && solicitud.ubicacion !== '' && solicitud.ubicacion !== 'undefined') {
+                    if (solicitud.ubicacion && solicitud.ubicacion !== 'null' && solicitud.ubicacion !== '' && solicitud
+                        .ubicacion !== 'undefined') {
                         console.log('✅ Intentando parsear ubicacion directo:', solicitud.ubicacion);
 
                         try {
@@ -806,15 +843,17 @@
 
                     if (!this.puedeGuardar) {
                         let mensaje = 'Por favor completa todas las ubicaciones correctamente';
-                        
-                        if (this.articuloRequiereSeries && this.seriesCompletadas < (this.solicitudSeleccionada?.cantidad || 0)) {
-                            mensaje = `Debe completar todos los números de serie. Faltan ${(this.solicitudSeleccionada?.cantidad || 0) - this.seriesCompletadas} serie(s)`;
+
+                        if (this.articuloRequiereSeries && this.seriesCompletadas < (this.solicitudSeleccionada
+                                ?.cantidad || 0)) {
+                            mensaje =
+                                `Debe completar todos los números de serie. Faltan ${(this.solicitudSeleccionada?.cantidad || 0) - this.seriesCompletadas} serie(s)`;
                         }
-                        
+
                         if (this.articuloRequiereSeries && this.tieneSerieDuplicada()) {
                             mensaje = 'No puede haber números de serie duplicados';
                         }
-                        
+
                         console.log('❌ Validaciones no pasadas:', mensaje);
                         this.mostrarNotificacion(mensaje, 'error');
                         return;
@@ -828,7 +867,7 @@
 
                         // Solo agregar series si el artículo las requiere
                         if (this.articuloRequiereSeries) {
-                            requestData.series = this.seriesForm.filter(serie => 
+                            requestData.series = this.seriesForm.filter(serie =>
                                 serie.numero_serie && serie.numero_serie.trim() !== ''
                             );
                         }
@@ -845,16 +884,19 @@
                             // Actualizar la solicitud en la vista
                             this.solicitudesAgrupadas.forEach(grupo => {
                                 grupo.solicitudes.forEach(solicitud => {
-                                    if (solicitud.idSolicitudIngreso === this.solicitudSeleccionada.idSolicitudIngreso) {
+                                    if (solicitud.idSolicitudIngreso === this.solicitudSeleccionada
+                                        .idSolicitudIngreso) {
                                         // Actualizar estado
                                         solicitud.estado = 'ubicado';
 
                                         // Actualizar ubicaciones
-                                        solicitud.ubicacion = response.data.ubicacion_texto || this.generarTextoUbicaciones(this.ubicacionesForm);
+                                        solicitud.ubicacion = response.data.ubicacion_texto || this
+                                            .generarTextoUbicaciones(this.ubicacionesForm);
                                         solicitud.ubicaciones = this.ubicacionesForm.map(ubic => ({
                                             ubicacion_id: ubic.ubicacion_id,
                                             cantidad: parseInt(ubic.cantidad),
-                                            nombre_ubicacion: this.getNombreUbicacion(ubic.ubicacion_id)
+                                            nombre_ubicacion: this.getNombreUbicacion(ubic
+                                                .ubicacion_id)
                                         }));
 
                                         // Actualizar series si las hay
@@ -865,7 +907,8 @@
                                         console.log('✅ Solicitud actualizada:', solicitud);
 
                                         // Recalcular estado general del grupo
-                                        grupo.estado_general = this.calcularEstadoGeneral(grupo.solicitudes);
+                                        grupo.estado_general = this.calcularEstadoGeneral(grupo
+                                            .solicitudes);
                                     }
                                 });
                             });
@@ -941,7 +984,9 @@
 
                 async cambiarEstadoGrupo(grupo, nuevoEstado) {
                     try {
-                        if (confirm(`¿Estás seguro de cambiar el estado de todos los artículos (${grupo.solicitudes.length}) a ${nuevoEstado}?`)) {
+                        if (confirm(
+                                `¿Estás seguro de cambiar el estado de todos los artículos (${grupo.solicitudes.length}) a ${nuevoEstado}?`
+                            )) {
                             // Cambiar estado de todas las solicitudes del grupo
                             const promises = grupo.solicitudes.map(solicitud =>
                                 axios.post(`/solicitud-ingreso/${solicitud.idSolicitudIngreso}/cambiar-estado`, {
@@ -958,7 +1003,9 @@
                                 });
                                 grupo.estado_general = nuevoEstado;
 
-                                this.mostrarNotificacion(`Estado de ${grupo.solicitudes.length} artículos actualizado a ${nuevoEstado}`, 'success');
+                                this.mostrarNotificacion(
+                                    `Estado de ${grupo.solicitudes.length} artículos actualizado a ${nuevoEstado}`,
+                                    'success');
                             }
                         }
                     } catch (error) {
