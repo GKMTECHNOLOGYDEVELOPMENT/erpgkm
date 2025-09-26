@@ -111,6 +111,7 @@ public function store(Request $request)
             'nombre' => 'required|string|max:255|unique:articulos,nombre',
             'stock_total' => 'required|nullable|integer',
             'stock_minimo' => 'required|nullable|integer',
+            'maneja_serie' => 'nullable|boolean', // ✅ Agregado
             'moneda_compra' => 'required|nullable|integer',
             'moneda_venta' => 'required|nullable|integer',
             'precio_compra' => 'required|nullable|numeric',
@@ -134,6 +135,9 @@ public function store(Request $request)
         $dataArticulo['precio_compra'] = $dataArticulo['precio_compra'] ?? 0;
         $dataArticulo['garantia_fabrica'] = $dataArticulo['garantia_fabrica'] ?? 0;
         $dataArticulo['unidad_tiempo_garantia'] = $dataArticulo['unidad_tiempo_garantia'] ?? 'meses';
+
+        // ✅ Manejar el checkbox (si no viene, es 0)
+        $dataArticulo['maneja_serie'] = $request->has('maneja_serie') ? 1 : 0;
 
         // Crear artículo
         $articulo = Articulo::create($dataArticulo);
@@ -239,6 +243,7 @@ public function store(Request $request)
                 'articulo_id' => $articulo->idArticulos,
                 'compra_id' => $compraId,
                 'stock_inicial' => $dataArticulo['stock_total'],
+                 'maneja_serie' => $dataArticulo['maneja_serie'], // ✅ Incluir en respuesta
                 'garantia' => $dataArticulo['garantia_fabrica'] . ' ' . $dataArticulo['unidad_tiempo_garantia'],
                 'proveedor_id' => $dataArticulo['idProveedor'] ?? null,
             ]
@@ -305,6 +310,7 @@ public function update(Request $request, $id)
             'nombre' => 'required|string|max:255',
             'stock_total' => 'required|nullable|integer',
             'stock_minimo' => 'required|nullable|integer',
+            'maneja_serie' => 'nullable|boolean', // ✅ Agregado
             'moneda_compra' => 'required|nullable|integer',
             'moneda_venta' => 'required|nullable|integer',
             'precio_compra' => 'required|nullable|numeric',
@@ -326,6 +332,9 @@ public function update(Request $request, $id)
 
         // ✅ Actualizar datos principales
         $dataArticulo = $validatedData;
+
+        // ✅ Manejar el checkbox (si no viene, es 0)
+        $dataArticulo['maneja_serie'] = $request->has('maneja_serie') ? 1 : 0;
         
         // Valores por defecto para los nuevos campos si no están presentes
         $dataArticulo['garantia_fabrica'] = $dataArticulo['garantia_fabrica'] ?? 0;
@@ -376,10 +385,13 @@ public function update(Request $request, $id)
             $articulo->update(['ficha_tecnica' => $fileName]);
         }
 
-        // ✅ Respuesta de éxito
+           // ✅ Respuesta de éxito
         return response()->json([
             'success' => true,
             'message' => 'Artículo actualizado correctamente',
+            'data' => [
+                'maneja_serie' => $dataArticulo['maneja_serie'] // ✅ Incluir en respuesta
+            ]
         ]);
 
     } catch (\Exception $e) {

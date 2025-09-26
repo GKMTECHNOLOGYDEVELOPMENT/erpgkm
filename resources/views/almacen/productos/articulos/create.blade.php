@@ -178,6 +178,21 @@
                     </div>
                 </div>
 
+                <!-- Maneja Serie -->
+                <div class="relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Maneja Serie</label>
+                    <div class="flex items-center mt-1">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input id="maneja_serie" name="maneja_serie" type="checkbox" value="1" 
+                                class="form-checkbox text-primary rounded">
+                            <span class="ml-2 text-sm text-gray-600">¿Este producto maneja números de serie?</span>
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Si está marcado, el producto requerirá números de serie únicos para cada unidad
+                    </p>
+                </div>
+
           <!-- Unidad de Medida -->
         <div class="relative input-with-icon">
             <div class="flex justify-between items-center">
@@ -682,6 +697,20 @@ document.getElementById("btnLimpiar").addEventListener("click", function () {
     document.getElementById('nombre_archivo').textContent = 'Ningún archivo seleccionado';
     document.getElementById('preview_pdf').classList.add('hidden');
 });
+</script>
+
+<script>
+   // Agregar en tu script existente
+document.getElementById('maneja_serie').addEventListener('change', function(e) {
+    const stockTotalInput = document.getElementById('stock_total');
+    
+    if (e.target.checked) {
+        // Si maneja serie, mostrar advertencia si stock > 1
+        if (parseInt(stockTotalInput.value) > 1) {
+            toastr.warning('Los productos que manejan serie normalmente tienen stock 1. Verifique el stock total.');
+        }
+    }
+}); 
 </script>
     <script src="{{ asset('assets/js/almacen/productos/productosValidaciones.js') }}"></script>
     <script src="{{ asset('assets/js/almacen/productos/modal.js') }}"></script>
