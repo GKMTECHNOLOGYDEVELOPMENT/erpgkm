@@ -212,14 +212,17 @@
                                                             x-text="getUbicacionesTexto(solicitud)"></span>
                                                     </div>
                                                 </div>
-                                                <!-- Series -->
                                                 <template x-if="solicitud.series && solicitud.series.length > 0">
                                                     <div>
                                                         <span class="text-gray-500">Series:</span>
-                                                        <span class="font-medium ml-1"
-                                                            x-text="getSeriesTexto(solicitud.series)"></span>
+                                                        <button
+                                                            @click="seriesModal = true; seriesSeleccionadas = solicitud.series"
+                                                            class="ml-2 text-blue-600 text-xs underline hover:text-blue-800">
+                                                            Ver series (<span x-text="solicitud.series.length"></span>)
+                                                        </button>
                                                     </div>
                                                 </template>
+
                                             </div>
 
                                             <!-- Botones -->
@@ -281,6 +284,57 @@
                         </div>
                     </div>
             </template>
+        </div>
+        <!-- Modal de series -->
+        <!-- Modal Extra Grande con Grid -->
+        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden" :class="seriesModal && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="seriesModal = false">
+                <div x-show="seriesModal" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-5xl my-8">
+
+                    <!-- Header -->
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <h5 class="font-bold text-lg">
+                            <i class="fas fa-barcode text-blue-600 mr-2"></i> Series del Artículo
+                        </h5>
+                        <button type="button" class="text-white-dark hover:text-dark" @click="seriesModal = false">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Contenido con scroll -->
+                    <div class="p-5 max-h-[70vh] overflow-y-auto">
+                        <template x-if="seriesSeleccionadas.length > 0">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                <template x-for="(serie, index) in seriesSeleccionadas" :key="index">
+                                    <div class="border rounded-lg p-3 bg-white shadow-sm flex flex-col">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-xs text-gray-400"># <span
+                                                    x-text="index + 1"></span></span>
+                                        </div>
+                                        <p class="font-mono font-semibold text-gray-800 text-sm truncate"
+                                            x-text="serie.numero_serie"></p>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <template x-if="seriesSeleccionadas.length === 0">
+                            <p class="text-gray-500 text-sm">No hay series registradas.</p>
+                        </template>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="flex justify-end items-center px-5 py-3 bg-gray-50">
+                        <button type="button" class="btn btn-outline-danger" @click="seriesModal = false">
+                            Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Modal de Ubicación con Series -->
@@ -523,6 +577,8 @@
                 solicitudesAgrupadas: @json($solicitudesAgrupadas),
                 ubicaciones: @json($ubicaciones),
                 modalUbicacionAbierto: false,
+                seriesModal: false,
+                seriesSeleccionadas: [],
                 solicitudSeleccionada: null,
                 ubicacionesForm: [],
                 seriesForm: [], // Nueva propiedad para series
