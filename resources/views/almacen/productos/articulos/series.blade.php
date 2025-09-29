@@ -61,7 +61,7 @@
                     <i class="fas fa-info-circle text-blue-500 mr-2"></i>
                     Información del Producto
                 </h2>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Código de Barras -->
                     <div class="bg-blue-50 rounded-lg p-4">
@@ -183,7 +183,8 @@
                                         {{ ucfirst(str_replace('_', ' ', $serie->origen)) }}
                                     </span>
                                 </td>
-                                <td class="text-center">{{ \Carbon\Carbon::parse($serie->fecha_ingreso)->format('d/m/Y H:i') }}</td>
+                                <td class="text-center">
+                                    {{ \Carbon\Carbon::parse($serie->fecha_ingreso)->format('d/m/Y H:i') }}</td>
                                 <td class="text-center">
                                     <div class="flex justify-center space-x-2">
                                         <button type="button" class="btn btn-info btn-sm"
@@ -205,13 +206,14 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-8">
+                            <tr class="odd">
+                                <td valign="top" colspan="6" class="dataTables_empty text-center py-8">
                                     <i class="fas fa-box-open text-gray-400 text-4xl mb-4"></i>
                                     <p class="text-gray-500">No se encontraron series para este artículo.</p>
                                 </td>
                             </tr>
                         @endforelse
+
                     </tbody>
                 </table>
             </div>
@@ -290,31 +292,40 @@
                     this.initDataTable();
                 },
 
-                initDataTable() {
-                    this.datatable = $('#tablaSeries').DataTable({
-                        responsive: true,
-                        autoWidth: false,
-                        pageLength: 10,
-                        dom: 'rtip',
-                        language: {
-                            zeroRecords: 'No se encontraron registros',
-                            info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
-                            infoEmpty: 'Mostrando 0 a 0 de 0 registros',
-                            infoFiltered: '(filtrado de _MAX_ registros totales)',
-                            paginate: {
-                                first: 'Primero',
-                                last: 'Último',
-                                next: 'Siguiente',
-                                previous: 'Anterior'
-                            }
-                        },
-                        columnDefs: [{
-                                orderable: false,
-                                targets: [5]
-                            } // Deshabilitar ordenamiento en columna de acciones
-                        ]
-                    });
-                },
+                this.datatable = $('#tablaSeries').DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    pageLength: 10,
+                    dom: 'rtip',
+                    language: {
+                        emptyTable: `
+            <div class="text-center py-8">
+                <i class="fas fa-box-open text-gray-400 text-4xl mb-4"></i>
+                <p class="text-gray-500">No se encontraron series para este artículo.</p>
+            </div>
+        `,
+                        zeroRecords: `
+            <div class="text-center py-8">
+                <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+                <p class="text-gray-500">No hay coincidencias con tu búsqueda.</p>
+            </div>
+        `,
+                        info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                        infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+                        infoFiltered: '(filtrado de _MAX_ registros totales)',
+                        paginate: {
+                            first: 'Primero',
+                            last: 'Último',
+                            next: 'Siguiente',
+                            previous: 'Anterior'
+                        }
+                    },
+                    columnDefs: [{
+                        orderable: false,
+                        targets: [5]
+                    }]
+                });
+
 
                 filtrarSeries() {
                     // Aplicar filtros simultáneamente
