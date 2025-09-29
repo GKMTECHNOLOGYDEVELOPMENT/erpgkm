@@ -918,7 +918,7 @@
 
 
 
-                <li class="menu nav-item">
+                <!-- <li class="menu nav-item">
                     <a href="{{ route('almacen.kits.index') }}" class="nav-link group">
                         <div class="flex items-center">
 
@@ -944,7 +944,7 @@
                                 de Articulos</span>
                         </div>
                     </a>
-                </li>
+                </li> -->
 
 
                 <!--nuevo--->
@@ -1188,9 +1188,9 @@
                          <li>
                             <a href="{{ route('solicitudingreso.index') }}">Solicitud de Ingreso</a>
                         </li>
-                        <li>
+                        <!-- <li>
                             <a href="{{ route('solicitudarticulo.index') }}">Solicitud de Articulo</a>
-                        </li>
+                        </li> -->
                         <li>
                             <a href="{{ route('solicitudcustodia.index') }}">Solicitud de Custodia</a>
                         </li>
