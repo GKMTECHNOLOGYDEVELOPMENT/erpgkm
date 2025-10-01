@@ -142,7 +142,7 @@
             <div
                 class="panel backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg sm:shadow-xl overflow-hidden border border-white/20">
                 <!-- Header de la tabla -->
-                <div class="bg-gradient-to-r from-slate-800 to-slate-700 px-4 sm:px-6 py-3 sm:py-5">
+                <div class="px-4 sm:px-6 py-3 sm:py-5">
                     <div class="flex items-center gap-2 sm:gap-3">
                         <div class="p-1 sm:p-2 bg-white/10 rounded-lg sm:rounded-xl">
                             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor"

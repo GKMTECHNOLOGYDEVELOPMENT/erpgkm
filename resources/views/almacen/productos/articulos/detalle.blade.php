@@ -1,5 +1,5 @@
 <x-layout.default>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Contenedor principal -->
     <div x-data="modalHandler()">
@@ -7,9 +7,13 @@
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse mb-4">
                 <li>
-                    <a href="{{ route('articulos.index') }}" class="text-primary hover:underline">Artículos</a>
+                    <a href="{{ route('articulos.index') }}" class="text-primary hover:underline flex items-center gap-2">
+                        <i class="fas fa-cube w-4 h-4"></i>
+                        Artículos
+                    </a>
                 </li>
-                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1 flex items-center gap-2">
+                    <i class="fas fa-info-circle w-4 h-4 text-gray-500"></i>
                     <span>Detalle Artículo</span>
                 </li>
             </ul>
@@ -18,7 +22,7 @@
         <!-- Panel principal mejorado -->
         <div class="panel rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <!-- Header con gradiente -->
-            <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8">
+            <div class="px-6 py-8">
                 <div class="text-center">
                     <h1 class="text-4xl sm:text-5xl font-bold uppercase tracking-tight mb-2">
                         {{ $articulo->nombre }}
@@ -68,8 +72,7 @@
 
                             <button type="button"
                                 @click="openModal('{{ $articulo->codigo_barras }}', '{{ $articulo->foto_codigobarras ? base64_encode($articulo->foto_codigobarras) : '' }}')"
-                                class="flex items-center justify-center gap-2 w-full sm:w-auto bg-blue-600 text-white px-6 py-2.5 rounded-lg font-medium shadow-md 
-                       hover:bg-blue-700 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
+                                class="btn btn-primary w-full text-base py-3 gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
@@ -105,8 +108,7 @@
                             </div>
 
                             <button type="button" @click="openModal('{{ $articulo->sku }}')"
-                                class="flex items-center justify-center gap-2 w-full sm:w-auto bg-secondary text-white px-6 py-2.5 rounded-lg font-medium shadow-md 
-                       hover:bg-purple-700 hover:shadow-lg hover:scale-105 active:scale-95 transition-all duration-200">
+                                class="btn btn-secondary w-full text-base py-3 gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
@@ -319,11 +321,7 @@
                                 </div>
                                 <div class="text-sm font-medium text-gray-600 mb-1">Garantía de Fábrica</div>
                                 <div class="text-lg font-semibold text-gray-800">
-                                    @if ($articulo->garantia_fabrica > 0)
-                                        {{ $articulo->garantia_fabrica }}
-                                    @else
-                                        <span class="text-gray-400">--</span>
-                                    @endif
+                                    {{ $articulo->garantia_fabrica ?? '--' }}
                                 </div>
                             </div>
 
@@ -337,31 +335,28 @@
                                 </div>
                                 <div class="text-sm font-medium text-gray-600 mb-1">Unidad de Tiempo</div>
                                 <div class="text-lg font-semibold text-gray-800">
-                                    @if ($articulo->garantia_fabrica > 0)
-                                        @switch($articulo->unidad_tiempo_garantia)
-                                            @case('dias')
-                                                Días
-                                            @break
+                                    @switch($articulo->unidad_tiempo_garantia)
+                                        @case('dias')
+                                            Días
+                                        @break
 
-                                            @case('semanas')
-                                                Semanas
-                                            @break
+                                        @case('semanas')
+                                            Semanas
+                                        @break
 
-                                            @case('meses')
-                                                Meses
-                                            @break
+                                        @case('meses')
+                                            Meses
+                                        @break
 
-                                            @case('años')
-                                                Años
-                                            @break
+                                        @case('años')
+                                            Años
+                                        @break
 
-                                            @default
-                                                {{ $articulo->unidad_tiempo_garantia ?? 'N/A' }}
-                                        @endswitch
-                                    @else
-                                        <span class="text-gray-400">--</span>
-                                    @endif
+                                        @default
+                                            {{ $articulo->unidad_tiempo_garantia ?? 'N/A' }}
+                                    @endswitch
                                 </div>
+
                             </div>
 
                             <div class="text-center">
@@ -473,7 +468,6 @@
 
 
     <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="//unpkg.com/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 

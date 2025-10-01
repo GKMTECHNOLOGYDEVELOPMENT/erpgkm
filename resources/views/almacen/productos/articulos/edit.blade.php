@@ -194,7 +194,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Maneja Serie</label>
                     <div class="flex items-center mt-1">
                         <label class="inline-flex items-center cursor-pointer">
-                            <input id="maneja_serie" name="maneja_serie" type="checkbox" value="1" 
+                            <input id="maneja_serie" name="maneja_serie" type="checkbox" value="1"
                                 class="form-checkbox text-primary rounded"
                                 {{ $articulo->maneja_serie ? 'checked' : '' }}>
                             <span class="ml-2 text-sm text-gray-600">¿Este producto maneja números de serie?</span>
@@ -258,24 +258,37 @@
 
                 <!-- Garantía de Fábrica -->
                 <div class="relative">
-                    <label for="garantia_fabrica" class="block text-sm font-medium text-gray-700">Garantía de Fábrica</label>
+                    <label for="garantia_fabrica" class="block text-sm font-medium text-gray-700">Garantía de
+                        Fábrica</label>
                     <div class="relative mt-1">
                         <i class="fas fa-shield-alt input-icon"></i>
-                        <input id="garantia_fabrica" name="garantia_fabrica" type="number" min="0" class="clean-input w-full"
-                            placeholder="Tiempo de garantía" value="{{ $articulo->garantia_fabrica ?? 0 }}">
+                        <input id="garantia_fabrica" name="garantia_fabrica" type="number" min="0"
+                            class="clean-input w-full" placeholder="Tiempo de garantía"
+                            value="{{ $articulo->garantia_fabrica ?? 0 }}">
                     </div>
                 </div>
 
                 <!-- Unidad de Tiempo de Garantía -->
-                <div class="relative" id="unidad_tiempo_container" style="{{ ($articulo->garantia_fabrica ?? 0) > 0 ? '' : 'display: none;' }}">
-                    <label for="unidad_tiempo_garantia" class="block text-sm font-medium text-gray-700">Unidad de Tiempo</label>
+                <div class="relative" id="unidad_tiempo_container"
+                    style="{{ ($articulo->garantia_fabrica ?? 0) > 0 ? '' : 'display: none;' }}">
+                    <label for="unidad_tiempo_garantia" class="block text-sm font-medium text-gray-700">Unidad de
+                        Tiempo</label>
                     <div class="relative mt-1">
                         <i class="fas fa-clock input-icon"></i>
-                        <select id="unidad_tiempo_garantia" name="unidad_tiempo_garantia" class="select2-single clean-input w-full pl-10">
-                            <option value="dias" {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'dias' ? 'selected' : '' }}>Días</option>
-                            <option value="semanas" {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'semanas' ? 'selected' : '' }}>Semanas</option>
-                            <option value="meses" {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'meses' ? 'selected' : '' }}>Meses</option>
-                            <option value="años" {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'años' ? 'selected' : '' }}>Años</option>
+                        <select id="unidad_tiempo_garantia" name="unidad_tiempo_garantia"
+                            class="select2-single clean-input w-full pl-10">
+                            <option value="dias"
+                                {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'dias' ? 'selected' : '' }}>Días
+                            </option>
+                            <option value="semanas"
+                                {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'semanas' ? 'selected' : '' }}>
+                                Semanas</option>
+                            <option value="meses"
+                                {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'meses' ? 'selected' : '' }}>Meses
+                            </option>
+                            <option value="años"
+                                {{ ($articulo->unidad_tiempo_garantia ?? 'meses') == 'años' ? 'selected' : '' }}>Años
+                            </option>
                         </select>
                     </div>
                 </div>
@@ -286,7 +299,8 @@
                     <div class="relative mt-1">
                         <i class="fas fa-truck input-icon"></i>
                         <select id="idProveedor" name="idProveedor" class="select2-single clean-input w-full pl-10">
-                            <option value="" {{ is_null($articulo->idProveedor) ? 'selected' : '' }}>Seleccionar proveedor (opcional)</option>
+                            <option value="" {{ is_null($articulo->idProveedor) ? 'selected' : '' }}>Seleccionar
+                                proveedor (opcional)</option>
                             @foreach ($proveedores as $proveedor)
                                 <option value="{{ $proveedor->idProveedor }}"
                                     {{ $proveedor->idProveedor == $articulo->idProveedor ? 'selected' : '' }}>
@@ -331,7 +345,24 @@
                         <input type="hidden" id="moneda_venta" name="moneda_venta" value="0">
                     </div>
                 </div>
-
+                <!-- Estado del Artículo -->
+                <div>
+                    <label for="estado" class="block text-sm font-medium">Estado</label>
+                    <div class="ml-4 w-12 h-6 relative">
+                        <input type="hidden" name="estado" value="0">
+                        <input type="checkbox" id="estado" name="estado"
+                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                            value="1"
+                            {{ old('estado', isset($articulo) ? $articulo->estado : 1) ? 'checked' : '' }} />
+                        <span
+                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full 
+                            before:absolute before:left-1 before:bg-white dark:before:bg-white-dark 
+                            dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 
+                            before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary 
+                            before:transition-all before:duration-300">
+                        </span>
+                    </div>
+                </div>
                 <!-- Foto -->
                 <div class="mb-5" x-data="{
                     fotoPreview: '/assets/images/articulo/producto-default.png',
@@ -367,7 +398,8 @@
                 <!-- Ficha Técnica -->
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700">Ficha Técnica (PDF)</label>
-                    <label for="ficha_tecnica" class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
+                    <label for="ficha_tecnica"
+                        class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
                         <i class="fas fa-upload mr-1"></i> Seleccionar archivo</label>
                     <div class="relative mt-1">
                         <input id="ficha_tecnica" name="ficha_tecnica" type="file" accept=".pdf"
@@ -379,11 +411,11 @@
                     </div>
 
                     <!-- Vista previa del PDF -->
-                    <div id="preview_pdf" class="mt-4 max-w-full">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Vista previa:</label>
-                        <iframe id="pdf_viewer" class="w-full h-[600px] border rounded"
+                    <div class="relative w-full" style="padding-top: 50%;"> <!-- 50% = aspecto 2:1 -->
+                        <iframe id="pdf_viewer" class="absolute top-0 left-0 w-full h-full border rounded"
                             type="application/pdf"></iframe>
                     </div>
+
                 </div>
 
 
@@ -392,28 +424,12 @@
                         document.addEventListener("DOMContentLoaded", function() {
                             document.getElementById('nombre_archivo').textContent = "{{ basename($articulo->ficha_tecnica) }}";
                             document.getElementById('pdf_viewer').src =
-                            "{{ asset('storage/fichas/' . $articulo->ficha_tecnica) }}";
+                                "{{ asset('storage/fichas/' . $articulo->ficha_tecnica) }}";
                         });
                     </script>
                 @endif
 
-                   <!-- Estado del Artículo -->
-                <div>
-                    <label for="estado" class="block text-sm font-medium">Estado</label>
-                    <div class="ml-4 w-12 h-6 relative">
-                        <input type="hidden" name="estado" value="0">
-                        <input type="checkbox" id="estado" name="estado"
-                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" value="1"
-                            {{ old('estado', isset($articulo) ? $articulo->estado : 1) ? 'checked' : '' }} />
-                        <span
-                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full 
-                            before:absolute before:left-1 before:bg-white dark:before:bg-white-dark 
-                            dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 
-                            before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary 
-                            before:transition-all before:duration-300">
-                        </span>
-                    </div>
-                </div>
+
 
 
 
@@ -524,87 +540,87 @@
                 });
             }
 
-           // ---------------------------
-// 4. Actualizar del formulario por AJAX con preloader
-// ---------------------------
-document.getElementById("btnGuardar").addEventListener("click", function() {
-    const form = document.getElementById("productoForm");
-    const btnGuardar = this;
+            // ---------------------------
+            // 4. Actualizar del formulario por AJAX con preloader
+            // ---------------------------
+            document.getElementById("btnGuardar").addEventListener("click", function() {
+                const form = document.getElementById("productoForm");
+                const btnGuardar = this;
 
-    // Ejecutar validaciones manuales
-    form.dispatchEvent(new Event('submit', {
-        cancelable: true,
-        bubbles: true
-    }));
+                // Ejecutar validaciones manuales
+                form.dispatchEvent(new Event('submit', {
+                    cancelable: true,
+                    bubbles: true
+                }));
 
-    const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
-    if (errores.length > 0) {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-        return;
-    }
+                const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
+                if (errores.length > 0) {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    return;
+                }
 
-    // Deshabilitar botón y mostrar loader
-    btnGuardar.disabled = true;
-    btnGuardar.innerHTML = `
+                // Deshabilitar botón y mostrar loader
+                btnGuardar.disabled = true;
+                btnGuardar.innerHTML = `
         <i class="fas fa-spinner fa-spin mr-2"></i> Actualizando...
     `;
-    btnGuardar.classList.add('opacity-75', 'cursor-not-allowed');
+                btnGuardar.classList.add('opacity-75', 'cursor-not-allowed');
 
-    const formData = new FormData(form);
+                const formData = new FormData(form);
 
-    // ✅ Agregar _method = PUT para que Laravel lo acepte como actualización
-    formData.append('_method', 'PUT');
+                // ✅ Agregar _method = PUT para que Laravel lo acepte como actualización
+                formData.append('_method', 'PUT');
 
-    // ✅ Este ID debe venir de un campo oculto en el formulario
-    const idArticulo = document.getElementById("idArticulo").value;
+                // ✅ Este ID debe venir de un campo oculto en el formulario
+                const idArticulo = document.getElementById("idArticulo").value;
 
-    const url = `/producto/update/${idArticulo}`;
-    console.log("📤 Enviando datos para actualización a:", url);
+                const url = `/producto/update/${idArticulo}`;
+                console.log("📤 Enviando datos para actualización a:", url);
 
-    fetch(url, {
-        method: "POST", // Laravel interpretará como PUT gracias a _method
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Restaurar botón a estado normal
-        btnGuardar.disabled = false;
-        btnGuardar.innerHTML = `
+                fetch(url, {
+                        method: "POST", // Laravel interpretará como PUT gracias a _method
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Restaurar botón a estado normal
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = `
             <i class="fas fa-save mr-2"></i> Actualizar Producto
         `;
-        btnGuardar.classList.remove('opacity-75', 'cursor-not-allowed');
+                        btnGuardar.classList.remove('opacity-75', 'cursor-not-allowed');
 
-        if (data.success) {
-            toastr.success("Producto actualizado correctamente");
+                        if (data.success) {
+                            toastr.success("Producto actualizado correctamente");
 
-            // ✅ Redireccionar después de 2 segundos para que el usuario vea el mensaje
-            // setTimeout(() => {
-            //     window.location.href = "/producto"; // Cambia por tu ruta deseada
-            // }, 2000);
+                            // ✅ Redireccionar después de 2 segundos para que el usuario vea el mensaje
+                            // setTimeout(() => {
+                            //     window.location.href = "/producto"; // Cambia por tu ruta deseada
+                            // }, 2000);
 
-        } else {
-            toastr.error("Error al actualizar el producto.");
-            console.error("❌ Error del servidor:", data);
-        }
-    })
-    .catch(error => {
-        // Restaurar botón a estado normal incluso en caso de error
-        btnGuardar.disabled = false;
-        btnGuardar.innerHTML = `
+                        } else {
+                            toastr.error("Error al actualizar el producto.");
+                            console.error("❌ Error del servidor:", data);
+                        }
+                    })
+                    .catch(error => {
+                        // Restaurar botón a estado normal incluso en caso de error
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = `
             <i class="fas fa-save mr-2"></i> Actualizar Producto
         `;
-        btnGuardar.classList.remove('opacity-75', 'cursor-not-allowed');
-        
-        toastr.error("Error en la comunicación con el servidor.");
-        console.error("🚨 Error AJAX:", error);
-    });
-});
+                        btnGuardar.classList.remove('opacity-75', 'cursor-not-allowed');
+
+                        toastr.error("Error en la comunicación con el servidor.");
+                        console.error("🚨 Error AJAX:", error);
+                    });
+            });
 
         });
     </script>
@@ -627,36 +643,36 @@ document.getElementById("btnGuardar").addEventListener("click", function() {
 
 
     <script>
-    // Función para mostrar/ocultar unidad de tiempo según garantía
-    function toggleUnidadTiempo() {
-        const garantiaInput = document.getElementById('garantia_fabrica');
-        const unidadTiempoContainer = document.getElementById('unidad_tiempo_container');
-        
-        if (garantiaInput && unidadTiempoContainer) {
-            if (garantiaInput.value > 0) {
-                unidadTiempoContainer.style.display = 'block';
-            } else {
-                unidadTiempoContainer.style.display = 'none';
+        // Función para mostrar/ocultar unidad de tiempo según garantía
+        function toggleUnidadTiempo() {
+            const garantiaInput = document.getElementById('garantia_fabrica');
+            const unidadTiempoContainer = document.getElementById('unidad_tiempo_container');
+
+            if (garantiaInput && unidadTiempoContainer) {
+                if (garantiaInput.value > 0) {
+                    unidadTiempoContainer.style.display = 'block';
+                } else {
+                    unidadTiempoContainer.style.display = 'none';
+                }
             }
         }
-    }
 
-    // Inicializar al cargar la página
-    document.addEventListener('DOMContentLoaded', function() {
-        toggleUnidadTiempo();
-        
-        // Event listener para cambios en garantía
-        const garantiaInput = document.getElementById('garantia_fabrica');
-        if (garantiaInput) {
-            garantiaInput.addEventListener('input', toggleUnidadTiempo);
-        }
-        
-        // Inicializar Select2 para el nuevo campo de proveedor
-        $('#idProveedor').select2({
-            placeholder: "Seleccione un proveedor",
-            width: '100%',
-            allowClear: true
+        // Inicializar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleUnidadTiempo();
+
+            // Event listener para cambios en garantía
+            const garantiaInput = document.getElementById('garantia_fabrica');
+            if (garantiaInput) {
+                garantiaInput.addEventListener('input', toggleUnidadTiempo);
+            }
+
+            // Inicializar Select2 para el nuevo campo de proveedor
+            $('#idProveedor').select2({
+                placeholder: "Seleccione un proveedor",
+                width: '100%',
+                allowClear: true
+            });
         });
-    });
-</script>
+    </script>
 </x-layout.default>

@@ -324,8 +324,8 @@
                     <!-- Vista previa del PDF -->
                     <div id="preview_pdf" class="mt-4 max-w-full">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Vista previa:</label>
-                        <iframe id="pdf_viewer" class="w-full h-[600px] border rounded"
-                            type="application/pdf"></iframe>
+                            <iframe id="pdf_viewer" class="w-full h-64 border rounded"
+                                type="application/pdf"></iframe>
                     </div>
                 </div>
 
