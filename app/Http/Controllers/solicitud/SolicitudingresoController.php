@@ -534,6 +534,8 @@ public function guardarUbicacion(Request $request)
     }
 }
 
+
+
 private function verificarTodosArticulosUbicados($solicitud)
 {
     try {
