@@ -142,36 +142,36 @@ public function usuario()
 
 
  // Constantes para los estados
-    const ESTADO_PENDIENTE = 'pendiente';
-    const ESTADO_RECIBIDO = 'recibido';
-    const ESTADO_ENVIADO_ALMACEN = 'enviado_almacen';
-    const ESTADO_ANULADO = 'anulado';
+const ESTADO_PENDIENTE = 'pendiente';
+const ESTADO_RECIBIDO = 'recibido';
+const ESTADO_ENVIADO_ALMACEN = 'enviado_almacen';
+const ESTADO_APROBADO = 'aprobado';
+const ESTADO_ANULADO = 'anulado';
 
+// Método para obtener los estados disponibles
+public static function getEstados()
+{
+    return [
+        self::ESTADO_PENDIENTE => 'Pendiente',
+        self::ESTADO_RECIBIDO => 'Recibido',
+        self::ESTADO_ENVIADO_ALMACEN => 'Enviado a Almacén',
+        self::ESTADO_APROBADO => 'Aprobado',
+        self::ESTADO_ANULADO => 'Anulado',
+    ];
+}
 
+// Método para obtener la clase CSS según el estado
+public function getEstadoBadgeClass()
+{
+    $classes = [
+        self::ESTADO_PENDIENTE => 'bg-yellow-100 text-yellow-800',
+        self::ESTADO_RECIBIDO => 'bg-green-100 text-green-800',
+        self::ESTADO_ENVIADO_ALMACEN => 'bg-blue-100 text-blue-800',
+        self::ESTADO_APROBADO => 'bg-green-100 text-green-800',
+        self::ESTADO_ANULADO => 'bg-red-100 text-red-800',
+    ];
 
-    // Método para obtener los estados disponibles
-    public static function getEstados()
-    {
-        return [
-            self::ESTADO_PENDIENTE => 'Pendiente',
-            self::ESTADO_RECIBIDO => 'Recibido',
-            self::ESTADO_ENVIADO_ALMACEN => 'Enviado a Almacén',
-            self::ESTADO_ANULADO => 'Anulado',
-        ];
-    }
-
-    // Método para obtener la clase CSS según el estado
-    public function getEstadoBadgeClass()
-    {
-        $classes = [
-            self::ESTADO_PENDIENTE => 'bg-yellow-100 text-yellow-800',
-            self::ESTADO_RECIBIDO => 'bg-green-100 text-green-800',
-            self::ESTADO_ENVIADO_ALMACEN => 'bg-blue-100 text-blue-800',
-            self::ESTADO_ANULADO => 'bg-red-100 text-red-800',
-        ];
-
-        return $classes[$this->estado] ?? 'bg-gray-100 text-gray-800';
-    }
-
+    return $classes[$this->estado] ?? 'bg-gray-100 text-gray-800';
+}
 
 }

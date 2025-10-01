@@ -35,7 +35,7 @@ class ComprasController extends Controller
             'fecha_inicio'  => 'sometimes|nullable|date',
             'fecha_fin'     => 'sometimes|nullable|date',
             'q'             => 'sometimes|nullable|string|max:100',
-            'estado'        => 'sometimes|nullable|in:pendiente,recibido,enviado_almacen,anulado', // Nuevo filtro
+            'estado'        => 'sometimes|nullable|in:pendiente,recibido,enviado_almacen,anulado,aprobado', // Nuevo filtro
         ]);
 
         if ($validator->fails()) {
@@ -106,9 +106,9 @@ class ComprasController extends Controller
     // Nuevo método para actualizar el estado
     public function updateEstado(Request $request, $idCompra)
     {
-        $validator = Validator::make($request->all(), [
-            'estado' => 'required|in:pendiente,recibido,enviado_almacen,anulado'
-        ]);
+       $validator = Validator::make($request->all(), [
+    'estado' => 'required|in:pendiente,recibido,enviado_almacen,aprobado,anulado',
+]);
 
         if ($validator->fails()) {
             return response()->json([

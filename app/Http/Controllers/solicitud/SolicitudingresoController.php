@@ -116,6 +116,204 @@ class SolicitudingresoController extends Controller
         return view('solicitud.solicitudingreso.index', compact('solicitudesAgrupadas', 'ubicaciones'));
     }
 
+
+
+
+
+// public function guardarUbicacion(Request $request)
+// {
+//     try {
+//         DB::beginTransaction();
+
+//         $solicitud = SolicitudIngreso::findOrFail($request->solicitud_id);
+        
+//         // Validar que la suma de las cantidades sea igual a la cantidad total
+//         $totalDistribuido = collect($request->ubicaciones)->sum('cantidad');
+        
+//         if ($totalDistribuido != $solicitud->cantidad) {
+//             return response()->json([
+//                 'success' => false,
+//                 'message' => 'La suma de las cantidades distribuidas ('.$totalDistribuido.') debe ser igual a la cantidad total ('.$solicitud->cantidad.')'
+//             ], 422);
+//         }
+
+//         // Verificar si el artículo requiere series
+//         $articulo = \App\Models\Articulo::find($solicitud->articulo_id);
+//         $requiereSeries = $articulo && $articulo->maneja_serie === 1;
+
+//         Log::info("Artículo ID: {$solicitud->articulo_id}, Maneja serie: " . ($articulo ? $articulo->maneja_serie : 'N/A') . ", Requiere series: " . ($requiereSeries ? 'SÍ' : 'NO'));
+
+//         // Validar series si es requerido
+//         if ($requiereSeries) {
+//             if (!$request->has('series') || empty($request->series)) {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'Este artículo requiere números de serie'
+//                 ], 422);
+//             }
+
+//             $totalSeries = count($request->series);
+//             if ($totalSeries != $solicitud->cantidad) {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => "Debe ingresar {$solicitud->cantidad} números de serie, recibidas: {$totalSeries}"
+//                 ], 422);
+//             }
+
+//             // Validar que no haya series duplicadas
+//             $seriesNumeros = array_column($request->series, 'numero_serie');
+//             $seriesUnicas = array_unique($seriesNumeros);
+//             if (count($seriesUnicas) != count($seriesNumeros)) {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'No puede haber números de serie duplicados'
+//                 ], 422);
+//             }
+
+//             // Validar que las series no existan ya en la base de datos para este artículo
+//             $seriesExistentes = ArticuloSerie::where('articulo_id', $solicitud->articulo_id)
+//                 ->whereIn('numero_serie', $seriesNumeros)
+//                 ->where(function($query) use ($solicitud) {
+//                     $query->where('origen', '!=', $solicitud->origen)
+//                           ->orWhere('origen_id', '!=', $solicitud->origen_id);
+//                 })
+//                 ->pluck('numero_serie')
+//                 ->toArray();
+
+//             if (!empty($seriesExistentes)) {
+//                 return response()->json([
+//                     'success' => false,
+//                     'message' => 'Los siguientes números de serie ya existen para este artículo: ' . implode(', ', $seriesExistentes)
+//                 ], 422);
+//             }
+//         }
+
+//         $esPrimeraUbicacion = ($solicitud->estado !== 'ubicado');
+        
+//         if ($esPrimeraUbicacion) {
+//             Log::info("Primera ubicación para solicitud ID: {$solicitud->idSolicitudIngreso}. Aumentando stock.");
+//         } else {
+//             Log::info("Re-ubicación para solicitud ID: {$solicitud->idSolicitudIngreso}. Stock ya fue aumentado anteriormente.");
+//         }
+
+//         // Eliminar ubicaciones y series existentes
+//         ArticuloUbicacion::where('origen', $solicitud->origen)
+//             ->where('articulo_id', $solicitud->articulo_id)
+//             ->where('origen_id', $solicitud->origen_id)
+//             ->delete();
+
+//         ArticuloSerie::where('origen', $solicitud->origen)
+//             ->where('articulo_id', $solicitud->articulo_id)
+//             ->where('origen_id', $solicitud->origen_id)
+//             ->delete();
+
+//         $nombresUbicaciones = [];
+        
+//         // Guardar cada ubicación
+//         foreach ($request->ubicaciones as $ubicacionData) {
+//             $articuloUbicacion = ArticuloUbicacion::create([
+//                 'origen' => $solicitud->origen,
+//                 'articulo_id' => $solicitud->articulo_id,
+//                 'origen_id' => $solicitud->origen_id,
+//                 'ubicacion_id' => $ubicacionData['ubicacion_id'],
+//                 'cantidad' => $ubicacionData['cantidad'],
+//                 'created_at' => now(),
+//                 'updated_at' => now()
+//             ]);
+
+//             $ubicacion = \App\Models\Ubicacion::find($ubicacionData['ubicacion_id']);
+//             if ($ubicacion) {
+//                 $nombresUbicaciones[] = $ubicacion->nombre . ' (' . $ubicacionData['cantidad'] . ')';
+//             }
+//         }
+
+//         // Guardar series sin ubicación
+//         $seriesGuardadas = [];
+//         if ($requiereSeries && !empty($request->series)) {
+//             Log::info("Guardando {$totalSeries} series para solicitud {$solicitud->idSolicitudIngreso}");
+            
+//             foreach ($request->series as $serieData) {
+//                 $serieBD = ArticuloSerie::create([
+//                     'origen' => $solicitud->origen,
+//                     'origen_id' => $solicitud->origen_id,
+//                     'articulo_id' => $solicitud->articulo_id,
+//                     'numero_serie' => $serieData['numero_serie'],
+//                     'estado' => 'activo'
+//                 ]);
+
+//                 $seriesGuardadas[] = [
+//                     'numero_serie' => $serieBD->numero_serie
+//                 ];
+
+//                 Log::info("Serie guardada: {$serieBD->numero_serie}");
+//             }
+//         }
+
+//         // Aumentar stock del artículo solo si es la primera vez
+//         if ($esPrimeraUbicacion && $articulo) {
+//             $stockAnterior = $articulo->stock_total;
+//             $nuevoStock = $stockAnterior + $solicitud->cantidad;
+            
+//             $articulo->stock_total = $nuevoStock;
+//             $articulo->save();
+            
+//             Log::info("Stock actualizado - Artículo ID: {$articulo->idArticulos}");
+//             Log::info("Stock anterior: {$stockAnterior}, Cantidad añadida: {$solicitud->cantidad}, Nuevo stock: {$nuevoStock}");
+//         }
+
+//         // Actualizar solicitud
+//         $ubicacionTexto = !empty($nombresUbicaciones) ? implode(', ', $nombresUbicaciones) : 'Sin ubicación';
+        
+//         $solicitud->ubicacion = $ubicacionTexto;
+//         $solicitud->estado = 'ubicado';
+//         $solicitud->save();
+
+//         DB::commit();
+
+//         // Retornar respuesta con las ubicaciones y series actualizadas
+//         $ubicacionesActualizadas = ArticuloUbicacion::with('ubicacion:idUbicacion,nombre')
+//             ->where('origen', $solicitud->origen)
+//             ->where('articulo_id', $solicitud->articulo_id)
+//             ->where('origen_id', $solicitud->origen_id)
+//             ->get()
+//             ->map(function($ubicacion) {
+//                 return [
+//                     'ubicacion_id' => $ubicacion->ubicacion_id,
+//                     'cantidad' => $ubicacion->cantidad,
+//                     'nombre_ubicacion' => $ubicacion->ubicacion->nombre
+//                 ];
+//             });
+
+//         $mensaje = 'Artículo ubicado correctamente en '.count($request->ubicaciones).' ubicación(es)';
+//         if ($requiereSeries) {
+//             $mensaje .= ' con '.count($seriesGuardadas).' número(s) de serie';
+//         }
+//         if ($esPrimeraUbicacion) {
+//             $mensaje .= ' y stock actualizado';
+//         }
+
+//         return response()->json([
+//             'success' => true,
+//             'message' => $mensaje,
+//             'ubicaciones' => $ubicacionesActualizadas,
+//             'series' => $seriesGuardadas,
+//             'ubicacion_texto' => $ubicacionTexto,
+//             'stock_actualizado' => $esPrimeraUbicacion
+//         ]);
+
+//     } catch (\Exception $e) {
+//         DB::rollBack();
+//         Log::error('Error al guardar ubicación: ' . $e->getMessage());
+//         Log::error('Stack trace: ' . $e->getTraceAsString());
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Error al guardar la ubicación: '.$e->getMessage()
+//         ], 500);
+//     }
+// }
+
+
+
 public function guardarUbicacion(Request $request)
 {
     try {
@@ -264,6 +462,30 @@ public function guardarUbicacion(Request $request)
         $solicitud->estado = 'ubicado';
         $solicitud->save();
 
+        // VERIFICAR SI TODOS LOS ARTÍCULOS DE LA COMPRA/ENTRADA ESTÁN UBICADOS
+        $todosUbicados = $this->verificarTodosArticulosUbicados($solicitud);
+
+        if ($todosUbicados) {
+            // Actualizar el estado de la compra o entrada proveedor a 'aprobado'
+            if ($solicitud->origen === 'compra') {
+                DB::table('compra')
+                    ->where('idCompra', $solicitud->origen_id)
+                    ->update([
+                        'estado' => 'aprobado',
+                        'updated_at' => now()
+                    ]);
+                Log::info("✅ COMPRA APROBADA - Todos los artículos ubicados. Compra ID: {$solicitud->origen_id}");
+            } elseif ($solicitud->origen === 'entrada_proveedor') {
+                DB::table('entradas_proveedores')
+                    ->where('id', $solicitud->origen_id)
+                    ->update([
+                        'estado' => 'aprobado',
+                        'updated_at' => now()
+                    ]);
+                Log::info("✅ ENTRADA PROVEEDOR APROBADA - Todos los artículos ubicados. Entrada ID: {$solicitud->origen_id}");
+            }
+        }
+
         DB::commit();
 
         // Retornar respuesta con las ubicaciones y series actualizadas
@@ -287,6 +509,9 @@ public function guardarUbicacion(Request $request)
         if ($esPrimeraUbicacion) {
             $mensaje .= ' y stock actualizado';
         }
+        if ($todosUbicados) {
+            $mensaje .= '. ¡Todos los artículos han sido ubicados!';
+        }
 
         return response()->json([
             'success' => true,
@@ -294,7 +519,8 @@ public function guardarUbicacion(Request $request)
             'ubicaciones' => $ubicacionesActualizadas,
             'series' => $seriesGuardadas,
             'ubicacion_texto' => $ubicacionTexto,
-            'stock_actualizado' => $esPrimeraUbicacion
+            'stock_actualizado' => $esPrimeraUbicacion,
+            'todos_ubicados' => $todosUbicados
         ]);
 
     } catch (\Exception $e) {
@@ -307,6 +533,35 @@ public function guardarUbicacion(Request $request)
         ], 500);
     }
 }
+
+private function verificarTodosArticulosUbicados($solicitud)
+{
+    try {
+        // Obtener todas las solicitudes del mismo origen y origen_id
+        $solicitudesDelMismoOrigen = SolicitudIngreso::where('origen', $solicitud->origen)
+            ->where('origen_id', $solicitud->origen_id)
+            ->get();
+
+        $totalSolicitudes = $solicitudesDelMismoOrigen->count();
+        $solicitudesUbicadas = $solicitudesDelMismoOrigen->where('estado', 'ubicado')->count();
+
+        $todosUbicados = ($totalSolicitudes > 0) && ($solicitudesUbicadas === $totalSolicitudes);
+
+        Log::info("Verificación ubicación - Origen: {$solicitud->origen}, ID: {$solicitud->origen_id}");
+        Log::info("Total solicitudes: {$totalSolicitudes}, Ubicadas: {$solicitudesUbicadas}, Todos ubicados: " . ($todosUbicados ? 'SÍ' : 'NO'));
+
+        return $todosUbicados;
+
+    } catch (\Exception $e) {
+        Log::error('Error al verificar artículos ubicados: ' . $e->getMessage());
+        return false;
+    }
+}
+
+
+
+
+
 
 
     private function calcularEstadoGeneral($solicitudes)

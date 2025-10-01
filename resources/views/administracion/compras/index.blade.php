@@ -55,15 +55,16 @@
                         Estado
                     </label>
                     <select x-model="filters.estado" @change="loadCompras()"
-                        class="form-select w-full rounded-xl border border-gray-200 focus:border-purple-500 
-               focus:ring-2 focus:ring-purple-100 transition-all duration-300 hover:border-purple-400
-               bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 cursor-pointer">
-                        <option value="">✨ Todos los estados</option>
-                        <option value="pendiente">🟡 Pendiente</option>
-                        <option value="recibido">🟢 Recibido</option>
-                        <option value="enviado_almacen">🔵 Enviado a Almacén</option>
-                        <option value="anulado">🔴 Anulado</option>
-                    </select>
+    class="form-select w-full rounded-xl border border-gray-200 focus:border-purple-500 
+           focus:ring-2 focus:ring-purple-100 transition-all duration-300 hover:border-purple-400
+           bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 cursor-pointer">
+    <option value="">✨ Todos los estados</option>
+    <option value="pendiente">🟡 Pendiente</option>
+    <option value="recibido">🟢 Recibido</option>
+    <option value="enviado_almacen">🔵 Enviado a Almacén</option>
+    <option value="aprobado">🟢 Aprobado</option>
+    <option value="anulado">🔴 Anulado</option>
+</select>
                 </div>
 
                 <!-- Botón Buscar -->
@@ -328,6 +329,7 @@
                                 <option value="pendiente">Pendiente</option>
                                 <option value="recibido">Recibido</option>
                                 <option value="enviado_almacen">Enviado a Almacén</option>
+                                <option value="aprobado">Aprobado</option>
                                 <option value="anulado">Anulado</option>
                             </select>
                         </div>
@@ -444,6 +446,7 @@
                         'pendiente': 'Pendiente',
                         'recibido': 'Recibido',
                         'enviado_almacen': 'Enviado Almacén',
+                        'aprobado': 'Aprobado',
                         'anulado': 'Anulado'
                     };
                     return estados[estado] || estado;
@@ -454,6 +457,7 @@
                         'pendiente': 'bg-yellow-100 text-yellow-800',
                         'recibido': 'bg-green-100 text-green-800',
                         'enviado_almacen': 'bg-blue-100 text-blue-800',
+                        'aprobado': 'bg-green-100 text-green-800',
                         'anulado': 'bg-red-100 text-red-800'
                     };
                     return classes[estado] || 'bg-gray-100 text-gray-800';
