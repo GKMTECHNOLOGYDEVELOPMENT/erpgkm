@@ -284,7 +284,7 @@
                     <span>Administracion</span>
                 </h2>
 
-                <!-- <li class="menu nav-item">
+                <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'components' }"
                         @click="activeDropdown === 'components' ? activeDropdown = null : activeDropdown = 'components'">
@@ -358,7 +358,7 @@
                             <a href="/components/lightbox">Lightbox</a>
                         </li>
                     </ul>
-                </li> -->
+                </li> 
 
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"

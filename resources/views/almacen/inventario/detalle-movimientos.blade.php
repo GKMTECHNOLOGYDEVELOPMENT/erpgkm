@@ -73,13 +73,14 @@
             </div>
             <!-- Botón de volver Mejorado -->
             <div class="mb-6 sm:mt-8 flex justify-center sm:justify-end">
-                <a href="#"
-                    class="btn btn-danger inline-flex items-center px-4 sm:px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5">
-                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ url()->previous() }}"
+                    class="btn btn-danger inline-flex items-center text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-2">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                     </svg>
-                    Volver al Kardex
+                    Volver Atrás
                 </a>
             </div>
             <!-- Resumen del Kardex Mejorado -->
@@ -153,7 +154,7 @@
                 </div>
 
                 <div
-                    class="bg-gradient-to-br from-emerald-50 to-teal-100 rounded-2xl p-4 sm:p-6 border border-dark
+                    class="rounded-2xl p-4 sm:p-6 border border-dark
          shadow-sm hover:shadow-lg hover:brightness-105 hover:-translate-y-1 
          transition-all duration-300 ease-out hover:animate-pulse">
                     <div class="flex items-center gap-3 mb-4">
@@ -170,7 +171,7 @@
                     </div>
                     <div class="text-center">
                         <div class="text-3xl sm:text-4xl font-bold text-dark mb-2">{{ $totalRegistrosEntradaMes }}</div>
-                        <div class="text-xs text-dark bg-emerald-100 px-2 py-1 rounded-full">
+                        <div class="text-xs text-dark bg-white/100 px-2 py-1 rounded-full">
                             Registros contabilizados
                         </div>
                     </div>
@@ -182,30 +183,27 @@
             <div
                 class="panel rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-gray-200/50 bg-white/80 backdrop-blur-sm">
                 <!-- Header de la tabla - Mejorado -->
-                <div
-                    class="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-900 px-4 sm:px-6 py-4 sm:py-5 relative overflow-hidden">
+                <div class="bg-dark px-4 sm:px-6 py-4 sm:py-5 relative overflow-hidden">
 
                     <!-- Efecto glow sutil -->
                     <div class="absolute inset-0">
-                        <div class="absolute -top-10 -left-10 w-40 h-40 bg-primary/30 rounded-full blur-2xl">
+                        <div class="absolute -top-10 -left-10 w-40 h-40  rounded-full blur-2xl">
                         </div>
-                        <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-500/30 rounded-full blur-2xl">
+                        <div class="absolute -bottom-10 -right-10 w-32 h-32 rounded-full blur-2xl">
                         </div>
                     </div>
 
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
                         <div class="flex items-center gap-2 sm:gap-3">
                             <div class="p-2 bg-white/20 rounded-xl backdrop-blur-sm border border-white/10">
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary" fill="none" stroke="currentColor"
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                             <div>
-                                <h2 class="text-lg sm:text-xl font-bold text-primary drop-shadow-sm">Movimientos del
-                                    Mes
-                                </h2>
+                                <h2 class="text-lg sm:text-xl font-bold text-primary drop-shadow-sm">MOVIMIENTOS DEL MES
                                 <div class="flex items-center gap-2 mt-1">
                                     <span
                                         class="text-white/90 text-xs sm:text-sm font-medium bg-white/10 px-2 py-1 rounded-full">
@@ -224,14 +222,14 @@
                                     {{ $year }}</span>
                                 <span class="text-white/60 text-xs">Período activo</span>
                             </div>
-                            <div
-                                class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center border border-primary/30">
-                                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor"
+                            <div class="w-8 h-8 rounded-t-lg flex items-center justify-center border">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -403,17 +401,6 @@
                                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                                        </svg>
-                                        Origen
-                                    </div>
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         Día
@@ -472,14 +459,6 @@
                                             class="text-sm font-bold {{ $esCompra ? 'text-green-700' : 'text-blue-700' }} bg-{{ $esCompra ? 'green' : 'blue' }}-50 px-3 py-1.5 rounded-lg">
                                             {{ $movimiento->cantidad }}
                                         </span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900">ID:
-                                            {{ $movimiento->ingreso_id }}</div>
-                                        @if ($movimiento->compra_id)
-                                            <div class="text-xs text-gray-500 mt-1 font-mono">Compra:
-                                                {{ $movimiento->compra_id }}</div>
-                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span

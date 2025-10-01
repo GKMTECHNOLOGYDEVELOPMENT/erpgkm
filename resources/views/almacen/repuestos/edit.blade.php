@@ -334,7 +334,23 @@
 
                     </div>
                 </div>
-
+                   <!-- Estado del Artículo -->
+                <div>
+                    <label for="estado" class="block text-sm font-medium">Estado</label>
+                    <div class="ml-4 w-12 h-6 relative">
+                        <input type="hidden" name="estado" value="0">
+                        <input type="checkbox" id="estado" name="estado"
+                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" value="1"
+                            {{ old('estado', isset($articulo) ? $articulo->estado : 1) ? 'checked' : '' }} />
+                        <span
+                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full 
+                            before:absolute before:left-1 before:bg-white dark:before:bg-white-dark 
+                            dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 
+                            before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary 
+                            before:transition-all before:duration-300">
+                        </span>
+                    </div>
+                </div>
                 <!-- Foto -->
                 <div class="mb-5" x-data="{ 
                     fotoPreview: '/assets/images/articulo/producto-default.png', 
@@ -381,9 +397,9 @@
                     </div>
 
                     <!-- Vista previa del PDF -->
-                    <div id="preview_pdf" class="mt-4 max-w-full">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Vista previa:</label>
-                        <iframe id="pdf_viewer" class="w-full h-[600px] border rounded" type="application/pdf"></iframe>
+                    <div class="relative w-full" style="padding-top: 50%;"> <!-- 50% = aspecto 2:1 -->
+                        <iframe id="pdf_viewer" class="absolute top-0 left-0 w-full h-full border rounded"
+                            type="application/pdf"></iframe>
                     </div>
                 </div>
 
@@ -397,23 +413,7 @@
                 </script>
                 @endif
 
-                   <!-- Estado del Artículo -->
-                <div>
-                    <label for="estado" class="block text-sm font-medium">Estado</label>
-                    <div class="ml-4 w-12 h-6 relative">
-                        <input type="hidden" name="estado" value="0">
-                        <input type="checkbox" id="estado" name="estado"
-                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" value="1"
-                            {{ old('estado', isset($articulo) ? $articulo->estado : 1) ? 'checked' : '' }} />
-                        <span
-                            class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full 
-                            before:absolute before:left-1 before:bg-white dark:before:bg-white-dark 
-                            dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 
-                            before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary 
-                            before:transition-all before:duration-300">
-                        </span>
-                    </div>
-                </div>
+
 
             </div>
             <div class="flex justify-end mt-6 gap-4">
