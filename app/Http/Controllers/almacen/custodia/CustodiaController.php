@@ -12,6 +12,7 @@ use App\Models\Modelo;
 use Illuminate\Support\Facades\DB;
 use App\Models\Ticket;
 use App\Models\Ubicacion;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -83,6 +84,17 @@ class CustodiaController extends Controller
             'devueltos'
         ));
     }
+
+
+    public function harvest($id)
+{
+    $custodia = Custodia::findOrFail($id);
+
+    // lógica de Harvest aquí...
+
+    return view('solicitud.solicitudcustodia.harvest', compact('custodia'));
+}
+
 
 
     public function actualizarCustodia(Request $request, $id)
@@ -290,13 +302,10 @@ class CustodiaController extends Controller
 
 
 
-    public function create()
+   public function create()
     {
-        $clientes = Cliente::where('estado', 1)->orderBy('nombre')->get();
-        $marcas = Marca::where('estado', 1)->orderBy('nombre')->get();
-        $modelos = Modelo::where('estado', 1)->orderBy('nombre')->get();
-
-        return view('solicitud.solicitudcustodia.create', compact('clientes', 'marcas', 'modelos'));
+        // Ya no necesitamos pasar los datos aquí, se cargarán via AJAX
+        return view('solicitud.solicitudcustodia.create');
     }
 
     public function store(Request $request)
@@ -334,18 +343,118 @@ class CustodiaController extends Controller
                 'observaciones' => $validated['observaciones'],
             ]);
 
+            // Si es una petición AJAX, retornar JSON
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Custodia creada exitosamente.',
+                    'data' => $custodia
+                ]);
+            }
+
             return redirect()->route('solicitudcustodia.index')
                 ->with('success', 'Custodia creada exitosamente.');
 
         } catch (\Exception $e) {
+            // Si es una petición AJAX, retornar error en JSON
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al crear la custodia: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()
                 ->with('error', 'Error al crear la custodia: ' . $e->getMessage())
                 ->withInput();
         }
     }
 
+    // Métodos actualizados para soportar búsqueda con Select2
+       public function getClientes(Request $request): JsonResponse
+    {
+        $search = $request->get('search');
+        
+        $clientes = Cliente::where('estado', 1)
+            ->when($search, function($query) use ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('nombre', 'like', "%{$search}%")
+                      ->orWhere('documento', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('nombre')
+            ->paginate(30);
 
+        // Transformar los datos para Select2
+        $transformed = $clientes->getCollection()->map(function($cliente) {
+            return [
+                'id' => $cliente->idCliente,
+                'nombre' => $cliente->nombre,
+                'documento' => $cliente->documento,
+                'text' => $cliente->nombre . ($cliente->documento ? ' - ' . $cliente->documento : '')
+            ];
+        });
 
+        return response()->json([
+            'results' => $transformed,
+            'pagination' => [
+                'more' => $clientes->hasMorePages()
+            ]
+        ]);
+    }
+
+        public function getMarcas(Request $request): JsonResponse
+    {
+        $search = $request->get('search');
+        
+        $marcas = Marca::where('estado', 1)
+            ->when($search, function($query) use ($search) {
+                $query->where('nombre', 'like', "%{$search}%");
+            })
+            ->orderBy('nombre')
+            ->paginate(30);
+
+        $transformed = $marcas->getCollection()->map(function($marca) {
+            return [
+                'id' => $marca->idMarca,
+                'nombre' => $marca->nombre,
+                'text' => $marca->nombre
+            ];
+        });
+
+        return response()->json([
+            'results' => $transformed,
+            'pagination' => [
+                'more' => $marcas->hasMorePages()
+            ]
+        ]);
+    }
+    public function getModelos(Request $request): JsonResponse
+    {
+        $search = $request->get('search');
+        
+        $modelos = Modelo::where('estado', 1)
+            ->when($search, function($query) use ($search) {
+                $query->where('nombre', 'like', "%{$search}%");
+            })
+            ->orderBy('nombre')
+            ->paginate(30);
+
+        $transformed = $modelos->getCollection()->map(function($modelo) {
+            return [
+                'id' => $modelo->idModelo,
+                'nombre' => $modelo->nombre,
+                'text' => $modelo->nombre
+            ];
+        });
+
+        return response()->json([
+            'results' => $transformed,
+            'pagination' => [
+                'more' => $modelos->hasMorePages()
+            ]
+        ]);
+    }
 
    public function guardarFotos(Request $request, $idCustodia)
     {

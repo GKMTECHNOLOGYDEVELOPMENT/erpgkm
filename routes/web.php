@@ -1340,8 +1340,13 @@ Route::post('/tickets/{id}/actualizar-custodia', [CustodiaController::class, 'ac
 
 
 Route::get('/tickets/{id}/custodia', [CustodiaController::class, 'verificarCustodia']);
+
 Route::get('/solicitud/custodia/opciones/{id}', [CustodiaController::class, 'opciones'])
     ->name('solicitudcustodia.opciones');
+
+    Route::get('/solicitud/custodia/harvest/{id}', [CustodiaController::class, 'harvest'])
+    ->name('solicitudcustodia.harvest');
+
 
 Route::put('/solicitud/custodia/{id}', [CustodiaController::class, 'update'])
     ->name('solicitudcustodia.update');

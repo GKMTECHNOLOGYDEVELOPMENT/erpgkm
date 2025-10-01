@@ -347,6 +347,21 @@
                                     </svg>
                                     OPCIONES
                                 </a>
+
+
+                                <!-- Botón Harvest -->
+                                <a href="{{ route('solicitudcustodia.harvest', ['id' => $custodia->id]) }}"
+                                    class="btn btn-success flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors duration-200">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 17a4 4 0 008 0M5 21h14M9 17V9a4 4 0 014-4h4" />
+                                    </svg>
+                                    HARVEST
+                                </a>
+
+
+
                             </div>
                         </div>
                     @endforeach

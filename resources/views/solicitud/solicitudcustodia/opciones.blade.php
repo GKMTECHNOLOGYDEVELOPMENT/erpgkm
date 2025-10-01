@@ -953,18 +953,18 @@ function cargarGaleriaFotos() {
 
 
                     // Cargar galería inmediatamente si estamos en estado Aprobado
-    @if($custodia->estado === 'Aprobado')
-        console.log('🔄 Forzando carga de galería para estado Aprobado');
-        setTimeout(() => {
-            cargarGaleriaFotos();
-        }, 500);
-    @endif
-    
-    // También cargar para otros estados
-    @if(in_array($custodia->estado, ['En revisión', 'Pendiente']))
-        console.log('🔄 Cargando galería para estado:', '{{ $custodia->estado }}');
-        cargarGaleriaFotos();
-    @endif
+                    @if($custodia->estado === 'Aprobado')
+                        console.log('🔄 Forzando carga de galería para estado Aprobado');
+                        setTimeout(() => {
+                            cargarGaleriaFotos();
+                        }, 500);
+                    @endif
+                    
+                    // También cargar para otros estados
+                    @if(in_array($custodia->estado, ['En revisión', 'Pendiente']))
+                        console.log('🔄 Cargando galería para estado:', '{{ $custodia->estado }}');
+                        cargarGaleriaFotos();
+                    @endif
 
                     // Enviar solicitud AJAX
                     fetch("{{ route('solicitudcustodia.update', $custodia->id) }}", {
