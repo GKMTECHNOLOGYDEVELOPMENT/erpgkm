@@ -65,6 +65,20 @@
                     </div>
                 </div>
             </form>
+
+
+            <!-- Botón "Crear Nueva Custodia" -->
+            <div class="mt-4 flex justify-end">
+                <a href="{{ route('solicitudcustodia.create') }}"
+                    class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4v16m8-8H4" />
+                    </svg>
+                    Crear Nueva Custodia
+                </a>
+            </div>
         </div>
 
         <!-- Tarjetas de estadísticas -->
@@ -151,8 +165,8 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
-                                    @if (isset($custodia->ticket->marca->nombre) && isset($custodia->ticket->modelo->nombre))
-                                        {{ $custodia->ticket->marca->nombre }} {{ $custodia->ticket->modelo->nombre }}
+                                    @if (isset($custodia->marca->nombre) && isset($custodia->modelo->nombre))
+                                        {{ $custodia->marca->nombre }} {{ $custodia->modelo->nombre }}
                                     @else
                                         Equipo sin especificar
                                     @endif
@@ -165,7 +179,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                     </svg>
-                                    Serie: {{ $custodia->ticket->serie ?? 'N/A' }}
+                                    Serie: {{ $custodia->serie ?? 'N/A' }}
                                 </div>
                             </div>
 
@@ -176,7 +190,7 @@
                                     <div
                                         class="h-10 w-10 flex-shrink-0 bg-indigo-100 rounded-full flex items-center justify-center border border-indigo-200">
                                         @php
-                                            $cliente = $custodia->ticket->cliente ?? null;
+                                            $cliente = $custodia->cliente ?? null;
                                             $inicial = 'C';
                                             if ($cliente) {
                                                 $nombres = explode(' ', $cliente->nombre ?? '');
@@ -190,12 +204,12 @@
                                     </div>
                                     <div class="ml-3">
                                         <h4 class="text-sm font-medium text-gray-900">
-                                            {{ $custodia->ticket->cliente->nombre ?? 'Cliente no especificado' }}
+                                            {{ $custodia->cliente->nombre ?? 'Cliente no especificado' }}
                                         </h4>
                                         <p class="text-xs text-gray-500">
-                                            @if (isset($custodia->ticket->cliente->documento) && isset($custodia->ticket->cliente->tipoDocumento))
-                                                {{ $custodia->ticket->cliente->tipoDocumento->nombre ?? 'Doc' }}:
-                                                {{ $custodia->ticket->cliente->documento }}
+                                            @if (isset($custodia->cliente->documento) && isset($custodia->cliente->tipoDocumento))
+                                                {{ $custodia->cliente->tipoDocumento->nombre ?? 'Doc' }}:
+                                                {{ $custodia->cliente->documento }}
                                             @else
                                                 Sin documento
                                             @endif
@@ -230,7 +244,7 @@
                                             <span class="text-sm font-bold block mb-1">Ticket:</span>
                                         </div>
                                         <span
-                                            class="text-sm font-medium text-purple-600">#{{ $custodia->ticket->numero_ticket ?? 'N/A' }}</span>
+                                            class="text-sm font-medium text-purple-600">#{{ $custodia->numero_ticket ?? 'N/A' }}</span>
                                     </div>
 
                                     <div class="flex items-center justify-between p-2 bg-warning-light rounded-md">

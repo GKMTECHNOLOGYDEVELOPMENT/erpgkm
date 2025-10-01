@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\almacen\custodia;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cliente;
 use App\Models\Custodia;
+use App\Models\CustodiaFoto;
 use App\Models\CustodiaUbicacion;
+use App\Models\Marca;
+use App\Models\Modelo;
 use Illuminate\Support\Facades\DB;
 use App\Models\Ticket;
 use App\Models\Ubicacion;
@@ -120,19 +124,24 @@ class CustodiaController extends Controller
             $ubicacion = trim($request->input('ubicacion_actual'));
             $fechaIngreso = $request->input('fecha_ingreso_custodia');
 
-            if (!$custodia) {
-                $custodia = Custodia::create([
-                    'codigocustodias'        => strtoupper(Str::random(10)),
-                    'id_ticket'              => $ticket->idTickets,
-                    'estado'                 => 'Pendiente',
-                    'fecha_ingreso_custodia' => $fechaIngreso ?? now()->toDateString(),
-                    'ubicacion_actual'       => $ubicacion,
-                    'responsable_entrega'    => null,
-                    'id_responsable_recepcion'  => auth()->id(),
-                    'observaciones'          => null,
-                    'fecha_devolucion'       => null,
-                ]);
-            } else {
+                    if (!$custodia) {
+            $custodia = Custodia::create([
+                'codigocustodias'        => strtoupper(Str::random(10)),
+                'id_ticket'              => $ticket->idTickets,
+                'idcliente'              => $ticket->idCliente,
+                'numero_ticket'          => $ticket->numero_ticket,
+                'idMarca'                => $ticket->idMarca,
+                'idModelo'               => $ticket->idModelo,
+                'serie'                  => $ticket->serie,
+                'estado'                 => 'Pendiente',
+                'fecha_ingreso_custodia' => $fechaIngreso ?? now()->toDateString(),
+                'ubicacion_actual'       => $ubicacion,
+                'responsable_entrega'    => null,
+                'id_responsable_recepcion'  => auth()->id(),
+                'observaciones'          => null,
+                'fecha_devolucion'       => null,
+            ]);
+        } else {
                 $custodia->ubicacion_actual = $ubicacion;
                 $custodia->fecha_ingreso_custodia = $fechaIngreso ?? $custodia->fecha_ingreso_custodia;
 
@@ -277,5 +286,276 @@ class CustodiaController extends Controller
                 'message' => 'Error al actualizar la custodia: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+
+
+    public function create()
+    {
+        $clientes = Cliente::where('estado', 1)->orderBy('nombre')->get();
+        $marcas = Marca::where('estado', 1)->orderBy('nombre')->get();
+        $modelos = Modelo::where('estado', 1)->orderBy('nombre')->get();
+
+        return view('solicitud.solicitudcustodia.create', compact('clientes', 'marcas', 'modelos'));
+    }
+
+    public function store(Request $request)
+    {
+        // Validación
+        $validated = $request->validate([
+            'idcliente' => 'required|exists:cliente,idCliente',
+            'numero_ticket' => 'nullable|string|max:100',
+            'idMarca' => 'nullable|exists:marca,idMarca',
+            'idModelo' => 'nullable|exists:modelo,idModelo',
+            'serie' => 'nullable|string|max:100',
+            'fecha_ingreso_custodia' => 'required|date',
+            'ubicacion_actual' => 'required|string|max:100',
+            'estado' => 'required|in:Pendiente,En revisión,Aprobado',
+            'observaciones' => 'nullable|string',
+        ]);
+
+        try {
+            // Generar código de custodia
+            $codigoCustodia = 'CUST-' . date('YmdHis') . '-' . rand(100, 999);
+
+            // Crear la custodia
+            $custodia = Custodia::create([
+                'codigocustodias' => $codigoCustodia,
+                'id_ticket' => null,
+                'idcliente' => $validated['idcliente'],
+                'numero_ticket' => $validated['numero_ticket'],
+                'idMarca' => $validated['idMarca'],
+                'idModelo' => $validated['idModelo'],
+                'serie' => $validated['serie'],
+                'estado' => $validated['estado'],
+                'fecha_ingreso_custodia' => $validated['fecha_ingreso_custodia'],
+                'ubicacion_actual' => $validated['ubicacion_actual'],
+                'id_responsable_recepcion' => auth()->id(),
+                'observaciones' => $validated['observaciones'],
+            ]);
+
+            return redirect()->route('solicitudcustodia.index')
+                ->with('success', 'Custodia creada exitosamente.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error al crear la custodia: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+
+
+
+   public function guardarFotos(Request $request, $idCustodia)
+    {
+        // Validar que la custodia exista
+        $custodia = Custodia::find($idCustodia);
+        
+        if (!$custodia) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Custodia no encontrada'
+            ], 404);
+        }
+
+        $request->validate([
+            'fotos.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120'
+        ]);
+
+        // Verificar que hay fotos
+        if (!$request->hasFile('fotos')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se han seleccionado fotos'
+            ], 400);
+        }
+
+        $fotosSubidas = [];
+
+        try {
+            foreach ($request->file('fotos') as $foto) {
+                // Validar cada archivo individualmente
+                if (!$foto->isValid()) {
+                    continue;
+                }
+
+                // Generar nombre único con hash
+                $nombreOriginal = $foto->getClientOriginalName();
+                $extension = $foto->getClientOriginalExtension();
+                $tipoMime = $foto->getMimeType();
+                $tamaño = $foto->getSize();
+                
+                // Leer el contenido del archivo
+                $contenidoImagen = file_get_contents($foto->getRealPath());
+                
+                // Generar hash único para el nombre
+                $nombreHash = $this->generarNombreHash($contenidoImagen, $custodia->id);
+                
+                // Generar hash para verificar integridad
+                $hashArchivo = hash('sha256', $contenidoImagen);
+
+                // Guardar en base de datos (se encripta automáticamente por el mutator)
+                $fotoGuardada = CustodiaFoto::create([
+                    'id_custodia' => $custodia->id,
+                    'nombre_archivo' => $nombreOriginal,
+                    'nombre_hash' => $nombreHash,
+                    'tipo_archivo' => $tipoMime,
+                    'tamaño_archivo' => $tamaño,
+                    'datos_imagen' => $contenidoImagen, // Se encripta automáticamente
+                    'hash_archivo' => $hashArchivo,
+                    'uploaded_by' => auth()->id()
+                ]);
+
+                $fotosSubidas[] = $fotoGuardada;
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => count($fotosSubidas) . ' foto(s) subida(s) correctamente',
+                'fotos_subidas' => count($fotosSubidas)
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar las fotos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generar nombre hash único para el archivo
+     */
+    private function generarNombreHash($contenidoImagen, $idCustodia)
+    {
+        $timestamp = microtime(true);
+        $stringUnico = $contenidoImagen . $timestamp . $idCustodia . Str::random(10);
+        
+        return hash('sha256', $stringUnico);
+    }
+
+    /**
+     * Obtener fotos de una custodia
+     */
+    public function obtenerFotos($idCustodia)
+    {
+        $fotos = CustodiaFoto::where('id_custodia', $idCustodia)
+                            ->select([
+                                'id',
+                                'nombre_archivo',
+                                'nombre_hash',
+                                'tipo_archivo',
+                                'tamaño_archivo',
+                                'hash_archivo',
+                                'descripcion',
+                                'uploaded_by',
+                                'created_at'
+                            ])
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+        
+        return response()->json([
+            'fotos' => $fotos
+        ]);
+    }
+
+    /**
+     * Obtener imagen individual (para mostrar en img src)
+     */
+    public function obtenerImagen($idFoto)
+    {
+        $foto = CustodiaFoto::find($idFoto);
+        
+        if (!$foto) {
+            abort(404);
+        }
+
+        // Verificar permisos (opcional)
+        // if (!auth()->check()) {
+        //     abort(403);
+        // }
+
+        // Obtener la imagen desencriptada a través del accesor
+        $imagenDesencriptada = $foto->imagen;
+        
+        if (!$imagenDesencriptada) {
+            abort(404);
+        }
+
+        // Devolver como respuesta de imagen
+        return response($imagenDesencriptada)
+            ->header('Content-Type', $foto->tipo_archivo)
+            ->header('Content-Length', strlen($imagenDesencriptada))
+            ->header('Cache-Control', 'private, max-age=3600')
+            ->header('Content-Disposition', 'inline; filename="' . $foto->nombre_archivo . '"');
+    }
+
+    /**
+     * Descargar foto
+     */
+    public function descargarFoto($idFoto)
+    {
+        $foto = CustodiaFoto::find($idFoto);
+        
+        if (!$foto) {
+            abort(404);
+        }
+
+        $imagenDesencriptada = $foto->imagen;
+        
+        if (!$imagenDesencriptada) {
+            abort(404);
+        }
+
+        return response($imagenDesencriptada)
+            ->header('Content-Type', $foto->tipo_archivo)
+            ->header('Content-Length', strlen($imagenDesencriptada))
+            ->header('Content-Disposition', 'attachment; filename="' . $foto->nombre_archivo . '"');
+    }
+
+    /**
+     * Eliminar foto
+     */
+    public function eliminarFoto($idFoto)
+    {
+        $foto = CustodiaFoto::find($idFoto);
+        
+        if (!$foto) {
+            return response()->json(['success' => false, 'message' => 'Foto no encontrada'], 404);
+        }
+        
+        // Verificar permisos (opcional)
+        if (auth()->id() !== $foto->uploaded_by && !auth()->user()->hasRole('admin')) {
+            return response()->json(['success' => false, 'message' => 'No tienes permisos para eliminar esta foto'], 403);
+        }
+        
+        // Eliminar registro (la imagen se elimina automáticamente de la BD)
+        $foto->delete();
+        
+        return response()->json(['success' => true, 'message' => 'Foto eliminada correctamente']);
+    }
+
+    /**
+     * Verificar integridad de una foto
+     */
+    public function verificarIntegridad($idFoto)
+    {
+        $foto = CustodiaFoto::find($idFoto);
+        
+        if (!$foto) {
+            return response()->json(['success' => false, 'message' => 'Foto no encontrada'], 404);
+        }
+
+        $imagenDesencriptada = $foto->imagen;
+        $hashActual = hash('sha256', $imagenDesencriptada);
+        $integro = ($hashActual === $foto->hash_archivo);
+
+        return response()->json([
+            'success' => true,
+            'integro' => $integro,
+            'hash_original' => $foto->hash_archivo,
+            'hash_actual' => $hashActual
+        ]);
     }
 }

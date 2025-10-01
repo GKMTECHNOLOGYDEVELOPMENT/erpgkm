@@ -121,7 +121,7 @@
 
     <div class="panel mt-6 p-5 max-w-6x2 mx-auto">
         <h2 class="text-xl font-bold mb-5 flex items-center">
-            <i class="fas fa-box text-primary mr-2"></i> Agregar Nuevo Producto
+            <i class="fas fa-box text-primary mr-2"></i> Agregar Nuevo Producto x2
         </h2>
 
 

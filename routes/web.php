@@ -231,7 +231,7 @@ Route::prefix('categoria')->name('categorias.')->group(function () {
         return Excel::download(new CategoriaExport, 'categorias.xlsx');
     })->name('exportExcel');
 });
-// INICIO CATEGORIA ///
+// INICIO UBICACIONES ///
 Route::prefix('ubicaciones')->name('ubicaciones.')->group(function () {
     Route::get('/', [UbicacionesController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [UbicacionesController::class, 'create'])->name('create'); // Guardar una nueva categoría
@@ -582,7 +582,7 @@ Route::prefix('solicitudingreso')->name('solicitudingreso.')->group(function () 
     Route::get('/{id}/edit', [SolicitudarticuloController::class, 'edit'])->name('edit'); // Editar una categoría
     Route::get('/{id}/show', [SolicitudarticuloController::class, 'show'])->name('show'); // Editar una categoría
     Route::get('/{id}/opciones', [SolicitudarticuloController::class, 'opciones'])->name('opciones'); // Editar una categoría
-
+    Route::post('/{id}/actualizar', [SolicitudIngresoController::class, 'actualizarSolicitud']);
     Route::put('/update/{id}', [SolicitudarticuloController::class, 'update'])->name('update'); // Actualizar una categoría
     // Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
     Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
@@ -1329,7 +1329,11 @@ if (app()->environment('local')) {
 
 
 Route::get('/preview/custodia', [CustodiaController::class, 'index'])->name('solicitudcustodia.index');
+Route::get('/custodia/create', [CustodiaController::class, 'create'])->name('solicitudcustodia.create');
 
+    // Guardar nueva custodia
+    Route::post('/custodia/store', [CustodiaController::class, 'store'])
+        ->name('solicitudcustodia.store');
 
 Route::post('/tickets/{id}/actualizar-custodia', [CustodiaController::class, 'actualizarCustodia'])->name('tickets.actualizar.custodia')->middleware('auth');
 
@@ -1380,3 +1384,14 @@ Route::post('/solicitud-ingreso/guardar-ubicacion', [SolicitudIngresoController:
 
 
 Route::post('/solicitud-ingreso/{id}/cambiar-estado', [SolicitudIngresoController::class, 'cambiarEstado'])->name('solicitud-ingreso.cambiar-estado');
+Route::post('/solicitud-ingreso/{id}/actualizar', [SolicitudIngresoController::class, 'actualizarSolicitud']);
+
+
+
+// Rutas para fotos de custodia (BLOB en base de datos)
+Route::get('/custodia/{id}/fotos', [CustodiaController::class, 'obtenerFotos'])->name('custodia.fotos');
+Route::post('/custodia/{id}/fotos', [CustodiaController::class, 'guardarFotos'])->name('custodia.fotos.subir');
+Route::get('/custodia/fotos/{id}/imagen', [CustodiaController::class, 'obtenerImagen'])->name('custodia.fotos.imagen');
+Route::get('/custodia/fotos/{id}/descargar', [CustodiaController::class, 'descargarFoto'])->name('custodia.fotos.descargar');
+Route::delete('/custodia/fotos/{id}', [CustodiaController::class, 'eliminarFoto'])->name('custodia.fotos.eliminar');
+Route::get('/custodia/fotos/{id}/verificar', [CustodiaController::class, 'verificarIntegridad'])->name('custodia.fotos.verificar');
