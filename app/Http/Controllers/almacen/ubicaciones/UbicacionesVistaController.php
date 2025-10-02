@@ -10,4 +10,10 @@ class UbicacionesVistaController extends Controller
     {
         return view('almacen.ubicaciones.vista-almacen');
     }
+
+    public function detalleRack()
+    {
+
+        return view('almacen.ubicaciones.detalle-rack');
+    }
 }

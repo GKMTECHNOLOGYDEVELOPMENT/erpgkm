@@ -105,19 +105,6 @@
                     <input x-model="filtro.buscar" @input="debounceFilter()" type="text" placeholder="Buscar..."
                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                 </div>
-
-                <!-- Categorías -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-2">Todas las categorías</label>
-                    <select x-model="filtro.categoria" @change="aplicarFiltros()"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
-                        <option value="">Todas las categorías</option>
-                        <option>Electrónica</option>
-                        <option>Accesorios</option>
-                        <option>Repuestos</option>
-                        <option>Herramientas</option>
-                    </select>
-                </div>
             </div>
 
             <!-- Botones acciones -->
@@ -252,9 +239,46 @@
             </div>
 
             <!-- Heatmap -->
-            <div class="heatmap-full-section overflow-auto">
+            <div class="heatmap-full-section overflow-auto relative">
                 <div id="heatmap" style="width:100%; height:100%; min-height:700px;"></div>
+
+                <!-- Preloader Moderno Elegante -->
+                <div x-show="loading" x-transition.opacity
+                    class="absolute inset-0 bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col items-center justify-center z-50 backdrop-blur-sm">
+
+                    <!-- Logo/Icono animado -->
+                    <div class="relative mb-6">
+                        <div
+                            class="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
+                            <i class="fa-solid fa-warehouse text-white text-xl"></i>
+                        </div>
+                        <div class="absolute -inset-2 bg-indigo-200 rounded-2xl blur-lg opacity-30 animate-ping"></div>
+                    </div>
+
+                    <!-- Spinner circular moderno -->
+                    <div class="relative mb-4">
+                        <div class="w-12 h-12 border-4 border-indigo-200 rounded-full"></div>
+                        <div
+                            class="w-12 h-12 border-4 border-transparent border-t-indigo-600 rounded-full absolute top-0 left-0 animate-spin">
+                        </div>
+                    </div>
+
+                    <!-- Texto -->
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Cargando almacén</h3>
+                        <p class="text-slate-600 text-sm">Preparando visualización en tiempo real...</p>
+                    </div>
+
+                    <!-- Barra de progreso sutil -->
+                    <div class="w-48 h-1 bg-slate-200 rounded-full mt-4 overflow-hidden">
+                        <div
+                            class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-[progress_2s_ease-in-out_infinite]">
+                        </div>
+                    </div>
+                </div>
             </div>
+
+
         </div>
 
 
@@ -283,14 +307,20 @@
                 cols: 24,
 
                 init() {
+                    this.loading = true; // 👈 muestra spinner al entrar
+
                     fetch("{{ asset('racks.json') }}")
                         .then(res => res.json())
                         .then(json => {
-                            this.data = json;
-                            this.calcStats();
-                            this.renderChart();
+                            setTimeout(() => { // ⏳ forzar duración de 5s
+                                this.data = json;
+                                this.calcStats();
+                                this.renderChart();
+                                this.loading = false; // ✅ ocultar spinner
+                            }, 5000);
                         });
                 },
+
 
 
                 genData() {
@@ -398,12 +428,9 @@
 
                 aplicarFiltros() {
                     this.loading = true;
-                    setTimeout(() => {
-                        this.genData();
-                        this.calcStats();
-                        this.updateChart();
-                        this.loading = false;
-                    }, 500);
+                    this.genData();
+                    this.calcStats();
+                    this.updateChart();
                 },
 
                 resetFiltros() {
@@ -413,8 +440,17 @@
                         buscar: '',
                         categoria: ''
                     };
-                    this.aplicarFiltros();
+
+                    this.loading = true;
+                    fetch("{{ asset('racks.json') }}")
+                        .then(res => res.json())
+                        .then(json => {
+                            this.data = json;
+                            this.calcStats();
+                            this.updateChart();
+                        });
                 },
+
 
                 periodoLabel() {
                     return `Últimos ${this.filtro.periodo} días`;
@@ -455,30 +491,44 @@
                 renderChart() {
                     const heatmapEl = document.getElementById('heatmap');
 
-                    // 🔹 Número de columnas únicas (posiciones en X)
                     const cols = [...new Set(this.data.map(d => d.x))].length;
-                    // 🔹 Número de filas únicas (racks en Y)
                     const rows = [...new Set(this.data.map(d => d.y))].length;
 
-                    // 🔹 Ancho dinámico (cada celda ~100px)
                     const ancho = cols * 100;
-                    // 🔹 Alto dinámico (cada fila ~50px)
                     const alto = rows * 50;
 
-                    // Asignar tamaños al contenedor
                     heatmapEl.style.width = ancho + 'px';
                     heatmapEl.style.height = alto + 'px';
 
-                    // Inicializar ECharts
+                    // 🔥 Siempre mostrar preload antes de renderizar
+                    this.loading = true;
+
                     this.chart = echarts.init(heatmapEl);
                     this.updateChart();
+
+                    // 👇 Esperar a que ECharts termine de renderizar
+                    this.chart.on('finished', () => {
+                        this.loading = false; // ✅ ocultar preloader automáticamente
+                    });
 
                     window.addEventListener('resize', () => this.chart && this.chart.resize());
                 },
 
 
+
                 baseOption() {
-                    const data = this.data.map(d => [d.x, d.y, d.value, d.ubicacion, d.piso]);
+                    const data = this.data.map(d => [
+                        d.x, // 0
+                        d.y, // 1
+                        d.value, // 2
+                        d.ubicacion, // 3
+                        d.piso, // 4
+                        d.rack, // 5
+                        d.producto, // 6
+                        d.cantidad, // 7
+                        d.categoria // 8
+                    ]);
+
                     return {
                         tooltip: {
                             trigger: 'item',
@@ -489,23 +539,25 @@
                                 fontSize: 14
                             },
                             formatter: (p) => {
-                                const [x, y, val, ubicacion, piso] = p.data;
-                                const ubic = this.data.find(d => d.x === x && d.y === y);
+                                const [x, y, val, ubicacion, piso, rack, producto, cantidad,
+                                    categoria
+                                ] = p.data;
                                 const borderColor = this.getFillColorByFloor(piso);
 
                                 return `
-              <div style="padding:12px; min-width: 280px;">
-                <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">🏢 Rack ${ubic.rack}</div>
-                <div style="margin-bottom:6px;">📍 Ubicación: <strong>${ubic.ubicacion}</strong></div>
-                <div style="margin-bottom:6px;">📦 Producto: <strong>${ubic.producto || 'Vacío'}</strong></div>
-                <div style="margin-bottom:6px;">📊 Cantidad: <strong>${ubic.cantidad}</strong></div>
-                <div style="margin-bottom:6px;">🏷️ Categoría: <strong>${ubic.categoria || 'N/A'}</strong></div>
-                <div style="margin-bottom:6px;">🏗️ Piso: <strong style="color:${borderColor}">${piso}</strong></div>
-                <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
-                <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
-              </div>
-            `;
+    <div style="padding:12px; min-width: 280px;">
+      <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">🏢 Rack ${rack}</div>
+      <div style="margin-bottom:6px;">📍 Ubicación: <strong>${ubicacion}</strong></div>
+      <div style="margin-bottom:6px;">📦 Producto: <strong>${producto || 'Vacío'}</strong></div>
+      <div style="margin-bottom:6px;">📊 Cantidad: <strong>${cantidad}</strong></div>
+      <div style="margin-bottom:6px;">🏷️ Categoría: <strong>${categoria || 'N/A'}</strong></div>
+      <div style="margin-bottom:6px;">🏗️ Piso: <strong style="color:${borderColor}">${piso}</strong></div>
+      <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
+      <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
+    </div>
+  `;
                             }
+
                         },
                         grid: {
                             left: 50,
@@ -558,14 +610,11 @@
                         series: [{
                             type: 'heatmap',
                             data,
+                            progressive: 2000,
                             label: {
                                 show: this.labels,
-                                formatter: (p) => {
-                                    const ubic = this.data.find(d => d.x === p.data[0] && d
-                                        .y === p.data[1]);
-                                    if (!ubic) return "";
-                                    return `${ubic.rack}\n${this.getIconByValue(ubic.value)} ${ubic.value}%`;
-                                },
+                                formatter: (p) =>
+                                    `${p.data[5]}\n${this.getIconByValue(p.data[2])} ${p.data[2]}%`,
                                 color: '#1e293b',
                                 fontSize: 12,
                                 fontWeight: "bold"
@@ -595,15 +644,31 @@
 
                 updateChart() {
                     if (!this.chart) return;
+
+                    this.loading = true; // 🔥 siempre activar antes de update
+
                     this.chart.setOption(this.baseOption(), true);
 
-                    // Click en un rack → detalle
-                    this.chart.off('click');
-                    this.chart.on('click', p => {
-                        const rack = p.data[3];
-                        window.location.href = `rackdetalle.html?rack=${rack}`;
+                    // ❌ Elimina listeners anteriores para evitar duplicados
+                    this.chart.off('finished');
+
+                    // ✅ Se dispara cuando echarts termina de renderizar
+                    this.chart.on('finished', () => {
+                        this.loading = false;
                     });
+                    // ✅ Captura click en cualquier celda
+                    this.chart.on('click', p => {
+                        const rack = p.data[5]; // nombre del rack (ej: A1, B2...)
+                        window.location.href = "{{ url('/almacen/ubicaciones/detalle') }}/" +
+                            rack;
+                    });
+
+                    // ⏳ Backup: si por alguna razón no dispara "finished", se cierra igual
+                    setTimeout(() => {
+                        this.loading = false;
+                    }, 1200); // 1.2s de margen
                 }
+
             }));
         });
     </script>

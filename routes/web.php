@@ -728,7 +728,7 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLaboratorioPdf'])
         ->name('helpdesk.pdf.laboratorio');
     Route::get('/helpdesk/pdf/conformidad/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateConformidadLaboratorioPdf'])
-    ->name('helpdesk.pdf.conformidad.laboratorio');
+        ->name('helpdesk.pdf.conformidad.laboratorio');
 
     Route::get('/helpdesk/pdf/laboratorio/{idOt}', [OrdenesHelpdeskController::class, 'generateLabPdfVisita'])
         ->name('helpdesk.pdf.laboratorio');
@@ -741,9 +741,9 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/helpdesk/pdf/conformidad/{idOt}', [OrdenesHelpdeskController::class, 'generateConformidadPdf'])
         ->name('helpdesk.pdf.conformidad');
     Route::get('/helpdesk/pdf/conformidad/levantamiento/{idOt}', [OrdenesHelpdeskController::class, 'generateConformidadLevantamientoPdf'])
-    ->name('helpdesk.pdf.conformidad.levantamiento');
+        ->name('helpdesk.pdf.conformidad.levantamiento');
     Route::get('/helpdesk/pdf/conformidad/ejecucion/{idOt}', [OrdenesHelpdeskController::class, 'generateConformidadEjecucionPdf'])
-    ->name('helpdesk.pdf.conformidad.ejecucion');
+        ->name('helpdesk.pdf.conformidad.ejecucion');
     Route::get('/helpdesk/pdf/ejecucion/{idOt}', [OrdenesHelpdeskController::class, 'generateEjecucionPdf'])->name('helpdesk.pdf.ejecucion');
     // ***** RUTAS GENERALES *****
     Route::put('/update/{id}', [OrdenesTrabajoController::class, 'update'])->name('update');
@@ -1332,9 +1332,9 @@ if (app()->environment('local')) {
 Route::get('/preview/custodia', [CustodiaController::class, 'index'])->name('solicitudcustodia.index');
 Route::get('/custodia/create', [CustodiaController::class, 'create'])->name('solicitudcustodia.create');
 
-    // Guardar nueva custodia
-    Route::post('/custodia/store', [CustodiaController::class, 'store'])
-        ->name('solicitudcustodia.store');
+// Guardar nueva custodia
+Route::post('/custodia/store', [CustodiaController::class, 'store'])
+    ->name('solicitudcustodia.store');
 
 Route::post('/tickets/{id}/actualizar-custodia', [CustodiaController::class, 'actualizarCustodia'])->name('tickets.actualizar.custodia')->middleware('auth');
 
@@ -1345,7 +1345,7 @@ Route::get('/tickets/{id}/custodia', [CustodiaController::class, 'verificarCusto
 Route::get('/solicitud/custodia/opciones/{id}', [CustodiaController::class, 'opciones'])
     ->name('solicitudcustodia.opciones');
 
-    Route::get('/solicitud/custodia/harvest/{id}', [CustodiaController::class, 'harvest'])
+Route::get('/solicitud/custodia/harvest/{id}', [CustodiaController::class, 'harvest'])
     ->name('solicitudcustodia.harvest');
 
 
@@ -1355,7 +1355,7 @@ Route::put('/solicitud/custodia/{id}', [CustodiaController::class, 'update'])
 
 
 
-    //PRODUCTOS 
+//PRODUCTOS
 // Ruta para mostrar la vista principal
 Route::get('/entradas-proveedores', [EntradasproveedoresController::class, 'index'])->name('entradas-proveedores.index');
 
@@ -1375,7 +1375,7 @@ Route::get('/kardex/detalle-movimientos/{kardex_id}', [KardexController::class, 
     ->name('kardex.detalle-movimientos');
 
 
-    // Ruta para ver las series de un producto
+// Ruta para ver las series de un producto
 Route::get('/producto/{id}/series', [ProductoController::class, 'verSeries'])->name('producto.series');
 Route::post('/series/cambiar-estado', [ProductoController::class, 'cambiarEstadoSerie']);
 Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [SolicitudingresoController::class, 'obtenerSeries']);
@@ -1394,6 +1394,7 @@ Route::post('/solicitud-ingreso/{id}/actualizar', [SolicitudIngresoController::c
 
 Route::get('/almacen/vista', [UbicacionesVistaController::class, 'vistaAlmacen'])
     ->name('almacen.vista');
+Route::get('/almacen/ubicaciones/detalle/{rack}', [UbicacionesVistaController::class, 'detalleRack'])->name('almacen.ubicaciones.detalle');
 
 // Rutas para fotos de custodia (BLOB en base de datos)
 Route::get('/custodia/{id}/fotos', [CustodiaController::class, 'obtenerFotos'])->name('custodia.fotos');
