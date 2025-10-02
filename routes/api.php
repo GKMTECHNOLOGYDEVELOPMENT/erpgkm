@@ -7,6 +7,7 @@ use App\Http\Controllers\administracion\asociados\ProveedoresController;
 use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
 use App\Http\Controllers\administracion\compras\ComprasController;
+use App\Http\Controllers\almacen\custodia\CustodiaController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kits\KitsController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
@@ -76,8 +77,11 @@ Route::get('/suministros', [SuministrosController::class, 'getAll']);
 Route::get('/ubicaciones', [UbicacionesController::class, 'getAllUbicaciones']);
 Route::get('/kits', [KitsController::class, 'getAll']);
 Route::get('subcategoria', [SubcategoriaController::class, 'getAll']);
-
-Route::get('/ubicaciones-articulo', [UbicacionesArticuloController::class, 'getUbicacionesArticulo']);
+// Rutas para cargar datos via AJAX
+Route::get('/api/clientescustodia', [CustodiaController::class, 'getClientes'])->name('api.clientescustodia');
+Route::get('/api/marcascustodia', [CustodiaController::class, 'getMarcas'])->name('api.marcascustodia');
+Route::get('/api/modeloscustodia', [CustodiaController::class, 'getModelos'])->name('api.modeloscustodia');
+Route::get('/ubicaciones-articulocustodia', [CustodiaController::class, 'getUbicacionesArticulo'])->name('api.ubicaciones-articulocustodia');
 
 
 Route::post('/check-nombre-tienda', [TiendaController::class, 'checkNombreTienda']);

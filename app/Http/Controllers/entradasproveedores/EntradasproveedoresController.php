@@ -168,7 +168,7 @@ public function guardarEntradaProveedor(Request $request)
             'fecha_ingreso' => $request->fecha_ingreso,
             'cliente_general_id' => $request->cliente_general_id ?: null,
             'observaciones' => $request->observaciones ?? null,
-            'estado' => 1,
+            'estado' => 'pendiente',
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -183,7 +183,7 @@ public function guardarEntradaProveedor(Request $request)
             'fecha_ingreso' => $request->fecha_ingreso,
             'cliente_general_id' => $request->cliente_general_id ?: null,
             'observaciones' => $request->observaciones ?? null,
-            'estado' => 1,
+            'estado' => 'pendiente',
             'created_at' => now(),
             'updated_at' => now()
         ]);

@@ -93,7 +93,7 @@
 
                     <div class="flex items-center gap-1 bg-success-light px-3 py-1.5 rounded-md">
                         <span class="text-xs uppercase tracking-wide">Cliente:</span>
-                        <span>{{ $custodia->ticket->cliente->nombre ?? 'Cliente N/A' }}</span>
+                        <span>{{ $custodia->cliente->nombre ?? 'Cliente N/A' }}</span>
                     </div>
                 </div>
             </div>
@@ -120,8 +120,8 @@
                 <div>
                     <div class="text-sm font-medium text-white">Equipo</div>
                     <div class="font-semibold text-white mt-1">
-                        {{ $custodia->ticket->marca->nombre ?? '—' }}
-                        {{ $custodia->ticket->modelo->nombre ?? '' }}
+                        {{ $custodia->marca->nombre ?? '—' }}
+                        {{ $custodia->modelo->nombre ?? '' }}
                     </div>
                 </div>
             </div>
@@ -137,7 +137,7 @@
                 </div>
                 <div>
                     <div class="text-sm font-medium text-white">Serie</div>
-                    <div class="font-semibold text-white mt-1">{{ $custodia->ticket->serie ?? 'N/A' }}</div>
+                    <div class="font-semibold text-white mt-1">{{ $custodia->serie ?? 'N/A' }}</div>
                 </div>
             </div>
 
@@ -169,7 +169,6 @@
                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Información de la custodia
-
                 </h2>
             </div>
 
@@ -184,7 +183,7 @@
                             class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 text-indigo-500"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width极="2"
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             Estado
@@ -223,7 +222,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0极l-4.243-4.243a8 8 0 1111.314 0z" />
+                                        d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
@@ -248,10 +247,10 @@
                 <div id="campos-aprobado" class="{{ $custodia->estado === 'Aprobado' ? '' : 'hidden' }} space-y-6">
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <h3 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-极600"
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7极v10l8 4" />
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                             Ubicación de equipo en almacén
                         </h3>
@@ -336,7 +335,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 text-indigo-500"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2 2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             Tiempo en custodia
                         </label>
@@ -345,7 +344,6 @@
                         </div>
                         <p class="text-xs text-gray-500 mt-1 pl-10">Ingreso: {{ $fechaIngreso->format('d/m/Y') }}</p>
                     </div>
-
 
                     <!-- Responsable recepción -->
                     <div id="wrap-resp" class="{{ $custodia->estado === 'Devuelto' ? '' : 'opacity-70' }}">
@@ -363,7 +361,7 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7极h14a7 7 0 00-7-7z" />
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </span>
                             <input type="text" id="id_responsable_recepcion" name="id_responsable_recepcion"
@@ -387,28 +385,85 @@
                             </svg>
                             Observaciones de Revisión
                         </h3>
-                        <textarea id="observacion_revision" name="observacion_revision" rows="3"
+                        <textarea id="observaciones" name="observaciones" rows="3"
                             class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                             placeholder="Detalles de revisión (pendientes, ajustes, comentarios internos)"
-                            {{ $isDisabled ? 'readonly' : '' }}>{{ old('observacion_revision', $custodia->observacion_revision ?? '') }}</textarea>
+                            {{ $isDisabled ? 'readonly' : '' }}>{{ old('observaciones', $custodia->observaciones ?? '') }}</textarea>
                     </div>
                 </div>
 
-                <!-- Observaciones generales -->
-                {{-- <div>
-                    <label for="observaciones"
-                        class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5 text-indigo-500"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 极01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Observaciones Generales
-                    </label>
-                    <textarea id="observaciones" name="observaciones" rows="4"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                        placeholder="Notas internas, detalles del estado, accesorios, etc." {{ $isDisabled ? 'readonly' : '' }}>{{ old('observaciones', $custodia->observaciones) }}</textarea>
-                </div> --}}
+                <!-- Sección para subir fotos (solo para estados En revisión y Aprobado) -->
+                <div id="campos-fotos" class="{{ in_array($custodia->estado, ['Pendiente', 'En revisión', 'Aprobado']) ? '' : 'hidden' }} space-y-6">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h3 class="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" 
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Gestión de Fotos 
+                        </h3>
+
+                        <!-- Área para subir fotos -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Subir Fotos
+                            </label>
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors duration-200">
+                                <input type="file" id="fotos" name="fotos[]" multiple 
+                                    accept="image/*" 
+                                    class="hidden" 
+                                    {{ $custodia->estado === 'Aprobado' ? 'disabled' : '' }}>
+                                <label for="fotos" class="cursor-pointer {{ $custodia->estado === 'Aprobado' ? 'cursor-not-allowed opacity-50' : '' }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-3" 
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <p class="text-sm text-gray-600 mb-2">
+                                        <span class="font-medium text-indigo-600">Haz clic para subir</span> o arrastra y suelta
+                                    </p>
+                                    <p class="text-xs text-gray-500">PNG, JPG, JPEG, WEBP hasta 5MB cada una</p>
+                                    @if($custodia->estado === 'Aprobado')
+                                    <p class="text-xs text-red-500 mt-2">Solo lectura - No se pueden subir nuevas fotos en estado Aprobado</p>
+                                    @endif
+                                </label>
+                            </div>
+                            <div id="preview-fotos" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                            
+                            <!-- Botón para subir fotos -->
+                            @if($custodia->estado !== 'Aprobado')
+                            <div class="mt-4 text-right">
+                                <button type="button" id="btn-subir-fotos" onclick="subirFotos()" 
+                                        class="btn btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" 
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    Subir Fotos
+                                </button>
+                            </div>
+                            @endif
+                        </div>
+
+                        <!-- Galería de fotos existentes -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700 mb-3">Fotos existentes</h4>
+                            <div id="galeria-fotos" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <!-- Las fotos existentes se cargarán aquí via AJAX -->
+                                <div class="text-center text-gray-500 py-8 col-span-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2" fill="none" 
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <p class="text-sm">Cargando fotos...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Sticky actions -->
                 <div
@@ -522,33 +577,334 @@
             estadoBadge.textContent = estado;
         }
 
-        // Mostrar u ocultar campos adicionales para estado Aprobado
-        function toggleCamposPorEstado() {
-            const estado = document.getElementById('estado').value;
-            const camposAprobado = document.getElementById('campos-aprobado');
-            const camposRevision = document.getElementById('campos-revision');
-            const ubicacionInput = document.getElementById('ubicacion_actual');
+function toggleCamposPorEstado() {
+    const estado = document.getElementById('estado').value;
+    const camposAprobado = document.getElementById('campos-aprobado');
+    const camposRevision = document.getElementById('campos-revision');
+    const camposFotos = document.getElementById('campos-fotos');
+    const ubicacionInput = document.getElementById('ubicacion_actual');
+    const fileInput = document.getElementById('fotos');
+    const btnSubirFotos = document.getElementById('btn-subir-fotos');
 
-            if (estado === 'Aprobado') {
-                camposAprobado.classList.remove('hidden');
-                camposRevision.classList.add('hidden');
-                ubicacionInput.setAttribute('readonly', true);
-                ubicacionInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-            } else if (estado === 'En revisión') {
-                camposRevision.classList.remove('hidden');
-                camposAprobado.classList.add('hidden');
-                ubicacionInput.removeAttribute('readonly');
-                ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-            } else {
-                camposAprobado.classList.add('hidden');
-                camposRevision.classList.add('hidden');
-                ubicacionInput.removeAttribute('readonly');
-                ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+    console.log('Estado actual:', estado);
+
+    // Mostrar/ocultar campos de ubicación
+    if (estado === 'Aprobado') {
+        camposAprobado.classList.remove('hidden');
+        camposRevision.classList.add('hidden');
+        if (ubicacionInput) {
+            ubicacionInput.setAttribute('readonly', true);
+            ubicacionInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+        }
+    } else if (estado === 'En revisión') {
+        camposRevision.classList.remove('hidden');
+        camposAprobado.classList.add('hidden');
+        if (ubicacionInput) {
+            ubicacionInput.removeAttribute('readonly');
+            ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+        }
+    } else {
+        camposAprobado.classList.add('hidden');
+        camposRevision.classList.add('hidden');
+        if (ubicacionInput) {
+            ubicacionInput.removeAttribute('readonly');
+            ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+        }
+    }
+
+    // MOSTRAR CAMPOS DE FOTOS PARA TODOS LOS ESTADOS
+    if (estado === 'Aprobado' || estado === 'En revisión' || estado === 'Pendiente') {
+        console.log('Mostrando sección de fotos para estado:', estado);
+        camposFotos.classList.remove('hidden');
+        
+        // Configurar permisos según el estado
+        if (estado === 'Aprobado') {
+            if (fileInput) {
+                fileInput.setAttribute('disabled', true);
+                fileInput.parentElement.classList.add('cursor-not-allowed', 'opacity-50');
+            }
+            if (btnSubirFotos) {
+                btnSubirFotos.style.display = 'none';
+            }
+        } else {
+            if (fileInput) {
+                fileInput.removeAttribute('disabled');
+                fileInput.parentElement.classList.remove('cursor-not-allowed', 'opacity-50');
+            }
+            if (btnSubirFotos) {
+                btnSubirFotos.style.display = 'block';
             }
         }
+        
+        // SIEMPRE cargar galería cuando se muestre la sección
+        console.log('Cargando galería de fotos para estado:', estado);
+        cargarGaleriaFotos();
+    } else {
+        console.log('Ocultando sección de fotos para estado:', estado);
+        camposFotos.classList.add('hidden');
+    }
+}
 
+        // Preview de fotos antes de subir
+        function setupFilePreview() {
+            const fileInput = document.getElementById('fotos');
+            const previewContainer = document.getElementById('preview-fotos');
+
+            fileInput.addEventListener('change', function(e) {
+                previewContainer.innerHTML = '';
+                const files = Array.from(e.target.files);
+
+                files.forEach((file, index) => {
+                    if (!file.type.startsWith('image/')) return;
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.createElement('div');
+                        preview.className = 'relative group';
+                        preview.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg border border-gray-200">
+                            <button type="button" onclick="removePreview(${index})" 
+                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                ×
+                            </button>
+                            <p class="text-xs text-gray-500 mt-1 truncate">${file.name}</p>
+                            <p class="text-xs text-gray-400">${(file.size / 1024).toFixed(1)} KB</p>
+                        `;
+                        previewContainer.appendChild(preview);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+
+        // Remover preview
+        function removePreview(index) {
+            const fileInput = document.getElementById('fotos');
+            const dt = new DataTransfer();
+            const files = Array.from(fileInput.files);
+            
+            files.forEach((file, i) => {
+                if (i !== index) dt.items.add(file);
+            });
+            
+            fileInput.files = dt.files;
+            setupFilePreview(); // Re-setup para actualizar preview
+        }
+
+// Cargar galería de fotos existentes
+function cargarGaleriaFotos() {
+    const custodiaId = '{{ $custodia->id }}';
+    const galeria = document.getElementById('galeria-fotos');
+    
+    console.log('🔍 Iniciando carga de galería de fotos...');
+    console.log('📁 Custodia ID:', custodiaId);
+    console.log('🔗 URL:', `/custodia/${custodiaId}/fotos`);
+    
+    // Mostrar loading
+    galeria.innerHTML = `
+        <div class="text-center text-gray-500 py-8 col-span-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+            <p class="text-sm">Cargando fotos...</p>
+        </div>
+    `;
+
+    fetch(`/custodia/${custodiaId}/fotos`)
+        .then(response => {
+            console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Datos recibidos:', data);
+            
+            if (data.fotos && data.fotos.length > 0) {
+                console.log(`🖼️ Se encontraron ${data.fotos.length} fotos`);
+                
+                galeria.innerHTML = data.fotos.map((foto, index) => `
+                    <div class="relative group bg-white rounded-lg border border-gray-200 p-3">
+                        <div class="relative">
+                            <img src="/custodia/fotos/${foto.id}/imagen?t=${new Date().getTime()}" 
+                                 class="w-full h-24 object-cover rounded-lg"
+                                 alt="${foto.nombre_archivo}"
+                                 loading="lazy"
+                                 onerror="console.error('❌ Error cargando imagen ${foto.id}'); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5YzljOWMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5FcnJvciBjYXJnYW5kbyBpbWFnZW48L3RleHQ+PC9zdmc+'"
+                                 onload="console.log('✅ Imagen ${foto.id} cargada correctamente')">
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                <button type="button" onclick="verFoto(${foto.id})" 
+                                        class="text-white bg-blue-600 rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Ver">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                                <button type="button" onclick="descargarFoto(${foto.id})" 
+                                        class="text-white bg-green-600 rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Descargar">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </button>
+                                ${!{{ $isDisabled ? 'true' : 'false' }} ? `
+                                <button type="button" onclick="eliminarFoto(${foto.id})" 
+                                        class="text-white bg-red-600 rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <p class="text-xs text-gray-700 font-medium truncate" title="${foto.nombre_archivo}">
+                                ${foto.nombre_archivo}
+                            </p>
+                            <p class="text-xs text-gray-500">${(foto.tamaño_archivo / 1024).toFixed(1)} KB</p>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                console.log('📭 No se encontraron fotos para esta custodia');
+                galeria.innerHTML = `
+                    <div class="text-center text-gray-500 py-8 col-span-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-sm font-medium text-gray-600">No hay fotos</p>
+                        <p class="text-xs text-gray-500 mt-1">No se han subido fotos para esta custodia</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error cargando galería:', error);
+            galeria.innerHTML = `
+                <div class="text-center text-red-500 py-8 col-span-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <p class="text-sm font-medium">Error cargando fotos</p>
+                    <p class="text-xs mt-1">${error.message}</p>
+                    <button onclick="cargarGaleriaFotos()" class="mt-2 text-xs bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 transition-colors">
+                        Reintentar
+                    </button>
+                </div>
+            `;
+        });
+}
+
+        // Subir fotos
+        function subirFotos() {
+            const fileInput = document.getElementById('fotos');
+            const files = fileInput.files;
+            const btnSubir = document.getElementById('btn-subir-fotos');
+            
+            if (files.length === 0) {
+                showNotification('Selecciona al menos una foto', false);
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+            
+            for (let i = 0; i < files.length; i++) {
+                formData.append('fotos[]', files[i]);
+            }
+
+            // Mostrar loader
+            const originalText = btnSubir.innerHTML;
+            btnSubir.innerHTML = '<span>Subiendo...</span>';
+            btnSubir.disabled = true;
+
+            fetch(`/custodia/{{ $custodia->id }}/fotos`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Fotos subidas correctamente', true);
+                    fileInput.value = ''; // Limpiar input
+                    document.getElementById('preview-fotos').innerHTML = ''; // Limpiar preview
+                    cargarGaleriaFotos(); // Recargar galería
+                } else {
+                    showNotification(data.message || 'Error al subir fotos', false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error de conexión al subir fotos', false);
+            })
+            .finally(() => {
+                // Restaurar botón
+                btnSubir.innerHTML = originalText;
+                btnSubir.disabled = false;
+            });
+        }
+
+        // Ver foto en nueva pestaña
+        function verFoto(idFoto) {
+            window.open(`/custodia/fotos/${idFoto}/imagen`, '_blank');
+        }
+
+        // Descargar foto
+        function descargarFoto(idFoto) {
+            window.open(`/custodia/fotos/${idFoto}/descargar`, '_blank');
+        }
+
+        // Verificar integridad de la foto
+        function verificarIntegridad(idFoto) {
+            fetch(`/custodia/fotos/${idFoto}/verificar`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.integro) {
+                            showNotification('✅ La foto está íntegra y no ha sido modificada', true);
+                        } else {
+                            showNotification('❌ La foto ha sido modificada o está corrupta', false);
+                        }
+                    } else {
+                        showNotification(data.message || 'Error al verificar integridad', false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Error de conexión al verificar integridad', false);
+                });
+        }
+
+        // Eliminar foto
+        function eliminarFoto(idFoto) {
+            if (!confirm('¿Estás seguro de eliminar esta foto?')) return;
+
+            fetch(`/custodia/fotos/${idFoto}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Foto eliminada correctamente', true);
+                    cargarGaleriaFotos();
+                } else {
+                    showNotification(data.message || 'Error al eliminar foto', false);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error de conexión', false);
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Página cargada. Estado inicial:', '{{ $custodia->estado }}');
+
             @if (!$isDisabled)
                 const btnGuardar = document.getElementById('btn-guardar');
                 const estadoSelect = document.getElementById('estado');
@@ -561,6 +917,12 @@
                 estadoSelect.addEventListener('change', function() {
                     toggleCamposPorEstado();
                 });
+
+                // Inicializar preview de fotos
+                setupFilePreview();
+                
+                // Cargar galería de fotos existentes
+                cargarGaleriaFotos();
 
                 // Manejar clic en guardar
                 btnGuardar.addEventListener('click', function() {
@@ -588,6 +950,21 @@
                             'observacion_almacen').value);
                         formData.append('cantidad', document.querySelector('input[name="cantidad"]').value);
                     }
+
+
+                    // Cargar galería inmediatamente si estamos en estado Aprobado
+                    @if($custodia->estado === 'Aprobado')
+                        console.log('🔄 Forzando carga de galería para estado Aprobado');
+                        setTimeout(() => {
+                            cargarGaleriaFotos();
+                        }, 500);
+                    @endif
+                    
+                    // También cargar para otros estados
+                    @if(in_array($custodia->estado, ['En revisión', 'Pendiente']))
+                        console.log('🔄 Cargando galería para estado:', '{{ $custodia->estado }}');
+                        cargarGaleriaFotos();
+                    @endif
 
                     // Enviar solicitud AJAX
                     fetch("{{ route('solicitudcustodia.update', $custodia->id) }}", {
@@ -649,4 +1026,13 @@
             @endif
         });
     </script>
+
+    <script>
+// Cargar inmediatamente cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        cargarGaleriaFotos();
+    }, 100);
+});
+</script>
 </x-layout.default>

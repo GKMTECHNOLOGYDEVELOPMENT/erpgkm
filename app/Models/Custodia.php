@@ -13,6 +13,11 @@ class Custodia extends Model
 
     protected $fillable = [
         'id_ticket',
+        'idcliente',
+        'numero_ticket',
+        'idMarca',
+        'idModelo',
+        'serie',
         'codigocustodias',
         'estado',
         'fecha_ingreso_custodia',
@@ -37,6 +42,22 @@ class Custodia extends Model
     public function custodiaUbicacion()
     {
         return $this->hasOne(CustodiaUbicacion::class, 'idCustodia', 'id');
+    }
+
+    // Relaciones
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class, 'idcliente', 'idCliente');
+    }
+
+    public function marca()
+    {
+        return $this->belongsTo(Marca::class, 'idMarca', 'idMarca');
+    }
+
+    public function modelo()
+    {
+        return $this->belongsTo(Modelo::class, 'idModelo', 'idModelo');
     }
 
 }

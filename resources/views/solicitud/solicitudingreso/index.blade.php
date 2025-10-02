@@ -35,11 +35,12 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por estado:</label>
                     <select x-model="filtroEstado"
-                        class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                            class="rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                         <option value="todos">Todos</option>
                         <option value="pendiente">Pendiente</option>
                         <option value="recibido">Recibido</option>
                         <option value="ubicado">Ubicado</option>
+                        <option value="actualizar">Actualizar Solicitud</option>
                     </select>
                 </div>
                 <div>
@@ -102,6 +103,19 @@
                     <div class="ml-4">
                         <p class="text-sm text-gray-600">Total Grupos</p>
                         <p class="text-2xl font-bold text-gray-800" x-text="contadores.total"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- En las estadísticas -->
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="p-2 bg-orange-100 rounded-lg">
+                        <i class="fas fa-sync-alt text-orange-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-orange-600">Por Actualizar</p>
+                        <p class="text-2xl font-bold text-orange-800" x-text="contadores.actualizar"></p>
                     </div>
                 </div>
             </div>
@@ -248,6 +262,22 @@
                                                         'bg-gray-100 text-gray-600 hover:bg-purple-50'">
                                                     Ubicar
                                                 </button>
+                                                <!-- Nuevo botón para Actualizar Solicitud - DESHABILITADO cuando esté ubicado -->
+                                                <button @click="abrirModalActualizar(solicitud)"
+                                                        :disabled="solicitud.estado === 'ubicado'"
+                                                        class="flex-1 px-2 py-1 text-xs rounded transition-colors"
+                                                        :class="solicitud.estado === 'ubicado' ? 
+                                                                'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                                                                solicitud.estado === 'actualizar' ? 
+                                                                'bg-orange-100 text-orange-800' : 
+                                                                'bg-gray-100 text-gray-600 hover:bg-orange-50'">
+                                                    <template x-if="solicitud.estado === 'ubicado'">
+                                                        <span title="No se puede actualizar una solicitud ya ubicada">Actualizar</span>
+                                                    </template>
+                                                    <template x-if="solicitud.estado !== 'ubicado'">
+                                                        <span>Actualizar</span>
+                                                    </template>
+                                                </button>
                                             </div>
                                         </div>
                                     </template>
@@ -277,6 +307,22 @@
                                             :class="grupo.estado_general === 'ubicado' ? 'bg-purple-100 text-purple-800' :
                                                 'bg-gray-100 text-gray-600 hover:bg-purple-50'">
                                             Todos Ubicado
+                                        </button>
+                                        <!-- Nuevo botón grupal -->
+                                        <button @click="cambiarEstadoGrupo(grupo, 'actualizar')"
+                                                :disabled="grupo.estado_general === 'ubicado' || grupo.solicitudes.some(s => s.estado === 'ubicado')"
+                                                class="px-3 py-1 text-xs rounded-lg transition-colors"
+                                                :class="(grupo.estado_general === 'ubicado' || grupo.solicitudes.some(s => s.estado === 'ubicado')) ? 
+                                                        'bg-gray-100 text-gray-400 cursor-not-allowed' :
+                                                        grupo.estado_general === 'actualizar' ? 
+                                                        'bg-orange-100 text-orange-800' : 
+                                                        'bg-gray-100 text-gray-600 hover:bg-orange-50'">
+                                            <template x-if="grupo.estado_general === 'ubicado' || grupo.solicitudes.some(s => s.estado === 'ubicado')">
+                                                <span title="No se puede actualizar solicitudes ya ubicadas">Todos Actualizar</span>
+                                            </template>
+                                            <template x-if="!(grupo.estado_general === 'ubicado' || grupo.solicitudes.some(s => s.estado === 'ubicado'))">
+                                                <span>Todos Actualizar</span>
+                                            </template>
                                         </button>
                                     </div>
                                 </div>
@@ -561,6 +607,144 @@
                 </div>
             </div>
         </div>
+
+
+
+
+
+
+<!-- Modal para Actualizar Solicitud -->
+<div class="fixed inset-0 bg-[black]/60 z-[999] hidden" :class="modalActualizarAbierto && '!block'">
+    <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalActualizar()">
+        <div x-show="modalActualizarAbierto" x-transition x-transition.duration.300
+             class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-2xl max-h-[95vh]">
+            
+            <!-- Header -->
+            <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3 border-b">
+                <div class="font-bold text-lg text-gray-800 flex items-center">
+                    <i class="fas fa-sync-alt mr-2 text-orange-500"></i>
+                    Actualizar Solicitud de Ingreso
+                </div>
+                <button type="button" class="text-gray-400 hover:text-gray-600" @click="cerrarModalActualizar()">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Contenido -->
+            <div class="p-5 overflow-y-auto max-h-[75vh]">
+                <!-- Información de la solicitud (SOLO LECTURA) -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6" x-show="solicitudActualizar">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="font-medium text-gray-700">Artículo:</p>
+                            <p class="text-lg font-semibold" x-text="getNombreArticulo(solicitudActualizar?.articulo)"></p>
+                            <p class="text-sm text-gray-600" 
+                               x-text="'Tipo: ' + getTipoArticulo(solicitudActualizar?.articulo?.idTipoArticulo)"></p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-700">Cantidad Actual:</p>
+                            <p class="text-lg font-semibold" x-text="solicitudActualizar?.cantidad || 0"></p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-700">Origen:</p>
+                            <p class="text-sm" x-text="solicitudActualizar?.origen === 'compra' ? 'Compra' : 'Entrada Proveedor'"></p>
+                            <p class="text-sm text-gray-600" 
+                               x-text="solicitudActualizar?.origen === 'compra' ? 
+                                       solicitudActualizar?.origen_especifico?.codigocompra : 
+                                       solicitudActualizar?.origen_especifico?.codigo_entrada"></p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-700">Estado Actual:</p>
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
+                                  :class="getEstadoClasses(solicitudActualizar?.estado)">
+                                <i :class="getEstadoIcon(solicitudActualizar?.estado)" class="mr-1"></i>
+                                <span x-text="solicitudActualizar?.estado"></span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Información adicional (solo lectura) -->
+                    <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-200">
+                        <div>
+                            <p class="font-medium text-gray-700 text-sm">Fecha Origen:</p>
+                            <p class="text-sm" x-text="formatFecha(solicitudActualizar?.fecha_origen)"></p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-700 text-sm">Lote:</p>
+                            <p class="text-sm" x-text="solicitudActualizar?.lote || 'N/A'"></p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-700 text-sm">Fecha Vencimiento:</p>
+                            <p class="text-sm" x-text="solicitudActualizar?.fecha_vencimiento ? formatFecha(solicitudActualizar.fecha_vencimiento) : 'N/A'"></p>
+                        </div>
+                    </div> -->
+                </div>
+
+                <!-- Formulario de actualización SIMPLIFICADO -->
+                <div class="space-y-6">
+                    <h4 class="text-md font-medium text-gray-800 border-b pb-2">
+                        <i class="fas fa-edit mr-2 text-blue-500"></i>
+                        Modificar Información
+                    </h4>
+
+                    <!-- Solo Cantidad y Observaciones -->
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- Cantidad -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-boxes mr-1"></i>
+                                Cantidad *
+                            </label>
+                            <input type="number" x-model="formActualizar.cantidad" min="1"
+                                   class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">
+                                Cantidad actual: <span class="font-semibold" x-text="solicitudActualizar?.cantidad || 0"></span>
+                            </p>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-sticky-note mr-1"></i>
+                                Observaciones
+                            </label>
+                            <textarea x-model="formActualizar.observaciones" rows="3"
+                                      placeholder="Ingrese observaciones adicionales..."
+                                      class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje informativo -->
+                    <!-- <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
+                            <div>
+                                <p class="text-sm text-blue-800 font-medium">Información importante</p>
+                                <p class="text-xs text-blue-600 mt-1">
+                                    Solo puedes modificar la cantidad y observaciones. Los demás campos son informativos y no se pueden modificar.
+                                </p>
+                            </div>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end items-center gap-3 px-5 py-3 border-t bg-[#fbfbfb] dark:bg-[#121c2c]">
+                <button type="button" class="btn btn-outline-danger" @click="cerrarModalActualizar()">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-warning" :disabled="!puedeActualizar" @click="guardarActualizacion">
+                    <i class="fas fa-sync-alt mr-2"></i>
+                    Actualizar Solicitud
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
     </div>
 
     <style>
@@ -577,11 +761,17 @@
                 solicitudesAgrupadas: @json($solicitudesAgrupadas),
                 ubicaciones: @json($ubicaciones),
                 modalUbicacionAbierto: false,
+                modalActualizarAbierto: false,
+                solicitudActualizar: null,
                 seriesModal: false,
                 seriesSeleccionadas: [],
                 solicitudSeleccionada: null,
                 ubicacionesForm: [],
                 seriesForm: [], // Nueva propiedad para series
+                formActualizar: {
+                    cantidad: 0,
+                    observaciones: ''
+                },
 
                 filtroEstado: 'todos',
                 filtroOrigen: 'todos',
@@ -596,6 +786,95 @@
                         total: grupos.length
                     };
                 },
+
+
+                // Computed property para validar
+get puedeActualizar() {
+    return this.formActualizar.cantidad > 0;
+},
+
+// Método para abrir el modal de actualización con validación
+abrirModalActualizar(solicitud) {
+    console.log('=== DEBUG abrirModalActualizar ===');
+    console.log('Solicitud a actualizar:', solicitud);
+    
+    // Validar que no esté ubicado
+    if (solicitud.estado === 'ubicado') {
+        this.mostrarNotificacion('No se puede actualizar una solicitud ya ubicada', 'warning');
+        return;
+    }
+    
+    this.solicitudActualizar = solicitud;
+    
+    // Llenar el formulario solo con campos editables
+    this.formActualizar = {
+        cantidad: solicitud.cantidad || 0,
+        observaciones: solicitud.observaciones || ''
+    };
+    
+    this.modalActualizarAbierto = true;
+},
+
+// Método para cerrar el modal
+cerrarModalActualizar() {
+    this.modalActualizarAbierto = false;
+    this.solicitudActualizar = null;
+    this.formActualizar = {
+        cantidad: 0,
+        observaciones: ''
+    };
+},
+
+// Método para formatear fecha para input type="date"
+formatFechaParaInput(fecha) {
+    if (!fecha) return '';
+    return new Date(fecha).toISOString().split('T')[0];
+},
+
+// Método para guardar la actualización SIMPLIFICADO
+async guardarActualizacion() {
+    console.log('=== DEBUG guardarActualizacion ===');
+    console.log('Datos a guardar:', this.formActualizar);
+    
+    if (!this.puedeActualizar) {
+        this.mostrarNotificacion('La cantidad debe ser mayor a 0', 'error');
+        return;
+    }
+
+    try {
+        const response = await axios.post(`/solicitud-ingreso/${this.solicitudActualizar.idSolicitudIngreso}/actualizar`, this.formActualizar);
+
+        if (response.data.success) {
+            this.mostrarNotificacion(response.data.message, 'success');
+
+            // Actualizar la solicitud en la vista
+            this.solicitudesAgrupadas.forEach(grupo => {
+                grupo.solicitudes.forEach(solicitud => {
+                    if (solicitud.idSolicitudIngreso === this.solicitudActualizar.idSolicitudIngreso) {
+                        // Actualizar solo los datos editables
+                        solicitud.cantidad = this.formActualizar.cantidad;
+                        solicitud.observaciones = this.formActualizar.observaciones;
+                        solicitud.estado = 'actualizar'; // Cambiar estado a actualizar
+                        
+                        console.log('✅ Solicitud actualizada en vista:', solicitud);
+                    }
+                });
+                
+                // Recalcular estado general del grupo
+                grupo.estado_general = this.calcularEstadoGeneral(grupo.solicitudes);
+            });
+
+            this.cerrarModalActualizar();
+        }
+    } catch (error) {
+        console.error('❌ Error al actualizar solicitud:', error);
+        const message = error.response?.data?.message || 'Error al actualizar la solicitud';
+        this.mostrarNotificacion(message, 'error');
+    }
+},
+
+
+
 
                 get solicitudesAgrupadasFiltradas() {
                     return this.solicitudesAgrupadas.filter(grupo => {
@@ -718,7 +997,8 @@
                     const classes = {
                         pendiente: 'bg-yellow-100 text-yellow-800',
                         recibido: 'bg-green-100 text-green-800',
-                        ubicado: 'bg-purple-100 text-purple-800'
+                        ubicado: 'bg-purple-100 text-purple-800',
+                        actualizar: 'bg-orange-100 text-orange-800'
                     };
                     return classes[estado] || 'bg-gray-100 text-gray-800';
                 },
@@ -727,7 +1007,8 @@
                     const icons = {
                         pendiente: 'fas fa-clock',
                         recibido: 'fas fa-check',
-                        ubicado: 'fas fa-map-marker-alt'
+                        ubicado: 'fas fa-map-marker-alt',
+                        actualizar: 'fas fa-sync-alt'
                     };
                     return icons[estado] || 'fas fa-question';
                 },
@@ -1031,44 +1312,59 @@
                     return 'Ubicación desconocida';
                 },
 
-                async cambiarEstado(id, nuevoEstado) {
-                    if (nuevoEstado === 'ubicado') {
-                        // Buscar la solicitud y abrir modal de ubicación
-                        let solicitudEncontrada = null;
-                        this.solicitudesAgrupadas.forEach(grupo => {
-                            const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
-                            if (solicitud) solicitudEncontrada = solicitud;
-                        });
+              async cambiarEstado(id, nuevoEstado) {
+    // Validar que no se pueda cambiar a "actualizar" si está ubicado
+    if (nuevoEstado === 'actualizar') {
+        let solicitudEncontrada = null;
+        this.solicitudesAgrupadas.forEach(grupo => {
+            const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
+            if (solicitud) solicitudEncontrada = solicitud;
+        });
 
-                        if (solicitudEncontrada) {
-                            this.abrirModalUbicacion(solicitudEncontrada);
-                        }
-                        return;
+        if (solicitudEncontrada && solicitudEncontrada.estado === 'ubicado') {
+            this.mostrarNotificacion('No se puede actualizar una solicitud ya ubicada', 'warning');
+            return;
+        }
+    }
+
+    if (nuevoEstado === 'ubicado') {
+        // Buscar la solicitud y abrir modal de ubicación
+        let solicitudEncontrada = null;
+        this.solicitudesAgrupadas.forEach(grupo => {
+            const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
+            if (solicitud) solicitudEncontrada = solicitud;
+        });
+
+        if (solicitudEncontrada) {
+            this.abrirModalUbicacion(solicitudEncontrada);
+        }
+        return;
+    }
+
+    // Resto del código existente...
+    try {
+        if (confirm('¿Estás seguro de cambiar el estado de este artículo?')) {
+            const response = await axios.post(`/solicitud-ingreso/${id}/cambiar-estado`, {
+                estado: nuevoEstado
+            });
+
+            if (response.data.success) {
+                this.solicitudesAgrupadas.forEach(grupo => {
+                    const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
+                    if (solicitud) {
+                        solicitud.estado = nuevoEstado;
+                        grupo.estado_general = this.calcularEstadoGeneral(grupo.solicitudes);
                     }
+                });
 
-                    try {
-                        if (confirm('¿Estás seguro de cambiar el estado de este artículo?')) {
-                            const response = await axios.post(`/solicitud-ingreso/${id}/cambiar-estado`, {
-                                estado: nuevoEstado
-                            });
-
-                            if (response.data.success) {
-                                this.solicitudesAgrupadas.forEach(grupo => {
-                                    const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
-                                    if (solicitud) {
-                                        solicitud.estado = nuevoEstado;
-                                        grupo.estado_general = this.calcularEstadoGeneral(grupo.solicitudes);
-                                    }
-                                });
-
-                                this.mostrarNotificacion('Estado actualizado correctamente', 'success');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error al cambiar estado:', error);
-                        this.mostrarNotificacion('Error al cambiar el estado', 'error');
-                    }
-                },
+                this.mostrarNotificacion('Estado actualizado correctamente', 'success');
+            }
+        }
+    } catch (error) {
+        console.error('Error al cambiar estado:', error);
+        this.mostrarNotificacion('Error al cambiar el estado', 'error');
+    }
+},
 
                 async cambiarEstadoGrupo(grupo, nuevoEstado) {
                     try {
