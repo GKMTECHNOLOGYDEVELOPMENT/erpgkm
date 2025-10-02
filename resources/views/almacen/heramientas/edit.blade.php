@@ -170,11 +170,17 @@
                     <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total</label>
                     <div class="relative mt-1">
                         <i class="fas fa-boxes input-icon"></i>
-                        <input id="stock_total" name="stock_total" type="number" min="0"
-                            class="clean-input w-full" placeholder="Ingrese stock total" required
-                            value="{{ $articulo->stock_total }}">
+
+                        <!-- Campo visible bloqueado -->
+                        <input id="stock_total" type="number" min="0"
+                            class="clean-input w-full bg-gray-100 cursor-not-allowed"
+                            value="{{ $articulo->stock_total }}" disabled>
+
+                        <!-- Campo oculto para enviar al backend -->
+                        <input type="hidden" name="stock_total" value="{{ $articulo->stock_total }}">
                     </div>
                 </div>
+
 
                 <!-- Stock Mínimo -->
                 <div class="relative">

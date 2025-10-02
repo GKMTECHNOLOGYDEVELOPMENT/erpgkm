@@ -173,10 +173,11 @@
                     <div class="relative mt-1">
                         <i class="fas fa-boxes input-icon"></i>
                         <input id="stock_total" name="stock_total" type="number" min="0"
-                            class="clean-input w-full" placeholder="Ingrese stock total" required
-                            value="{{ $articulo->stock_total }}">
+                            class="clean-input w-full bg-gray-100 cursor-not-allowed" placeholder="Ingrese stock total"
+                            required value="{{ $articulo->stock_total }}" readonly>
                     </div>
                 </div>
+
 
                 <!-- Stock Mínimo -->
                 <div class="relative">

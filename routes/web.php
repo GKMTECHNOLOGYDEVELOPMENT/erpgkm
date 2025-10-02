@@ -64,6 +64,7 @@ use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesArticuloController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
+use App\Http\Controllers\almacen\ubicaciones\UbicacionesVistaController;
 use App\Http\Controllers\Apps\ActividadController;
 use App\Http\Controllers\Apps\EtiquetaController;
 use App\Http\Controllers\areacomercial\ClienteSeguimientoController;
@@ -1380,3 +1381,6 @@ Route::post('/solicitud-ingreso/guardar-ubicacion', [SolicitudIngresoController:
 
 
 Route::post('/solicitud-ingreso/{id}/cambiar-estado', [SolicitudIngresoController::class, 'cambiarEstado'])->name('solicitud-ingreso.cambiar-estado');
+
+Route::get('/almacen/vista', [UbicacionesVistaController::class, 'vistaAlmacen'])
+    ->name('almacen.vista');

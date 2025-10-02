@@ -121,10 +121,12 @@
             display: flex;
             align-items: center;
         }
+
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             top: 6px !important;
             right: 10px !important;
         }
+
         .clean-input::placeholder {
             font-size: 0.85rem;
             /* o 0.75rem si lo quieres aún más pequeño */
@@ -176,8 +178,7 @@
                     <div class="relative mt-1">
                         <i class="fas fa-tag input-icon"></i>
                         <input id="sku" name="sku" type="text" class="clean-input w-full"
-                            value="{{ old('sku', $articulo->sku) }}"
-                            placeholder="Ingrese SKU">
+                            value="{{ old('sku', $articulo->sku) }}" placeholder="Ingrese SKU">
                     </div>
                 </div>
 
@@ -194,7 +195,7 @@
                 </div>
 
                 @php
-                $modelosSeleccionados = $articulo->modelos->pluck('idModelo')->toArray();
+                    $modelosSeleccionados = $articulo->modelos->pluck('idModelo')->toArray();
                 @endphp
 
 
@@ -206,14 +207,13 @@
                         <!-- <i class="fas fa-car input-icon"></i> -->
                         <select id="idModelo" name="idModelo[]" class="select2-multiple w-full" multiple="multiple">
                             @foreach ($modelos as $modelo)
-                            <option value="{{ $modelo->idModelo }}"
-                                data-marca="{{ $modelo->idMarca }}"
-                                data-categoria="{{ $modelo->idCategoria }}"
-                                {{ in_array($modelo->idModelo, $modelosSeleccionados) ? 'selected' : '' }}>
-                                {{ $modelo->nombre }} -
-                                {{ $modelo->marca->nombre ?? 'Sin Marca' }} -
-                                {{ $modelo->categoria->nombre ?? 'Sin Categoría' }}
-                            </option>
+                                <option value="{{ $modelo->idModelo }}" data-marca="{{ $modelo->idMarca }}"
+                                    data-categoria="{{ $modelo->idCategoria }}"
+                                    {{ in_array($modelo->idModelo, $modelosSeleccionados) ? 'selected' : '' }}>
+                                    {{ $modelo->nombre }} -
+                                    {{ $modelo->marca->nombre ?? 'Sin Marca' }} -
+                                    {{ $modelo->categoria->nombre ?? 'Sin Categoría' }}
+                                </option>
                             @endforeach
 
                         </select>
@@ -225,8 +225,8 @@
                     <label for="idsubcategoria" class="block text-sm font-medium text-gray-700">Sub Categoría</label>
                     <div class="relative mt-1">
                         <i class="fas fa-folder input-icon"></i>
-                        <select id="idsubcategoria" name="idsubcategoria" class="select2-single clean-input w-full pl-10"
-                            style="appearance: none;">
+                        <select id="idsubcategoria" name="idsubcategoria"
+                            class="select2-single clean-input w-full pl-10" style="appearance: none;">
                             <option value="" disabled>Seleccionar Subcategoría</option>
                             @foreach ($subcategorias as $subcategoria)
                                 <option value="{{ $subcategoria->id }}"
@@ -240,7 +240,7 @@
 
 
 
-                   
+
 
                 <!-- Precio Compra -->
                 <div>
@@ -253,8 +253,7 @@
                         <div class="relative flex-1">
                             <!-- <i class="fas fa-dollar-sign input-icon"></i> -->
                             <input id="precio_compra" name="precio_compra" type="number" step="0.01"
-                                class="clean-input w-full"
-                                value="{{ old('precio_compra', $articulo->precio_compra) }}"
+                                class="clean-input w-full" value="{{ old('precio_compra', $articulo->precio_compra) }}"
                                 placeholder="0.00">
 
                         </div>
@@ -272,8 +271,7 @@
                         </button>
                         <div class="relative flex-1">
                             <input id="precio_venta" name="precio_venta" type="number" step="0.01"
-                                class="clean-input w-full"
-                                value="{{ old('precio_venta', $articulo->precio_venta) }}"
+                                class="clean-input w-full" value="{{ old('precio_venta', $articulo->precio_venta) }}"
                                 placeholder="0.00">
 
                         </div>
@@ -286,12 +284,13 @@
                     <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total</label>
                     <div class="relative mt-1">
                         <i class="fas fa-boxes input-icon"></i>
-                        <input id="stock_total" name="stock_total" type="number" class="clean-input w-full"
+                        <input id="stock_total" name="stock_total" type="number"
+                            class="clean-input w-full bg-gray-100 cursor-not-allowed"
                             value="{{ old('stock_total', $articulo->stock_total) }}"
-                            placeholder="Ingrese stock total">
-
+                            placeholder="Ingrese stock total" readonly>
                     </div>
                 </div>
+
 
                 <!-- Stock Mínimo -->
                 <div class="relative">
@@ -310,13 +309,14 @@
                     <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
                     <div class="relative mt-1">
                         <i class="fas fa-balance-scale input-icon"></i>
-                        <select id="idUnidad" name="idUnidad" class="clean-input w-full pl-8" style="appearance: none;">
+                        <select id="idUnidad" name="idUnidad" class="clean-input w-full pl-8"
+                            style="appearance: none;">
                             <option value="" disabled selected>Seleccionar Unidad</option>
                             @foreach ($unidades as $unidad)
-                            <option value="{{ $unidad->idUnidad }}"
-                                {{ $unidad->idUnidad == $articulo->idUnidad ? 'selected' : '' }}>
-                                {{ $unidad->nombre }}
-                            </option>
+                                <option value="{{ $unidad->idUnidad }}"
+                                    {{ $unidad->idUnidad == $articulo->idUnidad ? 'selected' : '' }}>
+                                    {{ $unidad->nombre }}
+                                </option>
                             @endforeach
 
                         </select>
@@ -329,18 +329,18 @@
                     <div class="relative mt-1">
                         <i class="fas fa-ruler input-icon"></i>
                         <input id="pulgadas" name="pulgadas" type="text" class="clean-input w-full"
-                            value="{{ old('pulgadas', $articulo->pulgadas) }}"
-                            placeholder="Ej: 14'', 15'', etc.">
+                            value="{{ old('pulgadas', $articulo->pulgadas) }}" placeholder="Ej: 14'', 15'', etc.">
 
                     </div>
                 </div>
-                   <!-- Estado del Artículo -->
+                <!-- Estado del Artículo -->
                 <div>
                     <label for="estado" class="block text-sm font-medium">Estado</label>
                     <div class="ml-4 w-12 h-6 relative">
                         <input type="hidden" name="estado" value="0">
                         <input type="checkbox" id="estado" name="estado"
-                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" value="1"
+                            class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                            value="1"
                             {{ old('estado', isset($articulo) ? $articulo->estado : 1) ? 'checked' : '' }} />
                         <span
                             class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full 
@@ -352,12 +352,13 @@
                     </div>
                 </div>
                 <!-- Foto -->
-                <div class="mb-5" x-data="{ 
-                    fotoPreview: '/assets/images/articulo/producto-default.png', 
-                    defaultImage: '/assets/images/articulo/producto-default.png' 
+                <div class="mb-5" x-data="{
+                    fotoPreview: '/assets/images/articulo/producto-default.png',
+                    defaultImage: '/assets/images/articulo/producto-default.png'
                 }">
                     <label class="block text-sm font-medium text-gray-700">Foto</label>
-                    <label for="foto" class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
+                    <label for="foto"
+                        class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
                         <i class="fas fa-upload mr-1"></i> Seleccionar archivo</label>
                     <div class="relative mt-1">
                         <input id="foto" name="foto" type="file" accept="image/*"
@@ -373,10 +374,9 @@
                     <!-- Previsualización de imagen -->
                     <div class="flex justify-center mt-4">
                         <div class="w-full max-w-xs h-40 flex justify-center items-center bg-gray-50 rounded">
-                           <img 
-                                :src="fotoPreview !== defaultImage ? fotoPreview : '{{ $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : asset('assets/images/articulo/producto-default.png') }}'" 
-                                alt="Previsualización de la imagen" 
-                                class="w-full h-full object-contain">
+                            <img :src="fotoPreview !== defaultImage ? fotoPreview :
+                                '{{ $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : asset('assets/images/articulo/producto-default.png') }}'"
+                                alt="Previsualización de la imagen" class="w-full h-full object-contain">
 
                         </div>
                     </div>
@@ -385,7 +385,8 @@
                 <!-- Ficha Técnica -->
                 <div class="mb-5">
                     <label class="block text-sm font-medium text-gray-700">Ficha Técnica (PDF)</label>
-                    <label for="ficha_tecnica" class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
+                    <label for="ficha_tecnica"
+                        class="inline-block text-sm font-semibold px-3 py-1.5 rounded cursor-pointer hover:bg-blue-700 transition">
                         <i class="fas fa-upload mr-1"></i> Seleccionar archivo</label>
                     <div class="relative mt-1">
                         <input id="ficha_tecnica" name="ficha_tecnica" type="file" accept=".pdf"
@@ -405,12 +406,13 @@
 
 
                 @if ($articulo->ficha_tecnica)
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        document.getElementById('nombre_archivo').textContent = "{{ basename($articulo->ficha_tecnica) }}";
-                        document.getElementById('pdf_viewer').src = "{{ asset('storage/fichas/' . $articulo->ficha_tecnica) }}";
-                    });
-                </script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function() {
+                            document.getElementById('nombre_archivo').textContent = "{{ basename($articulo->ficha_tecnica) }}";
+                            document.getElementById('pdf_viewer').src =
+                            "{{ asset('storage/fichas/' . $articulo->ficha_tecnica) }}";
+                        });
+                    </script>
                 @endif
 
 
@@ -422,7 +424,7 @@
                     <i class="fas fa-times mr-2"></i> Cancelar
                 </a>
 
-             
+
 
                 <!-- Guardar -->
                 <button type="button" id="btnGuardar" class="btn btn-primary flex items-center">
@@ -438,13 +440,13 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     @php
-    $monedaCompraId = $articulo->moneda_compra;
-    $monedaVentaId = $articulo->moneda_venta;
+        $monedaCompraId = $articulo->moneda_compra;
+        $monedaVentaId = $articulo->moneda_venta;
     @endphp
 
-<script>
-    window.idArticulo = {{ $articulo->idArticulos ?? 'null' }};
-</script>
+    <script>
+        window.idArticulo = {{ $articulo->idArticulos ?? 'null' }};
+    </script>
 
 
 
@@ -464,46 +466,46 @@
             // ---------------------------
             // 2. Manejo de monedas
             // ---------------------------
-        const monedas = @json($monedas);
-        const monedaCompraId = {{ $monedaCompraId ?? 'null' }};
-        const monedaVentaId = {{ $monedaVentaId ?? 'null' }};
+            const monedas = @json($monedas);
+            const monedaCompraId = {{ $monedaCompraId ?? 'null' }};
+            const monedaVentaId = {{ $monedaVentaId ?? 'null' }};
 
-        let monedaCompraIndex = monedas.findIndex(m => m.idMonedas == monedaCompraId);
-        let monedaVentaIndex = monedas.findIndex(m => m.idMonedas == monedaVentaId);
+            let monedaCompraIndex = monedas.findIndex(m => m.idMonedas == monedaCompraId);
+            let monedaVentaIndex = monedas.findIndex(m => m.idMonedas == monedaVentaId);
 
-        if (monedaCompraIndex === -1) monedaCompraIndex = 0;
-        if (monedaVentaIndex === -1) monedaVentaIndex = 0;
+            if (monedaCompraIndex === -1) monedaCompraIndex = 0;
+            if (monedaVentaIndex === -1) monedaVentaIndex = 0;
 
-        const btnCompra = document.getElementById("toggleMonedaCompra");
-        const btnVenta = document.getElementById("toggleMonedaVenta");
-        const symbolCompra = document.getElementById("precio_compra_symbol");
-        const symbolVenta = document.getElementById("precio_venta_symbol");
-        const monedaInputCompra = document.getElementById("moneda_compra");
-        const monedaInputVenta = document.getElementById("moneda_venta");
+            const btnCompra = document.getElementById("toggleMonedaCompra");
+            const btnVenta = document.getElementById("toggleMonedaVenta");
+            const symbolCompra = document.getElementById("precio_compra_symbol");
+            const symbolVenta = document.getElementById("precio_venta_symbol");
+            const monedaInputCompra = document.getElementById("moneda_compra");
+            const monedaInputVenta = document.getElementById("moneda_venta");
 
-        if (monedas.length > 0) {
-            symbolCompra.textContent = monedas[monedaCompraIndex].nombre;
-            monedaInputCompra.value = monedas[monedaCompraIndex].idMonedas;
-            symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
-            monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
-
-            btnCompra.addEventListener("click", function () {
-                monedaCompraIndex = (monedaCompraIndex + 1) % monedas.length;
+            if (monedas.length > 0) {
                 symbolCompra.textContent = monedas[monedaCompraIndex].nombre;
                 monedaInputCompra.value = monedas[monedaCompraIndex].idMonedas;
-            });
-
-            btnVenta.addEventListener("click", function () {
-                monedaVentaIndex = (monedaVentaIndex + 1) % monedas.length;
                 symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
                 monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
-            });
-        } else {
-            btnCompra.disabled = true;
-            btnVenta.disabled = true;
-            symbolCompra.textContent = '';
-            symbolVenta.textContent = '';
-        }
+
+                btnCompra.addEventListener("click", function() {
+                    monedaCompraIndex = (monedaCompraIndex + 1) % monedas.length;
+                    symbolCompra.textContent = monedas[monedaCompraIndex].nombre;
+                    monedaInputCompra.value = monedas[monedaCompraIndex].idMonedas;
+                });
+
+                btnVenta.addEventListener("click", function() {
+                    monedaVentaIndex = (monedaVentaIndex + 1) % monedas.length;
+                    symbolVenta.textContent = monedas[monedaVentaIndex].nombre;
+                    monedaInputVenta.value = monedas[monedaVentaIndex].idMonedas;
+                });
+            } else {
+                btnCompra.disabled = true;
+                btnVenta.disabled = true;
+                symbolCompra.textContent = '';
+                symbolVenta.textContent = '';
+            }
 
 
             // ---------------------------
@@ -529,57 +531,60 @@
                 });
             }
 
- document.getElementById("btnGuardar").addEventListener("click", function () {
-    const form = document.getElementById("repuestosForm");
+            document.getElementById("btnGuardar").addEventListener("click", function() {
+                const form = document.getElementById("repuestosForm");
 
-    // Ejecutar validaciones manuales
-    form.dispatchEvent(new Event('submit', {
-        cancelable: true,
-        bubbles: true
-    }));
+                // Ejecutar validaciones manuales
+                form.dispatchEvent(new Event('submit', {
+                    cancelable: true,
+                    bubbles: true
+                }));
 
-    const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
-    if (errores.length > 0) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-    }
+                const errores = form.querySelectorAll(".error-msg, .error-msg-duplicado");
+                if (errores.length > 0) {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    return;
+                }
 
-    const formData = new FormData(form);
+                const formData = new FormData(form);
 
-    // ✅ Agregar _method = PUT para que Laravel lo acepte como actualización
-    formData.append('_method', 'PUT');
+                // ✅ Agregar _method = PUT para que Laravel lo acepte como actualización
+                formData.append('_method', 'PUT');
 
-    // ✅ Este ID debe venir de un campo oculto en el formulario
-    const idArticulo = document.getElementById("idArticulo").value;
+                // ✅ Este ID debe venir de un campo oculto en el formulario
+                const idArticulo = document.getElementById("idArticulo").value;
 
-    const url = `/repuestos/update/${idArticulo}`;
-    console.log("📤 Enviando datos para actualización a:", url);
+                const url = `/repuestos/update/${idArticulo}`;
+                console.log("📤 Enviando datos para actualización a:", url);
 
-    fetch(url, {
-        method: "POST", // Laravel interpretará como PUT gracias a _method
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            toastr.success("Repuesto actualizado correctamente");
+                fetch(url, {
+                        method: "POST", // Laravel interpretará como PUT gracias a _method
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success("Repuesto actualizado correctamente");
 
-            // ✅ Redireccionar o lo que quieras hacer después
-            // window.location.href = "/repuestos";
+                            // ✅ Redireccionar o lo que quieras hacer después
+                            // window.location.href = "/repuestos";
 
-        } else {
-            toastr.error("Error al actualizar el repuesto.");
-            console.error("❌ Error del servidor:", data);
-        }
-    })
-    .catch(error => {
-        toastr.error("Error en la comunicación con el servidor.");
-        console.error("🚨 Error AJAX:", error);
-    });
-});
+                        } else {
+                            toastr.error("Error al actualizar el repuesto.");
+                            console.error("❌ Error del servidor:", data);
+                        }
+                    })
+                    .catch(error => {
+                        toastr.error("Error en la comunicación con el servidor.");
+                        console.error("🚨 Error AJAX:", error);
+                    });
+            });
 
 
 
