@@ -31,6 +31,7 @@ use App\Models\Categoria;
 use App\Models\CondicionesTicket;
 use App\Models\ConstanciaEntrega;
 use App\Models\ConstanciaFoto;
+use App\Models\Custodia;
 use App\Models\Fotostickest;
 use App\Models\SeleccionarVisita;
 use App\Models\SolicitudEntrega;
@@ -3598,66 +3599,163 @@ if ($idEstadflujo == 2) {
 
 
 
+    // public function guardarEstadoflujo(Request $request)
+    // {
+    //     // Validar los datos
+    //     $request->validate([
+    //         'idTicket' => 'required|integer|exists:tickets,idTickets',
+    //         'idEstadflujo' => 'required|integer|exists:estado_flujo,idEstadflujo',
+    //     ]);
+
+    //     // Obtener el ID del usuario autenticado
+    //     $idUsuario = auth()->user()->idUsuario;
+
+    //     // Insertar el registro en la tabla ticketflujo
+    //     DB::table('ticketflujo')->insert([
+    //         'idTicket' => $request->idTicket,
+    //         'idEstadflujo' => $request->idEstadflujo,
+    //         'idUsuario' => $idUsuario,
+    //         'fecha_creacion' => now(),
+    //         'comentarioflujo' => $request->comentarioflujo ?? '',
+    //     ]);
+
+    //     // Obtener el último idTicketFlujo insertado
+    //     $idTicketFlujo = DB::getPdo()->lastInsertId();
+
+    //     // Actualizar la tabla tickets con el idTicketFlujo recién creado
+    //     DB::table('tickets')
+    //         ->where('idTickets', $request->idTicket)
+    //         ->update([
+    //             'idTicketFlujo' => $idTicketFlujo,
+    //         ]);
+
+    //     // Si el estado de flujo es 10, crear una visita
+    //     if ($request->idEstadflujo == 10) {
+    //         $idUsuarioAleatorio = rand(0, 1) ? 139 : 140;
+
+    //         DB::table('visitas')->insert([
+    //             'nombre' => 'Laboratorio',
+    //             'fecha_programada' => now(),
+    //             'fecha_asignada' => now(),
+    //             'fechas_desplazamiento' => null,
+    //             'fecha_llegada' => null,
+    //             'fecha_inicio' => null,
+    //             'fecha_final' => null,
+    //             'estado' => 1,
+    //             'idTickets' => $request->idTicket,
+    //             'idUsuario' => $idUsuarioAleatorio,
+    //             'fecha_inicio_hora' => null,
+    //             'fecha_final_hora' => null,
+    //             'necesita_apoyo' => 0,
+    //             'tipoServicio' => 7,
+    //             'visto' => 0,
+    //             'recojo' => null,
+    //             'estadovisita' => null,
+    //             'nombreclientetienda' => null,
+    //             'celularclientetienda' => null,
+    //             'dniclientetienda' => null,
+    //         ]);
+    //     }
+
+    //     return response()->json(['success' => true]);
+    // }
+
+
+
     public function guardarEstadoflujo(Request $request)
-    {
-        // Validar los datos
-        $request->validate([
-            'idTicket' => 'required|integer|exists:tickets,idTickets',
-            'idEstadflujo' => 'required|integer|exists:estado_flujo,idEstadflujo',
+{
+    // Validar los datos
+    $request->validate([
+        'idTicket' => 'required|integer|exists:tickets,idTickets',
+        'idEstadflujo' => 'required|integer|exists:estado_flujo,idEstadflujo',
+    ]);
+
+    // Obtener el ID del usuario autenticado
+    $idUsuario = auth()->user()->idUsuario;
+
+    // Insertar el registro en la tabla ticketflujo
+    DB::table('ticketflujo')->insert([
+        'idTicket' => $request->idTicket,
+        'idEstadflujo' => $request->idEstadflujo,
+        'idUsuario' => $idUsuario,
+        'fecha_creacion' => now(),
+        'comentarioflujo' => $request->comentarioflujo ?? '',
+    ]);
+
+    // Obtener el último idTicketFlujo insertado
+    $idTicketFlujo = DB::getPdo()->lastInsertId();
+
+    // Actualizar la tabla tickets con el idTicketFlujo recién creado
+    DB::table('tickets')
+        ->where('idTickets', $request->idTicket)
+        ->update([
+            'idTicketFlujo' => $idTicketFlujo,
         ]);
 
-        // Obtener el ID del usuario autenticado
-        $idUsuario = auth()->user()->idUsuario;
+    // Si el estado de flujo es 10, crear una visita
+    if ($request->idEstadflujo == 10) {
+        $idUsuarioAleatorio = rand(0, 1) ? 139 : 140;
 
-        // Insertar el registro en la tabla ticketflujo
-        DB::table('ticketflujo')->insert([
-            'idTicket' => $request->idTicket,
-            'idEstadflujo' => $request->idEstadflujo,
-            'idUsuario' => $idUsuario,
-            'fecha_creacion' => now(),
-            'comentarioflujo' => $request->comentarioflujo ?? '',
+        DB::table('visitas')->insert([
+            'nombre' => 'Laboratorio',
+            'fecha_programada' => now(),
+            'fecha_asignada' => now(),
+            'fechas_desplazamiento' => null,
+            'fecha_llegada' => null,
+            'fecha_inicio' => null,
+            'fecha_final' => null,
+            'estado' => 1,
+            'idTickets' => $request->idTicket,
+            'idUsuario' => $idUsuarioAleatorio,
+            'fecha_inicio_hora' => null,
+            'fecha_final_hora' => null,
+            'necesita_apoyo' => 0,
+            'tipoServicio' => 7,
+            'visto' => 0,
+            'recojo' => null,
+            'estadovisita' => null,
+            'nombreclientetienda' => null,
+            'celularclientetienda' => null,
+            'dniclientetienda' => null,
         ]);
-
-        // Obtener el último idTicketFlujo insertado
-        $idTicketFlujo = DB::getPdo()->lastInsertId();
-
-        // Actualizar la tabla tickets con el idTicketFlujo recién creado
-        DB::table('tickets')
-            ->where('idTickets', $request->idTicket)
-            ->update([
-                'idTicketFlujo' => $idTicketFlujo,
-            ]);
-
-        // Si el estado de flujo es 10, crear una visita
-        if ($request->idEstadflujo == 10) {
-            $idUsuarioAleatorio = rand(0, 1) ? 139 : 140;
-
-            DB::table('visitas')->insert([
-                'nombre' => 'Laboratorio',
-                'fecha_programada' => now(),
-                'fecha_asignada' => now(),
-                'fechas_desplazamiento' => null,
-                'fecha_llegada' => null,
-                'fecha_inicio' => null,
-                'fecha_final' => null,
-                'estado' => 1,
-                'idTickets' => $request->idTicket,
-                'idUsuario' => $idUsuarioAleatorio,
-                'fecha_inicio_hora' => null,
-                'fecha_final_hora' => null,
-                'necesita_apoyo' => 0,
-                'tipoServicio' => 7,
-                'visto' => 0,
-                'recojo' => null,
-                'estadovisita' => null,
-                'nombreclientetienda' => null,
-                'celularclientetienda' => null,
-                'dniclientetienda' => null,
-            ]);
-        }
-
-        return response()->json(['success' => true]);
     }
+
+    // Crear custodia automáticamente si el estado de flujo es 19 y el cliente tiene documento 20109072177
+    if ($request->idEstadflujo == 19) {
+        // Obtener el ticket con el cliente relacionado
+        $ticket = Ticket::with('cliente')->find($request->idTicket);
+        
+        if ($ticket && $ticket->cliente && $ticket->cliente->documento == '20109072177') {
+            // Verificar si ya existe una custodia para este ticket
+            $custodiaExistente = Custodia::where('id_ticket', $ticket->idTickets)->first();
+            
+            if (!$custodiaExistente) {
+                // Crear la custodia automáticamente
+                $custodia = Custodia::create([
+                    'codigocustodias'        => strtoupper(Str::random(10)),
+                    'id_ticket'              => $ticket->idTickets,
+                    'idcliente'              => $ticket->idCliente,
+                    'numero_ticket'          => $ticket->numero_ticket,
+                    'idMarca'                => $ticket->idMarca,
+                    'idModelo'               => $ticket->idModelo,
+                    'serie'                  => $ticket->serie,
+                    'estado'                 => 'Pendiente',
+                    'fecha_ingreso_custodia' => now()->toDateString(),
+                    'ubicacion_actual'       => 'Almacén', // Valor por defecto
+                    'responsable_entrega'    => null,
+                    'id_responsable_recepcion'  => $idUsuario,
+                    'observaciones'          => 'Custodia creada automáticamente por cambio de estado de flujo',
+                    'fecha_devolucion'       => null,
+                ]);
+
+                // Opcional: Log para seguimiento
+                Log::info("Custodia creada automáticamente para el ticket {$ticket->idTickets} debido al estado de flujo 19");
+            }
+        }
+    }
+
+    return response()->json(['success' => true]);
+}
 
 
     public function eliminarflujo($id)

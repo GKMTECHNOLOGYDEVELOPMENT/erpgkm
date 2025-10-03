@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\almacen\custodia;
 
 use App\Http\Controllers\Controller;
+use App\Models\Articulo;
 use App\Models\Cliente;
 use App\Models\Custodia;
 use App\Models\CustodiaFoto;
 use App\Models\CustodiaUbicacion;
+use App\Models\HarvestRetiro;
 use App\Models\Marca;
 use App\Models\Modelo;
 use Illuminate\Support\Facades\DB;
@@ -86,13 +88,125 @@ class CustodiaController extends Controller
     }
 
 
-    public function harvest($id)
+public function harvest($id)
 {
-    $custodia = Custodia::findOrFail($id);
+    $custodia = Custodia::with([
+        'ticket',
+        'ticket.cliente',
+        'ticket.marca',
+        'ticket.modelo'
+    ])->findOrFail($id);
 
-    // lógica de Harvest aquí...
+    // Obtener repuestos compatibles con modelos y subcategoria
+    $repuestos = Articulo::where('idTipoArticulo', 2) // Tipo repuesto
+        ->where('estado', 1) // Activos
+        ->with(['modelos', 'subcategoria']) // Cargar modelos (relación muchos a muchos)
+        ->select('idArticulos', 'codigo_repuesto', 'idsubcategoria')
+        ->get();
 
-    return view('solicitud.solicitudcustodia.harvest', compact('custodia'));
+    // Obtener retiros existentes
+    $retiros = HarvestRetiro::where('id_custodia', $id)
+        ->where('estado', 'Activo')
+        ->with(['responsable', 'articulo.modelos', 'articulo.subcategoria'])
+        ->get();
+
+    return view('solicitud.solicitudcustodia.harvest', compact(
+        'custodia', 
+        'repuestos',
+        'retiros'
+    ));
+}
+
+
+public function retirarRepuesto(Request $request, $id)
+{
+    $request->validate([
+        'codigo_repuesto' => 'required|string|max:255',
+        'cantidad' => 'required|integer|min:1',
+        'observaciones' => 'nullable|string|max:500'
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        $custodia = Custodia::findOrFail($id);
+
+        // Verificar que el código de repuesto existe y obtener el id_articulo
+        $articulo = Articulo::where('codigo_repuesto', $request->codigo_repuesto)
+            ->where('idTipoArticulo', 2)
+            ->first();
+
+        if (!$articulo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El código de repuesto no existe o no es un repuesto válido'
+            ], 400);
+        }
+
+        // Crear registro de retiro (incluyendo id_articulo)
+        $retiro = HarvestRetiro::create([
+            'id_custodia' => $id,
+            'id_articulo' => $articulo->idArticulos, // ✅ Agregamos el id_articulo
+            'codigo_repuesto' => $request->codigo_repuesto,
+            'cantidad_retirada' => $request->cantidad,
+            'observaciones' => $request->observaciones,
+            'id_responsable' => auth()->id(),
+            'estado' => 'Activo'
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Repuesto retirado correctamente',
+            'retiro' => $retiro
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al retirar repuesto: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
+public function anularRetiro($idRetiro)
+{
+    try {
+        $retiro = HarvestRetiro::where('id', $idRetiro)
+            ->where('estado', 'Activo')
+            ->firstOrFail();
+
+        // Solo cambiar el estado (no restaurar stock)
+        $retiro->estado = 'Anulado';
+        $retiro->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Retiro anulado correctamente'
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al anular retiro: ' . $e->getMessage()
+        ], 500);
+    }
+}
+public function getRepuestosCompatibles($idModelo)
+{
+    $repuestos = Articulo::where('idTipoArticulo', 2)
+        ->where(function($query) use ($idModelo) {
+            $query->where('idModelo', $idModelo)
+                  ->orWhereNull('idModelo');
+        })
+        ->where('estado', 1)
+        ->select('idArticulos as id', 'nombre', 'codigo_repuesto', 'stock_total')
+        ->get();
+
+    return response()->json($repuestos);
 }
 
 
@@ -369,6 +483,9 @@ class CustodiaController extends Controller
                 ->withInput();
         }
     }
+
+
+    
 
     // Métodos actualizados para soportar búsqueda con Select2
        public function getClientes(Request $request): JsonResponse

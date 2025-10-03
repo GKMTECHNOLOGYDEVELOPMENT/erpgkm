@@ -15,4 +15,10 @@ class Subcategoria extends Model
         'nombre',
         'descripcion',
     ];
+
+     // Relación con artículos
+    public function articulos()
+    {
+        return $this->hasMany(Articulo::class, 'idsubcategoria', 'id');
+    }
 }

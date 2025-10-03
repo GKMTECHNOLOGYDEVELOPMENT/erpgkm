@@ -646,50 +646,85 @@ function toggleCamposPorEstado() {
 }
 
         // Preview de fotos antes de subir
-        function setupFilePreview() {
-            const fileInput = document.getElementById('fotos');
-            const previewContainer = document.getElementById('preview-fotos');
+function setupFilePreview() {
+    const fileInput = document.getElementById('fotos');
+    const previewContainer = document.getElementById('preview-fotos');
 
-            fileInput.addEventListener('change', function(e) {
-                previewContainer.innerHTML = '';
-                const files = Array.from(e.target.files);
+    fileInput.addEventListener('change', function(e) {
+        renderPreviews();
+    });
+}
 
-                files.forEach((file, index) => {
-                    if (!file.type.startsWith('image/')) return;
+// Función para renderizar las previsualizaciones
+function renderPreviews() {
+    const fileInput = document.getElementById('fotos');
+    const previewContainer = document.getElementById('preview-fotos');
+    const files = Array.from(fileInput.files);
+    
+    previewContainer.innerHTML = '';
+    
+    if (files.length === 0) {
+        previewContainer.innerHTML = `
+            <div class="col-span-4 text-center text-gray-500 py-4">
+                <p class="text-sm">No hay fotos seleccionadas</p>
+            </div>
+        `;
+        return;
+    }
 
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const preview = document.createElement('div');
-                        preview.className = 'relative group';
-                        preview.innerHTML = `
-                            <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg border border-gray-200">
-                            <button type="button" onclick="removePreview(${index})" 
-                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                                ×
-                            </button>
-                            <p class="text-xs text-gray-500 mt-1 truncate">${file.name}</p>
-                            <p class="text-xs text-gray-400">${(file.size / 1024).toFixed(1)} KB</p>
-                        `;
-                        previewContainer.appendChild(preview);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            });
-        }
+    files.forEach((file, index) => {
+        if (!file.type.startsWith('image/')) return;
 
-        // Remover preview
-        function removePreview(index) {
-            const fileInput = document.getElementById('fotos');
-            const dt = new DataTransfer();
-            const files = Array.from(fileInput.files);
-            
-            files.forEach((file, i) => {
-                if (i !== index) dt.items.add(file);
-            });
-            
-            fileInput.files = dt.files;
-            setupFilePreview(); // Re-setup para actualizar preview
-        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.createElement('div');
+            preview.className = 'relative group bg-white rounded-lg border border-gray-200 p-3';
+            preview.innerHTML = `
+                <div class="relative">
+                    <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg">
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <button type="button" onclick="eliminarPreview(${index})" 
+                                class="text-white bg-red-600 rounded-full p-2 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <p class="text-xs text-gray-700 font-medium truncate" title="${file.name}">
+                        ${file.name}
+                    </p>
+                    <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(1)} KB</p>
+                </div>
+            `;
+            previewContainer.appendChild(preview);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// Función mejorada para eliminar previsualizaciones
+function eliminarPreview(index) {
+    const fileInput = document.getElementById('fotos');
+    const files = Array.from(fileInput.files);
+    
+    // Crear nueva lista de archivos excluyendo el índice a eliminar
+    const newFiles = files.filter((_, i) => i !== index);
+    
+    // Crear nuevo DataTransfer y agregar los archivos restantes
+    const dt = new DataTransfer();
+    newFiles.forEach(file => dt.items.add(file));
+    
+    // Actualizar el input de archivos
+    fileInput.files = dt.files;
+    
+    // Volver a renderizar las previsualizaciones
+    renderPreviews();
+    
+    // Disparar el evento change para notificar a otros listeners
+    fileInput.dispatchEvent(new Event('change'));
+}
 
 // Cargar galería de fotos existentes
 function cargarGaleriaFotos() {
