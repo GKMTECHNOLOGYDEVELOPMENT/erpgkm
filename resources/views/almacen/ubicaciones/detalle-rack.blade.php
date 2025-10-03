@@ -184,17 +184,17 @@
         <!-- Rack Grid Mejorado -->
         <main class="flex-1 p-8 perspective-[1000px] [transform-style:preserve-3d]">
             <div class="max-w-7xl mx-auto space-y-8">
-                <template x-for="(nivel, idxNivel) in rack.niveles.slice().reverse()" :key="idxNivel">
+                <template x-for="(nivel, idxInvertido) in [...rack.niveles].reverse()" :key="idxInvertido">
                     <div
                         class="panel rounded-2xl p-6 shadow-xl backdrop-blur-md border border-white/20
-            transition-transform duration-300 ease-in-out hover:translate-z-[10px] hover:scale-[1.02] hover:shadow-2xl">
+        transition-transform duration-300 ease-in-out hover:translate-z-[10px] hover:scale-[1.02] hover:shadow-2xl">
 
                         <div class="flex items-center gap-4 mb-6">
                             <div class="px-3 py-6 rounded-lg font-bold text-sm text-white 
-                                    [writing-mode:vertical-rl] [text-orientation:mixed] 
-                                    [transform:translateZ(5px)]"
+                    [writing-mode:vertical-rl] [text-orientation:mixed] 
+                    [transform:translateZ(5px)]"
                                 style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-                                NIVEL <span x-text="rack.niveles.length - idxNivel"></span>
+                                NIVEL <span x-text="rack.niveles.length - idxInvertido"></span>
                             </div>
                             <div class="flex-1 h-px bg-gradient-to-r from-purple-500 to-transparent"></div>
                             <div class="flex items-center gap-2 text-sm text-gray-600">

@@ -425,7 +425,9 @@ function rackDetalle() {
             } else {
                 // Navegación normal
                 this.idxRack = (nuevoIdx + this.racks.length) % this.racks.length;
-                this.initSwipers();
+                this.$nextTick(() => {
+                    this.initSwipers(); // 👈 Agregar esta línea
+                });
             }
         },
 
@@ -435,7 +437,6 @@ function rackDetalle() {
             const rackDestinoIdx = this.modalSeleccionRack.rackDestino;
 
             if (rackOrigenIdx === rackDestinoIdx) {
-                // Si es el mismo rack, usar reubicación normal
                 this.modoReubicacion.activo = true;
                 this.modalSeleccionRack.open = false;
                 this.info('Modo reubicación activado. Selecciona la ubicación destino');
@@ -446,9 +447,13 @@ function rackDetalle() {
             this.idxRack = rackDestinoIdx;
             this.modalSeleccionRack.open = false;
 
+            // Reinicializar swipers después del cambio
+            this.$nextTick(() => {
+                this.initSwipers();
+            });
+
             this.info(`Selecciona la ubicación destino en el rack ${this.rack.nombre}`);
         },
-
         // 👇 Método para completar la reubicación entre racks
         // 👇 Método para completar la reubicación entre racks - VERSIÓN MEJORADA
         completarReubicacionRack(ubicacionDestino) {
@@ -490,8 +495,7 @@ function rackDetalle() {
                 rack_origen: this.racks[rackOrigenIdx].nombre,
             });
 
-            // Limpiar origen y agregar al historial - ORIGEN
-            // IMPORTANTE: No limpiar el historial, solo agregar nuevo registro
+            // Agregar al historial del origen
             ubicacionOrigen.historial.unshift({
                 fecha: new Date().toISOString().split('T')[0],
                 producto: productoMovido,
@@ -507,12 +511,16 @@ function rackDetalle() {
             ubicacionOrigen.estado = 'vacio';
             ubicacionOrigen.fecha = null;
 
-            // Resetear modo
+            // Resetear modo ANTES de cambiar de rack
             this.cancelarReubicacion();
 
-            // Volver al rack origen para mostrar el cambio
+            // Ahora cambiar al rack origen para mostrar que el producto se fue
             this.idxRack = rackOrigenIdx;
-            this.initSwipers();
+
+            // Reinicializar swipers después del cambio
+            this.$nextTick(() => {
+                this.initSwipers();
+            });
 
             this.success(`Producto reubicado de ${codigoOrigen} a ${ubicacionDestino.codigo} (Rack ${this.racks[rackDestinoIdx].nombre})`);
         },
