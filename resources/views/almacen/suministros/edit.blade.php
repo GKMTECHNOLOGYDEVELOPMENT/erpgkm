@@ -172,10 +172,11 @@
                     <div class="relative mt-1">
                         <i class="fas fa-boxes input-icon"></i>
                         <input id="stock_total" name="stock_total" type="number" min="0"
-                            class="clean-input w-full" placeholder="Ingrese stock total" required
-                            value="{{ $articulo->stock_total }}">
+                            class="clean-input w-full bg-gray-100 cursor-not-allowed"
+                            value="{{ $articulo->stock_total }}" readonly>
                     </div>
                 </div>
+
 
                 <!-- Stock Mínimo -->
                 <div class="relative">
@@ -346,10 +347,10 @@
                         </div>
 
                         <!-- Vista previa del PDF -->
-                    <div class="relative w-full" style="padding-top: 50%;"> <!-- 50% = aspecto 2:1 -->
-                        <iframe id="pdf_viewer" class="absolute top-0 left-0 w-full h-full border rounded"
-                            type="application/pdf"></iframe>
-                    </div>
+                        <div class="relative w-full" style="padding-top: 50%;"> <!-- 50% = aspecto 2:1 -->
+                            <iframe id="pdf_viewer" class="absolute top-0 left-0 w-full h-full border rounded"
+                                type="application/pdf"></iframe>
+                        </div>
                     </div>
 
                 </div>
