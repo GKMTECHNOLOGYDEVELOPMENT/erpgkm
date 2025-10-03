@@ -92,16 +92,14 @@
                     <label class="block text-sm font-medium text-slate-600 mb-2">Sede</label>
                     <select x-model="filtro.sede" @change="aplicarFiltros()"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
-                        <option value="LIMA" selected>LIMA</option>
-                        <option value="CALLAO">CALLAO</option>
-                        <option value="AREQUIPA">AREQUIPA</option>
-                        <option value="TRUJILLO">TRUJILLO</option>
+                        <option value="PUENTE PIEDRA" selected>PUENTE PIEDRA</option>
+                        <option value="LOS OLIVOS">LOS OLIVOS</option>
                     </select>
                 </div>
 
                 <!-- Buscador -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-2">Rack, producto, código...</label>
+                    <label class="block text-sm font-medium text-slate-600 mb-2">Rack</label>
                     <input x-model="filtro.buscar" @input="debounceFilter()" type="text" placeholder="Buscar..."
                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                 </div>
@@ -223,9 +221,19 @@
                         <div class="h-6 w-px bg-gray-300"></div>
 
                         <!-- Tip -->
-                        <div class="flex items-center gap-2 text-xs text-blue-600 font-medium">
-                            💡 <span class="hidden sm:inline">Click en rack para detalles</span>
-                            <span class="sm:hidden">Click para detalles</span>
+                        <div
+                            class="flex items-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
+                            <div class="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full">
+                                <span class="text-blue-600 text-sm">💡</span>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-1">
+                                <span class="text-blue-800 font-semibold text-sm">Tip:</span>
+                                <span class="text-blue-700 text-sm">
+                                    <span class="hidden sm:inline">Haz click en cualquier rack para ver los
+                                        detalles</span>
+                                    <span class="sm:hidden">Toca cualquier rack para ver detalles</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -296,6 +304,7 @@
                     buscar: '',
                     categoria: ''
                 },
+                dataOriginal: [],
                 data: [],
                 stats: {
                     totalRacks: 0,
@@ -307,22 +316,61 @@
                 cols: 24,
 
                 init() {
-                    this.loading = true; // 👈 muestra spinner al entrar
+                    this.loading = true;
 
                     fetch("{{ asset('racks.json') }}")
                         .then(res => res.json())
                         .then(json => {
-                            setTimeout(() => { // ⏳ forzar duración de 5s
+                            setTimeout(() => {
+                                this.dataOriginal = json;
                                 this.data = json;
                                 this.calcStats();
                                 this.renderChart();
-                                this.loading = false; // ✅ ocultar spinner
+                                // El loading se oculta automáticamente en renderChart() con chart.on('finished')
                             }, 5000);
                         });
                 },
 
+                aplicarFiltros() {
+                    this.loading = true; // 👈 Mostrar preloader inmediatamente
 
+                    // Filtrar solo por nombre de rack
+                    if (this.filtro.buscar.trim()) {
+                        const busqueda = this.filtro.buscar.toLowerCase().trim();
+                        this.data = this.dataOriginal.filter(item => {
+                            return item.rack.toLowerCase().includes(busqueda);
+                        });
+                    } else {
+                        this.data = [...this.dataOriginal];
+                    }
 
+                    this.calcStats();
+                    this.updateChart();
+                    // ❌ Quitamos el setTimeout que cerraba el loading prematuramente
+                    // El loading se ocultará automáticamente en updateChart() con chart.on('finished')
+                },
+
+                debounceFilter() {
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = setTimeout(() => this.aplicarFiltros(), 300);
+                },
+
+                resetFiltros() {
+                    this.filtro = {
+                        periodo: '30',
+                        metric: 'movs',
+                        buscar: '',
+                        categoria: ''
+                    };
+
+                    this.loading = true;
+                    this.data = [...this.dataOriginal];
+                    this.calcStats();
+                    this.updateChart();
+                    // ❌ Quitamos el setTimeout que cerraba el loading prematuramente
+                },
+
+                // El resto de tus métodos se mantienen igual...
                 genData() {
                     this.data = [];
                     const categorias = ["Electrónica", "Accesorios", "Repuestos", "Herramientas"];
@@ -343,19 +391,16 @@
 
                     const sede = "PP";
 
-                    // 👇 cada rack/piso tendrá entre 3 y 8 posiciones (puedes ajustar)
                     const posicionesMin = 3;
                     const posicionesMax = 8;
 
-                    // 🔥 Una fila por letra, pisos horizontalmente
                     for (let r = 0; r < 26; r++) {
-                        const rack = String.fromCharCode(65 + r); // A, B, C...
-                        const pisos = Math.floor(Math.random() * 6) + 1; // entre 1 y 4 pisos
-                        const y = r; // fila según la letra
+                        const rack = String.fromCharCode(65 + r);
+                        const pisos = Math.floor(Math.random() * 6) + 1;
+                        const y = r;
                         let x = 0;
 
                         for (let piso = 1; piso <= pisos; piso++) {
-                            // 👇 número de posiciones dinámico para este rack/piso
                             const posicionesPorPiso = Math.floor(Math.random() * (posicionesMax -
                                 posicionesMin + 1)) + posicionesMin;
 
@@ -385,25 +430,21 @@
                                     rackLetter: rack
                                 });
 
-                                x++; // ✅ mantiene la escala horizontal igual que ahora
+                                x++;
                             }
                         }
                     }
                 },
 
                 calcStats() {
-                    // Racks únicos por letra (A, B, C... Z)
                     const racksUnicos = [...new Set(this.data.map(d => d.rack.charAt(0)))];
-
                     this.stats.totalRacks = racksUnicos.length;
 
-                    // Activos = racks (letra) con al menos una ubicación con valor > 20
                     const racksActivos = new Set(
                         this.data.filter(d => d.value > 20).map(d => d.rack.charAt(0))
                     );
                     this.stats.activeRacks = racksActivos.size;
 
-                    // Promedio de actividad = promedio de todos los valores (no por ubicación, sino agrupados por letra)
                     let sumPorRack = {};
                     let countPorRack = {};
                     this.data.forEach(d => {
@@ -421,37 +462,6 @@
                     );
                 },
 
-                debounceFilter() {
-                    clearTimeout(this.debounceTimer);
-                    this.debounceTimer = setTimeout(() => this.aplicarFiltros(), 300);
-                },
-
-                aplicarFiltros() {
-                    this.loading = true;
-                    this.genData();
-                    this.calcStats();
-                    this.updateChart();
-                },
-
-                resetFiltros() {
-                    this.filtro = {
-                        periodo: '30',
-                        metric: 'movs',
-                        buscar: '',
-                        categoria: ''
-                    };
-
-                    this.loading = true;
-                    fetch("{{ asset('racks.json') }}")
-                        .then(res => res.json())
-                        .then(json => {
-                            this.data = json;
-                            this.calcStats();
-                            this.updateChart();
-                        });
-                },
-
-
                 periodoLabel() {
                     return `Últimos ${this.filtro.periodo} días`;
                 },
@@ -468,24 +478,24 @@
 
                 getFillColorByFloor(piso) {
                     const colors = {
-                        1: '#fee2e2', // Rojo claro
-                        2: '#dbeafe', // Azul claro
-                        3: '#dcfce7', // Verde claro
-                        4: '#ede9fe', // Morado claro
-                        5: '#fef9c3', // Amarillo claro
-                        6: '#cffafe', // Celeste agua
-                        7: '#fbcfe8', // Rosado pastel
-                        8: '#e0f2fe', // Azul cielo
-                        9: '#d9f99d', // Verde lima
-                        10: '#fcd34d', // Mostaza suave
+                        1: '#fee2e2',
+                        2: '#dbeafe',
+                        3: '#dcfce7',
+                        4: '#ede9fe',
+                        5: '#fef9c3',
+                        6: '#cffafe',
+                        7: '#fbcfe8',
+                        8: '#e0f2fe',
+                        9: '#d9f99d',
+                        10: '#fcd34d',
                     };
-                    return colors[piso] || '#f3f4f6'; // Gris por defecto
+                    return colors[piso] || '#f3f4f6';
                 },
                 getIconByValue(val) {
-                    if (val < 25) return "🟢"; // pocos movimientos
-                    if (val < 50) return "🟡"; // medio
-                    if (val < 75) return "🟠"; // alto
-                    return "🔴"; // crítico
+                    if (val < 25) return "🟢";
+                    if (val < 50) return "🟡";
+                    if (val < 75) return "🟠";
+                    return "🔴";
                 },
 
                 renderChart() {
@@ -500,33 +510,23 @@
                     heatmapEl.style.width = ancho + 'px';
                     heatmapEl.style.height = alto + 'px';
 
-                    // 🔥 Siempre mostrar preload antes de renderizar
-                    this.loading = true;
+                    this.loading = true; // 🔥 Forzar preloader
+
+                    // Destruir chart anterior si existe
+                    if (this.chart) {
+                        this.chart.dispose();
+                    }
 
                     this.chart = echarts.init(heatmapEl);
                     this.updateChart();
 
-                    // 👇 Esperar a que ECharts termine de renderizar
-                    this.chart.on('finished', () => {
-                        this.loading = false; // ✅ ocultar preloader automáticamente
-                    });
-
                     window.addEventListener('resize', () => this.chart && this.chart.resize());
                 },
 
-
-
                 baseOption() {
                     const data = this.data.map(d => [
-                        d.x, // 0
-                        d.y, // 1
-                        d.value, // 2
-                        d.ubicacion, // 3
-                        d.piso, // 4
-                        d.rack, // 5
-                        d.producto, // 6
-                        d.cantidad, // 7
-                        d.categoria // 8
+                        d.x, d.y, d.value, d.ubicacion, d.piso,
+                        d.rack, d.producto, d.cantidad, d.categoria
                     ]);
 
                     return {
@@ -545,19 +545,18 @@
                                 const borderColor = this.getFillColorByFloor(piso);
 
                                 return `
-    <div style="padding:12px; min-width: 280px;">
-      <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">🏢 Rack ${rack}</div>
-      <div style="margin-bottom:6px;">📍 Ubicación: <strong>${ubicacion}</strong></div>
-      <div style="margin-bottom:6px;">📦 Producto: <strong>${producto || 'Vacío'}</strong></div>
-      <div style="margin-bottom:6px;">📊 Cantidad: <strong>${cantidad}</strong></div>
-      <div style="margin-bottom:6px;">🏷️ Categoría: <strong>${categoria || 'N/A'}</strong></div>
-      <div style="margin-bottom:6px;">🏗️ Piso: <strong style="color:${borderColor}">${piso}</strong></div>
-      <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
-      <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
-    </div>
-  `;
+                            <div style="padding:12px; min-width: 280px;">
+                                <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">🏢 Rack ${rack}</div>
+                                <div style="margin-bottom:6px;">📍 Ubicación: <strong>${ubicacion}</strong></div>
+                                <div style="margin-bottom:6px;">📦 Producto: <strong>${producto || 'Vacío'}</strong></div>
+                                <div style="margin-bottom:6px;">📊 Cantidad: <strong>${cantidad}</strong></div>
+                                <div style="margin-bottom:6px;">🏷️ Categoría: <strong>${categoria || 'N/A'}</strong></div>
+                                <div style="margin-bottom:6px;">🏗️ Piso: <strong style="color:${borderColor}">${piso}</strong></div>
+                                <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
+                                <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
+                            </div>
+                        `;
                             }
-
                         },
                         grid: {
                             left: 50,
@@ -601,12 +600,9 @@
                                 }
                             },
                             inverse: true,
-                            // 🔥 obtenemos la lista única de y (racks base: A, A1, B1, etc.)
                             data: [...new Set(this.data.map(d => d.y))],
                         },
-
                         visualMap: [],
-
                         series: [{
                             type: 'heatmap',
                             data,
@@ -645,30 +641,30 @@
                 updateChart() {
                     if (!this.chart) return;
 
-                    this.loading = true; // 🔥 siempre activar antes de update
+                    this.loading = true;
 
                     this.chart.setOption(this.baseOption(), true);
 
-                    // ❌ Elimina listeners anteriores para evitar duplicados
+                    // ✅ Limpiar listeners anteriores y agregar nuevo
                     this.chart.off('finished');
-
-                    // ✅ Se dispara cuando echarts termina de renderizar
                     this.chart.on('finished', () => {
                         this.loading = false;
                     });
-                    // ✅ Captura click en cualquier celda
+
+                    this.chart.off('click');
                     this.chart.on('click', p => {
-                        const rack = p.data[5]; // nombre del rack (ej: A1, B2...)
+                        const rack = p.data[5];
                         window.location.href = "{{ url('/almacen/ubicaciones/detalle') }}/" +
                             rack;
                     });
 
-                    // ⏳ Backup: si por alguna razón no dispara "finished", se cierra igual
+                    // ✅ Backup: si por alguna razón no se dispara 'finished', cerrar después de 3 segundos
                     setTimeout(() => {
-                        this.loading = false;
-                    }, 1200); // 1.2s de margen
+                        if (this.loading) {
+                            this.loading = false;
+                        }
+                    }, 3000);
                 }
-
             }));
         });
     </script>

@@ -60,15 +60,6 @@
         }
 
 
-        .level-indicator {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-            transform: translateZ(5px);
-        }
-
-
         @keyframes shine {
             0% {
                 left: -100%;
@@ -115,7 +106,7 @@
     </style>
     <div x-data="rackDetalle()" x-init="init()" class="min-h-screen flex flex-col ">
         <!-- Header Mejorado -->
-        <header class="relative overflow-hidden bg-dark text-white px-6 py-8">
+        <header class="relative overflow-hidden bg-black text-white px-6 py-8">
             <!-- Efecto Shine (equivalente al ::before) -->
             <div
                 class="absolute inset-0 -translate-x-full animate-[shine_3s_linear_infinite]
@@ -160,13 +151,14 @@
                 </div>
 
                 <!-- Navegación mejorada -->
+                <!-- En la sección de navegación, modifica los botones: -->
                 <div class="flex gap-3">
-                    <button @click="prevRack()"
+                    <button @click="cambiarRack(idxRack - 1)"
                         class="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 flex items-center gap-3 group border border-white/20 backdrop-blur-sm hover:shadow-lg">
                         <i class="fas fa-chevron-left group-hover:-translate-x-1 transition-transform"></i>
                         Anterior
                     </button>
-                    <button @click="nextRack()"
+                    <button @click="cambiarRack(idxRack + 1)"
                         class="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 flex items-center gap-3 group border border-white/20 backdrop-blur-sm hover:shadow-lg">
                         Siguiente
                         <i class="fas fa-chevron-right group-hover:translate-x-1 transition-transform"></i>
@@ -198,7 +190,10 @@
             transition-transform duration-300 ease-in-out hover:translate-z-[10px] hover:scale-[1.02] hover:shadow-2xl">
 
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="level-indicator px-3 py-6 rounded-lg font-bold text-sm">
+                            <div class="px-3 py-6 rounded-lg font-bold text-sm text-white 
+                                    [writing-mode:vertical-rl] [text-orientation:mixed] 
+                                    [transform:translateZ(5px)]"
+                                style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
                                 NIVEL <span x-text="rack.niveles.length - idxNivel"></span>
                             </div>
                             <div class="flex-1 h-px bg-gradient-to-r from-purple-500 to-transparent"></div>
@@ -227,36 +222,37 @@
                                             :style="{
                                                 backgroundColor: ubi.estado === 'bajo' ? '#22c55e' : ubi
                                                     .estado === 'medio' ? '#facc15' : ubi.estado === 'alto' ?
-                                                    '#f97316' : ubi.estado === 'muy_alto' ? '#ef4444' : '#f1f5f9'
+                                                    '#f97316' : ubi.estado === 'muy_alto' ? '#ef4444' : '#888ea8'
                                             }">
 
                                             <!-- Simulación del ::before con un div -->
                                             <div
                                                 class="absolute inset-[-2px] rounded-inherit
-                bg-gradient-to-tr from-transparent via-white/50 to-transparent
+                bg-gradient-to-tr from-transparent via-white/20 to-transparent
                 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10">
                                             </div>
 
                                             <!-- Código -->
-                                            <div class="text-xs font-bold mb-2 opacity-90" x-text="ubi.codigo"></div>
+                                            <div class="text-xs font-bold mb-2 opacity-90 text-white"
+                                                x-text="ubi.codigo"></div>
 
                                             <!-- Icono -->
-                                            <div class="text-2xl mb-2">
+                                            <div class="text-2xl mb-2 text-white">
                                                 <template x-if="ubi.producto">
                                                     <i class="fas fa-box"></i>
                                                 </template>
                                                 <template x-if="!ubi.producto">
-                                                    <i class="fas fa-cube text-gray-400"></i>
+                                                    <i class="fas fa-cube text-white"></i>
                                                 </template>
                                             </div>
 
                                             <!-- Nombre -->
                                             <template x-if="ubi.producto">
-                                                <div class="text-xs font-medium text-center px-2 truncate w-full"
+                                                <div class="text-xs font-medium text-center px-2 truncate w-full text-white"
                                                     x-text="ubi.producto"></div>
                                             </template>
                                             <template x-if="!ubi.producto">
-                                                <div class="text-xs text-gray-400">Vacío</div>
+                                                <div class="text-xs text-white">Vacío</div>
                                             </template>
                                         </div>
 
@@ -319,26 +315,28 @@
                                     <p class="text-gray-800" x-text="formatFecha(modal.ubi.fecha)"></p>
                                 </div>
 
-                                <div class="flex gap-3 pt-4">
+                                <div class="grid grid-cols-2 gap-3 pt-4">
                                     <button @click="iniciarReubicacion(modal.ubi)"
-                                        class="flex-1 bg-primary text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2">
-                                        <i class="fas fa-arrows-alt"></i>
+                                        class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        <i class="fas fa-arrows-alt text-xs"></i>
                                         Reubicar
                                     </button>
-                                    <button
-                                        class="flex-1 bg-secondary text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2">
-                                        <i class="fas fa-edit"></i>
-                                        Editar
+
+                                    <button @click="iniciarReubicacionRack(modal.ubi)"
+                                        class="bg-secondary hover:bg-purple-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        <i class="fas fa-exchange-alt text-xs"></i>
+                                        Otro Rack
                                     </button>
+
                                     <button
-                                        class="flex-1 bg-danger text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2">
-                                        <i class="fas fa-trash"></i>
+                                        class="bg-red-500 hover:bg-red-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        <i class="fas fa-trash text-xs"></i>
                                         Vaciar
                                     </button>
-                                    <!-- Nuevo botón -->
+
                                     <button @click="abrirHistorial(modal.ubi)"
-                                        class="flex-1 bg-dark text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2">
-                                        <i class="fas fa-history"></i>
+                                        class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        <i class="fas fa-history text-xs"></i>
                                         Historial
                                     </button>
                                 </div>
@@ -348,21 +346,100 @@
 
                         <!-- Si está vacío -->
                         <template x-if="!modal.ubi.producto">
-                            <div class="text-center py-8">
-                                <div
-                                    class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fas fa-cube text-3xl text-gray-400"></i>
+                            <div class="space-y-4">
+                                <div class="text-center py-4">
+                                    <div
+                                        class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <i class="fas fa-cube text-2xl text-gray-400"></i>
+                                    </div>
+                                    <h3 class="text-lg font-medium text-gray-800 mb-2">Ubicación disponible</h3>
+                                    <p class="text-gray-600">Esta posición está vacía y lista para almacenar productos
+                                    </p>
                                 </div>
-                                <h3 class="text-lg font-medium text-gray-800 mb-2">Ubicación disponible</h3>
-                                <p class="text-gray-600 mb-6">Esta posición está vacía y lista para almacenar
-                                    productos</p>
-                                <button
-                                    class="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-xl font-medium flex items-center justify-center gap-2 mx-auto">
-                                    <i class="fas fa-plus"></i>
-                                    Agregar Producto
-                                </button>
+
+                                <!-- Botones para ubicación vacía -->
+                                <div class="grid grid-cols-2 gap-3 pt-4">
+                                    <button @click="abrirHistorial(modal.ubi)"
+                                        class="bg-dark hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        <i class="fas fa-history text-xs"></i>
+                                        Historial Completo
+                                    </button>
+
+                                    <button
+                                        class="bg-success hover:bg-green-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        <i class="fas fa-plus text-xs"></i>
+                                        Agregar Producto
+                                    </button>
+                                </div>
                             </div>
                         </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para selección de rack destino -->
+        <div x-show="modalSeleccionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+            :class="modalSeleccionRack.open && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4"
+                @click.self="modalSeleccionRack.open = false">
+                <div x-show="modalSeleccionRack.open" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
+
+                    <!-- Header -->
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <div class="font-bold text-lg text-gray-800">
+                            Mover a Otro Rack
+                        </div>
+                        <button type="button" class="text-gray-500 hover:text-gray-700"
+                            @click="modalSeleccionRack.open = false">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="p-5">
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-4">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <label class="font-medium text-gray-600">Producto</label>
+                                    <p class="font-bold text-gray-800" x-text="modalSeleccionRack.producto"></p>
+                                </div>
+                                <div>
+                                    <label class="font-medium text-gray-600">Cantidad</label>
+                                    <p class="font-bold text-gray-800"
+                                        x-text="modalSeleccionRack.cantidad + ' unidades'"></p>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="font-medium text-gray-600">Ubicación origen</label>
+                                    <p class="font-bold text-gray-800" x-text="modalSeleccionRack.origen"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Rack
+                                Destino:</label>
+                            <select x-model="modalSeleccionRack.rackDestino"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <template x-for="(rack, index) in racks" :key="index">
+                                    <option :value="index" :disabled="index === modoReubicacion.rackOrigen"
+                                        x-text="'Rack ' + rack.nombre + (index === modoReubicacion.rackOrigen ? ' (Actual)' : '')">
+                                    </option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <div class="flex gap-3 pt-2">
+                            <button @click="modalSeleccionRack.open = false"
+                                class="flex-1 bg-gray-500 text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-600 transition">
+                                Cancelar
+                            </button>
+                            <button @click="confirmarReubicacionRack()"
+                                class="flex-1 bg-primary text-white py-3 px-4 rounded-xl font-medium hover:bg-purple-700 transition">
+                                Continuar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -388,23 +465,42 @@
 
                     <!-- Body -->
                     <div class="p-5 max-h-[70vh] overflow-y-auto">
+                        <!-- En el modal de historial, actualiza el template: -->
                         <template x-if="modalHistorial.ubi.historial && modalHistorial.ubi.historial.length > 0">
                             <ul class="space-y-3">
                                 <template x-for="(mov, idx) in modalHistorial.ubi.historial" :key="idx">
-                                    <li
-                                        class="p-3 border rounded-lg bg-white shadow flex justify-between items-center">
-                                        <div>
-                                            <p class="font-medium text-gray-800" x-text="mov.producto ?? 'Vacío'"></p>
-                                            <p class="text-xs text-gray-500"
-                                                x-text="mov.tipo + ' - ' + formatFecha(mov.fecha)"></p>
+                                    <li class="p-3 border rounded-lg bg-white shadow">
+                                        <div class="flex justify-between items-start mb-2">
+                                            <div>
+                                                <p class="font-medium text-gray-800" x-text="mov.producto || 'Vacío'">
+                                                </p>
+                                                <p class="text-xs text-gray-500 capitalize" x-text="mov.tipo"></p>
+                                            </div>
+                                            <span
+                                                class="font-semibold text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                                                x-text="mov.cantidad + ' und.'"></span>
                                         </div>
-                                        <span class="font-semibold text-sm" x-text="mov.cantidad + ' und.'"></span>
+                                        <div class="text-xs text-gray-500" x-text="formatFecha(mov.fecha)"></div>
+                                        <!-- Información adicional para reubicaciones -->
+                                        <template x-if="mov.desde">
+                                            <div class="text-xs text-purple-600 mt-1">
+                                                <i class="fas fa-arrow-right"></i> Desde: <span
+                                                    x-text="mov.desde"></span>
+                                                <template x-if="mov.rack_origen"> (Rack <span
+                                                        x-text="mov.rack_origen"></span>)</template>
+                                            </div>
+                                        </template>
+                                        <template x-if="mov.hacia">
+                                            <div class="text-xs text-green-600 mt-1">
+                                                <i class="fas fa-arrow-right"></i> Hacia: <span
+                                                    x-text="mov.hacia"></span>
+                                                <template x-if="mov.rack_destino"> (Rack <span
+                                                        x-text="mov.rack_destino"></span>)</template>
+                                            </div>
+                                        </template>
                                     </li>
                                 </template>
                             </ul>
-                        </template>
-                        <template x-if="!modalHistorial.ubi.historial || modalHistorial.ubi.historial.length === 0">
-                            <p class="text-gray-400 text-center italic">Sin movimientos registrados</p>
                         </template>
                     </div>
                 </div>
