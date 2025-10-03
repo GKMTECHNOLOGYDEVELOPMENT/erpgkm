@@ -849,7 +849,10 @@ Route::post('/guardarCondiciones/soporte', [OrdenesHelpdeskController::class, 'g
 Route::get('/ticket/{id}/estados', [OrdenesTrabajoController::class, 'loadEstados'])->name('ticket.loadEstados');
 Route::get('/visita/{ticketId}', [OrdenesTrabajoController::class, 'mostrarDetalles'])->name('visita.detalles');
 Route::post('/tickets/{idTicket}/actualizar-estado', [OrdenesTrabajoController::class, 'actualizarEstado']);
+
 Route::post('/guardar-estado', [OrdenesTrabajoController::class, 'guardarEstadoflujo'])->name('guardarEstado');
+
+
 Route::delete('/ticketflujo/{id}/eliminar', [OrdenesTrabajoController::class, 'eliminarflujo']);
 Route::post('/ticket/{ticketId}/relacionarflujo', [OrdenesTrabajoController::class, 'relacionarFlujo']);
 //politicas
@@ -1337,6 +1340,19 @@ Route::post('/custodia/store', [CustodiaController::class, 'store'])
     ->name('solicitudcustodia.store');
 
 Route::post('/tickets/{id}/actualizar-custodia', [CustodiaController::class, 'actualizarCustodia'])->name('tickets.actualizar.custodia')->middleware('auth');
+
+// routes/web.php
+
+
+Route::post('/solicitud/custodia/{id}/retirar-repuesto', [CustodiaController::class, 'retirarRepuesto'])
+    ->name('solicitudcustodia.retirar-repuesto')->middleware('auth');
+
+Route::post('/solicitud/custodia/anular-retiro/{idRetiro}', [CustodiaController::class, 'anularRetiro'])
+    ->name('solicitudcustodia.anular-retiro')->middleware('auth');
+
+Route::get('/solicitud/custodia/repuestos-compatibles/{idModelo}', [CustodiaController::class, 'getRepuestosCompatibles'])
+    ->name('solicitudcustodia.repuestos-compatibles');
+
 
 
 

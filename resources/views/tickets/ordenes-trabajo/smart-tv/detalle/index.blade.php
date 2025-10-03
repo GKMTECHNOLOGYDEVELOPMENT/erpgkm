@@ -546,6 +546,7 @@
                                     </button>
                                 </div>
 
+                                
                                 <!-- Body mejorado -->
                                 <div class="p-6 space-y-5">
                                     <div class="bg-blue-50 rounded-lg p-3 border border-blue-100 mb-2">

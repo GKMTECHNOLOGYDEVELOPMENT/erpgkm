@@ -240,4 +240,17 @@ class Usuario extends Authenticatable
     {
     return $this->hasMany(Tag::class, 'user_id', 'idUsuario');
     }
+
+
+	   // Relación con HarvestRetiro
+    public function harvestRetiros()
+    {
+        return $this->hasMany(HarvestRetiro::class, 'id_responsable', 'idUsuario');
+    }
+
+    // Accesor para nombre completo
+    public function getNombreCompletoAttribute()
+    {
+        return $this->Nombre . ' ' . $this->apellidoPaterno . ' ' . $this->apellidoMaterno;
+    }
 }
