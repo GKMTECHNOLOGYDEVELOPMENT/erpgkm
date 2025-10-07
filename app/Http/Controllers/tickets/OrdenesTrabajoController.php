@@ -3134,6 +3134,16 @@ class OrdenesTrabajoController extends Controller
             $tipoUsuario = $visitaSeleccionada->tecnico->idTipoUsuario ?? null;
         }
 
+
+        $nombreCliente = $orden->cliente->nombre ?? 'N/A';
+        $tipoDocCliente = $orden->cliente->tipodocumento->nombre ?? 'Documento';
+        $docCliente = $orden->cliente->documento ?? 'No disponible';
+
+        if ($condicion && $condicion->titular == 0) {
+            $nombreCliente = $condicion->nombre ?? $nombreCliente;
+            $tipoDocCliente = 'DNI';
+            $docCliente = $condicion->dni ?? $docCliente;
+        }
         // 🔹 Determinar la vista del PDF según el tipo de usuario
         $vistaPdf = ($tipoUsuario == 4)
             ? 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer'
@@ -3145,6 +3155,10 @@ class OrdenesTrabajoController extends Controller
             'fechaCreacion' => $fechaCreacion,
             'producto' => $producto,
             'transicionesStatusOt' => $transicionesStatusOt,
+            'nombreCliente' => $nombreCliente,
+            'tipoDocCliente' => $tipoDocCliente,
+            'docCliente' => $docCliente,
+            'condicion' => $condicion, // 👈 AGREGA ESTA LÍNEA
             'visitas' => $visitas,
             'firmaTecnico' => $firmaTecnico,
             'firmaCliente' => $firmaCliente,
