@@ -347,15 +347,29 @@
                         </div>
                     @endif
                 </div>
+
                 <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
+
                 <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                <p class="text-xs text-gray-600 uppercase tracking-wide">
-                    {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
-                </p>
-                <p class="text-xs text-gray-500">
-                    {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
-                    {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
-                </p>
+
+                {{-- Si el titular es 0, muestra datos de condicionesticket --}}
+                @if ($condicion && $condicion->titular == 0)
+                    <p class="text-xs text-gray-600 uppercase tracking-wide">
+                        {{ $nombreCliente }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ mb_strtoupper($tipoDocCliente) }}: {{ mb_strtoupper($docCliente) }}
+                    </p>
+                @else
+                    {{-- Caso normal --}}
+                    <p class="text-xs text-gray-600 uppercase tracking-wide">
+                        {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
+                        {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
+                    </p>
+                @endif
             </div>
         </div>
         <br>
