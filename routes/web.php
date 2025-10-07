@@ -1419,3 +1419,36 @@ Route::get('/custodia/fotos/{id}/imagen', [CustodiaController::class, 'obtenerIm
 Route::get('/custodia/fotos/{id}/descargar', [CustodiaController::class, 'descargarFoto'])->name('custodia.fotos.descargar');
 Route::delete('/custodia/fotos/{id}', [CustodiaController::class, 'eliminarFoto'])->name('custodia.fotos.eliminar');
 Route::get('/custodia/fotos/{id}/verificar', [CustodiaController::class, 'verificarIntegridad'])->name('custodia.fotos.verificar');
+
+
+
+
+// Rutas para el sistema de racks
+// Route::get('/almacen/ubicaciones/vista', [UbicacionesVistaController::class, 'vistaAlmacen'])->name('almacen.ubicaciones.vista');
+// Route::get('/almacen/ubicaciones/detalle/{rackId?}', [UbicacionesVistaController::class, 'detalleRack'])->name('almacen.ubicaciones.detalle');
+
+// Route::prefix('almacen/ubicaciones')->group(function () {
+//     // Vistas
+//     Route::get('/vista-almacen', [UbicacionesVistaController::class, 'vistaAlmacen'])->name('almacen.ubicaciones.vista');
+//     Route::get('/detalle-rack/{rackNombre}', [UbicacionesVistaController::class, 'detalleRack'])->name('almacen.ubicaciones.detalle');
+    
+//     // APIs
+//     Route::get('/heatmap-data', [UbicacionesVistaController::class, 'getHeatmapData'])->name('almacen.ubicaciones.heatmap-data');
+//     Route::get('/rack-data/{rackNombre}', [UbicacionesVistaController::class, 'getRackData'])->name('almacen.ubicaciones.rack-data');
+//     Route::get('/all-racks', [UbicacionesVistaController::class, 'getAllRacks'])->name('almacen.ubicaciones.all-racks');
+//     Route::post('/reubicar', [UbicacionesVistaController::class, 'reubicarProducto'])->name('almacen.ubicaciones.reubicar');
+//     Route::post('/vaciar-ubicacion', [UbicacionesVistaController::class, 'vaciarUbicacion'])->name('almacen.ubicaciones.vaciar');
+// });
+
+
+// Ruta para el detalle de un rack específico
+Route::get('/almacen/ubicaciones/detalle/{rack}', [UbicacionesVistaController::class, 'detalleRack'])
+    ->name('almacen.ubicaciones.detalle');
+
+
+
+
+// Rutas para reubicación
+Route::post('/almacen/reubicacion/iniciar', [UbicacionesVistaController::class, 'iniciarReubicacion'])->name('almacen.reubicacion.iniciar');
+Route::post('/almacen/reubicacion/confirmar', [UbicacionesVistaController::class, 'confirmarReubicacion'])->name('almacen.reubicacion.confirmar');
+Route::post('/almacen/reubicacion/cancelar', [UbicacionesVistaController::class, 'cancelarReubicacion'])->name('almacen.reubicacion.cancelar');

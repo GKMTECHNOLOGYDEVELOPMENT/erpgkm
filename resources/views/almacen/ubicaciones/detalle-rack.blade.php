@@ -6,8 +6,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
         @keyframes pulse-valid {
 
@@ -103,17 +104,26 @@
         .swiper-pagination-bullet-active {
             background: #000 !important;
         }
+
+        @keyframes pulse-valid { 0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } }
+        @keyframes pulse-invalid { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
+        .animate-pulse-valid { animation: pulse-valid 2s infinite; }
+        .animate-pulse-invalid { animation: pulse-invalid 2s infinite; }
+        .floating-stats { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .swiper-button-next, .swiper-button-prev { color: #000 !important; }
+        .swiper-pagination-bullet { background: #000 !important; }
+        .swiper-pagination-bullet-active { background: #000 !important; }
     </style>
-    <div x-data="rackDetalle()" x-init="init()" class="min-h-screen flex flex-col ">
+
+    <div x-data="rackDetalle()" x-init="init()" class="min-h-screen flex flex-col">
         <!-- Header Mejorado -->
         <header class="relative overflow-hidden bg-black text-white px-6 py-8">
-            <!-- Efecto Shine (equivalente al ::before) -->
-            <div
-                class="absolute inset-0 -translate-x-full animate-[shine_3s_linear_infinite]
-                bg-gradient-to-r from-transparent via-white/10 to-transparent">
-            </div>
+            <div class="absolute inset-0 -translate-x-full animate-[shine_3s_linear_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
-            <!-- Elementos decorativos de fondo -->
             <div class="absolute inset-0 overflow-hidden">
                 <div class="absolute -top-24 -right-24 w-48 h-48 bg-white/5 rounded-full"></div>
                 <div class="absolute -bottom-16 -left-16 w-40 h-40 bg-white/5 rounded-full"></div>
@@ -127,38 +137,36 @@
                     </div>
                     <div>
                         <h1 class="text-3xl font-bold tracking-tight">
-                            Rack <span x-text="rack.nombre" class="text-yellow-300"></span>
+                            Rack <span x-text="rack.nombre" class="text-yellow-300">{{ $rack['nombre'] }}</span>
                         </h1>
-                        <p class="text-white/80 text-base mt-1">Sistema de Gestión de Almacén</p>
+                        <p class="text-white/80 text-base mt-1">Sede: {{ $rack['sede'] }} - Sistema de Gestión de Almacén</p>
                     </div>
                 </div>
 
                 <!-- Stats flotantes -->
-                <div
-                    class="flex gap-8 px-8 py-5 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg">
+                <div class="flex gap-8 px-8 py-5 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg">
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-green-400" x-text="getStats().ocupadas"></div>
+                        <div class="text-3xl font-bold text-green-400" x-text="getStats().ocupadas">0</div>
                         <div class="text-sm text-white/80 mt-1">Ocupadas</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-red-400" x-text="getStats().vacias"></div>
+                        <div class="text-3xl font-bold text-red-400" x-text="getStats().vacias">0</div>
                         <div class="text-sm text-white/80 mt-1">Vacías</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-yellow-400" x-text="getStats().total"></div>
+                        <div class="text-3xl font-bold text-yellow-400" x-text="getStats().total">0</div>
                         <div class="text-sm text-white/80 mt-1">Total</div>
                     </div>
                 </div>
 
                 <!-- Navegación mejorada -->
-                <!-- En la sección de navegación, modifica los botones: -->
                 <div class="flex gap-3">
-                    <button @click="cambiarRack(idxRack - 1)"
+                    <button @click="cambiarRack('prev')"
                         class="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 flex items-center gap-3 group border border-white/20 backdrop-blur-sm hover:shadow-lg">
                         <i class="fas fa-chevron-left group-hover:-translate-x-1 transition-transform"></i>
                         Anterior
                     </button>
-                    <button @click="cambiarRack(idxRack + 1)"
+                    <button @click="cambiarRack('next')"
                         class="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 flex items-center gap-3 group border border-white/20 backdrop-blur-sm hover:shadow-lg">
                         Siguiente
                         <i class="fas fa-chevron-right group-hover:translate-x-1 transition-transform"></i>
@@ -166,7 +174,6 @@
                 </div>
             </div>
         </header>
-
 
         <!-- Indicador de Reubicación -->
         <div x-show="modoReubicacion.activo"
@@ -180,61 +187,46 @@
             </button>
         </div>
 
-
         <!-- Rack Grid Mejorado -->
         <main class="flex-1 p-8 perspective-[1000px] [transform-style:preserve-3d]">
             <div class="max-w-7xl mx-auto space-y-8">
-                <template x-for="(nivel, idxInvertido) in [...rack.niveles].reverse()" :key="idxInvertido">
-                    <div
-                        class="panel rounded-2xl p-6 shadow-xl backdrop-blur-md border border-white/20
-        transition-transform duration-300 ease-in-out hover:translate-z-[10px] hover:scale-[1.02] hover:shadow-2xl">
-
+                <template x-for="(nivel, nivelIndex) in rack.niveles" :key="nivelIndex">
+                    <div class="panel rounded-2xl p-6 shadow-xl backdrop-blur-md border border-white/20 transition-transform duration-300 ease-in-out hover:translate-z-[10px] hover:scale-[1.02] hover:shadow-2xl">
+                        
                         <div class="flex items-center gap-4 mb-6">
-                            <div class="px-3 py-6 rounded-lg font-bold text-sm text-white 
-                    [writing-mode:vertical-rl] [text-orientation:mixed] 
-                    [transform:translateZ(5px)]"
+                            <div class="px-3 py-6 rounded-lg font-bold text-sm text-white [writing-mode:vertical-rl] [text-orientation:mixed] [transform:translateZ(5px)]"
                                 style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">
-                                NIVEL <span x-text="rack.niveles.length - idxInvertido"></span>
+                                NIVEL <span x-text="nivel.numero"></span>
                             </div>
                             <div class="flex-1 h-px bg-gradient-to-r from-purple-500 to-transparent"></div>
                             <div class="flex items-center gap-2 text-sm text-gray-600">
-                                <span x-text="nivel.ubicaciones.filter(u => u.producto).length"></span>/<span
-                                    x-text="nivel.ubicaciones.length"></span> ocupadas
+                                <span x-text="nivel.ubicaciones.filter(u => u.producto).length"></span>/<span x-text="nivel.ubicaciones.length"></span> ocupadas
                                 <div class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></div>
                             </div>
                         </div>
+
                         <!-- Carrusel de ubicaciones -->
-                        <div class="swiper mySwiper">
+                        <div class="swiper mySwiper" :data-swiper-index="nivelIndex">
                             <div class="swiper-wrapper">
-                                <template x-for="(ubi, idx) in nivel.ubicaciones" :key="idx">
+                                <template x-for="(ubi, ubiIndex) in nivel.ubicaciones" :key="ubiIndex">
                                     <div class="swiper-slide">
                                         <div @click="manejarClickUbicacion(ubi)"
-                                            class="relative group h-32 rounded-xl flex flex-col items-center justify-center cursor-pointer
-           transition-all duration-300 ease-in-out overflow-hidden
-           hover:-translate-y-0.5 hover:scale-105 hover:shadow-xl"
+                                            class="relative group h-32 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ease-in-out overflow-hidden hover:-translate-y-0.5 hover:scale-105 hover:shadow-xl"
                                             :class="[
-                                                getEstadoClass(ubi.estado), // 👈 aquí le faltaba la coma
-                                                modoReubicacion.activo ?
-                                                (esDestinoValido(ubi) ? 'animate-pulse-valid' :
-                                                    'animate-pulse-invalid') :
-                                                ''
+                                                getEstadoClass(ubi.estado),
+                                                modoReubicacion.activo ? (esDestinoValido(ubi) ? 'animate-pulse-valid' : 'animate-pulse-invalid') : ''
                                             ]"
                                             :style="{
-                                                backgroundColor: ubi.estado === 'bajo' ? '#22c55e' : ubi
-                                                    .estado === 'medio' ? '#facc15' : ubi.estado === 'alto' ?
-                                                    '#f97316' : ubi.estado === 'muy_alto' ? '#ef4444' : '#888ea8'
+                                                backgroundColor: ubi.estado === 'bajo' ? '#22c55e' : 
+                                                            ubi.estado === 'medio' ? '#facc15' : 
+                                                            ubi.estado === 'alto' ? '#f97316' : 
+                                                            ubi.estado === 'muy_alto' ? '#ef4444' : '#888ea8'
                                             }">
 
-                                            <!-- Simulación del ::before con un div -->
-                                            <div
-                                                class="absolute inset-[-2px] rounded-inherit
-                bg-gradient-to-tr from-transparent via-white/20 to-transparent
-                opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10">
-                                            </div>
+                                            <div class="absolute inset-[-2px] rounded-inherit bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
 
                                             <!-- Código -->
-                                            <div class="text-xs font-bold mb-2 opacity-90 text-white"
-                                                x-text="ubi.codigo"></div>
+                                            <div class="text-xs font-bold mb-2 opacity-90 text-white" x-text="ubi.codigo"></div>
 
                                             <!-- Icono -->
                                             <div class="text-2xl mb-2 text-white">
@@ -248,15 +240,17 @@
 
                                             <!-- Nombre -->
                                             <template x-if="ubi.producto">
-                                                <div class="text-xs font-medium text-center px-2 truncate w-full text-white"
-                                                    x-text="ubi.producto"></div>
+                                                <div class="text-xs font-medium text-center px-2 truncate w-full text-white" x-text="ubi.producto"></div>
                                             </template>
                                             <template x-if="!ubi.producto">
                                                 <div class="text-xs text-white">Vacío</div>
                                             </template>
+
+                                            <!-- Cantidad -->
+                                            <template x-if="ubi.producto">
+                                                <div class="text-xs text-white mt-1" x-text="ubi.cantidad + '/' + ubi.capacidad"></div>
+                                            </template>
                                         </div>
-
-
                                     </div>
                                 </template>
                             </div>
@@ -266,14 +260,12 @@
                             <div class="swiper-button-prev"></div>
                             <div class="swiper-pagination"></div>
                         </div>
-
                     </div>
                 </template>
             </div>
         </main>
 
-
-        <!-- Modal -->
+       <!-- Modal -->
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="modal.open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="modal.open = false">
                 <div x-show="modal.open" x-transition x-transition.duration.300
@@ -584,5 +576,381 @@
         </div>
     </div>
 
-    <script src="{{ asset('assets/js/almacen/ubicaciones/detalle-rack.js') }}"></script>
+    </div>
+
+    <script>
+        function rackDetalle() {
+            return {
+                // Datos del rack desde PHP
+                rack: @json($rack),
+                todosRacks: @json($todosRacks),
+                rackActual: '{{ $rackActual }}',
+                
+                // Estado de la aplicación
+                idxRackActual: {{ array_search($rackActual, $todosRacks) }},
+                swipers: [],
+                modal: { open: false, ubi: {} },
+                modalReubicacion: { open: false, origen: '', destino: '', producto: '', cantidad: 0 },
+                modoReubicacion: { activo: false, origen: '', producto: '', rackOrigen: null },
+                modalSeleccionRack: { open: false, origen: '', producto: '', cantidad: 0, rackDestino: null },
+                modalHistorial: { open: false, ubi: {} },
+
+                init() {
+                    // Configuración global de toastr
+                    toastr.options = {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: 'toast-top-right',
+                        timeOut: '3000',
+                    };
+
+                    this.initSwipers();
+                },
+
+                initSwipers() {
+                    this.$nextTick(() => {
+                        // Destruir swipers anteriores
+                        this.swipers.forEach((s) => s.destroy(true, true));
+                        this.swipers = [];
+
+                        document.querySelectorAll('.mySwiper').forEach((el) => {
+                            const swiper = new Swiper(el, {
+                                slidesPerView: 4,
+                                spaceBetween: 20,
+                                navigation: {
+                                    nextEl: el.querySelector('.swiper-button-next'),
+                                    prevEl: el.querySelector('.swiper-button-prev'),
+                                },
+                                pagination: {
+                                    el: el.querySelector('.swiper-pagination'),
+                                    clickable: true,
+                                },
+                                breakpoints: {
+                                    320: { slidesPerView: 1 },
+                                    640: { slidesPerView: 2 },
+                                    1024: { slidesPerView: 4 },
+                                },
+                                observer: true,
+                                observeParents: true,
+                            });
+                            this.swipers.push(swiper);
+                        });
+                    });
+                },
+
+                // Navegación entre racks
+                cambiarRack(direccion) {
+                    let nuevoIdx = this.idxRackActual;
+                    
+                    if (direccion === 'next') {
+                        nuevoIdx = (nuevoIdx + 1) % this.todosRacks.length;
+                    } else if (direccion === 'prev') {
+                        nuevoIdx = (nuevoIdx - 1 + this.todosRacks.length) % this.todosRacks.length;
+                    }
+
+                    const siguienteRack = this.todosRacks[nuevoIdx];
+                    window.location.href = `/almacen/ubicaciones/detalle/${siguienteRack}`;
+                },
+
+                // Métodos de utilidad
+                getStats() {
+                    const todasUbicaciones = this.rack.niveles.flatMap((n) => n.ubicaciones);
+                    return {
+                        total: todasUbicaciones.length,
+                        ocupadas: todasUbicaciones.filter((u) => u.producto).length,
+                        vacias: todasUbicaciones.filter((u) => !u.producto).length,
+                    };
+                },
+
+                getEstadoClass(estado) {
+                    switch (estado) {
+                        case 'muy_alto': return 'text-white shadow-lg shadow-red-500/30';
+                        case 'alto': return 'text-white shadow-lg shadow-orange-500/30';
+                        case 'medio': return 'text-black shadow-lg shadow-yellow-400/30';
+                        case 'bajo': return 'text-white shadow-lg shadow-green-500/30';
+                        default: return 'bg-slate-200 text-slate-500 border-2 border-dashed border-slate-400';
+                    }
+                },
+
+                formatFecha(fecha) {
+                    if (!fecha) return 'Sin registros';
+                    return new Date(fecha).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                    });
+                },
+
+                // Métodos de interacción (mantén los mismos que tenías)
+                manejarClickUbicacion(ubi) {
+                    if (this.modoReubicacion.activo) {
+                        // Lógica de reubicación...
+                        if (ubi.codigo === this.modoReubicacion.origen) {
+                            this.cancelarReubicacion();
+                        } else if (this.esDestinoValido(ubi)) {
+                            this.modalReubicacion.origen = this.modoReubicacion.origen;
+                            this.modalReubicacion.destino = ubi.codigo;
+                            this.modalReubicacion.producto = this.modoReubicacion.producto;
+                            this.modalReubicacion.cantidad = ubi.cantidad;
+                            this.modalReubicacion.open = true;
+                        }
+                    } else {
+                        this.verDetalle(ubi);
+                    }
+                },
+
+                verDetalle(ubi) {
+                    this.modal.ubi = ubi;
+                    this.modal.open = true;
+                },
+
+                abrirHistorial(ubi) {
+                    this.modalHistorial.ubi = ubi;
+                    this.modalHistorial.open = true;
+                },
+ async iniciarReubicacion(ubi) {
+    if (!ubi.producto || ubi.cantidad <= 0) {
+        this.error('No se puede reubicar: cantidad inválida');
+        return;
+    }
+
+    console.log('Datos de reubicación (JS):', {
+        id: ubi.id,
+        producto: ubi.producto,
+        cantidad: ubi.cantidad,
+        tipo_cantidad: typeof ubi.cantidad
+    });
+
+    try {
+        const payload = {
+            ubicacion_origen_id: Number(ubi.id),        // Forzar número
+            producto: ubi.producto,
+            cantidad: Number(ubi.cantidad)              // Forzar número
+        };
+
+        console.log('Payload enviado:', payload);
+
+        const response = await fetch('/almacen/reubicacion/iniciar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        console.log('Respuesta del servidor:', result);
+
+        if (result.success) {
+            this.modoReubicacion.activo = true;
+            this.modoReubicacion.origen = ubi.codigo;
+            this.modoReubicacion.producto = ubi.producto;
+            this.modoReubicacion.ubicacionOrigenId = ubi.id;
+            this.modoReubicacion.cantidad = Number(ubi.cantidad);
+            this.modal.open = false;
+            this.success('Modo reubicación activado. Selecciona la ubicación destino.');
+        } else {
+            this.error(result.message || 'Error al iniciar reubicación');
+            if (result.errors) {
+                console.error('Errores de validación:', result.errors);
+            }
+            if (result.debug_types) {
+                console.error('Tipos de datos recibidos:', result.debug_types);
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        this.error('Error de conexión al servidor');
+    }
+},
+        async confirmarReubicacion() {
+            try {
+                // Buscar la ubicación destino por código
+                const ubicacionDestino = this.buscarUbicacionPorCodigo(this.modalReubicacion.destino);
+                
+                if (!ubicacionDestino) {
+                    this.error('Ubicación destino no encontrada');
+                    return;
+                }
+
+                console.log('Confirmando reubicación:', {
+                    origen_id: this.modoReubicacion.ubicacionOrigenId,
+                    destino_id: ubicacionDestino.id,
+                    producto: this.modalReubicacion.producto,
+                    cantidad: this.modalReubicacion.cantidad
+                });
+
+                const response = await fetch('/almacen/reubicacion/confirmar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        ubicacion_origen_id: this.modoReubicacion.ubicacionOrigenId,
+                        ubicacion_destino_id: ubicacionDestino.id,
+                        producto: this.modalReubicacion.producto,
+                        cantidad: parseInt(this.modalReubicacion.cantidad),
+                        tipo_reubicacion: 'mismo_rack'
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Respuesta confirmación:', result);
+
+                if (result.success) {
+                    this.success(result.message);
+                    
+                    // Actualizar la interfaz
+                    this.actualizarInterfazDespuesReubicacion(
+                        this.modoReubicacion.ubicacionOrigenId,
+                        ubicacionDestino.id,
+                        parseInt(this.modalReubicacion.cantidad)
+                    );
+                    
+                    this.cancelarReubicacion();
+                    this.modalReubicacion.open = false;
+                } else {
+                    this.error(result.message || 'Error al confirmar reubicación');
+                    if (result.errors) {
+                        console.error('Errores de validación:', result.errors);
+                        // Mostrar errores específicos
+                        Object.values(result.errors).forEach(errorArray => {
+                            errorArray.forEach(error => {
+                                this.error(error);
+                            });
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                this.error('Error de conexión al servidor');
+            }
+        },
+
+
+        async cancelarReubicacion() {
+            try {
+                await fetch('/almacen/reubicacion/cancelar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+
+                this.modoReubicacion.activo = false;
+                this.modoReubicacion.origen = '';
+                this.modoReubicacion.producto = '';
+                this.modoReubicacion.ubicacionOrigenId = null;
+                this.modoReubicacion.cantidad = 0;
+                this.modalReubicacion.open = false;
+                
+                this.info('Reubicación cancelada');
+            } catch (error) {
+                console.error('Error:', error);
+                this.modoReubicacion.activo = false;
+                this.modalReubicacion.open = false;
+            }
+        },
+
+         // Método auxiliar para buscar ubicación por código
+        buscarUbicacionPorCodigo(codigo) {
+            for (const nivel of this.rack.niveles) {
+                for (const ubi of nivel.ubicaciones) {
+                    if (ubi.codigo === codigo) {
+                        return ubi;
+                    }
+                }
+            }
+            return null;
+        },
+
+        // Método para actualizar la interfaz después de reubicación
+        actualizarInterfazDespuesReubicacion(origenId, destinoId, cantidad) {
+            // Buscar las ubicaciones en la estructura de datos
+            let ubicacionOrigen = null;
+            let ubicacionDestino = null;
+            let nivelOrigenIndex = -1;
+            let ubiOrigenIndex = -1;
+            let nivelDestinoIndex = -1;
+            let ubiDestinoIndex = -1;
+
+            // Encontrar las ubicaciones
+            this.rack.niveles.forEach((nivel, nivelIndex) => {
+                nivel.ubicaciones.forEach((ubi, ubiIndex) => {
+                    if (ubi.id === origenId) {
+                        ubicacionOrigen = ubi;
+                        nivelOrigenIndex = nivelIndex;
+                        ubiOrigenIndex = ubiIndex;
+                    }
+                    if (ubi.id === destinoId) {
+                        ubicacionDestino = ubi;
+                        nivelDestinoIndex = nivelIndex;
+                        ubiDestinoIndex = ubiIndex;
+                    }
+                });
+            });
+
+            if (ubicacionOrigen && ubicacionDestino) {
+                // Mover datos de origen a destino
+                ubicacionDestino.producto = ubicacionOrigen.producto;
+                ubicacionDestino.cantidad = cantidad;
+                ubicacionDestino.estado = this.calcularEstado(cantidad, ubicacionDestino.capacidad);
+                ubicacionDestino.fecha = new Date().toISOString().split('T')[0];
+
+                // Actualizar origen
+                const nuevaCantidadOrigen = ubicacionOrigen.cantidad - cantidad;
+                if (nuevaCantidadOrigen > 0) {
+                    ubicacionOrigen.cantidad = nuevaCantidadOrigen;
+                    ubicacionOrigen.estado = this.calcularEstado(nuevaCantidadOrigen, ubicacionOrigen.capacidad);
+                } else {
+                    ubicacionOrigen.producto = null;
+                    ubicacionOrigen.cantidad = 0;
+                    ubicacionOrigen.estado = 'vacio';
+                    ubicacionOrigen.fecha = null;
+                }
+
+                // Forzar actualización de Alpine.js
+                this.rack.niveles[nivelOrigenIndex].ubicaciones[ubiOrigenIndex] = { ...ubicacionOrigen };
+                this.rack.niveles[nivelDestinoIndex].ubicaciones[ubiDestinoIndex] = { ...ubicacionDestino };
+                
+                // Reinicializar swipers
+                this.$nextTick(() => {
+                    this.initSwipers();
+                });
+            }
+        },
+
+         // Método para calcular estado basado en cantidad y capacidad
+        calcularEstado(cantidad, capacidad) {
+            if (capacidad <= 0) return 'vacio';
+            
+            const porcentaje = (cantidad / capacidad) * 100;
+            
+            if (porcentaje == 0) return 'vacio';
+            if (porcentaje <= 24) return 'bajo';
+            if (porcentaje <= 49) return 'medio';
+            if (porcentaje <= 74) return 'alto';
+            return 'muy_alto';
+        },
+
+
+                esDestinoValido(ubi) {
+                    return !ubi.producto || ubi.codigo === this.modoReubicacion.origen;
+                },
+
+                // Métodos toastr
+                success(msg) { toastr.success(msg); },
+                error(msg) { toastr.error(msg); },
+                warning(msg) { toastr.warning(msg); },
+                info(msg) { toastr.info(msg); },
+
+                // Los demás métodos de reubicación los mantienes igual...
+                // confirmarReubicacion(), iniciarReubicacionRack(), etc.
+            };
+        }
+    </script>
 </x-layout.default>

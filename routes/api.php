@@ -20,6 +20,7 @@ use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesArticuloController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesController;
+use App\Http\Controllers\almacen\ubicaciones\UbicacionesVistaController;
 use App\Http\Controllers\Apps\ActividadController;
 use App\Http\Controllers\Apps\CalendarController;
 use App\Http\Controllers\Apps\EtiquetaController;
@@ -412,6 +413,8 @@ Route::prefix('v1')->group(function () {
     Route::delete('/empresasForm/{id}', [EmpresaFormController::class, 'destroy']);
 });
 
+//LOG DE PRUEBA PARA EL DESARROLLO DE LA APP 
+
 
 Route::prefix('cronograma/{idSeguimiento}')->group(function() {
     Route::get('/data', [CronogramaController::class, 'getData']);
@@ -480,3 +483,18 @@ Route::get('/verificar-codigo-barras', [ComprasController::class, 'verificarCodi
 // Rutas que ya deberías tener
 // Route::get('/documentos', [ComprasController::class, 'getDocumentos'])->name('api.documentos');
 // Route::get('/getall-proveedores', [ComprasController::class, 'getProveedores'])->name('api.proveedores');
+
+// API Routes
+Route::get('/racks/data', [UbicacionesVistaController::class, 'getRacksData'])->name('api.racks.data');
+Route::get('/rack/{rackId}', [UbicacionesVistaController::class, 'getRackDetail'])->name('api.rack.detail');
+Route::get('/racks', [UbicacionesVistaController::class, 'getAllRacks'])->name('api.racks.all');
+Route::get('/articulos/search', [UbicacionesVistaController::class, 'searchArticulos'])->name('api.articulos.search');
+
+// Acciones
+Route::post('/articulo/agregar', [UbicacionesVistaController::class, 'agregarProducto'])->name('api.articulo.agregar');
+Route::post('/rack/reubicar', [UbicacionesVistaController::class, 'reubicarProducto'])->name('api.rack.reubicar');
+Route::post('/ubicacion/vaciar', [UbicacionesVistaController::class, 'vaciarUbicacion'])->name('api.ubicacion.vaciar');
+
+// Ruta API para obtener datos dinámicos de los racks
+Route::get('/almacen/racks/datos', [UbicacionesVistaController::class, 'getDatosRacks'])
+    ->name('api.almacen.racks.datos');
