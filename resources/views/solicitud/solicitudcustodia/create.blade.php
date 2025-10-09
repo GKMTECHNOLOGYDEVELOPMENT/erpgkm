@@ -56,7 +56,7 @@
         </div>
 
         <!-- Formulario -->
-        <div class="max-w-4xl mx-auto">
+        <div class="w-full mx-auto">
             <div class="panel rounded-xl shadow-sm p-6">
                 <form id="custodiaForm" method="POST">
                     @csrf

@@ -3252,105 +3252,163 @@ class OrdenesTrabajoController extends Controller
             'visitas.fotostickest'
         ])->findOrFail($idOt);
 
+
+        // 🔹 Obtener el idVisitas de la tabla seleccionarvisita según el idTickets
         $seleccionada = SeleccionarVisita::where('idTickets', $idOt)->first();
+
+        // Si no se ha encontrado una visita seleccionada, manejar el caso adecuadamente
         if (!$seleccionada) {
-            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada.']);
+            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada para este ticket.']);
         }
 
+        // Obtener el idVisitas de la visita seleccionada
         $idVisitasSeleccionada = $seleccionada->idVisitas;
 
+        // 🔹 Obtener transiciones de estado filtradas por idTickets y idVisitas
         $transicionesStatusOt = TransicionStatusTicket::where('idTickets', $idOt)
-            ->where('idVisitas', $idVisitasSeleccionada)
+            ->where('idVisitas', $idVisitasSeleccionada)  // Filtrar por la visita seleccionada
             ->whereNotNull('justificacion')
             ->where('justificacion', '!=', '')
-            ->with('estado_ot')->get();
+            ->with('estado_ot')
+            ->get();
 
+        // 🔹 OBTENER DATOS DEL PRODUCTO
         $producto = [
             'categoria' => $orden->modelo->categoria->nombre ?? 'No especificado',
             'marca' => $orden->modelo->marca->nombre ?? 'No especificado',
             'modelo' => $orden->modelo->nombre ?? 'No especificado',
             'serie' => $orden->serie ?? 'No especificado',
-            'fallaReportada' => $orden->fallaReportada ?? 'No especificado'
+            'fallaReportada' => $orden->fallaReportada ?? 'No especificado' // 🔹 Agregamos la falla reportada
         ];
 
         $condicion = DB::table('condicionesticket')
             ->where('idTickets', $idOt)
-            ->where('idVisitas', $idVisitasSeleccionada)
+            ->where('idVisitas', $idVisitasSeleccionada) // ✅
             ->first();
 
         $motivoCondicion = $condicion->motivo ?? null;
+
         $logoGKM = $this->procesarLogoMarca(file_get_contents(public_path('assets/images/auth/logogkm2.png')));
         $marca = $orden->modelo->marca ?? null;
-        $marca->logo_base64 = !empty($marca->foto) ? $this->procesarLogoMarca($marca->foto) : null;
+        $marca->logo_base64 = null;
 
-        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
-        $visitas = collect();
-        if ($visitaSeleccionada) {
-            $visitas = collect([[
-                'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
-                'fecha_programada' => optional($visitaSeleccionada->fecha_programada)->format('d/m/Y'),
-                'hora_inicio' => optional($visitaSeleccionada->fecha_inicio)->format('H:i'),
-                'hora_final' => optional($visitaSeleccionada->fecha_final)->format('H:i'),
-                'fecha_llegada' => optional($visitaSeleccionada->fecha_llegada)->format('d/m/Y H:i'),
-                'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? '') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
-                'correo' => $visitaSeleccionada->tecnico->correo ?? 'No disponible',
-                'telefono' => $visitaSeleccionada->tecnico->telefono ?? 'No registrado',
-                'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
-                'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
-                'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
-            ]]);
+        if ($marca && !empty($marca->foto)) {
+            $marca->logo_base64 = $this->procesarLogoMarca($marca->foto);
         }
 
-        $firma = DB::table('firmas')->where('idTickets', $idOt)->where('idVisitas', $idVisitasSeleccionada)->first();
-        $firmaCliente = $firma && $firma->firma_cliente
-            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente)) : null;
-        $firmaTecnico = $visitaSeleccionada->tecnico->firma
-            ? 'data:image/png;base64,' . base64_encode($visitaSeleccionada->tecnico->firma) : null;
 
+
+        // 🔹 FORMATEAR VISITAS PARA LA VISTA
+        $visitas = collect();
+
+        if ($orden->visitas) {
+            // Filtrar la visita seleccionada utilizando el idVisitas obtenido anteriormente
+            $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+
+            if ($visitaSeleccionada) {
+                // Formatear la visita seleccionada para el informe
+                $visitas = collect([ // Creamos un array solo con la visita seleccionada
+                    [
+                        'nombre' => $visitaSeleccionada->nombre ?? 'N/A',
+                        'fecha_programada' => $visitaSeleccionada->fecha_programada ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_programada)) : 'N/A',
+                        'hora_inicio' => $visitaSeleccionada->fecha_inicio ? date('H:i', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A',
+                        'hora_final' => $visitaSeleccionada->fecha_final ? date('H:i', strtotime($visitaSeleccionada->fecha_final)) : 'N/A',
+                        'fecha_llegada' => $visitaSeleccionada->fecha_llegada ? date('d/m/Y H:i', strtotime($visitaSeleccionada->fecha_llegada)) : 'N/A',
+                        'tecnico' => ($visitaSeleccionada->tecnico->Nombre ?? 'N/A') . ' ' . ($visitaSeleccionada->tecnico->apellidoPaterno ?? ''),
+                        'correo' => ($visitaSeleccionada->tecnico->correo ?? 'No disponible'),
+                        'telefono' => ($visitaSeleccionada->tecnico->telefono ?? 'No registrado'),
+                        'documento' => $visitaSeleccionada->tecnico->documento ?? 'No disponible',
+                        'tipo_documento' => $visitaSeleccionada->tecnico->tipodocumento->nombre ?? 'Documento',
+                        'vehiculo_placa' => $visitaSeleccionada->tecnico->vehiculo->numero_placa ?? 'Sin placa',
+                    ]
+                ]);
+            }
+        }
+
+        // 🔹 OBTENER FIRMAS FILTRADAS POR idTickets Y idVisitas
+        $firma = DB::table('firmas')->where('idTickets', $idOt)
+            ->where('idVisitas', $idVisitasSeleccionada)  // Filtrar por la visita seleccionada
+            ->first();
+
+        // Aplicar optimización de imágenes a las firmas
+        // $firmaTecnico = $firma && !empty($firma->firma_tecnico)
+        //     ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
+        //     : null;
+
+        $firmaCliente = $firma && !empty($firma->firma_cliente)
+            ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_cliente))
+            : null;
+
+        // 🔹 OBTENER IMÁGENES EN BASE64 (Filtrar los anexos de la visita seleccionada)
+        $visitaSeleccionada = $orden->visitas->where('idVisitas', $idVisitasSeleccionada)->first();
+
+        // 🔹 Obtener la firma del técnico (usuario)
+        $firmaTecnico = null;
+        if ($visitaSeleccionada && $visitaSeleccionada->tecnico) {
+            // Obtener el técnico (usuario) asociado a la visita
+            $tecnico = $visitaSeleccionada->tecnico;
+
+            // Comprobar si el técnico tiene una firma en la tabla usuarios
+            if ($tecnico && !empty($tecnico->firma)) {
+                // Codificar la firma en base64 para ser mostrada en el PDF
+                $firmaTecnico = 'data:image/png;base64,' . base64_encode($tecnico->firma);
+            }
+        }
+
+        // ✅ Solo cargar imágenes desde condicionesticket
         $imagenesAnexos = DB::table('condicionesticket')
             ->where('idTickets', $idOt)
             ->where('idVisitas', $idVisitasSeleccionada)
             ->whereNotNull('imagen')
             ->get()
-            ->map(fn($c) => [
-                'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($c->imagen)),
-                'descripcion' => 'CONDICIÓN: ' . ($c->motivo ?? 'Sin descripción')
-            ]);
+            ->map(function ($condicion) {
+                return [
+                    'foto_base64' => $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($condicion->imagen)),
+                    'descripcion' => 'CONDICIÓN: ' . ($condicion->motivo ?? 'Sin descripción')
+                ];
+            });
 
-        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(fn($f) => [
-            'foto_base64' => $f->foto ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($f->foto)) : null,
-            'descripcion' => $f->descripcion
-        ]);
+        // Obtener las imágenes de los tickets y optimizarlas
+        $imagenesFotosTickets = $visitaSeleccionada->fotostickest->map(function ($foto) {
+            return [
+                'foto_base64' => !empty($foto->foto)
+                    ? $this->optimizeBase64Image('data:image/jpeg;base64,' . base64_encode($foto->foto))
+                    : null,
+                'descripcion' => $foto->descripcion
+            ];
+        });
 
-        $fechaCreacion = $visitaSeleccionada->fecha_inicio
-            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio)) : 'N/A';
 
 
+        // 🔹 Obtener la fecha_inicio de la visita seleccionada
+        $fechaCreacion = $visitaSeleccionada && $visitaSeleccionada->fecha_inicio
+            ? date('d/m/Y', strtotime($visitaSeleccionada->fecha_inicio)) // Formato dd/mm/yyyy
+            : 'N/A';
 
-        $nombreCliente = $orden->cliente->nombre ?? 'N/A';
-        $tipoDocCliente = $orden->cliente->tipodocumento->nombre ?? 'Documento';
-        $docCliente = $orden->cliente->documento ?? 'No disponible';
 
-        if ($condicion && $condicion->titular == 0) {
-            $nombreCliente = $condicion->nombre ?? $nombreCliente;
-            $tipoDocCliente = 'DNI';
-            $docCliente = $condicion->dni ?? $docCliente;
+        // 🔹 Determinar vista según tipo de servicio
+        $tipoServicio = $visitaSeleccionada->tipoServicio ?? null;
+        $nombreVisita = Str::lower($visitaSeleccionada->nombre ?? '');
+
+        if (Str::contains($nombreVisita, 'laboratorio')) {
+            // 🔸 No se toca: laboratorio mantiene su vista
+            $vistaPdf = 'tickets.ordenes-trabajo.smart-tv.informe.pdf.laboratorio';
+        } elseif (in_array($tipoServicio, [3, 4])) {
+            // 🔸 tipoServicio = 3 (recojo) o 4 (entrega)
+            $vistaPdf = 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer';
+        } elseif ($tipoServicio == 1) {
+            // 🔸 tipoServicio = 1 (visita)
+            $vistaPdf = 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
+        } else {
+            // 🔸 Cualquier otro tipo no contemplado
+            $vistaPdf = 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
         }
 
-        $tipoUsuario = $visitaSeleccionada->tecnico->idTipoUsuario ?? null;
-        $vistaPdf = ($tipoUsuario == 4)
-            ? 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe_chofer'
-            : 'tickets.ordenes-trabajo.smart-tv.informe.pdf.informe';
-
-        $html = view($vistaPdf, [
+        $html = View($vistaPdf, [
             'orden' => $orden,
             'fechaCreacion' => $fechaCreacion,
             'producto' => $producto,
             'transicionesStatusOt' => $transicionesStatusOt,
-            'nombreCliente' => $nombreCliente,
-            'tipoDocCliente' => $tipoDocCliente,
-            'docCliente' => $docCliente,
-            'condicion' => $condicion, // 👈 AGREGA ESTA LÍNEA
             'visitas' => $visitas,
             'firmaTecnico' => $firmaTecnico,
             'firmaCliente' => $firmaCliente,
@@ -3360,7 +3418,7 @@ class OrdenesTrabajoController extends Controller
             'logoGKM' => $logoGKM,
             'motivoCondicion' => $motivoCondicion,
             'modoVistaPrevia' => false,
-            'firma' => $firma
+            'firma' => $firma, // ✅ AÑADE ESTO
         ])->render();
 
         // 1. Guardar PDF temporal

@@ -1,4 +1,17 @@
 <x-layout.default>
+
+
+
+    <div class="mb-6">
+        <ul class="flex space-x-2 rtl:space-x-reverse">
+            <li>
+                <a href="" class="text-primary hover:underline">Almacen</a>
+            </li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <span>Lista de Solicitudes de Custodia</span>
+            </li>
+        </ul>
+    </div>
     <div class="container mx-auto px-4 py-6">
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
@@ -69,12 +82,10 @@
 
             <!-- Botón "Crear Nueva Custodia" -->
             <div class="mt-4 flex justify-end">
-                <a href="{{ route('solicitudcustodia.create') }}"
-                    class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4v16m8-8H4" />
+                <a href="{{ route('solicitudcustodia.create') }}" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
                     Crear Nueva Custodia
                 </a>
@@ -337,7 +348,7 @@
                             </div>
 
                             <!-- Footer con botón de opciones -->
-                            <div class="px-5 py-3  border-t border-gray-200 flex justify-end">
+                            <div class="px-5 py-3  border-t border-gray-200 gap-2 flex justify-end">
                                 <a href="{{ route('solicitudcustodia.opciones', ['id' => $custodia->id]) }}"
                                     class="btn btn-warning flex items-center px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-md transition-colors duration-200">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -359,8 +370,6 @@
                                     </svg>
                                     HARVEST
                                 </a>
-
-
 
                             </div>
                         </div>
