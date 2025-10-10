@@ -779,4 +779,197 @@ public function iniciarReubicacion(Request $request)
 
 
 
+
+public function listarProductos()
+{
+    try {
+        $productos = DB::table('articulos')
+            ->where('estado', 1)
+            ->select('idArticulos as id', 'nombre')
+            ->orderBy('nombre')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $productos
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al listar productos: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar productos: ' . $e->getMessage()
+        ], 500);
+    }
+}
+public function agregarProducto(Request $request)
+{
+    DB::beginTransaction();
+    
+    try {
+        $validator = Validator::make($request->all(), [
+            'ubicacion_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
+            'articulo_id' => 'required|integer|exists:articulos,idArticulos',
+            'cantidad' => 'required|integer|min:1',
+            'observaciones' => 'nullable|string|max:500'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Obtener información de la ubicación
+        $ubicacion = DB::table('rack_ubicaciones as ru')
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->select('ru.*', 'r.nombre as rack_nombre', 'r.idRack as rack_id')
+            ->where('ru.idRackUbicacion', $request->ubicacion_id)
+            ->first();
+
+        // Verificar que la ubicación esté vacía
+        if ($ubicacion->articulo_id !== null || $ubicacion->cantidad_actual > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La ubicación ya está ocupada'
+            ], 422);
+        }
+
+        // Verificar que la cantidad no supere la capacidad
+        if ($request->cantidad > $ubicacion->capacidad_maxima) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La cantidad supera la capacidad máxima de la ubicación'
+            ], 422);
+        }
+
+        // Obtener información del producto
+        $producto = DB::table('articulos')
+            ->where('idArticulos', $request->articulo_id)
+            ->first();
+
+        // Actualizar la ubicación
+        DB::table('rack_ubicaciones')
+            ->where('idRackUbicacion', $request->ubicacion_id)
+            ->update([
+                'articulo_id' => $request->articulo_id,
+                'cantidad_actual' => $request->cantidad,
+                'estado_ocupacion' => $this->calcularEstadoOcupacion($request->cantidad, $ubicacion->capacidad_maxima),
+                'updated_at' => now()
+            ]);
+
+        // Registrar el movimiento
+        DB::table('rack_movimientos')->insert([
+            'articulo_id' => $request->articulo_id,
+            'ubicacion_destino_id' => $request->ubicacion_id,
+            'rack_destino_id' => $ubicacion->rack_id,
+            'cantidad' => $request->cantidad,
+            'tipo_movimiento' => 'ajuste',
+            'observaciones' => $request->observaciones ?: 'Ingreso de producto',
+            'codigo_ubicacion_destino' => $ubicacion->codigo_unico ?? $ubicacion->codigo,
+            'nombre_rack_destino' => $ubicacion->rack_nombre,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Producto agregado exitosamente',
+            'data' => [
+                'producto' => [
+                    'nombre' => $producto->nombre,
+                    'cantidad' => $request->cantidad
+                ]
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al agregar producto: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error interno del servidor'
+        ], 500);
+    }
+}
+
+public function vaciarUbicacion(Request $request)
+{
+    DB::beginTransaction();
+    
+    try {
+        $validator = Validator::make($request->all(), [
+            'ubicacion_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Obtener información de la ubicación
+        $ubicacion = DB::table('rack_ubicaciones as ru')
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->select('ru.*', 'r.nombre as rack_nombre', 'r.idRack as rack_id')
+            ->where('ru.idRackUbicacion', $request->ubicacion_id)
+            ->first();
+
+        // Verificar que la ubicación tenga producto
+        if (!$ubicacion->articulo_id || $ubicacion->cantidad_actual <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La ubicación ya está vacía'
+            ], 422);
+        }
+
+        // Registrar movimiento de salida
+        DB::table('rack_movimientos')->insert([
+            'articulo_id' => $ubicacion->articulo_id,
+            'ubicacion_origen_id' => $request->ubicacion_id,
+            'rack_origen_id' => $ubicacion->rack_id,
+            'cantidad' => $ubicacion->cantidad_actual,
+            'tipo_movimiento' => 'salida',
+            'observaciones' => 'Ubicación vaciada manualmente',
+            'codigo_ubicacion_origen' => $ubicacion->codigo_unico ?? $ubicacion->codigo,
+            'nombre_rack_origen' => $ubicacion->rack_nombre,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Vaciar la ubicación
+        DB::table('rack_ubicaciones')
+            ->where('idRackUbicacion', $request->ubicacion_id)
+            ->update([
+                'articulo_id' => null,
+                'cantidad_actual' => 0,
+                'estado_ocupacion' => 'vacio',
+                'updated_at' => now()
+            ]);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ubicación vaciada exitosamente'
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al vaciar ubicación: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error interno del servidor'
+        ], 500);
+    }
+}
+
+
+
 }

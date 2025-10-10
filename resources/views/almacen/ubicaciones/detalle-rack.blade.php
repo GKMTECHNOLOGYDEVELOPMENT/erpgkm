@@ -265,110 +265,285 @@
             </div>
         </main>
 
-       <!-- Modal -->
-        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="modal.open && '!block'">
-            <div class="flex items-start justify-center min-h-screen px-4" @click.self="modal.open = false">
-                <div x-show="modal.open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
+      <!-- Modal -->
+<div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="modal.open && '!block'">
+    <div class="flex items-start justify-center min-h-screen px-4" @click.self="modal.open = false">
+        <div x-show="modal.open" x-transition x-transition.duration.300
+            class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
 
-                    <!-- Header -->
-                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <div class="font-bold text-lg text-gray-800">
-                            Ubicación <span x-text="modal.ubi.codigo" class="text-purple-600"></span>
-                        </div>
-                        <button type="button" class="text-gray-500 hover:text-gray-700" @click="modal.open = false">
-                            <i class="fas fa-times"></i>
-                        </button>
+            <!-- Header -->
+            <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                <div class="font-bold text-lg text-gray-800">
+                    Ubicación <span x-text="modal.ubi.codigo" class="text-purple-600"></span>
+                </div>
+                <button type="button" class="text-gray-500 hover:text-gray-700" @click="modal.open = false">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
 
-                    </div>
-
-                    <!-- Body -->
-                    <div class="p-5">
-                        <!-- Si tiene producto -->
-                        <template x-if="modal.ubi.producto">
-                            <div class="space-y-4">
-                                <div class="bg-green-50 p-4 rounded-xl border border-green-200">
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="text-sm font-medium text-gray-600">Producto</label>
-                                            <p class="text-lg font-bold text-gray-800" x-text="modal.ubi.producto">
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <label class="text-sm font-medium text-gray-600">Cantidad</label>
-                                            <p class="text-lg font-bold text-gray-800"
-                                                x-text="modal.ubi.cantidad + ' unidades'"></p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="bg-gray-50 p-4 rounded-xl">
-                                    <label class="text-sm font-medium text-gray-600">Último movimiento</label>
-                                    <p class="text-gray-800" x-text="formatFecha(modal.ubi.fecha)"></p>
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-3 pt-4">
-                                    <button @click="iniciarReubicacion(modal.ubi)"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-arrows-alt text-xs"></i>
-                                        Reubicar
-                                    </button>
-
-                                    <button @click="iniciarReubicacionRack(modal.ubi)"
-                                        class="bg-secondary hover:bg-purple-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-exchange-alt text-xs"></i>
-                                        Otro Rack
-                                    </button>
-
-                                    <button
-                                        class="bg-red-500 hover:bg-red-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-trash text-xs"></i>
-                                        Vaciar
-                                    </button>
-
-                                    <button @click="abrirHistorial(modal.ubi)"
-                                        class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-history text-xs"></i>
-                                        Historial
-                                    </button>
-                                </div>
-
-                            </div>
-                        </template>
-
-                        <!-- Si está vacío -->
-                        <template x-if="!modal.ubi.producto">
-                            <div class="space-y-4">
-                                <div class="text-center py-4">
-                                    <div
-                                        class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="fas fa-cube text-2xl text-gray-400"></i>
-                                    </div>
-                                    <h3 class="text-lg font-medium text-gray-800 mb-2">Ubicación disponible</h3>
-                                    <p class="text-gray-600">Esta posición está vacía y lista para almacenar productos
+            <!-- Body -->
+            <div class="p-5">
+                <!-- Si tiene producto -->
+                <template x-if="modal.ubi.producto">
+                    <div class="space-y-4">
+                        <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Producto</label>
+                                    <p class="text-lg font-bold text-gray-800" x-text="modal.ubi.producto">
                                     </p>
                                 </div>
-
-                                <!-- Botones para ubicación vacía -->
-                                <div class="grid grid-cols-2 gap-3 pt-4">
-                                    <button @click="abrirHistorial(modal.ubi)"
-                                        class="bg-dark hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-history text-xs"></i>
-                                        Historial Completo
-                                    </button>
-
-                                    <button
-                                        class="bg-success hover:bg-green-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-plus text-xs"></i>
-                                        Agregar Producto
-                                    </button>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Cantidad</label>
+                                    <p class="text-lg font-bold text-gray-800"
+                                        x-text="modal.ubi.cantidad + ' unidades'"></p>
                                 </div>
                             </div>
-                        </template>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <label class="text-sm font-medium text-gray-600">Último movimiento</label>
+                            <p class="text-gray-800" x-text="formatFecha(modal.ubi.fecha)"></p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pt-4">
+                            <button @click="iniciarReubicacion(modal.ubi)"
+                                class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-arrows-alt text-xs"></i>
+                                Reubicar
+                            </button>
+
+                            <button @click="iniciarReubicacionRack(modal.ubi)"
+                                class="bg-secondary hover:bg-purple-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-exchange-alt text-xs"></i>
+                                Otro Rack
+                            </button>
+
+                            <button @click="vaciarUbicacion(modal.ubi)"
+                                class="bg-red-500 hover:bg-red-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-trash text-xs"></i>
+                                Vaciar
+                            </button>
+
+                            <button @click="abrirHistorial(modal.ubi)"
+                                class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-history text-xs"></i>
+                                Historial
+                            </button>
+                        </div>
                     </div>
+                </template>
+
+                <!-- Si está vacío -->
+                <template x-if="!modal.ubi.producto">
+                    <div class="space-y-4">
+                        <div class="text-center py-4">
+                            <div
+                                class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-cube text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-800 mb-2">Ubicación disponible</h3>
+                            <p class="text-gray-600">Esta posición está vacía y lista para almacenar productos
+                            </p>
+                        </div>
+
+                        <!-- Botones para ubicación vacía -->
+                        <div class="grid grid-cols-2 gap-3 pt-4">
+                            <button @click="abrirHistorial(modal.ubi)"
+                                class="bg-dark hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-history text-xs"></i>
+                                Historial Completo
+                            </button>
+
+                            <button @click="abrirModalAgregarProducto(modal.ubi)"
+                                class="bg-success hover:bg-green-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-plus text-xs"></i>
+                                Agregar Producto
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="modal.open && '!block'">
+    <div class="flex items-start justify-center min-h-screen px-4" @click.self="modal.open = false">
+        <div x-show="modal.open" x-transition x-transition.duration.300
+            class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
+
+            <!-- Header -->
+            <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                <div class="font-bold text-lg text-gray-800">
+                    Ubicación <span x-text="modal.ubi.codigo" class="text-purple-600"></span>
+                </div>
+                <button type="button" class="text-gray-500 hover:text-gray-700" @click="modal.open = false">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5">
+                <!-- Si tiene producto -->
+                <template x-if="modal.ubi.producto">
+                    <div class="space-y-4">
+                        <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Producto</label>
+                                    <p class="text-lg font-bold text-gray-800" x-text="modal.ubi.producto">
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600">Cantidad</label>
+                                    <p class="text-lg font-bold text-gray-800"
+                                        x-text="modal.ubi.cantidad + ' unidades'"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <label class="text-sm font-medium text-gray-600">Último movimiento</label>
+                            <p class="text-gray-800" x-text="formatFecha(modal.ubi.fecha)"></p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 pt-4">
+                            <button @click="iniciarReubicacion(modal.ubi)"
+                                class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-arrows-alt text-xs"></i>
+                                Reubicar
+                            </button>
+
+                            <button @click="iniciarReubicacionRack(modal.ubi)"
+                                class="bg-secondary hover:bg-purple-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-exchange-alt text-xs"></i>
+                                Otro Rack
+                            </button>
+
+                            <button @click="vaciarUbicacion(modal.ubi)"
+                                class="bg-red-500 hover:bg-red-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-trash text-xs"></i>
+                                Vaciar
+                            </button>
+
+                            <button @click="abrirHistorial(modal.ubi)"
+                                class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-history text-xs"></i>
+                                Historial
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Si está vacío -->
+                <template x-if="!modal.ubi.producto">
+                    <div class="space-y-4">
+                        <div class="text-center py-4">
+                            <div
+                                class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-cube text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-800 mb-2">Ubicación disponible</h3>
+                            <p class="text-gray-600">Esta posición está vacía y lista para almacenar productos
+                            </p>
+                        </div>
+
+                        <!-- Botones para ubicación vacía -->
+                        <div class="grid grid-cols-2 gap-3 pt-4">
+                            <button @click="abrirHistorial(modal.ubi)"
+                                class="bg-dark hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-history text-xs"></i>
+                                Historial Completo
+                            </button>
+
+                            <button @click="abrirModalAgregarProducto(modal.ubi)"
+                                class="bg-success hover:bg-green-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                <i class="fas fa-plus text-xs"></i>
+                                Agregar Producto
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Agregar Producto -->
+<div x-show="modalAgregarProducto.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+    :class="modalAgregarProducto.open && '!block'">
+    <div class="flex items-start justify-center min-h-screen px-4" @click.self="modalAgregarProducto.open = false">
+        <div x-show="modalAgregarProducto.open" x-transition x-transition.duration.300
+            class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
+
+            <!-- Header -->
+            <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                <div class="font-bold text-lg text-gray-800">
+                    Agregar Producto
+                </div>
+                <button type="button" class="text-gray-500 hover:text-gray-700" @click="cerrarModalAgregarProducto()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5">
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-4">
+                    <div class="text-sm">
+                        <label class="font-medium text-gray-600">Ubicación:</label>
+                        <p class="font-bold text-gray-800" x-text="modalAgregarProducto.ubicacion.codigo"></p>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Select de productos -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Producto:</label>
+                        <select x-model="modalAgregarProducto.productoSeleccionado"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Seleccione un producto</option>
+                            <template x-for="producto in modalAgregarProducto.productos" :key="producto.id">
+                                <option :value="producto.id" x-text="producto.nombre"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad:</label>
+                        <input type="number" x-model="modalAgregarProducto.cantidad"
+                            :max="modalAgregarProducto.capacidadMaxima"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Ingrese la cantidad">
+                        <p class="text-xs text-gray-500 mt-1" x-text="'Capacidad máxima: ' + modalAgregarProducto.capacidadMaxima + ' unidades'"></p>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones (opcional):</label>
+                        <textarea x-model="modalAgregarProducto.observaciones"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            rows="3"
+                            placeholder="Ingrese observaciones sobre este movimiento..."></textarea>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-6">
+                    <button @click="cerrarModalAgregarProducto()"
+                        class="flex-1 bg-gray-500 text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-600 transition">
+                        Cancelar
+                    </button>
+                    <button @click="confirmarAgregarProducto()"
+                        class="flex-1 bg-success text-white py-3 px-4 rounded-xl font-medium hover:bg-green-700 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-check"></i>
+                        Agregar Producto
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Modal para selección de rack destino -->
         <div x-show="modalSeleccionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
@@ -585,6 +760,16 @@
                 rack: @json($rack),
                 todosRacks: @json($todosRacks),
                 rackActual: '{{ $rackActual }}',
+
+                   modalAgregarProducto: {
+            open: false,
+            ubicacion: {},
+            productos: [],
+            productoSeleccionado: '',
+            cantidad: 1,
+            capacidadMaxima: 0,
+            observaciones: ''
+        },
                 
                 // Estado de la aplicación
                 idxRackActual: {{ array_search($rackActual, $todosRacks) }},
@@ -688,10 +873,11 @@
                         if (ubi.codigo === this.modoReubicacion.origen) {
                             this.cancelarReubicacion();
                         } else if (this.esDestinoValido(ubi)) {
+                            // CORRECIÓN: Usar la cantidad del modoReubicacion, no de la ubicación destino
                             this.modalReubicacion.origen = this.modoReubicacion.origen;
                             this.modalReubicacion.destino = ubi.codigo;
                             this.modalReubicacion.producto = this.modoReubicacion.producto;
-                            this.modalReubicacion.cantidad = ubi.cantidad;
+                            this.modalReubicacion.cantidad = this.modoReubicacion.cantidad; // ← ESTA ES LA CORRECCIÓN
                             this.modalReubicacion.open = true;
                         }
                     } else {
@@ -709,7 +895,10 @@
                     this.modalHistorial.open = true;
                 },
  async iniciarReubicacion(ubi) {
-    if (!ubi.producto || ubi.cantidad <= 0) {
+    // Convertir cantidad a número
+    const cantidad = parseInt(ubi.cantidad);
+    
+    if (!ubi.producto || cantidad <= 0 || isNaN(cantidad)) {
         this.error('No se puede reubicar: cantidad inválida');
         return;
     }
@@ -717,15 +906,15 @@
     console.log('Datos de reubicación (JS):', {
         id: ubi.id,
         producto: ubi.producto,
-        cantidad: ubi.cantidad,
-        tipo_cantidad: typeof ubi.cantidad
+        cantidad: cantidad,
+        tipo_cantidad: typeof cantidad
     });
 
     try {
         const payload = {
-            ubicacion_origen_id: Number(ubi.id),        // Forzar número
+            ubicacion_origen_id: Number(ubi.id),
             producto: ubi.producto,
-            cantidad: Number(ubi.cantidad)              // Forzar número
+            cantidad: cantidad  // Usar la cantidad convertida
         };
 
         console.log('Payload enviado:', payload);
@@ -748,7 +937,7 @@
             this.modoReubicacion.origen = ubi.codigo;
             this.modoReubicacion.producto = ubi.producto;
             this.modoReubicacion.ubicacionOrigenId = ubi.id;
-            this.modoReubicacion.cantidad = Number(ubi.cantidad);
+            this.modoReubicacion.cantidad = cantidad;  // Guardar la cantidad convertida
             this.modal.open = false;
             this.success('Modo reubicación activado. Selecciona la ubicación destino.');
         } else {
@@ -765,58 +954,113 @@
         this.error('Error de conexión al servidor');
     }
 },
-        async confirmarReubicacion() {
+async abrirModalAgregarProducto(ubi) {
+    try {
+        this.modalAgregarProducto.ubicacion = ubi;
+        this.modalAgregarProducto.capacidadMaxima = ubi.capacidad;
+        this.modalAgregarProducto.cantidad = 1;
+        this.modalAgregarProducto.productoSeleccionado = '';
+        this.modalAgregarProducto.observaciones = '';
+
+        console.log('Cargando productos...');
+
+        // Cargar lista de productos - usando GET
+        const response = await fetch('/almacen/productos/listar', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+
+        console.log('Respuesta recibida:', response);
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Resultado productos:', result);
+
+        if (result.success) {
+            this.modalAgregarProducto.productos = result.data;
+            console.log('Productos cargados:', result.data.length);
+        } else {
+            this.error(result.message || 'Error al cargar productos');
+            return;
+        }
+
+        this.modalAgregarProducto.open = true;
+        this.modal.open = false;
+
+    } catch (error) {
+        console.error('Error al cargar productos:', error);
+        this.error('Error al cargar la lista de productos: ' + error.message);
+    }
+},
+
+   cerrarModalAgregarProducto() {
+            this.modalAgregarProducto.open = false;
+            this.modalAgregarProducto.ubicacion = {};
+            this.modalAgregarProducto.productos = [];
+            this.modalAgregarProducto.productoSeleccionado = '';
+            this.modalAgregarProducto.cantidad = 1;
+            this.modalAgregarProducto.observaciones = '';
+        },
+        async confirmarAgregarProducto() {
             try {
-                // Buscar la ubicación destino por código
-                const ubicacionDestino = this.buscarUbicacionPorCodigo(this.modalReubicacion.destino);
-                
-                if (!ubicacionDestino) {
-                    this.error('Ubicación destino no encontrada');
+                // Validaciones
+                if (!this.modalAgregarProducto.productoSeleccionado) {
+                    this.error('Por favor seleccione un producto');
                     return;
                 }
 
-                console.log('Confirmando reubicación:', {
-                    origen_id: this.modoReubicacion.ubicacionOrigenId,
-                    destino_id: ubicacionDestino.id,
-                    producto: this.modalReubicacion.producto,
-                    cantidad: this.modalReubicacion.cantidad
-                });
+                const cantidad = parseInt(this.modalAgregarProducto.cantidad);
+                if (isNaN(cantidad) || cantidad <= 0) {
+                    this.error('La cantidad debe ser mayor a 0');
+                    return;
+                }
 
-                const response = await fetch('/almacen/reubicacion/confirmar', {
+                if (cantidad > this.modalAgregarProducto.capacidadMaxima) {
+                    this.error(`La cantidad no puede superar la capacidad máxima de ${this.modalAgregarProducto.capacidadMaxima} unidades`);
+                    return;
+                }
+
+                const payload = {
+                    ubicacion_id: this.modalAgregarProducto.ubicacion.id,
+                    articulo_id: this.modalAgregarProducto.productoSeleccionado,
+                    cantidad: cantidad,
+                    observaciones: this.modalAgregarProducto.observaciones
+                };
+
+                console.log('Agregando producto:', payload);
+
+                const response = await fetch('/almacen/ubicaciones/agregar-producto', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
-                    body: JSON.stringify({
-                        ubicacion_origen_id: this.modoReubicacion.ubicacionOrigenId,
-                        ubicacion_destino_id: ubicacionDestino.id,
-                        producto: this.modalReubicacion.producto,
-                        cantidad: parseInt(this.modalReubicacion.cantidad),
-                        tipo_reubicacion: 'mismo_rack'
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const result = await response.json();
-                console.log('Respuesta confirmación:', result);
+                console.log('Respuesta agregar producto:', result);
 
                 if (result.success) {
-                    this.success(result.message);
+                    this.success('Producto agregado exitosamente');
                     
                     // Actualizar la interfaz
-                    this.actualizarInterfazDespuesReubicacion(
-                        this.modoReubicacion.ubicacionOrigenId,
-                        ubicacionDestino.id,
-                        parseInt(this.modalReubicacion.cantidad)
+                    this.actualizarInterfazDespuesAgregarProducto(
+                        this.modalAgregarProducto.ubicacion.id,
+                        result.data.producto,
+                        cantidad
                     );
                     
-                    this.cancelarReubicacion();
-                    this.modalReubicacion.open = false;
+                    this.cerrarModalAgregarProducto();
                 } else {
-                    this.error(result.message || 'Error al confirmar reubicación');
+                    this.error(result.message || 'Error al agregar producto');
                     if (result.errors) {
-                        console.error('Errores de validación:', result.errors);
-                        // Mostrar errores específicos
                         Object.values(result.errors).forEach(errorArray => {
                             errorArray.forEach(error => {
                                 this.error(error);
@@ -824,11 +1068,170 @@
                         });
                     }
                 }
+
             } catch (error) {
                 console.error('Error:', error);
                 this.error('Error de conexión al servidor');
             }
         },
+
+        actualizarInterfazDespuesAgregarProducto(ubicacionId, producto, cantidad) {
+            // Buscar la ubicación en la estructura de datos
+            this.rack.niveles.forEach((nivel, nivelIndex) => {
+                nivel.ubicaciones.forEach((ubi, ubiIndex) => {
+                    if (ubi.id === ubicacionId) {
+                        // Actualizar la ubicación
+                        this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
+                            ...ubi,
+                            producto: producto.nombre,
+                            cantidad: cantidad,
+                            estado: this.calcularEstado(cantidad, ubi.capacidad),
+                            fecha: new Date().toISOString()
+                        };
+                    }
+                });
+            });
+
+            // Forzar actualización de Alpine.js
+            this.rack = { ...this.rack };
+            
+            // Reinicializar swipers
+            this.$nextTick(() => {
+                this.initSwipers();
+            });
+        },
+
+
+         // Método para vaciar ubicación (también lo agregué)
+        async vaciarUbicacion(ubi) {
+            if (!confirm('¿Está seguro de que desea vaciar esta ubicación?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/almacen/ubicaciones/vaciar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        ubicacion_id: ubi.id
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    this.success('Ubicación vaciada exitosamente');
+                    
+                    // Actualizar interfaz
+                    this.actualizarInterfazDespuesVaciar(ubi.id);
+                    this.modal.open = false;
+                } else {
+                    this.error(result.message || 'Error al vaciar ubicación');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                this.error('Error de conexión al servidor');
+            }
+        },
+
+        actualizarInterfazDespuesVaciar(ubicacionId) {
+            this.rack.niveles.forEach((nivel, nivelIndex) => {
+                nivel.ubicaciones.forEach((ubi, ubiIndex) => {
+                    if (ubi.id === ubicacionId) {
+                        this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
+                            ...ubi,
+                            producto: null,
+                            cantidad: 0,
+                            estado: 'vacio',
+                            fecha: null
+                        };
+                    }
+                });
+            });
+
+            this.rack = { ...this.rack };
+            this.$nextTick(() => {
+                this.initSwipers();
+            });
+        },
+
+
+        async confirmarReubicacion() {
+    try {
+        // Buscar la ubicación destino por código
+        const ubicacionDestino = this.buscarUbicacionPorCodigo(this.modalReubicacion.destino);
+        
+        if (!ubicacionDestino) {
+            this.error('Ubicación destino no encontrada');
+            return;
+        }
+
+        // Asegurar que la cantidad sea un número válido
+        const cantidad = parseInt(this.modalReubicacion.cantidad);
+        
+        console.log('Confirmando reubicación:', {
+            origen_id: this.modoReubicacion.ubicacionOrigenId,
+            destino_id: ubicacionDestino.id,
+            producto: this.modalReubicacion.producto,
+            cantidad: cantidad,
+            tipo_cantidad: typeof cantidad
+        });
+
+        if (cantidad <= 0 || isNaN(cantidad)) {
+            this.error('Cantidad inválida para reubicación');
+            return;
+        }
+
+        const response = await fetch('/almacen/reubicacion/confirmar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                ubicacion_origen_id: this.modoReubicacion.ubicacionOrigenId,
+                ubicacion_destino_id: ubicacionDestino.id,
+                producto: this.modalReubicacion.producto,
+                cantidad: cantidad,
+                tipo_reubicacion: 'mismo_rack'
+            })
+        });
+
+        const result = await response.json();
+        console.log('Respuesta confirmación:', result);
+
+        if (result.success) {
+            this.success(result.message);
+            
+            // Actualizar la interfaz
+            this.actualizarInterfazDespuesReubicacion(
+                this.modoReubicacion.ubicacionOrigenId,
+                ubicacionDestino.id,
+                cantidad
+            );
+            
+            this.cancelarReubicacion();
+            this.modalReubicacion.open = false;
+        } else {
+            this.error(result.message || 'Error al confirmar reubicación');
+            if (result.errors) {
+                console.error('Errores de validación:', result.errors);
+                Object.values(result.errors).forEach(errorArray => {
+                    errorArray.forEach(error => {
+                        this.error(error);
+                    });
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        this.error('Error de conexión al servidor');
+    }
+},
 
 
         async cancelarReubicacion() {
