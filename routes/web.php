@@ -1458,3 +1458,11 @@ Route::post('/almacen/reubicacion/cancelar', [UbicacionesVistaController::class,
 Route::get('/almacen/productos/listar', [UbicacionesVistaController::class, 'listarProductos']); // Cambiado a GET
 Route::post('/almacen/ubicaciones/agregar-producto', [UbicacionesVistaController::class, 'agregarProducto']);
 Route::post('/almacen/ubicaciones/vaciar', [UbicacionesVistaController::class, 'vaciarUbicacion']);
+// Rutas para reubicación entre racks
+Route::get('/almacen/racks/disponibles', [UbicacionesVistaController::class, 'listarRacksDisponibles']);
+Route::get('/almacen/racks/{id}/ubicaciones-vacias', [UbicacionesVistaController::class, 'listarUbicacionesVacias']);
+// Rutas para gestión de racks y ubicaciones
+Route::post('/almacen/racks/crear', [UbicacionesVistaController::class, 'crearRack']);
+Route::get('/almacen/racks/listar', [UbicacionesVistaController::class, 'listarRacks']);
+Route::get('/almacen/racks/{id}/info', [UbicacionesVistaController::class, 'obtenerInfoRack']);
+Route::post('/almacen/ubicaciones/crear', [UbicacionesVistaController::class, 'crearUbicacion']);

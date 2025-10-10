@@ -470,6 +470,90 @@
     </div>
 </div>
 
+<!-- Modal para Reubicación entre Racks -->
+<div x-show="modalReubicacionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+    :class="modalReubicacionRack.open && '!block'">
+    <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalReubicacionRack()">
+        <div x-show="modalReubicacionRack.open" x-transition x-transition.duration.300
+            class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
+
+            <!-- Header -->
+            <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                <div class="font-bold text-lg text-gray-800">
+                    Reubicar a Otro Rack
+                </div>
+                <button type="button" class="text-gray-500 hover:text-gray-700" @click="cerrarModalReubicacionRack()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-5">
+                <!-- Información del producto origen -->
+                <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-4">
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <label class="font-medium text-gray-600">Producto</label>
+                            <p class="font-bold text-gray-800" x-text="modalReubicacionRack.ubicacionOrigen.producto"></p>
+                        </div>
+                        <div>
+                            <label class="font-medium text-gray-600">Cantidad</label>
+                            <p class="font-bold text-gray-800" x-text="modalReubicacionRack.ubicacionOrigen.cantidad + ' unidades'"></p>
+                        </div>
+                        <div class="col-span-2">
+                            <label class="font-medium text-gray-600">Ubicación origen</label>
+                            <p class="font-bold text-gray-800" x-text="modalReubicacionRack.ubicacionOrigen.codigo"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selección de rack destino -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Rack Destino:</label>
+                    <select x-model="modalReubicacionRack.rackDestinoSeleccionado" 
+                            @change="cargarUbicacionesDestino()"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Seleccione un rack</option>
+                        <template x-for="rack in modalReubicacionRack.racksDisponibles" :key="rack.id">
+                            <option :value="rack.id" x-text="'Rack ' + rack.nombre + ' - ' + rack.sede"></option>
+                        </template>
+                    </select>
+                </div>
+
+                <!-- Selección de ubicación destino -->
+                <div class="mb-4" x-show="modalReubicacionRack.rackDestinoSeleccionado">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Ubicación Destino:</label>
+                    <select x-model="modalReubicacionRack.ubicacionDestinoSeleccionada"
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Seleccione una ubicación</option>
+                        <template x-for="ubicacion in modalReubicacionRack.ubicacionesDestino" :key="ubicacion.id">
+                            <option :value="ubicacion.id" 
+                                    x-text="ubicacion.codigo + ' (Capacidad: ' + ubicacion.capacidad_maxima + ')'"></option>
+                        </template>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1" 
+                       x-text="modalReubicacionRack.ubicacionesDestino.length + ' ubicaciones vacías disponibles'"
+                       x-show="modalReubicacionRack.rackDestinoSeleccionado"></p>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button @click="cerrarModalReubicacionRack()"
+                        class="flex-1 bg-gray-500 text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-600 transition">
+                        Cancelar
+                    </button>
+                    <button @click="confirmarReubicacionRack()"
+                        :disabled="!modalReubicacionRack.ubicacionDestinoSeleccionada"
+                        :class="!modalReubicacionRack.ubicacionDestinoSeleccionada ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-purple-700'"
+                        class="flex-1 text-white py-3 px-4 rounded-xl font-medium transition flex items-center justify-center gap-2">
+                        <i class="fas fa-check"></i>
+                        Confirmar Reubicación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal para Agregar Producto -->
 <div x-show="modalAgregarProducto.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
     :class="modalAgregarProducto.open && '!block'">
@@ -770,6 +854,14 @@
             capacidadMaxima: 0,
             observaciones: ''
         },
+         modalReubicacionRack: {
+            open: false,
+            ubicacionOrigen: {},
+            racksDisponibles: [],
+            rackDestinoSeleccionado: '',
+            ubicacionDestinoSeleccionada: '',
+            ubicacionesDestino: []
+        },
                 
                 // Estado de la aplicación
                 idxRackActual: {{ array_search($rackActual, $todosRacks) }},
@@ -894,6 +986,169 @@
                     this.modalHistorial.ubi = ubi;
                     this.modalHistorial.open = true;
                 },
+
+                // MÉTODOS PARA REUBICACIÓN ENTRE RACKS
+async iniciarReubicacionRack(ubi) {
+    try {
+        if (!ubi.producto || ubi.cantidad <= 0) {
+            this.error('No se puede reubicar: la ubicación está vacía');
+            return;
+        }
+
+        // Cargar lista de racks disponibles (excluyendo el actual)
+        const response = await fetch('/almacen/racks/disponibles', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            this.modalReubicacionRack.racksDisponibles = result.data;
+            this.modalReubicacionRack.ubicacionOrigen = ubi;
+            this.modalReubicacionRack.rackDestinoSeleccionado = '';
+            this.modalReubicacionRack.ubicacionDestinoSeleccionada = '';
+            this.modalReubicacionRack.ubicacionesDestino = [];
+            this.modalReubicacionRack.open = true;
+            this.modal.open = false;
+        } else {
+            this.error(result.message || 'Error al cargar racks disponibles');
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        this.error('Error al iniciar reubicación entre racks');
+    }
+},
+
+async cargarUbicacionesDestino() {
+    if (!this.modalReubicacionRack.rackDestinoSeleccionado) {
+        this.modalReubicacionRack.ubicacionesDestino = [];
+        return;
+    }
+
+    try {
+        const response = await fetch(`/almacen/racks/${this.modalReubicacionRack.rackDestinoSeleccionado}/ubicaciones-vacias`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            this.modalReubicacionRack.ubicacionesDestino = result.data;
+        } else {
+            this.error(result.message || 'Error al cargar ubicaciones destino');
+            this.modalReubicacionRack.ubicacionesDestino = [];
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        this.error('Error al cargar ubicaciones destino');
+        this.modalReubicacionRack.ubicacionesDestino = [];
+    }
+},
+
+async confirmarReubicacionRack() {
+    try {
+        // Validaciones
+        if (!this.modalReubicacionRack.rackDestinoSeleccionado) {
+            this.error('Por favor seleccione un rack destino');
+            return;
+        }
+
+        if (!this.modalReubicacionRack.ubicacionDestinoSeleccionada) {
+            this.error('Por favor seleccione una ubicación destino');
+            return;
+        }
+
+        const payload = {
+            ubicacion_origen_id: this.modalReubicacionRack.ubicacionOrigen.id,
+            ubicacion_destino_id: this.modalReubicacionRack.ubicacionDestinoSeleccionada,
+            producto: this.modalReubicacionRack.ubicacionOrigen.producto,
+            cantidad: parseInt(this.modalReubicacionRack.ubicacionOrigen.cantidad),
+            tipo_reubicacion: 'otro_rack'
+        };
+
+        console.log('Confirmando reubicación entre racks:', payload);
+
+        const response = await fetch('/almacen/reubicacion/confirmar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        console.log('Respuesta reubicación entre racks:', result);
+
+        if (result.success) {
+            this.success('Producto reubicado entre racks exitosamente');
+            
+            // Actualizar la interfaz
+            this.actualizarInterfazDespuesReubicacionRack(
+                this.modalReubicacionRack.ubicacionOrigen.id,
+                this.modalReubicacionRack.ubicacionDestinoSeleccionada,
+                parseInt(this.modalReubicacionRack.ubicacionOrigen.cantidad)
+            );
+            
+            this.cerrarModalReubicacionRack();
+        } else {
+            this.error(result.message || 'Error al reubicar entre racks');
+            if (result.errors) {
+                Object.values(result.errors).forEach(errorArray => {
+                    errorArray.forEach(error => {
+                        this.error(error);
+                    });
+                });
+            }
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        this.error('Error de conexión al servidor');
+    }
+},
+
+actualizarInterfazDespuesReubicacionRack(origenId, destinoId, cantidad) {
+    // Vaciar la ubicación origen en la interfaz actual
+    this.rack.niveles.forEach((nivel, nivelIndex) => {
+        nivel.ubicaciones.forEach((ubi, ubiIndex) => {
+            if (ubi.id === origenId) {
+                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
+                    ...ubi,
+                    producto: null,
+                    cantidad: 0,
+                    estado: 'vacio',
+                    fecha: null
+                };
+            }
+        });
+    });
+
+    // Forzar actualización
+    this.rack = { ...this.rack };
+    this.$nextTick(() => {
+        this.initSwipers();
+    });
+},
+
+cerrarModalReubicacionRack() {
+    this.modalReubicacionRack.open = false;
+    this.modalReubicacionRack.ubicacionOrigen = {};
+    this.modalReubicacionRack.racksDisponibles = [];
+    this.modalReubicacionRack.rackDestinoSeleccionado = '';
+    this.modalReubicacionRack.ubicacionDestinoSeleccionada = '';
+    this.modalReubicacionRack.ubicacionesDestino = [];
+},
  async iniciarReubicacion(ubi) {
     // Convertir cantidad a número
     const cantidad = parseInt(ubi.cantidad);

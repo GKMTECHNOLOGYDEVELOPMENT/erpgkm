@@ -52,19 +52,35 @@
     </style>
 
     <div x-data="almacenHeatmap" x-init="init()" class="container">
-        <!-- Header -->
+         <!-- Header -->
         <div class="mb-6 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-            <div class="flex items-center gap-3">
-                <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
-                    <i class="fa-solid fa-warehouse text-indigo-600"></i>
-                </span>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-slate-800">
-                        Vista del Almacén por SEDES
-                    </h1>
-                    <p class="mt-0.5 text-sm text-slate-500">
-                        Análisis de actividad y ocupación en tiempo real
-                    </p>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
+                        <i class="fa-solid fa-warehouse text-indigo-600"></i>
+                    </span>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-slate-800">
+                            Vista del Almacén por SEDES
+                        </h1>
+                        <p class="mt-0.5 text-sm text-slate-500">
+                            Análisis de actividad y ocupación en tiempo real
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Botones de gestión -->
+                <div class="flex gap-3">
+                    <button @click="abrirModalCrearRack()" 
+                            class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition">
+                        <i class="fas fa-plus"></i>
+                        Crear Rack
+                    </button>
+                    <button @click="abrirModalCrearUbicacion()" 
+                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
+                        <i class="fas fa-layer-group"></i>
+                        Crear Ubicación
+                    </button>
                 </div>
             </div>
         </div>
@@ -276,6 +292,190 @@
                 </div>
             </div>
         </div>
+
+
+
+<!-- Modal para Crear Rack -->
+        <div x-show="modalCrearRack.open" class="fixed inset-0 z-[999] flex items-center justify-center p-4 modal-overlay" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            <div class="modal-content w-full max-w-md" @click.outside="cerrarModalCrearRack()">
+                <div class="flex items-center justify-between p-6 border-b border-slate-200">
+                    <h3 class="text-lg font-semibold text-slate-800">Crear Nuevo Rack</h3>
+                    <button @click="cerrarModalCrearRack()" class="text-slate-400 hover:text-slate-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form @submit.prevent="crearRack()" class="p-6 space-y-4">
+                    <!-- Nombre del Rack -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Nombre del Rack *</label>
+                        <input type="text" x-model="modalCrearRack.form.nombre" required
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                               placeholder="Ej: R01, R02, A01...">
+                    </div>
+
+                    <!-- Sede -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Sede *</label>
+                        <select x-model="modalCrearRack.form.sede" required
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                            <option value="">Seleccione una sede</option>
+                            @foreach($sedes as $sede)
+                                <option value="{{ $sede }}">{{ $sede }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Configuración de dimensiones -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Filas *</label>
+                            <input type="number" x-model="modalCrearRack.form.filas" required min="1" max="10"
+                                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                                   placeholder="Número de filas">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">Columnas *</label>
+                            <input type="number" x-model="modalCrearRack.form.columnas" required min="1" max="20"
+                                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                                   placeholder="Número de columnas">
+                        </div>
+                    </div>
+
+                    <!-- Estado -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Estado *</label>
+                        <select x-model="modalCrearRack.form.estado" required
+                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" @click="cerrarModalCrearRack()"
+                                class="flex-1 bg-slate-200 text-slate-700 py-2 px-4 rounded-lg font-medium hover:bg-slate-300 transition">
+                            Cancelar
+                        </button>
+                        <button type="submit" :disabled="modalCrearRack.loading"
+                                :class="modalCrearRack.loading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'"
+                                class="flex-1 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                            <i class="fas fa-spinner fa-spin" x-show="modalCrearRack.loading"></i>
+                            <span x-text="modalCrearRack.loading ? 'Creando...' : 'Crear Rack'"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+     <!-- Modal para Crear Ubicación -->
+<div x-show="modalCrearUbicacion.open" class="fixed inset-0 z-[999] flex items-center justify-center p-4 modal-overlay" 
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+    <div class="modal-content w-full max-w-md" @click.outside="cerrarModalCrearUbicacion()">
+        <div class="flex items-center justify-between p-6 border-b border-slate-200">
+            <h3 class="text-lg font-semibold text-slate-800">Crear Ubicación en Rack</h3>
+            <button @click="cerrarModalCrearUbicacion()" class="text-slate-400 hover:text-slate-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form @submit.prevent="crearUbicacion()" class="p-6 space-y-4">
+            <!-- Selección de Rack -->
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Rack *</label>
+                <select x-model="modalCrearUbicacion.form.rack_id" required @change="cargarRackInfo()"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                    <option value="">Seleccione un rack</option>
+                    <template x-for="rack in modalCrearUbicacion.racks" :key="rack.idRack">
+                        <option :value="rack.idRack" x-text="'Rack ' + rack.nombre + ' - ' + rack.sede"></option>
+                    </template>
+                </select>
+            </div>
+
+            <!-- Información del rack seleccionado - CORREGIDO -->
+            <div x-show="modalCrearUbicacion.rackInfo" class="bg-blue-50 p-3 rounded-lg">
+                <div class="text-sm text-blue-800">
+                    <span x-text="'Rack: ' + (modalCrearUbicacion.rackInfo ? modalCrearUbicacion.rackInfo.nombre : '')"></span> 
+                    <span x-show="modalCrearUbicacion.rackInfo"> | </span>
+                    <span x-text="'Dimensiones: ' + (modalCrearUbicacion.rackInfo ? modalCrearUbicacion.rackInfo.filas + 'x' + modalCrearUbicacion.rackInfo.columnas : '')"></span>
+                </div>
+            </div>
+
+            <!-- Nivel y Posición -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Nivel *</label>
+                    <input type="number" x-model="modalCrearUbicacion.form.nivel" required min="1"
+                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                           placeholder="Nivel">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Posición *</label>
+                    <input type="number" x-model="modalCrearUbicacion.form.posicion" required min="1"
+                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                           placeholder="Posición">
+                </div>
+            </div>
+
+            <!-- Código y Capacidad -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Código *</label>
+                    <input type="text" x-model="modalCrearUbicacion.form.codigo" required
+                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                           placeholder="Ej: A1, B2...">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Capacidad Máxima *</label>
+                    <input type="number" x-model="modalCrearUbicacion.form.capacidad_maxima" required min="1"
+                           class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200"
+                           placeholder="Ej: 100">
+                </div>
+            </div>
+
+            <!-- Estado Ocupación -->
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Estado Inicial *</label>
+                <select x-model="modalCrearUbicacion.form.estado_ocupacion" required
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
+                    <option value="vacio">Vacío</option>
+                    <option value="bajo">Bajo</option>
+                    <option value="medio">Medio</option>
+                    <option value="alto">Alto</option>
+                    <option value="muy_alto">Muy Alto</option>
+                </select>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 pt-4">
+                <button type="button" @click="cerrarModalCrearUbicacion()"
+                        class="flex-1 bg-slate-200 text-slate-700 py-2 px-4 rounded-lg font-medium hover:bg-slate-300 transition">
+                    Cancelar
+                </button>
+                <button type="submit" :disabled="modalCrearUbicacion.loading"
+                        :class="modalCrearUbicacion.loading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'"
+                        class="flex-1 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                    <i class="fas fa-spinner fa-spin" x-show="modalCrearUbicacion.loading"></i>
+                    <span x-text="modalCrearUbicacion.loading ? 'Creando...' : 'Crear Ubicación'"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+    </div>
+
     </div>
 
     <script>
@@ -290,6 +490,33 @@
                     sede: '',
                     buscar: ''
                 },
+                // Nuevos estados para los modales
+                modalCrearRack: {
+                    open: false,
+                    loading: false,
+                    form: {
+                        nombre: '',
+                        sede: '',
+                        filas: 1,
+                        columnas: 1,
+                        estado: 'activo'
+                    }
+                },
+
+                modalCrearUbicacion: {
+                    open: false,
+                    loading: false,
+                    racks: [],
+                    rackInfo: null,
+                    form: {
+                        rack_id: '',
+                        codigo: '',
+                        nivel: 1,
+                        posicion: 1,
+                        capacidad_maxima: 100,
+                        estado_ocupacion: 'vacio'
+                    }
+                },
                 dataOriginal: [],
                 data: [],
                 stats: {
@@ -303,6 +530,176 @@
 
                 init() {
                     this.cargarDatos();
+                },
+
+                // MÉTODOS PARA CREAR RACK
+                async abrirModalCrearRack() {
+                    this.modalCrearRack.open = true;
+                    // Resetear formulario
+                    this.modalCrearRack.form = {
+                        nombre: '',
+                        sede: '',
+                        filas: 1,
+                        columnas: 1,
+                        estado: 'activo'
+                    };
+                },
+
+                cerrarModalCrearRack() {
+                    this.modalCrearRack.open = false;
+                    this.modalCrearRack.loading = false;
+                },
+
+                async crearRack() {
+                    this.modalCrearRack.loading = true;
+                    
+                    try {
+                        const response = await fetch('/almacen/racks/crear', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(this.modalCrearRack.form)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.success('Rack creado exitosamente');
+                            this.cerrarModalCrearRack();
+                            this.cargarDatos(); // Recargar datos para actualizar stats
+                        } else {
+                            this.error(result.message || 'Error al crear rack');
+                            if (result.errors) {
+                                Object.values(result.errors).forEach(errorArray => {
+                                    errorArray.forEach(error => {
+                                        this.error(error);
+                                    });
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    } finally {
+                        this.modalCrearRack.loading = false;
+                    }
+                },
+
+                // MÉTODOS PARA CREAR UBICACIÓN
+                async abrirModalCrearUbicacion() {
+                    try {
+                        // Cargar lista de racks
+                        const response = await fetch('/almacen/racks/listar');
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.modalCrearUbicacion.racks = result.data;
+                            this.modalCrearUbicacion.open = true;
+                            // Resetear formulario
+                            this.modalCrearUbicacion.form = {
+                                rack_id: '',
+                                codigo: '',
+                                nivel: 1,
+                                posicion: 1,
+                                capacidad_maxima: 100,
+                                estado_ocupacion: 'vacio'
+                            };
+                            this.modalCrearUbicacion.rackInfo = null;
+                        } else {
+                            this.error('Error al cargar lista de racks');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    }
+                },
+
+                cerrarModalCrearUbicacion() {
+                    this.modalCrearUbicacion.open = false;
+                    this.modalCrearUbicacion.loading = false;
+                },
+
+                async cargarRackInfo() {
+    if (!this.modalCrearUbicacion.form.rack_id) {
+        this.modalCrearUbicacion.rackInfo = null;
+        return;
+    }
+
+    try {
+        console.log('Cargando información del rack:', this.modalCrearUbicacion.form.rack_id);
+        
+        const response = await fetch(`/almacen/racks/${this.modalCrearUbicacion.form.rack_id}/info`);
+        
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('Respuesta info rack:', result);
+
+        if (result.success) {
+            this.modalCrearUbicacion.rackInfo = result.data;
+            console.log('Info del rack cargada:', result.data);
+        } else {
+            console.warn('No se pudo cargar la info del rack:', result.message);
+            this.modalCrearUbicacion.rackInfo = null;
+        }
+    } catch (error) {
+        console.error('Error al cargar info del rack:', error);
+        this.modalCrearUbicacion.rackInfo = null;
+        this.error('Error al cargar información del rack seleccionado');
+    }
+},
+
+                async crearUbicacion() {
+                    this.modalCrearUbicacion.loading = true;
+                    
+                    try {
+                        const response = await fetch('/almacen/ubicaciones/crear', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(this.modalCrearUbicacion.form)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.success('Ubicación creada exitosamente');
+                            this.cerrarModalCrearUbicacion();
+                            this.cargarDatos(); // Recargar datos para actualizar stats
+                        } else {
+                            this.error(result.message || 'Error al crear ubicación');
+                            if (result.errors) {
+                                Object.values(result.errors).forEach(errorArray => {
+                                    errorArray.forEach(error => {
+                                        this.error(error);
+                                    });
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    } finally {
+                        this.modalCrearUbicacion.loading = false;
+                    }
+                },
+
+                // Método para mostrar notificaciones (si no lo tienes)
+                success(message) {
+                    // Puedes usar toastr, sweetalert, o console.log
+                    console.log('Éxito:', message);
+                    alert('Éxito: ' + message); // Temporal, puedes cambiar por tu sistema de notificaciones
+                },
+
+                error(message) {
+                    console.error('Error:', message);
+                    alert('Error: ' + message); // Temporal
                 },
 
                 async cargarDatos() {

@@ -971,5 +971,246 @@ public function vaciarUbicacion(Request $request)
 }
 
 
+public function listarRacksDisponibles()
+{
+    try {
+        // Excluir el rack actual y obtener racks activos
+        $racks = DB::table('racks')
+            ->where('estado', 'activo')
+            ->where('idRack', '!=', request('rack_actual')) // Puedes enviar el rack actual desde el frontend si es necesario
+            ->select('idRack as id', 'nombre', 'sede')
+            ->orderBy('nombre')
+            ->get();
 
+        return response()->json([
+            'success' => true,
+            'data' => $racks
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al listar racks disponibles: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar racks disponibles'
+        ], 500);
+    }
+}
+
+public function listarUbicacionesVacias($rackId)
+{
+    try {
+        $ubicaciones = DB::table('rack_ubicaciones as ru')
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('ru.rack_id', $rackId)
+            ->where('ru.estado_ocupacion', 'vacio')
+            ->where(function($query) {
+                $query->where('ru.articulo_id', null)
+                      ->orWhere('ru.cantidad_actual', 0);
+            })
+            ->select(
+                'ru.idRackUbicacion as id',
+                'ru.codigo',
+                'ru.codigo_unico',
+                'ru.capacidad_maxima',
+                'ru.nivel',
+                'ru.posicion',
+                'r.nombre as rack_nombre'
+            )
+            ->orderBy('ru.nivel')
+            ->orderBy('ru.posicion')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $ubicaciones
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al listar ubicaciones vacías: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar ubicaciones vacías'
+        ], 500);
+    }
+}
+
+
+
+
+public function crearRack(Request $request)
+{
+    DB::beginTransaction();
+    
+    try {
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:10|unique:racks,nombre',
+            'sede' => 'required|string|max:50',
+            'filas' => 'required|integer|min:1|max:10',
+            'columnas' => 'required|integer|min:1|max:20',
+            'estado' => 'required|in:activo,inactivo'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Crear el rack
+        $rackId = DB::table('racks')->insertGetId([
+            'nombre' => $request->nombre,
+            'sede' => $request->sede,
+            'filas' => $request->filas,
+            'columnas' => $request->columnas,
+            'estado' => $request->estado,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Rack creado exitosamente',
+            'data' => ['id' => $rackId]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al crear rack: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error interno del servidor: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function listarRacks()
+{
+    try {
+        $racks = DB::table('racks')
+            ->where('estado', 'activo')
+            ->select('idRack', 'nombre', 'sede', 'filas', 'columnas')
+            ->orderBy('nombre')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $racks
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al listar racks: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar racks'
+        ], 500);
+    }
+}
+
+public function obtenerInfoRack($id)
+{
+    try {
+        $rack = DB::table('racks')
+            ->where('idRack', $id)
+            ->select('idRack', 'nombre', 'sede', 'filas', 'columnas')
+            ->first();
+
+        if (!$rack) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rack no encontrado'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $rack
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al obtener info del rack: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar información del rack'
+        ], 500);
+    }
+}
+
+public function crearUbicacion(Request $request)
+{
+    DB::beginTransaction();
+    
+    try {
+        $validator = Validator::make($request->all(), [
+            'rack_id' => 'required|integer|exists:racks,idRack',
+            'codigo' => 'required|string|max:20',
+            'nivel' => 'required|integer|min:1',
+            'posicion' => 'required|integer|min:1',
+            'capacidad_maxima' => 'required|integer|min:1',
+            'estado_ocupacion' => 'required|in:vacio,bajo,medio,alto,muy_alto'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Verificar que no exista ya una ubicación con el mismo código en el mismo rack
+        $ubicacionExistente = DB::table('rack_ubicaciones')
+            ->where('rack_id', $request->rack_id)
+            ->where('codigo', $request->codigo)
+            ->exists();
+
+        if ($ubicacionExistente) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ya existe una ubicación con este código en el rack seleccionado'
+            ], 422);
+        }
+
+        // Generar código único automáticamente
+        $rack = DB::table('racks')->where('idRack', $request->rack_id)->first();
+        $codigoUnico = $rack->nombre . '-' . $request->codigo;
+
+        // Crear la ubicación
+        $ubicacionId = DB::table('rack_ubicaciones')->insertGetId([
+            'rack_id' => $request->rack_id,
+            'codigo' => $request->codigo,
+            'codigo_unico' => $codigoUnico,
+            'nivel' => $request->nivel,
+            'posicion' => $request->posicion,
+            'capacidad_maxima' => $request->capacidad_maxima,
+            'estado_ocupacion' => $request->estado_ocupacion,
+            'articulo_id' => null, // Siempre null al crear
+            'cantidad_actual' => 0, // Siempre 0 al crear
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Ubicación creada exitosamente',
+            'data' => [
+                'id' => $ubicacionId,
+                'codigo_unico' => $codigoUnico
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al crear ubicación: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error interno del servidor: ' . $e->getMessage()
+        ], 500);
+    }
+}
 }
