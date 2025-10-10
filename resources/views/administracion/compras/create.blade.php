@@ -110,7 +110,16 @@
              /* o 0.75rem si lo quieres aún más pequeño */
          }
      </style>
-
+     <div>
+         <ul class="flex space-x-2 rtl:space-x-reverse">
+             <li>
+                 <a href="{{ route('administracion.compra') }}" class="text-primary hover:underline">Compras</a>
+             </li>
+             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                 <span>Crear</span>
+             </li>
+         </ul>
+     </div>
      <div class="container mx-auto px-4 py-6" x-data="compra">
          <!-- Encabezado -->
          <div class="mb-8">

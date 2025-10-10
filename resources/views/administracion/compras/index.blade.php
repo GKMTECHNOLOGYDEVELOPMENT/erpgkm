@@ -1,6 +1,15 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-
+     <div class="mb-6">
+         <ul class="flex space-x-2 rtl:space-x-reverse">
+             <li>
+                 <a href="" class="text-primary hover:underline">Administración</a>
+             </li>
+             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                 <span>Lista de Compras</span>
+             </li>
+         </ul>
+     </div>
     <div x-data="comprasList" x-init="init()">
         <!-- Filtros - Agregar filtro por estado -->
         <div
