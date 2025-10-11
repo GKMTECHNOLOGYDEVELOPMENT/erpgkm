@@ -118,208 +118,13 @@ class SolicitudingresoController extends Controller
 
 
 
-
-
-// public function guardarUbicacion(Request $request)
-// {
-//     try {
-//         DB::beginTransaction();
-
-//         $solicitud = SolicitudIngreso::findOrFail($request->solicitud_id);
-        
-//         // Validar que la suma de las cantidades sea igual a la cantidad total
-//         $totalDistribuido = collect($request->ubicaciones)->sum('cantidad');
-        
-//         if ($totalDistribuido != $solicitud->cantidad) {
-//             return response()->json([
-//                 'success' => false,
-//                 'message' => 'La suma de las cantidades distribuidas ('.$totalDistribuido.') debe ser igual a la cantidad total ('.$solicitud->cantidad.')'
-//             ], 422);
-//         }
-
-//         // Verificar si el artículo requiere series
-//         $articulo = \App\Models\Articulo::find($solicitud->articulo_id);
-//         $requiereSeries = $articulo && $articulo->maneja_serie === 1;
-
-//         Log::info("Artículo ID: {$solicitud->articulo_id}, Maneja serie: " . ($articulo ? $articulo->maneja_serie : 'N/A') . ", Requiere series: " . ($requiereSeries ? 'SÍ' : 'NO'));
-
-//         // Validar series si es requerido
-//         if ($requiereSeries) {
-//             if (!$request->has('series') || empty($request->series)) {
-//                 return response()->json([
-//                     'success' => false,
-//                     'message' => 'Este artículo requiere números de serie'
-//                 ], 422);
-//             }
-
-//             $totalSeries = count($request->series);
-//             if ($totalSeries != $solicitud->cantidad) {
-//                 return response()->json([
-//                     'success' => false,
-//                     'message' => "Debe ingresar {$solicitud->cantidad} números de serie, recibidas: {$totalSeries}"
-//                 ], 422);
-//             }
-
-//             // Validar que no haya series duplicadas
-//             $seriesNumeros = array_column($request->series, 'numero_serie');
-//             $seriesUnicas = array_unique($seriesNumeros);
-//             if (count($seriesUnicas) != count($seriesNumeros)) {
-//                 return response()->json([
-//                     'success' => false,
-//                     'message' => 'No puede haber números de serie duplicados'
-//                 ], 422);
-//             }
-
-//             // Validar que las series no existan ya en la base de datos para este artículo
-//             $seriesExistentes = ArticuloSerie::where('articulo_id', $solicitud->articulo_id)
-//                 ->whereIn('numero_serie', $seriesNumeros)
-//                 ->where(function($query) use ($solicitud) {
-//                     $query->where('origen', '!=', $solicitud->origen)
-//                           ->orWhere('origen_id', '!=', $solicitud->origen_id);
-//                 })
-//                 ->pluck('numero_serie')
-//                 ->toArray();
-
-//             if (!empty($seriesExistentes)) {
-//                 return response()->json([
-//                     'success' => false,
-//                     'message' => 'Los siguientes números de serie ya existen para este artículo: ' . implode(', ', $seriesExistentes)
-//                 ], 422);
-//             }
-//         }
-
-//         $esPrimeraUbicacion = ($solicitud->estado !== 'ubicado');
-        
-//         if ($esPrimeraUbicacion) {
-//             Log::info("Primera ubicación para solicitud ID: {$solicitud->idSolicitudIngreso}. Aumentando stock.");
-//         } else {
-//             Log::info("Re-ubicación para solicitud ID: {$solicitud->idSolicitudIngreso}. Stock ya fue aumentado anteriormente.");
-//         }
-
-//         // Eliminar ubicaciones y series existentes
-//         ArticuloUbicacion::where('origen', $solicitud->origen)
-//             ->where('articulo_id', $solicitud->articulo_id)
-//             ->where('origen_id', $solicitud->origen_id)
-//             ->delete();
-
-//         ArticuloSerie::where('origen', $solicitud->origen)
-//             ->where('articulo_id', $solicitud->articulo_id)
-//             ->where('origen_id', $solicitud->origen_id)
-//             ->delete();
-
-//         $nombresUbicaciones = [];
-        
-//         // Guardar cada ubicación
-//         foreach ($request->ubicaciones as $ubicacionData) {
-//             $articuloUbicacion = ArticuloUbicacion::create([
-//                 'origen' => $solicitud->origen,
-//                 'articulo_id' => $solicitud->articulo_id,
-//                 'origen_id' => $solicitud->origen_id,
-//                 'ubicacion_id' => $ubicacionData['ubicacion_id'],
-//                 'cantidad' => $ubicacionData['cantidad'],
-//                 'created_at' => now(),
-//                 'updated_at' => now()
-//             ]);
-
-//             $ubicacion = \App\Models\Ubicacion::find($ubicacionData['ubicacion_id']);
-//             if ($ubicacion) {
-//                 $nombresUbicaciones[] = $ubicacion->nombre . ' (' . $ubicacionData['cantidad'] . ')';
-//             }
-//         }
-
-//         // Guardar series sin ubicación
-//         $seriesGuardadas = [];
-//         if ($requiereSeries && !empty($request->series)) {
-//             Log::info("Guardando {$totalSeries} series para solicitud {$solicitud->idSolicitudIngreso}");
-            
-//             foreach ($request->series as $serieData) {
-//                 $serieBD = ArticuloSerie::create([
-//                     'origen' => $solicitud->origen,
-//                     'origen_id' => $solicitud->origen_id,
-//                     'articulo_id' => $solicitud->articulo_id,
-//                     'numero_serie' => $serieData['numero_serie'],
-//                     'estado' => 'activo'
-//                 ]);
-
-//                 $seriesGuardadas[] = [
-//                     'numero_serie' => $serieBD->numero_serie
-//                 ];
-
-//                 Log::info("Serie guardada: {$serieBD->numero_serie}");
-//             }
-//         }
-
-//         // Aumentar stock del artículo solo si es la primera vez
-//         if ($esPrimeraUbicacion && $articulo) {
-//             $stockAnterior = $articulo->stock_total;
-//             $nuevoStock = $stockAnterior + $solicitud->cantidad;
-            
-//             $articulo->stock_total = $nuevoStock;
-//             $articulo->save();
-            
-//             Log::info("Stock actualizado - Artículo ID: {$articulo->idArticulos}");
-//             Log::info("Stock anterior: {$stockAnterior}, Cantidad añadida: {$solicitud->cantidad}, Nuevo stock: {$nuevoStock}");
-//         }
-
-//         // Actualizar solicitud
-//         $ubicacionTexto = !empty($nombresUbicaciones) ? implode(', ', $nombresUbicaciones) : 'Sin ubicación';
-        
-//         $solicitud->ubicacion = $ubicacionTexto;
-//         $solicitud->estado = 'ubicado';
-//         $solicitud->save();
-
-//         DB::commit();
-
-//         // Retornar respuesta con las ubicaciones y series actualizadas
-//         $ubicacionesActualizadas = ArticuloUbicacion::with('ubicacion:idUbicacion,nombre')
-//             ->where('origen', $solicitud->origen)
-//             ->where('articulo_id', $solicitud->articulo_id)
-//             ->where('origen_id', $solicitud->origen_id)
-//             ->get()
-//             ->map(function($ubicacion) {
-//                 return [
-//                     'ubicacion_id' => $ubicacion->ubicacion_id,
-//                     'cantidad' => $ubicacion->cantidad,
-//                     'nombre_ubicacion' => $ubicacion->ubicacion->nombre
-//                 ];
-//             });
-
-//         $mensaje = 'Artículo ubicado correctamente en '.count($request->ubicaciones).' ubicación(es)';
-//         if ($requiereSeries) {
-//             $mensaje .= ' con '.count($seriesGuardadas).' número(s) de serie';
-//         }
-//         if ($esPrimeraUbicacion) {
-//             $mensaje .= ' y stock actualizado';
-//         }
-
-//         return response()->json([
-//             'success' => true,
-//             'message' => $mensaje,
-//             'ubicaciones' => $ubicacionesActualizadas,
-//             'series' => $seriesGuardadas,
-//             'ubicacion_texto' => $ubicacionTexto,
-//             'stock_actualizado' => $esPrimeraUbicacion
-//         ]);
-
-//     } catch (\Exception $e) {
-//         DB::rollBack();
-//         Log::error('Error al guardar ubicación: ' . $e->getMessage());
-//         Log::error('Stack trace: ' . $e->getTraceAsString());
-//         return response()->json([
-//             'success' => false,
-//             'message' => 'Error al guardar la ubicación: '.$e->getMessage()
-//         ], 500);
-//     }
-// }
-
-
-
 public function guardarUbicacion(Request $request)
 {
     try {
         DB::beginTransaction();
 
         $solicitud = SolicitudIngreso::findOrFail($request->solicitud_id);
+        $articulo = \App\Models\Articulo::find($solicitud->articulo_id);
         
         // Validar que la suma de las cantidades sea igual a la cantidad total
         $totalDistribuido = collect($request->ubicaciones)->sum('cantidad');
@@ -332,7 +137,6 @@ public function guardarUbicacion(Request $request)
         }
 
         // Verificar si el artículo requiere series
-        $articulo = \App\Models\Articulo::find($solicitud->articulo_id);
         $requiereSeries = $articulo && $articulo->maneja_serie === 1;
 
         Log::info("Artículo ID: {$solicitud->articulo_id}, Maneja serie: " . ($articulo ? $articulo->maneja_serie : 'N/A') . ", Requiere series: " . ($requiereSeries ? 'SÍ' : 'NO'));
@@ -403,22 +207,69 @@ public function guardarUbicacion(Request $request)
 
         $nombresUbicaciones = [];
         
-        // Guardar cada ubicación
+        // Guardar cada ubicación en rack_ubicaciones
         foreach ($request->ubicaciones as $ubicacionData) {
-            $articuloUbicacion = ArticuloUbicacion::create([
-                'origen' => $solicitud->origen,
-                'articulo_id' => $solicitud->articulo_id,
-                'origen_id' => $solicitud->origen_id,
-                'ubicacion_id' => $ubicacionData['ubicacion_id'],
-                'cantidad' => $ubicacionData['cantidad'],
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+            $rackUbicacionId = $ubicacionData['ubicacion_id'];
+            
+            // Verificar si la ubicación del rack existe
+            $rackUbicacion = DB::table('rack_ubicaciones')
+                ->where('idRackUbicacion', $rackUbicacionId)
+                ->first();
 
-            $ubicacion = \App\Models\Ubicacion::find($ubicacionData['ubicacion_id']);
-            if ($ubicacion) {
-                $nombresUbicaciones[] = $ubicacion->nombre . ' (' . $ubicacionData['cantidad'] . ')';
+            if (!$rackUbicacion) {
+                throw new Exception("La ubicación del rack no existe");
             }
+
+            // Verificar si la ubicación está disponible
+            if ($rackUbicacion->articulo_id !== null && $rackUbicacion->articulo_id != $solicitud->articulo_id) {
+                throw new Exception("La ubicación {$rackUbicacion->codigo} ya está ocupada por otro artículo");
+            }
+
+            // Verificar capacidad
+            if ($ubicacionData['cantidad'] > $rackUbicacion->capacidad_maxima) {
+                throw new Exception("La cantidad excede la capacidad máxima de la ubicación {$rackUbicacion->codigo}");
+            }
+
+            // Actualizar o crear en rack_ubicaciones
+            if ($rackUbicacion->articulo_id === null) {
+                // Nueva ubicación
+                DB::table('rack_ubicaciones')
+                    ->where('idRackUbicacion', $rackUbicacionId)
+                    ->update([
+                        'articulo_id' => $solicitud->articulo_id,
+                        'cantidad_actual' => $ubicacionData['cantidad'],
+                        'estado_ocupacion' => $this->calcularEstadoOcupacion($ubicacionData['cantidad'], $rackUbicacion->capacidad_maxima),
+                        'updated_at' => now()
+                    ]);
+            } else {
+                // Ya existe el artículo en esta ubicación, sumar cantidad
+                $nuevaCantidad = $rackUbicacion->cantidad_actual + $ubicacionData['cantidad'];
+                
+                if ($nuevaCantidad > $rackUbicacion->capacidad_maxima) {
+                    throw new Exception("La cantidad total excede la capacidad máxima de la ubicación {$rackUbicacion->codigo}");
+                }
+
+                DB::table('rack_ubicaciones')
+                    ->where('idRackUbicacion', $rackUbicacionId)
+                    ->update([
+                        'cantidad_actual' => $nuevaCantidad,
+                        'estado_ocupacion' => $this->calcularEstadoOcupacion($nuevaCantidad, $rackUbicacion->capacidad_maxima),
+                        'updated_at' => now()
+                    ]);
+            }
+
+            // Guardar también en articulo_ubicaciones para mantener compatibilidad
+            // ArticuloUbicacion::create([
+            //     'origen' => $solicitud->origen,
+            //     'articulo_id' => $solicitud->articulo_id,
+            //     'origen_id' => $solicitud->origen_id,
+            //     'ubicacion_id' => $ubicacionData['ubicacion_id'],
+            //     'cantidad' => $ubicacionData['cantidad'],
+            //     'created_at' => now(),
+            //     'updated_at' => now()
+            // ]);
+
+            $nombresUbicaciones[] = $rackUbicacion->codigo . ' (' . $ubicacionData['cantidad'] . ')';
         }
 
         // Guardar series sin ubicación
@@ -453,6 +304,28 @@ public function guardarUbicacion(Request $request)
             
             Log::info("Stock actualizado - Artículo ID: {$articulo->idArticulos}");
             Log::info("Stock anterior: {$stockAnterior}, Cantidad añadida: {$solicitud->cantidad}, Nuevo stock: {$nuevoStock}");
+        }
+
+        // Registrar movimiento en rack_movimientos
+        $rackInfo = DB::table('rack_ubicaciones')
+            ->where('idRackUbicacion', $request->ubicaciones[0]['ubicacion_id'])
+            ->join('racks', 'rack_ubicaciones.rack_id', '=', 'racks.idRack')
+            ->first();
+
+        if ($rackInfo) {
+            DB::table('rack_movimientos')->insert([
+                'articulo_id' => $solicitud->articulo_id,
+                'ubicacion_destino_id' => $request->ubicaciones[0]['ubicacion_id'],
+                'rack_destino_id' => $rackInfo->rack_id,
+                'cantidad' => $solicitud->cantidad,
+                'tipo_movimiento' => 'entrada',
+                'observaciones' => 'Ingreso desde solicitud: ' . ($solicitud->origen === 'compra' ? 
+                    $solicitud->compra->codigocompra : $solicitud->entradaProveedor->codigo_entrada),
+                'codigo_ubicacion_destino' => $rackInfo->codigo, // Cambiado a codigo
+                'nombre_rack_destino' => $rackInfo->nombre,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
         }
 
         // Actualizar solicitud
@@ -533,6 +406,18 @@ public function guardarUbicacion(Request $request)
         ], 500);
     }
 }
+private function calcularEstadoOcupacion($cantidad, $capacidadMaxima)
+{
+    if ($capacidadMaxima <= 0) return 'vacio';
+    
+    $porcentaje = ($cantidad / $capacidadMaxima) * 100;
+    
+    if ($porcentaje == 0) return 'vacio';
+    if ($porcentaje <= 24) return 'bajo';
+    if ($porcentaje <= 49) return 'medio';
+    if ($porcentaje <= 74) return 'alto';
+    return 'muy_alto';
+}
 
 
 
@@ -605,6 +490,374 @@ private function verificarTodosArticulosUbicados($solicitud)
     }
 
 
+//     public function sugerirUbicaciones($articuloId, $cantidad)
+// {
+//     try {
+//         Log::info("=== SUGERENCIAS DE UBICACIÓN ===");
+//         Log::info("Artículo ID: {$articuloId}, Cantidad requerida: {$cantidad}");
+
+//         // PRIMERO: Buscar si el artículo ya tiene ubicaciones existentes
+//         $ubicacionesExistentes = DB::table('rack_ubicaciones as ru')
+//             ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+//             ->where('ru.articulo_id', $articuloId)
+//             ->where('r.estado', 'activo')
+//             ->select(
+//                 'ru.idRackUbicacion',
+//                 'ru.codigo',
+//                 'ru.cantidad_actual',
+//                 'ru.capacidad_maxima',
+//                 'r.nombre as rack_nombre',
+//                 'r.sede'
+//             )
+//             ->get()
+//             ->map(function($ubicacion) {
+//                 $espacioDisponible = $ubicacion->capacidad_maxima - $ubicacion->cantidad_actual;
+//                 return [
+//                     'id' => $ubicacion->idRackUbicacion,
+//                     'codigo' => $ubicacion->codigo,
+//                     'rack_nombre' => $ubicacion->rack_nombre,
+//                     'sede' => $ubicacion->sede,
+//                     'cantidad_actual' => $ubicacion->cantidad_actual,
+//                     'capacidad_maxima' => $ubicacion->capacidad_maxima,
+//                     'espacio_disponible' => $espacioDisponible,
+//                     'tipo' => 'existente',
+//                     'prioridad' => 1
+//                 ];
+//             });
+
+//         Log::info("Ubicaciones existentes encontradas: " . $ubicacionesExistentes->count());
+
+//         // CASO 1: Si hay ubicaciones existentes con espacio suficiente para TODA la cantidad
+//         $ubicacionesExistentesCompletas = $ubicacionesExistentes->filter(function($ubicacion) use ($cantidad) {
+//             return $ubicacion['espacio_disponible'] >= $cantidad;
+//         });
+
+//         if ($ubicacionesExistentesCompletas->isNotEmpty()) {
+//             Log::info("CASO 1: Se encontraron ubicaciones existentes con espacio completo");
+//             return response()->json([
+//                 'success' => true,
+//                 'sugerencias' => $ubicacionesExistentesCompletas->values(),
+//                 'total_sugerencias' => $ubicacionesExistentesCompletas->count(),
+//                 'tipo_sugerencia' => 'existentes_completas',
+//                 'mensaje' => 'Ubicaciones existentes con espacio disponible'
+//             ]);
+//         }
+
+//         // CASO 2: Si hay ubicaciones existentes pero con espacio INSUFICIENTE
+//         $ubicacionesExistentesParciales = $ubicacionesExistentes->filter(function($ubicacion) {
+//             return $ubicacion['espacio_disponible'] > 0;
+//         });
+
+//         if ($ubicacionesExistentesParciales->isNotEmpty()) {
+//             Log::info("CASO 2: Hay ubicaciones existentes pero con espacio insuficiente. Buscando ubicaciones adicionales...");
+            
+//             // Buscar ubicaciones vacías para complementar
+//             $ubicacionesVacias = $this->obtenerUbicacionesVacias($cantidad);
+            
+//             // Combinar ubicaciones existentes (aunque tengan espacio insuficiente) con vacías
+//             $sugerenciasCombinadas = $ubicacionesExistentesParciales
+//                 ->merge($ubicacionesVacias)
+//                 ->sortBy('prioridad')
+//                 ->values();
+
+//             return response()->json([
+//                 'success' => true,
+//                 'sugerencias' => $sugerenciasCombinadas,
+//                 'total_sugerencias' => $sugerenciasCombinadas->count(),
+//                 'tipo_sugerencia' => 'combinada',
+//                 'mensaje' => 'Ubicaciones existentes (espacio insuficiente) + ubicaciones vacías sugeridas'
+//             ]);
+//         }
+
+//         // CASO 3: No hay ubicaciones existentes para este artículo - Buscar TODAS las ubicaciones vacías
+//         Log::info("CASO 3: No hay ubicaciones existentes. Buscando todas las ubicaciones vacías disponibles...");
+//         $ubicacionesVacias = $this->obtenerUbicacionesVacias($cantidad);
+
+//         if ($ubicacionesVacias->isNotEmpty()) {
+//             return response()->json([
+//                 'success' => true,
+//                 'sugerencias' => $ubicacionesVacias,
+//                 'total_sugerencias' => $ubicacionesVacias->count(),
+//                 'tipo_sugerencia' => 'solo_vacias',
+//                 'mensaje' => 'Ubicaciones vacías disponibles'
+//             ]);
+//         }
+
+//         // CASO 4: No hay ubicaciones disponibles
+//         Log::info("CASO 4: No hay ubicaciones disponibles");
+//         return response()->json([
+//             'success' => true,
+//             'sugerencias' => [],
+//             'total_sugerencias' => 0,
+//             'tipo_sugerencia' => 'sin_sugerencias',
+//             'mensaje' => 'No hay ubicaciones disponibles para la cantidad requerida'
+//         ]);
+
+//     } catch (\Exception $e) {
+//         Log::error('Error al sugerir ubicaciones: ' . $e->getMessage());
+//         return response()->json([
+//             'success' => false,
+//             'message' => 'Error al obtener sugerencias de ubicación'
+//         ], 500);
+//     }
+// }
+
+// // Método auxiliar para obtener ubicaciones vacías
+// private function obtenerUbicacionesVacias($cantidad)
+// {
+//     return DB::table('rack_ubicaciones as ru')
+//         ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+//         ->where('ru.articulo_id', null)
+//         ->where('ru.estado_ocupacion', 'vacio')
+//         ->where('r.estado', 'activo')
+//         ->where('ru.capacidad_maxima', '>=', $cantidad)
+//         ->select(
+//             'ru.idRackUbicacion',
+//             'ru.codigo',
+//             'ru.capacidad_maxima',
+//             'r.nombre as rack_nombre',
+//             'r.sede'
+//         )
+//         ->get()
+//         ->map(function($ubicacion) {
+//             return [
+//                 'id' => $ubicacion->idRackUbicacion,
+//                 'codigo' => $ubicacion->codigo,
+//                 'rack_nombre' => $ubicacion->rack_nombre,
+//                 'sede' => $ubicacion->sede,
+//                 'cantidad_actual' => 0,
+//                 'capacidad_maxima' => $ubicacion->capacidad_maxima,
+//                 'espacio_disponible' => $ubicacion->capacidad_maxima,
+//                 'tipo' => 'nueva',
+//                 'prioridad' => 2
+//             ];
+//         });
+// }
+public function sugerirUbicacionesMejorado($articuloId, $cantidad)
+{
+    try {
+        Log::info("=== SUGERENCIAS MEJORADAS DE UBICACIÓN ===");
+        Log::info("Artículo ID: {$articuloId}, Cantidad requerida: {$cantidad}");
+
+        // PRIMERO: Buscar ubicaciones existentes del artículo
+        $ubicacionesExistentes = DB::table('rack_ubicaciones as ru')
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('ru.articulo_id', $articuloId)
+            ->where('r.estado', 'activo')
+            ->select(
+                'ru.idRackUbicacion',
+                'ru.codigo',
+                'ru.cantidad_actual',
+                'ru.capacidad_maxima',
+                'r.nombre as rack_nombre',
+                'r.sede'
+            )
+            ->get()
+            ->map(function($ubicacion) use ($cantidad) { // CORRECCIÓN: agregar use ($cantidad)
+                $espacioDisponible = $ubicacion->capacidad_maxima - $ubicacion->cantidad_actual;
+                return [
+                    'id' => $ubicacion->idRackUbicacion,
+                    'codigo' => $ubicacion->codigo,
+                    'rack_nombre' => $ubicacion->rack_nombre,
+                    'sede' => $ubicacion->sede,
+                    'cantidad_actual' => $ubicacion->cantidad_actual,
+                    'capacidad_maxima' => $ubicacion->capacidad_maxima,
+                    'espacio_disponible' => $espacioDisponible,
+                    'tipo' => 'existente',
+                    'prioridad' => 1,
+                    'puede_almacenar_completo' => $espacioDisponible >= $cantidad
+                ];
+            });
+
+        Log::info("Ubicaciones existentes: " . $ubicacionesExistentes->count());
+
+        // CASO 1: Ubicaciones existentes pueden almacenar TODO
+        $puedenAlmacenarCompleto = $ubicacionesExistentes->where('puede_almacenar_completo', true);
+        
+        if ($puedenAlmacenarCompleto->isNotEmpty()) {
+            Log::info("CASO 1: Ubicaciones existentes pueden almacenar cantidad completa");
+            return $this->formatearRespuesta($puedenAlmacenarCompleto->values(), 'existentes_completas', 
+                "Ubicaciones existentes con espacio suficiente");
+        }
+
+        // CASO 2: Ubicaciones existentes tienen espacio INSUFICIENTE
+        $tienenEspacioInsuficiente = $ubicacionesExistentes->where('espacio_disponible', '>', 0)
+            ->where('puede_almacenar_completo', false);
+
+        if ($tienenEspacioInsuficiente->isNotEmpty()) {
+            Log::info("CASO 2: Ubicaciones existentes tienen espacio insuficiente");
+            
+            // Calcular cantidad faltante
+            $espacioTotalExistente = $tienenEspacioInsuficiente->sum('espacio_disponible');
+            $cantidadFaltante = $cantidad - $espacioTotalExistente;
+            
+            Log::info("Espacio total en existentes: {$espacioTotalExistente}, Cantidad faltante: {$cantidadFaltante}");
+
+            if ($cantidadFaltante > 0) {
+                // Buscar ubicaciones vacías para la cantidad faltante
+                $ubicacionesVacias = $this->obtenerUbicacionesVacias($cantidadFaltante);
+                
+                $sugerenciasCombinadas = $tienenEspacioInsuficiente
+                    ->merge($ubicacionesVacias)
+                    ->sortBy('prioridad')
+                    ->values();
+
+                return $this->formatearRespuesta($sugerenciasCombinadas, 'combinada_existentes_vacias',
+                    "Ubicaciones existentes (espacio insuficiente) + ubicaciones vacías para completar");
+            }
+        }
+
+        // CASO 3: No hay ubicaciones existentes - Buscar múltiples ubicaciones vacías
+        Log::info("CASO 3: Buscando ubicaciones vacías para cantidad completa: {$cantidad}");
+        $ubicacionesVaciasCompletas = $this->obtenerUbicacionesVacias($cantidad);
+
+        if ($ubicacionesVaciasCompletas->isNotEmpty()) {
+            return $this->formatearRespuesta($ubicacionesVaciasCompletas, 'solo_vacias_completas',
+                "Ubicaciones vacías disponibles para cantidad completa");
+        }
+
+        // CASO 4: Buscar múltiples ubicaciones vacías que sumen la cantidad requerida
+        Log::info("CASO 4: Buscando combinación de ubicaciones vacías");
+        $combinacionUbicaciones = $this->buscarCombinacionUbicaciones($cantidad);
+        
+        if ($combinacionUbicaciones->isNotEmpty()) {
+            return $this->formatearRespuesta($combinacionUbicaciones, 'combinada_vacias',
+                "Combinación de ubicaciones vacías que suman la cantidad requerida");
+        }
+
+        // CASO 5: Sin sugerencias
+        Log::info("CASO 5: No hay ubicaciones disponibles");
+        return $this->formatearRespuesta(collect([]), 'sin_sugerencias',
+            "No hay ubicaciones disponibles para la cantidad requerida");
+
+    } catch (\Exception $e) {
+        Log::error('Error en sugerirUbicacionesMejorado: ' . $e->getMessage());
+        Log::error('Stack trace: ' . $e->getTraceAsString());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener sugerencias de ubicación: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+// Método para buscar combinación de ubicaciones vacías
+private function buscarCombinacionUbicaciones($cantidadRequerida)
+{
+    try {
+        $ubicacionesVacias = DB::table('rack_ubicaciones as ru')
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('ru.articulo_id', null)
+            ->where('ru.estado_ocupacion', 'vacio')
+            ->where('r.estado', 'activo')
+            ->select(
+                'ru.idRackUbicacion',
+                'ru.codigo',
+                'ru.capacidad_maxima',
+                'r.nombre as rack_nombre',
+                'r.sede'
+            )
+            ->orderBy('ru.capacidad_maxima', 'desc')
+            ->get()
+            ->map(function($ubicacion) {
+                return [
+                    'id' => $ubicacion->idRackUbicacion,
+                    'codigo' => $ubicacion->codigo,
+                    'rack_nombre' => $ubicacion->rack_nombre,
+                    'sede' => $ubicacion->sede,
+                    'cantidad_actual' => 0,
+                    'capacidad_maxima' => $ubicacion->capacidad_maxima,
+                    'espacio_disponible' => $ubicacion->capacidad_maxima,
+                    'tipo' => 'nueva',
+                    'prioridad' => 2
+                ];
+            });
+
+        Log::info("Ubicaciones vacías encontradas para combinación: " . $ubicacionesVacias->count());
+
+        // Algoritmo simple: tomar las ubicaciones más grandes hasta cubrir la cantidad
+        $combinacion = collect([]);
+        $totalAcumulado = 0;
+        
+        foreach ($ubicacionesVacias as $ubicacion) {
+            if ($totalAcumulado >= $cantidadRequerida) break;
+            
+            $combinacion->push($ubicacion);
+            $totalAcumulado += $ubicacion['capacidad_maxima'];
+        }
+
+        Log::info("Combinación encontrada - Total acumulado: {$totalAcumulado}, Requerido: {$cantidadRequerida}");
+
+        // Solo retornar si la combinación cubre al menos el 80% de lo requerido
+        if ($totalAcumulado >= $cantidadRequerida * 0.8) {
+            return $combinacion;
+        }
+
+        return collect([]);
+
+    } catch (\Exception $e) {
+        Log::error('Error en buscarCombinacionUbicaciones: ' . $e->getMessage());
+        return collect([]);
+    }
+}
+
+// Método auxiliar para obtener ubicaciones vacías
+private function obtenerUbicacionesVacias($cantidad)
+{
+    try {
+        Log::info("Buscando ubicaciones vacías con capacidad >= {$cantidad}");
+        
+        $ubicaciones = DB::table('rack_ubicaciones as ru')
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('ru.articulo_id', null)
+            ->where('ru.estado_ocupacion', 'vacio')
+            ->where('r.estado', 'activo')
+            ->where('ru.capacidad_maxima', '>=', $cantidad)
+            ->select(
+                'ru.idRackUbicacion',
+                'ru.codigo',
+                'ru.capacidad_maxima',
+                'r.nombre as rack_nombre',
+                'r.sede'
+            )
+            ->get();
+
+        Log::info("Ubicaciones vacías encontradas: " . $ubicaciones->count());
+
+        return $ubicaciones->map(function($ubicacion) {
+            return [
+                'id' => $ubicacion->idRackUbicacion,
+                'codigo' => $ubicacion->codigo,
+                'rack_nombre' => $ubicacion->rack_nombre,
+                'sede' => $ubicacion->sede,
+                'cantidad_actual' => 0,
+                'capacidad_maxima' => $ubicacion->capacidad_maxima,
+                'espacio_disponible' => $ubicacion->capacidad_maxima,
+                'tipo' => 'nueva',
+                'prioridad' => 2
+            ];
+        });
+
+    } catch (\Exception $e) {
+        Log::error('ERROR en obtenerUbicacionesVacias: ' . $e->getMessage());
+        return collect([]);
+    }
+}
+
+// Método auxiliar para formatear respuesta
+private function formatearRespuesta($sugerencias, $tipo, $mensaje)
+{
+    return response()->json([
+        'success' => true,
+        'sugerencias' => $sugerencias,
+        'total_sugerencias' => $sugerencias->count(),
+        'tipo_sugerencia' => $tipo,
+        'mensaje' => $mensaje,
+        'debug' => [
+            'tipo_caso' => $tipo,
+            'cantidad_sugerencias' => $sugerencias->count()
+        ]
+    ]);
+}
 
 public function actualizarSolicitud(Request $request, $id)
 {

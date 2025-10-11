@@ -1466,3 +1466,5 @@ Route::post('/almacen/racks/crear', [UbicacionesVistaController::class, 'crearRa
 Route::get('/almacen/racks/listar', [UbicacionesVistaController::class, 'listarRacks']);
 Route::get('/almacen/racks/{id}/info', [UbicacionesVistaController::class, 'obtenerInfoRack']);
 Route::post('/almacen/ubicaciones/crear', [UbicacionesVistaController::class, 'crearUbicacion']);
+
+Route::get('/solicitud-ingreso/sugerir-ubicaciones/{articuloId}/{cantidad}', [SolicitudingresoController::class, 'sugerirUbicacionesMejorado']);
