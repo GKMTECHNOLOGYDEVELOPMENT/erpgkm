@@ -21,16 +21,16 @@
             background: transparent;
         }
     </style>
-     <div class="mb-6">
-         <ul class="flex space-x-2 rtl:space-x-reverse">
-             <li>
-                 <a href="" class="text-primary hover:underline">Almacen</a>
-             </li>
-             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                 <span>Lista de Solicitudes de Ingreso</span>
-             </li>
-         </ul>
-     </div>
+    <div class="mb-6">
+        <ul class="flex space-x-2 rtl:space-x-reverse">
+            <li>
+                <a href="" class="text-primary hover:underline">Almacen</a>
+            </li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <span>Lista de Solicitudes de Ingreso</span>
+            </li>
+        </ul>
+    </div>
     <div x-data="solicitudApp()" class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="mb-8">
@@ -263,41 +263,27 @@
                                             <div class="flex space-x-1 mt-2">
                                                 <button
                                                     @click="cambiarEstado(solicitud.idSolicitudIngreso, 'pendiente')"
-                                                    class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                                    :class="solicitud.estado === 'pendiente' ?
-                                                        'bg-yellow-100 text-yellow-800' :
-                                                        'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
+                                                    :disabled="botonIndividualDeshabilitado(solicitud, 'pendiente')"
+                                                    :class="getBotonIndividualClasses(solicitud, 'pendiente')">
                                                     Pendiente
                                                 </button>
                                                 <button
                                                     @click="cambiarEstado(solicitud.idSolicitudIngreso, 'recibido')"
-                                                    class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                                    :class="solicitud.estado === 'recibido' ? 'bg-green-100 text-green-800' :
-                                                        'bg-gray-100 text-gray-600 hover:bg-green-50'">
+                                                    :disabled="botonIndividualDeshabilitado(solicitud, 'recibido')"
+                                                    :class="getBotonIndividualClasses(solicitud, 'recibido')">
                                                     Recibido
                                                 </button>
-                                                <button @click="abrirModalUbicacion(solicitud)"
-                                                    class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                                    :class="solicitud.estado === 'ubicado' ? 'bg-purple-100 text-purple-800' :
-                                                        'bg-gray-100 text-gray-600 hover:bg-purple-50'">
+                                                <button
+                                                    @click="cambiarEstado(solicitud.idSolicitudIngreso, 'ubicado')"
+                                                    :disabled="botonIndividualDeshabilitado(solicitud, 'ubicado')"
+                                                    :class="getBotonIndividualClasses(solicitud, 'ubicado')">
                                                     Ubicar
                                                 </button>
-                                                <!-- Nuevo botón para Actualizar Solicitud - DESHABILITADO cuando esté ubicado -->
-                                                <button @click="abrirModalActualizar(solicitud)"
-                                                    :disabled="solicitud.estado === 'ubicado'"
-                                                    class="flex-1 px-2 py-1 text-xs rounded transition-colors"
-                                                    :class="solicitud.estado === 'ubicado' ?
-                                                        'bg-gray-100 text-gray-400 cursor-not-allowed' :
-                                                        solicitud.estado === 'actualizar' ?
-                                                        'bg-orange-100 text-orange-800' :
-                                                        'bg-gray-100 text-gray-600 hover:bg-orange-50'">
-                                                    <template x-if="solicitud.estado === 'ubicado'">
-                                                        <span
-                                                            title="No se puede actualizar una solicitud ya ubicada">Actualizar</span>
-                                                    </template>
-                                                    <template x-if="solicitud.estado !== 'ubicado'">
-                                                        <span>Actualizar</span>
-                                                    </template>
+                                                <button
+                                                    @click="abrirModalActualizar(solicitud)"
+                                                    :disabled="botonIndividualDeshabilitado(solicitud, 'actualizar')"
+                                                    :class="getBotonIndividualClasses(solicitud, 'actualizar')">
+                                                    Actualizar
                                                 </button>
                                             </div>
                                         </div>
@@ -311,44 +297,29 @@
                                     <span class="text-xs text-gray-500"
                                         x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
                                     <div class="flex space-x-2">
-                                        <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
-                                            class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                            :class="grupo.estado_general === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-gray-100 text-gray-600 hover:bg-yellow-50'">
+                                        <button
+                                            @click="cambiarEstadoGrupo(grupo, 'pendiente')"
+                                            :disabled="botonGrupalDeshabilitado(grupo, 'pendiente')"
+                                            :class="getBotonGrupalClasses(grupo, 'pendiente')">
                                             Todos Pendiente
                                         </button>
-                                        <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
-                                            class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                            :class="grupo.estado_general === 'recibido' ? 'bg-green-100 text-green-800' :
-                                                'bg-gray-100 text-gray-600 hover:bg-green-50'">
+                                        <button
+                                            @click="cambiarEstadoGrupo(grupo, 'recibido')"
+                                            :disabled="botonGrupalDeshabilitado(grupo, 'recibido')"
+                                            :class="getBotonGrupalClasses(grupo, 'recibido')">
                                             Todos Recibido
                                         </button>
-                                        <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
-                                            class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                            :class="grupo.estado_general === 'ubicado' ? 'bg-purple-100 text-purple-800' :
-                                                'bg-gray-100 text-gray-600 hover:bg-purple-50'">
+                                        <button
+                                            @click="cambiarEstadoGrupo(grupo, 'ubicado')"
+                                            :disabled="botonGrupalDeshabilitado(grupo, 'ubicado')"
+                                            :class="getBotonGrupalClasses(grupo, 'ubicado')">
                                             Todos Ubicado
                                         </button>
-                                        <!-- Nuevo botón grupal -->
-                                        <button @click="cambiarEstadoGrupo(grupo, 'actualizar')"
-                                            :disabled="grupo.estado_general === 'ubicado' || grupo.solicitudes.some(s => s
-                                                .estado === 'ubicado')"
-                                            class="px-3 py-1 text-xs rounded-lg transition-colors"
-                                            :class="(grupo.estado_general === 'ubicado' || grupo.solicitudes.some(s => s
-                                                .estado === 'ubicado')) ?
-                                            'bg-gray-100 text-gray-400 cursor-not-allowed' :
-                                            grupo.estado_general === 'actualizar' ?
-                                                'bg-orange-100 text-orange-800' :
-                                                'bg-gray-100 text-gray-600 hover:bg-orange-50'">
-                                            <template
-                                                x-if="grupo.estado_general === 'ubicado' || grupo.solicitudes.some(s => s.estado === 'ubicado')">
-                                                <span title="No se puede actualizar solicitudes ya ubicadas">Todos
-                                                    Actualizar</span>
-                                            </template>
-                                            <template
-                                                x-if="!(grupo.estado_general === 'ubicado' || grupo.solicitudes.some(s => s.estado === 'ubicado'))">
-                                                <span>Todos Actualizar</span>
-                                            </template>
+                                        <button
+                                            @click="cambiarEstadoGrupo(grupo, 'actualizar')"
+                                            :disabled="botonGrupalDeshabilitado(grupo, 'actualizar')"
+                                            :class="getBotonGrupalClasses(grupo, 'actualizar')">
+                                            Todos Actualizar
                                         </button>
                                     </div>
                                 </div>
@@ -465,26 +436,36 @@
                                 </h4>
                                 <template x-for="(ubicacion, index) in ubicacionesForm" :key="index">
                                     <div class="flex gap-3 items-start border border-gray-200 rounded-lg p-3">
+                                        <!-- En el modal de ubicación, modifica el select de ubicaciones -->
                                         <div class="flex-1">
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
+
+                                            <!-- Agrega este botón en el modal de ubicación -->
+                                            <button type="button" @click="buscarSugerencias()"
+                                                class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm">
+                                                <i class="fas fa-magic"></i>
+                                                Buscar Ubicaciones Sugeridas
+                                            </button>
+
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación *</label>
                                             <select x-model="ubicacion.ubicacion_id"
                                                 class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                                 <option value="">Seleccionar ubicación</option>
                                                 <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
                                                     <option :value="ubic.idUbicacion" x-text="ubic.nombre"
-                                                        :selected="ubicacion.ubicacion_id == ubic.idUbicacion || ubic.nombre ===
-                                                            ubicacion
-                                                            .nombre_ubicacion">
+                                                        :class="ubic.nombre.includes('Espacio:') ? 'text-green-600 font-medium' : ''">
                                                     </option>
                                                 </template>
                                             </select>
-                                            <template x-if="ubicacion.nombre_ubicacion && !ubicacion.ubicacion_id">
-                                                <p class="text-xs text-orange-600 mt-1">
-                                                    <i class="fas fa-exclamation-triangle mr-1"></i>
-                                                    Ubicación temporal: <span
-                                                        x-text="ubicacion.nombre_ubicacion"></span>
-                                                </p>
+
+                                            <!-- Mostrar sugerencias si no hay ubicación seleccionada -->
+                                            <template x-if="!ubicacion.ubicacion_id && ubicaciones.length > 0">
+                                                <div class="mt-2 p-2 bg-blue-50 rounded-lg">
+                                                    <p class="text-xs text-blue-700">
+                                                        <i class="fas fa-lightbulb mr-1"></i>
+                                                        <strong>Sugerencia:</strong> Hay <span x-text="ubicaciones.length"></span> ubicaciones disponibles para este artículo.
+                                                        Las opciones en <span class="text-green-600 font-medium">verde</span> son sugerencias automáticas.
+                                                    </p>
+                                                </div>
                                             </template>
                                         </div>
                                         <div class="w-32">
@@ -695,21 +676,6 @@
                                 </div>
                             </div>
 
-                            <!-- Información adicional (solo lectura) -->
-                            <!-- <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-200">
-                        <div>
-                            <p class="font-medium text-gray-700 text-sm">Fecha Origen:</p>
-                            <p class="text-sm" x-text="formatFecha(solicitudActualizar?.fecha_origen)"></p>
-                        </div>
-                        <div>
-                            <p class="font-medium text-gray-700 text-sm">Lote:</p>
-                            <p class="text-sm" x-text="solicitudActualizar?.lote || 'N/A'"></p>
-                        </div>
-                        <div>
-                            <p class="font-medium text-gray-700 text-sm">Fecha Vencimiento:</p>
-                            <p class="text-sm" x-text="solicitudActualizar?.fecha_vencimiento ? formatFecha(solicitudActualizar.fecha_vencimiento) : 'N/A'"></p>
-                        </div>
-                    </div> -->
                         </div>
 
                         <!-- Formulario de actualización SIMPLIFICADO -->
@@ -745,19 +711,6 @@
                                         class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"></textarea>
                                 </div>
                             </div>
-
-                            <!-- Mensaje informativo -->
-                            <!-- <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <div class="flex items-start">
-                            <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-2"></i>
-                            <div>
-                                <p class="text-sm text-blue-800 font-medium">Información importante</p>
-                                <p class="text-xs text-blue-600 mt-1">
-                                    Solo puedes modificar la cantidad y observaciones. Los demás campos son informativos y no se pueden modificar.
-                                </p>
-                            </div>
-                        </div>
-                    </div> -->
                         </div>
                     </div>
 
@@ -1109,39 +1062,34 @@
                     console.log('📝 Series form inicializado:', this.seriesForm);
                 },
 
-                abrirModalUbicacion(solicitud) {
+                // En tu JavaScript, modifica el método para procesar las sugerencias
+                async abrirModalUbicacion(solicitud) {
                     console.log('=== DEBUG abrirModalUbicacion ===');
                     console.log('Solicitud seleccionada:', solicitud);
-                    console.log('Ubicaciones existentes:', solicitud.ubicaciones);
-                    console.log('Series existentes:', solicitud.series);
-                    console.log('Campo ubicacion directo:', solicitud.ubicacion);
 
                     this.solicitudSeleccionada = solicitud;
 
-                    // Cargar ubicaciones existentes
-                    if (solicitud.ubicacion && solicitud.ubicacion !== 'null' && solicitud.ubicacion !== '' && solicitud
-                        .ubicacion !== 'undefined') {
-                        console.log('✅ Intentando parsear ubicacion directo:', solicitud.ubicacion);
+                    // Obtener sugerencias de ubicaciones
+                    try {
+                        const response = await axios.get(`/solicitud-ingreso/sugerir-ubicaciones/${solicitud.articulo_id}/${solicitud.cantidad}`);
 
-                        try {
-                            const ubicacionesParseadas = this.parsearUbicacionDesdeTexto(solicitud.ubicacion);
-                            console.log('Ubicaciones parseadas:', ubicacionesParseadas);
+                        if (response.data.success) {
+                            console.log('Sugerencias obtenidas:', response.data.sugerencias);
 
-                            if (ubicacionesParseadas.length > 0) {
-                                this.ubicacionesForm = ubicacionesParseadas;
-                                console.log('✅ Cargado desde campo directo');
-                            } else {
-                                throw new Error('No se pudieron parsear las ubicaciones');
+                            // Si hay sugerencias, cargarlas en el select de ubicaciones
+                            if (response.data.sugerencias.length > 0) {
+                                this.ubicaciones = response.data.sugerencias.map(sugerencia => ({
+                                    idUbicacion: sugerencia.id,
+                                    nombre: `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede}) - Espacio: ${sugerencia.espacio_disponible}`
+                                }));
                             }
-                        } catch (error) {
-                            console.log('❌ Error parseando, usando ubicaciones relacionadas o formulario vacío');
-                            this.cargarUbicacionesPorRelacion(solicitud);
                         }
-                    } else {
-                        this.cargarUbicacionesPorRelacion(solicitud);
+                    } catch (error) {
+                        console.error('Error al obtener sugerencias:', error);
                     }
 
-                    // Inicializar series después de cargar ubicaciones
+                    // Resto del código para cargar ubicaciones existentes...
+                    this.cargarUbicacionesPorRelacion(solicitud);
                     this.inicializarSeries();
 
                     console.log('Cantidad disponible inicial:', this.cantidadDisponible);
@@ -1151,7 +1099,6 @@
 
                     this.modalUbicacionAbierto = true;
                 },
-
                 parsearUbicacionDesdeTexto(textoUbicacion) {
                     console.log('Parseando texto:', textoUbicacion);
 
@@ -1348,36 +1295,109 @@
                     return 'Ubicación desconocida';
                 },
 
-                async cambiarEstado(id, nuevoEstado) {
-                    // Validar que no se pueda cambiar a "actualizar" si está ubicado
-                    if (nuevoEstado === 'actualizar') {
-                        let solicitudEncontrada = null;
-                        this.solicitudesAgrupadas.forEach(grupo => {
-                            const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
-                            if (solicitud) solicitudEncontrada = solicitud;
-                        });
+                // NUEVO: Método para verificar si un botón individual debe estar deshabilitado
+                botonIndividualDeshabilitado(solicitud, estado) {
+                    if (solicitud.estado === 'ubicado') {
+                        return true; // Si ya está ubicado, deshabilitar todos los botones
+                    }
+                    return false;
+                },
 
-                        if (solicitudEncontrada && solicitudEncontrada.estado === 'ubicado') {
-                            this.mostrarNotificacion('No se puede actualizar una solicitud ya ubicada', 'warning');
-                            return;
-                        }
+                // NUEVO: Método para verificar si un botón grupal debe estar deshabilitado
+                botonGrupalDeshabilitado(grupo, estado) {
+                    // Si TODOS los artículos están ubicados, deshabilitar todos los botones grupales
+                    if (grupo.estado_general === 'ubicado') {
+                        return true;
                     }
 
-                    if (nuevoEstado === 'ubicado') {
-                        // Buscar la solicitud y abrir modal de ubicación
-                        let solicitudEncontrada = null;
-                        this.solicitudesAgrupadas.forEach(grupo => {
-                            const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
-                            if (solicitud) solicitudEncontrada = solicitud;
-                        });
+                    // Para el botón "Todos Actualizar", verificar si ALGÚN artículo está ubicado
+                    if (estado === 'actualizar') {
+                        return grupo.solicitudes.some(s => s.estado === 'ubicado');
+                    }
 
-                        if (solicitudEncontrada) {
-                            this.abrirModalUbicacion(solicitudEncontrada);
-                        }
+                    return false;
+                },
+
+                // NUEVO: Método para obtener las clases de los botones individuales
+                getBotonIndividualClasses(solicitud, estado) {
+                    const baseClasses = 'flex-1 px-2 py-1 text-xs rounded transition-colors';
+
+                    if (this.botonIndividualDeshabilitado(solicitud, estado)) {
+                        return `${baseClasses} bg-gray-100 text-gray-400 cursor-not-allowed`;
+                    }
+
+                    if (solicitud.estado === estado) {
+                        const estadoClasses = {
+                            pendiente: 'bg-yellow-100 text-yellow-800',
+                            recibido: 'bg-green-100 text-green-800',
+                            ubicado: 'bg-purple-100 text-purple-800',
+                            actualizar: 'bg-orange-100 text-orange-800'
+                        };
+                        return `${baseClasses} ${estadoClasses[estado] || 'bg-gray-100 text-gray-800'}`;
+                    }
+
+                    const hoverClasses = {
+                        pendiente: 'bg-gray-100 text-gray-600 hover:bg-yellow-50',
+                        recibido: 'bg-gray-100 text-gray-600 hover:bg-green-50',
+                        ubicado: 'bg-gray-100 text-gray-600 hover:bg-purple-50',
+                        actualizar: 'bg-gray-100 text-gray-600 hover:bg-orange-50'
+                    };
+
+                    return `${baseClasses} ${hoverClasses[estado] || 'bg-gray-100 text-gray-600'}`;
+                },
+
+                // NUEVO: Método para obtener las clases de los botones grupales
+                getBotonGrupalClasses(grupo, estado) {
+                    const baseClasses = 'px-3 py-1 text-xs rounded-lg transition-colors';
+
+                    if (this.botonGrupalDeshabilitado(grupo, estado)) {
+                        return `${baseClasses} bg-gray-100 text-gray-400 cursor-not-allowed`;
+                    }
+
+                    if (grupo.estado_general === estado) {
+                        const estadoClasses = {
+                            pendiente: 'bg-yellow-100 text-yellow-800',
+                            recibido: 'bg-green-100 text-green-800',
+                            ubicado: 'bg-purple-100 text-purple-800',
+                            actualizar: 'bg-orange-100 text-orange-800'
+                        };
+                        return `${baseClasses} ${estadoClasses[estado] || 'bg-gray-100 text-gray-800'}`;
+                    }
+
+                    const hoverClasses = {
+                        pendiente: 'bg-gray-100 text-gray-600 hover:bg-yellow-50',
+                        recibido: 'bg-gray-100 text-gray-600 hover:bg-green-50',
+                        ubicado: 'bg-gray-100 text-gray-600 hover:bg-purple-50',
+                        actualizar: 'bg-gray-100 text-gray-600 hover:bg-orange-50'
+                    };
+
+                    return `${baseClasses} ${hoverClasses[estado] || 'bg-gray-100 text-gray-600'}`;
+                },
+
+                // MODIFICAR: El método cambiarEstado para incluir validación
+                async cambiarEstado(id, nuevoEstado) {
+                    // Buscar la solicitud
+                    let solicitudEncontrada = null;
+                    this.solicitudesAgrupadas.forEach(grupo => {
+                        const solicitud = grupo.solicitudes.find(s => s.idSolicitudIngreso === id);
+                        if (solicitud) solicitudEncontrada = solicitud;
+                    });
+
+                    if (!solicitudEncontrada) return;
+
+                    // Validar que no se pueda cambiar el estado si ya está ubicado
+                    if (solicitudEncontrada.estado === 'ubicado') {
+                        this.mostrarNotificacion('No se puede cambiar el estado de un artículo ya ubicado', 'warning');
                         return;
                     }
 
-                    // Resto del código existente...
+                    // Para el estado "ubicado", abrir el modal
+                    if (nuevoEstado === 'ubicado') {
+                        this.abrirModalUbicacion(solicitudEncontrada);
+                        return;
+                    }
+
+                    // Resto del código existente para cambiar estado...
                     try {
                         if (confirm('¿Estás seguro de cambiar el estado de este artículo?')) {
                             const response = await axios.post(`/solicitud-ingreso/${id}/cambiar-estado`, {
@@ -1402,13 +1422,31 @@
                     }
                 },
 
+                // MODIFICAR: El método cambiarEstadoGrupo para incluir validación
                 async cambiarEstadoGrupo(grupo, nuevoEstado) {
+                    // Validar que no se pueda cambiar el estado si TODOS están ubicados
+                    if (grupo.estado_general === 'ubicado') {
+                        this.mostrarNotificacion('No se puede cambiar el estado de artículos ya ubicados', 'warning');
+                        return;
+                    }
+
+                    // Para "Todos Actualizar", verificar que NINGUNO esté ubicado
+                    if (nuevoEstado === 'actualizar') {
+                        const hayUbicados = grupo.solicitudes.some(s => s.estado === 'ubicado');
+                        if (hayUbicados) {
+                            this.mostrarNotificacion('No se puede actualizar un grupo que contiene artículos ya ubicados', 'warning');
+                            return;
+                        }
+                    }
+
                     try {
                         if (confirm(
                                 `¿Estás seguro de cambiar el estado de todos los artículos (${grupo.solicitudes.length}) a ${nuevoEstado}?`
                             )) {
-                            // Cambiar estado de todas las solicitudes del grupo
-                            const promises = grupo.solicitudes.map(solicitud =>
+                            // Filtrar solo las solicitudes que no están ubicadas
+                            const solicitudesParaActualizar = grupo.solicitudes.filter(s => s.estado !== 'ubicado');
+
+                            const promises = solicitudesParaActualizar.map(solicitud =>
                                 axios.post(`/solicitud-ingreso/${solicitud.idSolicitudIngreso}/cambiar-estado`, {
                                     estado: nuevoEstado
                                 })
@@ -1417,20 +1455,46 @@
                             const results = await Promise.all(promises);
 
                             if (results.every(result => result.data.success)) {
-                                // Actualizar estados localmente
+                                // Actualizar estados localmente solo de las no ubicadas
                                 grupo.solicitudes.forEach(solicitud => {
-                                    solicitud.estado = nuevoEstado;
+                                    if (solicitud.estado !== 'ubicado') {
+                                        solicitud.estado = nuevoEstado;
+                                    }
                                 });
-                                grupo.estado_general = nuevoEstado;
+                                grupo.estado_general = this.calcularEstadoGeneral(grupo.solicitudes);
 
                                 this.mostrarNotificacion(
-                                    `Estado de ${grupo.solicitudes.length} artículos actualizado a ${nuevoEstado}`,
+                                    `Estado de ${solicitudesParaActualizar.length} artículos actualizado a ${nuevoEstado}`,
                                     'success');
                             }
                         }
                     } catch (error) {
                         console.error('Error al cambiar estado del grupo:', error);
                         this.mostrarNotificacion('Error al cambiar el estado del grupo', 'error');
+                    }
+                },
+                // Método para buscar sugerencias manualmente
+                async buscarSugerencias() {
+                    if (!this.solicitudSeleccionada) return;
+
+                    try {
+                        this.mostrarNotificacion('Buscando ubicaciones sugeridas...', 'info');
+
+                        const response = await axios.get(`/solicitud-ingreso/sugerir-ubicaciones/${this.solicitudSeleccionada.articulo_id}/${this.solicitudSeleccionada.cantidad}`);
+
+                        if (response.data.success && response.data.sugerencias.length > 0) {
+                            this.ubicaciones = response.data.sugerencias.map(sugerencia => ({
+                                idUbicacion: sugerencia.id,
+                                nombre: `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede}) - Espacio: ${sugerencia.espacio_disponible}`
+                            }));
+
+                            this.mostrarNotificacion(`Se encontraron ${response.data.sugerencias.length} ubicaciones sugeridas`, 'success');
+                        } else {
+                            this.mostrarNotificacion('No se encontraron ubicaciones sugeridas', 'warning');
+                        }
+                    } catch (error) {
+                        console.error('Error al buscar sugerencias:', error);
+                        this.mostrarNotificacion('Error al buscar sugerencias', 'error');
                     }
                 },
 
