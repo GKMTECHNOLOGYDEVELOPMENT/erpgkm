@@ -711,46 +711,46 @@
                 },
 
                 async crearRack() {
-    this.modalCrearRack.loading = true;
+                this.modalCrearRack.loading = true;
 
-    try {
-        const response = await fetch('/almacen/racks/crear', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(this.modalCrearRack.form)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            this.success(result.message || 'Rack creado exitosamente');
-            this.cerrarModalCrearRack();
-            this.cargarDatos(); // Recargar datos para actualizar stats
-            
-            // Mostrar información adicional si está disponible
-            if (result.data && result.data.total_ubicaciones) {
-                console.log(`Se crearon ${result.data.total_ubicaciones} ubicaciones automáticamente`);
-            }
-        } else {
-            this.error(result.message || 'Error al crear rack');
-            if (result.errors) {
-                Object.values(result.errors).forEach(errorArray => {
-                    errorArray.forEach(error => {
-                        this.error(error);
+                try {
+                    const response = await fetch('/almacen/racks/crear', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify(this.modalCrearRack.form)
                     });
-                });
-            }
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        this.error('Error de conexión al servidor');
-    } finally {
-        this.modalCrearRack.loading = false;
-    }
-},
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.success(result.message || 'Rack creado exitosamente');
+                        this.cerrarModalCrearRack();
+                        this.cargarDatos(); // Recargar datos para actualizar stats
+                        
+                        // Mostrar información adicional si está disponible
+                        if (result.data && result.data.total_ubicaciones) {
+                            console.log(`Se crearon ${result.data.total_ubicaciones} ubicaciones automáticamente`);
+                        }
+                    } else {
+                        this.error(result.message || 'Error al crear rack');
+                        if (result.errors) {
+                            Object.values(result.errors).forEach(errorArray => {
+                                errorArray.forEach(error => {
+                                    this.error(error);
+                                });
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.error('Error de conexión al servidor');
+                } finally {
+                    this.modalCrearRack.loading = false;
+                }
+            },
 
                 // MÉTODOS PARA CREAR UBICACIÓN
                 async abrirModalCrearUbicacion() {
@@ -871,34 +871,47 @@
                     alert('Error: ' + message); // Temporal
                 },
 
-                async cargarDatos() {
-                    this.loading = true;
+         async cargarDatos() {
+    this.loading = true;
 
-                    try {
-                        const params = new URLSearchParams({
-                            periodo: this.filtro.periodo,
-                            sede: this.filtro.sede,
-                            buscar: this.filtro.buscar
-                        });
+    try {
+        const params = new URLSearchParams({
+            periodo: this.filtro.periodo,
+            sede: this.filtro.sede,
+            buscar: this.filtro.buscar
+        });
 
-                        const response = await fetch(`/api/almacen/racks/datos?${params}`);
-                        const result = await response.json();
+        const response = await fetch(`/api/almacen/racks/datos?${params}`);
+        const result = await response.json();
 
-                        if (result.success) {
-                            this.dataOriginal = result.data;
-                            this.data = result.data;
-                            this.stats = result.stats;
-                            this.renderChart();
-                        } else {
-                            console.error('Error al cargar datos:', result);
-                            alert('Error al cargar los datos del almacén');
-                        }
-                    } catch (error) {
-                        console.error('Error en cargarDatos:', error);
-                        alert('Error de conexión al servidor');
-                    }
-                },
-
+        if (result.success) {
+            this.dataOriginal = result.data;
+            this.data = result.data;
+            this.stats = result.stats;
+            
+            // ✅ DEBUG: Verificar que los datos tengan sede
+            console.log('Datos cargados:', {
+                total: this.data.length,
+                tieneSede: this.data.every(d => d.hasOwnProperty('sede')),
+                sample: this.data.slice(0, 3).map(d => ({ 
+                    rack: d.rack, 
+                    sede: d.sede,
+                    x: d.x, 
+                    y: d.y 
+                }))
+            });
+            
+            this.renderChart();
+        } else {
+            console.error('Error al cargar datos:', result);
+            alert('Error al cargar los datos del almacén');
+        }
+    } catch (error) {
+        console.error('Error en cargarDatos:', error);
+        alert('Error de conexión al servidor');
+        this.loading = false;
+    }
+},
                 aplicarFiltros() {
                     this.cargarDatos();
                 },
@@ -949,176 +962,279 @@
                     return "🔴";
                 },
 
-                renderChart() {
-                    const heatmapEl = document.getElementById('heatmap');
-                    const cols = Math.max(...this.data.map(d => d.x)) + 1;
-                    const rows = Math.max(...this.data.map(d => d.y)) + 1;
+             renderChart() {
+    const heatmapEl = document.getElementById('heatmap');
+    
+    // ✅ VALIDAR QUE HAY DATOS
+    if (!this.data || this.data.length === 0) {
+        console.warn('No hay datos para renderizar el heatmap');
+        this.loading = false;
+        
+        // Mostrar mensaje en el contenedor
+        heatmapEl.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; color: #666;">
+                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <h3>No hay datos disponibles</h3>
+                <p>No se encontraron racks para mostrar</p>
+            </div>
+        `;
+        return;
+    }
 
-                    heatmapEl.style.width = (cols * 100) + 'px';
-                    heatmapEl.style.height = (rows * 50) + 'px';
+    try {
+        // Calcular dimensiones con validación
+        const xValues = this.data.map(d => d.x).filter(x => x !== undefined);
+        const yValues = this.data.map(d => d.y).filter(y => y !== undefined);
+        
+        if (xValues.length === 0 || yValues.length === 0) {
+            throw new Error('Datos de coordenadas inválidos');
+        }
 
-                    if (this.chart) {
-                        this.chart.dispose();
-                    }
+        const cols = Math.max(...xValues) + 1;
+        const rows = Math.max(...yValues) + 1;
 
-                    this.chart = echarts.init(heatmapEl);
-                    this.updateChart();
+        heatmapEl.style.width = (cols * 100) + 'px';
+        heatmapEl.style.height = (rows * 50) + 'px';
 
-                    window.addEventListener('resize', () => this.chart && this.chart.resize());
-                },
+        if (this.chart) {
+            this.chart.dispose();
+        }
 
-                baseOption() {
-                    const valorCampo = this.mode === 'heat' ? 'value' : 'ocupacion';
-                    const data = this.data.map(d => [
-                        d.x, d.y, d[valorCampo], d.ubicacion, d.piso,
-                        d.rack, d.producto, d.cantidad, d.categoria, d.capacidad
-                    ]);
+        this.chart = echarts.init(heatmapEl);
+        this.updateChart();
 
-                    return {
-                        tooltip: {
-                            trigger: 'item',
-                            backgroundColor: 'rgba(0,0,0,0.85)',
-                            borderColor: 'rgba(255,255,255,0.2)',
-                            textStyle: {
-                                color: '#fff',
-                                fontSize: 14
-                            },
-                            formatter: (p) => {
-                                const [x, y, val, ubicacion, piso, rack, producto, cantidad,
-                                    categoria, capacidad, letraRack, actividadBruta, maxActividad
-                                ] = p.data;
-                                return `
-                                    <div style="padding:12px; min-width: 280px;">
-                                        <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">🏢 Rack ${rack}</div>
-                                        <div style="margin-bottom:6px;">📍 Ubicación: <strong>${ubicacion}</strong></div>
-                                        <div style="margin-bottom:6px;">📦 Producto: <strong>${producto}</strong></div>
-                                        <div style="margin-bottom:6px;">📊 Cantidad: <strong>${cantidad} / ${capacidad}</strong></div>
-                                        <div style="margin-bottom:6px;">🏷️ Categoría: <strong>${categoria}</strong></div>
-                                        <div style="margin-bottom:6px;">🏗️ Piso: <strong>${piso}</strong></div>
-                                        <div style="margin-bottom:6px;">📈 Actividad: <strong>${val}%</strong></div>
-                                        <!-- DEBUG INFO -->
-                                        <div style="background:#f3f4f6; padding:8px; border-radius:4px; margin-top:8px;">
-                                            <div style="font-size:11px; color:#6b7280;">
-                                                <strong>Debug:</strong> Movimientos: ${actividadBruta || 0}, Máx: ${maxActividad || 1}
-                                            </div>
-                                        </div>
-                                        <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
-                                        <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
-                                    </div>
-                                `;
-                            }
-                        },
-                        grid: {
-                            left: 50,
-                            right: 20,
-                            top: 40,
-                            bottom: 40,
-                        },
-                        xAxis: {
-                            type: 'category',
-                            splitArea: {
-                                show: false
-                            },
-                            axisLabel: {
-                                show: false
-                            },
-                            axisLine: {
-                                show: false
-                            },
-                            axisTick: {
-                                show: false
-                            }
-                        },
-                        yAxis: {
-                            type: 'category',
-                            axisLabel: {
-                                show: true,
-                                color: '#64748b',
-                                fontSize: 14,
-                                margin: 15,
-                                formatter: (value) => {
-                                    // Encontrar la letra del rack para esta fila
-                                    const rackData = this.data.find(d => d.y == value);
-                                    return rackData ? rackData.letra : value;
-                                }
-                            },
-                            axisLine: {
-                                lineStyle: {
-                                    color: '#e2e8f0',
-                                    width: 1
-                                }
-                            },
-                            axisTick: {
-                                show: true,
-                                lineStyle: {
-                                    color: '#e2e8f0'
-                                }
-                            },
-                            inverse: true,
-                            data: [...new Set(this.data.map(d => d.y))],
-                        },
-                        visualMap: [],
-                        series: [{
-                            type: 'heatmap',
-                            data,
-                            progressive: 2000,
-                            label: {
-                                show: this.labels,
-                                formatter: (p) => {
-                                    const ubicacion = p.data[3]; // ubicación completa
-                                    // const letraRack = p.data[11]; // nueva propiedad 'letra'
-                                    return `${this.getIconByValue(p.data[2])} ${p.data[2]}%\n${ubicacion}`;
-                                },
-                                color: '#1e293b',
-                                fontSize: 10, // Reducido para caber más información
-                                fontWeight: "bold"
-                            },
-                            itemStyle: {
-                                color: p => this.getFillColorByFloor(p.data[4]),
-                                borderColor: '#fff',
-                                borderWidth: 2,
-                                borderType: 'solid'
-                            },
-                            emphasis: {
-                                itemStyle: {
-                                    borderColor: '#000',
-                                    borderWidth: 4,
-                                    shadowBlur: 12,
-                                    shadowColor: 'rgba(0, 0, 0, 0.3)'
-                                },
-                                label: {
-                                    show: true,
-                                    fontSize: 13,
-                                    fontWeight: 'bold'
-                                }
-                            }
-                        }]
-                    };
-                },
+        window.addEventListener('resize', () => this.chart && this.chart.resize());
+    } catch (error) {
+        console.error('Error al renderizar chart:', error);
+        this.loading = false;
+        
+        heatmapEl.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; color: #dc2626;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <h3>Error al cargar el mapa de calor</h3>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+},
 
-                updateChart() {
-                    if (!this.chart) return;
-
-                    this.loading = true;
-                    this.chart.setOption(this.baseOption(), true);
-
-                    this.chart.off('finished');
-                    this.chart.on('finished', () => {
-                        this.loading = false;
-                    });
-
-                    this.chart.off('click');
-                    this.chart.on('click', p => {
-                        const rack = p.data[5];
-                        window.location.href = `/almacen/ubicaciones/detalle/${rack}`;
-                    });
-
-                    setTimeout(() => {
-                        if (this.loading) {
-                            this.loading = false;
-                        }
-                    }, 3000);
+              baseOption() {
+    // ✅ VALIDAR QUE HAY DATOS ANTES DE PROCESAR
+    if (!this.data || this.data.length === 0) {
+        return {
+            title: {
+                text: 'No hay datos disponibles',
+                left: 'center',
+                top: 'center',
+                textStyle: {
+                    color: '#999',
+                    fontSize: 16
                 }
+            }
+        };
+    }
+
+    const valorCampo = this.mode === 'heat' ? 'value' : 'ocupacion';
+    
+    // ✅ AGREGAR SEDE AL ARRAY DE DATOS (índice 10)
+    const data = this.data.map(d => [
+        d.x || 0, 
+        d.y || 0, 
+        d[valorCampo] || 0, 
+        d.ubicacion || 'N/A',
+        d.piso || 1,
+        d.rack || 'N/A',
+        d.producto || 'Vacío',
+        d.cantidad || 0,
+        d.categoria || 'Sin categoría',
+        d.capacidad || 100,
+        d.sede || 'N/A'  // ✅ NUEVO: Sede en índice 10
+    ]);
+
+    // ✅ OBTENER DATOS DEL YAXIS CON VALIDACIÓN
+    const yAxisData = [...new Set(this.data.map(d => d.y))].filter(y => y !== undefined);
+
+    return {
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            borderColor: 'rgba(255,255,255,0.2)',
+            textStyle: {
+                color: '#fff',
+                fontSize: 14
+            },
+            formatter: (p) => {
+                try {
+                    // ✅ ACTUALIZAR ÍNDICES PARA INCLUIR SEDE
+                    const [x, y, val, ubicacion, piso, rack, producto, cantidad, categoria, capacidad, sede] = p.data;
+                    return `
+                        <div style="padding:12px; min-width: 280px;">
+                            <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">🏢 Rack ${rack} - ${sede}</div>
+                            <div style="margin-bottom:6px;">📍 Ubicación: <strong>${ubicacion}</strong></div>
+                            <div style="margin-bottom:6px;">📦 Producto: <strong>${producto}</strong></div>
+                            <div style="margin-bottom:6px;">📊 Cantidad: <strong>${cantidad} / ${capacidad}</strong></div>
+                            <div style="margin-bottom:6px;">🏷️ Categoría: <strong>${categoria}</strong></div>
+                            <div style="margin-bottom:6px;">🏗️ Piso: <strong>${piso}</strong></div>
+                            <div style="margin-bottom:6px;">📈 ${this.mode === 'heat' ? 'Actividad' : 'Ocupación'}: <strong>${val}%</strong></div>
+                            <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
+                            <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Error en tooltip:', error);
+                    return '<div>Error al cargar información</div>';
+                }
+            }
+        },
+        grid: {
+            left: 50,
+            right: 20,
+            top: 40,
+            bottom: 40,
+        },
+        xAxis: {
+            type: 'category',
+            splitArea: {
+                show: false
+            },
+            axisLabel: {
+                show: false
+            },
+            axisLine: {
+                show: false
+            },
+            axisTick: {
+                show: false
+            }
+        },
+        yAxis: {
+            type: 'category',
+            axisLabel: {
+                show: true,
+                color: '#64748b',
+                fontSize: 14,
+                margin: 15,
+                formatter: (value) => {
+                    try {
+                        // Encontrar la letra del rack para esta fila
+                        const rackData = this.data.find(d => d.y == value);
+                        return rackData ? (rackData.letra || value) : value;
+                    } catch (error) {
+                        return value;
+                    }
+                }
+            },
+            axisLine: {
+                lineStyle: {
+                    color: '#e2e8f0',
+                    width: 1
+                }
+            },
+            axisTick: {
+                show: true,
+                lineStyle: {
+                    color: '#e2e8f0'
+                }
+            },
+            inverse: true,
+            data: yAxisData, // ✅ Usar datos validados
+        },
+        visualMap: [],
+        series: [{
+            type: 'heatmap',
+            data: data,
+            progressive: 2000,
+            label: {
+                show: this.labels,
+                formatter: (p) => {
+                    try {
+                        const ubicacion = p.data[3] || 'N/A';
+                        const valor = p.data[2] || 0;
+                        return `${this.getIconByValue(valor)} ${valor}%\n${ubicacion}`;
+                    } catch (error) {
+                        return 'N/A';
+                    }
+                },
+                color: '#1e293b',
+                fontSize: 10,
+                fontWeight: "bold"
+            },
+            itemStyle: {
+                color: p => this.getFillColorByFloor(p.data[4] || 1),
+                borderColor: '#fff',
+                borderWidth: 2,
+                borderType: 'solid'
+            },
+            emphasis: {
+                itemStyle: {
+                    borderColor: '#000',
+                    borderWidth: 4,
+                    shadowBlur: 12,
+                    shadowColor: 'rgba(0, 0, 0, 0.3)'
+                },
+                label: {
+                    show: true,
+                    fontSize: 13,
+                    fontWeight: 'bold'
+                }
+            }
+        }]
+    };
+},
+
+      updateChart() {
+    if (!this.chart) {
+        console.warn('Chart no inicializado');
+        this.loading = false;
+        return;
+    }
+
+    try {
+        this.loading = true;
+        const option = this.baseOption();
+        this.chart.setOption(option, true);
+
+        this.chart.off('finished');
+        this.chart.on('finished', () => {
+            this.loading = false;
+        });
+
+        this.chart.off('click');
+        this.chart.on('click', (p) => {
+            try {
+                // ✅ NAVEGACIÓN CORRECTA - SEDE EN ÍNDICE 10
+                if (!p.data || p.data.length < 11) {
+                    console.warn('Datos incompletos en el click:', p.data);
+                    return;
+                }
+
+                const rack = p.data[5];    // índice 5: nombre del rack
+                const sede = p.data[10];   // índice 10: sede (NUEVO)
+                
+                console.log('Navegando a:', rack, 'en sede:', sede);
+                
+                if (rack && sede && rack !== 'N/A' && sede !== 'N/A') {
+                    // ✅ Redirigir con ambos parámetros
+                    window.location.href = `/almacen/ubicaciones/detalle/${rack}?sede=${encodeURIComponent(sede)}`;
+                } else {
+                    console.warn('Datos inválidos para navegación:', { rack, sede });
+                }
+            } catch (error) {
+                console.error('Error en click handler:', error);
+            }
+        });
+
+        setTimeout(() => {
+            if (this.loading) {
+                this.loading = false;
+            }
+        }, 3000);
+
+    } catch (error) {
+        console.error('Error al actualizar chart:', error);
+        this.loading = false;
+    }
+}
             }));
         });
     </script>

@@ -223,6 +223,7 @@ public function getDatosRacks(Request $request)
                 'categoria' => $categoria,
                 'piso' => $ub->piso,
                 'estado' => $ub->estado_ocupacion,
+                'sede' => $ub->sede, // ✅ ESTA LÍNEA ES CRÍTICA
                 'actividad_bruta' => $actividadPorRack[$ub->idRack] ?? 0, // Para debug
                 'max_actividad' => $maxActividad // Para debug
             ];
@@ -261,59 +262,27 @@ public function getDatosRacks(Request $request)
 }
 
 
-    // public function detalleRack($rack)
-    // {
-    //     // Obtener información del rack
-    //     $rackInfo = DB::table('racks')
-    //         ->where('nombre', $rack)
-    //         ->where('estado', 'activo')
-    //         ->first();
-
-    //     if (!$rackInfo) {
-    //         abort(404, 'Rack no encontrado');
-    //     }
-
-    //     // Obtener todas las ubicaciones del rack con sus artículos
-    //     $ubicaciones = DB::table('rack_ubicaciones as ru')
-    //         ->leftJoin('articulos as a', 'ru.articulo_id', '=', 'a.idArticulos')
-    //         ->select(
-    //             'ru.*',
-    //             'a.nombre as producto',
-    //             'a.codigo_barras',
-    //             'a.stock_total',
-    //             'a.foto'
-    //         )
-    //         ->where('ru.rack_id', $rackInfo->idRack)
-    //         ->orderBy('ru.nivel')
-    //         ->orderBy('ru.posicion')
-    //         ->get();
-
-    //     // Obtener movimientos recientes del rack (últimos 30 días)
-    //     $movimientos = DB::table('rack_movimientos as rm')
-    //         ->leftJoin('articulos as a', 'rm.articulo_id', '=', 'a.idArticulos')
-    //         ->leftJoin('users as u', 'rm.usuario_id', '=', 'u.id')
-    //         ->select(
-    //             'rm.*',
-    //             'a.nombre as producto',
-    //             'u.name as usuario'
-    //         )
-    //         ->where(function($query) use ($rackInfo) {
-    //             $query->where('rm.rack_origen_id', $rackInfo->idRack)
-    //                   ->orWhere('rm.rack_destino_id', $rackInfo->idRack);
-    //         })
-    //         ->where('rm.created_at', '>=', now()->subDays(30))
-    //         ->orderBy('rm.created_at', 'desc')
-    //         ->limit(50)
-    //         ->get();
-
-    //     return view('almacen.ubicaciones.detalle-rack', compact('rackInfo', 'ubicaciones', 'movimientos'));
-    // }
-
-
     
-   public function detalleRack($rack)
+public function detalleRack($rack)
 {
-    // Obtener datos del rack específico
+    // ✅ OBTENER LA SEDE DESDE EL QUERY PARAMETER
+    $sede = request('sede');
+    
+    if (!$sede) {
+        // Si no viene sede, intentar obtenerla del primer rack que coincida
+        $rackInfo = DB::table('racks')
+            ->where('nombre', $rack)
+            ->where('estado', 'activo')
+            ->first();
+            
+        if (!$rackInfo) {
+            return redirect()->route('almacen.vista')->with('error', 'Rack no encontrado');
+        }
+        
+        $sede = $rackInfo->sede;
+    }
+
+    // ✅ Obtener datos del rack específico CON FILTRO POR SEDE
     $rackData = DB::table('racks as r')
         ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
         ->leftJoin('articulos as a', 'ru.articulo_id', '=', 'a.idArticulos')
@@ -336,6 +305,7 @@ public function getDatosRacks(Request $request)
             'ru.updated_at'
         )
         ->where('r.nombre', $rack)
+        ->where('r.sede', $sede) // ✅ FILTRO CRÍTICO POR SEDE
         ->where('r.estado', 'activo')
         ->orderBy('ru.nivel', 'desc')
         ->orderBy('ru.posicion')
@@ -343,13 +313,13 @@ public function getDatosRacks(Request $request)
 
     // Si no existe el rack, redirigir
     if ($rackData->isEmpty()) {
-        return redirect()->route('almacen.vista')->with('error', 'Rack no encontrado');
+        return redirect()->route('almacen.vista')->with('error', "Rack '{$rack}' no encontrado en la sede '{$sede}'");
     }
 
     $rackId = $rackData->first()->idRack;
     $ubicacionesIds = $rackData->pluck('idRackUbicacion');
 
-    // Obtener historial de movimientos para este rack - CORREGIDO
+    // Obtener historial de movimientos para este rack (el resto del código igual)
     $historialPorUbicacion = [];
     
     if ($ubicacionesIds->isNotEmpty()) {
@@ -379,13 +349,13 @@ public function getDatosRacks(Request $request)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Procesar movimientos para cada ubicación
+        // Procesar movimientos para cada ubicación (código igual)
         foreach ($movimientos as $mov) {
             // Movimientos donde esta ubicación es ORIGEN
             if ($mov->ubicacion_origen_id && in_array($mov->ubicacion_origen_id, $ubicacionesIds->toArray())) {
                 $historialPorUbicacion[$mov->ubicacion_origen_id][] = [
                     'fecha' => $mov->created_at,
-                    'producto' => 'Producto Movido', // Podrías hacer join con articulos si necesitas el nombre
+                    'producto' => 'Producto Movido',
                     'cantidad' => $mov->cantidad,
                     'tipo' => $mov->tipo_movimiento,
                     'desde' => $mov->codigo_ubicacion_origen,
@@ -414,7 +384,6 @@ public function getDatosRacks(Request $request)
             // Movimientos a nivel de rack (sin ubicación específica)
             if ((!$mov->ubicacion_origen_id && !$mov->ubicacion_destino_id) && 
                 ($mov->rack_origen_id == $rackId || $mov->rack_destino_id == $rackId)) {
-                // Asignar a todas las ubicaciones del rack o a una especial
                 foreach ($ubicacionesIds as $ubicacionId) {
                     $historialPorUbicacion[$ubicacionId][] = [
                         'fecha' => $mov->created_at,
@@ -481,8 +450,9 @@ public function getDatosRacks(Request $request)
         ];
     }
 
-    // Obtener lista de todos los racks para navegación
+    // ✅ Obtener lista de todos los racks para navegación (FILTRADO POR SEDE)
     $todosRacks = DB::table('racks')
+        ->where('sede', $sede) // ✅ Solo racks de esta sede
         ->where('estado', 'activo')
         ->orderBy('nombre')
         ->pluck('nombre')
@@ -491,7 +461,8 @@ public function getDatosRacks(Request $request)
     return view('almacen.ubicaciones.detalle-rack', [
         'rack' => $rackEstructurado,
         'todosRacks' => $todosRacks,
-        'rackActual' => $rack
+        'rackActual' => $rack,
+        'sedeActual' => $sede
     ]);
 }
 
