@@ -208,51 +208,51 @@
                         <!-- Carrusel de ubicaciones -->
                         <div class="swiper mySwiper" :data-swiper-index="nivelIndex">
                             <div class="swiper-wrapper">
-                                <template x-for="(ubi, ubiIndex) in nivel.ubicaciones" :key="ubiIndex">
-                                    <div class="swiper-slide">
-                                        <div @click="manejarClickUbicacion(ubi)"
-                                            class="relative group h-32 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ease-in-out overflow-hidden hover:-translate-y-0.5 hover:scale-105 hover:shadow-xl"
-                                            :class="[
-                                                getEstadoClass(ubi.estado),
-                                                modoReubicacion.activo ? (esDestinoValido(ubi) ? 'animate-pulse-valid' : 'animate-pulse-invalid') : ''
-                                            ]"
-                                            :style="{
-                                                backgroundColor: ubi.estado === 'bajo' ? '#22c55e' : 
-                                                            ubi.estado === 'medio' ? '#facc15' : 
-                                                            ubi.estado === 'alto' ? '#f97316' : 
-                                                            ubi.estado === 'muy_alto' ? '#ef4444' : '#888ea8'
-                                            }">
+                               <!-- Dentro del carrusel de ubicaciones -->
+<template x-for="(ubi, ubiIndex) in nivel.ubicaciones" :key="ubiIndex">
+    <div class="swiper-slide">
+        <div @click="manejarClickUbicacion(ubi)"
+            class="relative group h-32 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ease-in-out overflow-hidden hover:-translate-y-0.5 hover:scale-105 hover:shadow-xl"
+            :class="[
+                getEstadoClass(ubi.estado),
+                modoReubicacion.activo ? (esDestinoValido(ubi) ? 'animate-pulse-valid' : 'animate-pulse-invalid') : ''
+            ]"
+            :style="{
+                backgroundColor: ubi.estado === 'bajo' ? '#22c55e' : 
+                            ubi.estado === 'medio' ? '#facc15' : 
+                            ubi.estado === 'alto' ? '#f97316' : 
+                            ubi.estado === 'muy_alto' ? '#ef4444' : '#888ea8'
+            }">
 
-                                            <div class="absolute inset-[-2px] rounded-inherit bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+            <div class="absolute inset-[-2px] rounded-inherit bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
 
-                                            <!-- Código -->
-                                            <div class="text-xs font-bold mb-2 opacity-90 text-white" x-text="ubi.codigo"></div>
+            <!-- Código -->
+            <div class="text-xs font-bold mb-2 opacity-90 text-white" x-text="ubi.codigo"></div>
 
-                                            <!-- Icono -->
-                                            <div class="text-2xl mb-2 text-white">
-                                                <template x-if="ubi.producto">
-                                                    <i class="fas fa-box"></i>
-                                                </template>
-                                                <template x-if="!ubi.producto">
-                                                    <i class="fas fa-cube text-white"></i>
-                                                </template>
-                                            </div>
+            <!-- Icono -->
+            <div class="text-2xl mb-2 text-white">
+                <template x-if="ubi.productos && ubi.productos.length > 0">
+                    <i class="fas fa-boxes"></i>
+                </template>
+                <template x-if="!ubi.productos || ubi.productos.length === 0">
+                    <i class="fas fa-cube text-white"></i>
+                </template>
+            </div>
 
-                                            <!-- Nombre -->
-                                            <template x-if="ubi.producto">
-                                                <div class="text-xs font-medium text-center px-2 truncate w-full text-white" x-text="ubi.producto"></div>
-                                            </template>
-                                            <template x-if="!ubi.producto">
-                                                <div class="text-xs text-white">Vacío</div>
-                                            </template>
-
-                                            <!-- Cantidad -->
-                                            <template x-if="ubi.producto">
-                                                <div class="text-xs text-white mt-1" x-text="ubi.cantidad + '/' + ubi.capacidad"></div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
+            <!-- Información de productos -->
+            <template x-if="ubi.productos && ubi.productos.length > 0">
+                <div class="text-center">
+                    <div class="text-xs font-medium text-white" 
+                         x-text="ubi.productos.length + ' producto' + (ubi.productos.length > 1 ? 's' : '')"></div>
+                    <div class="text-xs text-white mt-1" x-text="ubi.cantidad + '/' + ubi.capacidad"></div>
+                </div>
+            </template>
+            <template x-if="!ubi.productos || ubi.productos.length === 0">
+                <div class="text-xs text-white">Vacío</div>
+            </template>
+        </div>
+    </div>
+</template>
                             </div>
 
                             <!-- Controles -->
@@ -265,7 +265,7 @@
             </div>
         </main>
 
-      <!-- Modal -->
+     <!-- Modal -->
 <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="modal.open && '!block'">
     <div class="flex items-start justify-center min-h-screen px-4" @click.self="modal.open = false">
         <div x-show="modal.open" x-transition x-transition.duration.300
@@ -283,20 +283,40 @@
 
             <!-- Body -->
             <div class="p-5">
-                <!-- Si tiene producto -->
-                <template x-if="modal.ubi.producto">
+                <!-- ✅ AQUÍ VA EL NUEVO CÓDIGO - REEMPLAZA LA SECCIÓN ACTUAL -->
+                
+                <!-- Si tiene productos (NUEVA VERSIÓN) -->
+                <template x-if="modal.ubi.productos && modal.ubi.productos.length > 0">
                     <div class="space-y-4">
                         <div class="bg-green-50 p-4 rounded-xl border border-green-200">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-sm font-medium text-gray-600">Producto</label>
-                                    <p class="text-lg font-bold text-gray-800" x-text="modal.ubi.producto">
-                                    </p>
-                                </div>
-                                <div>
-                                    <label class="text-sm font-medium text-gray-600">Cantidad</label>
-                                    <p class="text-lg font-bold text-gray-800"
-                                        x-text="modal.ubi.cantidad + ' unidades'"></p>
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-semibold text-gray-800">Productos en esta ubicación</h3>
+                                <span class="bg-green-500 text-white px-2 py-1 rounded text-sm" 
+                                      x-text="modal.ubi.productos.length + ' producto' + (modal.ubi.productos.length > 1 ? 's' : '')"></span>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <template x-for="(producto, idx) in modal.ubi.productos" :key="idx">
+                                    <div class="flex justify-between items-center p-3 bg-white rounded-lg border">
+                                        <div>
+                                            <p class="font-medium text-gray-800" x-text="producto.nombre"></p>
+                                            <p class="text-sm text-gray-600" x-text="producto.categoria"></p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="font-bold text-gray-800" x-text="producto.cantidad + ' und.'"></span>
+                                            <button @click="iniciarReubicacionProducto(modal.ubi, producto)"
+                                                class="block mt-1 text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition">
+                                                Mover
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            
+                            <div class="mt-3 pt-3 border-t border-green-200">
+                                <div class="flex justify-between text-sm">
+                                    <span class="font-medium">Total:</span>
+                                    <span class="font-bold" x-text="modal.ubi.cantidad + '/' + modal.ubi.capacidad + ' unidades'"></span>
                                 </div>
                             </div>
                         </div>
@@ -307,10 +327,10 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-3 pt-4">
-                            <button @click="iniciarReubicacion(modal.ubi)"
+                            <button @click="iniciarReubicacionMultiple(modal.ubi)"
                                 class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                 <i class="fas fa-arrows-alt text-xs"></i>
-                                Reubicar
+                                Reubicar Todo
                             </button>
 
                             <button @click="iniciarReubicacionRack(modal.ubi)"
@@ -334,8 +354,8 @@
                     </div>
                 </template>
 
-                <!-- Si está vacío -->
-                <template x-if="!modal.ubi.producto">
+                <!-- Si está vacío (se mantiene igual) -->
+                <template x-if="!modal.ubi.productos || modal.ubi.productos.length === 0">
                     <div class="space-y-4">
                         <div class="text-center py-4">
                             <div
@@ -914,6 +934,44 @@
                         });
                     });
                 },
+
+                // En tu Alpine.js, agrega estos métodos:
+
+// Método para reubicar un producto específico
+iniciarReubicacionProducto(ubi, producto) {
+    this.modoReubicacion.activo = true;
+    this.modoReubicacion.origen = ubi.codigo;
+    this.modoReubicacion.producto = producto.nombre;
+    this.modoReubicacion.ubicacionOrigenId = ubi.id;
+    this.modoReubicacion.productoId = producto.id;
+    this.modoReubicacion.cantidad = producto.cantidad;
+    this.modoReubicacion.tipo = 'producto_especifico';
+    this.modal.open = false;
+    this.success('Modo reubicación activado para: ' + producto.nombre);
+},
+
+// Método para reubicar todos los productos
+iniciarReubicacionMultiple(ubi) {
+    this.modoReubicacion.activo = true;
+    this.modoReubicacion.origen = ubi.codigo;
+    this.modoReubicacion.producto = 'Todos los productos';
+    this.modoReubicacion.ubicacionOrigenId = ubi.id;
+    this.modoReubicacion.cantidad = ubi.cantidad;
+    this.modoReubicacion.tipo = 'todos_los_productos';
+    this.modal.open = false;
+    this.success('Modo reubicación activado para todos los productos');
+},
+
+// Actualizar el método esDestinoValido
+esDestinoValido(ubi) {
+    if (this.modoReubicacion.tipo === 'producto_especifico') {
+        // Para producto específico, verificar que no exista el mismo producto en el destino
+        const productoExistente = ubi.productos?.find(p => p.id === this.modoReubicacion.productoId);
+        return !productoExistente && ubi.codigo !== this.modoReubicacion.origen;
+    }
+    // Para reubicación completa, el destino debe estar vacío
+    return (!ubi.productos || ubi.productos.length === 0) && ubi.codigo !== this.modoReubicacion.origen;
+},
 
                 // Navegación entre racks
                 cambiarRack(direccion) {

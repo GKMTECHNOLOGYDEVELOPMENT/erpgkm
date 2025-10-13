@@ -265,11 +265,10 @@ public function getDatosRacks(Request $request)
     
 public function detalleRack($rack)
 {
-    // ✅ OBTENER LA SEDE DESDE EL QUERY PARAMETER
+    // Obtener la sede desde el query parameter
     $sede = request('sede');
     
     if (!$sede) {
-        // Si no viene sede, intentar obtenerla del primer rack que coincida
         $rackInfo = DB::table('racks')
             ->where('nombre', $rack)
             ->where('estado', 'activo')
@@ -282,10 +281,11 @@ public function detalleRack($rack)
         $sede = $rackInfo->sede;
     }
 
-    // ✅ Obtener datos del rack específico CON FILTRO POR SEDE
+    // Obtener datos del rack específico CON MÚLTIPLES ARTÍCULOS - CONSULTA CORREGIDA
     $rackData = DB::table('racks as r')
         ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
-        ->leftJoin('articulos as a', 'ru.articulo_id', '=', 'a.idArticulos')
+        ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
+        ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
         ->select(
             'r.idRack',
@@ -296,16 +296,17 @@ public function detalleRack($rack)
             'ru.codigo_unico',
             'ru.nivel',
             'ru.posicion',
-            'ru.cantidad_actual',
             'ru.capacidad_maxima',
             'ru.estado_ocupacion',
-            'a.nombre as producto',
             'a.idArticulos',
+            'a.nombre as producto',
             'ta.nombre as categoria',
+            'rua.cantidad',
             'ru.updated_at'
+            // Removemos el SUM aquí y lo calculamos después
         )
         ->where('r.nombre', $rack)
-        ->where('r.sede', $sede) // ✅ FILTRO CRÍTICO POR SEDE
+        ->where('r.sede', $sede)
         ->where('r.estado', 'activo')
         ->orderBy('ru.nivel', 'desc')
         ->orderBy('ru.posicion')
@@ -317,11 +318,10 @@ public function detalleRack($rack)
     }
 
     $rackId = $rackData->first()->idRack;
-    $ubicacionesIds = $rackData->pluck('idRackUbicacion');
+    $ubicacionesIds = $rackData->pluck('idRackUbicacion')->unique();
 
-    // Obtener historial de movimientos para este rack (el resto del código igual)
+    // Obtener historial de movimientos (código igual al anterior)
     $historialPorUbicacion = [];
-    
     if ($ubicacionesIds->isNotEmpty()) {
         $movimientos = DB::table('rack_movimientos')
             ->where(function($query) use ($ubicacionesIds) {
@@ -349,7 +349,7 @@ public function detalleRack($rack)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Procesar movimientos para cada ubicación (código igual)
+        // Procesar movimientos para cada ubicación
         foreach ($movimientos as $mov) {
             // Movimientos donde esta ubicación es ORIGEN
             if ($mov->ubicacion_origen_id && in_array($mov->ubicacion_origen_id, $ubicacionesIds->toArray())) {
@@ -401,46 +401,64 @@ public function detalleRack($rack)
         }
     }
 
-    // Estructurar datos para la vista
+    // Estructurar datos para la vista CON MÚLTIPLES ARTÍCULOS
     $rackEstructurado = [
         'nombre' => $rackData->first()->rack_nombre,
         'sede' => $rackData->first()->sede,
         'niveles' => []
     ];
 
-    // Agrupar por niveles
+    // Agrupar por niveles y ubicaciones
     $niveles = $rackData->groupBy('nivel');
     
     foreach ($niveles as $nivelNum => $ubicacionesNivel) {
         $ubicacionesEstructuradas = [];
         
-        foreach ($ubicacionesNivel as $ubicacion) {
+        // Agrupar por ubicación
+        $ubicacionesAgrupadas = $ubicacionesNivel->groupBy('idRackUbicacion');
+        
+        foreach ($ubicacionesAgrupadas as $ubicacionId => $articulos) {
+            $primerArticulo = $articulos->first();
+            
+            // Calcular cantidad total y productos
+            $cantidadTotal = $articulos->sum('cantidad');
+            $productos = $articulos->where('producto')->map(function($art) {
+                return [
+                    'id' => $art->idArticulos,
+                    'nombre' => $art->producto,
+                    'cantidad' => $art->cantidad,
+                    'categoria' => $art->categoria
+                ];
+            })->values();
+            
             // Determinar estado basado en porcentaje de ocupación
             $porcentajeOcupacion = 0;
-            if ($ubicacion->capacidad_maxima > 0) {
-                $porcentajeOcupacion = ($ubicacion->cantidad_actual / $ubicacion->capacidad_maxima) * 100;
+            if ($primerArticulo->capacidad_maxima > 0) {
+                $porcentajeOcupacion = ($cantidadTotal / $primerArticulo->capacidad_maxima) * 100;
             }
             
-            // Usar el estado de la base de datos o calcularlo
-            $estado = $ubicacion->estado_ocupacion;
-            if ($estado == 'vacio' && $porcentajeOcupacion > 0) {
-                // Recalcular si hay inconsistencia
+            // Calcular estado
+            $estado = $primerArticulo->estado_ocupacion;
+            if ($estado == 'vacio' && $cantidadTotal > 0) {
                 if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
                 elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
                 elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
                 elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
+            } elseif ($cantidadTotal == 0) {
+                $estado = 'vacio';
             }
             
             $ubicacionesEstructuradas[] = [
-                'id' => $ubicacion->idRackUbicacion,
-                'codigo' => $ubicacion->codigo_unico ?? $ubicacion->codigo,
-                'producto' => $ubicacion->producto,
-                'cantidad' => $ubicacion->cantidad_actual,
-                'capacidad' => $ubicacion->capacidad_maxima,
+                'id' => $primerArticulo->idRackUbicacion,
+                'codigo' => $primerArticulo->codigo_unico ?? $primerArticulo->codigo,
+                'productos' => $productos->toArray(),
+                'producto' => $productos->isNotEmpty() ? $productos->first()['nombre'] : null, // Para compatibilidad
+                'cantidad' => $cantidadTotal, // Cantidad total
+                'capacidad' => $primerArticulo->capacidad_maxima,
                 'estado' => $estado,
-                'categoria' => $ubicacion->categoria,
-                'fecha' => $ubicacion->updated_at,
-                'historial' => $historialPorUbicacion[$ubicacion->idRackUbicacion] ?? []
+                'categoria' => $productos->isNotEmpty() ? $productos->first()['categoria'] : null,
+                'fecha' => $primerArticulo->updated_at,
+                'historial' => $historialPorUbicacion[$primerArticulo->idRackUbicacion] ?? []
             ];
         }
         
@@ -450,9 +468,9 @@ public function detalleRack($rack)
         ];
     }
 
-    // ✅ Obtener lista de todos los racks para navegación (FILTRADO POR SEDE)
+    // Obtener lista de todos los racks para navegación
     $todosRacks = DB::table('racks')
-        ->where('sede', $sede) // ✅ Solo racks de esta sede
+        ->where('sede', $sede)
         ->where('estado', 'activo')
         ->orderBy('nombre')
         ->pluck('nombre')
@@ -465,7 +483,6 @@ public function detalleRack($rack)
         'sedeActual' => $sede
     ]);
 }
-
 
 
 public function iniciarReubicacion(Request $request)
@@ -771,6 +788,7 @@ public function listarProductos()
         ], 500);
     }
 }
+
 public function agregarProducto(Request $request)
 {
     DB::beginTransaction();
@@ -798,19 +816,16 @@ public function agregarProducto(Request $request)
             ->where('ru.idRackUbicacion', $request->ubicacion_id)
             ->first();
 
-        // Verificar que la ubicación esté vacía
-        if ($ubicacion->articulo_id !== null || $ubicacion->cantidad_actual > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'La ubicación ya está ocupada'
-            ], 422);
-        }
+        // Calcular cantidad total actual en la ubicación (SOLO de rack_ubicacion_articulos)
+        $cantidadTotalActual = DB::table('rack_ubicacion_articulos')
+            ->where('rack_ubicacion_id', $request->ubicacion_id)
+            ->sum('cantidad');
 
-        // Verificar que la cantidad no supere la capacidad
-        if ($request->cantidad > $ubicacion->capacidad_maxima) {
+        // Verificar que la nueva cantidad no supere la capacidad
+        if (($cantidadTotalActual + $request->cantidad) > $ubicacion->capacidad_maxima) {
             return response()->json([
                 'success' => false,
-                'message' => 'La cantidad supera la capacidad máxima de la ubicación'
+                'message' => 'La cantidad supera la capacidad máxima de la ubicación. Espacio disponible: ' . ($ubicacion->capacidad_maxima - $cantidadTotalActual) . ' unidades'
             ], 422);
         }
 
@@ -819,13 +834,40 @@ public function agregarProducto(Request $request)
             ->where('idArticulos', $request->articulo_id)
             ->first();
 
-        // Actualizar la ubicación
+        // Verificar si ya existe el artículo en la ubicación (SOLO en rack_ubicacion_articulos)
+        $articuloExistente = DB::table('rack_ubicacion_articulos')
+            ->where('rack_ubicacion_id', $request->ubicacion_id)
+            ->where('articulo_id', $request->articulo_id)
+            ->first();
+
+        if ($articuloExistente) {
+            // Actualizar cantidad existente en rack_ubicacion_articulos
+            DB::table('rack_ubicacion_articulos')
+                ->where('rack_ubicacion_id', $request->ubicacion_id)
+                ->where('articulo_id', $request->articulo_id)
+                ->update([
+                    'cantidad' => $articuloExistente->cantidad + $request->cantidad,
+                    'updated_at' => now()
+                ]);
+        } else {
+            // Insertar nuevo registro SOLO en rack_ubicacion_articulos
+            DB::table('rack_ubicacion_articulos')->insert([
+                'rack_ubicacion_id' => $request->ubicacion_id,
+                'articulo_id' => $request->articulo_id,
+                'cantidad' => $request->cantidad,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+        // Actualizar estado de ocupación de la ubicación (SOLO en rack_ubicaciones)
+        $nuevaCantidadTotal = $cantidadTotalActual + $request->cantidad;
+        $nuevoEstado = $this->calcularEstadoOcupacion($nuevaCantidadTotal, $ubicacion->capacidad_maxima);
+        
         DB::table('rack_ubicaciones')
             ->where('idRackUbicacion', $request->ubicacion_id)
             ->update([
-                'articulo_id' => $request->articulo_id,
-                'cantidad_actual' => $request->cantidad,
-                'estado_ocupacion' => $this->calcularEstadoOcupacion($request->cantidad, $ubicacion->capacidad_maxima),
+                'estado_ocupacion' => $nuevoEstado,
                 'updated_at' => now()
             ]);
 
@@ -850,9 +892,12 @@ public function agregarProducto(Request $request)
             'message' => 'Producto agregado exitosamente',
             'data' => [
                 'producto' => [
+                    'id' => $producto->idArticulos,
                     'nombre' => $producto->nombre,
                     'cantidad' => $request->cantidad
-                ]
+                ],
+                'espacio_disponible' => $ubicacion->capacidad_maxima - $nuevaCantidadTotal,
+                'cantidad_total_ubicacion' => $nuevaCantidadTotal
             ]
         ]);
 
@@ -861,7 +906,7 @@ public function agregarProducto(Request $request)
         Log::error('Error al agregar producto: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => 'Error interno del servidor'
+            'message' => 'Error interno del servidor: ' . $e->getMessage()
         ], 500);
     }
 }
@@ -890,34 +935,46 @@ public function vaciarUbicacion(Request $request)
             ->where('ru.idRackUbicacion', $request->ubicacion_id)
             ->first();
 
-        // Verificar que la ubicación tenga producto
-        if (!$ubicacion->articulo_id || $ubicacion->cantidad_actual <= 0) {
+        // Obtener todos los productos de esta ubicación
+        $productosEnUbicacion = DB::table('rack_ubicacion_articulos as rua')
+            ->join('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
+            ->where('rua.rack_ubicacion_id', $request->ubicacion_id)
+            ->select('a.nombre as producto', 'rua.cantidad', 'a.idArticulos')
+            ->get();
+
+        // Verificar que la ubicación tenga productos
+        if ($productosEnUbicacion->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'La ubicación ya está vacía'
             ], 422);
         }
 
-        // Registrar movimiento de salida
-        DB::table('rack_movimientos')->insert([
-            'articulo_id' => $ubicacion->articulo_id,
-            'ubicacion_origen_id' => $request->ubicacion_id,
-            'rack_origen_id' => $ubicacion->rack_id,
-            'cantidad' => $ubicacion->cantidad_actual,
-            'tipo_movimiento' => 'salida',
-            'observaciones' => 'Ubicación vaciada manualmente',
-            'codigo_ubicacion_origen' => $ubicacion->codigo_unico ?? $ubicacion->codigo,
-            'nombre_rack_origen' => $ubicacion->rack_nombre,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        // Registrar movimientos de salida para cada producto
+        foreach ($productosEnUbicacion as $producto) {
+            DB::table('rack_movimientos')->insert([
+                'articulo_id' => $producto->idArticulos,
+                'ubicacion_origen_id' => $request->ubicacion_id,
+                'rack_origen_id' => $ubicacion->rack_id,
+                'cantidad' => $producto->cantidad,
+                'tipo_movimiento' => 'salida',
+                'observaciones' => 'Ubicación vaciada manualmente - ' . $producto->producto,
+                'codigo_ubicacion_origen' => $ubicacion->codigo_unico ?? $ubicacion->codigo,
+                'nombre_rack_origen' => $ubicacion->rack_nombre,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
 
-        // Vaciar la ubicación
+        // Vaciar TODOS los productos de la ubicación en rack_ubicacion_articulos
+        DB::table('rack_ubicacion_articulos')
+            ->where('rack_ubicacion_id', $request->ubicacion_id)
+            ->delete();
+
+        // Actualizar la ubicación a estado vacío
         DB::table('rack_ubicaciones')
             ->where('idRackUbicacion', $request->ubicacion_id)
             ->update([
-                'articulo_id' => null,
-                'cantidad_actual' => 0,
                 'estado_ocupacion' => 'vacio',
                 'updated_at' => now()
             ]);
@@ -926,7 +983,11 @@ public function vaciarUbicacion(Request $request)
 
         return response()->json([
             'success' => true,
-            'message' => 'Ubicación vaciada exitosamente'
+            'message' => 'Ubicación vaciada exitosamente. Se removieron ' . $productosEnUbicacion->count() . ' productos.',
+            'data' => [
+                'productos_removidos' => $productosEnUbicacion->count(),
+                'productos' => $productosEnUbicacion->pluck('producto')
+            ]
         ]);
 
     } catch (\Exception $e) {
