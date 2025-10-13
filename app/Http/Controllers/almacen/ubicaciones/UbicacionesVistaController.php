@@ -10,19 +10,17 @@ use Illuminate\Support\Facades\Validator;
 
 class UbicacionesVistaController extends Controller
 {
-    public function vistaAlmacen()
-    {
-        // Obtener las sedes disponibles
-        $sedes = DB::table('racks')
-            ->select('sede')
-            ->distinct()
-            ->where('estado', 'activo')
-            ->orderBy('sede')
-            ->pluck('sede');
+public function vistaAlmacen()
+{
+    // Obtener las sedes disponibles desde la tabla sucursal
+    $sedes = DB::table('sucursal')
+        ->select('nombre')
+        ->where('estado', 1) // Asumiendo que 1 = activo
+        ->orderBy('nombre')
+        ->pluck('nombre');
 
-        return view('almacen.ubicaciones.vista-almacen', compact('sedes'));
-    }
-
+    return view('almacen.ubicaciones.vista-almacen', compact('sedes'));
+}
 
 
 
@@ -1035,18 +1033,32 @@ public function listarUbicacionesVacias($rackId)
 }
 
 
-
-
 public function crearRack(Request $request)
 {
     DB::beginTransaction();
     
     try {
         $validator = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:10|unique:racks,nombre',
-            'sede' => 'required|string|max:50',
-            'filas' => 'required|integer|min:1|max:10',
-            'columnas' => 'required|integer|min:1|max:20',
+            'nombre' => [
+                'required',
+                'string',
+                'max:10',
+                function ($attribute, $value, $fail) use ($request) {
+                    // Verificar que el nombre sea único en la misma sede
+                    $existe = DB::table('racks')
+                        ->where('nombre', $value)
+                        ->where('sede', $request->sede) // Seguimos usando 'sede'
+                        ->exists();
+                    
+                    if ($existe) {
+                        $fail("El nombre '$value' ya está en uso en la sede {$request->sede}.");
+                    }
+                }
+            ],
+            'sede' => 'required|string|max:50|exists:sucursal,nombre', // Validamos que exista en sucursal
+            'filas' => 'required|integer|min:1|max:12',
+            'columnas' => 'required|integer|min:1|max:24',
+            'capacidad_maxima' => 'required|integer|min:1|max:1000',
             'estado' => 'required|in:activo,inactivo'
         ]);
 
@@ -1061,7 +1073,7 @@ public function crearRack(Request $request)
         // Crear el rack
         $rackId = DB::table('racks')->insertGetId([
             'nombre' => $request->nombre,
-            'sede' => $request->sede,
+            'sede' => $request->sede, // Guardamos el nombre de la sucursal
             'filas' => $request->filas,
             'columnas' => $request->columnas,
             'estado' => $request->estado,
@@ -1069,12 +1081,22 @@ public function crearRack(Request $request)
             'updated_at' => now()
         ]);
 
+        // Obtener el rack creado para generar el código único
+        $rack = DB::table('racks')->where('idRack', $rackId)->first();
+
+        // Generar ubicaciones automáticamente con capacidad personalizada
+        $capacidadMaxima = $request->input('capacidad_maxima', 100);
+        $this->generarUbicacionesAutomaticas($rack, $capacidadMaxima);
+
         DB::commit();
 
         return response()->json([
             'success' => true,
-            'message' => 'Rack creado exitosamente',
-            'data' => ['id' => $rackId]
+            'message' => 'Rack creado exitosamente con ' . ($request->filas * $request->columnas) . ' ubicaciones generadas',
+            'data' => [
+                'id' => $rackId,
+                'total_ubicaciones' => $request->filas * $request->columnas
+            ]
         ]);
 
     } catch (\Exception $e) {
@@ -1087,6 +1109,179 @@ public function crearRack(Request $request)
     }
 }
 
+/**
+ * Genera ubicaciones automáticamente para un rack
+ */
+private function generarUbicacionesAutomaticas($rack, $capacidadMaxima = 100)
+{
+    $ubicaciones = [];
+    $now = now();
+
+    // Generar ubicaciones basadas en filas y columnas
+    for ($nivel = 1; $nivel <= $rack->filas; $nivel++) {
+        for ($posicion = 1; $posicion <= $rack->columnas; $posicion++) {
+            // Generar código automático (ej: A1-01, A1-02, etc.)
+            $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
+            $codigoUnico = $rack->nombre . '-' . $codigo;
+
+            $ubicaciones[] = [
+                'rack_id' => $rack->idRack,
+                'codigo' => $codigo,
+                'codigo_unico' => $codigoUnico,
+                'nivel' => $nivel,
+                'posicion' => $posicion,
+                'estado_ocupacion' => 'vacio',
+                'capacidad_maxima' => $capacidadMaxima,
+                'articulo_id' => null,
+                'cantidad_actual' => 0,
+                'created_at' => $now,
+                'updated_at' => $now
+            ];
+        }
+    }
+
+    // Insertar todas las ubicaciones en lote
+    if (!empty($ubicaciones)) {
+        DB::table('rack_ubicaciones')->insert($ubicaciones);
+    }
+
+    Log::debug('Ubicaciones generadas automáticamente', [
+        'rack_id' => $rack->idRack,
+        'rack_nombre' => $rack->nombre,
+        'total_ubicaciones' => count($ubicaciones),
+        'filas' => $rack->filas,
+        'columnas' => $rack->columnas,
+        'capacidad_maxima' => $capacidadMaxima
+    ]);
+}
+
+/**
+ * Genera el código de ubicación basado en el formato existente
+ */
+private function generarCodigoUbicacion($nombreRack, $nivel, $posicion)
+{
+    // Formato: {LetraRack}{Nivel}-{Posición con 2 dígitos}
+    // Ejemplo: A1-01, A1-02, B2-01, etc.
+    return $nombreRack . $nivel . '-' . str_pad($posicion, 2, '0', STR_PAD_LEFT);
+}
+
+public function sugerirSiguienteLetra(Request $request)
+{
+    try {
+        $validator = Validator::make($request->all(), [
+            'sede' => 'required|string|max:50'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sede requerida'
+            ], 422);
+        }
+
+        $sede = $request->sede;
+
+        // Obtener todas las letras usadas en esta sede específica
+        $letrasUsadas = DB::table('racks')
+            ->where('sede', $sede) // Filtramos por el nombre de la sede
+            ->where('estado', 'activo')
+            ->pluck('nombre')
+            ->map(function($nombre) {
+                // Extraer solo la letra (asumiendo que el nombre es una sola letra)
+                $letra = strtoupper(trim($nombre));
+                // Si es una sola letra A-Z, devolverla, sino null
+                return preg_match('/^[A-Z]$/', $letra) ? $letra : null;
+            })
+            ->filter() // Remover nulls
+            ->unique()
+            ->sort()
+            ->values();
+
+        Log::debug('Letras usadas en sede ' . $sede, ['letras' => $letrasUsadas->toArray()]);
+
+        // Definir el abecedario completo
+        $abecedario = range('A', 'Z');
+        
+        // Encontrar la primera letra disponible
+        $siguienteLetra = null;
+        foreach ($abecedario as $letra) {
+            if (!$letrasUsadas->contains($letra)) {
+                $siguienteLetra = $letra;
+                break;
+            }
+        }
+
+        // Si todas las letras están usadas, sugerir patrón con números
+        if (!$siguienteLetra) {
+            // Buscar el último rack numérico en esta sede
+            $racksConNumeros = DB::table('racks')
+                ->where('sede', $sede)
+                ->where('estado', 'activo')
+                ->where('nombre', 'regexp', '^[A-Z][0-9]+$')
+                ->pluck('nombre')
+                ->sort()
+                ->values();
+
+            if ($racksConNumeros->isNotEmpty()) {
+                $ultimoRack = $racksConNumeros->last();
+                // Extraer número y aumentar
+                preg_match('/([A-Z])(\d+)/', $ultimoRack, $matches);
+                if (count($matches) === 3) {
+                    $letraBase = $matches[1];
+                    $numero = (int)$matches[2] + 1;
+                    $siguienteLetra = $letraBase . $numero;
+                } else {
+                    $siguienteLetra = 'A1';
+                }
+            } else {
+                // Si no hay racks con números, empezar con A1
+                $siguienteLetra = 'A1';
+            }
+        }
+
+        // Si aún no hay sugerencia, usar doble letra (AA, AB, etc.)
+        if (!$siguienteLetra) {
+            // Buscar si ya hay racks con doble letra en esta sede
+            $racksDobleLetra = DB::table('racks')
+                ->where('sede', $sede)
+                ->where('estado', 'activo')
+                ->where('nombre', 'regexp', '^[A-Z]{2}$')
+                ->pluck('nombre')
+                ->sort()
+                ->values();
+
+            if ($racksDobleLetra->isNotEmpty()) {
+                $ultimaDobleLetra = $racksDobleLetra->last();
+                // Incrementar la doble letra (AA -> AB, AB -> AC, etc.)
+                $siguienteLetra = ++$ultimaDobleLetra;
+            } else {
+                $siguienteLetra = 'AA';
+            }
+        }
+
+        Log::debug('Siguiente letra sugerida', [
+            'sede' => $sede,
+            'sugerencia' => $siguienteLetra,
+            'letras_usadas' => $letrasUsadas->toArray()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'sugerencia' => $siguienteLetra,
+                'letras_usadas' => $letrasUsadas->toArray(),
+                'abecedario_completo' => $abecedario
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al sugerir siguiente letra: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al generar sugerencia: ' . $e->getMessage()
+        ], 500);
+    }
+}
 public function listarRacks()
 {
     try {

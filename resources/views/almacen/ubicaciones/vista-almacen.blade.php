@@ -81,11 +81,11 @@
                         <i class="fas fa-plus"></i>
                         Crear Rack
                     </button>
-                    <button @click="abrirModalCrearUbicacion()"
+                    <!-- <button @click="abrirModalCrearUbicacion()"
                         class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
                         <i class="fas fa-layer-group"></i>
                         Crear Ubicación
-                    </button>
+                    </button> -->
                 </div>
             </div>
         </div>
@@ -163,7 +163,7 @@
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                         <option value="">Todas las sedes</option>
                         @foreach ($sedes as $sede)
-                            <option value="{{ $sede }}">{{ $sede }}</option>
+                        <option value="{{ $sede }}">{{ $sede }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -195,11 +195,11 @@
                     Etiquetas: <span x-text="labels ? 'ON' : 'OFF'"></span>
                 </button>
 
-                <button @click="resetFiltros()"
+                <!-- <button @click="resetFiltros()"
                     class="inline-flex items-center gap-2 rounded-lg bg-red-500 text-white px-4 py-2 text-sm font-medium hover:bg-red-600 transition">
                     <i class="fas fa-undo"></i>
                     Resetear
-                </button>
+                </button> -->
 
                 <button @click="cargarDatos()"
                     class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition">
@@ -331,57 +331,88 @@
                     </div>
                     <div class="p-5">
                         <form @submit.prevent="crearRack()" class="space-y-4">
-                            <!-- Nombre del Rack -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Nombre
-                                    del Rack *</label>
-                                <input type="text" x-model="modalCrearRack.form.nombre" required
-                                    class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
-                                    placeholder="Ej: R01, R02, A01...">
-                            </div>
-
                             <!-- Sede -->
                             <div>
-                                <label
-                                    class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Sede
-                                    *</label>
-                                <select x-model="modalCrearRack.form.sede" required
+                                <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Sede *</label>
+                                <select x-model="modalCrearRack.form.sede" required @change="sugerirSiguienteLetra()"
                                     class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
                                     <option value="">Seleccione una sede</option>
                                     @foreach ($sedes as $sede)
-                                        <option value="{{ $sede }}">{{ $sede }}</option>
+                                    <option value="{{ $sede }}">{{ $sede }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+
+                            <!-- Nombre del Rack con Sugerencia Automática -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
+                                    Nombre del Rack *
+                                    <span x-show="modalCrearRack.sugerencia" class="text-green-600 text-xs ml-2">
+                                        💡 Sugerencia: <span x-text="modalCrearRack.sugerencia" class="font-bold"></span>
+                                    </span>
+                                </label>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="modalCrearRack.form.nombre" required
+                                        class="form-input flex-1 rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
+                                        placeholder="Ej: A, B, C, A1..."
+                                        :class="modalCrearRack.form.nombre && modalCrearRack.sugerencia && modalCrearRack.form.nombre !== modalCrearRack.sugerencia ? 'border-orange-500' : ''">
+                                    <button type="button" @click="usarSugerencia()"
+                                        x-show="modalCrearRack.sugerencia"
+                                        class="btn btn-outline-primary whitespace-nowrap text-sm px-3 py-2">
+                                        Usar Sugerencia
+                                    </button>
+                                </div>
+
+                                <!-- Información de letras usadas -->
+                                <div x-show="modalCrearRack.letrasUsadas && modalCrearRack.letrasUsadas.length > 0"
+                                    class="text-xs text-slate-500 mt-2 p-2 bg-slate-50 rounded">
+                                    <div class="font-medium mb-1">Letras usadas en <span x-text="modalCrearRack.form.sede" class="font-bold"></span>:</div>
+                                    <div class="flex flex-wrap gap-1">
+                                        <template x-for="letra in modalCrearRack.letrasUsadas" :key="letra">
+                                            <span class="px-2 py-1 bg-slate-200 rounded" x-text="letra"></span>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Información de disponibilidad -->
+                                <div x-show="modalCrearRack.letrasUsadas && modalCrearRack.letrasUsadas.length > 0"
+                                    class="text-xs text-slate-500 mt-1">
+                                    <span x-text="26 - modalCrearRack.letrasUsadas.length"></span> letras disponibles de 26
+                                </div>
                             </div>
 
                             <!-- Configuración de dimensiones -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label
-                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas
-                                        *</label>
-                                    <input type="number" x-model="modalCrearRack.form.filas" required min="1"
-                                        max="10"
+                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas *</label>
+                                    <input type="number" x-model="modalCrearRack.form.filas" required min="1" max="12"
                                         class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                         placeholder="Número de filas">
                                 </div>
                                 <div>
-                                    <label
-                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Columnas
-                                        *</label>
-                                    <input type="number" x-model="modalCrearRack.form.columnas" required
-                                        min="1" max="20"
+                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Columnas *</label>
+                                    <input type="number" x-model="modalCrearRack.form.columnas" required min="1" max="24"
                                         class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                         placeholder="Número de columnas">
                                 </div>
                             </div>
 
+                            <!-- Capacidad Máxima -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
+                                    Capacidad Máxima por Ubicación *
+                                </label>
+                                <input type="number" x-model="modalCrearRack.form.capacidad_maxima" required min="1" max="1000" 
+                                    class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
+                                    placeholder="Ej: 100, 200, 500...">
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Esta capacidad se aplicará a todas las ubicaciones del rack
+                                </p>
+                            </div>
+
                             <!-- Estado -->
                             <div>
-                                <label
-                                    class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Estado
-                                    *</label>
+                                <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Estado *</label>
                                 <select x-model="modalCrearRack.form.estado" required
                                     class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
                                     <option value="activo">Activo</option>
@@ -389,6 +420,7 @@
                                 </select>
                             </div>
 
+                     
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-8 gap-4">
                                 <button type="button" @click="cerrarModalCrearRack()"
@@ -396,8 +428,7 @@
                                     Cancelar
                                 </button>
                                 <button type="submit" :disabled="modalCrearRack.loading"
-                                    :class="modalCrearRack.loading ? 'bg-indigo-400 cursor-not-allowed' :
-                                        'bg-indigo-600 hover:bg-indigo-700'"
+                                    :class="modalCrearRack.loading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'"
                                     class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
                                     <i class="fas fa-spinner fa-spin" x-show="modalCrearRack.loading"></i>
                                     <span x-text="modalCrearRack.loading ? 'Creando...' : 'Crear Rack'"></span>
@@ -555,11 +586,14 @@
                 modalCrearRack: {
                     open: false,
                     loading: false,
+                    sugerencia: null,
+                    letrasUsadas: [],
                     form: {
                         nombre: '',
                         sede: '',
                         filas: 1,
                         columnas: 1,
+                        capacidad_maxima: 100, // Nuevo campo
                         estado: 'activo'
                     }
                 },
@@ -604,50 +638,119 @@
                         columnas: 1,
                         estado: 'activo'
                     };
+                    this.modalCrearRack.sugerencia = null;
+                    this.modalCrearRack.letrasUsadas = [];
+                },
+                async abrirModalCrearRack() {
+                    this.modalCrearRack.open = true;
+                    // Resetear formulario
+                    this.modalCrearRack.form = {
+                        nombre: '',
+                        sede: '',
+                        filas: 1,
+                        columnas: 1,
+                        estado: 'activo'
+                    };
+                    this.modalCrearRack.sugerencia = null;
+                    this.modalCrearRack.letrasUsadas = [];
                 },
 
+                async sugerirSiguienteLetra() {
+                    if (!this.modalCrearRack.form.sede) {
+                        this.modalCrearRack.sugerencia = null;
+                        this.modalCrearRack.letrasUsadas = [];
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/almacen/racks/sugerir-letra', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                sede: this.modalCrearRack.form.sede
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.modalCrearRack.sugerencia = result.data.sugerencia;
+                            this.modalCrearRack.letrasUsadas = result.data.letras_usadas;
+                        } else {
+                            console.error('Error al obtener sugerencia:', result.message);
+                            this.modalCrearRack.sugerencia = null;
+                            this.modalCrearRack.letrasUsadas = [];
+                        }
+                    } catch (error) {
+                        console.error('Error al obtener sugerencia:', error);
+                        this.modalCrearRack.sugerencia = null;
+                        this.modalCrearRack.letrasUsadas = [];
+                    }
+                },
+
+                usarSugerencia() {
+                    if (this.modalCrearRack.sugerencia) {
+                        this.modalCrearRack.form.nombre = this.modalCrearRack.sugerencia;
+
+                        // Mostrar mensaje temporal de confirmación
+                        this.mostrarMensajeTemporal('Sugerencia aplicada: ' + this.modalCrearRack.sugerencia, 'success');
+                    }
+                },
+                mostrarMensajeTemporal(mensaje, tipo = 'info') {
+                    // Puedes implementar tu sistema de notificaciones aquí
+                    console.log(`${tipo.toUpperCase()}: ${mensaje}`);
+                    // O usar alert temporal
+                    // alert(mensaje);
+                },
                 cerrarModalCrearRack() {
                     this.modalCrearRack.open = false;
                     this.modalCrearRack.loading = false;
                 },
 
                 async crearRack() {
-                    this.modalCrearRack.loading = true;
+    this.modalCrearRack.loading = true;
 
-                    try {
-                        const response = await fetch('/almacen/racks/crear', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector(
-                                    'meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify(this.modalCrearRack.form)
-                        });
+    try {
+        const response = await fetch('/almacen/racks/crear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(this.modalCrearRack.form)
+        });
 
-                        const result = await response.json();
+        const result = await response.json();
 
-                        if (result.success) {
-                            this.success('Rack creado exitosamente');
-                            this.cerrarModalCrearRack();
-                            this.cargarDatos(); // Recargar datos para actualizar stats
-                        } else {
-                            this.error(result.message || 'Error al crear rack');
-                            if (result.errors) {
-                                Object.values(result.errors).forEach(errorArray => {
-                                    errorArray.forEach(error => {
-                                        this.error(error);
-                                    });
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        this.error('Error de conexión al servidor');
-                    } finally {
-                        this.modalCrearRack.loading = false;
-                    }
-                },
+        if (result.success) {
+            this.success(result.message || 'Rack creado exitosamente');
+            this.cerrarModalCrearRack();
+            this.cargarDatos(); // Recargar datos para actualizar stats
+            
+            // Mostrar información adicional si está disponible
+            if (result.data && result.data.total_ubicaciones) {
+                console.log(`Se crearon ${result.data.total_ubicaciones} ubicaciones automáticamente`);
+            }
+        } else {
+            this.error(result.message || 'Error al crear rack');
+            if (result.errors) {
+                Object.values(result.errors).forEach(errorArray => {
+                    errorArray.forEach(error => {
+                        this.error(error);
+                    });
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        this.error('Error de conexión al servidor');
+    } finally {
+        this.modalCrearRack.loading = false;
+    }
+},
 
                 // MÉTODOS PARA CREAR UBICACIÓN
                 async abrirModalCrearUbicacion() {
