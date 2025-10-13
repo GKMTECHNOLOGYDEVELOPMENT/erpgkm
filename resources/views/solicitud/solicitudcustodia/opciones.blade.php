@@ -107,53 +107,80 @@
         </div>
 
         <!-- Summary card -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div class="bg-primary p-5 rounded-xl border shadow-sm flex items-start gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Card 1: Equipo -->
+            <div
+                class="group relative bg-primary p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                <!-- Efecto de brillo animado -->
                 <div
-                    class="h-12 w-12 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                    </svg>
+                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                 </div>
-                <div>
-                    <div class="text-sm font-medium text-white">Equipo</div>
-                    <div class="font-semibold text-white mt-1">
-                        {{ $custodia->marca->nombre ?? '—' }}
-                        {{ $custodia->modelo->nombre ?? '' }}
+
+                <div class="relative flex items-start gap-4">
+                    <div
+                        class="h-14 w-14 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-white mb-1">Equipo</div>
+                        <div class="text-lg font-bold text-white truncate">
+                            {{ $custodia->marca->nombre ?? '—' }}
+                            {{ $custodia->modelo->nombre ?? '' }}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-info p-5 rounded-xl border border-gray-200 shadow-sm flex items-start gap-4">
+            <!-- Card 2: Serie -->
+            <div
+                class="group relative bg-info p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                <!-- Efecto de brillo animado -->
                 <div
-                    class="h-12 w-12 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
+                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                 </div>
-                <div>
-                    <div class="text-sm font-medium text-white">Serie</div>
-                    <div class="font-semibold text-white mt-1">{{ $custodia->serie ?? 'N/A' }}</div>
+
+                <div class="relative flex items-start gap-4">
+                    <div
+                        class="h-14 w-14 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-blue-100 mb-1">Serie</div>
+                        <div class="text-lg font-bold text-white truncate">{{ $custodia->serie ?? 'N/A' }}</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-dark p-5 rounded-xl border border-gray-200 shadow-sm flex items-start gap-4">
+            <!-- Card 3: Fecha de Ingreso -->
+            <div
+                class="group relative bg-secondary p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                <!-- Efecto de brillo animado -->
                 <div
-                    class="h-12 w-12 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                    class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
                 </div>
-                <div>
-                    <div class="text-sm font-medium text-white">Ingreso a custodia</div>
-                    <div class="font-semibold text-white mt-1">
-                        {{ \Carbon\Carbon::parse($custodia->fecha_ingreso_custodia)->format('d/m/Y') }}
+
+                <div class="relative flex items-start gap-4">
+                    <div
+                        class="h-14 w-14 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-white mb-1">Ingreso a custodia</div>
+                        <div class="text-lg font-bold text-white">
+                            {{ \Carbon\Carbon::parse($custodia->fecha_ingreso_custodia)->format('d/m/Y') }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -304,12 +331,8 @@
                                 <textarea id="observacion_almacen" name="observacion_almacen" rows="3"
                                     class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
                                     placeholder="Detalles específicos sobre la ubicación en almacén, condición del equipo, etc."
-                                    {{ $isDisabled ? 'readonly' : '' }}>
-@if (isset($custodia->custodiaUbicacion))
-{{ trim($custodia->custodiaUbicacion->observacion) }}
-@endif
-{{ old('observacion_almacen') }}
-</textarea>
+                                    {{ $isDisabled ? 'readonly' : '' }}>{{ isset($custodia->custodiaUbicacion) ? trim($custodia->custodiaUbicacion->observacion) : old('observacion_almacen') }}</textarea>
+
                             </div>
                         </div>
                         <!-- Campo oculto para la cantidad (siempre será 1) -->
@@ -689,7 +712,7 @@
                     <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg">
                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
                         <button type="button" onclick="eliminarPreview(${index})" 
-                                class="text-white bg-red-600 rounded-full p-2 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
+                                class="text-white bg-danger rounded-full p-2 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
@@ -786,13 +809,13 @@
                                     </svg>
                                 </button>
                                 ${!{{ $isDisabled ? 'true' : 'false' }} ? `
-                                        <button type="button" onclick="eliminarFoto(${foto.id})" 
-                                                class="text-white bg-red-600 rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                        ` : ''}
+                                                    <button type="button" onclick="eliminarFoto(${foto.id})" 
+                                                            class="text-white bg-danger rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                    ` : ''}
                             </div>
                         </div>
                         <div class="mt-2">
