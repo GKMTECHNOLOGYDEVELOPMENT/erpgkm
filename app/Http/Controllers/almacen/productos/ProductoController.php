@@ -109,7 +109,7 @@ public function store(Request $request)
             'codigo_barras' => 'required|string|max:255|unique:articulos,codigo_barras',
             'sku' => 'required|string|max:255|unique:articulos,sku',
             'nombre' => 'required|string|max:255|unique:articulos,nombre',
-            'stock_total' => 'required|nullable|integer',
+            // 'stock_total' => 'required|nullable|integer',
             'stock_minimo' => 'required|nullable|integer',
             'maneja_serie' => 'nullable|boolean', // ✅ Agregado
             'moneda_compra' => 'required|nullable|integer',
@@ -131,7 +131,7 @@ public function store(Request $request)
         $dataArticulo['estado'] = $dataArticulo['estado'] ?? 1;
         $dataArticulo['idTipoArticulo'] = 1;
         $dataArticulo['fecha_ingreso'] = now();
-        $dataArticulo['stock_total'] = $dataArticulo['stock_total'] ?? 0;
+        $dataArticulo['stock_total'] = 0;
         $dataArticulo['precio_compra'] = $dataArticulo['precio_compra'] ?? 0;
         $dataArticulo['garantia_fabrica'] = $dataArticulo['garantia_fabrica'] ?? 0;
         $dataArticulo['unidad_tiempo_garantia'] = $dataArticulo['unidad_tiempo_garantia'] ?? 'meses';
