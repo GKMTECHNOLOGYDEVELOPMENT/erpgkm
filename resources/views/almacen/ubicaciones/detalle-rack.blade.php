@@ -844,8 +844,17 @@
                                                                 <i class="fas fa-box text-blue-600"></i>
                                                             </div>
                                                             <div class="flex-1 min-w-0">
+                                                                <!-- ✅ NUEVO: Mostrar nombre o código según el tipo -->
                                                                 <p class="font-semibold text-gray-800 text-sm truncate mb-1"
                                                                     x-text="producto.nombre"></p>
+
+                                                                <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
+                                                                <template x-if="producto.mostrando_codigo_repuesto">
+                                                                    <p class="text-xs text-gray-500 truncate mb-1"
+                                                                        x-text="'Nombre: ' + producto.nombre_original">
+                                                                    </p>
+                                                                </template>
+
                                                                 <div class="flex gap-2">
                                                                     <span
                                                                         class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
@@ -854,9 +863,9 @@
                                                                         :class="{
                                                                             'bg-green-100 text-green-700': producto
                                                                                 .tipo_articulo === 'PRODUCTOS',
-                                                                            'bg-yellow-100 text-warning': producto
+                                                                            'bg-yellow-100 text-yellow-700': producto
                                                                                 .tipo_articulo === 'REPUESTOS',
-                                                                            'bg-purple-100 text-secondary': producto
+                                                                            'bg-purple-100 text-purple-700': producto
                                                                                 .tipo_articulo === 'SUMINISTROS',
                                                                             'bg-orange-100 text-orange-700': producto
                                                                                 .tipo_articulo === 'HERAMIENTAS',
@@ -867,6 +876,15 @@
                                                                         }"
                                                                         x-text="producto.tipo_articulo || 'Standard'">
                                                                     </span>
+
+                                                                    <!-- ✅ NUEVO: Badge para indicar que se muestra código de repuesto -->
+                                                                    <template
+                                                                        x-if="producto.mostrando_codigo_repuesto">
+                                                                        <span
+                                                                            class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-medium">
+                                                                            Código Repuesto
+                                                                        </span>
+                                                                    </template>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -924,50 +942,53 @@
                                     <!-- Lista de productos seleccionados (MEJORADO) -->
                                     <div class="space-y-3 max-h-80 overflow-y-auto">
                                         <template x-if="modalAgregarProducto.productosSeleccionados.length > 0">
-                                            <template
-                                                x-for="(producto, index) in modalAgregarProducto.productosSeleccionados"
-                                                :key="producto.id">
-                                                <div
-                                                    class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-all duration-200">
-                                                    <!-- Encabezado del producto -->
-                                                    <div class="flex items-start justify-between mb-3">
-                                                        <div class="flex items-start gap-3 flex-1">
-                                                            <!-- Ícono del producto -->
-                                                            <div
-                                                                class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
-                                                                <i class="fas fa-box text-sm"></i>
-                                                            </div>
+                                           <template x-for="(producto, index) in modalAgregarProducto.productosSeleccionados"
+          :key="producto.id">
+    <div class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-all duration-200">
+        <!-- Encabezado del producto -->
+        <div class="flex items-start justify-between mb-3">
+            <div class="flex items-start gap-3 flex-1">
+                <!-- Ícono del producto -->
+                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                    <i class="fas fa-box text-sm"></i>
+                </div>
 
-                                                            <!-- Información del producto -->
-                                                            <div class="flex-1 min-w-0">
-                                                                <h4 class="font-semibold text-gray-800 text-sm truncate"
-                                                                    x-text="producto.nombre || 'Sin nombre'"></h4>
-                                                                <div class="flex gap-2 mt-2">
-                                                                    <span
-                                                                        class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs"
-                                                                        x-text="producto.categoria || 'Sin categoría'"></span>
-                                                                    <span
-                                                                        class="px-2 py-0.5 rounded text-xs font-medium"
-                                                                        :class="{
-                                                                            'bg-green-100 text-green-700': producto
-                                                                                .tipo_articulo === 'PRODUCTOS',
-                                                                            'bg-yellow-100 text-warning': producto
-                                                                                .tipo_articulo === 'REPUESTOS',
-                                                                            'bg-purple-100 text-secondary': producto
-                                                                                .tipo_articulo === 'SUMINISTROS',
-                                                                            'bg-orange-100 text-danger': producto
-                                                                                .tipo_articulo === 'HERAMIENTAS',
-                                                                            'bg-gray-100 text-gray-700': !['PRODUCTOS',
-                                                                                'REPUESTOS', 'SUMINISTROS',
-                                                                                'HERAMIENTAS'
-                                                                            ].includes(producto.tipo_articulo)
-                                                                        }"
-                                                                        x-text="producto.tipo_articulo || 'Sin tipo'">
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                <!-- Información del producto -->
+                <div class="flex-1 min-w-0">
+                    <!-- ✅ NUEVO: Mostrar nombre o código según el tipo -->
+                    <h4 class="font-semibold text-gray-800 text-sm truncate mb-1"
+                        x-text="producto.nombre || 'Sin nombre'"></h4>
+                    
+                    <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
+                    <template x-if="producto.mostrando_codigo_repuesto">
+                        <p class="text-xs text-gray-500 truncate mb-2"
+                           x-text="'Nombre: ' + producto.nombre_original"></p>
+                    </template>
+                    
+                    <div class="flex gap-2 mt-2">
+                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs"
+                              x-text="producto.categoria || 'Sin categoría'"></span>
+                        <span class="px-2 py-0.5 rounded text-xs font-medium"
+                              :class="{
+                                  'bg-green-100 text-green-700': producto.tipo_articulo === 'PRODUCTOS',
+                                  'bg-yellow-100 text-yellow-700': producto.tipo_articulo === 'REPUESTOS',
+                                  'bg-purple-100 text-purple-700': producto.tipo_articulo === 'SUMINISTROS',
+                                  'bg-orange-100 text-orange-700': producto.tipo_articulo === 'HERAMIENTAS',
+                                  'bg-gray-100 text-gray-700': !['PRODUCTOS', 'REPUESTOS', 'SUMINISTROS', 'HERAMIENTAS'].includes(producto.tipo_articulo)
+                              }"
+                              x-text="producto.tipo_articulo || 'Sin tipo'">
+                        </span>
+                        
+                        <!-- ✅ NUEVO: Badge para indicar que se muestra código de repuesto -->
+                        <template x-if="producto.mostrando_codigo_repuesto">
+                            <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
+                                Código Repuesto
+                            </span>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div
 
                                                     <!-- Controles y stock -->
                                                     <div
@@ -1442,10 +1463,17 @@
                 // En tu Alpine.js, agrega estos métodos:
 
                 // Método para reubicar un producto específico
+                // Método para reubicar un producto específico
                 iniciarReubicacionProducto(ubi, producto) {
+                    // ✅ CORRECCIÓN: Asegurar que el producto tenga nombre
+                    if (!producto || !producto.nombre) {
+                        this.error('No se puede reubicar: producto no válido');
+                        return;
+                    }
+
                     this.modoReubicacion.activo = true;
                     this.modoReubicacion.origen = ubi.codigo;
-                    this.modoReubicacion.producto = producto.nombre;
+                    this.modoReubicacion.producto = producto.nombre.toString().trim(); // ✅ Asegurar string
                     this.modoReubicacion.ubicacionOrigenId = ubi.id;
                     this.modoReubicacion.productoId = producto.id;
                     this.modoReubicacion.cantidad = producto.cantidad;
@@ -1456,16 +1484,21 @@
 
                 // Método para reubicar todos los productos
                 iniciarReubicacionMultiple(ubi) {
+                    // ✅ CORRECCIÓN: Verificar que haya productos
+                    if (!ubi.productos || ubi.productos.length === 0) {
+                        this.error('No hay productos para reubicar');
+                        return;
+                    }
+
                     this.modoReubicacion.activo = true;
                     this.modoReubicacion.origen = ubi.codigo;
                     this.modoReubicacion.producto = 'Todos los productos';
                     this.modoReubicacion.ubicacionOrigenId = ubi.id;
-                    this.modoReubicacion.cantidad = ubi.cantidad;
+                    this.modoReubicacion.cantidad = ubi.cantidad_total;
                     this.modoReubicacion.tipo = 'todos_los_productos';
                     this.modal.open = false;
                     this.success('Modo reubicación activado para todos los productos');
                 },
-
                 // Actualizar el método esDestinoValido
                 esDestinoValido(ubi) {
                     if (this.modoReubicacion.tipo === 'producto_especifico') {
@@ -1531,25 +1564,41 @@
                     });
                 },
 
-                // Métodos de interacción (mantén los mismos que tenías)
                 manejarClickUbicacion(ubi) {
                     if (this.modoReubicacion.activo) {
                         // Lógica de reubicación...
                         if (ubi.codigo === this.modoReubicacion.origen) {
                             this.cancelarReubicacion();
                         } else if (this.esDestinoValido(ubi)) {
-                            // CORRECIÓN: Usar la cantidad del modoReubicacion, no de la ubicación destino
+                            // ✅ CORRECCIÓN: Asegurarnos de que tenemos todos los datos necesarios
+                            if (!this.modoReubicacion.producto) {
+                                this.error('No se ha seleccionado un producto para reubicar');
+                                this.cancelarReubicacion();
+                                return;
+                            }
+
+                            // ✅ CORRECCIÓN: Obtener la cantidad actualizada de la ubicación origen
+                            const ubicacionOrigenActual = this.buscarUbicacionPorCodigo(this.modoReubicacion.origen);
+                            if (!ubicacionOrigenActual) {
+                                this.error('No se pudo encontrar la ubicación origen');
+                                this.cancelarReubicacion();
+                                return;
+                            }
+
                             this.modalReubicacion.origen = this.modoReubicacion.origen;
                             this.modalReubicacion.destino = ubi.codigo;
                             this.modalReubicacion.producto = this.modoReubicacion.producto;
-                            this.modalReubicacion.cantidad = this.modoReubicacion.cantidad; // ← ESTA ES LA CORRECCIÓN
+
+                            // ✅ CORRECCIÓN: Usar la cantidad actualizada de la ubicación origen
+                            this.modalReubicacion.cantidad = ubicacionOrigenActual.cantidad_total || this.modoReubicacion
+                                .cantidad;
+
                             this.modalReubicacion.open = true;
                         }
                     } else {
                         this.verDetalle(ubi);
                     }
                 },
-
                 verDetalle(ubi) {
                     this.modal.ubi = ubi;
                     this.modal.open = true;
@@ -1631,28 +1680,54 @@
                     }
                 },
 
-                async confirmarReubicacionRack() {
+                async confirmarReubicacion() {
                     try {
-                        // Validaciones
-                        if (!this.modalReubicacionRack.rackDestinoSeleccionado) {
-                            this.error('Por favor seleccione un rack destino');
+                        // ✅ CORRECCIÓN: Validaciones más robustas antes de enviar
+                        if (!this.modalReubicacion.producto || this.modalReubicacion.producto.trim() === '') {
+                            this.error('El producto no está definido. Por favor, cancela y reinicia la reubicación.');
                             return;
                         }
 
-                        if (!this.modalReubicacionRack.ubicacionDestinoSeleccionada) {
-                            this.error('Por favor seleccione una ubicación destino');
+                        // Buscar la ubicación destino por código
+                        const ubicacionDestino = this.buscarUbicacionPorCodigo(this.modalReubicacion.destino);
+
+                        if (!ubicacionDestino) {
+                            this.error('Ubicación destino no encontrada');
+                            return;
+                        }
+
+                        // Asegurar que la cantidad sea un número válido
+                        const cantidad = parseInt(this.modalReubicacion.cantidad);
+
+                        console.log('Confirmando reubicación:', {
+                            origen_id: this.modoReubicacion.ubicacionOrigenId,
+                            destino_id: ubicacionDestino.id,
+                            producto: this.modalReubicacion.producto,
+                            cantidad: cantidad,
+                            tipo_cantidad: typeof cantidad
+                        });
+
+                        if (cantidad <= 0 || isNaN(cantidad)) {
+                            this.error('Cantidad inválida para reubicación');
+                            return;
+                        }
+
+                        // ✅ CORRECCIÓN: Validar que el producto no esté vacío
+                        if (!this.modalReubicacion.producto || this.modalReubicacion.producto === 'null' || this
+                            .modalReubicacion.producto.trim() === '') {
+                            this.error('Error: El producto no está definido correctamente');
                             return;
                         }
 
                         const payload = {
-                            ubicacion_origen_id: this.modalReubicacionRack.ubicacionOrigen.id,
-                            ubicacion_destino_id: this.modalReubicacionRack.ubicacionDestinoSeleccionada,
-                            producto: this.modalReubicacionRack.ubicacionOrigen.producto,
-                            cantidad: parseInt(this.modalReubicacionRack.ubicacionOrigen.cantidad),
-                            tipo_reubicacion: 'otro_rack'
+                            ubicacion_origen_id: this.modoReubicacion.ubicacionOrigenId,
+                            ubicacion_destino_id: ubicacionDestino.id,
+                            producto: this.modalReubicacion.producto.toString().trim(), // ✅ Asegurar que sea string
+                            cantidad: cantidad,
+                            tipo_reubicacion: 'mismo_rack'
                         };
 
-                        console.log('Confirmando reubicación entre racks:', payload);
+                        console.log('Payload enviado:', payload);
 
                         const response = await fetch('/almacen/reubicacion/confirmar', {
                             method: 'POST',
@@ -1665,30 +1740,50 @@
                         });
 
                         const result = await response.json();
-                        console.log('Respuesta reubicación entre racks:', result);
+                        console.log('Respuesta confirmación:', result);
 
                         if (result.success) {
-                            this.success('Producto reubicado entre racks exitosamente');
+                            this.success(result.message);
 
-                            // Actualizar la interfaz
-                            this.actualizarInterfazDespuesReubicacionRack(
-                                this.modalReubicacionRack.ubicacionOrigen.id,
-                                this.modalReubicacionRack.ubicacionDestinoSeleccionada,
-                                parseInt(this.modalReubicacionRack.ubicacionOrigen.cantidad)
-                            );
-
-                            this.cerrarModalReubicacionRack();
-                        } else {
-                            this.error(result.message || 'Error al reubicar entre racks');
-                            if (result.errors) {
-                                Object.values(result.errors).forEach(errorArray => {
-                                    errorArray.forEach(error => {
-                                        this.error(error);
-                                    });
-                                });
+                            // Actualizar la interfaz con los datos devueltos del servidor
+                            if (result.data.ubicaciones_actualizadas) {
+                                this.actualizarUbicacionesEnFrontend(result.data.ubicaciones_actualizadas);
+                            } else {
+                                // Si no vienen datos actualizados, usar el método existente
+                                this.actualizarInterfazDespuesReubicacion(
+                                    this.modoReubicacion.ubicacionOrigenId,
+                                    ubicacionDestino.id,
+                                    cantidad
+                                );
                             }
-                        }
 
+                            this.cancelarReubicacion();
+                            this.modalReubicacion.open = false;
+                        } else {
+                            // ✅ CORRECCIÓN: Mejor manejo de errores
+                            let errorMessage = result.message || 'Error al confirmar reubicación';
+
+                            if (result.errors) {
+                                console.error('Errores de validación:', result.errors);
+
+                                // Mostrar errores específicos
+                                if (result.errors.producto) {
+                                    errorMessage = result.errors.producto[0];
+                                } else if (result.errors.cantidad) {
+                                    errorMessage = result.errors.cantidad[0];
+                                } else {
+                                    // Mostrar todos los errores
+                                    Object.values(result.errors).forEach(errorArray => {
+                                        errorArray.forEach(error => {
+                                            this.error(error);
+                                        });
+                                    });
+                                    return; // Salir para no mostrar el mensaje general
+                                }
+                            }
+
+                            this.error(errorMessage);
+                        }
                     } catch (error) {
                         console.error('Error:', error);
                         this.error('Error de conexión al servidor');
@@ -2535,12 +2630,17 @@
                         if (result.success) {
                             this.success(result.message);
 
-                            // Actualizar la interfaz
-                            this.actualizarInterfazDespuesReubicacion(
-                                this.modoReubicacion.ubicacionOrigenId,
-                                ubicacionDestino.id,
-                                cantidad
-                            );
+                            // ✅ NUEVO: Actualizar la interfaz con los datos devueltos del servidor
+                            if (result.data.ubicaciones_actualizadas) {
+                                this.actualizarUbicacionesEnFrontend(result.data.ubicaciones_actualizadas);
+                            } else {
+                                // Si no vienen datos actualizados, usar el método existente
+                                this.actualizarInterfazDespuesReubicacion(
+                                    this.modoReubicacion.ubicacionOrigenId,
+                                    ubicacionDestino.id,
+                                    cantidad
+                                );
+                            }
 
                             this.cancelarReubicacion();
                             this.modalReubicacion.open = false;
@@ -2560,6 +2660,54 @@
                         this.error('Error de conexión al servidor');
                     }
                 },
+                // ✅ NUEVO: Método para actualizar ubicaciones específicas en el frontend
+                actualizarUbicacionesEnFrontend(ubicacionesActualizadas) {
+                    const {
+                        origen,
+                        destino
+                    } = ubicacionesActualizadas;
+
+                    // Actualizar ubicación origen
+                    if (origen) {
+                        this.actualizarUbicacionEnRack(origen);
+                    }
+
+                    // Actualizar ubicación destino
+                    if (destino) {
+                        this.actualizarUbicacionEnRack(destino);
+                    }
+
+                    // Reprocesar datos para recalcular categorías y tipos acumulados
+                    this.procesarDatosRack();
+
+                    // Forzar actualización de Alpine.js
+                    this.rack = {
+                        ...this.rack
+                    };
+
+                    // Reinicializar swipers
+                    this.$nextTick(() => {
+                        this.initSwipers();
+                    });
+                },
+
+                // ✅ NUEVO: Método para actualizar una ubicación específica en el rack
+                actualizarUbicacionEnRack(ubicacionActualizada) {
+                    this.rack.niveles.forEach((nivel, nivelIndex) => {
+                        nivel.ubicaciones.forEach((ubi, ubiIndex) => {
+                            if (ubi.id === ubicacionActualizada.id) {
+                                // Actualizar la ubicación con los nuevos datos
+                                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
+                                    ...ubi,
+                                    productos: ubicacionActualizada.productos,
+                                    cantidad_total: ubicacionActualizada.cantidad_total,
+                                    estado: ubicacionActualizada.estado,
+                                    fecha: ubicacionActualizada.fecha
+                                };
+                            }
+                        });
+                    });
+                },
 
 
                 async cancelarReubicacion() {
@@ -2573,16 +2721,25 @@
                             }
                         });
 
+                        // ✅ CORRECCIÓN: Limpiar completamente todos los datos
                         this.modoReubicacion.activo = false;
                         this.modoReubicacion.origen = '';
                         this.modoReubicacion.producto = '';
                         this.modoReubicacion.ubicacionOrigenId = null;
                         this.modoReubicacion.cantidad = 0;
+                        this.modoReubicacion.tipo = '';
+
+                        // También limpiar el modal
                         this.modalReubicacion.open = false;
+                        this.modalReubicacion.origen = '';
+                        this.modalReubicacion.destino = '';
+                        this.modalReubicacion.producto = '';
+                        this.modalReubicacion.cantidad = 0;
 
                         this.info('Reubicación cancelada');
                     } catch (error) {
                         console.error('Error:', error);
+                        // Limpiar de todas formas aunque falle la petición
                         this.modoReubicacion.activo = false;
                         this.modalReubicacion.open = false;
                     }
@@ -2599,9 +2756,14 @@
                     }
                     return null;
                 },
-
-                // Método para actualizar la interfaz después de reubicación
+                // Método para actualizar la interfaz después de reubicación (mantener como respaldo)
                 actualizarInterfazDespuesReubicacion(origenId, destinoId, cantidad) {
+                    console.log('Actualizando interfaz después de reubicación:', {
+                        origenId,
+                        destinoId,
+                        cantidad
+                    });
+
                     // Buscar las ubicaciones en la estructura de datos
                     let ubicacionOrigen = null;
                     let ubicacionDestino = null;
@@ -2627,39 +2789,66 @@
                     });
 
                     if (ubicacionOrigen && ubicacionDestino) {
+                        console.log('Ubicaciones encontradas, actualizando...');
+
                         // Mover datos de origen a destino
-                        ubicacionDestino.producto = ubicacionOrigen.producto;
-                        ubicacionDestino.cantidad = cantidad;
-                        ubicacionDestino.estado = this.calcularEstado(cantidad, ubicacionDestino.capacidad);
-                        ubicacionDestino.fecha = new Date().toISOString().split('T')[0];
+                        if (ubicacionOrigen.productos && ubicacionOrigen.productos.length > 0) {
+                            const productoAMover = {
+                                ...ubicacionOrigen.productos[0]
+                            };
+                            productoAMover.cantidad = cantidad;
 
-                        // Actualizar origen
-                        const nuevaCantidadOrigen = ubicacionOrigen.cantidad - cantidad;
-                        if (nuevaCantidadOrigen > 0) {
-                            ubicacionOrigen.cantidad = nuevaCantidadOrigen;
-                            ubicacionOrigen.estado = this.calcularEstado(nuevaCantidadOrigen, ubicacionOrigen.capacidad);
-                        } else {
-                            ubicacionOrigen.producto = null;
-                            ubicacionOrigen.cantidad = 0;
-                            ubicacionOrigen.estado = 'vacio';
-                            ubicacionOrigen.fecha = null;
+                            // Actualizar destino
+                            this.rack.niveles[nivelDestinoIndex].ubicaciones[ubiDestinoIndex] = {
+                                ...ubicacionDestino,
+                                productos: [productoAMover],
+                                cantidad_total: cantidad,
+                                estado: this.calcularEstado(cantidad, ubicacionDestino.capacidad),
+                                fecha: new Date().toISOString()
+                            };
+
+                            // Actualizar origen
+                            const nuevaCantidadOrigen = ubicacionOrigen.cantidad_total - cantidad;
+                            if (nuevaCantidadOrigen > 0) {
+                                this.rack.niveles[nivelOrigenIndex].ubicaciones[ubiOrigenIndex] = {
+                                    ...ubicacionOrigen,
+                                    productos: [{
+                                        ...ubicacionOrigen.productos[0],
+                                        cantidad: nuevaCantidadOrigen
+                                    }],
+                                    cantidad_total: nuevaCantidadOrigen,
+                                    estado: this.calcularEstado(nuevaCantidadOrigen, ubicacionOrigen.capacidad),
+                                    fecha: new Date().toISOString()
+                                };
+                            } else {
+                                this.rack.niveles[nivelOrigenIndex].ubicaciones[ubiOrigenIndex] = {
+                                    ...ubicacionOrigen,
+                                    productos: [],
+                                    cantidad_total: 0,
+                                    estado: 'vacio',
+                                    fecha: null
+                                };
+                            }
+
+                            // Reprocesar datos para recalcular categorías y tipos acumulados
+                            this.procesarDatosRack();
+
+                            // Forzar actualización de Alpine.js
+                            this.rack = {
+                                ...this.rack
+                            };
+
+                            // Reinicializar swipers
+                            this.$nextTick(() => {
+                                this.initSwipers();
+                            });
+
+                            console.log('Interfaz actualizada exitosamente');
                         }
-
-                        // Forzar actualización de Alpine.js
-                        this.rack.niveles[nivelOrigenIndex].ubicaciones[ubiOrigenIndex] = {
-                            ...ubicacionOrigen
-                        };
-                        this.rack.niveles[nivelDestinoIndex].ubicaciones[ubiDestinoIndex] = {
-                            ...ubicacionDestino
-                        };
-
-                        // Reinicializar swipers
-                        this.$nextTick(() => {
-                            this.initSwipers();
-                        });
+                    } else {
+                        console.error('No se encontraron las ubicaciones para actualizar');
                     }
                 },
-
                 // Método para calcular estado basado en cantidad y capacidad
                 calcularEstado(cantidad, capacidad) {
                     if (capacidad <= 0) return 'vacio';
