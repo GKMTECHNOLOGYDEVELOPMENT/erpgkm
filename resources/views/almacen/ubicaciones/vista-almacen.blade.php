@@ -161,9 +161,11 @@
                     <label class="block text-sm font-medium text-slate-600 mb-2">Sede</label>
                     <select x-model="filtro.sede" @change="aplicarFiltros()"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
-                        <option value="">Todas las sedes</option>
                         @foreach ($sedes as $sede)
-                            <option value="{{ $sede }}">{{ $sede }}</option>
+                        <option value="{{ $sede }}"
+                            {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}> <!-- ← Esto asegura que esté seleccionado -->
+                            {{ $sede }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -193,6 +195,12 @@
                     class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition">
                     <i class="fas fa-tag"></i>
                     Etiquetas: <span x-text="labels ? 'ON' : 'OFF'"></span>
+                </button>
+
+                <button @click="abrirModalSeleccionRack()"
+                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
+                    <i class="fas fa-edit"></i>
+                    Editar Dimensiones
                 </button>
 
                 <!-- <button @click="resetFiltros()"
@@ -310,6 +318,71 @@
         </div>
 
 
+        <!-- Modal para Seleccionar Rack -->
+        <div x-show="modalSeleccionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+            :class="modalSeleccionRack.open && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click="cerrarModalSeleccionRack()">
+                <div x-show="modalSeleccionRack.open" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-2xl" @click.stop>
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <div class="font-bold text-lg">Seleccionar Rack para Editar</div>
+                        <button type="button" class="text-white-dark hover:text-dark"
+                            @click="cerrarModalSeleccionRack()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-5">
+                        <!-- Preloader -->
+                        <div x-show="modalSeleccionRack.loading" class="flex justify-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                        </div>
+
+                        <!-- Lista de racks -->
+                        <div x-show="!modalSeleccionRack.loading" class="space-y-3">
+                            <template x-if="modalSeleccionRack.racks.length === 0">
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-box-open text-4xl mb-4"></i>
+                                    <p>No hay racks disponibles</p>
+                                </div>
+                            </template>
+
+                            <template x-for="rack in modalSeleccionRack.racks" :key="rack.idRack">
+                                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                                    @click="seleccionarRackParaEdicion(rack)">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-warehouse text-indigo-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="font-semibold text-gray-800" x-text="'Rack ' + rack.nombre"></div>
+                                            <div class="text-sm text-gray-600" x-text="rack.sede"></div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-500" x-text="rack.filas + 'x' + rack.columnas"></div>
+                                        <div class="text-xs text-gray-400" x-text="(rack.filas * rack.columnas) + ' ubicaciones'"></div>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400 ml-4"></i>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end items-center mt-6 gap-4">
+                            <button type="button" @click="cerrarModalSeleccionRack()"
+                                class="btn btn-outline-danger">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Modal para Crear Rack -->
         <div x-show="modalCrearRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
@@ -340,7 +413,7 @@
                                     class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
                                     <option value="">Seleccione una sede</option>
                                     @foreach ($sedes as $sede)
-                                        <option value="{{ $sede }}">{{ $sede }}</option>
+                                    <option value="{{ $sede }}">{{ $sede }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -582,6 +655,93 @@
                 </div>
             </div>
         </div>
+
+
+
+        <!-- Modal para Editar Dimensiones del Rack -->
+        <div x-show="modalEditarDimensiones.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+            :class="modalEditarDimensiones.open && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click="cerrarModalEditarDimensiones()">
+                <div x-show="modalEditarDimensiones.open" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg" @click.stop>
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <div class="font-bold text-lg">Editar Dimensiones del Rack</div>
+                        <button type="button" class="text-white-dark hover:text-dark"
+                            @click="cerrarModalEditarDimensiones()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-5">
+                        <form @submit.prevent="actualizarDimensionesRack()" class="space-y-4">
+                            <!-- Información del rack -->
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg" x-show="modalEditarDimensiones.rack">
+                                <div class="text-sm text-blue-800 dark:text-blue-300">
+                                    <span x-text="'Rack: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.nombre : '')"></span>
+                                    <span x-show="modalEditarDimensiones.rack"> | </span>
+                                    <span x-text="'Sede: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.sede : '')"></span>
+                                </div>
+                            </div>
+
+                            <!-- Configuración de dimensiones -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas *</label>
+                                    <input type="number" x-model="modalEditarDimensiones.form.filas" required min="1" max="12"
+                                        class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
+                                        placeholder="Número de filas">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Columnas *</label>
+                                    <input type="number" x-model="modalEditarDimensiones.form.columnas" required min="1" max="24"
+                                        class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
+                                        placeholder="Número de columnas">
+                                </div>
+                            </div>
+
+                            <!-- Capacidad Máxima -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
+                                    Capacidad Máxima por Ubicación *
+                                </label>
+                                <input type="number" x-model="modalEditarDimensiones.form.capacidad_maxima" required min="1" max="1000"
+                                    class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
+                                    placeholder="Ej: 100, 200, 500...">
+                                <p class="text-xs text-slate-500 mt-1">
+                                    Esta capacidad se aplicará a las nuevas ubicaciones generadas
+                                </p>
+                            </div>
+
+                            <!-- Resumen de cambios -->
+                            <div x-show="modalEditarDimensiones.cambiosDetectados" class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
+                                <div class="text-sm text-amber-800 dark:text-amber-300">
+                                    <div class="font-medium mb-1">Resumen de cambios:</div>
+                                    <div x-text="modalEditarDimensiones.resumenCambios"></div>
+                                </div>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="flex justify-end items-center mt-8 gap-4">
+                                <button type="button" @click="cerrarModalEditarDimensiones()"
+                                    class="btn btn-outline-danger">
+                                    Cancelar
+                                </button>
+                                <button type="submit" :disabled="modalEditarDimensiones.loading"
+                                    :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'"
+                                    class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                                    <i class="fas fa-spinner fa-spin" x-show="modalEditarDimensiones.loading"></i>
+                                    <span x-text="modalEditarDimensiones.loading ? 'Actualizando...' : 'Actualizar Dimensiones'"></span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     </div>
@@ -613,6 +773,27 @@
                         estado: 'activo'
                     }
                 },
+                // Agrega este nuevo estado al inicio con los otros modales
+                modalSeleccionRack: {
+                    open: false,
+                    racks: [],
+                    rackSeleccionado: null,
+                    loading: false
+                },
+
+                modalEditarDimensiones: {
+                    open: false,
+                    loading: false,
+                    rack: null,
+                    cambiosDetectados: false,
+                    resumenCambios: '',
+                    form: {
+                        filas: 1,
+                        columnas: 1,
+                        capacidad_maxima: 100
+                    }
+                },
+
 
                 modalCrearUbicacion: {
                     open: false,
@@ -657,6 +838,44 @@
                     this.modalCrearRack.sugerencia = null;
                     this.modalCrearRack.letrasUsadas = [];
                 },
+                // Método para abrir modal de selección de rack
+                async abrirModalSeleccionRack() {
+                    try {
+                        this.modalSeleccionRack.loading = true;
+
+                        // Cargar lista de racks disponibles
+                        const response = await fetch('/almacen/racks/listar');
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.modalSeleccionRack.racks = result.data;
+                            this.modalSeleccionRack.open = true;
+                            this.modalSeleccionRack.rackSeleccionado = null;
+                        } else {
+                            this.error('Error al cargar lista de racks');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    } finally {
+                        this.modalSeleccionRack.loading = false;
+                    }
+                },
+                // Método para seleccionar un rack y abrir el modal de edición
+                async seleccionarRackParaEdicion(rack) {
+                    this.modalSeleccionRack.rackSeleccionado = rack;
+
+                    // Cerrar modal de selección
+                    this.modalSeleccionRack.open = false;
+
+                    // Abrir modal de edición con el rack seleccionado
+                    await this.abrirModalEditarDimensiones(rack);
+                },
+                cerrarModalSeleccionRack() {
+                    this.modalSeleccionRack.open = false;
+                    this.modalSeleccionRack.racks = [];
+                    this.modalSeleccionRack.rackSeleccionado = null;
+                },
                 async abrirModalCrearRack() {
                     this.modalCrearRack.open = true;
                     // Resetear formulario
@@ -669,6 +888,34 @@
                     };
                     this.modalCrearRack.sugerencia = null;
                     this.modalCrearRack.letrasUsadas = [];
+                },
+
+                // Método para abrir modal de edición
+                async abrirModalEditarDimensiones(rack) {
+                    try {
+                        // Verificar que el rack existe
+                        if (!rack || !rack.idRack) {
+                            this.error('Rack no válido');
+                            return;
+                        }
+
+                        const response = await fetch(`/almacen/racks/${rack.idRack}/info`);
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.modalEditarDimensiones.rack = result.data;
+                            this.modalEditarDimensiones.form.filas = result.data.filas;
+                            this.modalEditarDimensiones.form.columnas = result.data.columnas;
+                            this.modalEditarDimensiones.form.capacidad_maxima = 100; // Valor por defecto
+                            this.modalEditarDimensiones.open = true;
+                            this.calcularCambios();
+                        } else {
+                            this.error('Error al cargar información del rack');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    }
                 },
 
                 async sugerirSiguienteLetra() {
@@ -717,6 +964,84 @@
                             .sugerencia, 'success');
                     }
                 },
+
+                // Calcular cambios cuando se modifiquen las dimensiones
+                // Calcular cambios cuando se modifiquen las dimensiones
+                calcularCambios() {
+                    const rack = this.modalEditarDimensiones.rack;
+
+                    // Verificar que el rack existe
+                    if (!rack) {
+                        this.modalEditarDimensiones.cambiosDetectados = false;
+                        this.modalEditarDimensiones.resumenCambios = 'No hay rack seleccionado';
+                        return;
+                    }
+
+                    const nuevasFilas = this.modalEditarDimensiones.form.filas;
+                    const nuevasColumnas = this.modalEditarDimensiones.form.columnas;
+
+                    const ubicacionesActuales = rack.filas * rack.columnas;
+                    const ubicacionesNuevas = nuevasFilas * nuevasColumnas;
+                    const diferencia = ubicacionesNuevas - ubicacionesActuales;
+
+                    this.modalEditarDimensiones.cambiosDetectados = diferencia !== 0;
+
+                    if (diferencia > 0) {
+                        this.modalEditarDimensiones.resumenCambios =
+                            `Se generarán ${diferencia} nuevas ubicaciones. Total: ${ubicacionesNuevas} ubicaciones.`;
+                    } else if (diferencia < 0) {
+                        this.modalEditarDimensiones.resumenCambios =
+                            `Se reducirán ${Math.abs(diferencia)} ubicaciones. Total: ${ubicacionesNuevas} ubicaciones.`;
+                    } else {
+                        this.modalEditarDimensiones.resumenCambios = 'No hay cambios en el número de ubicaciones.';
+                    }
+                },
+                // Método para actualizar dimensiones
+                async actualizarDimensionesRack() {
+                    this.modalEditarDimensiones.loading = true;
+
+                    try {
+                        const response = await fetch(`/almacen/racks/${this.modalEditarDimensiones.rack.idRack}/actualizar-dimensiones`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(this.modalEditarDimensiones.form)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.success(result.message);
+                            this.cerrarModalEditarDimensiones();
+                            this.cargarDatos(); // Recargar datos para actualizar la vista
+                        } else {
+                            this.error(result.message || 'Error al actualizar dimensiones');
+                            if (result.errors) {
+                                Object.values(result.errors).forEach(errorArray => {
+                                    errorArray.forEach(error => {
+                                        this.error(error);
+                                    });
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    } finally {
+                        this.modalEditarDimensiones.loading = false;
+                    }
+                },
+
+                cerrarModalEditarDimensiones() {
+                    this.modalEditarDimensiones.open = false;
+                    this.modalEditarDimensiones.loading = false;
+                    this.modalEditarDimensiones.rack = null;
+                    this.modalEditarDimensiones.cambiosDetectados = false;
+                    this.modalEditarDimensiones.resumenCambios = '';
+                },
+
                 mostrarMensajeTemporal(mensaje, tipo = 'info') {
                     // Puedes implementar tu sistema de notificaciones aquí
                     console.log(`${tipo.toUpperCase()}: ${mensaje}`);
@@ -753,7 +1078,7 @@
                             if (result.data && result.data.total_ubicaciones) {
                                 console.log(
                                     `Se crearon ${result.data.total_ubicaciones} ubicaciones automáticamente`
-                                    );
+                                );
                             }
                         } else {
                             this.error(result.message || 'Error al crear rack');
@@ -945,7 +1270,7 @@
                 resetFiltros() {
                     this.filtro = {
                         periodo: '30',
-                        sede: '',
+                        sede: 'LOS OLIVOS', // ← Ahora tiene el valor por defecto
                         buscar: ''
                     };
                     this.cargarDatos();
@@ -1076,7 +1401,7 @@
 
                     // ✅ OBTENER DATOS DEL YAXIS CON VALIDACIÓN
                     const yAxisData = [...new Set(this.data.map(d => d.y))].filter(y => y !==
-                    undefined);
+                        undefined);
 
                     return {
                         tooltip: {
@@ -1237,7 +1562,7 @@
                                 }
 
                                 const rack = p.data[5]; // índice 5: nombre del rack
-                                const sede = p.data[10]; // índice 10: sede (NUEVO)
+                                const sede = p.data[9]; // índice 10: sede (NUEVO)
 
                                 console.log('Navegando a:', rack, 'en sede:', sede);
 

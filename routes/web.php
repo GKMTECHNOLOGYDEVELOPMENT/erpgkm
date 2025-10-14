@@ -1463,6 +1463,7 @@ Route::get('/almacen/racks/disponibles', [UbicacionesVistaController::class, 'li
 Route::get('/almacen/racks/{id}/ubicaciones-vacias', [UbicacionesVistaController::class, 'listarUbicacionesVacias']);
 // Rutas para gestión de racks y ubicaciones
 Route::post('/almacen/racks/crear', [UbicacionesVistaController::class, 'crearRack']);
+Route::post('/almacen/racks/{rackId}/actualizar-dimensiones', [UbicacionesVistaController::class, 'actualizarDimensionesRack']);
 Route::get('/almacen/racks/listar', [UbicacionesVistaController::class, 'listarRacks']);
 Route::get('/almacen/racks/{id}/info', [UbicacionesVistaController::class, 'obtenerInfoRack']);
 Route::post('/almacen/ubicaciones/crear', [UbicacionesVistaController::class, 'crearUbicacion']);
@@ -1470,3 +1471,7 @@ Route::post('/almacen/racks/sugerir-letra', [UbicacionesVistaController::class, 
 
 
 Route::get('/solicitud-ingreso/sugerir-ubicaciones/{articuloId}/{cantidad}', [SolicitudingresoController::class, 'sugerirUbicacionesMejorado']);
+
+
+Route::get('/custodia/{id}/sugerencias-ubicacion', [CustodiaController::class, 'sugerirUbicacionesCustodia']);
+Route::get('/custodia/{id}/ubicacion-actual', [CustodiaController::class, 'obtenerUbicacionActual']);

@@ -24,6 +24,7 @@ class Custodia extends Model
         'fecha_devolucion',
         'observaciones',
         'ubicacion_actual',
+        'observacion_almacen', // ✅ AÑADIR ESTA LÍNEA
         'responsable_entrega',
         'id_responsable_recepcion',
     ];
