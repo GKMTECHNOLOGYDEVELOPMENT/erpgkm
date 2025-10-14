@@ -351,69 +351,341 @@ public function getRepuestosCompatibles($idModelo)
         return view('solicitud.solicitudcustodia.opciones', compact('custodia', 'ubicaciones'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $custodia = Custodia::findOrFail($id);
+ public function update(Request $request, $id)
+{
+    $custodia = Custodia::findOrFail($id);
 
-        // Validar los datos
-        $validated = $request->validate([
-            'estado' => 'required|in:Pendiente,En revisión,Aprobado,Rechazado,Devuelto',
-            'ubicacion_actual' => 'required_if:estado,Aprobado|max:100',
-            'observaciones' => 'nullable|string',
-            'idubicacion' => 'required_if:estado,Aprobado|exists:ubicacion,idUbicacion',
-            'observacion_almacen' => 'nullable|string',
-            'cantidad' => 'sometimes|integer|min:1'
+    // Validar los datos - CAMBIAR idubicacion por rack_ubicacion_id
+    $validated = $request->validate([
+        'estado' => 'required|in:Pendiente,En revisión,Aprobado,Rechazado,Devuelto',
+        'ubicacion_actual' => 'required_if:estado,Aprobado|max:100',
+        'observaciones' => 'nullable|string',
+        'rack_ubicacion_id' => 'required_if:estado,Aprobado|exists:rack_ubicaciones,idRackUbicacion', // ✅ CAMBIADO
+        'observacion_almacen' => 'nullable|string',
+        'cantidad' => 'sometimes|integer|min:1'
+    ]);
+
+   DB::beginTransaction();
+
+    try {
+        $estadoAnterior = $custodia->estado;
+        $custodia->update($validated);
+        $custodia->observacion_almacen = $validated['observacion_almacen'] ?? null; // ✅ GUARDAR EN 
+
+        if ($request->estado === 'Aprobado') {
+            $this->guardarCustodiaEnRack($custodia, $request);
+        } else if ($estadoAnterior === 'Aprobado' && $request->estado !== 'Aprobado') {
+            $this->eliminarCustodiaDeRack($custodia);
+            CustodiaUbicacion::where('idCustodia', $custodia->id)->delete();
+        }
+
+        DB::commit();
+
+        // ✅ OBTENER UBICACIÓN ACTUAL DESPUÉS DE GUARDAR
+        $ubicacionActual = $this->obtenerUbicacionActualData($custodia->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Custodia actualizada correctamente',
+            'estado_actualizado' => $custodia->estado,
+            'ubicacion_actual' => $ubicacionActual // ✅ Agregar ubicación actual
         ]);
 
-        // Desactivar verificaciones de FK temporalmente (SOLO DESARROLLO)
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al actualizar custodia: ' . $e->getMessage());
 
-        DB::beginTransaction();
-
-        try {
-            // Actualizar la custodia
-            $custodia->update($validated);
-
-            // Si el estado es Aprobado, guardar en custodia_ubicacion
-            if ($request->estado === 'Aprobado') {
-                $ubicacion = Ubicacion::find($request->idubicacion);
-
-                // Usar updateOrCreate con el formato correcto
-                CustodiaUbicacion::updateOrCreate(
-                    ['idCustodia' => $custodia->id],
-                    [
-                        'idUbicacion' => $request->idubicacion,
-                        'observacion' => $request->observacion_almacen,
-                        'cantidad' => $request->cantidad ?? 1,
-                        'updated_at' => now(),
-                        'created_at' => now() // Asegurar created_at
-                    ]
-                );
-            } else if ($request->estado !== 'Aprobado') {
-                CustodiaUbicacion::where('idCustodia', $custodia->id)->delete();
-            }
-
-            DB::commit();
-
-            // Reactivar verificaciones de FK
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Custodia actualizada correctamente',
-                'estado_actualizado' => $custodia->estado
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar la custodia: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar la custodia: ' . $e->getMessage()
+        ], 500);
     }
+}
 
+// ✅ Método auxiliar para obtener datos de ubicación
+private function obtenerUbicacionActualData($custodiaId)
+{
+    return DB::table('rack_ubicacion_articulos as rua')
+        ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+        ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+        ->where('rua.custodia_id', $custodiaId)
+        ->select(
+            'ru.idRackUbicacion',
+            'ru.codigo',
+            'rua.cantidad',
+            'r.nombre as rack_nombre',
+            'r.sede'
+        )
+        ->first();
+}
+
+/**
+ * Guardar custodia en rack_ubicacion_articulos - CORREGIDO
+ */
+private function guardarCustodiaEnRack($custodia, $request)
+{
+    try {
+        $rackUbicacionId = $request->rack_ubicacion_id; // ✅ Usar el nuevo campo
+        
+        // Verificar que la ubicación del rack existe
+        $rackUbicacion = DB::table('rack_ubicaciones')
+            ->where('idRackUbicacion', $rackUbicacionId)
+            ->first();
+
+        if (!$rackUbicacion) {
+            throw new Exception('Ubicación de rack no encontrada');
+        }
+
+        // Verificar capacidad disponible
+        $cantidadActualEnUbicacion = DB::table('rack_ubicacion_articulos')
+            ->where('rack_ubicacion_id', $rackUbicacionId)
+            ->sum('cantidad');
+
+        $capacidadDisponible = $rackUbicacion->capacidad_maxima - $cantidadActualEnUbicacion;
+        $cantidadRequerida = $request->cantidad ?? 1;
+
+        if ($cantidadRequerida > $capacidadDisponible) {
+            throw new Exception("La ubicación {$rackUbicacion->codigo} no tiene suficiente capacidad. Disponible: {$capacidadDisponible}, Requerido: {$cantidadRequerida}");
+        }
+
+        // Verificar si ya existe esta custodia en algún rack
+        $custodiaExistente = DB::table('rack_ubicacion_articulos')
+            ->where('custodia_id', $custodia->id)
+            ->first();
+
+        if ($custodiaExistente) {
+            // Actualizar ubicación existente
+            DB::table('rack_ubicacion_articulos')
+                ->where('custodia_id', $custodia->id)
+                ->update([
+                    'rack_ubicacion_id' => $rackUbicacionId,
+                    'cantidad' => $cantidadRequerida,
+                    'updated_at' => now()
+                ]);
+                
+            Log::info("Custodia {$custodia->id} actualizada en rack {$rackUbicacionId}");
+        } else {
+            // Crear nuevo registro en rack_ubicacion_articulos
+            DB::table('rack_ubicacion_articulos')->insert([
+                'rack_ubicacion_id' => $rackUbicacionId,
+                'articulo_id' => null, // No es un artículo del inventario
+                'custodia_id' => $custodia->id, // Nuevo campo
+                'cantidad' => $cantidadRequerida,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            
+            Log::info("Custodia {$custodia->id} creada en rack {$rackUbicacionId}");
+        }
+
+        // Actualizar estado de ocupación del rack
+        $this->actualizarEstadoRack($rackUbicacionId);
+
+        // ✅ ELIMINAR registro antiguo de custodia_ubicacion si existe
+        CustodiaUbicacion::where('idCustodia', $custodia->id)->delete();
+
+    } catch (\Exception $e) {
+        Log::error('Error al guardar custodia en rack: ' . $e->getMessage());
+        throw $e;
+    }
+}
+
+
+/**
+ * Obtener ubicación actual de la custodia en racks
+ */
+/**
+ * Obtener ubicación actual de la custodia en racks
+ */
+public function obtenerUbicacionActual($custodiaId)
+{
+    try {
+        $custodia = Custodia::findOrFail($custodiaId);
+        
+        $ubicacionActual = DB::table('rack_ubicacion_articulos as rua')
+            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('rua.custodia_id', $custodiaId)
+            ->select(
+                'ru.idRackUbicacion',
+                'ru.codigo',
+                'rua.cantidad',
+                'r.nombre as rack_nombre',
+                'r.sede'
+            )
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'ubicacion_actual' => $ubicacionActual
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al obtener ubicación actual: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener ubicación actual'
+        ], 500);
+    }
+}
+
+/**
+ * Buscar rack disponible para custodia
+ */
+private function buscarRackDisponibleParaCustodia($ubicacion)
+{
+    // Buscar racks en la misma sede/sucursal que tengan espacio
+    return DB::table('rack_ubicaciones as ru')
+        ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+        ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
+        ->where('r.estado', 'activo')
+        ->where('r.sede', 'LIKE', '%' . $ubicacion->sucursal->nombre . '%') // Ajustar según tu lógica de sedes
+        ->select(
+            'ru.idRackUbicacion',
+            'ru.codigo',
+            'ru.capacidad_maxima',
+            'r.nombre as rack_nombre',
+            'r.sede',
+            DB::raw('COALESCE(SUM(rua.cantidad), 0) as cantidad_ocupada')
+        )
+        ->groupBy('ru.idRackUbicacion', 'ru.codigo', 'ru.capacidad_maxima', 'r.nombre', 'r.sede')
+        ->havingRaw('ru.capacidad_maxima - COALESCE(SUM(rua.cantidad), 0) >= 1') // Mínimo 1 unidad de espacio
+        ->orderBy('cantidad_ocupada', 'asc') // Priorizar racks con menos ocupación
+        ->first();
+}
+
+/**
+ * Eliminar custodia del sistema de racks
+ */
+private function eliminarCustodiaDeRack($custodia)
+{
+    try {
+        // Eliminar registro de rack_ubicacion_articulos
+        $eliminados = DB::table('rack_ubicacion_articulos')
+            ->where('custodia_id', $custodia->id)
+            ->delete();
+
+        if ($eliminados > 0) {
+            Log::info("Custodia {$custodia->id} eliminada del sistema de racks");
+        }
+
+    } catch (\Exception $e) {
+        Log::error('Error al eliminar custodia de rack: ' . $e->getMessage());
+        throw $e;
+    }
+}
+
+/**
+ * Actualizar estado de ocupación del rack
+ */
+private function actualizarEstadoRack($rackUbicacionId)
+{
+    try {
+        // Calcular ocupación actual
+        $ocupacion = DB::table('rack_ubicacion_articulos')
+            ->where('rack_ubicacion_id', $rackUbicacionId)
+            ->sum('cantidad');
+
+        $rackUbicacion = DB::table('rack_ubicaciones')
+            ->where('idRackUbicacion', $rackUbicacionId)
+            ->first();
+
+        if ($rackUbicacion) {
+            $estado = $this->calcularEstadoOcupacion($ocupacion, $rackUbicacion->capacidad_maxima);
+            
+            DB::table('rack_ubicaciones')
+                ->where('idRackUbicacion', $rackUbicacionId)
+                ->update([
+                    'estado_ocupacion' => $estado,
+                    'updated_at' => now()
+                ]);
+        }
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar estado del rack: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Calcular estado de ocupación (mismo método que en UbicacionesVistaController)
+ */
+private function calcularEstadoOcupacion($cantidad, $capacidadMaxima)
+{
+    if ($capacidadMaxima <= 0) return 'vacio';
+    
+    $porcentaje = ($cantidad / $capacidadMaxima) * 100;
+    
+    if ($porcentaje == 0) return 'vacio';
+    if ($porcentaje <= 24) return 'bajo';
+    if ($porcentaje <= 49) return 'medio';
+    if ($porcentaje <= 74) return 'alto';
+    return 'muy_alto';
+}
+
+
+/**
+ * Obtener sugerencias de ubicación para custodia
+ */
+public function sugerirUbicacionesCustodia($custodiaId)
+{
+    try {
+        $custodia = Custodia::findOrFail($custodiaId);
+        
+        // Usar el mismo sistema de sugerencias que para artículos
+        $sugerencias = $this->obtenerSugerenciasUbicaciones(1); // Cantidad siempre 1 para custodias
+
+        return response()->json([
+            'success' => true,
+            'sugerencias' => $sugerencias,
+            'mensaje' => 'Sugerencias de ubicación para custodia'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al obtener sugerencias para custodia: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener sugerencias de ubicación'
+        ], 500);
+    }
+}
+
+/**
+ * Método reutilizable para obtener sugerencias (compartido con solicitud ingreso)
+ */
+private function obtenerSugerenciasUbicaciones($cantidad)
+{
+    // Aquí puedes reutilizar la lógica del método sugerirUbicacionesMejorado
+    
+    return DB::table('rack_ubicaciones as ru')
+        ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+        ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
+        ->where('r.estado', 'activo')
+        ->select(
+            'ru.idRackUbicacion as id',
+            'ru.codigo',
+            'ru.capacidad_maxima',
+            'r.nombre as rack_nombre',
+            'r.sede',
+            DB::raw('COALESCE(SUM(rua.cantidad), 0) as cantidad_ocupada')
+        )
+        ->groupBy('ru.idRackUbicacion', 'ru.codigo', 'ru.capacidad_maxima', 'r.nombre', 'r.sede')
+        ->havingRaw('ru.capacidad_maxima - COALESCE(SUM(rua.cantidad), 0) >= ?', [$cantidad])
+        ->orderBy('cantidad_ocupada', 'asc')
+        ->get()
+        ->map(function($ubicacion) use ($cantidad) {
+            $espacioDisponible = $ubicacion->capacidad_maxima - $ubicacion->cantidad_ocupada;
+            return [
+                'id' => $ubicacion->id,
+                'codigo' => $ubicacion->codigo,
+                'rack_nombre' => $ubicacion->rack_nombre,
+                'sede' => $ubicacion->sede,
+                'cantidad_actual' => $ubicacion->cantidad_ocupada,
+                'capacidad_maxima' => $ubicacion->capacidad_maxima,
+                'espacio_disponible' => $espacioDisponible,
+                'tipo' => 'rack',
+                'prioridad' => 1
+            ];
+        });
+}
 
 
    public function create()
