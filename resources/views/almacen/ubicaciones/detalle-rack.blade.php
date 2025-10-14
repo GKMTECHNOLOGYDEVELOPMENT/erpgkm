@@ -384,22 +384,31 @@
                                 <!-- Resumen de la ubicación -->
                                 <div
                                     class="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-xl border border-blue-200">
-                                    <div class="grid grid-cols-3 gap-4 mb-3">
-                                        <div class="text-center">
-                                            <div class="text-2xl font-bold text-blue-600"
-                                                x-text="modal.ubi.productos.length"></div>
-                                            <div class="text-xs text-gray-600">Productos</div>
+                                    <div class="flex justify-between items-start mb-3">
+                                        <div class="grid grid-cols-3 gap-4 flex-1">
+                                            <div class="text-center">
+                                                <div class="text-2xl font-bold text-blue-600"
+                                                    x-text="modal.ubi.productos.length"></div>
+                                                <div class="text-xs text-gray-600">Productos</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-2xl font-bold text-green-600"
+                                                    x-text="modal.ubi.cantidad_total"></div>
+                                                <div class="text-xs text-gray-600">Unidades</div>
+                                            </div>
+                                            <div class="text-center">
+                                                <div class="text-2xl font-bold text-purple-600"
+                                                    x-text="modal.ubi.capacidad"></div>
+                                                <div class="text-xs text-gray-600">Capacidad</div>
+                                            </div>
                                         </div>
-                                        <div class="text-center">
-                                            <div class="text-2xl font-bold text-green-600"
-                                                x-text="modal.ubi.cantidad_total"></div>
-                                            <div class="text-xs text-gray-600">Unidades</div>
-                                        </div>
-                                        <div class="text-center">
-                                            <div class="text-2xl font-bold text-purple-600"
-                                                x-text="modal.ubi.capacidad"></div>
-                                            <div class="text-xs text-gray-600">Capacidad</div>
-                                        </div>
+
+                                        <!-- ✅ NUEVO: Botón para agregar más productos -->
+                                        <button @click="abrirModalAgregarProducto(modal.ubi)"
+                                            class="ml-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                            <i class="fas fa-plus text-xs"></i>
+                                            Agregar Más
+                                        </button>
                                     </div>
 
                                     <!-- Categorías y tipos -->
@@ -417,18 +426,22 @@
                                     </div>
                                 </div>
 
-                                <!-- Lista de productos -->
+                                <!-- Lista de productos MEJORADA -->
                                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                                    <div class="bg-gray-50 px-4 py-3 border-b">
+                                    <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                                         <h3 class="font-semibold text-gray-800">Productos en esta ubicación</h3>
+                                        <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
+                                            Capacidad: <span x-text="modal.ubi.cantidad_total"></span>/<span
+                                                x-text="modal.ubi.capacidad"></span>
+                                        </span>
                                     </div>
 
                                     <div class="max-h-64 overflow-y-auto">
                                         <template x-for="(producto, idx) in modal.ubi.productos"
                                             :key="idx">
-                                            <div class="border-b border-gray-100 last:border-b-0">
-                                                <div
-                                                    class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
+                                            <div
+                                                class="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+                                                <div class="flex items-center justify-between p-4">
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center gap-3 mb-2">
                                                             <div
@@ -450,14 +463,64 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="text-right">
-                                                        <span class="block font-bold text-gray-800 text-lg"
-                                                            x-text="producto.cantidad + ' und.'"></span>
-                                                        <button
-                                                            @click="iniciarReubicacionProducto(modal.ubi, producto)"
-                                                            class="mt-1 text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition-all duration-200 hover:scale-105 flex items-center gap-1">
-                                                            <i class="fas fa-arrows-alt text-xs"></i>
-                                                            Mover
+                                                    <div class="text-right flex items-center gap-3">
+                                                        <!-- ✅ NUEVO: Controles de edición -->
+                                                        <div
+                                                            class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                                                            <button @click="decrementarCantidadExistente(idx)"
+                                                                :disabled="producto.cantidad <= 1"
+                                                                class="w-6 h-6 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                <i class="fas fa-minus text-gray-600 text-xs"></i>
+                                                            </button>
+
+                                                            <input type="number" x-model="producto.cantidad"
+                                                                @change="actualizarCantidadProducto(idx)"
+                                                                min="1" :max="modal.ubi.capacidad"
+                                                                class="w-12 text-center p-1 border border-gray-300 rounded text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+                                                            <button @click="incrementarCantidadExistente(idx)"
+                                                                :disabled="getCantidadTotalModal() >= modal.ubi.capacidad"
+                                                                class="w-6 h-6 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                <i class="fas fa-plus text-gray-600 text-xs"></i>
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="flex flex-col items-end gap-1">
+                                                            <span class="block font-bold text-gray-800 text-lg"
+                                                                x-text="producto.cantidad + ' und.'"></span>
+
+                                                            <div class="flex gap-1">
+                                                                <button
+                                                                    @click="iniciarReubicacionProducto(modal.ubi, producto)"
+                                                                    class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1">
+                                                                    <i class="fas fa-arrows-alt text-xs"></i>
+                                                                    Mover
+                                                                </button>
+
+                                                                <!-- ✅ NUEVO: Botón para eliminar producto específico -->
+                                                                <button @click="eliminarProductoIndividual(idx)"
+                                                                    class="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1">
+                                                                    <i class="fas fa-trash text-xs"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- ✅ NUEVO: Información de cambios pendientes -->
+                                                <div x-show="producto.cantidadOriginal !== undefined && producto.cantidad !== producto.cantidadOriginal"
+                                                    class="bg-yellow-50 border-t border-yellow-200 px-4 py-2 text-xs text-yellow-700 flex justify-between items-center">
+                                                    <span>Cambios pendientes: <span
+                                                            x-text="producto.cantidadOriginal"></span> → <span
+                                                            x-text="producto.cantidad"></span> unidades</span>
+                                                    <div class="flex gap-1">
+                                                        <button @click="guardarCambiosProducto(idx)"
+                                                            class="bg-green-500 hover:bg-green-600 text-white px-2 py-0.5 rounded text-xs">
+                                                            Guardar
+                                                        </button>
+                                                        <button @click="cancelarCambiosProducto(idx)"
+                                                            class="bg-gray-500 hover:bg-gray-600 text-white px-2 py-0.5 rounded text-xs">
+                                                            Cancelar
                                                         </button>
                                                     </div>
                                                 </div>
@@ -491,7 +554,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Botones de acción -->
+                                <!-- Botones de acción MEJORADOS -->
                                 <div class="grid grid-cols-2 gap-3 pt-4">
                                     <button @click="iniciarReubicacionMultiple(modal.ubi)"
                                         class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
@@ -500,21 +563,27 @@
                                     </button>
 
                                     <button @click="iniciarReubicacionRack(modal.ubi)"
-                                        class="bg-secondary text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        class="bg-purple-500 hover:bg-purple-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-exchange-alt text-xs"></i>
                                         Otro Rack
+                                    </button>
+
+                                    <button @click="abrirModalAgregarProducto(modal.ubi)"
+                                        class="bg-green-500 hover:bg-green-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        <i class="fas fa-plus text-xs"></i>
+                                        Agregar Más
                                     </button>
 
                                     <button @click="vaciarUbicacion(modal.ubi)"
                                         class="bg-red-500 hover:bg-red-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-trash text-xs"></i>
-                                        Vaciar
+                                        Vaciar Todo
                                     </button>
 
                                     <button @click="abrirHistorial(modal.ubi)"
-                                        class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105 col-span-2">
                                         <i class="fas fa-history text-xs"></i>
-                                        Historial
+                                        Historial Completo
                                     </button>
                                 </div>
                             </div>
@@ -605,7 +674,8 @@
                                 @change="cargarUbicacionesDestino()"
                                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Seleccione un rack</option>
-                                <template x-for="rack in modalReubicacionRack.racksDisponibles" :key="rack.id">
+                                <template x-for="rack in modalReubicacionRack.racksDisponibles"
+                                    :key="rack.id">
                                     <option :value="rack.id" x-text="'Rack ' + rack.nombre + ' - ' + rack.sede">
                                     </option>
                                 </template>
@@ -985,7 +1055,7 @@
                                 :class="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
                                     modalAgregarProducto.capacidadMaxima ?
                                     'bg-gray-400 cursor-not-allowed' :
-                                    'bg-green-500 hover:from-green-600 hover:to-blue-600'"
+                                    'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600'"
                                 class="flex-1 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 shadow-lg">
                                 <i class="fas fa-check"></i>
                                 Agregar Productos
@@ -1974,67 +2044,98 @@
 
                 async confirmarAgregarProducto() {
                     try {
-                        // Validaciones
-                        if (!this.modalAgregarProducto.productoSeleccionado) {
-                            this.error('Por favor seleccione un producto');
+                        // ✅ VALIDACIONES ACTUALIZADAS para múltiples productos
+                        if (this.modalAgregarProducto.productosSeleccionados.length === 0) {
+                            this.error('Por favor seleccione al menos un producto');
                             return;
                         }
 
-                        const cantidad = parseInt(this.modalAgregarProducto.cantidad);
-                        if (isNaN(cantidad) || cantidad <= 0) {
-                            this.error('La cantidad debe ser mayor a 0');
-                            return;
-                        }
-
-                        if (cantidad > this.modalAgregarProducto.capacidadMaxima) {
+                        // Validar que no se exceda la capacidad máxima
+                        const totalCantidades = this.getTotalCantidades();
+                        if (totalCantidades > this.modalAgregarProducto.capacidadMaxima) {
                             this.error(
-                                `La cantidad no puede superar la capacidad máxima de ${this.modalAgregarProducto.capacidadMaxima} unidades`
+                                `La cantidad total (${totalCantidades}) no puede superar la capacidad máxima de ${this.modalAgregarProducto.capacidadMaxima} unidades`
                             );
                             return;
                         }
 
-                        const payload = {
+                        // Validar cantidades individuales
+                        for (let producto of this.modalAgregarProducto.productosSeleccionados) {
+                            const cantidad = parseInt(producto.cantidad);
+                            if (isNaN(cantidad) || cantidad <= 0) {
+                                this.error(`La cantidad para ${producto.nombre} debe ser mayor a 0`);
+                                return;
+                            }
+
+                            // Validar stock si está disponible
+                            if (producto.stock && cantidad > producto.stock) {
+                                this.error(
+                                    `La cantidad para ${producto.nombre} (${cantidad}) excede el stock disponible (${producto.stock})`
+                                );
+                                return;
+                            }
+                        }
+
+                        console.log('Preparando para agregar productos:', {
                             ubicacion_id: this.modalAgregarProducto.ubicacion.id,
-                            articulo_id: this.modalAgregarProducto.productoSeleccionado,
-                            cantidad: cantidad,
-                            observaciones: this.modalAgregarProducto.observaciones
-                        };
-
-                        console.log('Agregando producto:', payload);
-
-                        const response = await fetch('/almacen/ubicaciones/agregar-producto', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content')
-                            },
-                            body: JSON.stringify(payload)
+                            productos_count: this.modalAgregarProducto.productosSeleccionados.length,
+                            total_cantidad: totalCantidades
                         });
 
-                        const result = await response.json();
-                        console.log('Respuesta agregar producto:', result);
+                        // ✅ ENVIAR CADA PRODUCTO INDIVIDUALMENTE (manteniendo compatibilidad con tu backend actual)
+                        const promises = this.modalAgregarProducto.productosSeleccionados.map(async (producto) => {
+                            const payload = {
+                                ubicacion_id: this.modalAgregarProducto.ubicacion.id,
+                                articulo_id: producto.id,
+                                cantidad: parseInt(producto.cantidad),
+                                observaciones: this.modalAgregarProducto.observaciones
+                            };
 
-                        if (result.success) {
-                            this.success('Producto agregado exitosamente');
+                            console.log('Enviando producto:', payload);
 
-                            // Actualizar la interfaz
-                            this.actualizarInterfazDespuesAgregarProducto(
-                                this.modalAgregarProducto.ubicacion.id,
-                                result.data.producto,
-                                cantidad
+                            const response = await fetch('/almacen/ubicaciones/agregar-producto', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify(payload)
+                            });
+
+                            return await response.json();
+                        });
+
+                        // Esperar a que todas las peticiones se completen
+                        const results = await Promise.all(promises);
+
+                        // Verificar si todas fueron exitosas
+                        const allSuccess = results.every(result => result.success);
+
+                        if (allSuccess) {
+                            this.success(
+                                `✅ ${this.modalAgregarProducto.productosSeleccionados.length} producto(s) agregado(s) exitosamente`
                             );
+
+                            // ✅ ACTUALIZAR INTERFAZ para múltiples productos
+                            // Usamos tu función existente pero la llamamos para cada producto
+                            this.modalAgregarProducto.productosSeleccionados.forEach(producto => {
+                                this.actualizarInterfazDespuesAgregarProducto(
+                                    this.modalAgregarProducto.ubicacion.id,
+                                    producto, // El objeto producto completo
+                                    parseInt(producto.cantidad)
+                                );
+                            });
 
                             this.cerrarModalAgregarProducto();
                         } else {
-                            this.error(result.message || 'Error al agregar producto');
-                            if (result.errors) {
-                                Object.values(result.errors).forEach(errorArray => {
-                                    errorArray.forEach(error => {
-                                        this.error(error);
-                                    });
-                                });
-                            }
+                            // Manejar errores individuales
+                            const errorMessages = results
+                                .filter(result => !result.success)
+                                .map(result => result.message)
+                                .join(', ');
+
+                            this.error(`Error al agregar algunos productos: ${errorMessages}`);
                         }
 
                     } catch (error) {
@@ -2105,6 +2206,213 @@
                     this.$nextTick(() => {
                         this.initSwipers();
                     });
+                },
+
+
+                // ✅ NUEVOS MÉTODOS para edición de productos existentes - AGREGAR DESPUÉS DE confirmarAgregarProducto
+
+                // Preparar productos para edición cuando se abre el modal
+                prepararEdicionProductos() {
+                    if (this.modal.ubi && this.modal.ubi.productos) {
+                        this.modal.ubi.productos.forEach(producto => {
+                            // Guardar la cantidad original para detectar cambios
+                            producto.cantidadOriginal = producto.cantidad;
+                        });
+                    }
+                },
+
+                // Calcular cantidad total en el modal
+                getCantidadTotalModal() {
+                    if (!this.modal.ubi || !this.modal.ubi.productos) return 0;
+                    return this.modal.ubi.productos.reduce((sum, p) => sum + (parseInt(p.cantidad) || 0), 0);
+                },
+
+                // Incrementar cantidad de producto existente
+                incrementarCantidadExistente(index) {
+                    if (!this.modal.ubi || !this.modal.ubi.productos) return;
+
+                    const producto = this.modal.ubi.productos[index];
+                    const totalActual = this.getCantidadTotalModal();
+
+                    if (totalActual < this.modal.ubi.capacidad) {
+                        producto.cantidad = parseInt(producto.cantidad) + 1;
+                    } else {
+                        this.warning('No se puede exceder la capacidad máxima de la ubicación');
+                    }
+                },
+
+                // Decrementar cantidad de producto existente
+                decrementarCantidadExistente(index) {
+                    if (!this.modal.ubi || !this.modal.ubi.productos) return;
+
+                    const producto = this.modal.ubi.productos[index];
+                    if (producto.cantidad > 1) {
+                        producto.cantidad = parseInt(producto.cantidad) - 1;
+                    }
+                },
+
+                // Actualizar cantidad cuando se cambia manualmente
+                actualizarCantidadProducto(index) {
+                    if (!this.modal.ubi || !this.modal.ubi.productos) return;
+
+                    const producto = this.modal.ubi.productos[index];
+                    const cantidad = parseInt(producto.cantidad);
+
+                    if (isNaN(cantidad) || cantidad < 1) {
+                        producto.cantidad = 1;
+                        return;
+                    }
+
+                    const total = this.getCantidadTotalModal();
+                    if (total > this.modal.ubi.capacidad) {
+                        const exceso = total - this.modal.ubi.capacidad;
+                        producto.cantidad = Math.max(1, cantidad - exceso);
+                        this.warning('Se ajustó la cantidad para no exceder la capacidad máxima');
+                    }
+                },
+
+                // Guardar cambios de un producto específico
+                async guardarCambiosProducto(index) {
+                    if (!this.modal.ubi || !this.modal.ubi.productos) return;
+
+                    const producto = this.modal.ubi.productos[index];
+
+                    try {
+                        const payload = {
+                            ubicacion_id: this.modal.ubi.id,
+                            articulo_id: producto.id,
+                            cantidad: parseInt(producto.cantidad),
+                            accion: 'actualizar'
+                        };
+
+                        console.log('Actualizando producto:', payload);
+
+                        const response = await fetch('/almacen/ubicaciones/actualizar-producto', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.success(`Cantidad de ${producto.nombre} actualizada exitosamente`);
+                            // Actualizar la cantidad original
+                            producto.cantidadOriginal = producto.cantidad;
+
+                            // Actualizar la interfaz principal
+                            this.actualizarInterfazDespuesCambio(this.modal.ubi.id);
+                        } else {
+                            this.error(`Error al actualizar ${producto.nombre}: ${result.message}`);
+                            // Revertir cambios
+                            producto.cantidad = producto.cantidadOriginal;
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                        producto.cantidad = producto.cantidadOriginal;
+                    }
+                },
+
+                // Cancelar cambios de un producto
+                cancelarCambiosProducto(index) {
+                    if (!this.modal.ubi || !this.modal.ubi.productos) return;
+
+                    const producto = this.modal.ubi.productos[index];
+                    producto.cantidad = producto.cantidadOriginal;
+                    delete producto.cantidadOriginal;
+                },
+
+                // Eliminar producto individual
+                async eliminarProductoIndividual(index) {
+                    if (!this.modal.ubi || !this.modal.ubi.productos) return;
+
+                    const producto = this.modal.ubi.productos[index];
+
+                    if (!confirm(`¿Está seguro de que desea eliminar ${producto.nombre} de esta ubicación?`)) {
+                        return;
+                    }
+
+                    try {
+                        const payload = {
+                            ubicacion_id: this.modal.ubi.id,
+                            articulo_id: producto.id,
+                            accion: 'eliminar'
+                        };
+
+                        console.log('Eliminando producto:', payload);
+
+                        const response = await fetch('/almacen/ubicaciones/eliminar-producto', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.success(`${producto.nombre} eliminado exitosamente`);
+
+                            // Remover producto de la lista
+                            this.modal.ubi.productos.splice(index, 1);
+
+                            // Actualizar la interfaz principal
+                            this.actualizarInterfazDespuesCambio(this.modal.ubi.id);
+
+                            // Si no quedan productos, cerrar el modal
+                            if (this.modal.ubi.productos.length === 0) {
+                                this.modal.open = false;
+                            }
+                        } else {
+                            this.error(`Error al eliminar ${producto.nombre}: ${result.message}`);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    }
+                },
+
+                // Actualizar interfaz después de cambios
+                actualizarInterfazDespuesCambio(ubicacionId) {
+                    // Buscar y actualizar la ubicación en la estructura principal
+                    this.rack.niveles.forEach((nivel, nivelIndex) => {
+                        nivel.ubicaciones.forEach((ubi, ubiIndex) => {
+                            if (ubi.id === ubicacionId) {
+                                // Actualizar propiedades calculadas
+                                ubi.cantidad_total = ubi.productos.reduce((sum, p) => sum + p.cantidad, 0);
+                                ubi.estado = this.calcularEstado(ubi.cantidad_total, ubi.capacidad);
+                                ubi.fecha = new Date().toISOString();
+
+                                // Reprocesar categorías y tipos
+                                this.procesarDatosRack();
+                            }
+                        });
+                    });
+
+                    // Forzar actualización
+                    this.rack = {
+                        ...this.rack
+                    };
+
+                    // Reinicializar swipers
+                    this.$nextTick(() => {
+                        this.initSwipers();
+                    });
+                },
+
+                // Y actualiza el método verDetalle para preparar la edición
+                verDetalle(ubi) {
+                    this.modal.ubi = ubi;
+                    this.modal.open = true;
+                    this.prepararEdicionProductos(); // ✅ NUEVO: Preparar para edición
                 },
 
                 // Método para vaciar ubicación (también lo agregué)
