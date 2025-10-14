@@ -1470,3 +1470,6 @@ Route::post('/almacen/racks/sugerir-letra', [UbicacionesVistaController::class, 
 
 
 Route::get('/solicitud-ingreso/sugerir-ubicaciones/{articuloId}/{cantidad}', [SolicitudingresoController::class, 'sugerirUbicacionesMejorado']);
+// Rutas para gestión de productos en ubicaciones
+Route::post('/almacen/ubicaciones/actualizar-producto', [UbicacionesVistaController::class, 'actualizarProducto'])->name('ubicaciones.actualizar-producto');
+Route::post('/almacen/ubicaciones/eliminar-producto', [UbicacionesVistaController::class, 'eliminarProducto'])->name('ubicaciones.eliminar-producto');
