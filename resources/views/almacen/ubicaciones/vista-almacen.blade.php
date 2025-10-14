@@ -1237,7 +1237,7 @@
                                 }
 
                                 const rack = p.data[5]; // índice 5: nombre del rack
-                                const sede = p.data[10]; // índice 10: sede (NUEVO)
+                                const sede = p.data[9]; // índice 10: sede (NUEVO)
 
                                 console.log('Navegando a:', rack, 'en sede:', sede);
 

@@ -728,27 +728,57 @@ public function getDatosRacks(Request $request)
 
 
 
-    public function listarProductos()
-    {
-        try {
-            $productos = DB::table('articulos')
-                ->where('estado', 1)
-                ->select('idArticulos as id', 'nombre')
-                ->orderBy('nombre')
-                ->get();
+public function listarProductos()
+{
+    try {
+        $productos = DB::table('articulos as a')
+            ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
+            ->where('a.estado', 1)
+            ->select(
+                'a.idArticulos as id', 
+                'a.nombre',
+                'a.codigo_repuesto',
+                'ta.nombre as tipo_articulo',
+                'ta.idTipoArticulo',
+                'c.nombre as categoria',
+                'a.stock_total as stock'
+            )
+            ->orderBy('a.nombre')
+            ->get();
 
-            return response()->json([
-                'success' => true,
-                'data' => $productos
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error al listar productos: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al cargar productos: ' . $e->getMessage()
-            ], 500);
-        }
+        // Procesar los datos para aplicar la lógica de visualización
+        $productosProcesados = $productos->map(function ($producto) {
+            $mostrarComoRepuesto = $producto->idTipoArticulo == 2; // 2 = REPUESTOS
+            
+            return [
+                'id' => $producto->id,
+                'nombre' => $mostrarComoRepuesto 
+                    ? ($producto->codigo_repuesto ?: $producto->nombre) 
+                    : $producto->nombre,
+                'nombre_original' => $producto->nombre, // Mantener el nombre original por si acaso
+                'codigo_repuesto' => $producto->codigo_repuesto,
+                'tipo_articulo' => $producto->tipo_articulo,
+                'idTipoArticulo' => $producto->idTipoArticulo,
+                'categoria' => $producto->categoria,
+                'stock' => $producto->stock,
+                'es_repuesto' => $mostrarComoRepuesto
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $productosProcesados
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al listar productos: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar productos: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function agregarProducto(Request $request)
     {
