@@ -1525,54 +1525,71 @@
                 },
 
                 // ✅ NUEVO MÉTODO: Procesar datos para acumular categorías y tipos
-                procesarDatosRack() {
-                    this.rack.niveles.forEach(nivel => {
-                        nivel.ubicaciones.forEach(ubicacion => {
-                            if (ubicacion.productos && ubicacion.productos.length > 0) {
-                                // ✅ Acumular categorías únicas (incluyendo custodias)
-                                const categoriasUnicas = [...new Set(ubicacion.productos
-                                    .map(p => p.custodia_id ? (p.categoria_custodia || 'Custodia') :
-                                        p.categoria)
-                                    .filter(c => c && c !== 'Sin categoría')
-                                )];
+procesarDatosRack() {
+    this.rack.niveles.forEach(nivel => {
+        nivel.ubicaciones.forEach(ubicacion => {
+            if (ubicacion.productos && ubicacion.productos.length > 0) {
+                // ✅ Acumular categorías únicas (incluyendo custodias)
+                const categoriasUnicas = [...new Set(ubicacion.productos
+                    .map(p => p.custodia_id ? (p.categoria_custodia || 'Custodia') :
+                        p.categoria)
+                    .filter(c => c && c !== 'Sin categoría')
+                )];
 
-                                // ✅ Acumular tipos de artículo únicos (incluyendo custodias)
-                                const tiposUnicos = [...new Set(ubicacion.productos
-                                    .map(p => p.custodia_id ? 'CUSTODIA' : p.tipo_articulo)
-                                    .filter(t => t && t !== 'Sin tipo')
-                                )];
+                // ✅ Acumular tipos de artículo únicos (incluyendo custodias)
+                const tiposUnicos = [...new Set(ubicacion.productos
+                    .map(p => p.custodia_id ? 'CUSTODIA' : p.tipo_articulo)
+                    .filter(t => t && t !== 'Sin tipo')
+                )];
 
-                                // ✅ Agregar propiedades acumuladas a la ubicación
-                                ubicacion.categorias_acumuladas = categoriasUnicas.length > 0 ?
-                                    categoriasUnicas.join(', ') : 'Sin categoría';
+                // ✅ Acumular clientes generales únicos (solo productos normales)
+                const clientesUnicos = [...new Set(ubicacion.productos
+                    .filter(p => !p.custodia_id && p.cliente_general_nombre)
+                    .map(p => p.cliente_general_nombre)
+                    .filter(c => c && c !== 'Cliente no encontrado')
+                )];
 
-                                ubicacion.tipos_acumulados = tiposUnicos.length > 0 ?
-                                    tiposUnicos.join(', ') : 'Sin tipo';
+                // ✅ Agregar propiedades acumuladas a la ubicación
+                ubicacion.categorias_acumuladas = categoriasUnicas.length > 0 ?
+                    categoriasUnicas.join(', ') : 'Sin categoría';
 
-                                // ✅ Calcular cantidad total
-                                ubicacion.cantidad_total = ubicacion.productos.reduce((sum, p) => sum + (p
-                                    .cantidad || 0), 0);
+                ubicacion.tipos_acumulados = tiposUnicos.length > 0 ?
+                    tiposUnicos.join(', ') : 'Sin tipo';
 
-                                // ✅ NUEVO: Asegurar que cada producto tenga las propiedades de custodia
-                                ubicacion.productos.forEach(producto => {
-                                    if (!producto.hasOwnProperty('custodia_id')) {
-                                        producto.custodia_id = null;
-                                    }
-                                    // Si es custodia y no tiene código, asignar uno por defecto
-                                    if (producto.custodia_id && !producto.codigocustodias) {
-                                        producto.codigocustodias = 'CUST-' + producto.custodia_id;
-                                    }
-                                });
+                // ✅ NUEVO: Agregar clientes acumulados
+                ubicacion.clientes_acumulados = clientesUnicos.length > 0 ?
+                    clientesUnicos.join(', ') : 'Sin cliente';
 
-                            } else {
-                                // Si no hay productos, establecer valores por defecto
-                                ubicacion.categorias_acumuladas = 'Sin categoría';
-                                ubicacion.tipos_acumulados = 'Sin tipo';
-                                ubicacion.cantidad_total = 0;
-                            }
-                        });
-                    });
-                },
+                // ✅ Calcular cantidad total
+                ubicacion.cantidad_total = ubicacion.productos.reduce((sum, p) => sum + (p
+                    .cantidad || 0), 0);
+
+                // ✅ NUEVO: Asegurar que cada producto tenga las propiedades de custodia y cliente
+                ubicacion.productos.forEach(producto => {
+                    if (!producto.hasOwnProperty('custodia_id')) {
+                        producto.custodia_id = null;
+                    }
+                    // Si es custodia y no tiene código, asignar uno por defecto
+                    if (producto.custodia_id && !producto.codigocustodias) {
+                        producto.codigocustodias = 'CUST-' + producto.custodia_id;
+                    }
+                    
+                    // ✅ NUEVO: Asegurar que los productos normales tengan cliente general
+                    if (!producto.custodia_id && !producto.hasOwnProperty('cliente_general_nombre')) {
+                        producto.cliente_general_nombre = 'Sin cliente';
+                    }
+                });
+
+            } else {
+                // Si no hay productos, establecer valores por defecto
+                ubicacion.categorias_acumuladas = 'Sin categoría';
+                ubicacion.tipos_acumulados = 'Sin tipo';
+                ubicacion.clientes_acumulados = 'Sin cliente'; // ✅ NUEVO
+                ubicacion.cantidad_total = 0;
+            }
+        });
+    });
+},
 
                 initSwipers() {
                     this.$nextTick(() => {
@@ -2267,18 +2284,20 @@ async abrirModalAgregarProducto(ubi) {
         this.modalAgregarProducto.virtualScroll.loading = false;
     }
 },
-                // 4. Y actualizar el método cerrarModalAgregarProducto:
-                cerrarModalAgregarProducto() {
-                    this.modalAgregarProducto.open = false;
-                    this.modalAgregarProducto.ubicacion = {};
-                    this.modalAgregarProducto.productos = [];
-                    this.modalAgregarProducto.productosSeleccionados = []; // ← Limpiar
-                    this.modalAgregarProducto.productosFiltrados = []; // ← Limpiar
-                    this.modalAgregarProducto.busqueda = ''; // ← Limpiar
-                    this.modalAgregarProducto.productoSeleccionado = '';
-                    this.modalAgregarProducto.cantidad = 1;
-                    this.modalAgregarProducto.observaciones = '';
-                },
+             // ✅ ACTUALIZAR: Método para cerrar modal de agregar producto
+cerrarModalAgregarProducto() {
+    this.modalAgregarProducto.open = false;
+    this.modalAgregarProducto.ubicacion = {};
+    this.modalAgregarProducto.productos = [];
+    this.modalAgregarProducto.productosSeleccionados = []; // ← Limpiar
+    this.modalAgregarProducto.productosFiltrados = []; // ← Limpiar
+    this.modalAgregarProducto.busqueda = ''; // ← Limpiar
+    this.modalAgregarProducto.productoSeleccionado = '';
+    this.modalAgregarProducto.cantidad = 1;
+    this.modalAgregarProducto.observaciones = '';
+    // ✅ NO limpiar clientesGenerales para mantenerlos disponibles
+    // this.modalAgregarProducto.clientesGenerales = []; ← NO HACER ESTO
+},
 
                 actualizarInterfazDespuesReubicacionRack(origenId, destinoId, cantidad) {
                     // Vaciar la ubicación origen en la interfaz actual
@@ -2487,69 +2506,85 @@ async confirmarAgregarProducto() {
     }
 },
 
-                actualizarInterfazDespuesAgregarProducto(ubicacionId, producto, cantidad) {
-                    // Buscar la ubicación en la estructura de datos
-                    this.rack.niveles.forEach((nivel, nivelIndex) => {
-                        nivel.ubicaciones.forEach((ubi, ubiIndex) => {
-                            if (ubi.id === ubicacionId) {
-                                // ✅ CORRECCIÓN: Manejar múltiples productos
-                                const productosActuales = ubi.productos || [];
+                // ✅ ACTUALIZAR: Método para actualizar interfaz después de agregar producto
+actualizarInterfazDespuesAgregarProducto(ubicacionId, producto, cantidad) {
+    // Buscar la ubicación en la estructura de datos
+    this.rack.niveles.forEach((nivel, nivelIndex) => {
+        nivel.ubicaciones.forEach((ubi, ubiIndex) => {
+            if (ubi.id === ubicacionId) {
+                // ✅ CORRECCIÓN: Manejar múltiples productos
+                const productosActuales = ubi.productos || [];
 
-                                // Crear el nuevo producto con la estructura correcta
-                                const nuevoProducto = {
-                                    id: producto.id,
-                                    nombre: producto.nombre,
-                                    categoria: producto.categoria || 'Sin categoría',
-                                    tipo_articulo: producto.tipo_articulo || 'Sin tipo',
-                                    cantidad: cantidad
-                                };
+                // ✅ NUEVO: Buscar información del cliente general
+                const clienteGeneral = this.modalAgregarProducto.clientesGenerales.find(
+                    cliente => cliente.id == producto.cliente_general_id
+                );
 
-                                // Verificar si el producto ya existe en la ubicación
-                                const productoExistenteIndex = productosActuales.findIndex(p => p.id ===
-                                    producto.id);
+                // Crear el nuevo producto con la estructura correcta INCLUYENDO CLIENTE
+                const nuevoProducto = {
+                    id: producto.id,
+                    nombre: producto.nombre,
+                    categoria: producto.categoria || 'Sin categoría',
+                    tipo_articulo: producto.tipo_articulo || 'Sin tipo',
+                    cantidad: cantidad,
+                    // ✅ NUEVO: Incluir datos del cliente general
+                    cliente_general_id: producto.cliente_general_id,
+                    cliente_general_nombre: clienteGeneral ? clienteGeneral.descripcion : 'Cliente no encontrado',
+                    // Campos para repuestos
+                    nombre_original: producto.nombre_original,
+                    codigo_repuesto: producto.codigo_repuesto,
+                    es_repuesto: producto.es_repuesto,
+                    mostrando_codigo_repuesto: producto.mostrando_codigo_repuesto
+                };
 
-                                if (productoExistenteIndex >= 0) {
-                                    // Si existe, actualizar la cantidad
-                                    productosActuales[productoExistenteIndex].cantidad += cantidad;
-                                } else {
-                                    // Si no existe, agregar el nuevo producto
-                                    productosActuales.push(nuevoProducto);
-                                }
+                // Verificar si el producto ya existe en la ubicación
+                const productoExistenteIndex = productosActuales.findIndex(p => p.id === producto.id);
 
-                                // ✅ ACTUALIZACIÓN COMPLETA de la ubicación
-                                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
-                                    ...ubi,
-                                    productos: productosActuales,
-                                    // Mantener compatibilidad con propiedades antiguas
-                                    producto: productosActuales.length > 0 ? productosActuales[0]
-                                        .nombre : null,
-                                    cantidad: productosActuales.reduce((sum, p) => sum + p.cantidad, 0),
-                                    // Actualizar propiedades calculadas
-                                    cantidad_total: productosActuales.reduce((sum, p) => sum + p
-                                        .cantidad, 0),
-                                    estado: this.calcularEstado(
-                                        productosActuales.reduce((sum, p) => sum + p.cantidad, 0),
-                                        ubi.capacidad
-                                    ),
-                                    fecha: new Date().toISOString()
-                                };
-                            }
-                        });
-                    });
+                if (productoExistenteIndex >= 0) {
+                    // Si existe, actualizar la cantidad
+                    productosActuales[productoExistenteIndex].cantidad += cantidad;
+                    // ✅ NUEVO: Actualizar también el cliente general si es diferente
+                    if (producto.cliente_general_id) {
+                        productosActuales[productoExistenteIndex].cliente_general_id = producto.cliente_general_id;
+                        productosActuales[productoExistenteIndex].cliente_general_nombre = clienteGeneral ? clienteGeneral.descripcion : 'Cliente no encontrado';
+                    }
+                } else {
+                    // Si no existe, agregar el nuevo producto
+                    productosActuales.push(nuevoProducto);
+                }
 
-                    // ✅ Reprocesar datos para recalcular categorías y tipos acumulados
-                    this.procesarDatosRack();
+                // ✅ ACTUALIZACIÓN COMPLETA de la ubicación
+                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
+                    ...ubi,
+                    productos: productosActuales,
+                    // Mantener compatibilidad con propiedades antiguas
+                    producto: productosActuales.length > 0 ? productosActuales[0].nombre : null,
+                    cantidad: productosActuales.reduce((sum, p) => sum + p.cantidad, 0),
+                    // Actualizar propiedades calculadas
+                    cantidad_total: productosActuales.reduce((sum, p) => sum + p.cantidad, 0),
+                    estado: this.calcularEstado(
+                        productosActuales.reduce((sum, p) => sum + p.cantidad, 0),
+                        ubi.capacidad
+                    ),
+                    fecha: new Date().toISOString()
+                };
+            }
+        });
+    });
 
-                    // ✅ Forzar actualización de Alpine.js
-                    this.rack = {
-                        ...this.rack
-                    };
+    // ✅ Reprocesar datos para recalcular categorías y tipos acumulados
+    this.procesarDatosRack();
 
-                    // ✅ Reinicializar swipers
-                    this.$nextTick(() => {
-                        this.initSwipers();
-                    });
-                },
+    // ✅ Forzar actualización de Alpine.js
+    this.rack = {
+        ...this.rack
+    };
+
+    // ✅ Reinicializar swipers
+    this.$nextTick(() => {
+        this.initSwipers();
+    });
+},
 
 
                 // ✅ NUEVOS MÉTODOS para edición de productos existentes - AGREGAR DESPUÉS DE confirmarAgregarProducto
